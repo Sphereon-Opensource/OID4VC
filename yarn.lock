@@ -628,6 +628,13 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
+"@sphereon/ssi-types@0.8.1-next.20":
+  version "0.8.1-next.20"
+  resolved "https://registry.yarnpkg.com/@sphereon/ssi-types/-/ssi-types-0.8.1-next.20.tgz#48b93d02e8999d5efcd0b938c78adc12b27d06dc"
+  integrity sha512-kesuBgbzzVBOXr43QpcZw6DahJWlGuc9+3nyIODgSwcACLkrevVQIL0vbw4PSAiCl8MoG38W/j1zSaQaWHGnOg==
+  dependencies:
+    jwt-decode "^3.1.2"
+
 "@tokenizer/token@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@tokenizer/token/-/token-0.3.0.tgz#fe98a93fe789247e998c75e74e9c7c63217aa276"
@@ -2673,6 +2680,11 @@ json5@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.1.tgz#655d50ed1e6f95ad1a3caababd2b0efda10b395c"
   integrity sha512-1hqLFMSrGHRHxav9q9gNjJ5EXznIxGVO09xQRrwplcS8qs28pZ8s8hupZAmqDwZUmVZ2Qb2jnyPOWcDH8m8dlA==
+
+jwt-decode@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/jwt-decode/-/jwt-decode-3.1.2.tgz#3fb319f3675a2df0c2895c8f5e9fa4b67b04ed59"
+  integrity sha512-UfpWE/VZn0iP50d8cz9NrZLM9lSWhcJ+0Gt/nm4by88UL+J1SiKN8/5dkjMmbEzwL2CAe+67GsegCbIKtbp75A==
 
 kind-of@^6.0.3:
   version "6.0.3"
