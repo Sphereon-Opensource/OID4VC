@@ -1,10 +1,23 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "parserOptions": { "project": "./tsconfig.json" },
-  "env": { "es6": true },
-  "ignorePatterns": ["node_modules", "dist", "generator", "coverage", "jest.config.js"],
-  "plugins": ["import", "eslint-comments"],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "env": {
+    "es6": true
+  },
+  "ignorePatterns": [
+    "build",
+    "coverage",
+    "dist",
+    "jest.config.js",
+    "node_modules"
+  ],
+  "plugins": [
+    "import",
+    "eslint-comments"
+  ],
   "extends": [
     "eslint:recommended",
     "plugin:eslint-comments/recommended",
@@ -12,33 +25,47 @@
     "plugin:import/typescript",
     "prettier"
   ],
-  "globals": { "BigInt": true, "console": true, "WebAssembly": true },
+  "globals": {
+    "BigInt": true,
+    "console": true,
+    "WebAssembly": true
+  },
   "rules": {
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/typedef": [
       "error",
       {
-        "call-signature":  true,
-        "arrow-call-signature":  true,
-        "parameter":  true,
-        "arrow-parameter":  true,
-        "property-declaration":  true,
-        "variable-declaration":  true,
-        "member-variable-declaration":  true
+        "call-signature": true,
+        "arrow-call-signature": true,
+        "parameter": true,
+        "arrow-parameter": true,
+        "property-declaration": true,
+        "variable-declaration": true,
+        "member-variable-declaration": true
       }
     ],
     "eslint-comments/disable-enable-pair": [
       "error",
-      { "allowWholeFile": true }
+      {
+        "allowWholeFile": true
+      }
     ],
     "eslint-comments/no-unused-disable": "error",
     "import/order": [
       "error",
-      { "newlines-between": "always", "alphabetize": { "order": "asc" } }
+      {
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc"
+        }
+      }
     ],
     "sort-imports": [
       "error",
-      { "ignoreDeclarationSort": true, "ignoreCase": true }
+      {
+        "ignoreDeclarationSort": true,
+        "ignoreCase": true
+      }
     ]
   }
 }

@@ -5,7 +5,7 @@ module.exports = {
         "^jose/(.*)$": "<rootDir>/node_modules/jose/dist/node/cjs/$1",
     },
     rootDir: ".",
-    roots: ["<rootDir>/src/", "<rootDir>/test/"],
+    roots: ["<rootDir>/src/", "<rootDir>/tests/"],
     testMatch: ["**/?(*.)+(spec|test).+(ts|tsx|js)"],
     transform: {
         "^.+\\.(ts|tsx)?$": "ts-jest",

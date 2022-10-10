@@ -60,5 +60,6 @@ export enum ProofType {
 export interface ProofOfPossession {
   proof_type: ProofType;
   jwt: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any;
 }

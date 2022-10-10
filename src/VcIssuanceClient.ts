@@ -1,7 +1,7 @@
 import { ClaimFormat } from '@sphereon/ssi-types';
 
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
-import { postWithBearerToken } from './functions/HttpUtils';
+import { postWithBearerToken } from './functions';
 import { CredentialRequest, CredentialResponse, CredentialResponseError, ProofOfPossession } from './types';
 
 export class VcIssuanceClient {

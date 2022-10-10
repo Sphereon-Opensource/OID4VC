@@ -1,14 +1,13 @@
-import { BAD_PARAMS } from '../Oidc4vciErrors';
-import { IssuanceInitiationRequestPayload } from '../types';
+import { BAD_PARAMS } from '../types';
 
-export function encodeJsonAsURI(json: IssuanceInitiationRequestPayload[] | IssuanceInitiationRequestPayload) {
+export function encodeJsonAsURI(json: unknown[] | unknown) {
   if (!Array.isArray(json)) {
     return encodeJsonObjectAsURI(json);
   }
   return json.map((j) => encodeJsonObjectAsURI(j)).join('&');
 }
 
-function encodeJsonObjectAsURI(json: IssuanceInitiationRequestPayload) {
+function encodeJsonObjectAsURI(json: unknown) {
   if (typeof json === 'string') {
     return encodeJsonObjectAsURI(JSON.parse(json));
   }
@@ -48,10 +47,9 @@ export function decodeUriAsJson(uri: string) {
   return result.length < 2 ? result[0] : result;
 }
 
-function decodeJsonProperty(parts: IssuanceInitiationRequestPayload) {
+function decodeJsonProperty(parts: unknown) {
   const json = {};
-  for (const key in parts) {
-    const value = parts[key];
+  for (const [key, value] of Object.entries(parts)) {
     if (!value) {
       continue;
     }
