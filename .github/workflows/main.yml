@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: install node v14
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: yarn install
+        run: yarn install
+      - name: tsc
+        uses: icrawl/action-tsc@v1
+      - name: yarn build
+        run: yarn build
+      - name: yarn test
+        run: yarn test
+      - name: codecov
+        uses: codecov/codecov-action@v2
+        with:
+#          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          name: codecove # optional
+          flags: unittest
+          fail_ci_if_error: true # optional (default = false)
+          version: "v0.1.15"
+          #directory: ./coverage/reports/
+          #files: ./coverage1.xml,./coverage2.xml
+          verbose: true # optional (default = false)

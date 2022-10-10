@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig",
+  "exclude": [
+    "test/**/*.ts",
+    "generator/**/*.ts"
+  ]
+}
