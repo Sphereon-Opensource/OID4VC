@@ -1,3 +1,5 @@
+import { CredentialRequest } from '../CredentialRequest';
+
 export enum CredentialFormat {
   JWT_VC = 'jwt_vc',
   LDP_VC = 'ldp_vc',
@@ -16,3 +18,5 @@ export interface ProofOfPossesion {
   jws: string;
   [x: string]: any;
 }
+
+export type Request = CredentialRequest;
