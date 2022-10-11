@@ -6,8 +6,7 @@
   "private": false,
   "scripts": {
     "build": "run-p build:*",
-    "build:main": "tsc -p tsconfig.build.json",
-    "build:schemaGenerator": "node --loader ts-node/esm generator/schemaGenerator.ts",
+    "build:main": "tsc -p tsconfig.json",
     "clean": "rimraf dist coverage",
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"{src,test}/**/*.ts\" --write",

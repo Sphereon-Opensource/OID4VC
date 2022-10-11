@@ -1,5 +1,5 @@
 import {decodeUriAsJson, encodeJsonAsURI} from "../src/functions/Encoding";
-import {Flow} from "../src/types/FlowType";
+import {AuthzFlowType} from "../src/types/AuthzFlowType";
 
 describe("Issuance Initiation Request", () => {
   it('should parse an object into open-id-URI', () => {
@@ -47,16 +47,16 @@ describe("Issuance Initiation Request", () => {
     ])
   })
   it('should return authorization code flow type', () => {
-    expect(Flow.valueOf({
+    expect(AuthzFlowType.valueOf({
       issuer: 'test',
       credential_type: 'test'
-    })).toEqual(Flow.AUTHORIZATION_CODE_FLOW)
+    })).toEqual(AuthzFlowType.AUTHORIZATION_CODE_FLOW)
   })
   it('should return pre-authorized code flow', () => {
-    expect(Flow.valueOf({
+    expect(AuthzFlowType.valueOf({
       issuer: 'test',
       credential_type: 'test',
       pre_authorized_code: 'test'
-    })).toEqual(Flow.PRE_AUTHORIZED_CODE_FLOW)
+    })).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)
   })
 })
