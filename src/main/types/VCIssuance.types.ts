@@ -25,6 +25,7 @@ export interface CredentialResponseError {
 }
 
 export enum CredentialResponseErrorCode {
+  UNKNOWN = 'unknown exception occurred',
   INVALID_OR_MISSING_PROOF = 'invalid_or_missing_proof',
   INVALID_REQUEST = 'invalid_request',
   INVALID_TOKEN = 'invalid_token',
