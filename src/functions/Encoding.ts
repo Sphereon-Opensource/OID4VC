@@ -43,18 +43,7 @@ export function decodeUriAsJson(uri: string) {
   if (!uri || !uri.includes('issuer') || !uri.includes('credential_type')) {
     throw new Error(BAD_PARAMS);
   }
-  const parts = new URLSearchParams(uri);
-  const entries = Array.from(parts.entries());
-  const jsonArray = [];
-  let json: unknown = {};
-  for (const [key, value] of entries) {
-    if (Object.prototype.hasOwnProperty.call(json, key)) {
-      jsonArray.push(json);
-      json = {};
-    }
-    json[key] = value;
-  }
-  jsonArray.push(json);
+  const jsonArray = parseURI(uri);
   const result = jsonArray.map((o) => decodeJsonProperty(o));
   return result.length < 2 ? result[0] : result;
 }
@@ -82,4 +71,20 @@ function decodeJsonProperty(parts: IssuanceInitiationRequestPayload) {
     }
   }
   return json;
+}
+
+export function parseURI(uri: string) {
+  const jsonArray = [];
+  let json: unknown = {};
+  const dict = uri.split('&');
+  for (const entry of dict) {
+    const pair = entry.split('=');
+    if (Object.prototype.hasOwnProperty.call(json, pair[0])) {
+      jsonArray.push(json);
+      json = {};
+    }
+    json[pair[0]] = pair[1];
+  }
+  jsonArray.push(json);
+  return jsonArray;
 }
