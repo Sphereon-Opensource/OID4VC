@@ -1,14 +1,18 @@
 import { IssuanceInitiationRequestPayload } from '../types/IssuanceInitiationRequestTypes';
 import { BAD_PARAMS } from '../types/Oidc4vciErrors';
 
-export function encodeJsonAsURI(json: IssuanceInitiationRequestPayload[] | IssuanceInitiationRequestPayload) {
+/**
+ * @function encodeJsonAsURI encodes a Json object into an URI
+ * @param json object or array of type IssuanceInitiationRequestPayload
+ */
+export function encodeJsonAsURI(json: IssuanceInitiationRequestPayload[] | IssuanceInitiationRequestPayload): string {
   if (!Array.isArray(json)) {
     return encodeJsonObjectAsURI(json);
   }
   return json.map((j) => encodeJsonObjectAsURI(j)).join('&');
 }
 
-function encodeJsonObjectAsURI(json: IssuanceInitiationRequestPayload) {
+function encodeJsonObjectAsURI(json: IssuanceInitiationRequestPayload): string {
   if (typeof json === 'string') {
     return encodeJsonObjectAsURI(JSON.parse(json));
   }
@@ -23,6 +27,11 @@ function encodeJsonObjectAsURI(json: IssuanceInitiationRequestPayload) {
     if (!value) {
       continue;
     }
+    //Skip properties that are not of URL type
+    if (!['issuer', 'credential_type'].includes(key)) {
+      results.push(`${key}=${value}`);
+      continue;
+    }
     const isBool = typeof value == 'boolean';
     const isNumber = typeof value == 'number';
     const isString = typeof value == 'string';
@@ -30,16 +39,20 @@ function encodeJsonObjectAsURI(json: IssuanceInitiationRequestPayload) {
     if (isBool || isNumber) {
       encoded = `${encodeAndStripWhitespace(key)}=${value}`;
     } else if (isString) {
-      encoded = `${encodeAndStripWhitespace(key)}=${encodeURIComponent(value)}`;
+      encoded = `${encodeAndStripWhitespace(key)}=${encodeOidc4vciURIComponent(value)}`;
     } else {
-      encoded = `${encodeAndStripWhitespace(key)}=${encodeURIComponent(JSON.stringify(value))}`;
+      encoded = `${encodeAndStripWhitespace(key)}=${encodeOidc4vciURIComponent(JSON.stringify(value))}`;
     }
     results.push(encoded);
   }
   return results.join('&');
 }
 
-export function decodeUriAsJson(uri: string) {
+/**
+ * @function decodeUriAsJson decodes an URI into a Json object
+ * @param uri string
+ */
+export function decodeUriAsJson(uri: string): IssuanceInitiationRequestPayload[] | IssuanceInitiationRequestPayload {
   if (!uri || !uri.includes('issuer') || !uri.includes('credential_type')) {
     throw new Error(BAD_PARAMS);
   }
@@ -48,7 +61,7 @@ export function decodeUriAsJson(uri: string) {
   return result.length < 2 ? result[0] : result;
 }
 
-function decodeJsonProperty(parts: IssuanceInitiationRequestPayload) {
+function decodeJsonProperty(parts: IssuanceInitiationRequestPayload): IssuanceInitiationRequestPayload {
   const json = {};
   for (const key in parts) {
     const value = parts[key];
@@ -70,10 +83,15 @@ function decodeJsonProperty(parts: IssuanceInitiationRequestPayload) {
       }
     }
   }
-  return json;
+  return json as IssuanceInitiationRequestPayload;
 }
 
-export function parseURI(uri: string) {
+/**
+ * @function parseURI parses the URI replacing special characters
+ * @param uri string
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function parseURI(uri: string): any[] {
   const jsonArray = [];
   let json: unknown = {};
   const dict = uri.split('&');
@@ -87,4 +105,14 @@ export function parseURI(uri: string) {
   }
   jsonArray.push(json);
   return jsonArray;
+}
+
+/**
+ * @function encodeOidc4vciURIComponent is used to encode chars that are not encoded by default
+ * @param uriComponent query string
+ */
+export function encodeOidc4vciURIComponent(uriComponent: string): string {
+  // -_.!~*'() are not escaped because they are considered safe.
+  // Add them to the regex as you need
+  return encodeURIComponent(uriComponent).replace(/\./g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
 }
