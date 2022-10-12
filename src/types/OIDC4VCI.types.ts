@@ -57,7 +57,6 @@ export enum ExchangeStep {
 export interface AuthorizationExchangeMetaData {
   exchanges: Map<ExchangeStep, AuthorizationExchange>; //   tokenEndPoint: URL
 
-  isAuthenticatingWithAuthorizationServer: boolean;
   client_type?: ClientType;
 }
 
@@ -89,7 +88,7 @@ export interface AccessTokenIssuanceRequest extends Request {
   client_id?: string;
   code_verifier?: string;
   grant_type: string;
-  'pre-authorized_code': string;
+  pre_authorized_code: string;
   redirect_uri?: string;
   scope?: string;
   user_pin?: bigint;

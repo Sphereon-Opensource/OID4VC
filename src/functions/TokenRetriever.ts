@@ -3,7 +3,6 @@ import {
   AccessTokenIssuanceResponse,
   AuthorizationExchangeMetaData,
   AuthorizationRequest,
-  ClientType,
   ExchangeStep,
   GrantTypes,
 } from '../types';
@@ -28,9 +27,9 @@ export class TokenRetriever {
   }
 
   private assertValidPreAuthorizedCode(accessTokenIssuanceRequest: AccessTokenIssuanceRequest): void {
-    if (!accessTokenIssuanceRequest['pre-authorized_code']) {
+    if (!accessTokenIssuanceRequest.pre_authorized_code) {
       throw new Error(
-        this.PRE_AUTHORIZED_SCENARIO_MESSAGE + 'Pre-authorization must be proven by presenting the pre-authorized_code. Code must be present.'
+        this.PRE_AUTHORIZED_SCENARIO_MESSAGE + 'Pre-authorization must be proven by presenting the pre-authorized code. Code must be present.'
       );
     }
   }
@@ -51,14 +50,6 @@ export class TokenRetriever {
     }
   }
 
-  private assertIfItMustBeAuthenticatedWithAuthorizationServer(authorizationExchangeMetaData: AuthorizationExchangeMetaData) {
-    if (authorizationExchangeMetaData.client_type === ClientType.CONFIDENTIAL) {
-      if (!authorizationExchangeMetaData.isAuthenticatingWithAuthorizationServer) {
-        throw new Error('It must be authenticating with the server.');
-      }
-    }
-  }
-
   private validate(accessTokenIssuanceRequest: AccessTokenIssuanceRequest, authorizationExchangeMetaData: AuthorizationExchangeMetaData): void {
     if (this.isGrantTypePreAuthorized(accessTokenIssuanceRequest.grant_type)) {
       this.assertValidPreAuthorizedCode(accessTokenIssuanceRequest);
@@ -68,7 +59,6 @@ export class TokenRetriever {
     const authorizationRequest = authorizationExchangeMetaData.exchanges.get(ExchangeStep.AUTHORIZATION).request as AuthorizationRequest;
 
     this.assertRedirectURIISValid(authorizationRequest, accessTokenIssuanceRequest);
-    this.assertIfItMustBeAuthenticatedWithAuthorizationServer(authorizationExchangeMetaData);
     this.assertClientIdIsValid(accessTokenIssuanceRequest, authorizationExchangeMetaData.isAuthenticatingWithAuthorizationServer);
   }
 
