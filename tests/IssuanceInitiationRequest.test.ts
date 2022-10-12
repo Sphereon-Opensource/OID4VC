@@ -6,7 +6,7 @@ describe("Issuance Initiation Request", () => {
       issuer: 'https://server.example.com',
       credential_type: 'https://did.example.org/healthCard',
       op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
-    })).toEqual('issuer=https%3A%2F%2Fserver.example.com&credential_type=https%3A%2F%2Fdid.example.org%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy')
+    })).toEqual('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy')
   })
   it('should parse an array of objects as open-id-URI', () => {
     expect(encodeJsonAsURI([
@@ -20,10 +20,10 @@ describe("Issuance Initiation Request", () => {
       credential_type: 'https://did.example1.org/healthCard',
       op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
     },
-    ])).toEqual('issuer=https%3A%2F%2Fserver.example.com&credential_type=https%3A%2F%2Fdid.example.org%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy&issuer=https%3A%2F%2Fserver.example1.com&credential_type=https%3A%2F%2Fdid.example1.org%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy')
+    ])).toEqual('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy&issuer=https%3A%2F%2Fserver%2Eexample1%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample1%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy')
   })
   it('should parse open-id-URI as json object', () => {
-    expect(decodeUriAsJson('issuer=https%3A%2F%2Fserver.example.com&credential_type=https%3A%2F%2Fdid.example.org%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy'))
+    expect(decodeURIAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy'))
     .toEqual({
       issuer: 'https://server.example.com',
       credential_type: 'https://did.example.org/healthCard',
@@ -31,7 +31,7 @@ describe("Issuance Initiation Request", () => {
     })
   })
   it('should parse open-id-URI as json array', () => {
-    expect(decodeUriAsJson('issuer=https%3A%2F%2Fserver.example.com&credential_type=https%3A%2F%2Fdid.example.org%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy&issuer=https%3A%2F%2Fserver.example1.com&credential_type=https%3A%2F%2Fdid.example1.org%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy'))
+    expect(decodeURIAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy&issuer=https%3A%2F%2Fserver%2Eexample1%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample1%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy'))
     .toEqual([
       {
         issuer: 'https://server.example.com',
