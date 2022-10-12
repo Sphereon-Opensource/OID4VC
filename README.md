@@ -24,6 +24,10 @@ export interface IssuanceInitiationRequestPayload {
 
 ### Usage
 
+#### encodeJsonAsURI:
+
+Encodes a Json object/array created based on `IssuanceInitiationRequestPayload` interface into an URI:
+
 ```typescript
 const encodedURI = encodeJsonAsURI({
   issuer: 'https://server.example.com',
@@ -51,8 +55,12 @@ console.log(encodedURI)
 // issuer=https%253A%252F%252Fserver%252Eexample%252Ecom&credential_type=https%253A%252F%252Fdid%252Eexample%252Eorg%252FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy&issuer=https%253A%252F%252Fserver%252Eexample%252Ecom&credential_type=https%253A%252F%252Fdid%252Eexample%252Eorg%252FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy
 ```
 
+#### decodeURIAsJson:
+
+Decodes URI into a Json object/array:
+
 ```typescript
-const decodedJson = decodeUriAsJson('issuer=https%253A%252F%252Fserver%252Eexample%252Ecom&credential_type=https%253A%252F%252Fdid%252Eexample%252Eorg%252FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy&issuer=https%253A%252F%252Fserver%252Eexample1%252Ecom&credential_type=https%253A%252F%252Fdid%252Eexample1%252Eorg%252FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy')
+const decodedJson = decodeURIAsJson('issuer=https%253A%252F%252Fserver%252Eexample%252Ecom&credential_type=https%253A%252F%252Fdid%252Eexample%252Eorg%252FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy&issuer=https%253A%252F%252Fserver%252Eexample1%252Ecom&credential_type=https%253A%252F%252Fdid%252Eexample1%252Eorg%252FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy')
 // console.log(decodedJson)
 // [
 //     {
@@ -68,3 +76,29 @@ const decodedJson = decodeUriAsJson('issuer=https%253A%252F%252Fserver%252Eexamp
 // ]
 ```
 * NOTE: The input may contain duplicated keys, that will result in an array
+
+#### parseURI:
+
+Parses the URI without decoding it
+
+```typescript
+ const parsedURI = parseURI('issuer=https%253A%252F%252Fserver%252Eexample%252Ecom&credential_type=https%253A%252F%252Fdid%252Eexample%252Eorg%252FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy')
+ console.log(parsedURI)
+//  [
+//      {
+//        issuer: 'https%253A%252F%252Fserver%252Eexample%252Ecom',
+//        credential_type: 'https%253A%252F%252Fdid%252Eexample%252Eorg%252FhealthCard',
+//        op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
+//      }
+// ]
+```
+
+#### encodeOidc4vciURIComponent
+
+Encodes chars that are not encoded by default
+
+```typescript
+const encodedURI = encodeOidc4vciURIComponent('https://server.example.com');
+console.log(encodedURI)
+// 'https%253A%252F%252Fserver%252Eexample%252Ecom'
+```

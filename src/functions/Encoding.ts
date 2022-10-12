@@ -1,4 +1,4 @@
-import { IssuanceInitiationRequestPayload } from '../types/IssuanceInitiationRequestTypes';
+import { IssuanceInitiationRequestPayload, SearchValue } from '../types/IssuanceInitiationRequestTypes';
 import { BAD_PARAMS } from '../types/Oidc4vciErrors';
 
 /**
@@ -39,9 +39,9 @@ function encodeJsonObjectAsURI(json: IssuanceInitiationRequestPayload): string {
     if (isBool || isNumber) {
       encoded = `${encodeAndStripWhitespace(key)}=${value}`;
     } else if (isString) {
-      encoded = `${encodeAndStripWhitespace(key)}=${encodeOidc4vciURIComponent(value)}`;
+      encoded = `${encodeAndStripWhitespace(key)}=${encodeOidc4vciURIComponent(value, /\./g)}`;
     } else {
-      encoded = `${encodeAndStripWhitespace(key)}=${encodeOidc4vciURIComponent(JSON.stringify(value))}`;
+      encoded = `${encodeAndStripWhitespace(key)}=${encodeOidc4vciURIComponent(JSON.stringify(value), /\./g)}`;
     }
     results.push(encoded);
   }
@@ -52,7 +52,7 @@ function encodeJsonObjectAsURI(json: IssuanceInitiationRequestPayload): string {
  * @function decodeUriAsJson decodes an URI into a Json object
  * @param uri string
  */
-export function decodeUriAsJson(uri: string): IssuanceInitiationRequestPayload[] | IssuanceInitiationRequestPayload {
+export function decodeURIAsJson(uri: string): IssuanceInitiationRequestPayload[] | IssuanceInitiationRequestPayload {
   if (!uri || !uri.includes('issuer') || !uri.includes('credential_type')) {
     throw new Error(BAD_PARAMS);
   }
@@ -109,10 +109,11 @@ export function parseURI(uri: string): any[] {
 
 /**
  * @function encodeOidc4vciURIComponent is used to encode chars that are not encoded by default
+ * @param searchValue The pattern/regexp to find the char(s) to be encoded
  * @param uriComponent query string
  */
-export function encodeOidc4vciURIComponent(uriComponent: string): string {
+export function encodeOidc4vciURIComponent(uriComponent: string, searchValue: SearchValue): string {
   // -_.!~*'() are not escaped because they are considered safe.
   // Add them to the regex as you need
-  return encodeURIComponent(uriComponent).replace(/\./g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+  return encodeURIComponent(uriComponent).replace(searchValue, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
 }

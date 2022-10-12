@@ -1,4 +1,4 @@
-import {decodeUriAsJson, encodeJsonAsURI} from "../src/functions/Encoding";
+import {decodeURIAsJson, encodeJsonAsURI} from "../src/functions/Encoding";
 import {AuthzFlowType} from "../src/types/AuthzFlowType";
 
 describe("Issuance Initiation Request", () => {
@@ -24,7 +24,7 @@ describe("Issuance Initiation Request", () => {
     ])).toEqual('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy&issuer=https%3A%2F%2Fserver%2Eexample1%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample1%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy')
   })
   it('should parse open-id-URI as json object', () => {
-    expect(decodeUriAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy'))
+    expect(decodeURIAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy'))
     .toEqual({
       issuer: 'https://server.example.com',
       credential_type: 'https://did.example.org/healthCard',
@@ -32,7 +32,7 @@ describe("Issuance Initiation Request", () => {
     })
   })
   it('should parse open-id-URI as json array', () => {
-    expect(decodeUriAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy&issuer=https%3A%2F%2Fserver%2Eexample1%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample1%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy'))
+    expect(decodeURIAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy&issuer=https%3A%2F%2Fserver%2Eexample1%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample1%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy'))
     .toEqual([
       {
         issuer: 'https://server.example.com',
