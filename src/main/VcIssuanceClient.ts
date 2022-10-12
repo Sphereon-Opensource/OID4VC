@@ -17,7 +17,6 @@ export class VcIssuanceClient {
       credentialRequestUrl: opts.builder.credentialRequestUrl,
       credentialType: opts.builder.credentialType,
       format: opts.builder.format,
-      proof: opts.builder.proof,
     };
   }
 
@@ -49,18 +48,15 @@ export class VcIssuanceClient {
     }
   }
 
-  public createCredentialRequest(): CredentialRequest {
-    if (
-      !this._issuanceRequestOpts.credentialType &&
-      !this._issuanceRequestOpts.format &&
-      !this._issuanceRequestOpts.proof
-    ) {
-      throw new Error('Not all the necessary values are filled.');
-    }
+  public createCredentialRequest(opts: {
+    credentialType?: string | string[];
+    format?: ClaimFormat | ClaimFormat[];
+    proof: ProofOfPossession;
+  }): CredentialRequest {
     return {
-      type: this._issuanceRequestOpts.credentialType,
-      format: this._issuanceRequestOpts.format,
-      proof: this._issuanceRequestOpts.proof,
+      type: opts.credentialType ? opts.credentialType : this._issuanceRequestOpts.credentialType,
+      format: opts.format ? opts.format : this._issuanceRequestOpts.format,
+      proof: opts.proof,
     };
   }
 }

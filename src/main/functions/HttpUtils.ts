@@ -2,7 +2,11 @@ import { fetch } from 'cross-fetch';
 
 import { CredentialRequest } from '../types';
 
-export async function postWithBearerToken(url: string, body: CredentialRequest, bearerToken: string): Promise<Response> {
+export async function postWithBearerToken(
+  url: string,
+  body: CredentialRequest,
+  bearerToken: string
+): Promise<Response> {
   try {
     const response = await fetch(url, {
       method: 'POST',
