@@ -6,10 +6,6 @@ describe('VcIssuanceClient ', () => {
     const vcIssuanceClient = VcIssuanceClient.builder()
       .withCredentialRequestUrl('oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
-      .withPoP({
-        proof_type: ProofType.JWT,
-        jwt: 'eyJraWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwiYWxnIjoiRVMyNTYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJzNkJoZFJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJpYXQiOiIyMDE4LTA5LTE0VDIxOjE5OjEwWiIsIm5vbmNlIjoidFppZ25zbkZicCJ9.ewdkIkPV50iOeBUqMXCC_aZKPxgihac0aW9EkL1nOzM',
-      })
       .build();
     expect(vcIssuanceClient._issuanceRequestOpts.credentialRequestUrl).toBe('oidc4vci.demo.spruceid.com/credential');
   });
@@ -18,13 +14,14 @@ describe('VcIssuanceClient ', () => {
     const vcIssuanceClient = VcIssuanceClient.builder()
       .withCredentialRequestUrl('oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
-      .withPoP({
-        proof_type: ProofType.JWT,
-        jwt: 'eyJraWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwiYWxnIjoiRVMyNTYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJzNkJoZFJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJpYXQiOiIyMDE4LTA5LTE0VDIxOjE5OjEwWiIsIm5vbmNlIjoidFppZ25zbkZicCJ9.ewdkIkPV50iOeBUqMXCC_aZKPxgihac0aW9EkL1nOzM',
-      })
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
-    const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest();
+    const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({
+        proof: {
+            proof_type: ProofType.JWT,
+            jwt: 'eyJraWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwiYWxnIjoiRVMyNTYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJzNkJoZFJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJpYXQiOiIyMDE4LTA5LTE0VDIxOjE5OjEwWiIsIm5vbmNlIjoidFppZ25zbkZicCJ9.ewdkIkPV50iOeBUqMXCC_aZKPxgihac0aW9EkL1nOzM',
+        }
+    });
     expect(credentialRequest.type).toBe(
       'https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential'
     );
