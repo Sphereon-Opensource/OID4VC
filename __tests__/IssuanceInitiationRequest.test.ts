@@ -1,4 +1,4 @@
-import {decodeUriAsJson, encodeJsonAsURI} from "../src/functions/Encoding";
+import {decodeUriAsJson, encodeJsonAsURI} from "../src/main/functions/Encoding";
 import {AuthzFlowType} from "../src/types/AuthzFlowType";
 
 describe("Issuance Initiation Request", () => {

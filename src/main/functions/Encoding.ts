@@ -1,5 +1,5 @@
-import { IssuanceInitiationRequestPayload } from '../types/IssuanceInitiationRequestTypes';
-import { BAD_PARAMS } from '../types/Oidc4vciErrors';
+import { IssuanceInitiationRequestPayload } from '../types';
+import { BAD_PARAMS } from '../Oidc4vciErrors';
 
 export function encodeJsonAsURI(json: IssuanceInitiationRequestPayload[] | IssuanceInitiationRequestPayload) {
   if (!Array.isArray(json)) {
