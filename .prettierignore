@@ -1,6 +1,3 @@
-# Ignore artifacts:
 dist
 coverage
-
-# Ignore all schema files:
-src/main/schemas
+node_modules
