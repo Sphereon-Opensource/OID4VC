@@ -42,14 +42,6 @@ export class TokenRetriever {
     }
   }
 
-  private assertClientIdIsValid(accessTokenIssuanceRequest: AccessTokenIssuanceRequest, isAuthenticatingWithAuthorizationServer: boolean) {
-    if (!isAuthenticatingWithAuthorizationServer) {
-      if (!accessTokenIssuanceRequest.client_id) {
-        throw new Error('The client Id must be present.');
-      }
-    }
-  }
-
   private validate(accessTokenIssuanceRequest: AccessTokenIssuanceRequest, authorizationExchangeMetaData: AuthorizationExchangeMetaData): void {
     if (this.isGrantTypePreAuthorized(accessTokenIssuanceRequest.grant_type)) {
       this.assertValidPreAuthorizedCode(accessTokenIssuanceRequest);
@@ -59,7 +51,6 @@ export class TokenRetriever {
     const authorizationRequest = authorizationExchangeMetaData.exchanges.get(ExchangeStep.AUTHORIZATION).request as AuthorizationRequest;
 
     this.assertRedirectURIISValid(authorizationRequest, accessTokenIssuanceRequest);
-    this.assertClientIdIsValid(accessTokenIssuanceRequest, authorizationExchangeMetaData.isAuthenticatingWithAuthorizationServer);
   }
 
   private getEncodedAccessTokenURL(accessTokenIssuanceRequest: AccessTokenIssuanceRequest): URL {

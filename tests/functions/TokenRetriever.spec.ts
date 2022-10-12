@@ -21,7 +21,7 @@ describe('TokenRetriever should', () => {
 
       const accessTokenIssuanceRequest: AccessTokenIssuanceRequest = Builder<AccessTokenIssuanceRequest>()
         .grant_type(GrantTypes['PRE-AUTHORIZED'])
-        ['pre-authorized_code']('pre-authorized_code2022-10-11')
+        .pre_authorized_code('pre-authorized_code2022-10-11')
         .build();
 
       const authRequest: AuthorizationRequest = Builder<AuthorizationRequest>().build();
@@ -36,7 +36,6 @@ describe('TokenRetriever should', () => {
       const exchanges: Map<ExchangeStep, AuthorizationExchange> = new Map<ExchangeStep, AuthorizationExchange>();
       exchanges.set(ExchangeStep.AUTHORIZATION, authorizationExchange);
       const authorizationExchangeMetaData: AuthorizationExchangeMetaData = Builder<AuthorizationExchangeMetaData>()
-        .isAuthenticatingWithAuthorizationServer(true)
         .client_type(ClientType.CONFIDENTIAL)
         .exchanges(exchanges)
         .build();

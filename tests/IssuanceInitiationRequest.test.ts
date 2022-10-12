@@ -1,4 +1,4 @@
-import {AuthzFlowType, decodeUriAsJson, encodeJsonAsURI} from "../src";
+import {AuthzFlowType, decodeURIAsJson, encodeJsonAsURI} from "../src";
 
 describe("Issuance Initiation Request", () => {
   it('should parse an object into open-id-URI', () => {

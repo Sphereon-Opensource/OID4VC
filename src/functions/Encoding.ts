@@ -1,7 +1,8 @@
 import { BAD_PARAMS } from '../types';
+import { SearchValue } from '../types/IssuanceInitiationRequestTypes';
 
 /**
- * @function encodeJsonAsURI encodes a Json object into an URI
+ * @function encodeJsonAsURI encodes a Json object into a URI
  * @param json object or array of type IssuanceInitiationRequestPayload
  */
 export function encodeJsonAsURI(json: unknown[] | unknown) {
@@ -88,7 +89,7 @@ function decodeJsonProperty(parts: unknown) {
  * @function parseURI parses the URI replacing special characters
  * @param uri string
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export function parseURI(uri: string) {
   const jsonArray = [];
   let json: unknown = {};
