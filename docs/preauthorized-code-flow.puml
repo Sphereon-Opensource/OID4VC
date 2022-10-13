@@ -1,0 +1,38 @@
+@startuml
+
+header Pre-authorized Code Flow
+
+title
+Pre-authorized Code Flow
+Pre-authorized Code Flow between a holder and an issuer
+end title
+
+
+autonumber
+
+participant "Holder" as H order 1 #PINK
+participant "Wallet" as W order 2 #YELLOW
+participant "Issuer" as I order 3 #ORANGE
+
+H -> I: Holder applies for one or more credentials online.
+I -> I: The Issuer generates a pre-authorization code \nthe Issuer puts the OIDC4VCI Initiate Issuance Request\n into a QR Code.
+I -> H: The Issuer either shows the QR Code to the holder\n or prints a document with the QR Code on it.
+H -> W: Holder uses the Wallet to scan the QR Code\n displayed on the Issuer website.
+W -> W: Since the QR Code contains an Issuance Initiation Request, \nthe Wallet then starts the issuance flow.
+W -> I: (OPTIONAL) The wallet uses the URL in the QR Code to\n obtain the issuer’s metadata.
+W -> W: (OPTIONAL) Wallet generates a new DID / keypair\n or selects an existing DID / keypair.
+W -> W: The Wallet generates the OIDC4VCI Token Request.
+W -> I: The Wallet sends the OIDCVCI Token Request via HTTPS\n to the OIDC4VCI token endpoint of the Issuer\n including the pre-authorized code.
+I -> I: The Issuer verifies the OIDC4VCI Token Request\n and checks whether the request was pre-authorized.
+I -> W: The Issuer returns the OIDC4VCI token (access_token).
+W -> W: The Wallet generates a JWT that contains a nonce and\n short validity time and is \nsigned by the private key of the DID.\n This will provide the issuer with PoP of the private key.
+W -> W: The Wallet creates the OIDC4VCI Credential Request
+W -> I: The Wallet sends the OIDC4VCI credential request \nvia HTTPS to the OIDC4VCI credential endpoint of the Issuer.
+I -> I: The Issuer verifies the OIDC4VCI credential request\n (based on the access_token) and the PoP (JWT).
+I -> I: The Issuer extracts the DID from the PoP.
+I -> I: The Issuer creates the credential, adds the subject’s DID\n and signs the credential with the private key of their Issuer’ URI.
+I -> I: The Issuer generates the OIDC4VCI Credential Response.
+I -> W: The Wallet receives the OIDC4VCI credential response\n and extracts the credential(s) to store in the Wallet.
+W -> H: Wallet shows the credential(s) to the holder.
+
+@enduml

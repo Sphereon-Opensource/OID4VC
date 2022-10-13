@@ -8,6 +8,13 @@
 
 _IMPORTANT it still in development and it's not fully functional_
 
+This library is based on [openid-4-verifiable-credential-issuance](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) for requesting Verifiable Credentials.
+
+### Flow
+#### Pre-authorized Code Flow
+The below diagram shows the steps involved in this flow. Note that wallet inner functionalities (like saving VCs) are out of scope of this library. Also This library doesn't involve any functionalities of a VC Issuer
+![Flow diagram](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Sphereon-Opensource/OIDC4VCI-client/develop/docs/preauthorized-code-flow.puml)
+
 ### Interfaces
 
 ```typescript
@@ -17,6 +24,23 @@ export interface IssuanceInitiationRequestParams {
   pre_authorized_code?: string, //CONDITIONAL The code representing the issuer's authorization for the Wallet to obtain Credentials of a certain type. This code MUST be short lived and single-use. MUST be present in a pre-authorized code flow.
   user_pin_required?: boolean, //OPTIONAL Boolean value specifying whether the issuer expects presentation of a user PIN along with the Token Request in a pre-authorized code flow. Default is false.
   op_state?: string //OPTIONAL String value created by the Credential Issuer and opaque to the Wallet that is used to bind the sub-sequent authentication request with the Credential Issuer to a context set up during previous steps
+}
+
+export interface CredentialRequest {
+  type: string | string[];
+  format: CredentialFormat | CredentialFormat[];
+  proof: ProofOfPossession;
+}
+
+export interface CredentialResponse {
+  credential: W3CVerifiableCredential;
+  format: CredentialFormat;
+}
+
+export interface CredentialResponseError {
+  error: CredentialResponseErrorCode;
+  error_description?: string;
+  error_uri?: string;
 }
 ```
 
