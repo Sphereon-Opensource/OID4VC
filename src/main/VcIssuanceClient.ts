@@ -13,6 +13,7 @@ export class VcIssuanceClient {
     proof: ProofOfPossession;
     token: string;
   }>;
+
   public constructor(opts: { builder?: VcIssuanceClientBuilder }) {
     this._issuanceRequestOpts = {
       credentialRequestUrl: opts.builder.credentialRequestUrl,
@@ -44,7 +45,11 @@ export class VcIssuanceClient {
       const response = await postWithBearerToken(requestUrl, request, requestToken);
       //TODO: remove this in the future
       console.log(response);
-      return response.json();
+      const responseJson = await response.json();
+      if (responseJson.error) {
+        return { ...responseJson } as CredentialResponseError;
+      }
+      return { ...responseJson } as CredentialResponse;
     } catch (e) {
       //TODO: remove this in the future
       console.log(e);

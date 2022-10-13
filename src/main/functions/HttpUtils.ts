@@ -16,9 +16,9 @@ export async function postWithBearerToken(
       body: JSON.stringify(body),
     });
     if (!response || !response.status || response.status >= 400) {
-      throw new Error(`${await response.json()}`);
+      return await response;
     }
-    return response;
+    return await response;
   } catch (error) {
     throw new Error(`${(error as Error).message}`);
   }
