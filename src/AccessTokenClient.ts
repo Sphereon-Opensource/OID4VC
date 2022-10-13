@@ -13,7 +13,7 @@ export class AccessTokenClient {
 
   private assertNumericPin(accessTokenRequest: AccessTokenRequest, isPinRequired: boolean): void {
     if (isPinRequired) {
-      if (!accessTokenRequest.user_pin || !(0 < accessTokenRequest.user_pin || accessTokenRequest.user_pin <= 99999999)) {
+      if (!accessTokenRequest.user_pin || accessTokenRequest.user_pin < 0 ||  99999999 < accessTokenRequest.user_pin) {
         throw new Error(
           this.PRE_AUTHORIZED_SCENARIO_MESSAGE + 'A valid pin consists of maximum 8 numeric characters (the numbers 0 - 9) must be present.'
         );

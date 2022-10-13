@@ -48,14 +48,12 @@ describe('AccessTokenClient should', () => {
 
         nock('https://sphereonjunit20221013.com/').post(/.*/).reply(200, '');
 
-        try {
-        await accessTokenClient.acquireAccessToken(
+        await expect(
+            accessTokenClient.acquireAccessToken(
             AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
             accessTokenIssuanceRequest,
             'https://sphereonjunit20221013.com/')
-        } catch (e) {
-          expect(e.message).toEqual('grant type must be \'urn:ietf:params:oauth:grant-type:pre-authorized_code\'');
-        }
+        ).rejects.toThrow('grant type must be \'urn:ietf:params:oauth:grant-type:pre-authorized_code\'');
       },
       UNIT_TEST_TIMEOUT
   );
@@ -74,15 +72,13 @@ describe('AccessTokenClient should', () => {
 
         nock('https://sphereonjunit20221013.com/').post(/.*/).reply(200, {});
 
-        try {
-          await accessTokenClient.acquireAccessToken(
+        await expect(
+            accessTokenClient.acquireAccessToken(
               AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
               accessTokenIssuanceRequest,
               'https://sphereonjunit20221013.com/',
               true)
-        } catch (e) {
-          expect(e.message).toEqual('The grant type is set to be pre-authorized. Pre-authorization must be proven by presenting the pre-authorized code. Code must be present.');
-        }
+        ).rejects.toThrow('The grant type is set to be pre-authorized. Pre-authorization must be proven by presenting the pre-authorized code. Code must be present.');
       },
       UNIT_TEST_TIMEOUT
   );
@@ -101,15 +97,13 @@ describe('AccessTokenClient should', () => {
 
         nock('https://sphereonjunit20221013.com/').post(/.*/).reply(200, {});
 
-        try {
-          await accessTokenClient.acquireAccessToken(
+        await expect(
+            accessTokenClient.acquireAccessToken(
               AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
               accessTokenIssuanceRequest,
               'https://sphereonjunit20221013.com/',
               true)
-        } catch (e) {
-          expect(e.message).toEqual('The grant type is set to be pre-authorized. A valid pin consists of maximum 8 numeric characters (the numbers 0 - 9) must be present.');
-        }
+        ).rejects.toThrow('The grant type is set to be pre-authorized. A valid pin consists of maximum 8 numeric characters (the numbers 0 - 9) must be present.');
       },
       UNIT_TEST_TIMEOUT
   );
@@ -128,16 +122,42 @@ describe('AccessTokenClient should', () => {
 
         nock('https://sphereonjunit20221013.com/').post(/.*/).reply(200, {});
 
-        try {
-          await accessTokenClient.acquireAccessToken(
+        await expect(
+            accessTokenClient.acquireAccessToken(
               AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
               accessTokenIssuanceRequest,
               'https://sphereonjunit20221013.com/',
               true)
-        } catch (e) {
-          expect(e.message).toEqual('The client Id must be present.');
-        }
+        ).rejects.toThrow('The client Id must be present.');
       },
       UNIT_TEST_TIMEOUT
   );
+  it(
+      'get error for incorrectly long pin',
+      async () => {
+
+        const accessTokenClient: AccessTokenClient = new AccessTokenClient();
+
+        const accessTokenIssuanceRequest: AccessTokenRequest = {
+          grant_type: GrantTypes.PRE_AUTHORIZED,
+          pre_authorized_code: '20221013',
+          client_id: 'spheroen.com',
+          user_pin: 123456789
+        } as AccessTokenRequest;
+
+        nock('https://sphereonjunit20221013.com/').post(/.*/).reply(200, {});
+
+        await expect(
+            accessTokenClient.acquireAccessToken(
+            AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
+            accessTokenIssuanceRequest,
+            'https://sphereonjunit20221013.com/',
+            true)
+        ).rejects.toThrow(
+            Error('The grant type is set to be pre-authorized. A valid pin consists of maximum 8 numeric characters (the numbers 0 - 9) must be present.')
+        );
+      },
+      UNIT_TEST_TIMEOUT
+  );
+
 });
