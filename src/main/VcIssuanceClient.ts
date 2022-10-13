@@ -69,7 +69,7 @@ export class VcIssuanceClient {
   /**
    * createProofOfPossession creates and returns the ProofOfPossession object
    * @param opts
-   *         - jwtSignerCallback: function to create the signature
+   *         - jwtSignerCallback: function to sign the proof
    *         - jwtSignerArgs: The arguments to create the signature
    */
   public async createProofOfPossession(opts: {
@@ -85,11 +85,11 @@ export class VcIssuanceClient {
     }
   }
 
-  public async createCredentialRequest(opts: {
+  public createCredentialRequest(opts: {
     credentialType?: string | string[];
     format?: CredentialFormat | CredentialFormat[];
     proof: ProofOfPossession;
-  }): Promise<CredentialRequest> {
+  }): CredentialRequest {
     return {
       type: opts.credentialType ? opts.credentialType : this._issuanceRequestOpts.credentialType,
       format: opts.format ? opts.format : this._issuanceRequestOpts.format,

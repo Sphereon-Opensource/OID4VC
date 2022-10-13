@@ -62,7 +62,7 @@ describe('VcIssuanceClient ', () => {
       jwtSignerArgs: jwtArgs,
       jwtSignerCallback: (args) => signJWT(args)
     })
-    const credentialRequest: CredentialRequest = await vcIssuanceClient.createCredentialRequest({ proof });
+    const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof });
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy()
     expect(credentialRequest.type).toBe(
         'https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential'
@@ -83,7 +83,7 @@ describe('VcIssuanceClient ', () => {
       jwtSignerArgs: jwtArgs,
       jwtSignerCallback: (args) => signJWT(args)
     })
-    const credentialRequest: CredentialRequest = await vcIssuanceClient.createCredentialRequest({ proof });
+    const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof });
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy()
     const result: CredentialResponseError | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest);
     expect(result['error']).toBe('unsupported_format');
@@ -103,7 +103,7 @@ describe('VcIssuanceClient ', () => {
       jwtSignerArgs: jwtArgs,
       jwtSignerCallback: (args) => signJWT(args)
     })
-    const credentialRequest: CredentialRequest = await vcIssuanceClient.createCredentialRequest({ proof });
+    const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof });
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy()
     const result: CredentialResponseError | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest);
     expect(result['credential']).toBeDefined();
