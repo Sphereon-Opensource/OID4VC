@@ -39,15 +39,13 @@ export interface AccessTokenRequest {
 }
 
 export interface AccessTokenResponse {
-  username?: string;
-  password?: string;
-  access_token?: string;
+  access_token?: number; // integer
   token_type?: string;
-  expires_in?: bigint; // in seconds
+  expires_in?: number; // in seconds
   c_nonce?: string;
-  c_nonce_expires_in?: bigint; // in seconds
+  c_nonce_expires_in?: number; // in seconds
   authorization_pending?: boolean;
-  interval?: bigint; // in seconds
+  interval?: number; // in seconds
 }
 
 export interface ErrorResponse extends Response {

@@ -1,6 +1,5 @@
-import { encodeJsonAsURI } from './functions';
+import { encodeJsonAsURI, post } from './functions';
 import { AccessTokenRequest, AccessTokenResponse, AuthzFlowType, GrantTypes } from './types';
-import { Builder } from './utils';
 
 export class AccessTokenClient {
   const;
@@ -51,9 +50,9 @@ export class AccessTokenClient {
     return new URL(issuerURL + '?' + encodeJsonAsURI(accessTokenRequest));
   }
 
-  private async sendAuthCode(requestTokenURL: URL): Promise<AccessTokenResponse> {
-    // TODO Implement
-    return !requestTokenURL ? Builder<AccessTokenResponse>().build() : null;
+  private async sendAuthCode(tokenRequestURL: URL, accessTokenRequest: AccessTokenRequest): Promise<AccessTokenResponse> {
+    const response = await post(tokenRequestURL.toString(), accessTokenRequest);
+    return ((await response).json()) as AccessTokenResponse;
   }
 
   public async acquireAccessToken(
@@ -63,6 +62,6 @@ export class AccessTokenClient {
   ): Promise<AccessTokenResponse> {
     this.validate(authFlowType, accessTokenRequest);
     const requestTokenURL: URL = this.getEncodedAccessTokenURL(accessTokenRequest, issuerURL);
-    return this.sendAuthCode(requestTokenURL);
+    return this.sendAuthCode(requestTokenURL, accessTokenRequest);
   }
 }

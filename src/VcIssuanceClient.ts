@@ -1,7 +1,7 @@
 import { ClaimFormat } from '@sphereon/ssi-types';
 
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
-import { postWithBearerToken } from './functions';
+import { post } from './functions';
 import { CredentialRequest, CredentialResponse, ErrorResponse, ProofOfPossession } from './types';
 
 export class VcIssuanceClient {
@@ -29,7 +29,7 @@ export class VcIssuanceClient {
     try {
       const requestUrl: string = url ? url : this._issuanceRequestOpts.credentialRequestUrl;
       const requestToken: string = token ? token : this._issuanceRequestOpts.token;
-      const response = await postWithBearerToken(requestUrl, request, requestToken);
+      const response = await post(requestUrl, request, requestToken);
       //TODO: remove this in the future
       console.log(response);
       return response.json();
