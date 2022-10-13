@@ -4,11 +4,11 @@ import { DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, IssuanceInitiationRequestPayl
 /**
  * @function encodeJsonAsURI encodes a Json object into an URI
  * @param json object
- * @param options:
+ * @param opts:
  *          - urlTypeProperties: a list of properties which the value is an URL
  *          - arrayTypeProperties: a list of properties which are an array
  */
-export function encodeJsonAsURI(json: unknown, options?: EncodeJsonAsURIOpts): string {
+export function encodeJsonAsURI(json: unknown, opts?: EncodeJsonAsURIOpts): string {
   if (typeof json === 'string') {
     return encodeJsonAsURI(JSON.parse(json));
   }
@@ -23,11 +23,11 @@ export function encodeJsonAsURI(json: unknown, options?: EncodeJsonAsURIOpts): s
       continue;
     }
     //Skip properties that are not of URL type
-    if (!options?.urlTypeProperties.includes(key)) {
+    if (!opts?.urlTypeProperties.includes(key)) {
       results.push(`${key}=${value}`);
       continue;
     }
-    if (options?.arrayTypeProperties.includes(key)) {
+    if (opts.arrayTypeProperties?.includes(key) && Array.isArray(value)) {
       results.push(
         value.map((v) => `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(v, /\./g)}`).join('&')
       );
@@ -52,15 +52,15 @@ export function encodeJsonAsURI(json: unknown, options?: EncodeJsonAsURIOpts): s
 /**
  * @function decodeUriAsJson decodes an URI into a Json object
  * @param uri string
- * @param options:
+ * @param opts:
  *          - requiredProperties: the required properties
  *          - duplicatedProperties: properties that show up more that once
  */
-export function decodeURIAsJson(uri: string, options?: DecodeURIAsJsonOpts): IssuanceInitiationRequestPayload {
-  if (!uri || !options?.requiredProperties.every((p) => uri.includes(p))) {
+export function decodeURIAsJson(uri: string, opts?: DecodeURIAsJsonOpts): IssuanceInitiationRequestPayload {
+  if (!uri || !opts?.requiredProperties.every((p) => uri.includes(p))) {
     throw new Error(BAD_PARAMS);
   }
-  const parsedURI = parseURI(uri, options?.duplicatedProperties);
+  const parsedURI = parseURI(uri, opts?.duplicatedProperties);
   return decodeJsonProperty(parsedURI);
 }
 
@@ -73,7 +73,11 @@ function decodeJsonProperty(parts: any): any {
       continue;
     }
     if (Array.isArray(value)) {
-      json[decodeURIComponent(key)] = value.map((v) => decodeURIComponent(v));
+      if (value.length > 1) {
+        json[decodeURIComponent(key)] = value.map((v) => decodeURIComponent(v));
+      } else {
+        json[decodeURIComponent(key)] = decodeURIComponent(value[0]);
+      }
     }
     const isBool = typeof value == 'boolean';
     const isNumber = typeof value == 'number';

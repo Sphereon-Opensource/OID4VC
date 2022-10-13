@@ -53,6 +53,18 @@ export interface CredentialResponseError {
 Encodes a Json object created based on `IssuanceInitiationRequestPayload` interface into an URI:
 
 ```typescript
+const encodedUri = encodeJsonAsURI({
+      issuer: 'https://server.example.com',
+      credential_type: 'https://did.example.org/healthCard',
+      op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
+    }, {
+      urlTypeProperties: ['issuer', 'credential_type']
+    })
+console.log(encodedUri)
+// issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy
+```
+
+```typescript
 const encodedURI = encodeJsonAsURI(
     {
       issuer: 'https://server.example.com',
@@ -72,6 +84,20 @@ console.log(encodedURI)
 Decodes URI into a Json object:
 
 ```typescript
+const decodedJson = decodeURIAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy', {
+  duplicatedProperties: ['credential_type'],
+  requiredProperties: ['issuer', 'credential_type']
+})
+console.log(decodedJson)
+// console.log(decodedURI)
+// {
+//   issuer: 'https://server.example.com',
+//   credential_type: 'https://did.example.org/healthCard',
+//   op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
+// }
+```
+
+```typescript
 const decodedJson = decodeJsonAsURI('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy', 
     {
       duplicatedProperties: ['credential_type'],
@@ -80,8 +106,8 @@ const decodedJson = decodeJsonAsURI('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom
 // console.log(decodedJson)
 // {
 //   issuer: 'https://server.example.com',
-//       credential_type: ['https://did.example.org/healthCard', 'https://did.example1.org/driverLicense'],
-//     op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
+//   credential_type: ['https://did.example.org/healthCard', 'https://did.example1.org/driverLicense'],
+//   op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
 // }
 ```
 
