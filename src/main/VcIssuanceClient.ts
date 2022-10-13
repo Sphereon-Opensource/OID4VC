@@ -44,7 +44,6 @@ export class VcIssuanceClient {
     try {
       const response = await postWithBearerToken(requestUrl, request, requestToken);
       //TODO: remove this in the future
-      console.log(response);
       const responseJson = await response.json();
       if (responseJson.error) {
         return { ...responseJson } as CredentialResponseError;
@@ -52,7 +51,6 @@ export class VcIssuanceClient {
       return { ...responseJson } as CredentialResponse;
     } catch (e) {
       //TODO: remove this in the future
-      console.log(e);
       return e;
     }
   }
