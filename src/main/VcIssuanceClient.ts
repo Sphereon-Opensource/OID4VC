@@ -2,7 +2,7 @@ import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { URL_NOT_VALID } from './Oidc4vciErrors';
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
-import { checkUrlValidity, postWithBearerToken } from './functions/HttpUtils';
+import { isValidURL, postWithBearerToken } from './functions/HttpUtils';
 import { CredentialRequest, CredentialResponse, CredentialResponseError, ProofOfPossession } from './types';
 
 export class VcIssuanceClient {
