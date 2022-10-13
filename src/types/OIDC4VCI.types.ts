@@ -34,8 +34,7 @@ export interface AccessTokenRequest {
   pre_authorized_code: string;
   redirect_uri?: string;
   scope?: string;
-  user_pin?: bigint;
-  user_pin_required?: boolean;
+  user_pin?: number;
 }
 
 export interface AccessTokenResponse {

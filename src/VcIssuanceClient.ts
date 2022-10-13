@@ -1,11 +1,9 @@
 import { CredentialFormat } from '@sphereon/ssi-types';
 
-import { URL_NOT_VALID } from './Oidc4vciErrors';
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
-import { isValidURL, postWithBearerToken } from './functions/HttpUtils';
-import { CredentialRequest, CredentialResponse, CredentialResponseError, ProofOfPossession } from './types';
-import { post } from './functions';
-import { CredentialRequest, CredentialResponse, ErrorResponse, ProofOfPossession } from './types';
+import { isValidURL, post } from './functions';
+import { ErrorResponse, URL_NOT_VALID } from './types';
+import { CredentialRequest, CredentialResponse, ProofOfPossession } from './types';
 
 export class VcIssuanceClient {
   _issuanceRequestOpts: Partial<{
@@ -28,7 +26,7 @@ export class VcIssuanceClient {
     return new VcIssuanceClientBuilder();
   }
 
-  public async sendCredentialRequest(request: CredentialRequest, url?: string, token?: string ): Promise<CredentialResponse | ErrorResponse> {
+  public async sendCredentialRequest(request: CredentialRequest, url?: string, token?: string): Promise<CredentialResponse | ErrorResponse> {
     const requestUrl: string = url ? url : this._issuanceRequestOpts.credentialRequestUrl;
     if (!isValidURL(requestUrl)) {
       throw new Error(URL_NOT_VALID);
@@ -39,7 +37,7 @@ export class VcIssuanceClient {
       //TODO: remove this in the future
       const responseJson = await response.json();
       if (responseJson.error) {
-        return { ...responseJson } as CredentialResponseError;
+        return { ...responseJson } as ErrorResponse;
       }
       return { ...responseJson } as CredentialResponse;
     } catch (e) {

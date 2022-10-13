@@ -11,9 +11,9 @@ export class AccessTokenClient {
     }
   }
 
-  private assertNumericPin(accessTokenRequest: AccessTokenRequest): void {
-    if (accessTokenRequest.user_pin_required) {
-      if (!(0 < accessTokenRequest.user_pin || accessTokenRequest.user_pin <= 99999999)) {
+  private assertNumericPin(accessTokenRequest: AccessTokenRequest, isPinRequired: boolean): void {
+    if (isPinRequired) {
+      if (!accessTokenRequest.user_pin || !(0 < accessTokenRequest.user_pin || accessTokenRequest.user_pin <= 99999999)) {
         throw new Error(
           this.PRE_AUTHORIZED_SCENARIO_MESSAGE + 'A valid pin consists of maximum 8 numeric characters (the numbers 0 - 9) must be present.'
         );
@@ -30,18 +30,16 @@ export class AccessTokenClient {
   }
 
   private assertNonEmptyClientId(accessTokenRequest: AccessTokenRequest): void {
-    if (accessTokenRequest.client_id) {
-      if (accessTokenRequest.client_id.length < 1) {
-        throw new Error('The client Id must be present.');
-      }
+    if (!accessTokenRequest.client_id || accessTokenRequest.client_id.length < 1) {
+      throw new Error('The client Id must be present.');
     }
   }
 
-  private validate(authzFlowType: AuthzFlowType, accessTokenRequest: AccessTokenRequest): void {
+  private validate(authzFlowType: AuthzFlowType, accessTokenRequest: AccessTokenRequest, isPinRequired: boolean): void {
     if (authzFlowType === AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW) {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyPreAuthorizedCode(accessTokenRequest);
-      this.assertNumericPin(accessTokenRequest);
+      this.assertNumericPin(accessTokenRequest, isPinRequired);
       this.assertNonEmptyClientId(accessTokenRequest);
     }
   }
@@ -52,15 +50,16 @@ export class AccessTokenClient {
 
   private async sendAuthCode(tokenRequestURL: URL, accessTokenRequest: AccessTokenRequest): Promise<AccessTokenResponse> {
     const response = await post(tokenRequestURL.toString(), accessTokenRequest);
-    return ((await response).json()) as AccessTokenResponse;
+    return (await response).json() as AccessTokenResponse;
   }
 
   public async acquireAccessToken(
     authFlowType: AuthzFlowType,
     accessTokenRequest: AccessTokenRequest,
-    issuerURL: string
+    issuerURL: string,
+    isPinRequired?: boolean
   ): Promise<AccessTokenResponse> {
-    this.validate(authFlowType, accessTokenRequest);
+    this.validate(authFlowType, accessTokenRequest, isPinRequired);
     const requestTokenURL: URL = this.getEncodedAccessTokenURL(accessTokenRequest, issuerURL);
     return this.sendAuthCode(requestTokenURL, accessTokenRequest);
   }

@@ -8,11 +8,12 @@ describe('AccessTokenClient should', () => {
   it(
       'get Access Token without resulting in errors',
       async () => {
-        const tokenRetriever: AccessTokenClient = new AccessTokenClient();
+        const accessTokenClient: AccessTokenClient = new AccessTokenClient();
 
         const accessTokenIssuanceRequest: AccessTokenRequest = {
           grant_type: GrantTypes.PRE_AUTHORIZED,
-          pre_authorized_code: '20221013'
+          pre_authorized_code: '20221013',
+          client_id: 'sphereon'
         } as AccessTokenRequest;
 
         const body: AccessTokenResponse = {
@@ -25,12 +26,117 @@ describe('AccessTokenClient should', () => {
         };
         nock('https://sphereonjunit20221013.com/').post(/.*/).reply(200, JSON.stringify(body));
 
-        const accessTokenResponse: AccessTokenResponse = await tokenRetriever.acquireAccessToken(
+        const accessTokenResponse: AccessTokenResponse = await accessTokenClient.acquireAccessToken(
             AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
             accessTokenIssuanceRequest,
             'https://sphereonjunit20221013.com/');
 
         expect(accessTokenResponse).toEqual(body);
+      },
+      UNIT_TEST_TIMEOUT
+  );
+
+  it(
+      'get error',
+      async () => {
+        const accessTokenClient: AccessTokenClient = new AccessTokenClient();
+
+        const accessTokenIssuanceRequest: AccessTokenRequest = {
+          grant_type: GrantTypes.AUTHORIZATION_CODE
+        } as AccessTokenRequest;
+
+
+        nock('https://sphereonjunit20221013.com/').post(/.*/).reply(200, '');
+
+        try {
+        await accessTokenClient.acquireAccessToken(
+            AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
+            accessTokenIssuanceRequest,
+            'https://sphereonjunit20221013.com/')
+        } catch (e) {
+          expect(e.message).toEqual('grant type must be \'urn:ietf:params:oauth:grant-type:pre-authorized_code\'');
+        }
+      },
+      UNIT_TEST_TIMEOUT
+  );
+
+  it(
+      'get error for incorrect code',
+      async () => {
+
+        const accessTokenClient: AccessTokenClient = new AccessTokenClient();
+
+        const accessTokenIssuanceRequest: AccessTokenRequest = {
+          grant_type: GrantTypes.PRE_AUTHORIZED,
+          pre_authorized_code: '',
+          user_pin: 1.0
+        } as AccessTokenRequest;
+
+        nock('https://sphereonjunit20221013.com/').post(/.*/).reply(200, {});
+
+        try {
+          await accessTokenClient.acquireAccessToken(
+              AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
+              accessTokenIssuanceRequest,
+              'https://sphereonjunit20221013.com/',
+              true)
+        } catch (e) {
+          expect(e.message).toEqual('The grant type is set to be pre-authorized. Pre-authorization must be proven by presenting the pre-authorized code. Code must be present.');
+        }
+      },
+      UNIT_TEST_TIMEOUT
+  );
+
+  it(
+      'get error for incorrect pin',
+      async () => {
+
+        const accessTokenClient: AccessTokenClient = new AccessTokenClient();
+
+        const accessTokenIssuanceRequest: AccessTokenRequest = {
+          grant_type: GrantTypes.PRE_AUTHORIZED,
+          pre_authorized_code: '20221013',
+          user_pin: null
+        } as AccessTokenRequest;
+
+        nock('https://sphereonjunit20221013.com/').post(/.*/).reply(200, {});
+
+        try {
+          await accessTokenClient.acquireAccessToken(
+              AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
+              accessTokenIssuanceRequest,
+              'https://sphereonjunit20221013.com/',
+              true)
+        } catch (e) {
+          expect(e.message).toEqual('The grant type is set to be pre-authorized. A valid pin consists of maximum 8 numeric characters (the numbers 0 - 9) must be present.');
+        }
+      },
+      UNIT_TEST_TIMEOUT
+  );
+
+  it(
+      'get error for incorrect client id',
+      async () => {
+
+        const accessTokenClient: AccessTokenClient = new AccessTokenClient();
+
+        const accessTokenIssuanceRequest: AccessTokenRequest = {
+          grant_type: GrantTypes.PRE_AUTHORIZED,
+          pre_authorized_code: '20221013',
+          user_pin: 20221013
+        } as AccessTokenRequest;
+
+        nock('https://sphereonjunit20221013.com/').post(/.*/).reply(200, {});
+
+        try {
+          await accessTokenClient.acquireAccessToken(
+              AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
+              accessTokenIssuanceRequest,
+              'https://sphereonjunit20221013.com/',
+              true)
+        } catch (e) {
+          expect(e.message).toEqual('The client Id must be present.');
+        }
       },
       UNIT_TEST_TIMEOUT
   );
