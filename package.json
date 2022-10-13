@@ -12,16 +12,16 @@
     "clean": "rimraf dist coverage",
     "watch": "tsc -w",
     "fix": "run-s fix:*",
-    "fix:prettier": "prettier \"{src,test}/**/*.ts\" --write",
+    "fix:prettier": "prettier \"{src,__test__}/**/*.ts\" --write",
     "fix:lint": "eslint . --ext .ts --fix",
     "test": "run-s build test:*",
     "test:lint": "eslint . --ext .ts",
-    "test:prettier": "prettier \"{src,test}/**/*.ts\" --list-different",
+    "test:prettier": "prettier \"{src,__test__}/**/*.ts\" --list-different",
     "test:cov": "jest --ci --coverage && codecov",
     "uninstall": "rimraf dist coverage yarn.lock package-lock.json node_modules"
   },
   "dependencies": {
-    "@sphereon/ssi-types": "0.8.1-next.20",
+    "@sphereon/ssi-types": "0.8.1-next.31",
     "bs58": "^5.0.0",
     "cross-fetch": "^3.1.5",
     "uint8arrays": "^3.1.1"

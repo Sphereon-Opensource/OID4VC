@@ -1,6 +1,9 @@
-import { ClaimFormat } from '@sphereon/ssi-types';
+import { CredentialFormat } from '@sphereon/ssi-types';
 
+import { URL_NOT_VALID } from './Oidc4vciErrors';
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
+import { isValidURL, postWithBearerToken } from './functions/HttpUtils';
+import { CredentialRequest, CredentialResponse, CredentialResponseError, ProofOfPossession } from './types';
 import { post } from './functions';
 import { CredentialRequest, CredentialResponse, ErrorResponse, ProofOfPossession } from './types';
 
@@ -8,7 +11,7 @@ export class VcIssuanceClient {
   _issuanceRequestOpts: Partial<{
     credentialRequestUrl: string;
     credentialType: string | string[];
-    format: ClaimFormat | ClaimFormat[];
+    format: CredentialFormat | CredentialFormat[];
     proof: ProofOfPossession;
     token: string;
   }>;
@@ -25,24 +28,29 @@ export class VcIssuanceClient {
     return new VcIssuanceClientBuilder();
   }
 
-  public async sendCredentialRequest(request: CredentialRequest, url?: string, token?: string): Promise<CredentialResponse | ErrorResponse> {
+  public async sendCredentialRequest(request: CredentialRequest, url?: string, token?: string ): Promise<CredentialResponse | ErrorResponse> {
+    const requestUrl: string = url ? url : this._issuanceRequestOpts.credentialRequestUrl;
+    if (!isValidURL(requestUrl)) {
+      throw new Error(URL_NOT_VALID);
+    }
+    const requestToken: string = token ? token : this._issuanceRequestOpts.token;
     try {
-      const requestUrl: string = url ? url : this._issuanceRequestOpts.credentialRequestUrl;
-      const requestToken: string = token ? token : this._issuanceRequestOpts.token;
       const response = await post(requestUrl, request, requestToken);
       //TODO: remove this in the future
-      console.log(response);
-      return response.json();
+      const responseJson = await response.json();
+      if (responseJson.error) {
+        return { ...responseJson } as CredentialResponseError;
+      }
+      return { ...responseJson } as CredentialResponse;
     } catch (e) {
       //TODO: remove this in the future
-      console.log(e);
       return e;
     }
   }
 
   public createCredentialRequest(opts: {
     credentialType?: string | string[];
-    format?: ClaimFormat | ClaimFormat[];
+    format?: CredentialFormat | CredentialFormat[];
     proof: ProofOfPossession;
   }): CredentialRequest {
     return {
