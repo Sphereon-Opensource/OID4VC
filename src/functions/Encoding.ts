@@ -1,13 +1,16 @@
-import { IssuanceInitiationRequestPayload, SearchValue } from '../types/IssuanceInitiationRequestTypes';
+import { DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, IssuanceInitiationRequestPayload, SearchValue } from '../types/IssuanceInitiationRequestTypes';
 import { BAD_PARAMS } from '../types/Oidc4vciErrors';
 
 /**
- * @function encodeOidc4vciJsonAsURI encodes a Json object into an URI
- * @param json object of type IssuanceInitiationRequestPayload
+ * @function encodeJsonAsURI encodes a Json object into an URI
+ * @param json object
+ * @param options:
+ *          - urlTypeProperties: a list of properties which the value is an URL
+ *          - arrayTypeProperties: a list of properties which are an array
  */
-export function encodeOidc4vciJsonAsURI(json: IssuanceInitiationRequestPayload): string {
+export function encodeJsonAsURI(json: unknown, options?: EncodeJsonAsURIOpts): string {
   if (typeof json === 'string') {
-    return encodeOidc4vciJsonAsURI(JSON.parse(json));
+    return encodeJsonAsURI(JSON.parse(json));
   }
   const results = [];
 
@@ -20,12 +23,12 @@ export function encodeOidc4vciJsonAsURI(json: IssuanceInitiationRequestPayload):
       continue;
     }
     //Skip properties that are not of URL type
-    if (!['issuer', 'credential_type'].includes(key)) {
+    if (!options?.urlTypeProperties.includes(key)) {
       results.push(`${key}=${value}`);
       continue;
     }
-    if (key === 'credential_type') {
-      results.push(value.map((v) => `${encodeAndStripWhitespace(key)}=${encodeOidc4vciURIComponent(v, /\./g)}`).join('&'));
+    if (options?.arrayTypeProperties.includes(key)) {
+      results.push(value.map((v) => `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(v, /\./g)}`).join('&'));
       continue;
     }
     const isBool = typeof value == 'boolean';
@@ -35,9 +38,9 @@ export function encodeOidc4vciJsonAsURI(json: IssuanceInitiationRequestPayload):
     if (isBool || isNumber) {
       encoded = `${encodeAndStripWhitespace(key)}=${value}`;
     } else if (isString) {
-      encoded = `${encodeAndStripWhitespace(key)}=${encodeOidc4vciURIComponent(value, /\./g)}`;
+      encoded = `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(value, /\./g)}`;
     } else {
-      encoded = `${encodeAndStripWhitespace(key)}=${encodeOidc4vciURIComponent(JSON.stringify(value), /\./g)}`;
+      encoded = `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(JSON.stringify(value), /\./g)}`;
     }
     results.push(encoded);
   }
@@ -45,14 +48,17 @@ export function encodeOidc4vciJsonAsURI(json: IssuanceInitiationRequestPayload):
 }
 
 /**
- * @function decodeOidc4vciUriAsJson decodes an URI into a Json object
+ * @function decodeUriAsJson decodes an URI into a Json object
  * @param uri string
+ * @param options:
+ *          - requiredProperties: the required properties
+ *          - duplicatedProperties: properties that show up more that once
  */
-export function decodeOidc4vciURIAsJson(uri: string): IssuanceInitiationRequestPayload {
-  if (!uri || !uri.includes('issuer') || !uri.includes('credential_type')) {
+export function decodeURIAsJson(uri: string, options?: DecodeURIAsJsonOpts): IssuanceInitiationRequestPayload {
+  if (!uri || !options?.requiredProperties.every((p) => uri.includes(p))) {
     throw new Error(BAD_PARAMS);
   }
-  const parsedURI = parseURI(uri, ['credential_type']);
+  const parsedURI = parseURI(uri, options?.duplicatedProperties);
   return decodeJsonProperty(parsedURI);
 }
 
@@ -108,11 +114,11 @@ export function parseURI(uri: string, duplicated?: string[]): unknown {
 }
 
 /**
- * @function encodeOidc4vciURIComponent is used to encode chars that are not encoded by default
+ * @function customEncodeURIComponent is used to encode chars that are not encoded by default
  * @param searchValue The pattern/regexp to find the char(s) to be encoded
  * @param uriComponent query string
  */
-export function encodeOidc4vciURIComponent(uriComponent: string, searchValue: SearchValue): string {
+export function customEncodeURIComponent(uriComponent: string, searchValue: SearchValue): string {
   // -_.!~*'() are not escaped because they are considered safe.
   // Add them to the regex as you need
   return encodeURIComponent(uriComponent).replace(searchValue, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);

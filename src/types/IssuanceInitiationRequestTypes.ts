@@ -8,3 +8,7 @@ export interface IssuanceInitiationRequestPayload {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type SearchValue = { [Symbol.replace](string: string, replacer: (substring: string, ...args: any[]) => string): string };
+
+export type EncodeJsonAsURIOpts = { urlTypeProperties?: string[]; arrayTypeProperties?: string[] };
+
+export type DecodeURIAsJsonOpts = { requiredProperties?: string[]; duplicatedProperties?: string[] };

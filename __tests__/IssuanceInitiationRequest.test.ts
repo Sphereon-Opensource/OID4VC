@@ -1,17 +1,23 @@
-import {decodeOidc4vciURIAsJson, encodeOidc4vciJsonAsURI} from "../src/functions/Encoding";
+import {decodeURIAsJson, encodeJsonAsURI} from "../src/functions/Encoding";
 import {AuthzFlowType} from "../src/types/AuthzFlowType";
 
 describe("Issuance Initiation Request", () => {
   it('should parse an object into open-id-URI', () => {
-    expect(encodeOidc4vciJsonAsURI({
+    expect(encodeJsonAsURI({
       issuer: 'https://server.example.com',
       credential_type: ['https://did.example.org/healthCard', 'https://did.example.org/driverLicense'],
       op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
+    }, {
+      arrayTypeProperties: ['credential_type'],
+      urlTypeProperties: ['issuer', 'credential_type']
     })).toEqual('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy')
   })
 
   it('should parse open-id-URI as json object', () => {
-    expect(decodeOidc4vciURIAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy'))
+    expect(decodeURIAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy', {
+      duplicatedProperties: ['credential_type'],
+      requiredProperties: ['issuer', 'credential_type']
+    }))
     .toEqual({
       issuer: 'https://server.example.com',
       credential_type: ['https://did.example.org/healthCard', 'https://did.example.org/driverLicense'],

@@ -29,11 +29,15 @@ export interface IssuanceInitiationRequestPayload {
 Encodes a Json object created based on `IssuanceInitiationRequestPayload` interface into an URI:
 
 ```typescript
-const encodedURI = encodeOidc4vciJsonAsURI(
+const encodedURI = encodeJsonAsURI(
     {
       issuer: 'https://server.example.com',
       credential_type: ['https://did.example.org/healthCard', 'https://did.example1.org/driverLicense'],
       op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
+    },
+    {
+      arrayTypeProperties: ['credential_type'],
+      urlTypeProperties: ['issuer', 'credential_type']
     })
 console.log(encodedURI)
 // issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy
@@ -44,7 +48,11 @@ console.log(encodedURI)
 Decodes URI into a Json object:
 
 ```typescript
-const decodedJson = decodeOidc4vciJsonAsURI('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy')
+const decodedJson = decodeJsonAsURI('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy', 
+    {
+      duplicatedProperties: ['credential_type'],
+      requiredProperties: ['issuer', 'credential_type']
+    })
 // console.log(decodedJson)
 // {
 //   issuer: 'https://server.example.com',
@@ -70,12 +78,12 @@ Parses the URI without decoding it
 // }
 ```
 
-#### encodeOidc4vciURIComponent
+#### customEncodeURIComponent
 
 Encodes chars that are not encoded by default
 
 ```typescript
-const encodedURI = encodeOidc4vciURIComponent('https://server.example.com');
+const encodedURI = customEncodeURIComponent('https://server.example.com', /\./g);
 console.log(encodedURI)
 // 'https%253A%252F%252Fserver%252Eexample%252Ecom'
 ```
