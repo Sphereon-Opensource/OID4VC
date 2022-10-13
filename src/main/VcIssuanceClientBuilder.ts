@@ -1,11 +1,11 @@
-import { ClaimFormat } from '@sphereon/ssi-types';
+import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { VcIssuanceClient } from './VcIssuanceClient';
 
 export default class VcIssuanceClientBuilder {
   credentialRequestUrl: string;
   credentialType: string | string[];
-  format: ClaimFormat | ClaimFormat[];
+  format: CredentialFormat | CredentialFormat[];
 
   withCredentialRequestUrl(credentialRequestUrl: string): VcIssuanceClientBuilder {
     this.credentialRequestUrl = credentialRequestUrl;
@@ -17,7 +17,7 @@ export default class VcIssuanceClientBuilder {
     return this;
   }
 
-  withFormat(format: ClaimFormat | ClaimFormat[]): VcIssuanceClientBuilder {
+  withFormat(format: CredentialFormat | CredentialFormat[]): VcIssuanceClientBuilder {
     this.format = format;
     return this;
   }

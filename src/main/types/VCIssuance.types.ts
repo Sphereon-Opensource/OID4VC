@@ -1,5 +1,4 @@
-import { W3CVerifiableCredential } from '@sphereon/ssi-types';
-import { ClaimFormat } from '@sphereon/ssi-types/src/types/vc';
+import { CredentialFormat, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 export enum AuthzFlowType {
   AUTHORIZATION_CODE_FLOW = 'Authorization Code Flow',
@@ -20,13 +19,13 @@ export interface CredentialRequest {
   //TODO: handling list is out of scope for now
   type: string | string[];
   //TODO: handling list is out of scope for now
-  format: ClaimFormat | ClaimFormat[];
+  format: CredentialFormat | CredentialFormat[];
   proof: ProofOfPossession;
 }
 
 export interface CredentialResponse {
   credential: W3CVerifiableCredential;
-  format: ClaimFormat;
+  format: CredentialFormat;
 }
 
 export interface CredentialResponseError {
@@ -60,5 +59,5 @@ export enum ProofType {
 export interface ProofOfPossession {
   proof_type: ProofType;
   jwt: string;
-  [x: string]: any;
+  [x: string]: unknown;
 }

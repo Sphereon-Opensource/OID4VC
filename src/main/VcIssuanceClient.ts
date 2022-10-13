@@ -1,4 +1,4 @@
-import { ClaimFormat } from '@sphereon/ssi-types';
+import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { URL_NOT_VALID } from './Oidc4vciErrors';
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
@@ -9,7 +9,7 @@ export class VcIssuanceClient {
   _issuanceRequestOpts: Partial<{
     credentialRequestUrl: string;
     credentialType: string | string[];
-    format: ClaimFormat | ClaimFormat[];
+    format: CredentialFormat | CredentialFormat[];
     proof: ProofOfPossession;
     token: string;
   }>;
@@ -54,7 +54,7 @@ export class VcIssuanceClient {
 
   public createCredentialRequest(opts: {
     credentialType?: string | string[];
-    format?: ClaimFormat | ClaimFormat[];
+    format?: CredentialFormat | CredentialFormat[];
     proof: ProofOfPossession;
   }): CredentialRequest {
     return {

@@ -635,10 +635,10 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@sphereon/ssi-types@0.8.1-next.20":
-  version "0.8.1-next.20"
-  resolved "https://registry.yarnpkg.com/@sphereon/ssi-types/-/ssi-types-0.8.1-next.20.tgz#48b93d02e8999d5efcd0b938c78adc12b27d06dc"
-  integrity sha512-kesuBgbzzVBOXr43QpcZw6DahJWlGuc9+3nyIODgSwcACLkrevVQIL0vbw4PSAiCl8MoG38W/j1zSaQaWHGnOg==
+"@sphereon/ssi-types@0.8.1-next.31":
+  version "0.8.1-next.31"
+  resolved "https://registry.yarnpkg.com/@sphereon/ssi-types/-/ssi-types-0.8.1-next.31.tgz#80d8bddb54f537734c942c5d922856c72dd6a387"
+  integrity sha512-+EPLFGbySIPdQZ5Hu1XBnfKH7Do5IFPkItJuI99VIzGy4hhNil0X5dz3CVMaFMPYjlBe/eUliYItovNb26Vh8Q==
   dependencies:
     jwt-decode "^3.1.2"
 
