@@ -26,13 +26,13 @@ W -> I: The Wallet sends the OIDCVCI Token Request via HTTPS\n to the OIDC4VCI t
 I -> I: The Issuer verifies the OIDC4VCI Token Request\n and checks whether the request was pre-authorized.
 I -> W: The Issuer returns the OIDC4VCI token (access_token).
 W -> W: The Wallet generates a JWT that contains a nonce and\n short validity time and is \nsigned by the private key of the DID.\n This will provide the issuer with PoP of the private key.
-W -> W: The Wallet creates the OIDC4VCI Credential Request
-W -> I: The Wallet sends the OIDC4VCI credential request \nvia HTTPS to the OIDC4VCI credential endpoint of the Issuer.
-I -> I: The Issuer verifies the OIDC4VCI credential request\n (based on the access_token) and the PoP (JWT).
+W -> W: The Wallet creates the CredentialRequest
+W -> I: The Wallet sends the CredentialRequest via \nVcIssuanceClient.sendCredentialRequest function
+I -> I: The Issuer verifies the CredentialRequest\n (based on the access_token) and the PoP (JWT).
 I -> I: The Issuer extracts the DID from the PoP.
 I -> I: The Issuer creates the credential, adds the subject’s DID\n and signs the credential with the private key of their Issuer’ URI.
-I -> I: The Issuer generates the OIDC4VCI Credential Response.
-I -> W: The Wallet receives the OIDC4VCI credential response\n and extracts the credential(s) to store in the Wallet.
+I -> I: The Issuer generates the CredentialResponse.
+I -> W: The Wallet receives the CredentialResponse\n and extracts the credential(s) to store in the Wallet.
 W -> H: Wallet shows the credential(s) to the holder.
 
 @enduml
