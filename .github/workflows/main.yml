@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: install node v14
+      - name: install node v16
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
       - name: yarn install
         run: yarn install
       - name: tsc
