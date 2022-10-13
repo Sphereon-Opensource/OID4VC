@@ -5,7 +5,7 @@ export enum GrantTypes {
 }
 
 export enum Encoding {
-  ENCODING = 'application/x-www-form-urlencoded',
+  FORM_URL_ENCODED = 'application/x-www-form-urlencoded',
   UTF_8 = 'UTF-8',
 }
 
@@ -21,7 +21,7 @@ export enum ClientType {
 export class ClientProfile {
   public static readonly WEB = new ClientProfile('web', ClientType.CONFIDENTIAL);
   public static readonly USER_AGENT_BASED = new ClientProfile('user-agent-based', ClientType.CONFIDENTIAL);
-  public static readonly NATIVE = new ClientProfile('native', ClientType.CONFIDENTIAL);
+  public static readonly NATIVE = new ClientProfile('native', ClientType.PUBLIC);
 
   private readonly _profile: string;
   private readonly _clientType: ClientType;
@@ -95,7 +95,7 @@ export interface AccessTokenIssuanceRequest extends Request {
   user_pin_required?: boolean;
 }
 
-export interface AccessTokenIssuanceResponse extends Response {
+export interface AccessTokenResponse extends Response {
   username?: string;
   password?: string;
   access_token?: string;

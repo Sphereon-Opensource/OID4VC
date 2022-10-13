@@ -2,7 +2,7 @@ import { ClaimFormat } from '@sphereon/ssi-types';
 
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
 import { postWithBearerToken } from './functions';
-import { CredentialRequest, CredentialResponse, CredentialResponseError, ProofOfPossession } from './types';
+import { CredentialRequest, CredentialResponse, ErrorResponse, ProofOfPossession } from './types';
 
 export class VcIssuanceClient {
   _issuanceRequestOpts: Partial<{
@@ -20,20 +20,11 @@ export class VcIssuanceClient {
     };
   }
 
-  public static builder() {
+  public static builder(): VcIssuanceClientBuilder {
     return new VcIssuanceClientBuilder();
   }
 
-  //TODO: implement this
-  public async acquireToken() {
-    return 'MY-TOKEN';
-  }
-
-  public async sendCredentialRequest(
-    request: CredentialRequest,
-    url?: string,
-    token?: string
-  ): Promise<CredentialResponse | CredentialResponseError> {
+  public async sendCredentialRequest(request: CredentialRequest, url?: string, token?: string): Promise<CredentialResponse | ErrorResponse> {
     try {
       const requestUrl: string = url ? url : this._issuanceRequestOpts.credentialRequestUrl;
       const requestToken: string = token ? token : this._issuanceRequestOpts.token;

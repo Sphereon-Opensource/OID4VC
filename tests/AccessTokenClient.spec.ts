@@ -1,30 +1,35 @@
 
 import {
+  AccessTokenClient,
   AccessTokenIssuanceRequest,
+  AccessTokenResponse,
   AuthorizationExchange,
   AuthorizationExchangeMetaData,
   AuthorizationGrantResponse,
-  AuthorizationRequest,
   Builder,
   ClientType,
   ExchangeStep,
   GrantTypes,
-  TokenRetriever,
-} from '../../src';
-import { UNIT_TEST_TIMEOUT } from '../IT.spec';
+  IssuanceInitiationRequestPayload
+} from '../src';
 
-describe('TokenRetriever should', () => {
+import { UNIT_TEST_TIMEOUT } from './IT.spec';
+
+describe('AccessTokenClient should', () => {
   it(
     'get Access Token without resulting in errors',
     async () => {
-      const tokenRetriever: TokenRetriever = new TokenRetriever();
+      const tokenRetriever: AccessTokenClient = new AccessTokenClient();
 
       const accessTokenIssuanceRequest: AccessTokenIssuanceRequest = Builder<AccessTokenIssuanceRequest>()
         .grant_type(GrantTypes['PRE-AUTHORIZED'])
         .pre_authorized_code('pre-authorized_code2022-10-11')
         .build();
 
-      const authRequest: AuthorizationRequest = Builder<AuthorizationRequest>().build();
+      const authRequest: IssuanceInitiationRequestPayload = Builder<IssuanceInitiationRequestPayload>()
+        .issuer('https://sphereonJuntiPreAuthIssuerHost2022-10-1300.com')
+        .build();
+
       const authResponse: AuthorizationGrantResponse = Builder<AuthorizationGrantResponse>().build();
 
       const authorizationExchange: AuthorizationExchange = Builder<AuthorizationExchange>()
@@ -40,7 +45,8 @@ describe('TokenRetriever should', () => {
         .exchanges(exchanges)
         .build();
 
-      expect(tokenRetriever.getAccessToken(accessTokenIssuanceRequest, authorizationExchangeMetaData)).toEqual(null);
+      const accessTokenResponse:AccessTokenResponse = await tokenRetriever.acquireAccessToken(accessTokenIssuanceRequest, authorizationExchangeMetaData);
+      expect(accessTokenResponse).toEqual(null);
     },
     UNIT_TEST_TIMEOUT
   );

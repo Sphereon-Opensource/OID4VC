@@ -1,12 +1,15 @@
 <h1 align="center">
   <br>
   <a href="https://www.sphereon.com"><img src="https://sphereon.com/content/themes/sphereon/assets/img/logo.svg" alt="Sphereon" width="400"></a>
-    <br>OIDC4VCI-CLIENT 
-    <br>A client to request and receive Verifiable Credentials using Oidc4vci
+    <br>OpenIDConnect 4 Verifiable Credential Issuer - Client 
   <br>
 </h1>
 
 _IMPORTANT it still in development and it's not fully functional_
+
+### Background 
+
+A client to request and receive Verifiable Credentials using Oidc4vci
 
 ### Interfaces
 

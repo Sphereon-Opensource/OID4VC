@@ -44,6 +44,12 @@
         "member-variable-declaration": true
       }
     ],
+    "@typescript-eslint/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true
+      }
+    ],
     "eslint-comments/disable-enable-pair": [
       "error",
       {

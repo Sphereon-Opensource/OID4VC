@@ -1,25 +1,24 @@
-import { BAD_PARAMS } from '../types';
-import { SearchValue } from '../types/IssuanceInitiationRequestTypes';
+import { BAD_PARAMS, SearchValue } from '../types';
 
 /**
  * @function encodeJsonAsURI encodes a Json object into a URI
- * @param json object or array of type IssuanceInitiationRequestPayload
+ * @param json object or array of type different objects.
  */
-export function encodeJsonAsURI(json: unknown[] | unknown) {
+export function encodeJsonAsURI(json: unknown[] | unknown): string {
   if (!Array.isArray(json)) {
     return encodeJsonObjectAsURI(json);
   }
   return json.map((j) => encodeJsonObjectAsURI(j)).join('&');
 }
 
-function encodeJsonObjectAsURI(json: unknown) {
+function encodeJsonObjectAsURI(json: unknown): string {
   if (typeof json === 'string') {
     return encodeJsonObjectAsURI(JSON.parse(json));
   }
 
   const results = [];
 
-  function encodeAndStripWhitespace(key: string) {
+  function encodeAndStripWhitespace(key: string): string {
     return encodeURIComponent(key.replace(' ', ''));
   }
 
@@ -48,20 +47,23 @@ function encodeJsonObjectAsURI(json: unknown) {
   return results.join('&');
 }
 
+export function validate(uri: string): void {
+  if (!uri || !uri.includes('issuer') || !uri.includes('credential_type')) {
+    throw new Error(BAD_PARAMS);
+  }
+}
+
 /**
  * @function decodeUriAsJson decodes an URI into a Json object
  * @param uri string
  */
-export function decodeURIAsJson(uri: string) {
-  if (!uri || !uri.includes('issuer') || !uri.includes('credential_type')) {
-    throw new Error(BAD_PARAMS);
-  }
+export function decodeURIAsJson(uri: string): unknown | unknown[] {
   const jsonArray = parseURI(uri);
   const result = jsonArray.map((o) => decodeJsonProperty(o));
   return result.length < 2 ? result[0] : result;
 }
 
-function decodeJsonProperty(parts: unknown) {
+function decodeJsonProperty(parts: unknown): unknown {
   const json = {};
   for (const [key, value] of Object.entries(parts)) {
     if (!value) {
@@ -90,7 +92,7 @@ function decodeJsonProperty(parts: unknown) {
  * @param uri string
  */
 
-export function parseURI(uri: string) {
+export function parseURI(uri: string): unknown[] {
   const jsonArray = [];
   let json: unknown = {};
   const dict = uri.split('&');

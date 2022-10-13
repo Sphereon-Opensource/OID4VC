@@ -1,14 +1,16 @@
+import { encodeJsonAsURI } from './functions';
 import {
   AccessTokenIssuanceRequest,
-  AccessTokenIssuanceResponse,
+  AccessTokenResponse,
   AuthorizationExchangeMetaData,
   AuthorizationRequest,
   ExchangeStep,
   GrantTypes,
-} from '../types';
-import { Builder } from '../utils';
+  IssuanceInitiationRequestPayload,
+} from './types';
+import { Builder } from './utils';
 
-export class TokenRetriever {
+export class AccessTokenClient {
   const;
   PRE_AUTHORIZED_SCENARIO_MESSAGE = 'The grant type is set to be pre-authorized. ';
 
@@ -34,7 +36,7 @@ export class TokenRetriever {
     }
   }
 
-  private assertRedirectURIISValid(authorizationRequest: AuthorizationRequest, accessTokenIssuanceRequest: AccessTokenIssuanceRequest) {
+  private assertRedirectURIISValid(authorizationRequest: AuthorizationRequest, accessTokenIssuanceRequest: AccessTokenIssuanceRequest): void {
     if (authorizationRequest.redirect_uri) {
       if (!accessTokenIssuanceRequest.redirect_uri) {
         throw new Error('The redirect URI must be present as it is configured during authorization step.');
@@ -53,22 +55,27 @@ export class TokenRetriever {
     this.assertRedirectURIISValid(authorizationRequest, accessTokenIssuanceRequest);
   }
 
-  private getEncodedAccessTokenURL(accessTokenIssuanceRequest: AccessTokenIssuanceRequest): URL {
-    // TODO Implement
-    return accessTokenIssuanceRequest ? new URL('https://sphereonDummyIssuer2022-10-11_00/token') : null;
-  }
-
-  private sendAccessToken(requestTokenURL: URL): AccessTokenIssuanceResponse {
-    // TODO Implement
-    return !requestTokenURL ? Builder<AccessTokenIssuanceResponse>().build() : null;
-  }
-
-  public getAccessToken(
+  private getEncodedAccessTokenURL(
     accessTokenIssuanceRequest: AccessTokenIssuanceRequest,
     authorizationExchangeMetaData: AuthorizationExchangeMetaData
-  ): AccessTokenIssuanceResponse {
+  ): URL {
+    const issuanceInitiationRequestPayload: IssuanceInitiationRequestPayload = authorizationExchangeMetaData.exchanges.get(ExchangeStep.AUTHORIZATION)
+      .request as IssuanceInitiationRequestPayload;
+
+    return new URL(issuanceInitiationRequestPayload.issuer + '?' + encodeJsonAsURI(accessTokenIssuanceRequest));
+  }
+
+  private sendAuthCode(requestTokenURL: URL): AccessTokenResponse {
+    // TODO Implement
+    return !requestTokenURL ? Builder<AccessTokenResponse>().build() : null;
+  }
+
+  public async acquireAccessToken(
+    accessTokenIssuanceRequest: AccessTokenIssuanceRequest,
+    authorizationExchangeMetaData: AuthorizationExchangeMetaData
+  ): Promise<AccessTokenResponse> {
     this.validate(accessTokenIssuanceRequest, authorizationExchangeMetaData);
-    const requestTokenURL: URL = this.getEncodedAccessTokenURL(accessTokenIssuanceRequest);
-    return this.sendAccessToken(requestTokenURL);
+    const requestTokenURL: URL = this.getEncodedAccessTokenURL(accessTokenIssuanceRequest, authorizationExchangeMetaData);
+    return this.sendAuthCode(requestTokenURL);
   }
 }
