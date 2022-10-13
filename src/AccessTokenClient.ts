@@ -1,26 +1,20 @@
 import { encodeJsonAsURI } from './functions';
-import {
-  AccessTokenIssuanceRequest,
-  AccessTokenResponse,
-  AuthorizationExchangeMetaData,
-  AuthorizationRequest,
-  ExchangeStep,
-  GrantTypes,
-  IssuanceInitiationRequestPayload,
-} from './types';
+import { AccessTokenRequest, AccessTokenResponse, AuthzFlowType, GrantTypes } from './types';
 import { Builder } from './utils';
 
 export class AccessTokenClient {
   const;
   PRE_AUTHORIZED_SCENARIO_MESSAGE = 'The grant type is set to be pre-authorized. ';
 
-  private isGrantTypePreAuthorized(grantType: string): boolean {
-    return GrantTypes['PRE-AUTHORIZED'] === grantType;
+  private assertPreAuthorizedGrantType(grantType: string): void {
+    if (GrantTypes.PRE_AUTHORIZED !== grantType) {
+      throw new Error("grant type must be 'urn:ietf:params:oauth:grant-type:pre-authorized_code'");
+    }
   }
 
-  private assertPinIsValid(accessTokenIssuanceRequest: AccessTokenIssuanceRequest): void {
-    if (accessTokenIssuanceRequest.user_pin_required) {
-      if (!(0 < accessTokenIssuanceRequest.user_pin || accessTokenIssuanceRequest.user_pin <= 99999999)) {
+  private assertNumericPin(accessTokenRequest: AccessTokenRequest): void {
+    if (accessTokenRequest.user_pin_required) {
+      if (!(0 < accessTokenRequest.user_pin || accessTokenRequest.user_pin <= 99999999)) {
         throw new Error(
           this.PRE_AUTHORIZED_SCENARIO_MESSAGE + 'A valid pin consists of maximum 8 numeric characters (the numbers 0 - 9) must be present.'
         );
@@ -28,54 +22,47 @@ export class AccessTokenClient {
     }
   }
 
-  private assertValidPreAuthorizedCode(accessTokenIssuanceRequest: AccessTokenIssuanceRequest): void {
-    if (!accessTokenIssuanceRequest.pre_authorized_code) {
+  private assertNonEmptyPreAuthorizedCode(accessTokenRequest: AccessTokenRequest): void {
+    if (!accessTokenRequest.pre_authorized_code) {
       throw new Error(
         this.PRE_AUTHORIZED_SCENARIO_MESSAGE + 'Pre-authorization must be proven by presenting the pre-authorized code. Code must be present.'
       );
     }
   }
 
-  private assertRedirectURIISValid(authorizationRequest: AuthorizationRequest, accessTokenIssuanceRequest: AccessTokenIssuanceRequest): void {
-    if (authorizationRequest.redirect_uri) {
-      if (!accessTokenIssuanceRequest.redirect_uri) {
-        throw new Error('The redirect URI must be present as it is configured during authorization step.');
+  private assertNonEmptyClientId(accessTokenRequest: AccessTokenRequest): void {
+    if (accessTokenRequest.client_id) {
+      if (accessTokenRequest.client_id.length < 1) {
+        throw new Error('The client Id must be present.');
       }
     }
   }
 
-  private validate(accessTokenIssuanceRequest: AccessTokenIssuanceRequest, authorizationExchangeMetaData: AuthorizationExchangeMetaData): void {
-    if (this.isGrantTypePreAuthorized(accessTokenIssuanceRequest.grant_type)) {
-      this.assertValidPreAuthorizedCode(accessTokenIssuanceRequest);
-      this.assertPinIsValid(accessTokenIssuanceRequest);
+  private validate(authzFlowType: AuthzFlowType, accessTokenRequest: AccessTokenRequest): void {
+    if (authzFlowType === AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW) {
+      this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
+      this.assertNonEmptyPreAuthorizedCode(accessTokenRequest);
+      this.assertNumericPin(accessTokenRequest);
+      this.assertNonEmptyClientId(accessTokenRequest);
     }
-
-    const authorizationRequest = authorizationExchangeMetaData.exchanges.get(ExchangeStep.AUTHORIZATION).request as AuthorizationRequest;
-
-    this.assertRedirectURIISValid(authorizationRequest, accessTokenIssuanceRequest);
   }
 
-  private getEncodedAccessTokenURL(
-    accessTokenIssuanceRequest: AccessTokenIssuanceRequest,
-    authorizationExchangeMetaData: AuthorizationExchangeMetaData
-  ): URL {
-    const issuanceInitiationRequestPayload: IssuanceInitiationRequestPayload = authorizationExchangeMetaData.exchanges.get(ExchangeStep.AUTHORIZATION)
-      .request as IssuanceInitiationRequestPayload;
-
-    return new URL(issuanceInitiationRequestPayload.issuer + '?' + encodeJsonAsURI(accessTokenIssuanceRequest));
+  private getEncodedAccessTokenURL(accessTokenRequest: AccessTokenRequest, issuerURL: string): URL {
+    return new URL(issuerURL + '?' + encodeJsonAsURI(accessTokenRequest));
   }
 
-  private sendAuthCode(requestTokenURL: URL): AccessTokenResponse {
+  private async sendAuthCode(requestTokenURL: URL): Promise<AccessTokenResponse> {
     // TODO Implement
     return !requestTokenURL ? Builder<AccessTokenResponse>().build() : null;
   }
 
   public async acquireAccessToken(
-    accessTokenIssuanceRequest: AccessTokenIssuanceRequest,
-    authorizationExchangeMetaData: AuthorizationExchangeMetaData
+    authFlowType: AuthzFlowType,
+    accessTokenRequest: AccessTokenRequest,
+    issuerURL: string
   ): Promise<AccessTokenResponse> {
-    this.validate(accessTokenIssuanceRequest, authorizationExchangeMetaData);
-    const requestTokenURL: URL = this.getEncodedAccessTokenURL(accessTokenIssuanceRequest, authorizationExchangeMetaData);
+    this.validate(authFlowType, accessTokenRequest);
+    const requestTokenURL: URL = this.getEncodedAccessTokenURL(accessTokenRequest, issuerURL);
     return this.sendAuthCode(requestTokenURL);
   }
 }

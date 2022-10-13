@@ -12,6 +12,7 @@ export class VcIssuanceClient {
     proof: ProofOfPossession;
     token: string;
   }>;
+
   public constructor(opts: { builder?: VcIssuanceClientBuilder }) {
     this._issuanceRequestOpts = {
       credentialRequestUrl: opts.builder.credentialRequestUrl,

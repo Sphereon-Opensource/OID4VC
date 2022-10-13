@@ -1,8 +1,6 @@
 import { W3CVerifiableCredential } from '@sphereon/ssi-types';
 import { ClaimFormat } from '@sphereon/ssi-types/src/types/vc';
 
-import { Request } from './OIDC4VCI.types';
-
 export enum AuthzFlowType {
   AUTHORIZATION_CODE_FLOW = 'Authorization Code Flow',
   PRE_AUTHORIZED_CODE_FLOW = 'Pre-Authorized Code Flow',
@@ -31,7 +29,7 @@ export interface CredentialResponse {
   format: ClaimFormat;
 }
 
-export interface IssuanceInitiationRequestPayload extends Request {
+export interface IssuanceInitiationRequestPayload {
   issuer: string; //(url) REQUIRED The issuer URL of the Credential issuer, the Wallet is requested to obtain one or more Credentials from.
   credential_type: string[] | string; //(url) REQUIRED A JSON string denoting the type of the Credential the Wallet shall request
   pre_authorized_code?: string; //CONDITIONAL the code representing the issuer's authorization for the Wallet to obtain Credentials of a certain type. This code MUST be short-lived and single-use. MUST be present in a pre-authorized code flow.
