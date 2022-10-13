@@ -1,9 +1,9 @@
-import {CredentialFormat} from '@sphereon/ssi-types';
+import { CredentialFormat } from '@sphereon/ssi-types';
 
-import {URL_NOT_VALID} from './Oidc4vciErrors';
+import { URL_NOT_VALID } from './Oidc4vciErrors';
+import { BAD_PARAMS } from './Oidc4vciErrors';
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
-import {isValidURL, postWithBearerToken} from './functions/HttpUtils';
-import {BAD_PARAMS} from "./Oidc4vciErrors";
+import { isValidURL, postWithBearerToken } from './functions/HttpUtils';
 import {
   CredentialRequest,
   CredentialResponse,
@@ -77,12 +77,12 @@ export class VcIssuanceClient {
     jwtSignerArgs: JWTSignerArgs;
   }): Promise<ProofOfPossession> {
     if (!opts.jwtSignerCallback || !opts.jwtSignerArgs) {
-      throw new Error(BAD_PARAMS)
+      throw new Error(BAD_PARAMS);
     }
     return {
       proof_type: ProofType.JWT,
-      jwt: await opts.jwtSignerCallback(opts.jwtSignerArgs)
-    }
+      jwt: await opts.jwtSignerCallback(opts.jwtSignerArgs),
+    };
   }
 
   public createCredentialRequest(opts: {
