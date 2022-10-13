@@ -1,5 +1,5 @@
-import { DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, IssuanceInitiationRequestPayload, SearchValue } from '../types/IssuanceInitiationRequestTypes';
-import { BAD_PARAMS } from '../types/Oidc4vciErrors';
+import { BAD_PARAMS } from '../Oidc4vciErrors';
+import { DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, IssuanceInitiationRequestPayload, SearchValue } from '../types';
 
 /**
  * @function encodeJsonAsURI encodes a Json object into an URI
@@ -28,7 +28,9 @@ export function encodeJsonAsURI(json: unknown, options?: EncodeJsonAsURIOpts): s
       continue;
     }
     if (options?.arrayTypeProperties.includes(key)) {
-      results.push(value.map((v) => `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(v, /\./g)}`).join('&'));
+      results.push(
+        value.map((v) => `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(v, /\./g)}`).join('&')
+      );
       continue;
     }
     const isBool = typeof value == 'boolean';
