@@ -24,7 +24,7 @@ export async function postWithBearerToken(
   }
 }
 
-export function checkUrlValidity(url: string) {
+export function isValidURL(url: string) {
   const urlPattern = new RegExp(
     '^(https?:\\/\\/)?' + // validate protocol
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
