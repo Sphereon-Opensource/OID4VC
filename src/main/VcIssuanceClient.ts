@@ -1,9 +1,18 @@
-import { CredentialFormat } from '@sphereon/ssi-types';
+import {CredentialFormat} from '@sphereon/ssi-types';
 
-import { URL_NOT_VALID } from './Oidc4vciErrors';
+import {URL_NOT_VALID} from './Oidc4vciErrors';
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
-import { isValidURL, postWithBearerToken } from './functions/HttpUtils';
-import { CredentialRequest, CredentialResponse, CredentialResponseError, ProofOfPossession } from './types';
+import {isValidURL, postWithBearerToken} from './functions/HttpUtils';
+import {BAD_PARAMS} from "./Oidc4vciErrors";
+import {
+  CredentialRequest,
+  CredentialResponse,
+  CredentialResponseError,
+  JWTSignerArgs,
+  JWTSignerCallback,
+  ProofOfPossession,
+  ProofType,
+} from './types';
 
 export class VcIssuanceClient {
   _issuanceRequestOpts: Partial<{
@@ -12,6 +21,8 @@ export class VcIssuanceClient {
     format: CredentialFormat | CredentialFormat[];
     proof: ProofOfPossession;
     token: string;
+    jwtSignerCallback: JWTSignerCallback;
+    jwtSignerArgs: JWTSignerArgs;
   }>;
 
   public constructor(opts: { builder?: VcIssuanceClientBuilder }) {
@@ -55,11 +66,30 @@ export class VcIssuanceClient {
     }
   }
 
-  public createCredentialRequest(opts: {
+  /**
+   * createProofOfPossession creates and returns the ProofOfPossession object
+   * @param opts
+   *         - jwtSignerCallback: function to create the signature
+   *         - jwtSignerArgs: The arguments to create the signature
+   */
+  public async createProofOfPossession(opts: {
+    jwtSignerCallback: JWTSignerCallback;
+    jwtSignerArgs: JWTSignerArgs;
+  }): Promise<ProofOfPossession> {
+    if (!opts.jwtSignerCallback || !opts.jwtSignerArgs) {
+      throw new Error(BAD_PARAMS)
+    }
+    return {
+      proof_type: ProofType.JWT,
+      jwt: await opts.jwtSignerCallback(opts.jwtSignerArgs)
+    }
+  }
+
+  public async createCredentialRequest(opts: {
     credentialType?: string | string[];
     format?: CredentialFormat | CredentialFormat[];
     proof: ProofOfPossession;
-  }): CredentialRequest {
+  }): Promise<CredentialRequest> {
     return {
       type: opts.credentialType ? opts.credentialType : this._issuanceRequestOpts.credentialType,
       format: opts.format ? opts.format : this._issuanceRequestOpts.format,

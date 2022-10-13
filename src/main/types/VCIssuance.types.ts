@@ -1,3 +1,5 @@
+import { KeyObject } from 'crypto';
+
 import { CredentialFormat, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 export enum AuthzFlowType {
@@ -61,3 +63,36 @@ export interface ProofOfPossession {
   jwt: string;
   [x: string]: unknown;
 }
+
+export interface JWK {
+  kty?: string;
+  crv?: string;
+  x?: string;
+  y?: string;
+  e?: string;
+  n?: string;
+}
+
+export interface JWTHeader {
+  alg: string; // REQUIRED by the JWT signer
+  kid?: string; // CONDITIONAL. JWT header containing the key ID. If the Credential shall be bound to a DID, the kid refers to a DID URL which identifies a particular key in the DID Document that the Credential shall be bound to. MUST NOT be present if jwk or x5c is present.
+  jwk?: JWK; // CONDITIONAL. JWT header containing the key material the new Credential shall be bound to. MUST NOT be present if kid or x5c is present.
+  x5c?: string[]; // CONDITIONAL. JWT header containing a certificate or certificate chain corresponding to the key used to sign the JWT. This element may be used to convey a key attestation. In such a case, the actual key certificate will contain attributes related to the key properties. MUST NOT be present if kid or jwk is present.
+}
+
+export interface JWTPayload {
+  iss: string; // REQUIRED (string). The value of this claim MUST be the client_id of the client making the credential request.
+  aud: string; // REQUIRED (string). The value of this claim MUST be the issuer URL of credential issuer.
+  iat: number; // REQUIRED (number). The value of this claim MUST be the time at which the proof was issued using the syntax defined in [RFC7519].
+  nonce: string; // REQUIRED (string). The value type of this claim MUST be a string, where the value is a c_nonce provided by the credential issuer.
+}
+
+export interface JWTSignerArgs {
+  header: JWTHeader;
+  payload: JWTPayload;
+  privateKey: KeyObject;
+}
+
+export type JWTSignerCallback = (args: JWTSignerArgs) => Promise<string>;
+
+export type Request = CredentialRequest;
