@@ -37,7 +37,7 @@ export class VcIssuanceClient {
     token?: string
   ): Promise<CredentialResponse | CredentialResponseError> {
     const requestUrl: string = url ? url : this._issuanceRequestOpts.credentialRequestUrl;
-    if (!checkUrlValidity(requestUrl)) {
+    if (!isValidURL(requestUrl)) {
       throw new Error(URL_NOT_VALID);
     }
     const requestToken: string = token ? token : this._issuanceRequestOpts.token;
