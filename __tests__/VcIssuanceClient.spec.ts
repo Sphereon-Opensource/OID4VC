@@ -4,10 +4,10 @@ import { CredentialRequest, ProofType } from '../src/main/types';
 describe('VcIssuanceClient ', () => {
   it('should build correctly provided with correct params', function () {
     const vcIssuanceClient = VcIssuanceClient.builder()
-      .withCredentialRequestUrl('oidc4vci.demo.spruceid.com/credential')
+      .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .build();
-    expect(vcIssuanceClient._issuanceRequestOpts.credentialRequestUrl).toBe('oidc4vci.demo.spruceid.com/credential');
+    expect(vcIssuanceClient._issuanceRequestOpts.credentialRequestUrl).toBe('https://oidc4vci.demo.spruceid.com/credential');
   });
 
   it('should build credential request correctly', function () {

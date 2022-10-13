@@ -1,7 +1,8 @@
 import { ClaimFormat } from '@sphereon/ssi-types';
 
+import { URL_NOT_VALID } from './Oidc4vciErrors';
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
-import { postWithBearerToken } from './functions/HttpUtils';
+import { checkUrlValidity, postWithBearerToken } from './functions/HttpUtils';
 import { CredentialRequest, CredentialResponse, CredentialResponseError, ProofOfPossession } from './types';
 
 export class VcIssuanceClient {
@@ -34,9 +35,12 @@ export class VcIssuanceClient {
     url?: string,
     token?: string
   ): Promise<CredentialResponse | CredentialResponseError> {
+    const requestUrl: string = url ? url : this._issuanceRequestOpts.credentialRequestUrl;
+    if (!checkUrlValidity(requestUrl)) {
+      throw new Error(URL_NOT_VALID);
+    }
+    const requestToken: string = token ? token : this._issuanceRequestOpts.token;
     try {
-      const requestUrl: string = url ? url : this._issuanceRequestOpts.credentialRequestUrl;
-      const requestToken: string = token ? token : this._issuanceRequestOpts.token;
       const response = await postWithBearerToken(requestUrl, request, requestToken);
       //TODO: remove this in the future
       console.log(response);
