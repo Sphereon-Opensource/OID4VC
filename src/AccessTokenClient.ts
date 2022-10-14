@@ -6,7 +6,7 @@ export class AccessTokenClient {
   PRE_AUTHORIZED_SCENARIO_MESSAGE = 'The grant type is set to be pre-authorized. ';
 
   private assertPreAuthorizedGrantType(grantType: string): void {
-    if (GrantTypes.PRE_AUTHORIZED !== grantType) {
+    if (GrantTypes.PRE_AUTHORIZED_CODE !== grantType) {
       throw new Error("grant type must be 'urn:ietf:params:oauth:grant-type:pre-authorized_code'");
     }
   }
