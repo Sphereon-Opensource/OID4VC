@@ -46,46 +46,6 @@ export interface CredentialResponseError {
 
 ### Functions
 
-```typescript
-export function encodeJsonAsURI(json: IssuanceInitiationRequestPayload[] | IssuanceInitiationRequestPayload) {
-  if (!Array.isArray(json)) {
-    return encodeJsonObjectAsURI(json);
-  }
-  return json.map((j) => encodeJsonObjectAsURI(j)).join('&');
-}
-
-function encodeJsonObjectAsURI(json: IssuanceInitiationRequestPayload) {
-  if (typeof json === 'string') {
-    return encodeJsonObjectAsURI(JSON.parse(json));
-  }
-
-  const results = [];
-
-  function encodeAndStripWhitespace(key: string) {
-    return encodeURIComponent(key.replace(' ', ''));
-  }
-
-  for (const [key, value] of Object.entries(json)) {
-    if (!value) {
-      continue;
-    }
-    const isBool = typeof value == 'boolean';
-    const isNumber = typeof value == 'number';
-    const isString = typeof value == 'string';
-    let encoded;
-    if (isBool || isNumber) {
-      encoded = `${encodeAndStripWhitespace(key)}=${value}`;
-    } else if (isString) {
-      encoded = `${encodeAndStripWhitespace(key)}=${encodeURIComponent(value)}`;
-    } else {
-      encoded = `${encodeAndStripWhitespace(key)}=${encodeURIComponent(JSON.stringify(value))}`;
-    }
-    results.push(encoded);
-  }
-  return results.join('&');
-}
-```
-
 #### Usage
 
 ```typescript
@@ -114,8 +74,6 @@ const encodedURI = encodeJsonAsURI(
 console.log(encodedURI)
 // issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy
 ```
-
-* NOTE: The input may be a single object or an array
 
 ```typescript
 const decodedJson = decodeURIAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy', {
@@ -179,20 +137,31 @@ Creates the ProofOfPossession object and JWT signature
 The callback function created using `jose`
 
 ```typescript
+// Must be JWS
 const signJWT = async (args: JWTSignerArgs): Promise<string> => {
-  const {header, payload, privateKey} = args
-  return await new jose.SignJWT({...payload})
-  .setProtectedHeader({...header, alg: 'RS256'})
-  .sign(privateKey)
+  const { header, payload, keyPair } = args
+  return await new jose.CompactSign(u8a.fromString(JSON.stringify({ ...payload })))
+  // Only ES256 and EdDSA are supported
+  .setProtectedHeader({ ...header, alg: args.header.alg })
+  .sign(keyPair.privateKey)
+}
+```
+
+```typescript
+const verifyJWT = async (args: { jws: string | Uint8Array, key: KeyLike | Uint8Array, options?: VerifyOptions }): Promise<void> => {
+  // Throws an exception if JWT is not valid
+  await jose.compactVerify(args.jws, args.key, args.options)
 }
 ```
 
 The arguments requested by `jose` and `oidc4vci`
 
 ```typescript
+const keyPair = await jose.generateKeyPair("ES256")
+
 const jwtArgs: JWTSignerArgs = {
   header: {
-    alg: "RS256",
+    alg: "ES256",
     kid: "did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1"
   },
   payload: {
@@ -201,9 +170,8 @@ const jwtArgs: JWTSignerArgs = {
     iat: 1659145924,
     nonce: "tZignsnFbp"
   },
-  privateKey: generateKeyPairSync("rsa", { // crypto
-    modulusLength: 4096
-  }).privateKey
+  privateKey: keyPair.privateKey,
+  publicKey: keyPair.publicKey
 }
 ```
 
@@ -212,7 +180,8 @@ The actual method call
 ```typescript
 const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
       jwtSignerArgs: jwtArgs,
-      jwtSignerCallback: (args) => signJWT(args)
+      jwtSignerCallback: (args) => signJWT(args),
+      jwtVerifyCallback: (args) => verifyJWT(args)
     })
 console.log(proof)
 // {

@@ -82,8 +82,11 @@ export interface JWK {
   n?: string;
 }
 
+export type Alg = 'ES256' | 'EdDSA';
+
 export interface JWTHeader {
-  alg: string; // REQUIRED by the JWT signer
+  alg?: Alg; // REQUIRED by the JWT signer
+  typ?: string; //JWT always
   kid?: string; // CONDITIONAL. JWT header containing the key ID. If the Credential shall be bound to a DID, the kid refers to a DID URL which identifies a particular key in the DID Document that the Credential shall be bound to. MUST NOT be present if jwk or x5c is present.
   jwk?: JWK; // CONDITIONAL. JWT header containing the key material the new Credential shall be bound to. MUST NOT be present if kid or x5c is present.
   x5c?: string[]; // CONDITIONAL. JWT header containing a certificate or certificate chain corresponding to the key used to sign the JWT. This element may be used to convey a key attestation. In such a case, the actual key certificate will contain attributes related to the key properties. MUST NOT be present if kid or jwk is present.
@@ -91,17 +94,28 @@ export interface JWTHeader {
 
 export interface JWTPayload {
   iss: string; // REQUIRED (string). The value of this claim MUST be the client_id of the client making the credential request.
-  aud: string; // REQUIRED (string). The value of this claim MUST be the issuer URL of credential issuer.
-  iat: number; // REQUIRED (number). The value of this claim MUST be the time at which the proof was issued using the syntax defined in [RFC7519].
+  aud?: string; // REQUIRED (string). The value of this claim MUST be the issuer URL of credential issuer.
+  iat?: number; // REQUIRED (number). The value of this claim MUST be the time at which the proof was issued using the syntax defined in [RFC7519].
   nonce: string; // REQUIRED (string). The value type of this claim MUST be a string, where the value is a c_nonce provided by the credential issuer.
+  jti: string; // A new nonce chosen by the wallet. Used to prevent replay
+  exp?: number; // Not longer than 5 minutes
 }
 
 export interface JWTSignerArgs {
   header: JWTHeader;
   payload: JWTPayload;
   privateKey: KeyObject;
+  publicKey: KeyObject;
+}
+
+export interface JWTVerifyArgs {
+  jws: string;
+  key: KeyObject;
+  algorithms?: Alg[];
 }
 
 export type JWTSignerCallback = (args: JWTSignerArgs) => Promise<string>;
+
+export type JWTVerifyCallback = (args: JWTVerifyArgs) => Promise<void>;
 
 export type Request = CredentialRequest;

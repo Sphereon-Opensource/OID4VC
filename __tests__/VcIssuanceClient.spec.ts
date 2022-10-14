@@ -1,7 +1,9 @@
-import {generateKeyPairSync} from "crypto";
+import {KeyObject} from "crypto";
 
 import * as jose from 'jose'
+import {KeyLike, VerifyOptions} from "jose/dist/types/types";
 import nock from 'nock';
+import * as u8a from 'uint8arrays'
 
 import {VcIssuanceClient} from '../src/main/VcIssuanceClient';
 import {
@@ -9,37 +11,42 @@ import {
   CredentialResponse,
   CredentialResponseError,
   CredentialResponseErrorCode,
-  JWTSignerArgs, ProofOfPossession,
+  JWTSignerArgs,
+  ProofOfPossession,
 } from '../src/main/types';
 
-const partialJWT = "eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJpc3MiOiJzNkJoZFJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJpYXQiOjE2NTkxNDU5MjQsIm5vbmNlIjoidFppZ25zbkZicCJ9"
 
+const partialJWT = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJhdWQiOiJodHRwczovL29pZGM0dmNpLmRlbW8uc3BydWNlaWQuY29tL2NyZWRlbnRpYWwiLCJpYXQiOjE2NjU3NT"
+
+// Must be JWS
 const signJWT = async (args: JWTSignerArgs): Promise<string> => {
-  const {header, payload, privateKey} = args
-  return await new jose.SignJWT({...payload})
-  .setProtectedHeader({...header, alg: 'RS256'})
+  const { header, payload, privateKey } = args
+  return await new jose.CompactSign(u8a.fromString(JSON.stringify({ ...payload })))
+  .setProtectedHeader({ ...header, alg: args.header.alg })
   .sign(privateKey)
+}
+
+const verifyJWT = async (args: { jws: string | Uint8Array, key: KeyLike | Uint8Array, options?: VerifyOptions }): Promise<void> => {
+  await jose.compactVerify(args.jws, args.key, args.options)
 }
 
 const jwtArgs: JWTSignerArgs = {
   header: {
-    alg: "RS256",
-    kid: "did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1"
+    kid: "did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1",
   },
   payload: {
     iss: "s6BhdRkqt3",
-    aud: "https://server.example.com",
-    iat: 1659145924,
-    nonce: "tZignsnFbp"
+    nonce: "tZignsnFbp",
+    jti: 'tZignsnFbp223',
   },
-  privateKey: undefined
+  privateKey: undefined,
+  publicKey: undefined
 }
 
-
 beforeAll(async () => {
-  jwtArgs.privateKey = generateKeyPairSync("rsa", {
-    modulusLength: 4096
-  }).privateKey
+  const keyPair = await jose.generateKeyPair("ES256")
+  jwtArgs.privateKey = keyPair.privateKey as KeyObject
+  jwtArgs.publicKey = keyPair.publicKey as KeyObject
 })
 
 describe('VcIssuanceClient ', () => {
@@ -54,13 +61,13 @@ describe('VcIssuanceClient ', () => {
   it('should build credential request correctly', async () => {
     const vcIssuanceClient = VcIssuanceClient.builder()
     .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
-    .withCredentialRequestUrl('oidc4vci.demo.spruceid.com/credential')
     .withFormat('jwt_vc')
     .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
     .build();
     const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
       jwtSignerArgs: jwtArgs,
-      jwtSignerCallback: (args) => signJWT(args)
+      jwtSignerCallback: (args) => signJWT(args),
+      jwtVerifyCallback: (args) => verifyJWT(args)
     })
     const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof });
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy()
@@ -81,7 +88,8 @@ describe('VcIssuanceClient ', () => {
     .build();
     const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
       jwtSignerArgs: jwtArgs,
-      jwtSignerCallback: (args) => signJWT(args)
+      jwtSignerCallback: (args) => signJWT(args),
+      jwtVerifyCallback: (args) => verifyJWT(args)
     })
     const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof });
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy()
@@ -101,7 +109,8 @@ describe('VcIssuanceClient ', () => {
     .build();
     const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
       jwtSignerArgs: jwtArgs,
-      jwtSignerCallback: (args) => signJWT(args)
+      jwtSignerCallback: (args) => signJWT(args),
+      jwtVerifyCallback: (args) => verifyJWT(args)
     })
     const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof });
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy()
