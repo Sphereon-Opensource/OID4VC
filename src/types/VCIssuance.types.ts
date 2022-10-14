@@ -36,9 +36,6 @@ export interface IssuanceInitiationRequestPayload {
   op_state?: string; //(JWT) OPTIONAL String value created by the Credential Issuer and opaque to the Wallet that is used to bind the subsequent authentication request with the Credential Issuer to a context set up during previous steps
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type SearchValue = { [Symbol.replace](string: string, replacer: (substring: string, ...args: any[]) => string): string };
-
 export enum ProofType {
   JWT = 'jwt',
 }
@@ -48,3 +45,12 @@ export interface ProofOfPossession {
   jwt: string;
   [x: string]: unknown;
 }
+
+export type SearchValue = {
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  [Symbol.replace](string: string, replacer: (substring: string, ...args: any[]) => string): string;
+};
+
+export type EncodeJsonAsURIOpts = { urlTypeProperties?: string[]; arrayTypeProperties?: string[] };
+
+export type DecodeURIAsJsonOpts = { requiredProperties?: string[]; duplicatedProperties?: string[] };

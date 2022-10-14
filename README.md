@@ -21,7 +21,7 @@ The below diagram shows the steps involved in this flow. Note that wallet inner 
 ### Interfaces
 
 ```typescript
-export interface IssuanceInitiationRequestParams {
+export interface IssuanceInitiationRequestPayload {
   issuer: string, //REQUIRED The issuer URL of the Credential issuer, the Wallet is requested to obtain one or more Credentials from.
   credential_type: string[] | string, //REQUIRED A JSON string denoting the type of the Credential the Wallet shall request
   pre_authorized_code?: string, //CONDITIONAL The code representing the issuer's authorization for the Wallet to obtain Credentials of a certain type. This code MUST be short lived and single-use. MUST be present in a pre-authorized code flow.
@@ -49,105 +49,94 @@ export interface CredentialResponseError {
 
 ### Functions
 
-```typescript
-export function encodeJsonAsURI(json: IssuanceInitiationRequestPayload[] | IssuanceInitiationRequestPayload) {
-  if (!Array.isArray(json)) {
-    return encodeJsonObjectAsURI(json);
-  }
-  return json.map((j) => encodeJsonObjectAsURI(j)).join('&');
-}
+### Usage
 
-function encodeJsonObjectAsURI(json: IssuanceInitiationRequestPayload) {
-  if (typeof json === 'string') {
-    return encodeJsonObjectAsURI(JSON.parse(json));
-  }
+#### encodeJsonAsURI:
 
-  const results = [];
-
-  function encodeAndStripWhitespace(key: string) {
-    return encodeURIComponent(key.replace(' ', ''));
-  }
-
-  for (const [key, value] of Object.entries(json)) {
-    if (!value) {
-      continue;
-    }
-    const isBool = typeof value == 'boolean';
-    const isNumber = typeof value == 'number';
-    const isString = typeof value == 'string';
-    let encoded;
-    if (isBool || isNumber) {
-      encoded = `${encodeAndStripWhitespace(key)}=${value}`;
-    } else if (isString) {
-      encoded = `${encodeAndStripWhitespace(key)}=${encodeURIComponent(value)}`;
-    } else {
-      encoded = `${encodeAndStripWhitespace(key)}=${encodeURIComponent(JSON.stringify(value))}`;
-    }
-    results.push(encoded);
-  }
-  return results.join('&');
-}
-```
-
-#### Usage
+Encodes a Json object created based on `IssuanceInitiationRequestPayload` interface into an URI:
 
 ```typescript
-const encodedURI = encodeJsonAsURI([
-    {
+const encodedUri = encodeJsonAsURI({
       issuer: 'https://server.example.com',
       credential_type: 'https://did.example.org/healthCard',
       op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
+    }, {
+      urlTypeProperties: ['issuer', 'credential_type']
+    })
+console.log(encodedUri)
+// issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy
+```
+
+```typescript
+const encodedURI = encodeJsonAsURI(
+    {
+      issuer: 'https://server.example.com',
+      credential_type: ['https://did.example.org/healthCard', 'https://did.example1.org/driverLicense'],
+      op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
     },
     {
-      issuer: 'https://server.example1.com',
-      credential_type: 'https://did.example1.org/healthCard',
-      op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
-    }
-
-    //  console.log(encodedURI)
-    // 'issuer=https%3A%2F%2Fserver.example.com&credential_type=https%3A%2F%2Fdid.example.org%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy&issuer=https%3A%2F%2Fserver.example1.com&credential_type=https%3A%2F%2Fdid.example1.org%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy'
+      arrayTypeProperties: ['credential_type'],
+      urlTypeProperties: ['issuer', 'credential_type']
+    })
+console.log(encodedURI)
+// issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy
 ```
 
-* NOTE: The input may be a single object or an array
+#### decodeURIAsJson:
+
+Decodes URI into a Json object:
 
 ```typescript
-export function decodeUriAsJson(uri: string) {
-  if (!uri || !uri.includes('issuer') || !uri.includes('credential_type')) {
-    throw new Error(BAD_PARAMS);
-  }
-  const parts = new URLSearchParams(uri);
-  const entries = Array.from(parts.entries());
-  const jsonArray = [];
-  let json: unknown = {};
-  for (const [key, value] of entries) {
-    if (Object.prototype.hasOwnProperty.call(json, key)) {
-      jsonArray.push(json);
-      json = {};
-    }
-    json[key] = value;
-  }
-  jsonArray.push(json);
-  const result = jsonArray.map((o) => decodeJsonProperty(o));
-  return result.length < 2 ? result[0] : result;
-}
+const decodedJson = decodeURIAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy', {
+  duplicatedProperties: ['credential_type'],
+  requiredProperties: ['issuer', 'credential_type']
+})
+console.log(decodedJson)
+// console.log(decodedURI)
+// {
+//   issuer: 'https://server.example.com',
+//   credential_type: 'https://did.example.org/healthCard',
+//   op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
+// }
 ```
 
-#### Usage
-
 ```typescript
-const decodedJson = decodeUriAsJson('issuer=https%253A%252F%252Fserver%252Eexample%252Ecom&credential_type=https%253A%252F%252Fdid%252Eexample%252Eorg%252FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy&issuer=https%253A%252F%252Fserver%252Eexample1%252Ecom&credential_type=https%253A%252F%252Fdid%252Eexample1%252Eorg%252FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy')
+const decodedJson = decodeJsonAsURI('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy', 
+    {
+      duplicatedProperties: ['credential_type'],
+      requiredProperties: ['issuer', 'credential_type']
+    })
 // console.log(decodedJson)
-// [
-//     {
-//       issuer: 'https://server.example.com',
-//           credential_type: 'https://did.example.org/healthCard',
-//         op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
-//     },
-//     {
-//       issuer: 'https://server.example1.com',
-//           credential_type: 'https://did.example1.org/healthCard',
-//         op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
-//     },
-// ]
+// {
+//   issuer: 'https://server.example.com',
+//   credential_type: ['https://did.example.org/healthCard', 'https://did.example1.org/driverLicense'],
+//   op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
+// }
 ```
-* NOTE: The input may contain duplicated keys, that will result in an array
+
+#### parseURI:
+
+Parses the URI without decoding it
+
+```typescript
+ const parsedURI = parseURI('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy')
+ console.log(parsedURI)
+// {
+//   "issuer": "https%3A%2F%2Fserver%2Eexample%2Ecom", 
+//   "credential_type": [
+//     "https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard",
+//     "https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense"
+//   ],
+//   "op_state": "eyJhbGciOiJSU0Et...FYUaBy"
+// }
+```
+
+#### customEncodeURIComponent
+
+Encodes chars that are not encoded by default
+
+```typescript
+const encodedURI = customEncodeURIComponent('https://server.example.com', /\./g);
+console.log(encodedURI)
+// 'https%253A%252F%252Fserver%252Eexample%252Ecom'
+```
