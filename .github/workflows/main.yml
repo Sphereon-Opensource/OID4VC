@@ -28,11 +28,7 @@ jobs:
       - name: codecov
         uses: codecov/codecov-action@v2
         with:
-#          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
           name: codecove # optional
           flags: unittest
-          fail_ci_if_error: true # optional (default = false)
-          version: "v0.1.15"
-          #directory: ./coverage/reports/
-          #files: ./coverage1.xml,./coverage2.xml
           verbose: true # optional (default = false)

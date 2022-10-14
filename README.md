@@ -1,12 +1,15 @@
 <h1 align="center">
   <br>
   <a href="https://www.sphereon.com"><img src="https://sphereon.com/content/themes/sphereon/assets/img/logo.svg" alt="Sphereon" width="400"></a>
-    <br>OIDC4VCI-CLIENT 
-    <br>A client to request and receive Verifiable Credentials using Oidc4vci
+    <br>OpenID for Verifiable Credential Issuance - Client 
   <br>
 </h1>
 
 _IMPORTANT it still in development and it's not fully functional_
+
+### Background 
+
+A client to request and receive Verifiable Credentials using OID4VCI.
 
 This library is based on [openid-4-verifiable-credential-issuance](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) for requesting Verifiable Credentials.
 
@@ -46,7 +49,11 @@ export interface CredentialResponseError {
 
 ### Functions
 
-#### Usage
+### Usage
+
+#### encodeJsonAsURI:
+
+Encodes a Json object created based on `IssuanceInitiationRequestPayload` interface into an URI:
 
 ```typescript
 const encodedUri = encodeJsonAsURI({
@@ -74,6 +81,10 @@ const encodedURI = encodeJsonAsURI(
 console.log(encodedURI)
 // issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy
 ```
+
+#### decodeURIAsJson:
+
+Decodes URI into a Json object:
 
 ```typescript
 const decodedJson = decodeURIAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy', {

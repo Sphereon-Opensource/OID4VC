@@ -1,4 +1,4 @@
-const UNIT_TEST_TIMEOUT = 30000;
+export const UNIT_TEST_TIMEOUT = 30000;
 
 describe('oidc4vci client should', () => {
   it(

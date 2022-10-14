@@ -5,7 +5,6 @@ import {KeyLike, VerifyOptions} from "jose/dist/types/types";
 import nock from 'nock';
 import * as u8a from 'uint8arrays'
 
-import {VcIssuanceClient} from '../src/main/VcIssuanceClient';
 import {
   CredentialRequest,
   CredentialResponse,
@@ -14,6 +13,10 @@ import {
   JWTSignerArgs,
   ProofOfPossession,
 } from '../src/main/types';
+  ErrorResponse,
+  ProofType,
+  VcIssuanceClient
+} from '../src';
 
 
 const partialJWT = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJhdWQiOiJodHRwczovL29pZGM0dmNpLmRlbW8uc3BydWNlaWQuY29tL2NyZWRlbnRpYWwiLCJpYXQiOjE2NjU3NT"
@@ -77,24 +80,27 @@ describe('VcIssuanceClient ', () => {
   });
 
   it('should get fail credential response', async function () {
-    nock('https://oidc4vci.demo.spruceid.com').post(/credential/).reply(400, {
-      error: CredentialResponseErrorCode.UNSUPPORTED_FORMAT,
+    const basePath = 'https://sphereonjunit2022101301.com/';
+
+    nock(basePath).post(/.*/).reply(200, {
+      error: 'unsupported_format',
       error_description: 'This is a mock error message'
     });
-    const vcIssuanceClient = VcIssuanceClient.builder()
-    .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
-    .withFormat('ldp_vc')
-    .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
-    .build();
+
+      const vcIssuanceClient = VcIssuanceClient.builder()
+        .withCredentialRequestUrl(basePath + '/credential')
+        .withFormat('ldp_vc')
+        .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
+        .build();
     const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
       jwtSignerArgs: jwtArgs,
       jwtSignerCallback: (args) => signJWT(args),
       jwtVerifyCallback: (args) => verifyJWT(args)
     })
-    const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof });
+      const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof })
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy()
-    const result: CredentialResponseError | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest);
-    expect(result['error']).toBe('unsupported_format');
+      const result: ErrorResponse | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest) ;
+      expect(result['error']).toBe('unsupported_format');
   });
 
   it('should get success credential response', async function () {
@@ -103,10 +109,10 @@ describe('VcIssuanceClient ', () => {
       credential: 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL2V4YW1wbGVzL3YxIl0sImlkIjoiaHR0cDovL2V4YW1wbGUuZWR1L2NyZWRlbnRpYWxzLzM3MzIiLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiVW5pdmVyc2l0eURlZ3JlZUNyZWRlbnRpYWwiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLmVkdS9pc3N1ZXJzLzU2NTA0OSIsImlzc3VhbmNlRGF0ZSI6IjIwMTAtMDEtMDFUMDA6MDA6MDBaIiwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEiLCJkZWdyZWUiOnsidHlwZSI6IkJhY2hlbG9yRGVncmVlIiwibmFtZSI6IkJhY2hlbG9yIG9mIFNjaWVuY2UgYW5kIEFydHMifX19LCJpc3MiOiJodHRwczovL2V4YW1wbGUuZWR1L2lzc3VlcnMvNTY1MDQ5IiwibmJmIjoxMjYyMzA0MDAwLCJqdGkiOiJodHRwOi8vZXhhbXBsZS5lZHUvY3JlZGVudGlhbHMvMzczMiIsInN1YiI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMSJ9.z5vgMTK1nfizNCg5N-niCOL3WUIAL7nXy-nGhDZYO_-PNGeE-0djCpWAMH8fD8eWSID5PfkPBYkx_dfLJnQ7NA'
     });
     const vcIssuanceClient = VcIssuanceClient.builder()
-    .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
-    .withFormat('jwt_vc')
-    .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
-    .build();
+      .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
+      .withFormat('jwt_vc')
+      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
+      .build();
     const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
       jwtSignerArgs: jwtArgs,
       jwtSignerCallback: (args) => signJWT(args),
@@ -114,7 +120,7 @@ describe('VcIssuanceClient ', () => {
     })
     const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof });
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy()
-    const result: CredentialResponseError | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest);
+    const result: ErrorResponse | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest) ;
     expect(result['credential']).toBeDefined();
   });
 });
