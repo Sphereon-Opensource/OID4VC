@@ -25,8 +25,6 @@ export class VcIssuanceClient {
     format: CredentialFormat | CredentialFormat[];
     proof: ProofOfPossession;
     token: string;
-    jwtSignerCallback: JWTSignerCallback;
-    jwtSignerArgs: JWTSignerArgs;
   }>;
 
   public constructor(opts: { builder?: VcIssuanceClientBuilder }) {
