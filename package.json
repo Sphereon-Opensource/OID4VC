@@ -20,6 +20,9 @@
     "test:cov": "jest --ci --coverage && codecov",
     "uninstall": "rimraf dist coverage yarn.lock package-lock.json node_modules"
   },
+  "engines": {
+    "node": ">=14"
+  },
   "dependencies": {
     "@sphereon/ssi-types": "0.8.1-next.31",
     "bs58": "^5.0.0",
