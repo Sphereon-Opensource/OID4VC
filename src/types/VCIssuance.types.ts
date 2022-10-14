@@ -53,9 +53,9 @@ export type SearchValue = {
   [Symbol.replace](string: string, replacer: (substring: string, ...args: any[]) => string): string;
 };
 
-export type EncodeJsonAsURIOpts = { urlTypeProperties?: string[]; arrayTypeProperties?: string[] };
+export type EncodeJsonAsURIOpts = { uriTypeProperties?: string[]; arrayTypeProperties?: string[]; baseUrl?: string };
 
-export type DecodeURIAsJsonOpts = { requiredProperties?: string[]; duplicatedProperties?: string[] };
+export type DecodeURIAsJsonOpts = { requiredProperties?: string[]; arrayTypeProperties?: string[] };
 
 export interface JWK {
   kty?: string;
@@ -69,7 +69,7 @@ export interface JWK {
 export type Alg = 'ES256' | 'EdDSA';
 
 export interface JWTHeader {
-  alg?: Alg; // REQUIRED by the JWT signer
+  alg: Alg; // REQUIRED by the JWT signer
   typ?: string; //JWT always
   kid?: string; // CONDITIONAL. JWT header containing the key ID. If the Credential shall be bound to a DID, the kid refers to a DID URL which identifies a particular key in the DID Document that the Credential shall be bound to. MUST NOT be present if jwk or x5c is present.
   jwk?: JWK; // CONDITIONAL. JWT header containing the key material the new Credential shall be bound to. MUST NOT be present if kid or x5c is present.
@@ -96,6 +96,13 @@ export interface JWTVerifyArgs {
   jws: string;
   key: KeyObject;
   algorithms?: Alg[];
+}
+
+export interface ProofOfPossessionOpts {
+  credentialRequestUrl: string;
+  jwtSignerArgs: JWTSignerArgs;
+  jwtSignerCallback: JWTSignerCallback;
+  jwtVerifyCallback?: JWTVerifyCallback;
 }
 
 export type JWTSignerCallback = (args: JWTSignerArgs) => Promise<string>;

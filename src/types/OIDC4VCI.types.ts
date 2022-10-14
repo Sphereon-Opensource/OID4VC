@@ -30,7 +30,7 @@ export interface AuthorizationGrantResponse {
 export interface AccessTokenRequest {
   client_id?: string;
   code_verifier?: string;
-  grant_type: string;
+  grant_type: GrantTypes;
   pre_authorized_code: string;
   redirect_uri?: string;
   scope?: string;

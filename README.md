@@ -5,18 +5,34 @@
   <br>
 </h1>
 
-_IMPORTANT it still in development and it's not fully functional_
+_IMPORTANT this package is in an early development stage and does not support all functionality from the OID4VCI spec
+yet!_
 
-### Background 
+### Background
 
-A client to request and receive Verifiable Credentials using OID4VCI.
+A client to request and receive Verifiable Credentials using
+the [OpenID for Verifiable Credential Issuance](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) (
+OID4VCI) specification for receiving Verifiable Credentials as a Holder.
 
-This library is based on [openid-4-verifiable-credential-issuance](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) for requesting Verifiable Credentials.
+### Flows
 
-### Flow
+#### Authorized Code Flow
+
+This flow isn't supported yet!
+
 #### Pre-authorized Code Flow
-The below diagram shows the steps involved in this flow. Note that wallet inner functionalities (like saving VCs) are out of scope of this library. Also This library doesn't involve any functionalities of a VC Issuer
-![Flow diagram](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Sphereon-Opensource/OIDC4VCI-client/develop/docs/preauthorized-code-flow.puml)
+
+The pre-authorized code flow assumes the user is using an out of bound mechanism outside the issuance flow to
+authenticate first.
+
+The below diagram shows the steps involved in the pre-authorized code flow. Note that wallet inner functionalities (like
+saving VCs) are out of scope for this library. Also This library doesn't involve any functionalities of a VC Issuer
+![Flow diagram](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Sphereon-Opensource/OID4VCI-client/develop/docs/preauthorized-code-flow.puml)
+
+#### Issuance Initiation
+
+Issuance is started from a so called Issuance Initiation Request by the Issuer. This typically is URI, typically exposed
+as a link or a QR code.
 
 ### Interfaces
 
@@ -49,64 +65,42 @@ export interface CredentialResponseError {
 
 ### Functions
 
-### Usage
+Several utility functions are available
 
-#### encodeJsonAsURI:
+#### convertJsonToURI:
 
-Encodes a Json object created based on `IssuanceInitiationRequestPayload` interface into an URI:
+Converts a Json object or string into an URI:
 
-```typescript
-const encodedUri = encodeJsonAsURI({
-      issuer: 'https://server.example.com',
-      credential_type: 'https://did.example.org/healthCard',
-      op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
-    }, {
-      urlTypeProperties: ['issuer', 'credential_type']
-    })
-console.log(encodedUri)
-// issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy
-```
 
 ```typescript
-const encodedURI = encodeJsonAsURI(
-    {
-      issuer: 'https://server.example.com',
-      credential_type: ['https://did.example.org/healthCard', 'https://did.example1.org/driverLicense'],
-      op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
-    },
-    {
-      arrayTypeProperties: ['credential_type'],
-      urlTypeProperties: ['issuer', 'credential_type']
-    })
+import { convertJsonToURI } from './Encoding';
+
+const encodedURI = convertJsonToURI(
+  {
+    issuer: 'https://server.example.com',
+    credential_type: ['https://did.example.org/healthCard', 'https://did.example1.org/driverLicense'],
+    op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
+  },
+  {
+    arrayTypeProperties: ['credential_type'],
+    urlTypeProperties: ['issuer', 'credential_type']
+  })
 console.log(encodedURI)
 // issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy
 ```
 
-#### decodeURIAsJson:
+#### convertURIToJsonObject:
 
-Decodes URI into a Json object:
+Converts a URI into a Json object with URL decoded properties. Allows to provide which potential duplicate keys need to be converted into an array.
 
 ```typescript
-const decodedJson = decodeURIAsJson('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&op_state=eyJhbGciOiJSU0Et...FYUaBy', {
-  duplicatedProperties: ['credential_type'],
+import { convertURIToJsonObject } from './Encoding';
+
+const decodedJson = convertURIToJsonObject('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy', {
+  arrayTypeProperties: ['credential_type'],
   requiredProperties: ['issuer', 'credential_type']
 })
 console.log(decodedJson)
-// console.log(decodedURI)
-// {
-//   issuer: 'https://server.example.com',
-//   credential_type: 'https://did.example.org/healthCard',
-//   op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
-// }
-```
-
-```typescript
-const decodedJson = decodeJsonAsURI('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy', 
-    {
-      duplicatedProperties: ['credential_type'],
-      requiredProperties: ['issuer', 'credential_type']
-    })
-// console.log(decodedJson)
 // {
 //   issuer: 'https://server.example.com',
 //   credential_type: ['https://did.example.org/healthCard', 'https://did.example1.org/driverLicense'],
@@ -114,33 +108,6 @@ const decodedJson = decodeJsonAsURI('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom
 // }
 ```
 
-#### parseURI:
-
-Parses the URI without decoding it
-
-```typescript
- const parsedURI = parseURI('issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy')
- console.log(parsedURI)
-// {
-//   "issuer": "https%3A%2F%2Fserver%2Eexample%2Ecom", 
-//   "credential_type": [
-//     "https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard",
-//     "https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense"
-//   ],
-//   "op_state": "eyJhbGciOiJSU0Et...FYUaBy"
-// }
-```
-* NOTE: The input may contain duplicated keys, that will result in an array
-
-#### customEncodeURIComponent
-
-Encodes chars that are not encoded by default
-
-```typescript
-const encodedURI = customEncodeURIComponent('https://server.example.com', /\./g);
-console.log(encodedURI)
-// 'https%253A%252F%252Fserver%252Eexample%252Ecom'
-```
 #### createProofOfPossession
 
 Creates the ProofOfPossession object and JWT signature
@@ -152,9 +119,9 @@ The callback function created using `jose`
 const signJWT = async (args: JWTSignerArgs): Promise<string> => {
   const { header, payload, keyPair } = args
   return await new jose.CompactSign(u8a.fromString(JSON.stringify({ ...payload })))
-  // Only ES256 and EdDSA are supported
-  .setProtectedHeader({ ...header, alg: args.header.alg })
-  .sign(keyPair.privateKey)
+    // Only ES256 and EdDSA are supported
+    .setProtectedHeader({ ...header, alg: args.header.alg })
+    .sign(keyPair.privateKey)
 }
 ```
 
@@ -190,10 +157,10 @@ The actual method call
 
 ```typescript
 const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
-      jwtSignerArgs: jwtArgs,
-      jwtSignerCallback: (args) => signJWT(args),
-      jwtVerifyCallback: (args) => verifyJWT(args)
-    })
+  jwtSignerArgs: jwtArgs,
+  jwtSignerCallback: (args) => signJWT(args),
+  jwtVerifyCallback: (args) => verifyJWT(args)
+})
 console.log(proof)
 // {
 //   "proof_type": "jwt",
