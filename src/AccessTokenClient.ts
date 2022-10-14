@@ -41,6 +41,8 @@ export class AccessTokenClient {
       this.assertNonEmptyPreAuthorizedCode(accessTokenRequest);
       this.assertNumericPin(accessTokenRequest, isPinRequired);
       this.assertNonEmptyClientId(accessTokenRequest);
+    } else {
+      throw new Error('Non-pre-authorized flow is not yet supported.');
     }
   }
 
