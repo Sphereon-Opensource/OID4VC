@@ -25,9 +25,9 @@ jobs:
         run: yarn build
       - name: yarn test
         run: yarn test
- uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v2
         with:
-#          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
           name: codecove # optional
           flags: unittest
           verbose: true # optional (default = false)
