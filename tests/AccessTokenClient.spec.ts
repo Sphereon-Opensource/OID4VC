@@ -173,7 +173,7 @@ describe('AccessTokenClient should', () => {
                 '',
                 false)
         ).rejects.toThrow(
-            Error('Non-pre-authorized flow is not yet supported.')
+            Error('Only pre-authorized-code flow is supported')
         );
       },
       UNIT_TEST_TIMEOUT
