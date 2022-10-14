@@ -9,7 +9,7 @@ _IMPORTANT it still in development and it's not fully functional_
 
 ### Background 
 
-A client to request and receive Verifiable Credentials using Oidc4vci
+A client to request and receive Verifiable Credentials using OID4VCI.
 
 This library is based on [openid-4-verifiable-credential-issuance](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) for requesting Verifiable Credentials.
 
