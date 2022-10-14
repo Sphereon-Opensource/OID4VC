@@ -1,22 +1,31 @@
 import { fetch } from 'cross-fetch';
 
 export async function post(url: string, body: unknown, bearerToken?: string): Promise<Response> {
+  let message = '';
   try {
-    const payload = {
+    const payload: RequestInit = {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
       body: JSON.stringify(body),
     };
-    const response = await fetch(url, payload);
-    if (!response || !response.status || (response.status !== 200 && response.status !== 201)) {
-      throw new Error(`${'RESPONSE_STATUS_UNEXPECTED'} ${response.status}:${response.statusText}, ${await response.text()}`);
+
+    if (bearerToken) {
+      payload.headers = {
+        Authorization: `Bearer ${bearerToken}`,
+      };
     }
-    return response;
+    const response = await fetch(url, payload);
+    if (response && response.status && response.status < 400) {
+      return response;
+    } else {
+      if (response) {
+        message = `${response.status}:${response.statusText}, ${await response.text()}`;
+      }
+    }
   } catch (error) {
     throw new Error(`${(error as Error).message}`);
   }
+
+  throw new Error('unexpected error: ' + message);
 }
 
 export function isValidURL(url: string): boolean {
