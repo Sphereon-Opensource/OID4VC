@@ -1,36 +1,77 @@
+import {KeyObject} from "crypto";
+
+import * as jose from 'jose'
+import {KeyLike, VerifyOptions} from "jose/dist/types/types";
 import nock from 'nock';
+import * as u8a from 'uint8arrays'
 
 import {
   CredentialRequest,
   CredentialResponse,
-  ErrorResponse,
-  ProofType,
+  ErrorResponse, JWS_NOT_VALID,
+  JWTSignerArgs,
+  ProofOfPossession,
   VcIssuanceClient
 } from '../src';
+
+
+const partialJWT = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJhdWQiOiJodHRwczovL29pZGM0dmNpLmRlbW8uc3BydWNlaWQuY29tL2NyZWRlbnRpYWwiLCJpYXQiOjE2NjU3NT"
+
+// Must be JWS
+const signJWT = async (args: JWTSignerArgs): Promise<string> => {
+  const { header, payload, privateKey } = args
+  return await new jose.CompactSign(u8a.fromString(JSON.stringify({ ...payload })))
+  .setProtectedHeader({ ...header, alg: args.header.alg })
+  .sign(privateKey)
+}
+
+const verifyJWT = async (args: { jws: string | Uint8Array, key: KeyLike | Uint8Array, options?: VerifyOptions }): Promise<void> => {
+  await jose.compactVerify(args.jws, args.key, args.options)
+}
+
+const jwtArgs: JWTSignerArgs = {
+  header: {
+    kid: "did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1",
+  },
+  payload: {
+    iss: "s6BhdRkqt3",
+    nonce: "tZignsnFbp",
+    jti: 'tZignsnFbp223',
+  },
+  privateKey: undefined,
+  publicKey: undefined
+}
+
+beforeAll(async () => {
+  const keyPair = await jose.generateKeyPair("ES256")
+  jwtArgs.privateKey = keyPair.privateKey as KeyObject
+  jwtArgs.publicKey = keyPair.publicKey as KeyObject
+})
 
 describe('VcIssuanceClient ', () => {
   it('should build correctly provided with correct params', function () {
     const vcIssuanceClient = VcIssuanceClient.builder()
-      .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .build();
+    .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
+    .withFormat('jwt_vc')
+    .build();
     expect(vcIssuanceClient._issuanceRequestOpts.credentialRequestUrl).toBe('https://oidc4vci.demo.spruceid.com/credential');
   });
 
-  it('should build credential request correctly', function () {
+  it('should build credential request correctly', async () => {
     const vcIssuanceClient = VcIssuanceClient.builder()
-      .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
-      .build();
-    const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({
-      proof: {
-        proof_type: ProofType.JWT,
-        jwt: 'eyJraWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwiYWxnIjoiRVMyNTYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJzNkJoZFJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJpYXQiOiIyMDE4LTA5LTE0VDIxOjE5OjEwWiIsIm5vbmNlIjoidFppZ25zbkZicCJ9.ewdkIkPV50iOeBUqMXCC_aZKPxgihac0aW9EkL1nOzM',
-      }
-    });
+    .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
+    .withFormat('jwt_vc')
+    .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
+    .build();
+    const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
+      jwtSignerArgs: jwtArgs,
+      jwtSignerCallback: (args) => signJWT(args),
+      jwtVerifyCallback: (args) => verifyJWT(args)
+    })
+    const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof });
+    expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy()
     expect(credentialRequest.type).toBe(
-      'https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential'
+        'https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential'
     );
   });
 
@@ -47,12 +88,13 @@ describe('VcIssuanceClient ', () => {
         .withFormat('ldp_vc')
         .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
         .build();
-      const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({
-          proof: {
-              proof_type: ProofType.JWT,
-              jwt: 'eyJraWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwiYWxnIjoiRVMyNTYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJzNkJoZFJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJpYXQiOiIyMDE4LTA5LTE0VDIxOjE5OjEwWiIsIm5vbmNlIjoidFppZ25zbkZicCJ9.ewdkIkPV50iOeBUqMXCC_aZKPxgihac0aW9EkL1nOzM',
-          }
-      });
+    const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
+      jwtSignerArgs: jwtArgs,
+      jwtSignerCallback: (args) => signJWT(args),
+      jwtVerifyCallback: (args) => verifyJWT(args)
+    })
+      const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof })
+    expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy()
       const result: ErrorResponse | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest) ;
       expect(result['error']).toBe('unsupported_format');
   });
@@ -67,13 +109,38 @@ describe('VcIssuanceClient ', () => {
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
-    const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({
-      proof: {
-        proof_type: ProofType.JWT,
-        jwt: 'eyJraWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwiYWxnIjoiRVMyNTYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJzNkJoZFJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJpYXQiOiIyMDE4LTA5LTE0VDIxOjE5OjEwWiIsIm5vbmNlIjoidFppZ25zbkZicCJ9.ewdkIkPV50iOeBUqMXCC_aZKPxgihac0aW9EkL1nOzM',
-      }
-    });
+    const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
+      jwtSignerArgs: jwtArgs,
+      jwtSignerCallback: (args) => signJWT(args)
+    })
+    const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof });
+    expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy()
     const result: ErrorResponse | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest) ;
     expect(result['credential']).toBeDefined();
   });
+  it('should fail creating a proof of possession with simple verification', async() => {
+    const vcIssuanceClient = VcIssuanceClient.builder()
+    .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
+    .withFormat('jwt_vc')
+    .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
+    .build();
+    await expect(vcIssuanceClient.createProofOfPossession({
+      jwtSignerArgs: jwtArgs,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      jwtSignerCallback: (_args) => Promise.resolve("invalid_jws")
+    })).rejects.toThrow(Error(JWS_NOT_VALID))
+  })
+  it('should fail creating a proof of possession with verify callback function', async() => {
+    const vcIssuanceClient = VcIssuanceClient.builder()
+    .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
+    .withFormat('jwt_vc')
+    .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
+    .build();
+    await expect(vcIssuanceClient.createProofOfPossession({
+      jwtSignerArgs: jwtArgs,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      jwtSignerCallback: (_args) => Promise.resolve("invalid_jws"),
+      jwtVerifyCallback: (args) => verifyJWT(args)
+    })).rejects.toThrow(Error(JWS_NOT_VALID))
+  })
 });

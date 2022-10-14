@@ -130,6 +130,7 @@ Parses the URI without decoding it
 //   "op_state": "eyJhbGciOiJSU0Et...FYUaBy"
 // }
 ```
+* NOTE: The input may contain duplicated keys, that will result in an array
 
 #### customEncodeURIComponent
 
@@ -139,4 +140,63 @@ Encodes chars that are not encoded by default
 const encodedURI = customEncodeURIComponent('https://server.example.com', /\./g);
 console.log(encodedURI)
 // 'https%253A%252F%252Fserver%252Eexample%252Ecom'
+```
+#### createProofOfPossession
+
+Creates the ProofOfPossession object and JWT signature
+
+The callback function created using `jose`
+
+```typescript
+// Must be JWS
+const signJWT = async (args: JWTSignerArgs): Promise<string> => {
+  const { header, payload, keyPair } = args
+  return await new jose.CompactSign(u8a.fromString(JSON.stringify({ ...payload })))
+  // Only ES256 and EdDSA are supported
+  .setProtectedHeader({ ...header, alg: args.header.alg })
+  .sign(keyPair.privateKey)
+}
+```
+
+```typescript
+const verifyJWT = async (args: { jws: string | Uint8Array, key: KeyLike | Uint8Array, options?: VerifyOptions }): Promise<void> => {
+  // Throws an exception if JWT is not valid
+  await jose.compactVerify(args.jws, args.key, args.options)
+}
+```
+
+The arguments requested by `jose` and `oidc4vci`
+
+```typescript
+const keyPair = await jose.generateKeyPair("ES256")
+
+const jwtArgs: JWTSignerArgs = {
+  header: {
+    alg: "ES256",
+    kid: "did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1"
+  },
+  payload: {
+    iss: "s6BhdRkqt3",
+    aud: "https://server.example.com",
+    iat: 1659145924,
+    nonce: "tZignsnFbp"
+  },
+  privateKey: keyPair.privateKey,
+  publicKey: keyPair.publicKey
+}
+```
+
+The actual method call
+
+```typescript
+const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
+      jwtSignerArgs: jwtArgs,
+      jwtSignerCallback: (args) => signJWT(args),
+      jwtVerifyCallback: (args) => verifyJWT(args)
+    })
+console.log(proof)
+// {
+//   "proof_type": "jwt",
+//     "jwt": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJpc3MiOiJzNkJoZFJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJpYXQiOjE2NTkxNDU5MjQsIm5vbmNlIjoidFppZ25zbkZicCJ9.btetOcsJ_VOePkwlFf2kyxm6hEUvPRimf3M-Dn3Lmzcmt5QiPToXNWxe_0fEJlRf4Ith55YGB43ScBe6ScZmD1gfLELYQF7LLg97yYlx_Iu8RLA2dS_7EWzLD3ZIzyUGf_uMq3HwXGJKL-ihroRpRBvxRLdZCy-j62nAzoTsBnlr6n79VjkGtlxIjN_CLGIQBhc3du3enghY6N4s3oXFrxWMl7UzGKdjCYN6vSagDb0MURjdiDCsK_yX4NyNd0nGpxqGhVgMpuhqEcqyU0qWPyHF-swtGG5JVAOJGd_YkJS5vbia8UdyOJXnAAdEE1E62a2yUPahNDxMh1iIpS0WO7y6QexWXdb5fmnWDst89T3ELS8Hj2Vzsw1XPyk9XR9JmiDzmEZdH05Wf4M9pXUG4-8_7StB6Lxc7_xDJdk6JPbzFgAIhJa4F_3rfPuwMseSEQvD6bDFowkIiUpt1vXGGVjVm3N4I4Th4_A2QpW4mDzcTKoZq9MKlDGXeLQBtiKXmqs10Jvzpp3O7kBwH7Qm6VUdBxk_-wsWplUZC4IvCfv23hy2SyFnh5zC6Wtw3UcbrSH6LcD7g-RNTKe4fRekyDxqLRdEm60BOozgBoTNhnetCrQ3e7HrApj9EP0vqNyXdtGGWCA011HVDnz6lVzf5yijJB8hOPpkgYGRmHdRQwI"
+// }
 ```

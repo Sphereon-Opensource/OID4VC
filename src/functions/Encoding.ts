@@ -9,7 +9,7 @@ import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, IssuanceInitiatio
  */
 export function encodeJsonAsURI(json: unknown, opts?: EncodeJsonAsURIOpts): string {
   if (typeof json === 'string') {
-    return encodeJsonAsURI(JSON.parse(json));
+    return encodeJsonAsURI(JSON.parse(json), opts);
   }
   const results = [];
 

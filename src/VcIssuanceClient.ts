@@ -2,8 +2,21 @@ import { CredentialFormat } from '@sphereon/ssi-types';
 
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
 import { isValidURL, post } from './functions';
-import { ErrorResponse, URL_NOT_VALID } from './types';
-import { CredentialRequest, CredentialResponse, ProofOfPossession } from './types';
+import {
+  BAD_PARAMS,
+  CredentialRequest,
+  CredentialResponse,
+  ErrorResponse,
+  JWS_NOT_VALID,
+  JWTHeader,
+  JWTPayload,
+  JWTSignerArgs,
+  JWTSignerCallback,
+  JWTVerifyCallback,
+  ProofOfPossession,
+  ProofType,
+  URL_NOT_VALID,
+} from './types';
 
 export class VcIssuanceClient {
   _issuanceRequestOpts: Partial<{
@@ -45,6 +58,61 @@ export class VcIssuanceClient {
       return e;
     }
   }
+
+  /**
+   * createProofOfPossession creates and returns the ProofOfPossession object
+   * @param opts
+   *         - jwtSignerCallback: function to sign the proof
+   *         - jwtSignerArgs: The arguments to create the signature
+   *         - jwtVerifyCallback: function to verify if JWT is valid
+   */
+  public async createProofOfPossession(opts: {
+    jwtSignerCallback: JWTSignerCallback;
+    jwtSignerArgs: JWTSignerArgs;
+    jwtVerifyCallback?: JWTVerifyCallback;
+  }): Promise<ProofOfPossession> {
+    if (!opts.jwtSignerCallback || !opts.jwtSignerArgs) {
+      throw new Error(BAD_PARAMS);
+    }
+    const signerArgs = this.setJWSDefaults(opts.jwtSignerArgs);
+    const jwt = await opts.jwtSignerCallback(signerArgs);
+    try {
+      if (opts.jwtVerifyCallback) {
+        const algorithm = opts.jwtSignerArgs.header.alg;
+        await opts.jwtVerifyCallback({ jws: jwt, key: opts.jwtSignerArgs.publicKey, algorithms: [algorithm] });
+      } else {
+        this.partiallyValidateJWS(jwt);
+      }
+    } catch {
+      throw new Error(JWS_NOT_VALID);
+    }
+    return {
+      proof_type: ProofType.JWT,
+      jwt,
+    };
+  }
+
+  private partiallyValidateJWS(jws: string): void {
+    if (jws.split('.').length !== 3 || !jws.startsWith('ey')) {
+      throw new Error(JWS_NOT_VALID);
+    }
+  }
+
+  private setJWSDefaults = (args: JWTSignerArgs): JWTSignerArgs => {
+    const now = +new Date();
+    const defaultPayload: Partial<JWTPayload> = {
+      aud: this._issuanceRequestOpts.credentialRequestUrl,
+      iat: (now / 1000) | 0,
+      exp: ((now + 5 * 60000) / 1000) | 0,
+    };
+    const defaultHeader: JWTHeader = {
+      alg: 'ES256',
+      typ: 'JWT',
+    };
+    args.payload = { ...defaultPayload, ...args.payload };
+    args.header = { ...defaultHeader, ...args.header };
+    return args;
+  };
 
   public createCredentialRequest(opts: {
     credentialType?: string | string[];
