@@ -8,7 +8,7 @@ import * as u8a from 'uint8arrays'
 import {
   CredentialRequest,
   CredentialResponse,
-  ErrorResponse,
+  ErrorResponse, JWS_NOT_VALID,
   JWTSignerArgs,
   ProofOfPossession,
   VcIssuanceClient
@@ -118,4 +118,29 @@ describe('VcIssuanceClient ', () => {
     const result: ErrorResponse | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest) ;
     expect(result['credential']).toBeDefined();
   });
+  it('should fail creating a proof of possession with simple verification', async() => {
+    const vcIssuanceClient = VcIssuanceClient.builder()
+    .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
+    .withFormat('jwt_vc')
+    .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
+    .build();
+    await expect(vcIssuanceClient.createProofOfPossession({
+      jwtSignerArgs: jwtArgs,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      jwtSignerCallback: (_args) => Promise.resolve("invalid_jws")
+    })).rejects.toThrow(Error(JWS_NOT_VALID))
+  })
+  it('should fail creating a proof of possession with verify callback function', async() => {
+    const vcIssuanceClient = VcIssuanceClient.builder()
+    .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
+    .withFormat('jwt_vc')
+    .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
+    .build();
+    await expect(vcIssuanceClient.createProofOfPossession({
+      jwtSignerArgs: jwtArgs,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      jwtSignerCallback: (_args) => Promise.resolve("invalid_jws"),
+      jwtVerifyCallback: (args) => verifyJWT(args)
+    })).rejects.toThrow(Error(JWS_NOT_VALID))
+  })
 });
