@@ -1,12 +1,13 @@
 import { CredentialFormat } from '@sphereon/ssi-types';
 
-import { BAD_PARAMS, JWS_NOT_VALID, URL_NOT_VALID } from './Oidc4vciErrors';
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
-import { isValidURL, postWithBearerToken } from './functions/HttpUtils';
+import { isValidURL, post } from './functions';
 import {
+  BAD_PARAMS,
   CredentialRequest,
   CredentialResponse,
-  CredentialResponseError,
+  ErrorResponse,
+  JWS_NOT_VALID,
   JWTHeader,
   JWTPayload,
   JWTSignerArgs,
@@ -14,10 +15,8 @@ import {
   JWTVerifyCallback,
   ProofOfPossession,
   ProofType,
+  URL_NOT_VALID,
 } from './types';
-import { isValidURL, post } from './functions';
-import { ErrorResponse, URL_NOT_VALID } from './types';
-import { CredentialRequest, CredentialResponse, ProofOfPossession } from './types';
 
 export class VcIssuanceClient {
   _issuanceRequestOpts: Partial<{
@@ -72,16 +71,20 @@ export class VcIssuanceClient {
   public async createProofOfPossession(opts: {
     jwtSignerCallback: JWTSignerCallback;
     jwtSignerArgs: JWTSignerArgs;
-    jwtVerifyCallback: JWTVerifyCallback;
+    jwtVerifyCallback?: JWTVerifyCallback;
   }): Promise<ProofOfPossession> {
-    if (!opts.jwtSignerCallback || !opts.jwtSignerArgs || !opts.jwtVerifyCallback) {
+    if (!opts.jwtSignerCallback || !opts.jwtSignerArgs) {
       throw new Error(BAD_PARAMS);
     }
     const signerArgs = this.setJWSDefaults(opts.jwtSignerArgs);
     const jwt = await opts.jwtSignerCallback(signerArgs);
     try {
-      const algorithm = opts.jwtSignerArgs.header.alg;
-      await opts.jwtVerifyCallback({ jws: jwt, key: opts.jwtSignerArgs.publicKey, algorithms: [algorithm] });
+      if (opts.jwtVerifyCallback) {
+        const algorithm = opts.jwtSignerArgs.header.alg;
+        await opts.jwtVerifyCallback({ jws: jwt, key: opts.jwtSignerArgs.publicKey, algorithms: [algorithm] });
+      } else {
+        this.partiallyValidateJWS(jwt);
+      }
     } catch {
       throw new Error(JWS_NOT_VALID);
     }
@@ -89,6 +92,12 @@ export class VcIssuanceClient {
       proof_type: ProofType.JWT,
       jwt,
     };
+  }
+
+  private partiallyValidateJWS(jws: string): void {
+    if (jws.split('.').length !== 3 || !jws.startsWith('ey')) {
+      throw new Error(JWS_NOT_VALID);
+    }
   }
 
   private setJWSDefaults = (args: JWTSignerArgs): JWTSignerArgs => {

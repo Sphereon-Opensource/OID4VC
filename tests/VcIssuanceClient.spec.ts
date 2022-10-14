@@ -8,13 +8,9 @@ import * as u8a from 'uint8arrays'
 import {
   CredentialRequest,
   CredentialResponse,
-  CredentialResponseError,
-  CredentialResponseErrorCode,
+  ErrorResponse,
   JWTSignerArgs,
   ProofOfPossession,
-} from '../src/main/types';
-  ErrorResponse,
-  ProofType,
   VcIssuanceClient
 } from '../src';
 
@@ -115,8 +111,7 @@ describe('VcIssuanceClient ', () => {
       .build();
     const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
       jwtSignerArgs: jwtArgs,
-      jwtSignerCallback: (args) => signJWT(args),
-      jwtVerifyCallback: (args) => verifyJWT(args)
+      jwtSignerCallback: (args) => signJWT(args)
     })
     const credentialRequest: CredentialRequest = vcIssuanceClient.createCredentialRequest({ proof });
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy()
