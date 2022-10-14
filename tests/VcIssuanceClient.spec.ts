@@ -1,13 +1,12 @@
 import nock from 'nock';
 
-import {VcIssuanceClient} from '../src/main/VcIssuanceClient';
 import {
   CredentialRequest,
   CredentialResponse,
-  CredentialResponseError,
-  CredentialResponseErrorCode,
-  ProofType
-} from '../src/main/types';
+  ErrorResponse,
+  ProofType,
+  VcIssuanceClient
+} from '../src';
 
 describe('VcIssuanceClient ', () => {
   it('should build correctly provided with correct params', function () {
@@ -36,12 +35,15 @@ describe('VcIssuanceClient ', () => {
   });
 
   it('should get fail credential response', async function () {
-      nock('https://oidc4vci.demo.spruceid.com').post(/credential/).reply(400, {
-          error: CredentialResponseErrorCode.UNSUPPORTED_FORMAT,
-        error_description: 'This is a mock error message'
-      });
+    const basePath = 'https://sphereonjunit2022101301.com/';
+
+    nock(basePath).post(/.*/).reply(200, {
+      error: 'unsupported_format',
+      error_description: 'This is a mock error message'
+    });
+
       const vcIssuanceClient = VcIssuanceClient.builder()
-        .withCredentialRequestUrl('https://oidc4vci.demo.spruceid.com/credential')
+        .withCredentialRequestUrl(basePath + '/credential')
         .withFormat('ldp_vc')
         .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
         .build();
@@ -51,7 +53,7 @@ describe('VcIssuanceClient ', () => {
               jwt: 'eyJraWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwiYWxnIjoiRVMyNTYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJzNkJoZFJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJpYXQiOiIyMDE4LTA5LTE0VDIxOjE5OjEwWiIsIm5vbmNlIjoidFppZ25zbkZicCJ9.ewdkIkPV50iOeBUqMXCC_aZKPxgihac0aW9EkL1nOzM',
           }
       });
-      const result: CredentialResponseError | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest) ;
+      const result: ErrorResponse | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest) ;
       expect(result['error']).toBe('unsupported_format');
   });
 
@@ -71,7 +73,7 @@ describe('VcIssuanceClient ', () => {
         jwt: 'eyJraWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwiYWxnIjoiRVMyNTYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJzNkJoZFJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJpYXQiOiIyMDE4LTA5LTE0VDIxOjE5OjEwWiIsIm5vbmNlIjoidFppZ25zbkZicCJ9.ewdkIkPV50iOeBUqMXCC_aZKPxgihac0aW9EkL1nOzM',
       }
     });
-    const result: CredentialResponseError | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest) ;
+    const result: ErrorResponse | CredentialResponse = await vcIssuanceClient.sendCredentialRequest(credentialRequest) ;
     expect(result['credential']).toBeDefined();
   });
 });

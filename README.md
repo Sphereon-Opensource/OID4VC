@@ -1,12 +1,15 @@
 <h1 align="center">
   <br>
   <a href="https://www.sphereon.com"><img src="https://sphereon.com/content/themes/sphereon/assets/img/logo.svg" alt="Sphereon" width="400"></a>
-    <br>OIDC4VCI-CLIENT 
-    <br>A client to request and receive Verifiable Credentials using Oidc4vci
+    <br>OpenID for Verifiable Credential Issuance - Client 
   <br>
 </h1>
 
 _IMPORTANT it still in development and it's not fully functional_
+
+### Background 
+
+A client to request and receive Verifiable Credentials using OID4VCI.
 
 This library is based on [openid-4-verifiable-credential-issuance](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) for requesting Verifiable Credentials.
 

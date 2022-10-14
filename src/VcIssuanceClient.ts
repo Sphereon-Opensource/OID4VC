@@ -1,9 +1,9 @@
 import { CredentialFormat } from '@sphereon/ssi-types';
 
-import { URL_NOT_VALID } from './Oidc4vciErrors';
 import VcIssuanceClientBuilder from './VcIssuanceClientBuilder';
-import { isValidURL, postWithBearerToken } from './functions/HttpUtils';
-import { CredentialRequest, CredentialResponse, CredentialResponseError, ProofOfPossession } from './types';
+import { isValidURL, post } from './functions';
+import { ErrorResponse, URL_NOT_VALID } from './types';
+import { CredentialRequest, CredentialResponse, ProofOfPossession } from './types';
 
 export class VcIssuanceClient {
   _issuanceRequestOpts: Partial<{
@@ -22,31 +22,22 @@ export class VcIssuanceClient {
     };
   }
 
-  public static builder() {
+  public static builder(): VcIssuanceClientBuilder {
     return new VcIssuanceClientBuilder();
   }
 
-  //TODO: implement this
-  public async acquireToken() {
-    return 'MY-TOKEN';
-  }
-
-  public async sendCredentialRequest(
-    request: CredentialRequest,
-    url?: string,
-    token?: string
-  ): Promise<CredentialResponse | CredentialResponseError> {
+  public async sendCredentialRequest(request: CredentialRequest, url?: string, token?: string): Promise<CredentialResponse | ErrorResponse> {
     const requestUrl: string = url ? url : this._issuanceRequestOpts.credentialRequestUrl;
     if (!isValidURL(requestUrl)) {
       throw new Error(URL_NOT_VALID);
     }
     const requestToken: string = token ? token : this._issuanceRequestOpts.token;
     try {
-      const response = await postWithBearerToken(requestUrl, request, requestToken);
+      const response = await post(requestUrl, request, requestToken);
       //TODO: remove this in the future
       const responseJson = await response.json();
       if (responseJson.error) {
-        return { ...responseJson } as CredentialResponseError;
+        return { ...responseJson } as ErrorResponse;
       }
       return { ...responseJson } as CredentialResponse;
     } catch (e) {
