@@ -1,7 +1,7 @@
 <h1 align="center">
   <br>
   <a href="https://www.sphereon.com"><img src="https://sphereon.com/content/themes/sphereon/assets/img/logo.svg" alt="Sphereon" width="400"></a>
-    <br>OpenIDConnect 4 Verifiable Credential Issuer - Client 
+    <br>OpenID for Verifiable Credential Issuance - Client 
   <br>
 </h1>
 
