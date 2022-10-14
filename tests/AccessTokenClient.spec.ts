@@ -160,4 +160,23 @@ describe('AccessTokenClient should', () => {
       UNIT_TEST_TIMEOUT
   );
 
+  it(
+      'get error for unsupported flow type',
+      async () => {
+
+        const accessTokenClient: AccessTokenClient = new AccessTokenClient();
+
+        await expect(
+            accessTokenClient.acquireAccessToken(
+                AuthzFlowType.AUTHORIZATION_CODE_FLOW,
+                {} as AccessTokenRequest,
+                '',
+                false)
+        ).rejects.toThrow(
+            Error('Non-pre-authorized flow is not yet supported.')
+        );
+      },
+      UNIT_TEST_TIMEOUT
+  );
+
 });

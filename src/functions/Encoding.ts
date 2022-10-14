@@ -27,9 +27,7 @@ export function encodeJsonAsURI(json: unknown, opts?: EncodeJsonAsURIOpts): stri
       continue;
     }
     if (opts.arrayTypeProperties?.includes(key) && Array.isArray(value)) {
-      results.push(
-        value.map((v) => `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(v, /\./g)}`).join('&')
-      );
+      results.push(value.map((v) => `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(v, /\./g)}`).join('&'));
       continue;
     }
     const isBool = typeof value == 'boolean';
