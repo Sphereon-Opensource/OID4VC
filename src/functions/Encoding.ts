@@ -1,11 +1,10 @@
-import { BAD_PARAMS } from '../Oidc4vciErrors';
-import { DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, IssuanceInitiationRequestPayload, SearchValue } from '../types';
+import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, IssuanceInitiationRequestPayload, SearchValue } from '../types';
 
 /**
- * @function encodeJsonAsURI encodes a Json object into an URI
+ * @function encodeJsonAsURI encodes a Json object into a URI
  * @param json object
  * @param opts:
- *          - urlTypeProperties: a list of properties which the value is an URL
+ *          - urlTypeProperties: a list of properties which the value is a URL
  *          - arrayTypeProperties: a list of properties which are an array
  */
 export function encodeJsonAsURI(json: unknown, opts?: EncodeJsonAsURIOpts): string {
@@ -14,7 +13,7 @@ export function encodeJsonAsURI(json: unknown, opts?: EncodeJsonAsURIOpts): stri
   }
   const results = [];
 
-  function encodeAndStripWhitespace(key: string) {
+  function encodeAndStripWhitespace(key: string): string {
     return encodeURIComponent(key.replace(' ', ''));
   }
 
