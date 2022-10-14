@@ -1,18 +1,17 @@
 import { BAD_PARAMS } from '../Oidc4vciErrors';
-import { IssuanceInitiationRequestPayload } from '../types';
+import { DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, IssuanceInitiationRequestPayload, SearchValue } from '../types';
 
-export function encodeJsonAsURI(json: IssuanceInitiationRequestPayload[] | IssuanceInitiationRequestPayload) {
-  if (!Array.isArray(json)) {
-    return encodeJsonObjectAsURI(json);
-  }
-  return json.map((j) => encodeJsonObjectAsURI(j)).join('&');
-}
-
-function encodeJsonObjectAsURI(json: IssuanceInitiationRequestPayload) {
+/**
+ * @function encodeJsonAsURI encodes a Json object into an URI
+ * @param json object
+ * @param opts:
+ *          - urlTypeProperties: a list of properties which the value is an URL
+ *          - arrayTypeProperties: a list of properties which are an array
+ */
+export function encodeJsonAsURI(json: unknown, opts?: EncodeJsonAsURIOpts): string {
   if (typeof json === 'string') {
-    return encodeJsonObjectAsURI(JSON.parse(json));
+    return encodeJsonAsURI(JSON.parse(json));
   }
-
   const results = [];
 
   function encodeAndStripWhitespace(key: string) {
@@ -23,6 +22,17 @@ function encodeJsonObjectAsURI(json: IssuanceInitiationRequestPayload) {
     if (!value) {
       continue;
     }
+    //Skip properties that are not of URL type
+    if (!opts?.urlTypeProperties.includes(key)) {
+      results.push(`${key}=${value}`);
+      continue;
+    }
+    if (opts.arrayTypeProperties?.includes(key) && Array.isArray(value)) {
+      results.push(
+        value.map((v) => `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(v, /\./g)}`).join('&')
+      );
+      continue;
+    }
     const isBool = typeof value == 'boolean';
     const isNumber = typeof value == 'number';
     const isString = typeof value == 'string';
@@ -30,35 +40,48 @@ function encodeJsonObjectAsURI(json: IssuanceInitiationRequestPayload) {
     if (isBool || isNumber) {
       encoded = `${encodeAndStripWhitespace(key)}=${value}`;
     } else if (isString) {
-      encoded = `${encodeAndStripWhitespace(key)}=${encodeURIComponent(value)}`;
+      encoded = `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(value, /\./g)}`;
     } else {
-      encoded = `${encodeAndStripWhitespace(key)}=${encodeURIComponent(JSON.stringify(value))}`;
+      encoded = `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(JSON.stringify(value), /\./g)}`;
     }
     results.push(encoded);
   }
   return results.join('&');
 }
 
-export function decodeUriAsJson(uri: string) {
-  if (!uri || !uri.includes('issuer') || !uri.includes('credential_type')) {
+/**
+ * @function decodeUriAsJson decodes an URI into a Json object
+ * @param uri string
+ * @param opts:
+ *          - requiredProperties: the required properties
+ *          - duplicatedProperties: properties that show up more that once
+ */
+export function decodeURIAsJson(uri: string, opts?: DecodeURIAsJsonOpts): IssuanceInitiationRequestPayload {
+  if (!uri || !opts?.requiredProperties.every((p) => uri.includes(p))) {
     throw new Error(BAD_PARAMS);
   }
-  const jsonArray = parseURI(uri);
-  const result = jsonArray.map((o) => decodeJsonProperty(o));
-  return result.length < 2 ? result[0] : result;
+  const parsedURI = parseURI(uri, opts?.duplicatedProperties);
+  return decodeJsonProperty(parsedURI);
 }
 
-function decodeJsonProperty(parts: IssuanceInitiationRequestPayload) {
-  const json = {};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function decodeJsonProperty(parts: any): any {
+  const json: unknown = {};
   for (const key in parts) {
     const value = parts[key];
     if (!value) {
       continue;
     }
+    if (Array.isArray(value)) {
+      if (value.length > 1) {
+        json[decodeURIComponent(key)] = value.map((v) => decodeURIComponent(v));
+      } else {
+        json[decodeURIComponent(key)] = decodeURIComponent(value[0]);
+      }
+    }
     const isBool = typeof value == 'boolean';
     const isNumber = typeof value == 'number';
     const isString = typeof value == 'string';
-
     if (isBool || isNumber) {
       json[decodeURIComponent(key)] = value;
     } else if (isString) {
@@ -73,18 +96,36 @@ function decodeJsonProperty(parts: IssuanceInitiationRequestPayload) {
   return json;
 }
 
-export function parseURI(uri: string) {
-  const jsonArray = [];
-  let json: unknown = {};
+/**
+ * @function parseURI into a Json object
+ * @param uri string
+ * @param duplicated array of string containing duplicated uri keys
+ */
+export function parseURI(uri: string, duplicated?: string[]): unknown {
+  const json: unknown = {};
   const dict = uri.split('&');
   for (const entry of dict) {
     const pair = entry.split('=');
-    if (Object.prototype.hasOwnProperty.call(json, pair[0])) {
-      jsonArray.push(json);
-      json = {};
+    if (duplicated?.includes(pair[0])) {
+      if (json[pair[0]] !== undefined) {
+        json[pair[0]].push(pair[1]);
+      } else {
+        json[pair[0]] = [pair[1]];
+      }
+      continue;
     }
     json[pair[0]] = pair[1];
   }
-  jsonArray.push(json);
-  return jsonArray;
+  return json;
+}
+
+/**
+ * @function customEncodeURIComponent is used to encode chars that are not encoded by default
+ * @param searchValue The pattern/regexp to find the char(s) to be encoded
+ * @param uriComponent query string
+ */
+export function customEncodeURIComponent(uriComponent: string, searchValue: SearchValue): string {
+  // -_.!~*'() are not escaped because they are considered safe.
+  // Add them to the regex as you need
+  return encodeURIComponent(uriComponent).replace(searchValue, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
 }
