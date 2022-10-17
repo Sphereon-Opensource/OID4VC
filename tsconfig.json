@@ -30,7 +30,7 @@
     /* Print names of files part of the compilation. */,
     "pretty": true,
     "rootDirs": [
-      "src",
+      "lib",
       "tests"
     ],
     /*"lib": [
@@ -40,7 +40,7 @@
   },
   "include": [
     "index.ts",
-    "src/**/*.ts",
+    "lib/**/*.ts",
     "tests/**/*.ts",
     "generator/**/*.ts"
   ],

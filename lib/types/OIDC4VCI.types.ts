@@ -13,6 +13,23 @@ export enum ResponseType {
   AUTH_CODE = 'code',
 }
 
+export interface AuthorizationServerOpts {
+  as?: string; // If not provided the issuer hostname will be used!
+  tokenEndpoint?: string; // Allows to override the default '/token' endpoint
+  clientId?: string; // If not provided a random clientId will be generated
+}
+
+export interface IssuerTokenEndpointOpts {
+  issuer: string;
+  tokenEndpoint?: string;
+}
+
+export interface AccessTokenRequestOpts {
+  asOpts?: AuthorizationServerOpts;
+  pin?: number;
+  // client_id?: string;
+}
+
 export interface AuthorizationRequest {
   response_type: ResponseType.AUTH_CODE;
   client_id: string;

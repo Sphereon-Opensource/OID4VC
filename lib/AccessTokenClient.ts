@@ -1,53 +1,54 @@
 import { ObjectUtils } from '@sphereon/ssi-types';
 
 import { convertJsonToURI, post } from './functions';
-import { AccessTokenRequest, AccessTokenResponse, ErrorResponse, GrantTypes, IssuanceInitiationRequestPayload } from './types';
-
-interface AccessTokenRequestOpts {
-  pin?: number;
-  client_id?: string;
-}
+import {
+  AccessTokenRequest,
+  AccessTokenRequestOpts,
+  AccessTokenResponse,
+  AuthorizationServerOpts,
+  ErrorResponse,
+  GrantTypes,
+  IssuanceInitiationRequestPayload,
+  IssuanceInitiationWithBaseUrl,
+  IssuerTokenEndpointOpts,
+} from './types';
 
 export class AccessTokenClient {
-  private _clientId?: string;
-  private _authorizationServerUrl?: string;
+  // private _clientId?: string;
+  // private _authorizationServerUrl?: string;
 
-  public async acquireAccessTokenUsingIssuanceInitiationRequest(
-    issuanceInitiationRequest: IssuanceInitiationRequestPayload,
-    opts?: { authorizationServerUrl?: string; isPinRequired?: boolean; pin?: number }
+  public async acquireAccessTokenUsingIssuanceInitiation(
+    issuanceInitiation: IssuanceInitiationWithBaseUrl,
+    clientId: string,
+    opts?: AccessTokenRequestOpts
   ): Promise<AccessTokenResponse | ErrorResponse> {
-    // We get the auth server from the options, or else the issuer is assumed. This is different from the other acquire method, where the authorization server is mandatory
-    const authorizationServerUrl = opts?.authorizationServerUrl
-      ? opts.authorizationServerUrl
-      : this._authorizationServerUrl
-      ? this._authorizationServerUrl
-      : issuanceInitiationRequest.issuer;
-
-    return await this.acquireAccessTokenUsingRequest(
-      await this.createAccessTokenRequest(issuanceInitiationRequest, {
-        authorizationServerUrl: this.determineAuthorizationServerUrl(authorizationServerUrl),
-        ...opts,
-      })
-    );
+    const { issuanceInitiationRequest } = issuanceInitiation;
+    const reqOpts = {
+      isPinRequired: issuanceInitiationRequest.user_pin_required || false,
+      issuerOpts: { issuer: issuanceInitiationRequest.issuer },
+      asOpts: opts?.asOpts ? { ...opts.asOpts } : undefined,
+    };
+    return await this.acquireAccessTokenUsingRequest(await this.createAccessTokenRequest(issuanceInitiationRequest, clientId, opts), reqOpts);
   }
 
   public async acquireAccessTokenUsingRequest(
     accessTokenRequest: AccessTokenRequest,
-    opts?: { isPinRequired?: boolean; authorizationServerUrl?: string }
+    opts: { isPinRequired?: boolean; asOpts?: AuthorizationServerOpts; issuerOpts?: IssuerTokenEndpointOpts }
   ): Promise<AccessTokenResponse | ErrorResponse> {
     this.validate(accessTokenRequest, opts?.isPinRequired);
     const requestTokenURL = convertJsonToURI(accessTokenRequest, {
-      baseUrl: this.determineAuthorizationServerUrl(opts?.authorizationServerUrl),
+      baseUrl: this.determineTokenURL(opts?.asOpts, opts?.issuerOpts),
     });
     return this.sendAuthCode(requestTokenURL, accessTokenRequest);
   }
 
   public async createAccessTokenRequest(
     issuanceInitiationRequest: IssuanceInitiationRequestPayload,
+    clientId: string,
     opts?: AccessTokenRequestOpts
   ): Promise<AccessTokenRequest> {
     const request: Partial<AccessTokenRequest> = {
-      client_id: opts?.client_id ? opts.client_id : this._clientId,
+      client_id: clientId,
     };
     if (issuanceInitiationRequest.user_pin_required) {
       this.assertNumericPin(true, opts.pin);
@@ -112,12 +113,24 @@ export class AccessTokenClient {
     return await response.json();
   }
 
-  private determineAuthorizationServerUrl(authorizationServerUrl?: string): string {
-    const url = authorizationServerUrl ? authorizationServerUrl : this._authorizationServerUrl;
+  private determineTokenURL(asOpts?: AuthorizationServerOpts, issuerOpts?: IssuerTokenEndpointOpts): string {
+    if (!asOpts && !issuerOpts) {
+      throw new Error('Cannot determine token URL if no issuer and no Authorization Server values are present');
+    }
+    const url = asOpts
+      ? this.creatTokenURLFromURL(asOpts.as, asOpts.tokenEndpoint)
+      : this.creatTokenURLFromURL(issuerOpts.issuer, issuerOpts.tokenEndpoint);
     if (!url || !ObjectUtils.isString(url)) {
-      throw new Error('No authorization server URL present. Cannot acquire access token');
+      throw new Error('No authorization server token URL present. Cannot acquire access token');
     }
     return url;
+  }
+
+  private creatTokenURLFromURL(url: string, tokenEndpoint?: string): string {
+    const hostname = url.replace(/https?:\/\//, '').split('/')[0];
+    const endpoint = tokenEndpoint ? tokenEndpoint : '/token';
+    // We always require https
+    return `https://${hostname}${endpoint}`;
   }
 
   private throwNotSupportedFlow(): void {
