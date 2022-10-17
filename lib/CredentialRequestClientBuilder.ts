@@ -9,7 +9,7 @@ export default class CredentialRequestClientBuilder {
   credentialType: string | string[];
   format: CredentialFormat | CredentialFormat[];
 
-  static fromIssuanceInitiationURI(issuanceInitiation: string): CredentialRequestClientBuilder {
+  public static fromIssuanceInitiationURI(issuanceInitiation: string): CredentialRequestClientBuilder {
     return CredentialRequestClientBuilder.fromIssuanceInitiationRequest(
       convertURIToJsonObject(issuanceInitiation, {
         arrayTypeProperties: ['credential_type'],
@@ -18,29 +18,29 @@ export default class CredentialRequestClientBuilder {
     );
   }
 
-  static fromIssuanceInitiationRequest(issuanceInitiation: IssuanceInitiationRequestPayload): CredentialRequestClientBuilder {
+  public static fromIssuanceInitiationRequest(issuanceInitiation: IssuanceInitiationRequestPayload): CredentialRequestClientBuilder {
     const builder = new CredentialRequestClientBuilder();
     builder.withCredentialRequestUrl(issuanceInitiation.issuer);
     builder.withCredentialType(issuanceInitiation.credential_type);
     return builder;
   }
 
-  withCredentialRequestUrl(credentialRequestUrl: string): CredentialRequestClientBuilder {
+  public withCredentialRequestUrl(credentialRequestUrl: string): CredentialRequestClientBuilder {
     this.credentialRequestUrl = credentialRequestUrl;
     return this;
   }
 
-  withCredentialType(credentialType: string | string[]): CredentialRequestClientBuilder {
+  public withCredentialType(credentialType: string | string[]): CredentialRequestClientBuilder {
     this.credentialType = credentialType;
     return this;
   }
 
-  withFormat(format: CredentialFormat | CredentialFormat[]): CredentialRequestClientBuilder {
+  public withFormat(format: CredentialFormat | CredentialFormat[]): CredentialRequestClientBuilder {
     this.format = format;
     return this;
   }
 
-  build(): CredentialRequestClient {
+  public build(): CredentialRequestClient {
     return new CredentialRequestClient(this);
   }
 }

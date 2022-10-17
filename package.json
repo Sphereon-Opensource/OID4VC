@@ -1,8 +1,9 @@
 {
   "name": "@sphereon/oid4vci-client",
-  "version": "0.0.1-unstable.1",
+  "version": "0.0.1-unstable.3",
   "description": "OpenID for Verifiable Credential Issuance (OID4VCI) client",
   "main": "dist/main/index.js",
+  "types": "dist/main/index.d.ts",
   "author": "Sphereon",
   "license": "Apache-2.0",
   "private": false,
@@ -51,9 +52,19 @@
     "ts-node": "^10.9.1",
     "typescript": "4.6.4"
   },
+  "files": [
+    "dist/main"
+  ],
   "prettier": {
     "singleQuote": true,
     "printWidth": 150
   },
-  "resolutions": {}
+  "keywords": [
+    "Sphereon",
+    "Verifiable Credentials",
+    "OpenID",
+    "OpenID for Verifiable Credential Issuance",
+    "OIDC4VCI",
+    "OID4VCI"
+  ]
 }

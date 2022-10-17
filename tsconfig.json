@@ -29,10 +29,6 @@
     "listFiles": false
     /* Print names of files part of the compilation. */,
     "pretty": true,
-    "rootDirs": [
-      "lib",
-      "tests"
-    ],
     /*"lib": [
       "ES2017"
     ],*/
@@ -41,8 +37,7 @@
   "include": [
     "index.ts",
     "lib/**/*.ts",
-    "tests/**/*.ts",
-    "generator/**/*.ts"
+    "tests/**/*.ts"
   ],
   "exclude": [
     "node_modules/**",

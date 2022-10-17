@@ -1,3 +1,4 @@
-export * from './OIDC4VCI.types';
+export * from './Authorization.types';
 export * from './Oidc4vciErrors';
-export * from './VCIssuance.types';
+export * from './CredentialIssuance.types';
+export * from './Generic.types';

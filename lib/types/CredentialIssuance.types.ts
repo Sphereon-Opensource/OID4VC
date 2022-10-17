@@ -2,21 +2,6 @@ import { KeyObject } from 'crypto';
 
 import { CredentialFormat, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
-export enum AuthzFlowType {
-  AUTHORIZATION_CODE_FLOW = 'Authorization Code Flow',
-  PRE_AUTHORIZED_CODE_FLOW = 'Pre-Authorized Code Flow',
-}
-
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace AuthzFlowType {
-  export function valueOf(request: IssuanceInitiationRequestPayload): AuthzFlowType {
-    if (request.pre_authorized_code) {
-      return AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW;
-    }
-    return AuthzFlowType.AUTHORIZATION_CODE_FLOW;
-  }
-}
-
 export interface CredentialRequest {
   //TODO: handling list is out of scope for now
   type: string | string[];

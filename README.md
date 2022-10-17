@@ -64,7 +64,14 @@ Now you will need to get an access token from the oAuth2 Authorization Server (A
 For now you can use the issuer hostname for the AS, as there is no way to know the AS from the Issuance Initiation for known until the following [OpenID Ticket](https://bitbucket.org/openid/connect/issues/1632/issuer-metadata-clarification-needed) is resolved. So the token endpoint would become https://<issuer-hostname>/token.
 The library allows to pass in a different value for the AS token endpoint as well, so you already can use a different AS if you know the AS upfront.
 
+````typescript
+import { AccessTokenClient } from './AccessTokenClient';
 
+const clientId = "abcd" // This can be a random value or a 
+
+AccessTokenClient.acquireAccessTokenUsingIssuanceInitiation()
+
+````
 
 
 ### Interfaces

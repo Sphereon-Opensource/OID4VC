@@ -1,3 +1,5 @@
+import { IssuanceInitiationRequestPayload } from './CredentialIssuance.types';
+
 export enum GrantTypes {
   AUTHORIZATION_CODE = 'authorization_code',
   PRE_AUTHORIZED_CODE = 'urn:ietf:params:oauth:grant-type:pre-authorized_code',
@@ -26,7 +28,7 @@ export interface IssuerTokenEndpointOpts {
 
 export interface AccessTokenRequestOpts {
   asOpts?: AuthorizationServerOpts;
-  pin?: number;
+  pin?: number; // Pin-number. Only used when required
   // client_id?: string;
 }
 
@@ -64,9 +66,17 @@ export interface AccessTokenResponse {
   interval?: number; // in seconds
 }
 
-export interface ErrorResponse extends Response {
-  error: string;
-  error_description?: string;
-  error_uri?: string;
-  state?: string;
+export enum AuthzFlowType {
+  AUTHORIZATION_CODE_FLOW = 'Authorization Code Flow',
+  PRE_AUTHORIZED_CODE_FLOW = 'Pre-Authorized Code Flow',
+}
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace AuthzFlowType {
+  export function valueOf(request: IssuanceInitiationRequestPayload): AuthzFlowType {
+    if (request.pre_authorized_code) {
+      return AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW;
+    }
+    return AuthzFlowType.AUTHORIZATION_CODE_FLOW;
+  }
 }

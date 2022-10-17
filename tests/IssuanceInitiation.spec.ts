@@ -1,5 +1,5 @@
 import { AuthzFlowType, convertJsonToURI, convertURIToJsonObject } from '../lib';
-import IssuanceInitiation from '../lib/IssuanceInitiation';
+import { IssuanceInitiation } from '../lib';
 
 describe('JSON To URI', () => {
   it('should parse an object into open-id-URI with a single credential_type', () => {
