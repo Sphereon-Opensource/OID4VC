@@ -102,8 +102,9 @@ function decodeJsonProperties(parts: string[]): unknown {
  * @param arrayType array of string containing array like keys
  */
 function getURIComponentsAsArray(uri: string, arrayType?: string[]): string[] {
+  const parts = uri.includes('?') ? uri.split('?')[1] : uri.includes('://') ? uri.split('://')[1] : uri;
   const json: string[] = [];
-  const dict = uri.split('&');
+  const dict = parts.split('&');
   for (const entry of dict) {
     const pair = entry.split('=');
     if (arrayType?.includes(pair[0])) {
