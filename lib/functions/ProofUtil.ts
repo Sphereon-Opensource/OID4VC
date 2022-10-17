@@ -11,7 +11,7 @@ export async function createProofOfPossession(opts: ProofOfPossessionOpts): Prom
   if (!opts.jwtSignerCallback || !opts.jwtSignerArgs) {
     throw new Error(BAD_PARAMS);
   }
-  const signerArgs = setJWSDefaults(opts.jwtSignerArgs, opts.credentialRequestUrl);
+  const signerArgs = setJWSDefaults(opts.jwtSignerArgs, opts.issuerURL, opts.clientId);
   const jwt = await opts.jwtSignerCallback(signerArgs);
   try {
     if (opts.jwtVerifyCallback) {
@@ -35,14 +35,19 @@ function partiallyValidateJWS(jws: string): void {
   }
 }
 
-function setJWSDefaults(args: JWTSignerArgs, credentialRequestUrl?: string): JWTSignerArgs {
+function setJWSDefaults(args: JWTSignerArgs, issuerUrl: string, clientId?: string): JWTSignerArgs {
   const now = +new Date();
-  const aud = args.payload.aud ? args.payload.aud : credentialRequestUrl;
+  const aud = args.payload.aud ? args.payload.aud : issuerUrl;
   if (!aud) {
-    throw new Error('No request url provider');
+    throw new Error('No issuer url provided');
+  }
+  const iss = args.payload.iss ? args.payload.iss : clientId;
+  if (!iss) {
+    throw new Error('No clientId provided');
   }
   const defaultPayload: Partial<JWTPayload> = {
     aud,
+    iss,
     iat: args.payload.iat ? args.payload.iat : now / 1000,
     exp: args.payload.exp ? args.payload.exp : (now + 5 * 60000) / 1000,
   };

@@ -2,10 +2,11 @@ import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialRequestClient } from './CredentialRequestClient';
 import { convertURIToJsonObject } from './functions';
-import { IssuanceInitiationRequestPayload } from './types';
+import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from './types';
 
-export default class CredentialRequestClientBuilder {
-  credentialRequestUrl: string;
+export class CredentialRequestClientBuilder {
+  issuerURL: string;
+  clientId: string;
   credentialType: string | string[];
   format: CredentialFormat | CredentialFormat[];
 
@@ -18,15 +19,20 @@ export default class CredentialRequestClientBuilder {
     );
   }
 
-  public static fromIssuanceInitiationRequest(issuanceInitiation: IssuanceInitiationRequestPayload): CredentialRequestClientBuilder {
+  public static fromIssuanceInitiationRequest(issuanceInitiationRequest: IssuanceInitiationRequestPayload): CredentialRequestClientBuilder {
     const builder = new CredentialRequestClientBuilder();
-    builder.withCredentialRequestUrl(issuanceInitiation.issuer);
-    builder.withCredentialType(issuanceInitiation.credential_type);
+    builder.withIssuerURL(issuanceInitiationRequest.issuer);
+    builder.withCredentialType(issuanceInitiationRequest.credential_type);
+
     return builder;
   }
 
-  public withCredentialRequestUrl(credentialRequestUrl: string): CredentialRequestClientBuilder {
-    this.credentialRequestUrl = credentialRequestUrl;
+  public static fromIssuanceInitiation(issuanceInitiation: IssuanceInitiationWithBaseUrl): CredentialRequestClientBuilder {
+    return CredentialRequestClientBuilder.fromIssuanceInitiationRequest(issuanceInitiation.issuanceInitiationRequest);
+  }
+
+  public withIssuerURL(credentialRequestUrl: string): CredentialRequestClientBuilder {
+    this.issuerURL = credentialRequestUrl;
     return this;
   }
 
@@ -37,6 +43,11 @@ export default class CredentialRequestClientBuilder {
 
   public withFormat(format: CredentialFormat | CredentialFormat[]): CredentialRequestClientBuilder {
     this.format = format;
+    return this;
+  }
+
+  public withClientId(clientId: string): CredentialRequestClientBuilder {
+    this.clientId = clientId;
     return this;
   }
 
