@@ -30,6 +30,11 @@ export interface CredentialResponse {
   format: CredentialFormat;
 }
 
+export interface IssuanceInitiationWithBaseUrl {
+  baseUrl: string;
+  issuanceInitiationRequest: IssuanceInitiationRequestPayload;
+}
+
 export interface IssuanceInitiationRequestPayload {
   issuer: string; //(url) REQUIRED The issuer URL of the Credential issuer, the Wallet is requested to obtain one or more Credentials from.
   credential_type: string[] | string; //(url) REQUIRED A JSON string denoting the type of the Credential the Wallet shall request
@@ -45,6 +50,7 @@ export enum ProofType {
 export interface ProofOfPossession {
   proof_type: ProofType;
   jwt: string;
+
   [x: string]: unknown;
 }
 
