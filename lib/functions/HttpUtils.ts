@@ -1,11 +1,13 @@
 import { fetch } from 'cross-fetch';
 
+import { Encoding } from '../types';
+
 export async function formPost(
   url: string,
   body: BodyInit,
   opts?: { bearerToken?: string; contentType?: string; customHeaders?: HeadersInit }
 ): Promise<Response> {
-  return await post(url, body, opts?.contentType ? { ...opts } : { contentType: 'multipart/form-data', ...opts });
+  return await post(url, body, opts?.contentType ? { ...opts } : { contentType: Encoding.FORM_URL_ENCODED, ...opts });
 }
 
 export async function post(
