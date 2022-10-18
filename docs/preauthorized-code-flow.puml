@@ -27,7 +27,7 @@ I -> I: The Issuer verifies the OIDC4VCI Token Request\n and checks whether the 
 I -> W: The Issuer returns the OIDC4VCI token (access_token).
 W -> W: The Wallet generates a JWT that contains a nonce and\n short validity time and is \nsigned by the private key of the DID.\n This will provide the issuer with PoP of the private key.
 W -> W: The Wallet creates the CredentialRequest
-W -> I: The Wallet sends the CredentialRequest via \nVcIssuanceClient.sendCredentialRequest function
+W -> I: The Wallet sends the CredentialRequest via \ncredReqClient.sendCredentialRequest function
 I -> I: The Issuer verifies the CredentialRequest\n (based on the access_token) and the PoP (JWT).
 I -> I: The Issuer extracts the DID from the PoP.
 I -> I: The Issuer creates the credential, adds the subject’s DID\n and signs the credential with the private key of their Issuer’ URI.

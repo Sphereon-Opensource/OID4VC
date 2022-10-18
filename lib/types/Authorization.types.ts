@@ -29,7 +29,6 @@ export interface IssuerTokenEndpointOpts {
 export interface AccessTokenRequestOpts {
   asOpts?: AuthorizationServerOpts;
   pin?: number; // Pin-number. Only used when required
-  // client_id?: string;
 }
 
 export interface AuthorizationRequest {

@@ -266,7 +266,7 @@ console.log(decodedJson);
 
 Creates the ProofOfPossession object and JWT signature
 
-The callback function created using `jose`
+The callback function created using the `jose` library.
 
 ```typescript
 // Must be JWS
@@ -310,7 +310,7 @@ const jwtArgs: JWTSignerArgs = {
 The actual method call
 
 ```typescript
-const proof: ProofOfPossession = await vcIssuanceClient.createProofOfPossession({
+const proof: ProofOfPossession = await createProofOfPossession({
   jwtSignerArgs: jwtArgs,
   jwtSignerCallback: (args) => signJWT(args),
   jwtVerifyCallback: (args) => verifyJWT(args),

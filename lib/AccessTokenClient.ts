@@ -14,9 +14,6 @@ import {
 } from './types';
 
 export class AccessTokenClient {
-  // private _clientId?: string;
-  // private _authorizationServerUrl?: string;
-
   public async acquireAccessTokenUsingIssuanceInitiation(
     issuanceInitiation: IssuanceInitiationWithBaseUrl,
     clientId: string,
