@@ -53,7 +53,7 @@ export class CredentialRequestClient {
     }
     const requestToken: string = opts?.overrideAccessToken ? opts.overrideAccessToken : this._issuanceRequestOpts.token;
     // fixme: Needs to be part of the Credential/Proof refactor. For now we just append the '/credential' endpoint
-    const response = await post(issuerURL + '/credential', request, requestToken);
+    const response = await post(issuerURL + '/credential', JSON.stringify(request), { bearerToken: requestToken });
     const responseJson = await response.json();
     if (responseJson.error) {
       return { ...responseJson } as ErrorResponse;
