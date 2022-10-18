@@ -11,6 +11,7 @@ import {
   IssuanceInitiationRequestPayload,
   IssuanceInitiationWithBaseUrl,
   IssuerTokenEndpointOpts,
+  PRE_AUTH_CODE_LITERAL,
 } from './types';
 
 export class AccessTokenClient {
@@ -51,12 +52,12 @@ export class AccessTokenClient {
       this.assertNumericPin(true, opts.pin);
       request.user_pin = opts.pin;
     }
-    if (issuanceInitiationRequest.pre_authorized_code) {
+    if (issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL]) {
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
-      request.pre_authorized_code = issuanceInitiationRequest.pre_authorized_code;
+      request[PRE_AUTH_CODE_LITERAL] = issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL];
     }
     if (issuanceInitiationRequest.op_state) {
-      if (issuanceInitiationRequest.pre_authorized_code) {
+      if (issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL]) {
         throw new Error('Cannot have both a pre_authorized_code and a op_state in the same initiation request');
       }
       request.grant_type = GrantTypes.AUTHORIZATION_CODE;
@@ -83,7 +84,7 @@ export class AccessTokenClient {
   }
 
   private assertNonEmptyPreAuthorizedCode(accessTokenRequest: AccessTokenRequest): void {
-    if (!accessTokenRequest.pre_authorized_code) {
+    if (!accessTokenRequest[PRE_AUTH_CODE_LITERAL]) {
       throw new Error('Pre-authorization must be proven by presenting the pre-authorized code. Code must be present.');
     }
   }

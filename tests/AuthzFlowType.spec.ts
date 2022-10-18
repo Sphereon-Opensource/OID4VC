@@ -22,7 +22,7 @@ describe('Authorization Flow Type determination', () => {
       AuthzFlowType.valueOf({
         issuer: 'test',
         credential_type: 'test',
-        pre_authorized_code: 'test',
+        'pre-authorized_code': 'test',
       })
     ).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
   });
@@ -31,7 +31,7 @@ describe('Authorization Flow Type determination', () => {
       AuthzFlowType.valueOf({
         issuer: 'test',
         credential_type: ['test', 'test1'],
-        pre_authorized_code: 'test',
+        'pre-authorized_code': 'test',
       })
     ).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
   });

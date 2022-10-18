@@ -14,7 +14,7 @@ describe('AccessTokenClient should', () => {
 
       const accessTokenIssuanceRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
-        pre_authorized_code: '20221013',
+        'pre-authorized_code': '20221013',
         client_id: 'sphereon',
       } as AccessTokenRequest;
 
@@ -62,7 +62,7 @@ describe('AccessTokenClient should', () => {
 
       const accessTokenIssuanceRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
-        pre_authorized_code: '',
+        'pre-authorized_code': '',
         user_pin: 1.0,
       } as AccessTokenRequest;
 
@@ -82,7 +82,7 @@ describe('AccessTokenClient should', () => {
 
       const accessTokenIssuanceRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
-        pre_authorized_code: '20221013',
+        'pre-authorized_code': '20221013',
         user_pin: null,
       } as AccessTokenRequest;
 
@@ -102,7 +102,7 @@ describe('AccessTokenClient should', () => {
 
       const accessTokenIssuanceRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
-        pre_authorized_code: '20221013',
+        'pre-authorized_code': '20221013',
         user_pin: 20221013,
       } as AccessTokenRequest;
 
@@ -121,7 +121,7 @@ describe('AccessTokenClient should', () => {
 
       const accessTokenIssuanceRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
-        pre_authorized_code: '20221013',
+        'pre-authorized_code': '20221013',
         client_id: 'spheroen.com',
         user_pin: 123456789,
       } as AccessTokenRequest;

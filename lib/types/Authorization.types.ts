@@ -1,4 +1,5 @@
 import { IssuanceInitiationRequestPayload } from './CredentialIssuance.types';
+import { PRE_AUTH_CODE_LITERAL } from './Generic.types';
 
 export enum GrantTypes {
   AUTHORIZATION_CODE = 'authorization_code',
@@ -49,7 +50,7 @@ export interface AccessTokenRequest {
   client_id?: string;
   code_verifier?: string;
   grant_type: GrantTypes;
-  pre_authorized_code: string;
+  'pre-authorized_code': string;
   redirect_uri?: string;
   scope?: string;
   user_pin?: number;
@@ -73,7 +74,7 @@ export enum AuthzFlowType {
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace AuthzFlowType {
   export function valueOf(request: IssuanceInitiationRequestPayload): AuthzFlowType {
-    if (request.pre_authorized_code) {
+    if (request[PRE_AUTH_CODE_LITERAL]) {
       return AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW;
     }
     return AuthzFlowType.AUTHORIZATION_CODE_FLOW;
