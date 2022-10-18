@@ -57,7 +57,7 @@ export interface AccessTokenRequest {
 }
 
 export interface AccessTokenResponse {
-  access_token?: number; // integer
+  access_token: string;
   token_type?: string;
   expires_in?: number; // in seconds
   c_nonce?: string;
