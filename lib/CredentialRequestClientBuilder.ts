@@ -2,13 +2,14 @@ import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialRequestClient } from './CredentialRequestClient';
 import { convertURIToJsonObject } from './functions';
-import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from './types';
+import { AccessTokenResponse, IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from './types';
 
 export class CredentialRequestClientBuilder {
   issuerURL: string;
   clientId: string;
   credentialType: string | string[];
   format: CredentialFormat | CredentialFormat[];
+  token: string;
 
   public static fromIssuanceInitiationURI(issuanceInitiation: string): CredentialRequestClientBuilder {
     return CredentialRequestClientBuilder.fromIssuanceInitiationRequest(
@@ -48,6 +49,16 @@ export class CredentialRequestClientBuilder {
 
   public withClientId(clientId: string): CredentialRequestClientBuilder {
     this.clientId = clientId;
+    return this;
+  }
+
+  public withToken(accessToken: string): CredentialRequestClientBuilder {
+    this.token = accessToken;
+    return this;
+  }
+
+  public withTokenFromResponse(response: AccessTokenResponse): CredentialRequestClientBuilder {
+    this.token = response.access_token;
     return this;
   }
 

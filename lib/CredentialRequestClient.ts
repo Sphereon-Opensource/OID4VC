@@ -52,7 +52,8 @@ export class CredentialRequestClient {
       throw new Error(URL_NOT_VALID);
     }
     const requestToken: string = opts?.overrideAccessToken ? opts.overrideAccessToken : this._issuanceRequestOpts.token;
-    const response = await post(issuerURL, request, requestToken);
+    // fixme: Needs to be part of the Credential/Proof refactor. For now we just append the '/credential' endpoint
+    const response = await post(issuerURL + '/credential', request, requestToken);
     const responseJson = await response.json();
     if (responseJson.error) {
       return { ...responseJson } as ErrorResponse;
@@ -72,8 +73,8 @@ export class CredentialRequestClient {
         ? proof
         : await createProofOfPossession({
             issuerURL: proof.issuerURL ? proof.issuerURL : this._issuanceRequestOpts.issuerURL,
-            ...proof,
             clientId: proof.clientId ? proof.clientId : this._issuanceRequestOpts.clientId,
+            ...proof,
           });
     return {
       type: opts?.credentialType ? opts.credentialType : this._issuanceRequestOpts.credentialType,
