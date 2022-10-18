@@ -5,7 +5,7 @@
   <br>
 </h1>
 
-[![CI](https://github.com/Sphereon-Opensource/oid4vci-client/actions/workflows/main.yml/badge.svg)](https://github.com/Sphereon-Opensource/oid4vci-client/actions/workflows/main.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/oid4vci-client/branch/develop/graph/badge.svg)](https://codecov.io/gh/Sphereon-Opensource/pex) [![NPM Version](https://img.shields.io/npm/v/@sphereon/oid4vci-client.svg)](https://npm.im/@sphereon/oid4vci-client)
+[![CI](https://github.com/Sphereon-Opensource/oid4vci-client/actions/workflows/main.yml/badge.svg)](https://github.com/Sphereon-Opensource/oid4vci-client/actions/workflows/main.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/oid4vci-client/branch/develop/graph/badge.svg)](https://codecov.io/gh/Sphereon-Opensource/oid4vci-client) [![NPM Version](https://img.shields.io/npm/v/@sphereon/oid4vci-client.svg)](https://npm.im/@sphereon/oid4vci-client)
 
 
 _IMPORTANT this package is in an early development stage and does not support all functionality from the OID4VCI spec
