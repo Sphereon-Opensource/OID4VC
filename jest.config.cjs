@@ -5,7 +5,7 @@ module.exports = {
         "^jose/(.*)$": "<rootDir>/node_modules/jose/dist/node/cjs/$1",
     },
     rootDir: ".",
-    roots: ["<rootDir>/src/", "<rootDir>/tests/"],
+    roots: ["<rootDir>/lib/", "<rootDir>/tests/"],
     testMatch: ["**/?(*.)+(spec|test).+(ts|tsx|js)"],
     transform: {
         "^.+\\.(ts|tsx)?$": "ts-jest",
@@ -13,9 +13,9 @@ module.exports = {
     moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
     coverageDirectory: "./coverage/",
     collectCoverageFrom: [
-        "src/**/*.{ts,tsx}",
-        "!src/schemas/**",
-        "!src/**/*.d.ts",
+        "lib/**/*.{ts,tsx}",
+        "!lib/schemas/**",
+        "!lib/**/*.d.ts",
         "!**/node_modules/**",
         "!jest.config.cjs",
         "!generator/**",

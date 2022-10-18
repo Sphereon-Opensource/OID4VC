@@ -1,15 +1,15 @@
-import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, IssuanceInitiationRequestPayload, SearchValue } from '../types';
+import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, SearchValue } from '../types';
 
 /**
  * @function encodeJsonAsURI encodes a Json object into a URI
  * @param json object
  * @param opts:
- *          - urlTypeProperties: a list of properties which the value is a URL
+ *          - urlTypeProperties: a list of properties of which the value is a URL
  *          - arrayTypeProperties: a list of properties which are an array
  */
-export function encodeJsonAsURI(json: unknown, opts?: EncodeJsonAsURIOpts): string {
+export function convertJsonToURI(json: unknown, opts?: EncodeJsonAsURIOpts): string {
   if (typeof json === 'string') {
-    return encodeJsonAsURI(JSON.parse(json), opts);
+    return convertJsonToURI(JSON.parse(json), opts);
   }
   const results = [];
 
@@ -22,11 +22,11 @@ export function encodeJsonAsURI(json: unknown, opts?: EncodeJsonAsURIOpts): stri
       continue;
     }
     //Skip properties that are not of URL type
-    if (!opts?.urlTypeProperties.includes(key)) {
+    if (!opts?.uriTypeProperties?.includes(key)) {
       results.push(`${key}=${value}`);
       continue;
     }
-    if (opts.arrayTypeProperties?.includes(key) && Array.isArray(value)) {
+    if (opts?.arrayTypeProperties?.includes(key) && Array.isArray(value)) {
       results.push(value.map((v) => `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(v, /\./g)}`).join('&'));
       continue;
     }
@@ -43,7 +43,11 @@ export function encodeJsonAsURI(json: unknown, opts?: EncodeJsonAsURIOpts): stri
     }
     results.push(encoded);
   }
-  return results.join('&');
+  const components = results.join('&');
+  if (opts.baseUrl) {
+    return `${opts.baseUrl}?${components}`;
+  }
+  return components;
 }
 
 /**
@@ -51,18 +55,17 @@ export function encodeJsonAsURI(json: unknown, opts?: EncodeJsonAsURIOpts): stri
  * @param uri string
  * @param opts:
  *          - requiredProperties: the required properties
- *          - duplicatedProperties: properties that show up more that once
+ *          - arrayTypeProperties: properties that can show up more that once
  */
-export function decodeURIAsJson(uri: string, opts?: DecodeURIAsJsonOpts): IssuanceInitiationRequestPayload {
+export function convertURIToJsonObject(uri: string, opts?: DecodeURIAsJsonOpts): unknown {
   if (!uri || !opts?.requiredProperties.every((p) => uri.includes(p))) {
     throw new Error(BAD_PARAMS);
   }
-  const parsedURI = parseURI(uri, opts?.duplicatedProperties);
-  return decodeJsonProperty(parsedURI);
+  const uriComponents = getURIComponentsAsArray(uri, opts?.arrayTypeProperties);
+  return decodeJsonProperties(uriComponents);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function decodeJsonProperty(parts: any): any {
+function decodeJsonProperties(parts: string[]): unknown {
   const json: unknown = {};
   for (const key in parts) {
     const value = parts[key];
@@ -94,16 +97,17 @@ function decodeJsonProperty(parts: any): any {
 }
 
 /**
- * @function parseURI into a Json object
+ * @function get URI Components as Array
  * @param uri string
- * @param duplicated array of string containing duplicated uri keys
+ * @param arrayType array of string containing array like keys
  */
-export function parseURI(uri: string, duplicated?: string[]): unknown {
-  const json: unknown = {};
-  const dict = uri.split('&');
+function getURIComponentsAsArray(uri: string, arrayType?: string[]): string[] {
+  const parts = uri.includes('?') ? uri.split('?')[1] : uri.includes('://') ? uri.split('://')[1] : uri;
+  const json: string[] = [];
+  const dict = parts.split('&');
   for (const entry of dict) {
     const pair = entry.split('=');
-    if (duplicated?.includes(pair[0])) {
+    if (arrayType?.includes(pair[0])) {
       if (json[pair[0]] !== undefined) {
         json[pair[0]].push(pair[1]);
       } else {
@@ -121,7 +125,7 @@ export function parseURI(uri: string, duplicated?: string[]): unknown {
  * @param searchValue The pattern/regexp to find the char(s) to be encoded
  * @param uriComponent query string
  */
-export function customEncodeURIComponent(uriComponent: string, searchValue: SearchValue): string {
+function customEncodeURIComponent(uriComponent: string, searchValue: SearchValue): string {
   // -_.!~*'() are not escaped because they are considered safe.
   // Add them to the regex as you need
   return encodeURIComponent(uriComponent).replace(searchValue, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
