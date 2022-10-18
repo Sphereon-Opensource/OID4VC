@@ -63,7 +63,7 @@ describe('AccessTokenClient should', () => {
       const accessTokenIssuanceRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
         'pre-authorized_code': '',
-        user_pin: 1.0,
+        user_pin: '1.0',
       } as AccessTokenRequest;
 
       nock(MOCK_URL).post(/.*/).reply(200, {});
@@ -103,7 +103,7 @@ describe('AccessTokenClient should', () => {
       const accessTokenIssuanceRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
         'pre-authorized_code': '20221013',
-        user_pin: 20221013,
+        user_pin: '20221013',
       } as AccessTokenRequest;
 
       nock(MOCK_URL).post(/.*/).reply(200, {});
@@ -123,7 +123,7 @@ describe('AccessTokenClient should', () => {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
         'pre-authorized_code': '20221013',
         client_id: 'spheroen.com',
-        user_pin: 123456789,
+        user_pin: '123456789',
       } as AccessTokenRequest;
 
       nock(MOCK_URL).post(/.*/).reply(200, {});

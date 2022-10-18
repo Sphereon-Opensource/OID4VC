@@ -29,7 +29,7 @@ export interface IssuerTokenEndpointOpts {
 
 export interface AccessTokenRequestOpts {
   asOpts?: AuthorizationServerOpts;
-  pin?: number; // Pin-number. Only used when required
+  pin?: string; // Pin-number. Only used when required
 }
 
 export interface AuthorizationRequest {
@@ -53,7 +53,7 @@ export interface AccessTokenRequest {
   'pre-authorized_code': string;
   redirect_uri?: string;
   scope?: string;
-  user_pin?: number;
+  user_pin?: string;
 }
 
 export interface AccessTokenResponse {
