@@ -38,15 +38,20 @@ export interface Claims {
   };
 }
 
-export interface Formats {
-  [x: FormatType]: {
+export enum FormatKeys {
+  ldp_vc = 'ldp_vc',
+  jwt_vc = 'jwt_vc',
+  mdl_iso = 'mdl_iso',
+  ac_vc = 'ac_vc',
+}
+
+export type Formats = {
+  [x in FormatKeys]: {
     types: string[];
     cryptographic_binding_methods_supported?: string[];
     cryptographic_suites_supported?: string[];
     [x: string]: unknown;
   };
-}
-
-export type FormatType = 'ldp_vc' | 'jwt_vc' | 'mdl_iso' | 'ac_vc';
+};
 
 export type ClaimIssuerDisplay = Partial<Pick<Display, 'name' | 'locale'>> & { [x: string]: unknown };
