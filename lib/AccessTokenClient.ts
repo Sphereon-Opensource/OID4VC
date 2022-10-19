@@ -1,6 +1,6 @@
 import { ObjectUtils } from '@sphereon/ssi-types';
 
-import { convertJsonToURI, post } from './functions';
+import { convertJsonToURI, formPost } from './functions';
 import {
   AccessTokenRequest,
   AccessTokenRequestOpts,
@@ -34,9 +34,7 @@ export class AccessTokenClient {
     opts: { isPinRequired?: boolean; asOpts?: AuthorizationServerOpts; issuerOpts?: IssuerTokenEndpointOpts }
   ): Promise<AccessTokenResponse | ErrorResponse> {
     this.validate(accessTokenRequest, opts?.isPinRequired);
-    const requestTokenURL = convertJsonToURI(accessTokenRequest, {
-      baseUrl: this.determineTokenURL(opts?.asOpts, opts?.issuerOpts),
-    });
+    const requestTokenURL = this.determineTokenURL(opts?.asOpts, opts?.issuerOpts);
     return this.sendAuthCode(requestTokenURL, accessTokenRequest);
   }
 
@@ -107,7 +105,7 @@ export class AccessTokenClient {
   }
 
   private async sendAuthCode(requestTokenURL: string, accessTokenRequest: AccessTokenRequest): Promise<AccessTokenResponse | ErrorResponse> {
-    const response = await post(requestTokenURL, accessTokenRequest);
+    const response = await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest));
     return await response.json();
   }
 
