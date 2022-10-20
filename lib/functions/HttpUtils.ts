@@ -1,18 +1,37 @@
 import { fetch } from 'cross-fetch';
 
-export async function post(url: string, body: unknown, bearerToken?: string): Promise<Response> {
+import { Encoding } from '../types';
+
+export async function formPost(
+  url: string,
+  body: BodyInit,
+  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit }
+): Promise<Response> {
+  return await post(url, body, opts?.contentType ? { ...opts } : { contentType: Encoding.FORM_URL_ENCODED, ...opts });
+}
+
+export async function post(
+  url: string,
+  body: BodyInit,
+  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit }
+): Promise<Response> {
   let message = '';
   try {
     const payload: RequestInit = {
       method: 'POST',
-      body: JSON.stringify(body),
+      body,
     };
+    const headers = opts?.customHeaders ? { ...opts.customHeaders, ...payload.headers } : { ...payload.headers };
 
-    if (bearerToken) {
-      payload.headers = {
-        Authorization: `Bearer ${bearerToken}`,
-      };
+    if (opts?.bearerToken) {
+      headers['Authorization'] = `Bearer ${opts.bearerToken}`;
     }
+    if (opts?.contentType) {
+      headers['Content-Type'] = opts.contentType;
+    }
+    headers['Accept'] = opts?.accept ? opts.accept : 'application/json';
+    payload.headers = headers;
+
     const response = await fetch(url, payload);
     if (response && response.status && response.status < 400) {
       return response;

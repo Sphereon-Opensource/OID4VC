@@ -44,7 +44,7 @@ export function convertJsonToURI(json: unknown, opts?: EncodeJsonAsURIOpts): str
     results.push(encoded);
   }
   const components = results.join('&');
-  if (opts.baseUrl) {
+  if (opts?.baseUrl) {
     return `${opts.baseUrl}?${components}`;
   }
   return components;
