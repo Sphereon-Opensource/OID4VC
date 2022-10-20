@@ -2,6 +2,31 @@ import { fetch } from 'cross-fetch';
 
 import { Encoding } from '../types';
 
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+
+export async function getJson<T>(URL: string): Promise<T> {
+  let message = '';
+
+  const response = await fetch(URL);
+  if (!response) {
+    message = 'no response returned'
+  } else {
+    if (response.status && response.status < 400) {
+      return await response.json() as T;
+    } else if (response.status === 404) {
+      throw new NotFoundError(`URL ${URL} was not found`);
+    } else {
+      message = `${response.status}:${response.statusText}, ${await response.text()}`;
+    }
+  }
+  throw new Error('error: ' + message);
+}
+
 export async function formPost(
   url: string,
   body: BodyInit,
@@ -19,7 +44,7 @@ export async function post(
   try {
     const payload: RequestInit = {
       method: 'POST',
-      body,
+      body
     };
     const headers = opts?.customHeaders ? { ...opts.customHeaders, ...payload.headers } : { ...payload.headers };
 
@@ -29,7 +54,7 @@ export async function post(
     if (opts?.contentType) {
       headers['Content-Type'] = opts.contentType;
     }
-    headers['Accept'] = opts?.accept ? opts.accept : 'application/json'
+    headers['Accept'] = opts?.accept ? opts.accept : 'application/json';
     payload.headers = headers;
 
     const response = await fetch(url, payload);
@@ -50,11 +75,11 @@ export async function post(
 export function isValidURL(url: string): boolean {
   const urlPattern = new RegExp(
     '^(https:\\/\\/)?' + // validate protocol
-      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
-      '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address
-      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // validate port and path
-      '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
-      '(\\#[-a-z\\d_]*)?$',
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // validate port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
+    '(\\#[-a-z\\d_]*)?$',
     'i'
   ); // validate fragment locator
   return !!urlPattern.test(url);
