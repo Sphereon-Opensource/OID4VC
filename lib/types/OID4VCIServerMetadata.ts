@@ -1,4 +1,5 @@
 import { CredentialFormat } from '@sphereon/ssi-types';
+
 import { OAuth2ASMetadata } from './OAuth2ASMetadata';
 
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2
@@ -10,7 +11,7 @@ export interface OID4VCIServerMetadata {
   auth_service?: string; //NON-SPEC compliant, but used by some issuers. URL of the AS. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
 }
 
-export type Oauth2ASWithOID4VCIMetadata = OAuth2ASMetadata & OID4VCIServerMetadata
+export type Oauth2ASWithOID4VCIMetadata = OAuth2ASMetadata & OID4VCIServerMetadata;
 
 export interface CredentialIssuer {
   display?: IssuerDisplay; //OPTIONAL. An array of objects, where each object contains display properties of a Credential issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:

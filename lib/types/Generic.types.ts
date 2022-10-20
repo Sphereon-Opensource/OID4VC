@@ -12,7 +12,7 @@ export const PRE_AUTH_CODE_LITERAL = 'pre-authorized_code';
 export enum WellKnownEndpoints {
   OIDC_CONFIGURATION = '/.well-known/openid-configuration',
   OAUTH_AS = '/.well-known/oauth-authorization-server',
-  OIDC4VCI = '/.well-known/openid-credential-issuer'
+  OIDC4VCI = '/.well-known/openid-credential-issuer',
 }
 
 export interface EndpointMetadata {
