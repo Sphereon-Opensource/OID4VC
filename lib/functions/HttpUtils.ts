@@ -5,7 +5,7 @@ import { Encoding } from '../types';
 export async function formPost(
   url: string,
   body: BodyInit,
-  opts?: { bearerToken?: string; contentType?: string; accept?: string, customHeaders?: HeadersInit }
+  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit }
 ): Promise<Response> {
   return await post(url, body, opts?.contentType ? { ...opts } : { contentType: Encoding.FORM_URL_ENCODED, ...opts });
 }
@@ -13,7 +13,7 @@ export async function formPost(
 export async function post(
   url: string,
   body: BodyInit,
-  opts?: { bearerToken?: string; contentType?: string; accept?: string, customHeaders?: HeadersInit }
+  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit }
 ): Promise<Response> {
   let message = '';
   try {
@@ -29,7 +29,7 @@ export async function post(
     if (opts?.contentType) {
       headers['Content-Type'] = opts.contentType;
     }
-    headers['Accept'] = opts?.accept ? opts.accept : 'application/json'
+    headers['Accept'] = opts?.accept ? opts.accept : 'application/json';
     payload.headers = headers;
 
     const response = await fetch(url, payload);
