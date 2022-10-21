@@ -1,5 +1,6 @@
 import { IssuanceInitiationRequestPayload } from './CredentialIssuance.types';
 import { PRE_AUTH_CODE_LITERAL } from './Generic.types';
+import { OID4VCIServerMetadata } from './OID4VCIServerMetadata';
 
 export enum GrantTypes {
   AUTHORIZATION_CODE = 'authorization_code',
@@ -19,16 +20,18 @@ export enum ResponseType {
 export interface AuthorizationServerOpts {
   as?: string; // If not provided the issuer hostname will be used!
   tokenEndpoint?: string; // Allows to override the default '/token' endpoint
-  clientId?: string; // If not provided a random clientId will be generated
+  clientId?: string;
 }
 
-export interface IssuerTokenEndpointOpts {
+export interface IssuerOpts {
   issuer: string;
   tokenEndpoint?: string;
+  fetchMetadata?: boolean;
 }
 
 export interface AccessTokenRequestOpts {
   asOpts?: AuthorizationServerOpts;
+  metadata?: OID4VCIServerMetadata;
   pin?: string; // Pin-number. Only used when required
 }
 

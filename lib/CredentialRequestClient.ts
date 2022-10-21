@@ -6,7 +6,7 @@ import { CredentialRequest, CredentialResponse, ErrorResponse, ProofOfPossession
 
 export class CredentialRequestClient {
   _issuanceRequestOpts: Partial<{
-    issuerURL: string;
+    credentialEndpoint: string;
     clientId: string;
     credentialType: string | string[];
     format: CredentialFormat | CredentialFormat[];
@@ -14,8 +14,8 @@ export class CredentialRequestClient {
     token: string;
   }>;
 
-  public getIssuerUrl(): string {
-    return this._issuanceRequestOpts.issuerURL;
+  public getCredentialEndpoint(): string {
+    return this._issuanceRequestOpts.credentialEndpoint;
   }
 
   public getClientId(): string {
@@ -47,7 +47,7 @@ export class CredentialRequestClient {
     request: CredentialRequest,
     opts?: { overrideIssuerURL?: string; overrideAccessToken?: string }
   ): Promise<CredentialResponse | ErrorResponse> {
-    const issuerURL: string = opts?.overrideIssuerURL ? opts.overrideIssuerURL : this._issuanceRequestOpts.issuerURL;
+    const issuerURL: string = opts?.overrideIssuerURL ? opts.overrideIssuerURL : this._issuanceRequestOpts.credentialEndpoint;
     if (!isValidURL(issuerURL)) {
       throw new Error(URL_NOT_VALID);
     }
@@ -72,7 +72,7 @@ export class CredentialRequestClient {
       'jwt' in proof
         ? proof
         : await createProofOfPossession({
-            issuerURL: proof.issuerURL ? proof.issuerURL : this._issuanceRequestOpts.issuerURL,
+            issuerURL: proof.issuerURL ? proof.issuerURL : this._issuanceRequestOpts.credentialEndpoint,
             clientId: proof.clientId ? proof.clientId : this._issuanceRequestOpts.clientId,
             ...proof,
           });

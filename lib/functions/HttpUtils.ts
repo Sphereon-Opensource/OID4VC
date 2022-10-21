@@ -2,6 +2,30 @@ import { fetch } from 'cross-fetch';
 
 import { Encoding } from '../types';
 
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+export async function getJson<T>(URL: string): Promise<T> {
+  let message = '';
+
+  const response = await fetch(URL);
+  if (!response) {
+    message = 'no response returned';
+  } else {
+    if (response.status && response.status < 400) {
+      return (await response.json()) as T;
+    } else if (response.status === 404) {
+      throw new NotFoundError(`URL ${URL} was not found`);
+    } else {
+      message = `${response.status}:${response.statusText}, ${await response.text()}`;
+    }
+  }
+  throw new Error('error: ' + message);
+}
+
 export async function formPost(
   url: string,
   body: BodyInit,
