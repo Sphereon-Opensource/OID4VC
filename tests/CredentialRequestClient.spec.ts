@@ -54,20 +54,20 @@ beforeAll(async () => {
 describe('Credential Request Client ', () => {
   it('should build correctly provided with correct params', function () {
     const credReqClient = CredentialRequestClient.builder()
-      .withIssuerURL('https://oidc4vci.demo.spruceid.com/credential')
+      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .build();
-    expect(credReqClient._issuanceRequestOpts.issuerURL).toBe('https://oidc4vci.demo.spruceid.com/credential');
+    expect(credReqClient._issuanceRequestOpts.credentialEndpoint).toBe('https://oidc4vci.demo.spruceid.com/credential');
   });
 
   it('should build credential request correctly', async () => {
     const credReqClient = CredentialRequestClient.builder()
-      .withIssuerURL('https://oidc4vci.demo.spruceid.com/credential')
+      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await createProofOfPossession({
-      issuerURL: credReqClient.getIssuerUrl(),
+      issuerURL: credReqClient.getCredentialEndpoint(),
       jwtSignerArgs: jwtArgs,
       jwtSignerCallback: (args) => signJWT(args),
       jwtVerifyCallback: (args) => verifyJWT(args),
@@ -86,12 +86,12 @@ describe('Credential Request Client ', () => {
     });
 
     const credReqClient = CredentialRequestClient.builder()
-      .withIssuerURL(basePath + '/credential')
+      .withCredentialEndpoint(basePath + '/credential')
       .withFormat('ldp_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await createProofOfPossession({
-      issuerURL: credReqClient.getIssuerUrl(),
+      issuerURL: credReqClient.getCredentialEndpoint(),
       jwtSignerArgs: jwtArgs,
       jwtSignerCallback: (args) => signJWT(args),
       jwtVerifyCallback: (args) => verifyJWT(args),
@@ -112,12 +112,12 @@ describe('Credential Request Client ', () => {
         credential: mockedVC,
       });
     const credReqClient = CredentialRequestClient.builder()
-      .withIssuerURL('https://oidc4vci.demo.spruceid.com/credential')
+      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await createProofOfPossession({
-      issuerURL: credReqClient.getIssuerUrl(),
+      issuerURL: credReqClient.getCredentialEndpoint(),
       jwtSignerArgs: jwtArgs,
       jwtSignerCallback: (args) => signJWT(args),
     });
@@ -128,13 +128,13 @@ describe('Credential Request Client ', () => {
   });
   it('should fail creating a proof of possession with simple verification', async () => {
     const credReqClient = CredentialRequestClient.builder()
-      .withIssuerURL('https://oidc4vci.demo.spruceid.com/credential')
+      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     await expect(
       createProofOfPossession({
-        issuerURL: credReqClient.getIssuerUrl(),
+        issuerURL: credReqClient.getCredentialEndpoint(),
         jwtSignerArgs: jwtArgs,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         jwtSignerCallback: (_args) => Promise.resolve('invalid_jws'),
@@ -143,13 +143,13 @@ describe('Credential Request Client ', () => {
   });
   it('should fail creating a proof of possession with verify callback function', async () => {
     const credReqClient = CredentialRequestClient.builder()
-      .withIssuerURL('https://oidc4vci.demo.spruceid.com/credential')
+      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     await expect(
       createProofOfPossession({
-        issuerURL: credReqClient.getIssuerUrl(),
+        issuerURL: credReqClient.getCredentialEndpoint(),
         jwtSignerArgs: jwtArgs,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         jwtSignerCallback: (_args) => Promise.resolve('invalid_jws'),
