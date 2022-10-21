@@ -7,7 +7,6 @@
 
 [![CI](https://github.com/Sphereon-Opensource/oid4vci-client/actions/workflows/main.yml/badge.svg)](https://github.com/Sphereon-Opensource/oid4vci-client/actions/workflows/main.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/oid4vci-client/branch/develop/graph/badge.svg)](https://codecov.io/gh/Sphereon-Opensource/oid4vci-client) [![NPM Version](https://img.shields.io/npm/v/@sphereon/oid4vci-client.svg)](https://npm.im/@sphereon/oid4vci-client)
 
-
 _IMPORTANT this package is in an early development stage and does not support all functionality from the OID4VCI spec
 yet!_
 
@@ -62,6 +61,47 @@ console.log(initiationRequestWithUrl);
  */
 ```
 
+#### Getting issuer/token metadata
+
+The OID4VCI spec defines a server metadata object that contains information about the issuer and the credentials they
+support. Next to this predefined endpoint there are also the well-known locations for OIDC Discovery configuration and
+Oauth2 Authorization Server configuration. These contain for instance the token endponts.
+The MetadataClient checks the OID4VCI well-known location for the medata and existence of a token endpoint. If the
+OID4VCI well-known location is not found, the OIDC/OAuth2 well-known locations will be tried:
+
+Example:
+
+````typescript
+import { MetadataClient } from './MetadataClient';
+
+const metadata = await MetadataClient.retrieveAllMetadataFromInitiation(initiationRequestWithUrl);
+
+console.log(metadata)
+/**
+ * {
+ *  issuer: 'https://server.example.com',
+ *  credential_endpoint: 'https://server.example.com/credential',
+ *  token_endpoint: 'https://server.example.com/token',
+ *  jwks_uri: 'https://server.example.com/jwks',
+ *  grant_types_supported: ['urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+ *  credentials_supported: {
+ *   OpenBadgeCredential: {
+ *     formats: {
+ *       jwt_vc: {
+ *         types: [
+ *           'https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential',
+ *           'https://w3id.org/ngi/OpenBadgeExtendedCredential',
+ *         ],
+ *         binding_methods_supported: ['did'],
+ *         cryptographic_suites_supported: ['ES256'],
+ *       },
+ *     },
+ *   },
+ *  },
+ * }
+ */
+````
+
 #### Acquiring the Access Token
 
 Now you will need to get an access token from the oAuth2 Authorization Server (AS), using some values from
@@ -84,7 +124,10 @@ const asOpts: AuthorizationServerOpts = {
   as: "as.example.com"
 }
 
-const accessTokenResponse = AccessTokenClient.acquireAccessTokenUsingIssuanceInitiation(initiationRequestWithUrl, clientId, { pin, asOpts })
+const accessTokenResponse = AccessTokenClient.acquireAccessTokenUsingIssuanceInitiation(initiationRequestWithUrl, clientId, {
+  pin,
+  asOpts
+})
 console.log(accessTokenResponse)
 /**
  * {
@@ -98,7 +141,8 @@ console.log(accessTokenResponse)
 
 #### Asking for the Verifiable Credential to be issued
 
-First of all we need to hook up a library that can sign JWTs. The library makes no assumptions as it will provide callbacks to perform the signature. In this example we will be using the jose library.
+First of all we need to hook up a library that can sign JWTs. The library makes no assumptions as it will provide
+callbacks to perform the signature. In this example we will be using the jose library.
 
 ````typescript
 
@@ -115,6 +159,7 @@ const signJWT = async (args: JWTSignerArgs): Promise<string> => {
 ````
 
 The JWT Signer Interfaces:
+
 ````typescript
 export type Alg = 'ES256' | 'EdDSA';
 
@@ -155,7 +200,8 @@ export type JWTSignerCallback = (args: JWTSignerArgs) => Promise<string>;
 export type JWTVerifyCallback = (args: JWTVerifyArgs) => Promise<void>;
 ````
 
-Now it is time to request the actual Credential(s) from the Issuer. The example uses a DID:JWK .The DID:JWK should match the keypair created earlier.
+Now it is time to request the actual Credential(s) from the Issuer. The example uses a DID:JWK .The DID:JWK should match
+the keypair created earlier.
 
 ````typescript
 import { CredentialRequestClientBuilder, CredentialResponse, ProofOfPossessionOpts } from './CredentialIssuance.types';
@@ -185,7 +231,9 @@ const credentialResponse: CredentialResponse = await credentialRequestClient.acq
 ````
 
 ### Interfaces
+
 Some important interfaces are described below:
+
 ```typescript
 export interface IssuanceInitiationRequestPayload {
   issuer: string; //REQUIRED The issuer URL of the Credential issuer, the Wallet is requested to obtain one or more Credentials from.

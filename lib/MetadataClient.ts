@@ -1,8 +1,24 @@
 import { getJson, NotFoundError } from './functions';
-import { EndpointMetadata, OAuth2ASMetadata, Oauth2ASWithOID4VCIMetadata, OID4VCIServerMetadata, WellKnownEndpoints } from './types';
+import {
+  EndpointMetadata,
+  IssuanceInitiationRequestPayload,
+  IssuanceInitiationWithBaseUrl,
+  OAuth2ASMetadata,
+  Oauth2ASWithOID4VCIMetadata,
+  OID4VCIServerMetadata,
+  WellKnownEndpoints,
+} from './types';
 
 export class MetadataClient {
   public static async;
+
+  public static async retrieveAllMetadataFromInitiation(initiation: IssuanceInitiationWithBaseUrl): Promise<EndpointMetadata> {
+    return MetadataClient.retrieveAllMetadataFromInitiationRequest(initiation.issuanceInitiationRequest);
+  }
+
+  public static async retrieveAllMetadataFromInitiationRequest(initiationRequest: IssuanceInitiationRequestPayload): Promise<EndpointMetadata> {
+    return MetadataClient.retrieveAllMetadata(initiationRequest.issuer);
+  }
 
   public static async retrieveAllMetadata(host: string): Promise<EndpointMetadata> {
     let token_endpoint;

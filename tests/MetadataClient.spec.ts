@@ -1,6 +1,6 @@
 import nock from 'nock';
 
-import { MetadataClient, WellKnownEndpoints } from '../lib';
+import { IssuanceInitiation, MetadataClient, WellKnownEndpoints } from '../lib';
 
 describe('Metadataclient with IdentiProof Issuer should', () => {
   beforeAll(() => {
@@ -12,6 +12,19 @@ describe('Metadataclient with IdentiProof Issuer should', () => {
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
 
     const metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
+    expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential');
+    expect(metadata.token_endpoint).toEqual('https://auth.research.identiproof.io/oauth2/token');
+    expect(metadata.oid4vci_metadata).toEqual(IDENTIPROOF_OID4VCI_METADATA);
+  });
+
+  it('succeed with OID4VCI and separate AS metadata from Initiation', async () => {
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OIDC4VCI).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
+    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
+
+    const INITIATE_URI =
+      'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
+    const initiation = IssuanceInitiation.fromURI(INITIATE_URI);
+    const metadata = await MetadataClient.retrieveAllMetadataFromInitiation(initiation);
     expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential');
     expect(metadata.token_endpoint).toEqual('https://auth.research.identiproof.io/oauth2/token');
     expect(metadata.oid4vci_metadata).toEqual(IDENTIPROOF_OID4VCI_METADATA);

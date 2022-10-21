@@ -96,25 +96,6 @@ describe('AccessTokenClient should', () => {
   );
 
   it(
-    'get error for incorrect client id',
-    async () => {
-      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
-
-      const accessTokenIssuanceRequest: AccessTokenRequest = {
-        grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
-        'pre-authorized_code': '20221013',
-        user_pin: '20221013',
-      } as AccessTokenRequest;
-
-      nock(MOCK_URL).post(/.*/).reply(200, {});
-
-      await expect(
-        accessTokenClient.acquireAccessTokenUsingRequest(accessTokenIssuanceRequest, { isPinRequired: true, asOpts: { as: MOCK_URL } })
-      ).rejects.toThrow('The client Id must be present.');
-    },
-    UNIT_TEST_TIMEOUT
-  );
-  it(
     'get error for incorrectly long pin',
     async () => {
       const accessTokenClient: AccessTokenClient = new AccessTokenClient();

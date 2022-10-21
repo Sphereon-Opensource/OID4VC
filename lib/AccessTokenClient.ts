@@ -1,5 +1,6 @@
 import { ObjectUtils } from '@sphereon/ssi-types';
 
+import { MetadataClient } from './MetadataClient';
 import { convertJsonToURI, formPost } from './functions';
 import {
   AccessTokenRequest,
@@ -10,14 +11,14 @@ import {
   GrantTypes,
   IssuanceInitiationRequestPayload,
   IssuanceInitiationWithBaseUrl,
-  IssuerTokenEndpointOpts,
+  IssuerOpts,
+  OID4VCIServerMetadata,
   PRE_AUTH_CODE_LITERAL,
 } from './types';
 
 export class AccessTokenClient {
   public async acquireAccessTokenUsingIssuanceInitiation(
     issuanceInitiation: IssuanceInitiationWithBaseUrl,
-    clientId: string,
     opts?: AccessTokenRequestOpts
   ): Promise<AccessTokenResponse | ErrorResponse> {
     const { issuanceInitiationRequest } = issuanceInitiation;
@@ -26,26 +27,34 @@ export class AccessTokenClient {
       issuerOpts: { issuer: issuanceInitiationRequest.issuer },
       asOpts: opts?.asOpts ? { ...opts.asOpts } : undefined,
     };
-    return await this.acquireAccessTokenUsingRequest(await this.createAccessTokenRequest(issuanceInitiationRequest, clientId, opts), reqOpts);
+    return await this.acquireAccessTokenUsingRequest(await this.createAccessTokenRequest(issuanceInitiationRequest, opts), reqOpts);
   }
 
   public async acquireAccessTokenUsingRequest(
     accessTokenRequest: AccessTokenRequest,
-    opts: { isPinRequired?: boolean; asOpts?: AuthorizationServerOpts; issuerOpts?: IssuerTokenEndpointOpts }
+    opts?: { isPinRequired?: boolean; metadata?: OID4VCIServerMetadata; asOpts?: AuthorizationServerOpts; issuerOpts?: IssuerOpts }
   ): Promise<AccessTokenResponse | ErrorResponse> {
     this.validate(accessTokenRequest, opts?.isPinRequired);
-    const requestTokenURL = this.determineTokenURL(opts?.asOpts, opts?.issuerOpts);
+    const requestTokenURL = this.determineTokenURL(
+      opts?.asOpts,
+      opts?.issuerOpts,
+      opts?.metadata
+        ? opts?.metadata
+        : opts?.issuerOpts?.fetchMetadata
+        ? await MetadataClient.retrieveOID4VCIServerMetadata(opts?.issuerOpts.issuer)
+        : undefined
+    );
     return this.sendAuthCode(requestTokenURL, accessTokenRequest);
   }
 
   public async createAccessTokenRequest(
     issuanceInitiationRequest: IssuanceInitiationRequestPayload,
-    clientId: string,
     opts?: AccessTokenRequestOpts
   ): Promise<AccessTokenRequest> {
-    const request: Partial<AccessTokenRequest> = {
-      client_id: clientId,
-    };
+    const request: Partial<AccessTokenRequest> = {};
+    if (opts?.asOpts?.clientId) {
+      opts.asOpts.clientId;
+    }
     if (issuanceInitiationRequest.user_pin_required) {
       this.assertNumericPin(true, opts.pin);
       request.user_pin = opts.pin;
@@ -87,18 +96,11 @@ export class AccessTokenClient {
     }
   }
 
-  private assertNonEmptyClientId(accessTokenRequest: AccessTokenRequest): void {
-    if (!accessTokenRequest.client_id || accessTokenRequest.client_id.length < 1) {
-      throw new Error('The client Id must be present.');
-    }
-  }
-
   private validate(accessTokenRequest: AccessTokenRequest, isPinRequired?: boolean): void {
     if (accessTokenRequest.grant_type === GrantTypes.PRE_AUTHORIZED_CODE) {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyPreAuthorizedCode(accessTokenRequest);
       this.assertNumericPin(isPinRequired, accessTokenRequest.user_pin);
-      this.assertNonEmptyClientId(accessTokenRequest);
     } else {
       this.throwNotSupportedFlow();
     }
@@ -109,12 +111,14 @@ export class AccessTokenClient {
     return await response.json();
   }
 
-  private determineTokenURL(asOpts?: AuthorizationServerOpts, issuerOpts?: IssuerTokenEndpointOpts): string {
+  private determineTokenURL(asOpts?: AuthorizationServerOpts, issuerOpts?: IssuerOpts, metadata?: OID4VCIServerMetadata): string {
     if (!asOpts && !issuerOpts) {
       throw new Error('Cannot determine token URL if no issuer and no Authorization Server values are present');
     }
     const url = asOpts
       ? this.creatTokenURLFromURL(asOpts.as, asOpts.tokenEndpoint)
+      : metadata
+      ? metadata.token_endpoint
       : this.creatTokenURLFromURL(issuerOpts.issuer, issuerOpts.tokenEndpoint);
     if (!url || !ObjectUtils.isString(url)) {
       throw new Error('No authorization server token URL present. Cannot acquire access token');

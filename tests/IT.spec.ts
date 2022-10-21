@@ -52,7 +52,7 @@ describe('OID4VCI-Client should', () => {
 
       /* The actual access token calls */
       const accessTokenClient: AccessTokenClient = new AccessTokenClient();
-      const accessTokenResponse = await accessTokenClient.acquireAccessTokenUsingIssuanceInitiation(initiationWithUrl, 'sphereon-client-id', {
+      const accessTokenResponse = await accessTokenClient.acquireAccessTokenUsingIssuanceInitiation(initiationWithUrl, {
         pin: '1234',
       });
 
