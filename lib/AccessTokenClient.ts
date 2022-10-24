@@ -82,7 +82,7 @@ export class AccessTokenClient {
 
   private assertNumericPin(isPinRequired?: boolean, pin?: string): void {
     if (isPinRequired) {
-      if (!pin || pin.length === 0 || pin.length > 8 || !/^-?\d+$/.test(pin)) {
+      if (!pin || pin.length === 0 || pin.length > 8 || !/^\d+$/.test(pin)) {
         throw new Error('A valid pin consisting of maximal 8 numeric characters must be present.');
       }
     } else if (pin) {

@@ -7,6 +7,9 @@ import { UNIT_TEST_TIMEOUT } from './IT.spec';
 const MOCK_URL = 'https://sphereonjunit20221013.com/';
 
 describe('AccessTokenClient should', () => {
+  beforeEach(() => {
+    nock.cleanAll();
+  });
   it(
     'get Access Token without resulting in errors',
     async () => {
@@ -103,7 +106,7 @@ describe('AccessTokenClient should', () => {
       const accessTokenIssuanceRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
         'pre-authorized_code': '20221013',
-        client_id: 'spheroen.com',
+        client_id: 'sphereon.com',
         user_pin: '123456789',
       } as AccessTokenRequest;
 
@@ -112,6 +115,35 @@ describe('AccessTokenClient should', () => {
       await expect(
         accessTokenClient.acquireAccessTokenUsingRequest(accessTokenIssuanceRequest, { isPinRequired: true, asOpts: { as: MOCK_URL } })
       ).rejects.toThrow(Error('A valid pin consisting of maximal 8 numeric characters must be present.'));
+    },
+    UNIT_TEST_TIMEOUT
+  );
+
+  it(
+    'get success for correct length of pin',
+    async () => {
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
+
+      const accessTokenIssuanceRequest: AccessTokenRequest = {
+        grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
+        'pre-authorized_code': '20221013',
+        client_id: 'sphereon.com',
+        user_pin: '12345678',
+      } as AccessTokenRequest;
+
+      const body: AccessTokenResponse = {
+        access_token: 'ey6546.546654.64565',
+        authorization_pending: false,
+        c_nonce: 'c_nonce2022101300',
+        c_nonce_expires_in: 2022101300,
+        interval: 2022101300,
+        token_type: 'Bearer',
+      };
+      nock(MOCK_URL).post(/.*/).reply(200, body);
+
+      await expect(
+        accessTokenClient.acquireAccessTokenUsingRequest(accessTokenIssuanceRequest, { isPinRequired: true, asOpts: { as: MOCK_URL } })
+      ).resolves.toEqual(body);
     },
     UNIT_TEST_TIMEOUT
   );
