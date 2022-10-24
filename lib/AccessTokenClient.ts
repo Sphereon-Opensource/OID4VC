@@ -26,6 +26,7 @@ export class AccessTokenClient {
       isPinRequired: issuanceInitiationRequest.user_pin_required || false,
       issuerOpts: { issuer: issuanceInitiationRequest.issuer },
       asOpts: opts?.asOpts ? { ...opts.asOpts } : undefined,
+      metadata: opts.metadata,
     };
     return await this.acquireAccessTokenUsingRequest(await this.createAccessTokenRequest(issuanceInitiationRequest, opts), reqOpts);
   }

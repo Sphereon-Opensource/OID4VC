@@ -11,18 +11,23 @@ export class NotFoundError extends Error {
 export async function getJson<T>(URL: string): Promise<T> {
   let message = '';
 
+  // TODO: Remove console.logs
+  console.log(`Well-known URL: URL`);
   const response = await fetch(URL);
   if (!response) {
     message = 'no response returned';
   } else {
     if (response.status && response.status < 400) {
-      return (await response.json()) as T;
+      const json = await response.json();
+      console.log(`Well-knonw response: ${JSON.stringify(json, null, 2)}`);
+      return json as T;
     } else if (response.status === 404) {
       throw new NotFoundError(`URL ${URL} was not found`);
     } else {
       message = `${response.status}:${response.statusText}, ${await response.text()}`;
     }
   }
+  console.log(`Well-knonw error: ${message}`);
   throw new Error('error: ' + message);
 }
 
@@ -56,8 +61,12 @@ export async function post(
     headers['Accept'] = opts?.accept ? opts.accept : 'application/json';
     payload.headers = headers;
 
+    // TODO: Remove the console.logs!
+    console.log(`fetching url: ${url}`);
+    console.log(`with payload: ${JSON.stringify(payload, null, 2)}`);
     const response = await fetch(url, payload);
     if (response && response.status && response.status < 400) {
+      console.log(`response: ${JSON.stringify(response, null, 2)}`);
       return response;
     } else {
       if (response) {
@@ -65,9 +74,11 @@ export async function post(
       }
     }
   } catch (error) {
+    console.log(`Error: ${error} ${error.message}`);
     throw new Error(`${(error as Error).message}`);
   }
 
+  console.log(`unexpected Error: ${message}`);
   throw new Error('unexpected error: ' + message);
 }
 

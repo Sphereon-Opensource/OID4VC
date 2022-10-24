@@ -98,7 +98,7 @@ export class MetadataClient {
     opts?: { errorOnNotFound?: boolean }
   ): Promise<T | undefined> {
     try {
-      return await getJson(`${host}${endpointType}`);
+      return await getJson(`${host.endsWith('/') ? host.slice(0, -1) : host}${endpointType}`);
     } catch (error) {
       if (!opts?.errorOnNotFound && error instanceof NotFoundError) {
         return undefined;
