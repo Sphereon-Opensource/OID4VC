@@ -31,12 +31,12 @@ export class MetadataClient {
 
   /**
    * Retrieve all metadata from an issuer
-   * @param issuerHost The issuer hostname
+   * @param issuer The issuer URL
    */
-  public static async retrieveAllMetadata(issuerHost: string): Promise<EndpointMetadata> {
+  public static async retrieveAllMetadata(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadata | undefined> {
     let token_endpoint;
     let credential_endpoint;
-    let oid4vciMetadata = await MetadataClient.retrieveOID4VCIServerMetadata(issuerHost);
+    let oid4vciMetadata = await MetadataClient.retrieveOID4VCIServerMetadata(issuer);
 
     if (oid4vciMetadata) {
       credential_endpoint = oid4vciMetadata.credential_endpoint;
@@ -50,12 +50,12 @@ export class MetadataClient {
       }
     } else {
       // No specific OID4VCI endpoint. Either can be an OAuth2 AS or an OpenID IDP. Let's start with OIDC first
-      let asConfig: Oauth2ASWithOID4VCIMetadata = await MetadataClient.retrieveWellknown(issuerHost, WellKnownEndpoints.OIDC_CONFIGURATION, {
+      let asConfig: Oauth2ASWithOID4VCIMetadata = await MetadataClient.retrieveWellknown(issuer, WellKnownEndpoints.OIDC_CONFIGURATION, {
         errorOnNotFound: false,
       });
       if (!asConfig) {
         // Now oAuth2
-        asConfig = await MetadataClient.retrieveWellknown(issuerHost, WellKnownEndpoints.OAUTH_AS, { errorOnNotFound: false });
+        asConfig = await MetadataClient.retrieveWellknown(issuer, WellKnownEndpoints.OAUTH_AS, { errorOnNotFound: false });
       }
       if (asConfig) {
         oid4vciMetadata = asConfig; // TODO: Strip other info?
@@ -64,11 +64,21 @@ export class MetadataClient {
       }
     }
     if (!token_endpoint) {
-      throw new Error(`Could not deduce the token endpoint for ${issuerHost}`);
-    } else if (!credential_endpoint) {
-      throw new Error(`Could not deduce the credential endpoint for ${issuerHost}`);
+      if (opts?.errorOnNotFound) {
+        throw new Error(`Could not deduce the token endpoint for ${issuer}`);
+      } else {
+        token_endpoint = `${issuer}${issuer.endsWith('/') ? '' : '/'}token`;
+      }
+    }
+    if (!credential_endpoint) {
+      if (opts?.errorOnNotFound) {
+        throw new Error(`Could not deduce the credential endpoint for ${issuer}`);
+      } else {
+        credential_endpoint = `${issuer}${issuer.endsWith('/') ? '' : '/'}credential`;
+      }
     }
     return {
+      issuer,
       token_endpoint,
       credential_endpoint,
       oid4vci_metadata: oid4vciMetadata,

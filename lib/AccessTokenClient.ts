@@ -26,7 +26,7 @@ export class AccessTokenClient {
       isPinRequired: issuanceInitiationRequest.user_pin_required || false,
       issuerOpts: { issuer: issuanceInitiationRequest.issuer },
       asOpts: opts?.asOpts ? { ...opts.asOpts } : undefined,
-      metadata: opts.metadata,
+      metadata: opts?.metadata,
     };
     return await this.acquireAccessTokenUsingRequest(await this.createAccessTokenRequest(issuanceInitiationRequest, opts), reqOpts);
   }
@@ -83,7 +83,7 @@ export class AccessTokenClient {
 
   private assertNumericPin(isPinRequired?: boolean, pin?: string): void {
     if (isPinRequired) {
-      if (!pin || pin.length === 0 || pin.length > 8 || !/^\d+$/.test(pin)) {
+      if (!pin || !/^\d{1,8}$/.test(pin)) {
         throw new Error('A valid pin consisting of maximal 8 numeric characters must be present.');
       }
     } else if (pin) {
@@ -128,8 +128,8 @@ export class AccessTokenClient {
   }
 
   private creatTokenURLFromURL(url: string, tokenEndpoint?: string): string {
-    const hostname = url.replace(/https?:\/\//, '').split('/')[0];
-    const endpoint = tokenEndpoint ? tokenEndpoint : '/token';
+    const hostname = url.replace(/https?:\/\//, '').replace(/\/$/, '');
+    const endpoint = tokenEndpoint ? (tokenEndpoint.startsWith('/') ? tokenEndpoint : tokenEndpoint.substring(1)) : '/token';
     // We always require https
     return `https://${hostname}${endpoint}`;
   }

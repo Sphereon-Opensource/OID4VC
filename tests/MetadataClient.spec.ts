@@ -43,7 +43,7 @@ describe('Metadataclient with IdentiProof Issuer should', () => {
       .get(WellKnownEndpoints.OAUTH_AS)
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
-    await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL)).rejects.toThrowError(
+    await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
       'Could not deduce the token endpoint for https://issuer.research.identiproof.io'
     );
   });
@@ -77,7 +77,7 @@ describe('Metadataclient with Spruce Issuer should', () => {
       .times(3)
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
-    await expect(() => MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL)).rejects.toThrowError(
+    await expect(() => MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
       'Could not deduce the token endpoint for https://ngi-oidc4vci-test.spruceid.xyz'
     );
   });
@@ -103,7 +103,7 @@ describe('Metadataclient with Danubetech should', () => {
       .times(3)
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
-    await expect(() => MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL)).rejects.toThrowError(
+    await expect(() => MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
       'Could not deduce the token endpoint for https://ngi-oidc4vci-test.spruceid.xyz'
     );
   });
@@ -119,8 +119,8 @@ describe('Metadataclient with Walt-id should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     const metadata = await MetadataClient.retrieveAllMetadata(WALT_ISSUER_URL);
-    expect(metadata.credential_endpoint).toEqual('https://issuer.walt-test.cloud/issuer-api/oidc/credential');
-    expect(metadata.token_endpoint).toEqual('https://issuer.walt-test.cloud/issuer-api/oidc/token');
+    expect(metadata.credential_endpoint).toEqual('https://jff.walt.id/issuer-api/oidc/credential');
+    expect(metadata.token_endpoint).toEqual('https://jff.walt.id/issuer-api/oidc/token');
     expect(metadata.oid4vci_metadata).toEqual(WALT_OID4VCI_METADATA);
   });
 
@@ -130,7 +130,7 @@ describe('Metadataclient with Walt-id should', () => {
       .times(4)
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
-    await expect(() => MetadataClient.retrieveAllMetadata(WALT_ISSUER_URL)).rejects.toThrowError(
+    await expect(() => MetadataClient.retrieveAllMetadata(WALT_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
       'Could not deduce the token endpoint for https://jff.walt.id/issuer-api/oidc'
     );
   });
@@ -266,11 +266,11 @@ const DANUBE_OIDC_METADATA = {
 };
 
 const WALT_OID4VCI_METADATA = {
-  authorization_endpoint: 'https://issuer.walt-test.cloud/issuer-api/oidc/fulfillPAR',
-  token_endpoint: 'https://issuer.walt-test.cloud/issuer-api/oidc/token',
-  pushed_authorization_request_endpoint: 'https://issuer.walt-test.cloud/issuer-api/oidc/par',
-  issuer: 'https://issuer.walt-test.cloud/issuer-api',
-  jwks_uri: 'https://issuer.walt-test.cloud/issuer-api/oidc',
+  authorization_endpoint: 'https://jff.walt.id/issuer-api/oidc/fulfillPAR',
+  token_endpoint: 'https://jff.walt.id/issuer-api/oidc/token',
+  pushed_authorization_request_endpoint: 'https://jff.walt.id/issuer-api/oidc/par',
+  issuer: 'https://jff.walt.id/issuer-api',
+  jwks_uri: 'https://jff.walt.id/issuer-api/oidc',
   grant_types_supported: ['authorization_code', 'urn:ietf:params:oauth:grant-type:pre-authorized_code'],
   request_uri_parameter_supported: true,
   credentials_supported: {
@@ -539,7 +539,7 @@ const WALT_OID4VCI_METADATA = {
       },
     },
   },
-  credential_issuer: { display: [{ locale: null, name: 'https://issuer.walt-test.cloud/issuer-api' }] },
-  credential_endpoint: 'https://issuer.walt-test.cloud/issuer-api/oidc/credential',
+  credential_issuer: { display: [{ locale: null, name: 'https://jff.walt.id/issuer-api' }] },
+  credential_endpoint: 'https://jff.walt.id/issuer-api/oidc/credential',
   subject_types_supported: ['public'],
 };

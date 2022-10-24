@@ -16,7 +16,8 @@ export enum WellKnownEndpoints {
 }
 
 export interface EndpointMetadata {
+  issuer: string;
   token_endpoint: string;
   credential_endpoint: string;
-  oid4vci_metadata: OID4VCIServerMetadata;
+  oid4vci_metadata?: OID4VCIServerMetadata;
 }
