@@ -157,13 +157,37 @@ const IDENTIPROOF_AS_METADATA = {
 };
 const IDENTIPROOF_OID4VCI_METADATA = {
   issuer: 'https://issuer.research.identiproof.io',
-  auth_service: 'https://auth.research.identiproof.io',
+  authorization_server: 'https://auth.research.identiproof.io',
   credential_endpoint: 'https://issuer.research.identiproof.io/credential',
   jwks_uri: 'https://issuer.research.identiproof.io/.well-known/did.json',
   credentials_supported: {
-    'Cyber Security Certificate': 'https://issuer.example.com#CyberSecurityCertificate',
-    OpenBadgeCredential: 'https://issuer.example.com#OpenBadgeCredential',
-    OpenBadgeExtendedCredential: 'https://issuer.example.com#OpenBadgeExtendedCredential',
+    'Cyber Security Certificate': {
+      formats: {
+        jwt_vc: {
+          types: ['VerifiableCredential', 'Cyber Security Certificate'],
+          cryptographic_binding_methods_supported: ['did'],
+          cryptographic_suites_supported: ['ES256'],
+        },
+      },
+    },
+    OpenBadgeCredential: {
+      formats: {
+        jwt_vc: {
+          types: ['VerifiableCredential', 'OpenBadgeCredential'],
+          cryptographic_binding_methods_supported: ['did'],
+          cryptographic_suites_supported: ['ES256'],
+        },
+      },
+    },
+    OpenBadgeExtendedCredential: {
+      formats: {
+        jwt_vc: {
+          types: ['VerifiableCredential', 'OpenBadgeExtendedCredential'],
+          cryptographic_binding_methods_supported: ['did'],
+          cryptographic_suites_supported: ['ES256'],
+        },
+      },
+    },
   },
 };
 

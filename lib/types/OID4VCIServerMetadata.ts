@@ -8,7 +8,7 @@ export interface OID4VCIServerMetadata {
   credentials_supported: CredentialsSupported; //REQUIRED. A JSON object containing a list of key value pairs, where the key is a string serving as an abstract identifier of the Credential. This identifier is RECOMMENDED to be collision resistant - it can be globally unique, but does not have to be when naming conflicts are unlikely to arise in a given use case. The value is a JSON object. The JSON object MUST conform to the structure of the Section 11.2.1.
   credential_issuer?: CredentialIssuer; //  A JSON object containing display properties for the Credential issuer.
   token_endpoint?: string; //NON-SPEC compliant, but used by several issuers. URL of the OP's Token Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
-  auth_service?: string; //NON-SPEC compliant, but used by some issuers. URL of the AS. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
+  authorization_server?: string; //NON-SPEC compliant, but used by some issuers. URL of the AS. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
 }
 
 export type Oauth2ASWithOID4VCIMetadata = OAuth2ASMetadata & OID4VCIServerMetadata;

@@ -41,9 +41,9 @@ export class MetadataClient {
     if (oid4vciMetadata) {
       credential_endpoint = oid4vciMetadata.credential_endpoint;
       token_endpoint = oid4vciMetadata.token_endpoint;
-      if (!token_endpoint && oid4vciMetadata.auth_service) {
+      if (!token_endpoint && oid4vciMetadata.authorization_server) {
         // Crossword uses this to separate the AS metadata. We fail when not found, since we now have no way of getting the token endpoint
-        const asMetadata: OAuth2ASMetadata = await this.retrieveWellknown(oid4vciMetadata.auth_service, WellKnownEndpoints.OAUTH_AS, {
+        const asMetadata: OAuth2ASMetadata = await this.retrieveWellknown(oid4vciMetadata.authorization_server, WellKnownEndpoints.OAUTH_AS, {
           errorOnNotFound: true,
         });
         token_endpoint = asMetadata?.token_endpoint;
