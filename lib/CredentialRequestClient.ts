@@ -9,7 +9,7 @@ import {
   JWTSignerArgs,
   ProofOfPossession,
   ProofOfPossessionOpts,
-  URL_NOT_VALID
+  URL_NOT_VALID,
 } from './types';
 
 export class CredentialRequestClient {
@@ -80,11 +80,14 @@ export class CredentialRequestClient {
     const proofOfPossession =
       'jwt' in proof
         ? proof
-        : await createProofOfPossession({
-            issuerURL: proof.issuerURL ? proof.issuerURL : this._issuanceRequestOpts.credentialEndpoint,
-            clientId: proof.clientId ? proof.clientId : this._issuanceRequestOpts.clientId,
-            ...proof,
-          }, this._jwtSignerArgs);
+        : await createProofOfPossession(
+            {
+              issuerURL: proof.issuerURL ? proof.issuerURL : this._issuanceRequestOpts.credentialEndpoint,
+              clientId: proof.clientId ? proof.clientId : this._issuanceRequestOpts.clientId,
+              ...proof,
+            },
+            this._jwtSignerArgs
+          );
     return {
       type: opts?.credentialType ? opts.credentialType : this._issuanceRequestOpts.credentialType,
       format: opts?.format ? opts.format : this._issuanceRequestOpts.format,
