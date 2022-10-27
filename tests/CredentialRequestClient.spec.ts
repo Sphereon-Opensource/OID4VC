@@ -9,12 +9,17 @@ import {
   createProofOfPossession,
   CredentialRequest,
   CredentialRequestClient,
+  CredentialRequestClientBuilder,
   CredentialResponse,
   ErrorResponse,
+  IssuanceInitiation,
   JWS_NOT_VALID,
   JWTSignerArgs,
+  MetadataClient,
   ProofOfPossession,
 } from '../lib';
+
+import { WALT_OID4VCI_METADATA } from './MetadataMocks';
 
 const partialJWT =
   'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJhdWQiOiJodHRwczovL29pZGM0dmNpLmRlbW8uc3BydWNlaWQuY29tL2NyZWRlbnRpYWwiLCJp';
@@ -156,5 +161,20 @@ describe('Credential Request Client ', () => {
         jwtVerifyCallback: (args) => verifyJWT(args),
       })
     ).rejects.toThrow(Error(JWS_NOT_VALID));
+  });
+});
+
+describe('Credential Request Client witk Walt.id ', () => {
+  it('should have correct metadata endpoints', async function () {
+    const WALT_IRR_URI =
+      'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
+    const inititation = IssuanceInitiation.fromURI(WALT_IRR_URI);
+
+    const metadata = await MetadataClient.retrieveAllMetadataFromInitiation(inititation);
+    expect(metadata.credential_endpoint).toEqual(WALT_OID4VCI_METADATA.credential_endpoint);
+    expect(metadata.token_endpoint).toEqual(WALT_OID4VCI_METADATA.token_endpoint);
+
+    const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation(inititation, metadata).build();
+    expect(credReqClient._issuanceRequestOpts.credentialEndpoint).toBe(WALT_OID4VCI_METADATA.credential_endpoint);
   });
 });

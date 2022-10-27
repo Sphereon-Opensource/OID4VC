@@ -45,15 +45,16 @@ export class CredentialRequestClient {
 
   public async acquireCredentialsUsingRequest(
     request: CredentialRequest,
-    opts?: { overrideIssuerURL?: string; overrideAccessToken?: string }
+    opts?: { overrideCredentialEndpoint?: string; overrideAccessToken?: string }
   ): Promise<CredentialResponse | ErrorResponse> {
-    const issuerURL: string = opts?.overrideIssuerURL ? opts.overrideIssuerURL : this._issuanceRequestOpts.credentialEndpoint;
-    if (!isValidURL(issuerURL)) {
+    const credentialEndpoint: string = opts?.overrideCredentialEndpoint
+      ? opts.overrideCredentialEndpoint
+      : this._issuanceRequestOpts.credentialEndpoint;
+    if (!isValidURL(credentialEndpoint)) {
       throw new Error(URL_NOT_VALID);
     }
     const requestToken: string = opts?.overrideAccessToken ? opts.overrideAccessToken : this._issuanceRequestOpts.token;
-    // fixme: Needs to be part of the Credential/Proof refactor. For now we just append the '/credential' endpoint
-    const response = await post(issuerURL + '/credential', JSON.stringify(request), { bearerToken: requestToken });
+    const response = await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken });
     const responseJson = await response.json();
     if (responseJson.error) {
       return { ...responseJson } as ErrorResponse;

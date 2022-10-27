@@ -7,6 +7,7 @@ import {
   AccessTokenRequestOpts,
   AccessTokenResponse,
   AuthorizationServerOpts,
+  EndpointMetadata,
   ErrorResponse,
   GrantTypes,
   IssuanceInitiationRequestPayload,
@@ -33,14 +34,14 @@ export class AccessTokenClient {
 
   public async acquireAccessTokenUsingRequest(
     accessTokenRequest: AccessTokenRequest,
-    opts?: { isPinRequired?: boolean; metadata?: OID4VCIServerMetadata; asOpts?: AuthorizationServerOpts; issuerOpts?: IssuerOpts }
+    opts?: { isPinRequired?: boolean; metadata?: EndpointMetadata; asOpts?: AuthorizationServerOpts; issuerOpts?: IssuerOpts }
   ): Promise<AccessTokenResponse | ErrorResponse> {
     this.validate(accessTokenRequest, opts?.isPinRequired);
     const requestTokenURL = this.determineTokenURL(
       opts?.asOpts,
       opts?.issuerOpts,
-      opts?.metadata
-        ? opts?.metadata
+      opts?.metadata?.oid4vci_metadata
+        ? opts?.metadata?.oid4vci_metadata
         : opts?.issuerOpts?.fetchMetadata
         ? await MetadataClient.retrieveOID4VCIServerMetadata(opts?.issuerOpts.issuer)
         : undefined

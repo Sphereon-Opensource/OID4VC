@@ -1,6 +1,5 @@
 import { IssuanceInitiationRequestPayload } from './CredentialIssuance.types';
-import { PRE_AUTH_CODE_LITERAL } from './Generic.types';
-import { OID4VCIServerMetadata } from './OID4VCIServerMetadata';
+import { EndpointMetadata, PRE_AUTH_CODE_LITERAL } from './Generic.types';
 
 export enum GrantTypes {
   AUTHORIZATION_CODE = 'authorization_code',
@@ -31,7 +30,7 @@ export interface IssuerOpts {
 
 export interface AccessTokenRequestOpts {
   asOpts?: AuthorizationServerOpts;
-  metadata?: OID4VCIServerMetadata;
+  metadata?: EndpointMetadata;
   pin?: string; // Pin-number. Only used when required
 }
 

@@ -2,7 +2,13 @@ import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialRequestClient } from './CredentialRequestClient';
 import { convertURIToJsonObject } from './functions';
-import { AccessTokenResponse, IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl, OID4VCIServerMetadata } from './types';
+import {
+  AccessTokenResponse,
+  EndpointMetadata,
+  IssuanceInitiationRequestPayload,
+  IssuanceInitiationWithBaseUrl,
+  OID4VCIServerMetadata,
+} from './types';
 
 export class CredentialRequestClientBuilder {
   credentialEndpoint: string;
@@ -11,7 +17,7 @@ export class CredentialRequestClientBuilder {
   format: CredentialFormat | CredentialFormat[];
   token: string;
 
-  public static fromIssuanceInitiationURI(issuanceInitiationURI: string, metadata?: OID4VCIServerMetadata): CredentialRequestClientBuilder {
+  public static fromIssuanceInitiationURI(issuanceInitiationURI: string, metadata?: EndpointMetadata): CredentialRequestClientBuilder {
     return CredentialRequestClientBuilder.fromIssuanceInitiationRequest(
       convertURIToJsonObject(issuanceInitiationURI, {
         arrayTypeProperties: ['credential_type'],
@@ -23,10 +29,10 @@ export class CredentialRequestClientBuilder {
 
   public static fromIssuanceInitiationRequest(
     issuanceInitiationRequest: IssuanceInitiationRequestPayload,
-    metadata?: OID4VCIServerMetadata
+    metadata?: EndpointMetadata
   ): CredentialRequestClientBuilder {
     const builder = new CredentialRequestClientBuilder();
-    builder.withCredentialEndpoint(metadata?.credential_endpoint ? metadata.credential_endpoint : issuanceInitiationRequest.issuer);
+    builder.withCredentialEndpoint(metadata?.credential_endpoint ? metadata.credential_endpoint : `${issuanceInitiationRequest.issuer}/credential`);
 
     //todo: This basically sets all types available during initiation. Probably the user only wants a subset. So do we want to do this?
     builder.withCredentialType(issuanceInitiationRequest.credential_type);
@@ -36,7 +42,7 @@ export class CredentialRequestClientBuilder {
 
   public static fromIssuanceInitiation(
     issuanceInitiation: IssuanceInitiationWithBaseUrl,
-    metadata?: OID4VCIServerMetadata
+    metadata?: EndpointMetadata
   ): CredentialRequestClientBuilder {
     return CredentialRequestClientBuilder.fromIssuanceInitiationRequest(issuanceInitiation.issuanceInitiationRequest, metadata);
   }
@@ -46,8 +52,8 @@ export class CredentialRequestClientBuilder {
     return this;
   }
 
-  public withCredentialEndpoint(credentialRequestUrl: string): CredentialRequestClientBuilder {
-    this.credentialEndpoint = credentialRequestUrl;
+  public withCredentialEndpoint(credentialEndpoint: string): CredentialRequestClientBuilder {
+    this.credentialEndpoint = credentialEndpoint;
     return this;
   }
 
