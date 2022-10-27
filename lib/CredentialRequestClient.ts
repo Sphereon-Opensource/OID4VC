@@ -2,7 +2,15 @@ import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { createProofOfPossession, isValidURL, post } from './functions';
-import { CredentialRequest, CredentialResponse, ErrorResponse, ProofOfPossession, ProofOfPossessionOpts, URL_NOT_VALID } from './types';
+import {
+  CredentialRequest,
+  CredentialResponse,
+  ErrorResponse,
+  JWTSignerArgs,
+  ProofOfPossession,
+  ProofOfPossessionOpts,
+  URL_NOT_VALID
+} from './types';
 
 export class CredentialRequestClient {
   _issuanceRequestOpts: Partial<{
@@ -10,9 +18,9 @@ export class CredentialRequestClient {
     clientId: string;
     credentialType: string | string[];
     format: CredentialFormat | CredentialFormat[];
-    proof: ProofOfPossession;
     token: string;
   }>;
+  _jwtSignerArgs: JWTSignerArgs;
 
   public getCredentialEndpoint(): string {
     return this._issuanceRequestOpts.credentialEndpoint;
@@ -24,6 +32,7 @@ export class CredentialRequestClient {
 
   public constructor(builder: CredentialRequestClientBuilder) {
     this._issuanceRequestOpts = { ...builder };
+    this._jwtSignerArgs = builder.jwtSignerArgs;
   }
 
   public static builder(): CredentialRequestClientBuilder {
@@ -75,7 +84,7 @@ export class CredentialRequestClient {
             issuerURL: proof.issuerURL ? proof.issuerURL : this._issuanceRequestOpts.credentialEndpoint,
             clientId: proof.clientId ? proof.clientId : this._issuanceRequestOpts.clientId,
             ...proof,
-          });
+          }, this._jwtSignerArgs);
     return {
       type: opts?.credentialType ? opts.credentialType : this._issuanceRequestOpts.credentialType,
       format: opts?.format ? opts.format : this._issuanceRequestOpts.format,

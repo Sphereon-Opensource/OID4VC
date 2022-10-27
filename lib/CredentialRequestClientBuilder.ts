@@ -2,13 +2,20 @@ import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialRequestClient } from './CredentialRequestClient';
 import { convertURIToJsonObject } from './functions';
-import { AccessTokenResponse, IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl, OID4VCIServerMetadata } from './types';
+import {
+  AccessTokenResponse,
+  IssuanceInitiationRequestPayload,
+  IssuanceInitiationWithBaseUrl,
+  JWTSignerArgs,
+  OID4VCIServerMetadata
+} from './types';
 
 export class CredentialRequestClientBuilder {
   credentialEndpoint: string;
   clientId: string;
   credentialType: string | string[];
   format: CredentialFormat | CredentialFormat[];
+  jwtSignerArgs: JWTSignerArgs;
   token: string;
 
   public static fromIssuanceInitiationURI(issuanceInitiationURI: string, metadata?: OID4VCIServerMetadata): CredentialRequestClientBuilder {
@@ -63,6 +70,11 @@ export class CredentialRequestClientBuilder {
 
   public withClientId(clientId: string): CredentialRequestClientBuilder {
     this.clientId = clientId;
+    return this;
+  }
+
+  public withJWTSignerArgs(jwtSignerArgs: JWTSignerArgs): CredentialRequestClientBuilder {
+    this.jwtSignerArgs = jwtSignerArgs;
     return this;
   }
 

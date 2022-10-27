@@ -6,12 +6,13 @@ import { BAD_PARAMS, JWS_NOT_VALID, JWTHeader, JWTPayload, JWTSignerArgs, ProofO
  *         - jwtSignerArgs: The arguments to create the signature
  *         - jwtSignerCallback: function to sign the proof
  *         - jwtVerifyCallback: function to verify if JWT is valid
+ * @param builderJwtSignerArgs: JwtSignerArgs populated in the builder
  */
-export async function createProofOfPossession(opts: ProofOfPossessionOpts): Promise<ProofOfPossession> {
+export async function createProofOfPossession(opts: ProofOfPossessionOpts, builderJwtSignerArgs?: JWTSignerArgs,): Promise<ProofOfPossession> {
   if (!opts.jwtSignerCallback || !opts.jwtSignerArgs) {
     throw new Error(BAD_PARAMS);
   }
-  const signerArgs = setJWSDefaults(opts.jwtSignerArgs, opts.issuerURL, opts.clientId);
+  const signerArgs = builderJwtSignerArgs? builderJwtSignerArgs: setJWSDefaults(opts.jwtSignerArgs, opts.issuerURL, opts.clientId);
   const jwt = await opts.jwtSignerCallback(signerArgs);
   try {
     if (opts.jwtVerifyCallback) {

@@ -92,7 +92,7 @@ export interface JWTVerifyArgs {
 export interface ProofOfPossessionOpts {
   issuerURL?: string;
   clientId?: string;
-  jwtSignerArgs: JWTSignerArgs;
+  jwtSignerArgs?: JWTSignerArgs;
   jwtSignerCallback: JWTSignerCallback;
   jwtVerifyCallback?: JWTVerifyCallback;
 }
