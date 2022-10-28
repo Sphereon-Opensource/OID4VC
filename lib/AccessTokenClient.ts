@@ -13,7 +13,6 @@ import {
   IssuanceInitiationRequestPayload,
   IssuanceInitiationWithBaseUrl,
   IssuerOpts,
-  OID4VCIServerMetadata,
   PRE_AUTH_CODE_LITERAL,
 } from './types';
 
@@ -48,10 +47,10 @@ export class AccessTokenClient {
     const requestTokenURL = this.determineTokenURL(
       opts?.asOpts,
       opts?.issuerOpts,
-      opts?.metadata?.oid4vci_metadata
-        ? opts?.metadata?.oid4vci_metadata
+      opts?.metadata
+        ? opts?.metadata
         : opts?.issuerOpts?.fetchMetadata
-        ? await MetadataClient.retrieveOID4VCIServerMetadata(opts?.issuerOpts.issuer)
+        ? await MetadataClient.retrieveAllMetadata(opts?.issuerOpts.issuer, { errorOnNotFound: false })
         : undefined
     );
     return this.sendAuthCode(requestTokenURL, accessTokenRequest);
@@ -121,15 +120,16 @@ export class AccessTokenClient {
     return await response.json();
   }
 
-  private determineTokenURL(asOpts?: AuthorizationServerOpts, issuerOpts?: IssuerOpts, metadata?: OID4VCIServerMetadata): string {
+  private determineTokenURL(asOpts?: AuthorizationServerOpts, issuerOpts?: IssuerOpts, metadata?: EndpointMetadata): string {
     if (!asOpts && !issuerOpts) {
       throw new Error('Cannot determine token URL if no issuer and no Authorization Server values are present');
     }
-    const url = asOpts
-      ? this.creatTokenURLFromURL(asOpts.as, asOpts.tokenEndpoint)
-      : metadata
-      ? metadata.token_endpoint
-      : this.creatTokenURLFromURL(issuerOpts.issuer, issuerOpts.tokenEndpoint);
+    const url =
+      asOpts && asOpts.as
+        ? this.creatTokenURLFromURL(asOpts.as, asOpts.tokenEndpoint)
+        : metadata?.token_endpoint
+        ? metadata.token_endpoint
+        : this.creatTokenURLFromURL(issuerOpts.issuer, issuerOpts.tokenEndpoint);
     if (!url || !ObjectUtils.isString(url)) {
       throw new Error('No authorization server token URL present. Cannot acquire access token');
     }
