@@ -48,8 +48,8 @@ function setJWSDefaults(args: JWTSignerArgs, issuerUrl: string, clientId?: strin
   const defaultPayload: Partial<JWTPayload> = {
     aud,
     iss,
-    iat: args.payload.iat ? args.payload.iat : now / 1000,
-    exp: args.payload.exp ? args.payload.exp : (now + 5 * 60000) / 1000,
+    iat: args.payload.iat ? args.payload.iat : now / 1000 - 60, // Let's ensure we subtract 60 seconds for potential time offsets
+    exp: args.payload.exp ? args.payload.exp : now / 1000 + 10 * 60,
   };
   const defaultHeader: JWTHeader = {
     alg: 'ES256',

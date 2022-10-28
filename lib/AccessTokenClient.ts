@@ -22,14 +22,8 @@ export class AccessTokenClient {
     opts?: AccessTokenRequestOpts
   ): Promise<AccessTokenResponse | ErrorResponse> {
     const { issuanceInitiationRequest } = issuanceInitiation;
-    let isPinRequired = false;
-    if (issuanceInitiationRequest !== undefined) {
-      if (typeof issuanceInitiationRequest.user_pin_required === 'string') {
-        isPinRequired = issuanceInitiationRequest.user_pin_required.toLowerCase() === 'true';
-      } else if (typeof issuanceInitiationRequest.user_pin_required === 'boolean') {
-        isPinRequired = issuanceInitiationRequest.user_pin_required;
-      }
-    }
+
+    const isPinRequired = this.isPinRequiredValue(issuanceInitiationRequest);
     const reqOpts = {
       isPinRequired,
       issuerOpts: { issuer: issuanceInitiationRequest.issuer },
@@ -64,7 +58,7 @@ export class AccessTokenClient {
     if (opts?.asOpts?.clientId) {
       opts.asOpts.clientId;
     }
-    if (issuanceInitiationRequest.user_pin_required) {
+    if (this.isPinRequiredValue(issuanceInitiationRequest)) {
       this.assertNumericPin(true, opts.pin);
       request.user_pin = opts.pin;
     }
@@ -87,6 +81,18 @@ export class AccessTokenClient {
     if (GrantTypes.PRE_AUTHORIZED_CODE !== grantType) {
       throw new Error("grant type must be 'urn:ietf:params:oauth:grant-type:pre-authorized_code'");
     }
+  }
+
+  private isPinRequiredValue(issuanceInitiationRequest: IssuanceInitiationRequestPayload): boolean {
+    let isPinRequired = false;
+    if (issuanceInitiationRequest !== undefined) {
+      if (typeof issuanceInitiationRequest.user_pin_required === 'string') {
+        isPinRequired = issuanceInitiationRequest.user_pin_required.toLowerCase() === 'true';
+      } else if (typeof issuanceInitiationRequest.user_pin_required === 'boolean') {
+        isPinRequired = issuanceInitiationRequest.user_pin_required;
+      }
+    }
+    return isPinRequired;
   }
 
   private assertNumericPin(isPinRequired?: boolean, pin?: string): void {
