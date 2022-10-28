@@ -56,7 +56,7 @@ export class AccessTokenClient {
   ): Promise<AccessTokenRequest> {
     const request: Partial<AccessTokenRequest> = {};
     if (opts?.asOpts?.clientId) {
-      opts.asOpts.clientId;
+      request.client_id = opts.asOpts.clientId;
     }
     if (this.isPinRequiredValue(issuanceInitiationRequest)) {
       this.assertNumericPin(true, opts.pin);
