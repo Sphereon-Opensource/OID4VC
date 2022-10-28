@@ -1,5 +1,3 @@
-import { KeyObject } from 'crypto';
-
 import { CredentialFormat, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 export interface CredentialRequest {
@@ -79,26 +77,29 @@ export interface JWTPayload {
 export interface JWTSignerArgs {
   header: JWTHeader;
   payload: JWTPayload;
-  privateKey: KeyObject;
-  publicKey: KeyObject;
+  /*privateKey: KeyObject;
+  publicKey: KeyObject;*/
 }
 
 export interface JWTVerifyArgs {
   jws: string;
-  key: KeyObject;
+  // key: KeyObject;
   algorithms?: Alg[];
+}
+export interface ProofOfPossessionCallbackArgs {
+  kid: string; // can be the did of the wallet
+  [x: string]: unknown;
 }
 
 export interface ProofOfPossessionOpts {
-  issuerURL?: string;
-  clientId?: string;
-  jwtSignerArgs: JWTSignerArgs;
-  jwtSignerCallback: JWTSignerCallback;
-  jwtVerifyCallback?: JWTVerifyCallback;
+  proofOfPossessionCallback: ProofOfPossessionCallback;
+  proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs;
 }
 
 export type JWTSignerCallback = (args: JWTSignerArgs) => Promise<string>;
 
 export type JWTVerifyCallback = (args: JWTVerifyArgs) => Promise<void>;
+
+export type ProofOfPossessionCallback = (args: ProofOfPossessionCallbackArgs) => Promise<ProofOfPossession>;
 
 export type Request = CredentialRequest;

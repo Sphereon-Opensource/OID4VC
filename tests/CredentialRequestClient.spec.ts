@@ -1,12 +1,6 @@
-import { KeyObject } from 'crypto';
-
-import * as jose from 'jose';
-import { KeyLike, VerifyOptions } from 'jose/dist/types/types';
 import nock from 'nock';
-import * as u8a from 'uint8arrays';
 
 import {
-  createProofOfPossession,
   CredentialRequest,
   CredentialRequestClient,
   CredentialRequestClientBuilder,
@@ -14,47 +8,21 @@ import {
   ErrorResponse,
   IssuanceInitiation,
   JWS_NOT_VALID,
-  JWTSignerArgs,
   MetadataClient,
   ProofOfPossession,
+  ProofOfPossessionCallbackArgs,
+  ProofType,
 } from '../lib';
+import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
 
 import { WALT_OID4VCI_METADATA } from './MetadataMocks';
 
 const partialJWT =
   'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJhdWQiOiJodHRwczovL29pZGM0dmNpLmRlbW8uc3BydWNlaWQuY29tL2NyZWRlbnRpYWwiLCJp';
 
-// Must be JWS
-const signJWT = async (args: JWTSignerArgs): Promise<string> => {
-  const { header, payload, privateKey } = args;
-  return await new jose.CompactSign(u8a.fromString(JSON.stringify({ ...payload })))
-    .setProtectedHeader({ ...header, alg: args.header.alg })
-    .sign(privateKey);
-};
-
-const verifyJWT = async (args: { jws: string | Uint8Array; key: KeyLike | Uint8Array; options?: VerifyOptions }): Promise<void> => {
-  await jose.compactVerify(args.jws, args.key, args.options);
-};
-
-const jwtArgs: JWTSignerArgs = {
-  header: {
-    alg: 'ES256',
-    kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
-  },
-  payload: {
-    iss: 's6BhdRkqt3',
-    nonce: 'tZignsnFbp',
-    jti: 'tZignsnFbp223',
-  },
-  privateKey: undefined,
-  publicKey: undefined,
-};
-
-beforeAll(async () => {
-  const keyPair = await jose.generateKeyPair('ES256');
-  jwtArgs.privateKey = keyPair.privateKey as KeyObject;
-  jwtArgs.publicKey = keyPair.publicKey as KeyObject;
-});
+async function proofOfPossessionCallbackFunction(args: ProofOfPossessionCallbackArgs): Promise<ProofOfPossession> {
+  return { kid: args.kid, jwt: partialJWT, proof_type: ProofType.JWT };
+}
 
 describe('Credential Request Client ', () => {
   it('should build correctly provided with correct params', function () {
@@ -71,12 +39,9 @@ describe('Credential Request Client ', () => {
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
-    const proof: ProofOfPossession = await createProofOfPossession({
-      issuerURL: credReqClient.getCredentialEndpoint(),
-      jwtSignerArgs: jwtArgs,
-      jwtSignerCallback: (args) => signJWT(args),
-      jwtVerifyCallback: (args) => verifyJWT(args),
-    });
+    const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
+      .withProofOfPossessionCallback(proofOfPossessionCallbackFunction, { kid: 'did:example:123' })
+      .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
     expect(credentialRequest.proof.jwt).toContain(partialJWT);
     expect(credentialRequest.type).toBe('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential');
@@ -95,12 +60,9 @@ describe('Credential Request Client ', () => {
       .withFormat('ldp_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
-    const proof: ProofOfPossession = await createProofOfPossession({
-      issuerURL: credReqClient.getCredentialEndpoint(),
-      jwtSignerArgs: jwtArgs,
-      jwtSignerCallback: (args) => signJWT(args),
-      jwtVerifyCallback: (args) => verifyJWT(args),
-    });
+    const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
+      .withProofOfPossessionCallback(proofOfPossessionCallbackFunction, { kid: 'did:example:123' })
+      .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
     const result: ErrorResponse | CredentialResponse = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
@@ -121,45 +83,29 @@ describe('Credential Request Client ', () => {
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
-    const proof: ProofOfPossession = await createProofOfPossession({
-      issuerURL: credReqClient.getCredentialEndpoint(),
-      jwtSignerArgs: jwtArgs,
-      jwtSignerCallback: (args) => signJWT(args),
-    });
+    const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
+      .withProofOfPossessionCallback(proofOfPossessionCallbackFunction, { kid: 'did:example:123' })
+      .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
     const result: ErrorResponse | CredentialResponse = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
     expect(result['credential']).toEqual(mockedVC);
   });
   it('should fail creating a proof of possession with simple verification', async () => {
-    const credReqClient = CredentialRequestClient.builder()
-      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
-      .build();
+    async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<ProofOfPossession> {
+      throw new Error(JWS_NOT_VALID);
+    }
     await expect(
-      createProofOfPossession({
-        issuerURL: credReqClient.getCredentialEndpoint(),
-        jwtSignerArgs: jwtArgs,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        jwtSignerCallback: (_args) => Promise.resolve('invalid_jws'),
-      })
+      new ProofOfPossessionBuilder().withProofOfPossessionCallback(proofOfPossessionCallbackFunction, { kid: 'did:example:123' }).build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
+
   it('should fail creating a proof of possession with verify callback function', async () => {
-    const credReqClient = CredentialRequestClient.builder()
-      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
-      .build();
+    async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<ProofOfPossession> {
+      throw new Error(JWS_NOT_VALID);
+    }
     await expect(
-      createProofOfPossession({
-        issuerURL: credReqClient.getCredentialEndpoint(),
-        jwtSignerArgs: jwtArgs,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        jwtSignerCallback: (_args) => Promise.resolve('invalid_jws'),
-        jwtVerifyCallback: (args) => verifyJWT(args),
-      })
+      new ProofOfPossessionBuilder().withProofOfPossessionCallback(proofOfPossessionCallbackFunction, { kid: 'did:example:123' }).build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
 });

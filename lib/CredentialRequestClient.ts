@@ -1,7 +1,8 @@
 import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
-import { createProofOfPossession, isValidURL, post } from './functions';
+import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
+import { isValidURL, post } from './functions';
 import { CredentialRequest, CredentialResponse, ErrorResponse, ProofOfPossession, ProofOfPossessionOpts, URL_NOT_VALID } from './types';
 
 export class CredentialRequestClient {
@@ -39,7 +40,16 @@ export class CredentialRequestClient {
       overrideAccessToken?: string;
     }
   ): Promise<CredentialResponse | ErrorResponse> {
-    const request = await this.createCredentialRequest(proof, { ...opts });
+    const proofOfPossession =
+      proof.proofOfPossessionCallback && proof.proofOfPossessionCallbackArgs
+        ? await new ProofOfPossessionBuilder()
+            .withProofOfPossessionCallback(
+              (proof as ProofOfPossessionOpts).proofOfPossessionCallback,
+              (proof as ProofOfPossessionOpts).proofOfPossessionCallbackArgs
+            )
+            .build()
+        : await new ProofOfPossessionBuilder().withProofOfPossession(proof as ProofOfPossession).build();
+    const request = await this.createCredentialRequest(proofOfPossession, { ...opts });
     return await this.acquireCredentialsUsingRequest(request, { ...opts });
   }
 
@@ -70,13 +80,14 @@ export class CredentialRequestClient {
     }
   ): Promise<CredentialRequest> {
     const proofOfPossession =
-      'jwt' in proof
-        ? proof
-        : await createProofOfPossession({
-            issuerURL: proof.issuerURL ? proof.issuerURL : this._issuanceRequestOpts.credentialEndpoint,
-            clientId: proof.clientId ? proof.clientId : this._issuanceRequestOpts.clientId,
-            ...proof,
-          });
+      proof.proofOfPossessionCallback && proof.proofOfPossessionCallbackArgs
+        ? await new ProofOfPossessionBuilder()
+            .withProofOfPossessionCallback(
+              (proof as ProofOfPossessionOpts).proofOfPossessionCallback,
+              (proof as ProofOfPossessionOpts).proofOfPossessionCallbackArgs
+            )
+            .build()
+        : await new ProofOfPossessionBuilder().withProofOfPossession(proof as ProofOfPossession).build();
     return {
       type: opts?.credentialType ? opts.credentialType : this._issuanceRequestOpts.credentialType,
       format: opts?.format ? opts.format : this._issuanceRequestOpts.format,
