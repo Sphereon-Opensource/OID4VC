@@ -27,7 +27,7 @@ export async function getJson<T>(URL: string): Promise<T> {
       message = `${response.status}:${response.statusText}, ${await response.text()}`;
     }
   }
-  console.log(`Well-knonw error: ${message}`);
+  console.log(`Well-known error: ${message}`);
   throw new Error('error: ' + message);
 }
 
