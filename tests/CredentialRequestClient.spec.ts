@@ -11,17 +11,15 @@ import {
   MetadataClient,
   ProofOfPossession,
   ProofOfPossessionCallbackArgs,
-  ProofType,
 } from '../lib';
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
 
 import { WALT_OID4VCI_METADATA } from './MetadataMocks';
 
-const partialJWT =
-  'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJhdWQiOiJodHRwczovL29pZGM0dmNpLmRlbW8uc3BydWNlaWQuY29tL2NyZWRlbnRpYWwiLCJp';
+// const partialJWT = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJhdWQiOiJodHRwczovL29pZGM0dmNpLmRlbW8uc3BydWNlaWQuY29tL2NyZWRlbnRpYWwiLCJp';
 
-async function proofOfPossessionCallbackFunction(args: ProofOfPossessionCallbackArgs): Promise<ProofOfPossession> {
-  return { kid: args.kid, jwt: partialJWT, proof_type: ProofType.JWT };
+async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<string> {
+  return 'ey.val.eu';
 }
 
 describe('Credential Request Client ', () => {
@@ -40,10 +38,19 @@ describe('Credential Request Client ', () => {
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
-      .withProofOfPossessionCallback(proofOfPossessionCallbackFunction, { kid: 'did:example:123' })
+      .withPoPCallbackOpts({
+        proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+        proofOfPossessionCallbackArgs: {
+          kid: 'did:example:123',
+          payload: {
+            aud: 'aud',
+            iss: 'sphereon',
+          },
+        },
+      })
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
-    expect(credentialRequest.proof.jwt).toContain(partialJWT);
+    expect(credentialRequest.proof.jwt).toContain('ey.val.eu');
     expect(credentialRequest.type).toBe('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential');
   });
 
@@ -61,10 +68,19 @@ describe('Credential Request Client ', () => {
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
-      .withProofOfPossessionCallback(proofOfPossessionCallbackFunction, { kid: 'did:example:123' })
+      .withPoPCallbackOpts({
+        proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+        proofOfPossessionCallbackArgs: {
+          kid: 'did:example:123',
+          payload: {
+            aud: 'aud',
+            iss: 'sphereon',
+          },
+        },
+      })
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
-    expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
+    expect(credentialRequest.proof.jwt.includes('ey.val')).toBeTruthy();
     const result: ErrorResponse | CredentialResponse = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
     expect(result['error']).toBe('unsupported_format');
   });
@@ -84,28 +100,59 @@ describe('Credential Request Client ', () => {
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
-      .withProofOfPossessionCallback(proofOfPossessionCallbackFunction, { kid: 'did:example:123' })
+      .withPoPCallbackOpts({
+        proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+        proofOfPossessionCallbackArgs: {
+          kid: 'did:example:123',
+          payload: {
+            aud: 'aud',
+            iss: 'sphereon',
+          },
+        },
+      })
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
-    expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
+    expect(credentialRequest.proof.jwt.includes('ey.val')).toBeTruthy();
     const result: ErrorResponse | CredentialResponse = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
     expect(result['credential']).toEqual(mockedVC);
   });
   it('should fail creating a proof of possession with simple verification', async () => {
-    async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<ProofOfPossession> {
+    async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<string> {
       throw new Error(JWS_NOT_VALID);
     }
     await expect(
-      new ProofOfPossessionBuilder().withProofOfPossessionCallback(proofOfPossessionCallbackFunction, { kid: 'did:example:123' }).build()
+      new ProofOfPossessionBuilder()
+        .withPoPCallbackOpts({
+          proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+          proofOfPossessionCallbackArgs: {
+            kid: 'did:example:123',
+            payload: {
+              aud: 'aud',
+              iss: 'sphereon',
+            },
+          },
+        })
+        .build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
 
   it('should fail creating a proof of possession with verify callback function', async () => {
-    async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<ProofOfPossession> {
+    async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<string> {
       throw new Error(JWS_NOT_VALID);
     }
     await expect(
-      new ProofOfPossessionBuilder().withProofOfPossessionCallback(proofOfPossessionCallbackFunction, { kid: 'did:example:123' }).build()
+      new ProofOfPossessionBuilder()
+        .withPoPCallbackOpts({
+          proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+          proofOfPossessionCallbackArgs: {
+            kid: 'did:example:123',
+            payload: {
+              aud: 'aud value',
+              iss: 'sphereon',
+            },
+          },
+        })
+        .build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
 });

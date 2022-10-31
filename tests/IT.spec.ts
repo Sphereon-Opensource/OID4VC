@@ -8,7 +8,6 @@ import {
   IssuanceInitiation,
   ProofOfPossession,
   ProofOfPossessionCallbackArgs,
-  ProofType,
 } from '../lib';
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
 
@@ -67,11 +66,26 @@ describe('OID4VCI-Client should', () => {
         .withFormat('jwt_vc')
         .withTokenFromResponse(accessTokenResponse as AccessTokenResponse)
         .build();
-      async function proofOfPossessionCallbackFunction(args: ProofOfPossessionCallbackArgs): Promise<ProofOfPossession> {
-        return { kid: args.kid, jwt: '...', proof_type: ProofType.JWT };
+      async function proofOfPossessionCallbackFunction(args: ProofOfPossessionCallbackArgs): Promise<string> {
+        console.log(args);
+        return 'ey.val.ue';
       }
+
+      //TS2322: Type '(args: ProofOfPossessionCallbackArgs) => Promise<string>'
+      // is not assignable to type 'ProofOfPossessionCallback'.
+      // Types of parameters 'args' and 'args' are incompatible.
+      // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
       const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
-        .withProofOfPossessionCallback(proofOfPossessionCallbackFunction, { kid: 'did:example:123' })
+        .withPoPCallbackOpts({
+          proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+          proofOfPossessionCallbackArgs: {
+            kid: 'did:example:123',
+            payload: {
+              aud: 'sphereon',
+              iss: 'sphereon',
+            },
+          },
+        })
         .build();
       const credResponse = (await credReqClient.acquireCredentialsUsingProof(proof, {})) as CredentialResponse;
       expect(credResponse.credential).toEqual(mockedVC);

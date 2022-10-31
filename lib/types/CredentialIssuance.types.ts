@@ -52,10 +52,54 @@ export interface ProofOfPossessionCallbackArgs {
 }
 
 export interface ProofOfPossessionOpts {
+  clientId?: string;
+  issuerURL?: string;
   proofOfPossessionCallback: ProofOfPossessionCallback;
   proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs;
 }
 
-export type ProofOfPossessionCallback = (args: ProofOfPossessionCallbackArgs) => Promise<ProofOfPossession>;
+export interface PoPSignInputDecoded {
+  aud: string;
+  exp?: number;
+  iat: number;
+  iss: string;
+  jti?: string;
+  jwk?: string;
+  x5c?: string;
+  kid?: string;
+  nonce: string;
+  signAlgorithm?: 'EdDSA' | string;
+  type?: 'JWT' | string;
+  [x: string]: unknown;
+}
+
+export interface PoPPayloadDecoded {
+  aud: string;
+  iss: string;
+  iat: number;
+  exp: number;
+  jti: string;
+  [x: string]: unknown;
+}
+
+export interface PoPHeaderDecoded {
+  alg: 'EdDSA' | string;
+  typ: 'JWT' | string;
+  kid: string;
+  [x: string]: unknown;
+}
+
+export interface PoPDecoded {
+  header: PoPHeaderDecoded;
+  payload: PoPPayloadDecoded;
+}
+
+export interface PoPEncoded {
+  proof_type: CredentialFormat;
+  jwt: string;
+  [x: string]: unknown;
+}
+
+export type ProofOfPossessionCallback = (args: { header?: unknown; payload?: unknown; [x: string]: unknown }) => Promise<string>;
 
 export type Request = CredentialRequest;
