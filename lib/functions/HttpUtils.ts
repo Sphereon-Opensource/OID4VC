@@ -19,7 +19,7 @@ export async function getJson<T>(URL: string): Promise<T> {
   } else {
     if (response.status && response.status < 400) {
       const json = await response.json();
-      // console.log(`Well-knonw response: ${JSON.stringify(json, null, 2)}`);
+      console.log(`Well-known response: ${JSON.stringify(json, null, 2)}`);
       return json as T;
     } else if (response.status === 404) {
       throw new NotFoundError(`URL ${URL} was not found`);
