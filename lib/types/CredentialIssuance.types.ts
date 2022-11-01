@@ -56,8 +56,6 @@ export interface JWK {
 }
 
 export interface ProofOfPossessionCallbackArgs {
-  privateKey: unknown;
-  publicKey: unknown;
   header: JWTHeader;
   payload: JWTPayload;
   [x: string]: unknown;
