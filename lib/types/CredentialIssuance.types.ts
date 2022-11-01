@@ -46,8 +46,7 @@ export type EncodeJsonAsURIOpts = { uriTypeProperties?: string[]; arrayTypePrope
 
 export type DecodeURIAsJsonOpts = { requiredProperties?: string[]; arrayTypeProperties?: string[] };
 
-export interface ProofOfPossessionCallbackArgs {
-  kid: string; // can be the did of the wallet
+export interface ProofOfPossessionCallbackArgs extends PoPDecoded {
   [x: string]: unknown;
 }
 
@@ -76,8 +75,8 @@ export interface PoPSignInputDecoded {
 export interface PoPPayloadDecoded {
   aud: string;
   iss: string;
-  iat: number;
-  exp: number;
+  iat?: number;
+  exp?: number;
   jti: string;
   [x: string]: unknown;
 }

@@ -57,8 +57,8 @@ function setJWSDefaults(args: ProofOfPossessionCallbackArgs, issuerUrl: string, 
     alg: 'ES256',
     typ: 'JWT',
   };
-  args.payload = { ...defaultPayload, ...(args.payload as unknown as ProofOfPossessionCallbackArgs) };
-  args.header = { ...defaultHeader, ...(args.header as unknown as any) };
+  args.payload = { ...defaultPayload, ...args.payload };
+  args.header = { ...defaultHeader, ...args.header };
   return args as unknown as any;
 }
 

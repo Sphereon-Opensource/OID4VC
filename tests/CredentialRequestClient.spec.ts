@@ -1,4 +1,5 @@
 import nock from 'nock';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   CredentialRequest,
@@ -41,10 +42,15 @@ describe('Credential Request Client ', () => {
       .withPoPCallbackOpts({
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
         proofOfPossessionCallbackArgs: {
-          kid: 'did:example:123',
           payload: {
-            aud: 'aud',
+            jti: uuidv4(),
             iss: 'sphereon',
+            aud: 'sphereon',
+          },
+          header: {
+            alg: 'EdDSA',
+            typ: 'JWT',
+            kid: 'did:example:123',
           },
         },
       })
@@ -71,10 +77,15 @@ describe('Credential Request Client ', () => {
       .withPoPCallbackOpts({
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
         proofOfPossessionCallbackArgs: {
-          kid: 'did:example:123',
           payload: {
-            aud: 'aud',
+            jti: uuidv4(),
             iss: 'sphereon',
+            aud: 'sphereon',
+          },
+          header: {
+            alg: 'EdDSA',
+            typ: 'JWT',
+            kid: 'did:example:123',
           },
         },
       })
@@ -103,10 +114,15 @@ describe('Credential Request Client ', () => {
       .withPoPCallbackOpts({
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
         proofOfPossessionCallbackArgs: {
-          kid: 'did:example:123',
           payload: {
-            aud: 'aud',
+            jti: uuidv4(),
             iss: 'sphereon',
+            aud: 'sphereon',
+          },
+          header: {
+            alg: 'EdDSA',
+            typ: 'JWT',
+            kid: 'did:example:123',
           },
         },
       })
@@ -125,10 +141,15 @@ describe('Credential Request Client ', () => {
         .withPoPCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
           proofOfPossessionCallbackArgs: {
-            kid: 'did:example:123',
             payload: {
-              aud: 'aud',
+              jti: uuidv4(),
               iss: 'sphereon',
+              aud: 'sphereon',
+            },
+            header: {
+              alg: 'EdDSA',
+              typ: 'JWT',
+              kid: 'did:example:123',
             },
           },
         })
@@ -147,8 +168,14 @@ describe('Credential Request Client ', () => {
           proofOfPossessionCallbackArgs: {
             kid: 'did:example:123',
             payload: {
-              aud: 'aud value',
+              jti: uuidv4(),
               iss: 'sphereon',
+              aud: 'sphereon',
+            },
+            header: {
+              alg: 'EdDSA',
+              typ: 'JWT',
+              kid: 'did:example:123',
             },
           },
         })

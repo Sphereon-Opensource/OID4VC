@@ -20,6 +20,7 @@ export class ProofOfPossessionBuilder {
     this.popEncoded = popEncoded;
     return this;
   }
+
   public async build(): Promise<ProofOfPossession> {
     if (this.popEncoded) {
       return Promise.resolve(this.popEncoded);

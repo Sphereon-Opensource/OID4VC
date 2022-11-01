@@ -1,4 +1,5 @@
 import nock from 'nock';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   AccessTokenClient,
@@ -79,10 +80,15 @@ describe('OID4VCI-Client should', () => {
         .withPoPCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
           proofOfPossessionCallbackArgs: {
-            kid: 'did:example:123',
             payload: {
-              aud: 'sphereon',
+              jti: uuidv4(),
               iss: 'sphereon',
+              aud: 'sphereon',
+            },
+            header: {
+              alg: 'EdDSA',
+              typ: 'JWT',
+              kid: 'did:example:123',
             },
           },
         })
