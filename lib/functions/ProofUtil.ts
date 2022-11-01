@@ -22,7 +22,11 @@ export async function createProofOfPossession(opts: ProofOfPossessionOpts): Prom
   if (!opts.proofOfPossessionCallback || !opts.proofOfPossessionCallbackArgs) {
     throw new Error(BAD_PARAMS);
   }
-  const signerArgs = setJWSDefaults(opts.proofOfPossessionCallbackArgs, opts.issuerURL, opts.clientId);
+  const signerArgs = setJWSDefaults(
+    opts.proofOfPossessionCallbackArgs,
+    opts.proofOfPossessionCallbackArgs.issuerURL,
+    opts.proofOfPossessionCallbackArgs.clientId
+  );
   const jwt = await opts.proofOfPossessionCallback(signerArgs);
   partiallyValidateJWS(jwt);
   const proof = {

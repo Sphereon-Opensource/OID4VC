@@ -56,14 +56,14 @@ export interface JWK {
 }
 
 export interface ProofOfPossessionCallbackArgs {
+  clientId?: string;
+  issuerURL?: string;
   header: JWTHeader;
   payload: JWTPayload;
   [x: string]: unknown;
 }
 
 export interface ProofOfPossessionOpts {
-  clientId?: string;
-  issuerURL?: string;
   proofOfPossessionCallback: JWTSignerCallback;
   proofOfPossessionVerifierCallback?: JWTVerifyCallback;
   proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs;
