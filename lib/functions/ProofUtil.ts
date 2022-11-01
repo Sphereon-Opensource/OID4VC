@@ -1,6 +1,15 @@
 import { JWTHeaderParameters } from 'jose';
 
-import { BAD_PARAMS, JWS_NOT_VALID, JWTPayload, ProofOfPossession, ProofOfPossessionCallbackArgs, ProofOfPossessionOpts, ProofType } from '../types';
+import {
+  BAD_PARAMS,
+  JWS_NOT_VALID,
+  JWTHeader,
+  JWTPayload,
+  ProofOfPossession,
+  ProofOfPossessionCallbackArgs,
+  ProofOfPossessionOpts,
+  ProofType,
+} from '../types';
 
 /**
  * createProofOfPossession creates and returns the ProofOfPossession object
@@ -18,7 +27,7 @@ export async function createProofOfPossession(opts: ProofOfPossessionOpts): Prom
   partiallyValidateJWS(jwt);
   const proof = {
     proof_type: ProofType.JWT,
-    jwt: jwt,
+    jwt,
   };
   if (opts.proofOfPossessionVerifierCallback) {
     await opts.proofOfPossessionVerifierCallback({ jwt, publicKey: opts.proofOfPossessionCallbackArgs.publicKey });
@@ -32,21 +41,21 @@ function partiallyValidateJWS(jws: string): void {
   }
 }
 
-function setJWSDefaults(args: ProofOfPossessionCallbackArgs, issuerUrl: string, clientId?: string): { header: unknown; payload: unknown } {
+function setJWSDefaults(args: ProofOfPossessionCallbackArgs, issuerUrl: string, clientId?: string): { header: JWTHeader; payload: JWTPayload } {
   const now = +new Date();
-  const aud = args.payload && args.payload['aud'] ? args.payload['aud'] : issuerUrl;
+  const aud = args.payload && args.payload.aud ? args.payload.aud : issuerUrl;
   if (!aud) {
     throw new Error('No issuer url provided');
   }
-  const iss = args.payload['iss'] ? args.payload['iss'] : clientId;
+  const iss = args.payload.iss ? args.payload.iss : clientId;
   if (!iss) {
     throw new Error('No clientId provided');
   }
   const defaultPayload: Partial<JWTPayload> = {
     aud,
     iss,
-    iat: args.payload['iat'] ? args.payload['iat'] : now / 1000 - 60, // Let's ensure we subtract 60 seconds for potential time offsets
-    exp: args.payload['exp'] ? args.payload['exp'] : now / 1000 + 10 * 60,
+    iat: args.payload.iat ? args.payload.iat : now / 1000 - 60, // Let's ensure we subtract 60 seconds for potential time offsets
+    exp: args.payload.exp ? args.payload.exp : now / 1000 + 10 * 60,
   };
   const defaultHeader: JWTHeaderParameters = {
     alg: 'ES256',
