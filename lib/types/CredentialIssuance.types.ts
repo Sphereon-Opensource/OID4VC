@@ -46,9 +46,20 @@ export type EncodeJsonAsURIOpts = { uriTypeProperties?: string[]; arrayTypePrope
 
 export type DecodeURIAsJsonOpts = { requiredProperties?: string[]; arrayTypeProperties?: string[] };
 
-export interface ProofOfPossessionCallbackArgs extends PoPDecoded {
+export interface JWK {
+  kty?: string;
+  crv?: string;
+  x?: string;
+  y?: string;
+  e?: string;
+  n?: string;
+}
+
+export interface ProofOfPossessionCallbackArgs {
   privateKey: unknown;
   publicKey: unknown;
+  header: JWTHeader;
+  payload: JWTPayload;
   [x: string]: unknown;
 }
 
@@ -60,15 +71,6 @@ export interface ProofOfPossessionOpts {
   proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs;
 }
 
-export interface PoPPayloadDecoded {
-  aud: string;
-  iss: string;
-  iat?: number;
-  exp?: number;
-  jti: string;
-  [x: string]: unknown;
-}
-
 export enum Alg {
   ES256 = 'ES256',
   EdDSA = 'EdDSA',
@@ -78,21 +80,22 @@ export enum Typ {
   JWT = 'JWT',
 }
 
-export interface PoPHeaderDecoded {
-  alg: Alg;
-  typ: Typ;
-  kid: string;
+export interface JWTHeader {
+  alg: Alg; // REQUIRED by the JWT signer
+  typ?: string; //JWT always
+  kid?: string; // CONDITIONAL. JWT header containing the key ID. If the Credential shall be bound to a DID, the kid refers to a DID URL which identifies a particular key in the DID Document that the Credential shall be bound to. MUST NOT be present if jwk or x5c is present.
+  jwk?: JWK; // CONDITIONAL. JWT header containing the key material the new Credential shall be bound to. MUST NOT be present if kid or x5c is present.
+  x5c?: string[]; // CONDITIONAL. JWT header containing a certificate or certificate chain corresponding to the key used to sign the JWT. This element may be used to convey a key attestation. In such a case, the actual key certificate will contain attributes related to the key properties. MUST NOT be present if kid or jwk is present.
   [x: string]: unknown;
 }
 
-export interface PoPDecoded {
-  header: PoPHeaderDecoded;
-  payload: PoPPayloadDecoded;
-}
-
-export interface PoPEncoded {
-  proof_type: CredentialFormat;
-  jwt: string;
+export interface JWTPayload {
+  iss?: string; // REQUIRED (string). The value of this claim MUST be the client_id of the client making the credential request.
+  aud?: string; // REQUIRED (string). The value of this claim MUST be the issuer URL of credential issuer.
+  iat?: number; // REQUIRED (number). The value of this claim MUST be the time at which the proof was issued using the syntax defined in [RFC7519].
+  nonce?: string; // REQUIRED (string). The value type of this claim MUST be a string, where the value is a c_nonce provided by the credential issuer. //TODO: Marked as required not present in NGI flow
+  jti: string; // A new nonce chosen by the wallet. Used to prevent replay
+  exp?: number; // Not longer than 5 minutes
   [x: string]: unknown;
 }
 

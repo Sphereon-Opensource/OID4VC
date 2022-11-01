@@ -1,6 +1,6 @@
-import { JWTHeaderParameters, JWTPayload } from 'jose';
+import { JWTHeaderParameters } from 'jose';
 
-import { BAD_PARAMS, JWS_NOT_VALID, ProofOfPossession, ProofOfPossessionCallbackArgs, ProofOfPossessionOpts, ProofType } from '../types';
+import { BAD_PARAMS, JWS_NOT_VALID, JWTPayload, ProofOfPossession, ProofOfPossessionCallbackArgs, ProofOfPossessionOpts, ProofType } from '../types';
 
 /**
  * createProofOfPossession creates and returns the ProofOfPossession object
