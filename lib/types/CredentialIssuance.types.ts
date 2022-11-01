@@ -97,7 +97,7 @@ export interface JWTPayload {
   exp?: number; // Not longer than 5 minutes
 }
 
-export type JWTSignerCallback = (args: { header?: unknown; payload?: unknown; [x: string]: unknown }) => Promise<string>;
+export type JWTSignerCallback = (args: { header?: JWTHeader; payload?: JWTPayload; [x: string]: unknown }) => Promise<string>;
 export type JWTVerifyCallback = (args: { [x: string]: unknown }) => Promise<void>;
 
 export type Request = CredentialRequest;
