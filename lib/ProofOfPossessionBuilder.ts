@@ -1,4 +1,4 @@
-import { createProofOfPossession } from './functions/ProofUtils';
+import { createProofOfPossession } from './functions/ProofUtil';
 import { PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, ProofOfPossessionOpts } from './types';
 
 export class ProofOfPossessionBuilder {
