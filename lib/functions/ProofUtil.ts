@@ -1,4 +1,5 @@
 import { JWTHeaderParameters } from 'jose';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   BAD_PARAMS,
@@ -24,6 +25,7 @@ export async function createProofOfPossession(opts: ProofOfPossessionOpts): Prom
   }
   const signerArgs = setJWSDefaults(
     opts.proofOfPossessionCallbackArgs,
+    opts.proofOfPossessionCallbackArgs.kid,
     opts.proofOfPossessionCallbackArgs.issuerURL,
     opts.proofOfPossessionCallbackArgs.clientId
   );
@@ -45,17 +47,28 @@ function partiallyValidateJWS(jws: string): void {
   }
 }
 
-function setJWSDefaults(args: ProofOfPossessionCallbackArgs, issuerUrl: string, clientId?: string): { header: JWTHeader; payload: JWTPayload } {
+function setJWSDefaults(
+  args: ProofOfPossessionCallbackArgs,
+  kid: string,
+  issuerUrl: string,
+  clientId?: string
+): { header: JWTHeader; payload: JWTPayload } {
   const now = +new Date();
-  const aud = args.payload && args.payload.aud ? args.payload.aud : issuerUrl;
+  const aud = args.payload.aud ? args.payload.aud : issuerUrl;
   if (!aud) {
     throw new Error('No issuer url provided');
+  }
+  const proof_kid = kid ? kid : args.header.kid;
+  if (!kid) {
+    throw new Error('No kid provided');
   }
   const iss = args.payload.iss ? args.payload.iss : clientId;
   if (!iss) {
     throw new Error('No clientId provided');
   }
+  const jti = args.payload.jti ? args.payload.jti : uuidv4();
   const defaultPayload: Partial<JWTPayload> = {
+    jti,
     aud,
     iss,
     iat: args.payload.iat ? args.payload.iat : now / 1000 - 60, // Let's ensure we subtract 60 seconds for potential time offsets
@@ -64,6 +77,7 @@ function setJWSDefaults(args: ProofOfPossessionCallbackArgs, issuerUrl: string, 
   const defaultHeader: JWTHeaderParameters = {
     alg: 'ES256',
     typ: 'JWT',
+    kid: proof_kid,
   };
   args.payload = { ...defaultPayload, ...args.payload };
   args.header = { ...defaultHeader, ...args.header };

@@ -87,7 +87,7 @@ describe('OID4VCI-Client should', () => {
       const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
         .withProofCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-          proofOfPossessionCallbackArgs: jwtArgs,
+          proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
         })
         .build();
       const credResponse = (await credReqClient.acquireCredentialsUsingProof(proof, {})) as CredentialResponse;

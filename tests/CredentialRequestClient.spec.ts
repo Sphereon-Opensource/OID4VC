@@ -70,7 +70,7 @@ describe('Credential Request Client ', () => {
       .withProofCallbackOpts({
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
         proofOfPossessionVerifierCallback: proofOfPossessionVerifierCallbackFunction,
-        proofOfPossessionCallbackArgs: jwtArgs,
+        proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
       })
       .build();
     await proofOfPossessionVerifierCallbackFunction({ ...proof, publicKey: jwtArgs.publicKey });
@@ -95,7 +95,7 @@ describe('Credential Request Client ', () => {
     const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
       .withProofCallbackOpts({
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-        proofOfPossessionCallbackArgs: jwtArgs,
+        proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
       })
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
@@ -121,7 +121,7 @@ describe('Credential Request Client ', () => {
     const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
       .withProofCallbackOpts({
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-        proofOfPossessionCallbackArgs: jwtArgs,
+        proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
       })
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
@@ -139,7 +139,7 @@ describe('Credential Request Client ', () => {
       new ProofOfPossessionBuilder()
         .withProofCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-          proofOfPossessionCallbackArgs: jwtArgs,
+          proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
         })
         .build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
@@ -154,7 +154,7 @@ describe('Credential Request Client ', () => {
       new ProofOfPossessionBuilder()
         .withProofCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-          proofOfPossessionCallbackArgs: jwtArgs,
+          proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
         })
         .build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));

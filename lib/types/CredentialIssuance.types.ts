@@ -56,6 +56,7 @@ export interface JWK {
 }
 
 export interface ProofOfPossessionCallbackArgs {
+  kid: string;
   clientId?: string;
   issuerURL?: string;
   header: JWTHeader;
@@ -91,7 +92,7 @@ export interface JWTPayload {
   aud?: string; // REQUIRED (string). The value of this claim MUST be the issuer URL of credential issuer.
   iat?: number; // REQUIRED (number). The value of this claim MUST be the time at which the proof was issued using the syntax defined in [RFC7519].
   nonce?: string; // REQUIRED (string). The value type of this claim MUST be a string, where the value is a c_nonce provided by the credential issuer. //TODO: Marked as required not present in NGI flow
-  jti: string; // A new nonce chosen by the wallet. Used to prevent replay
+  jti?: string; // A new nonce chosen by the wallet. Used to prevent replay
   exp?: number; // Not longer than 5 minutes
 }
 
