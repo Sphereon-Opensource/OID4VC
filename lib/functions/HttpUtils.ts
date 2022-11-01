@@ -45,40 +45,64 @@ export async function post(
   opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit }
 ): Promise<Response> {
   let message = '';
+
+  const headers = opts?.customHeaders ? opts.customHeaders : [];
+
+  if (opts?.bearerToken) {
+    headers['Authorization'] = `Bearer ${opts.bearerToken}`;
+  }
+  headers['Content-Type'] = opts?.contentType ? opts.contentType : 'application/json';
+  headers['Accept'] = opts?.accept ? opts.accept : 'application/json';
+
+  const payload: RequestInit = {
+    method: 'POST',
+    headers,
+    body,
+  };
+
   try {
-    const payload: RequestInit = {
-      method: 'POST',
-      body,
-    };
-    const headers = opts?.customHeaders ? { ...opts.customHeaders, ...payload.headers } : { ...payload.headers };
-
-    if (opts?.bearerToken) {
-      headers['Authorization'] = `Bearer ${opts.bearerToken}`;
-    }
-    if (opts?.contentType) {
-      headers['Content-Type'] = opts.contentType;
-    }
-    headers['Accept'] = opts?.accept ? opts.accept : 'application/json';
-    payload.headers = headers;
-
     // TODO: Remove the console.logs!
-    console.log(`fetching url: ${url}`);
-    console.log(`with payload: ${JSON.stringify(payload, null, 2)}`);
+    console.log(`START fetching url: ${url}`);
+    console.log(`with Headers: ${JSON.stringify(payload.headers)}`);
+    console.log(`with body: ${body}`);
+    // console.log(`with payload: ${JSON.stringify(payload)}`);
     const response = await fetch(url, payload);
-    if (response && response.status && response.status < 400) {
-      console.log(`response: ${JSON.stringify(response, null, 2)}`);
+    if (response && response.status >= 200 && response.status < 400) {
+      const logResponse = response.clone();
+      try {
+        // console.log(`Success response with status ${logResponse.status}. Headers: ${JSON.stringify(logResponse.headers)}`);
+        console.log(`Success response: ${JSON.stringify(await logResponse.json(), null, 2)}`);
+      } catch (jsonerror) {
+        console.log('success response did throw error on serialization: ' + jsonerror.message);
+        console.log(`Success response: ${JSON.stringify(await logResponse.text(), null, 2)}`);
+      }
+      console.log(`END fetching url: ${url}`);
       return response;
     } else {
       if (response) {
-        message = `${response.status}:${response.statusText}, ${await response.text()}`;
+        const logResponse = response.clone();
+        console.log(
+          `Response with status ${logResponse.status} and status text ${logResponse.statusText} with headers ${JSON.stringify(logResponse.headers)})}`
+        );
+        try {
+          message = `${logResponse.status}:${logResponse.statusText}, ${JSON.stringify(await logResponse.json())}`;
+        } catch (jsonerror) {
+          console.log(`accessing error body as json failed. Using text next.`);
+          message = `${logResponse.status}:${logResponse.statusText}, ${await logResponse.text()}`;
+        }
+      } else {
+        console.log(`No response received for ${url}`);
       }
     }
   } catch (error) {
-    console.log(`Error: ${error} ${error.message}`);
+    const err = error as Error;
+    console.log(`Error: ${JSON.stringify(err.stack)} ${error.message}`);
+    console.log(`END fetching url: ${url}`);
     throw new Error(`${(error as Error).message}`);
   }
 
-  console.log(`unexpected Error: ${message}`);
+  console.log(`unexpected Error: ${JSON.stringify(message)}`);
+  console.log(`END fetching url: ${url}`);
   throw new Error('unexpected error: ' + message);
 }
 

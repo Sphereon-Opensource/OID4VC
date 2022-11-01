@@ -13,7 +13,6 @@ import {
   IssuanceInitiationRequestPayload,
   IssuanceInitiationWithBaseUrl,
   IssuerOpts,
-  OID4VCIServerMetadata,
   PRE_AUTH_CODE_LITERAL,
 } from './types';
 
@@ -23,14 +22,8 @@ export class AccessTokenClient {
     opts?: AccessTokenRequestOpts
   ): Promise<AccessTokenResponse | ErrorResponse> {
     const { issuanceInitiationRequest } = issuanceInitiation;
-    let isPinRequired = false;
-    if (issuanceInitiationRequest !== undefined) {
-      if (typeof issuanceInitiationRequest.user_pin_required === 'string') {
-        isPinRequired = issuanceInitiationRequest.user_pin_required.toLowerCase() === 'true';
-      } else if (typeof issuanceInitiationRequest.user_pin_required === 'boolean') {
-        isPinRequired = issuanceInitiationRequest.user_pin_required;
-      }
-    }
+
+    const isPinRequired = this.isPinRequiredValue(issuanceInitiationRequest);
     const reqOpts = {
       isPinRequired,
       issuerOpts: { issuer: issuanceInitiationRequest.issuer },
@@ -48,10 +41,10 @@ export class AccessTokenClient {
     const requestTokenURL = this.determineTokenURL(
       opts?.asOpts,
       opts?.issuerOpts,
-      opts?.metadata?.oid4vci_metadata
-        ? opts?.metadata?.oid4vci_metadata
+      opts?.metadata
+        ? opts?.metadata
         : opts?.issuerOpts?.fetchMetadata
-        ? await MetadataClient.retrieveOID4VCIServerMetadata(opts?.issuerOpts.issuer)
+        ? await MetadataClient.retrieveAllMetadata(opts?.issuerOpts.issuer, { errorOnNotFound: false })
         : undefined
     );
     return this.sendAuthCode(requestTokenURL, accessTokenRequest);
@@ -65,7 +58,7 @@ export class AccessTokenClient {
     if (opts?.asOpts?.clientId) {
       opts.asOpts.clientId;
     }
-    if (issuanceInitiationRequest.user_pin_required) {
+    if (this.isPinRequiredValue(issuanceInitiationRequest)) {
       this.assertNumericPin(true, opts.pin);
       request.user_pin = opts.pin;
     }
@@ -88,6 +81,18 @@ export class AccessTokenClient {
     if (GrantTypes.PRE_AUTHORIZED_CODE !== grantType) {
       throw new Error("grant type must be 'urn:ietf:params:oauth:grant-type:pre-authorized_code'");
     }
+  }
+
+  private isPinRequiredValue(issuanceInitiationRequest: IssuanceInitiationRequestPayload): boolean {
+    let isPinRequired = false;
+    if (issuanceInitiationRequest !== undefined) {
+      if (typeof issuanceInitiationRequest.user_pin_required === 'string') {
+        isPinRequired = issuanceInitiationRequest.user_pin_required.toLowerCase() === 'true';
+      } else if (typeof issuanceInitiationRequest.user_pin_required === 'boolean') {
+        isPinRequired = issuanceInitiationRequest.user_pin_required;
+      }
+    }
+    return isPinRequired;
   }
 
   private assertNumericPin(isPinRequired?: boolean, pin?: string): void {
@@ -121,15 +126,16 @@ export class AccessTokenClient {
     return await response.json();
   }
 
-  private determineTokenURL(asOpts?: AuthorizationServerOpts, issuerOpts?: IssuerOpts, metadata?: OID4VCIServerMetadata): string {
+  private determineTokenURL(asOpts?: AuthorizationServerOpts, issuerOpts?: IssuerOpts, metadata?: EndpointMetadata): string {
     if (!asOpts && !issuerOpts) {
       throw new Error('Cannot determine token URL if no issuer and no Authorization Server values are present');
     }
-    const url = asOpts
-      ? this.creatTokenURLFromURL(asOpts.as, asOpts.tokenEndpoint)
-      : metadata
-      ? metadata.token_endpoint
-      : this.creatTokenURLFromURL(issuerOpts.issuer, issuerOpts.tokenEndpoint);
+    const url =
+      asOpts && asOpts.as
+        ? this.creatTokenURLFromURL(asOpts.as, asOpts.tokenEndpoint)
+        : metadata?.token_endpoint
+        ? metadata.token_endpoint
+        : this.creatTokenURLFromURL(issuerOpts.issuer, issuerOpts.tokenEndpoint);
     if (!url || !ObjectUtils.isString(url)) {
       throw new Error('No authorization server token URL present. Cannot acquire access token');
     }
