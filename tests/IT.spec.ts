@@ -85,7 +85,7 @@ describe('OID4VCI-Client should', () => {
       // Types of parameters 'args' and 'args' are incompatible.
       // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
       const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
-        .withPoPCallbackOpts({
+        .withProofCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
           proofOfPossessionCallbackArgs: jwtArgs,
         })

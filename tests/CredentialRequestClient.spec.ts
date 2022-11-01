@@ -67,7 +67,7 @@ describe('Credential Request Client ', () => {
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
-      .withPoPCallbackOpts({
+      .withProofCallbackOpts({
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
         proofOfPossessionVerifierCallback: proofOfPossessionVerifierCallbackFunction,
         proofOfPossessionCallbackArgs: jwtArgs,
@@ -93,7 +93,7 @@ describe('Credential Request Client ', () => {
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
-      .withPoPCallbackOpts({
+      .withProofCallbackOpts({
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
         proofOfPossessionCallbackArgs: jwtArgs,
       })
@@ -119,7 +119,7 @@ describe('Credential Request Client ', () => {
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
-      .withPoPCallbackOpts({
+      .withProofCallbackOpts({
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
         proofOfPossessionCallbackArgs: jwtArgs,
       })
@@ -137,7 +137,7 @@ describe('Credential Request Client ', () => {
     }
     await expect(
       new ProofOfPossessionBuilder()
-        .withPoPCallbackOpts({
+        .withProofCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
           proofOfPossessionCallbackArgs: jwtArgs,
         })
@@ -152,7 +152,7 @@ describe('Credential Request Client ', () => {
     }
     await expect(
       new ProofOfPossessionBuilder()
-        .withPoPCallbackOpts({
+        .withProofCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
           proofOfPossessionCallbackArgs: jwtArgs,
         })

@@ -2,11 +2,11 @@ import { createProofOfPossession } from './functions';
 import { PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, ProofOfPossessionOpts } from './types';
 
 export class ProofOfPossessionBuilder {
-  popCallbackOpts?: ProofOfPossessionOpts;
+  proofCallbackOpts?: ProofOfPossessionOpts;
   proof?: ProofOfPossession;
 
   withProofCallbackOpts(proofCallbackOpts: ProofOfPossessionOpts): ProofOfPossessionBuilder {
-    this.popCallbackOpts = popCallbackOpts;
+    this.proofCallbackOpts = proofCallbackOpts;
     return this;
   }
 
@@ -18,8 +18,8 @@ export class ProofOfPossessionBuilder {
   public async build(): Promise<ProofOfPossession> {
     if (this.proof) {
       return Promise.resolve(this.proof);
-    } else if (this.popCallbackOpts) {
-      return await createProofOfPossession(this.popCallbackOpts);
+    } else if (this.proofCallbackOpts) {
+      return await createProofOfPossession(this.proofCallbackOpts);
     }
     throw new Error(PROOF_CANT_BE_CONSTRUCTED);
   }
