@@ -86,7 +86,6 @@ export interface JWTHeader {
   kid?: string; // CONDITIONAL. JWT header containing the key ID. If the Credential shall be bound to a DID, the kid refers to a DID URL which identifies a particular key in the DID Document that the Credential shall be bound to. MUST NOT be present if jwk or x5c is present.
   jwk?: JWK; // CONDITIONAL. JWT header containing the key material the new Credential shall be bound to. MUST NOT be present if kid or x5c is present.
   x5c?: string[]; // CONDITIONAL. JWT header containing a certificate or certificate chain corresponding to the key used to sign the JWT. This element may be used to convey a key attestation. In such a case, the actual key certificate will contain attributes related to the key properties. MUST NOT be present if kid or jwk is present.
-  [x: string]: unknown;
 }
 
 export interface JWTPayload {
@@ -96,7 +95,6 @@ export interface JWTPayload {
   nonce?: string; // REQUIRED (string). The value type of this claim MUST be a string, where the value is a c_nonce provided by the credential issuer. //TODO: Marked as required not present in NGI flow
   jti: string; // A new nonce chosen by the wallet. Used to prevent replay
   exp?: number; // Not longer than 5 minutes
-  [x: string]: unknown;
 }
 
 export type JWTSignerCallback = (args: { header?: unknown; payload?: unknown; [x: string]: unknown }) => Promise<string>;
