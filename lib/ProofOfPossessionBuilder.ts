@@ -5,7 +5,7 @@ export class ProofOfPossessionBuilder {
   popCallbackOpts?: ProofOfPossessionOpts;
   proof?: ProofOfPossession;
 
-  withPoPCallbackOpts(popCallbackOpts: ProofOfPossessionOpts): ProofOfPossessionBuilder {
+  withProofCallbackOpts(proofCallbackOpts: ProofOfPossessionOpts): ProofOfPossessionBuilder {
     this.popCallbackOpts = popCallbackOpts;
     return this;
   }
