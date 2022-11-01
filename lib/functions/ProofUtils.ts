@@ -59,7 +59,7 @@ function setJWSDefaults(args: ProofOfPossessionCallbackArgs, issuerUrl: string, 
   };
   args.payload = { ...defaultPayload, ...args.payload };
   args.header = { ...defaultHeader, ...args.header };
-  return args as unknown as any;
+  return args;
 }
 
 export async function encodeProof(popSignInputDecodedArgs: PoPSignInputDecoded): Promise<string> {

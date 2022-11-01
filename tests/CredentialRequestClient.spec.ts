@@ -17,10 +17,12 @@ import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
 
 import { WALT_OID4VCI_METADATA } from './MetadataMocks';
 
-// const partialJWT = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJhdWQiOiJodHRwczovL29pZGM0dmNpLmRlbW8uc3BydWNlaWQuY29tL2NyZWRlbnRpYWwiLCJp';
+const partialJWT =
+  'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJhdWQiOiJodHRwczovL29pZGM0dmNpLmRlbW8uc3BydWNlaWQuY29tL2NyZWRlbnRpYWwiLCJp';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<string> {
-  return 'ey.val.eu';
+  return partialJWT + '.va';
 }
 
 describe('Credential Request Client ', () => {
@@ -56,7 +58,7 @@ describe('Credential Request Client ', () => {
       })
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
-    expect(credentialRequest.proof.jwt).toContain('ey.val.eu');
+    expect(credentialRequest.proof.jwt).toContain(partialJWT);
     expect(credentialRequest.type).toBe('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential');
   });
 
@@ -91,7 +93,7 @@ describe('Credential Request Client ', () => {
       })
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
-    expect(credentialRequest.proof.jwt.includes('ey.val')).toBeTruthy();
+    expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
     const result: ErrorResponse | CredentialResponse = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
     expect(result['error']).toBe('unsupported_format');
   });
@@ -128,11 +130,12 @@ describe('Credential Request Client ', () => {
       })
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
-    expect(credentialRequest.proof.jwt.includes('ey.val')).toBeTruthy();
+    expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
     const result: ErrorResponse | CredentialResponse = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
     expect(result['credential']).toEqual(mockedVC);
   });
   it('should fail creating a proof of possession with simple verification', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<string> {
       throw new Error(JWS_NOT_VALID);
     }
@@ -158,6 +161,7 @@ describe('Credential Request Client ', () => {
   });
 
   it('should fail creating a proof of possession with verify callback function', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<string> {
       throw new Error(JWS_NOT_VALID);
     }
