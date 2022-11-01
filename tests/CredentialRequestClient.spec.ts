@@ -1,7 +1,11 @@
+import { KeyObject } from 'crypto';
+
+import * as jose from 'jose';
 import nock from 'nock';
-import { v4 as uuidv4 } from 'uuid';
+import * as u8a from 'uint8arrays';
 
 import {
+  Alg,
   CredentialRequest,
   CredentialRequestClient,
   CredentialRequestClientBuilder,
@@ -12,18 +16,40 @@ import {
   MetadataClient,
   ProofOfPossession,
   ProofOfPossessionCallbackArgs,
+  Typ,
 } from '../lib';
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
 
 import { WALT_OID4VCI_METADATA } from './MetadataMocks';
+const partialJWT = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ';
 
-const partialJWT =
-  'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJhdWQiOiJodHRwczovL29pZGM0dmNpLmRlbW8uc3BydWNlaWQuY29tL2NyZWRlbnRpYWwiLCJp';
+const jwtArgs = {
+  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
+  payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'sphereon' },
+  privateKey: undefined,
+  publicKey: undefined,
+};
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<string> {
-  return partialJWT + '.va';
+async function proofOfPossessionCallbackFunction(args: ProofOfPossessionCallbackArgs): Promise<string> {
+  return await new jose.CompactSign(u8a.fromString(JSON.stringify({ ...args.payload })))
+    .setProtectedHeader({ ...args.header, alg: args.header.alg })
+    .sign(args.privateKey as KeyObject);
 }
+
+async function proofOfPossessionVerifierCallbackFunction(args: {
+  jws?: string | Uint8Array;
+  jwt?: string | Uint8Array;
+  publicKey: unknown;
+  [x: string]: unknown;
+}): Promise<void> {
+  await jose.compactVerify(args.jws ? args.jws : args.jwt, args.publicKey as KeyObject, args.options);
+}
+
+beforeAll(async () => {
+  const keyPair = await jose.generateKeyPair('ES256');
+  jwtArgs.privateKey = keyPair.privateKey as KeyObject;
+  jwtArgs.publicKey = keyPair.publicKey as KeyObject;
+});
 
 describe('Credential Request Client ', () => {
   it('should build correctly provided with correct params', function () {
@@ -43,20 +69,11 @@ describe('Credential Request Client ', () => {
     const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
       .withPoPCallbackOpts({
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-        proofOfPossessionCallbackArgs: {
-          payload: {
-            jti: uuidv4(),
-            iss: 'sphereon',
-            aud: 'sphereon',
-          },
-          header: {
-            alg: 'EdDSA',
-            typ: 'JWT',
-            kid: 'did:example:123',
-          },
-        },
+        proofOfPossessionVerifierCallback: proofOfPossessionVerifierCallbackFunction,
+        proofOfPossessionCallbackArgs: jwtArgs,
       })
       .build();
+    await proofOfPossessionVerifierCallbackFunction({ ...proof, publicKey: jwtArgs.publicKey });
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
     expect(credentialRequest.proof.jwt).toContain(partialJWT);
     expect(credentialRequest.type).toBe('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential');
@@ -78,18 +95,7 @@ describe('Credential Request Client ', () => {
     const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
       .withPoPCallbackOpts({
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-        proofOfPossessionCallbackArgs: {
-          payload: {
-            jti: uuidv4(),
-            iss: 'sphereon',
-            aud: 'sphereon',
-          },
-          header: {
-            alg: 'EdDSA',
-            typ: 'JWT',
-            kid: 'did:example:123',
-          },
-        },
+        proofOfPossessionCallbackArgs: jwtArgs,
       })
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
@@ -115,18 +121,7 @@ describe('Credential Request Client ', () => {
     const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
       .withPoPCallbackOpts({
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-        proofOfPossessionCallbackArgs: {
-          payload: {
-            jti: uuidv4(),
-            iss: 'sphereon',
-            aud: 'sphereon',
-          },
-          header: {
-            alg: 'EdDSA',
-            typ: 'JWT',
-            kid: 'did:example:123',
-          },
-        },
+        proofOfPossessionCallbackArgs: jwtArgs,
       })
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
@@ -134,6 +129,7 @@ describe('Credential Request Client ', () => {
     const result: ErrorResponse | CredentialResponse = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
     expect(result['credential']).toEqual(mockedVC);
   });
+
   it('should fail creating a proof of possession with simple verification', async () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<string> {
@@ -143,18 +139,7 @@ describe('Credential Request Client ', () => {
       new ProofOfPossessionBuilder()
         .withPoPCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-          proofOfPossessionCallbackArgs: {
-            payload: {
-              jti: uuidv4(),
-              iss: 'sphereon',
-              aud: 'sphereon',
-            },
-            header: {
-              alg: 'EdDSA',
-              typ: 'JWT',
-              kid: 'did:example:123',
-            },
-          },
+          proofOfPossessionCallbackArgs: jwtArgs,
         })
         .build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
@@ -169,26 +154,14 @@ describe('Credential Request Client ', () => {
       new ProofOfPossessionBuilder()
         .withPoPCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-          proofOfPossessionCallbackArgs: {
-            kid: 'did:example:123',
-            payload: {
-              jti: uuidv4(),
-              iss: 'sphereon',
-              aud: 'sphereon',
-            },
-            header: {
-              alg: 'EdDSA',
-              typ: 'JWT',
-              kid: 'did:example:123',
-            },
-          },
+          proofOfPossessionCallbackArgs: jwtArgs,
         })
         .build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
 });
 
-describe('Credential Request Client witk Walt.id ', () => {
+describe('Credential Request Client with Walt.id ', () => {
   it('should have correct metadata endpoints', async function () {
     const WALT_IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';

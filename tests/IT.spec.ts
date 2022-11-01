@@ -1,20 +1,28 @@
 import nock from 'nock';
-import { v4 as uuidv4 } from 'uuid';
 
 import {
   AccessTokenClient,
   AccessTokenResponse,
+  Alg,
   CredentialRequestClientBuilder,
   CredentialResponse,
   IssuanceInitiation,
   ProofOfPossession,
   ProofOfPossessionCallbackArgs,
+  Typ,
 } from '../lib';
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
 const ISSUER_URL = 'https://issuer.research.identiproof.io';
+const jwtArgs = {
+  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
+  payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'sphereon' },
+  privateKey: undefined,
+  publicKey: undefined,
+};
+
 describe('OID4VCI-Client should', () => {
   const INITIATE_QR_DATA =
     'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true';
@@ -79,18 +87,7 @@ describe('OID4VCI-Client should', () => {
       const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
         .withPoPCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-          proofOfPossessionCallbackArgs: {
-            payload: {
-              jti: uuidv4(),
-              iss: 'sphereon',
-              aud: 'sphereon',
-            },
-            header: {
-              alg: 'EdDSA',
-              typ: 'JWT',
-              kid: 'did:example:123',
-            },
-          },
+          proofOfPossessionCallbackArgs: jwtArgs,
         })
         .build();
       const credResponse = (await credReqClient.acquireCredentialsUsingProof(proof, {})) as CredentialResponse;

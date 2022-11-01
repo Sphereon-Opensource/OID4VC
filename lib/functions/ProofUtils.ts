@@ -1,15 +1,6 @@
 import { JWTHeaderParameters, JWTPayload } from 'jose';
-import sign from 'jwt-encode';
 
-import {
-  BAD_PARAMS,
-  JWS_NOT_VALID,
-  PoPSignInputDecoded,
-  ProofOfPossession,
-  ProofOfPossessionCallbackArgs,
-  ProofOfPossessionOpts,
-  ProofType,
-} from '../types';
+import { BAD_PARAMS, JWS_NOT_VALID, ProofOfPossession, ProofOfPossessionCallbackArgs, ProofOfPossessionOpts, ProofType } from '../types';
 
 /**
  * createProofOfPossession creates and returns the ProofOfPossession object
@@ -25,10 +16,14 @@ export async function createProofOfPossession(opts: ProofOfPossessionOpts): Prom
   const signerArgs = setJWSDefaults(opts.proofOfPossessionCallbackArgs, opts.issuerURL, opts.clientId);
   const jwt = await opts.proofOfPossessionCallback(signerArgs);
   partiallyValidateJWS(jwt);
-  return {
+  const proof = {
     proof_type: ProofType.JWT,
     jwt: jwt,
   };
+  if (opts.proofOfPossessionVerifierCallback) {
+    await opts.proofOfPossessionVerifierCallback({ jwt, publicKey: opts.proofOfPossessionCallbackArgs.publicKey });
+  }
+  return proof;
 }
 
 function partiallyValidateJWS(jws: string): void {
@@ -60,21 +55,4 @@ function setJWSDefaults(args: ProofOfPossessionCallbackArgs, issuerUrl: string, 
   args.payload = { ...defaultPayload, ...args.payload };
   args.header = { ...defaultHeader, ...args.header };
   return args;
-}
-
-export async function encodeProof(popSignInputDecodedArgs: PoPSignInputDecoded): Promise<string> {
-  return sign(
-    {
-      aud: popSignInputDecodedArgs.aud,
-      iss: popSignInputDecodedArgs.iss,
-      iat: popSignInputDecodedArgs.iat,
-      exp: popSignInputDecodedArgs.exp,
-      jti: popSignInputDecodedArgs.jti,
-    },
-    '',
-    {
-      alg: popSignInputDecodedArgs.signAlgorithm as unknown as any,
-      typ: popSignInputDecodedArgs.type as unknown as any,
-    }
-  );
 }

@@ -47,29 +47,17 @@ export type EncodeJsonAsURIOpts = { uriTypeProperties?: string[]; arrayTypePrope
 export type DecodeURIAsJsonOpts = { requiredProperties?: string[]; arrayTypeProperties?: string[] };
 
 export interface ProofOfPossessionCallbackArgs extends PoPDecoded {
+  privateKey: unknown;
+  publicKey: unknown;
   [x: string]: unknown;
 }
 
 export interface ProofOfPossessionOpts {
   clientId?: string;
   issuerURL?: string;
-  proofOfPossessionCallback: ProofOfPossessionCallback;
+  proofOfPossessionCallback: JWTSignerCallback;
+  proofOfPossessionVerifierCallback?: JWTVerifyCallback;
   proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs;
-}
-
-export interface PoPSignInputDecoded {
-  aud: string;
-  exp?: number;
-  iat: number;
-  iss: string;
-  jti?: string;
-  jwk?: string;
-  x5c?: string;
-  kid?: string;
-  nonce: string;
-  signAlgorithm?: 'EdDSA' | string;
-  type?: 'JWT' | string;
-  [x: string]: unknown;
 }
 
 export interface PoPPayloadDecoded {
@@ -81,9 +69,18 @@ export interface PoPPayloadDecoded {
   [x: string]: unknown;
 }
 
+export enum Alg {
+  ES256 = 'ES256',
+  EdDSA = 'EdDSA',
+}
+
+export enum Typ {
+  JWT = 'JWT',
+}
+
 export interface PoPHeaderDecoded {
-  alg: 'EdDSA' | string;
-  typ: 'JWT' | string;
+  alg: Alg;
+  typ: Typ;
   kid: string;
   [x: string]: unknown;
 }
@@ -99,6 +96,7 @@ export interface PoPEncoded {
   [x: string]: unknown;
 }
 
-export type ProofOfPossessionCallback = (args: { header?: unknown; payload?: unknown; [x: string]: unknown }) => Promise<string>;
+export type JWTSignerCallback = (args: { header?: unknown; payload?: unknown; [x: string]: unknown }) => Promise<string>;
+export type JWTVerifyCallback = (args: { [x: string]: unknown }) => Promise<void>;
 
 export type Request = CredentialRequest;
