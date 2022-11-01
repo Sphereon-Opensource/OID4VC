@@ -43,7 +43,7 @@ export class CredentialRequestClient {
     const proofOfPossession =
       proof.proofOfPossessionCallback && proof.proofOfPossessionCallbackArgs
         ? await new ProofOfPossessionBuilder().withPoPCallbackOpts(proof as ProofOfPossessionOpts).build()
-        : await new ProofOfPossessionBuilder().withPoPEncoded(proof as ProofOfPossession).build();
+        : await new ProofOfPossessionBuilder().withProof(proof as ProofOfPossession).build();
     const request = await this.createCredentialRequest(proofOfPossession, { ...opts });
     return await this.acquireCredentialsUsingRequest(request, { ...opts });
   }
@@ -77,7 +77,7 @@ export class CredentialRequestClient {
     const proofOfPossession =
       proof.proofOfPossessionCallback && proof.proofOfPossessionCallbackArgs
         ? await new ProofOfPossessionBuilder().withPoPCallbackOpts(proof as ProofOfPossessionOpts).build()
-        : await new ProofOfPossessionBuilder().withPoPEncoded(proof as ProofOfPossession).build();
+        : await new ProofOfPossessionBuilder().withProof(proof as ProofOfPossession).build();
     return {
       type: opts?.credentialType ? opts.credentialType : this._issuanceRequestOpts.credentialType,
       format: opts?.format ? opts.format : this._issuanceRequestOpts.format,

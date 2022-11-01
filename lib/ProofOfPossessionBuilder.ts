@@ -3,21 +3,21 @@ import { PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, ProofOfPossessionOpts } f
 
 export class ProofOfPossessionBuilder {
   popCallbackOpts?: ProofOfPossessionOpts;
-  popEncoded?: ProofOfPossession;
+  proof?: ProofOfPossession;
 
   withPoPCallbackOpts(popCallbackOpts: ProofOfPossessionOpts): ProofOfPossessionBuilder {
     this.popCallbackOpts = popCallbackOpts;
     return this;
   }
 
-  withPoPEncoded(popEncoded: ProofOfPossession): ProofOfPossessionBuilder {
-    this.popEncoded = popEncoded;
+  withProof(proof: ProofOfPossession): ProofOfPossessionBuilder {
+    this.proof = proof;
     return this;
   }
 
   public async build(): Promise<ProofOfPossession> {
-    if (this.popEncoded) {
-      return Promise.resolve(this.popEncoded);
+    if (this.proof) {
+      return Promise.resolve(this.proof);
     } else if (this.popCallbackOpts) {
       return await createProofOfPossession(this.popCallbackOpts);
     }
