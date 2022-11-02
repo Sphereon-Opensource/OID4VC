@@ -9,6 +9,7 @@ import {
   CredentialRequestClient,
   CredentialRequestClientBuilder,
   CredentialResponse,
+  EndpointMetadata,
   ErrorResponse,
   IssuanceInitiation,
   JWS_NOT_VALID,
@@ -16,10 +17,11 @@ import {
   ProofOfPossession,
   ProofOfPossessionCallbackArgs,
   Typ,
+  WellKnownEndpoints,
 } from '../lib';
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
 
-import { WALT_OID4VCI_METADATA } from './MetadataMocks';
+import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, WALT_OID4VCI_METADATA } from './MetadataMocks';
 const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJqdGkiOiJ0WmlnbnNuRmJwMjIzIiwiYXVkIjoic3BoZXJlb24iLCJpc3MiOi';
 
 const jwtArgs = {
@@ -30,6 +32,8 @@ const jwtArgs = {
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1';
 
 let keypair: KeyPair;
+let metadata: EndpointMetadata;
+
 async function proofOfPossessionCallbackFunction(args: ProofOfPossessionCallbackArgs): Promise<string> {
   return await new jose.SignJWT({ ...args.payload })
     .setProtectedHeader({ alg: 'ES256' })
@@ -51,6 +55,8 @@ async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; ki
 beforeAll(async () => {
   const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
   keypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject };
+  nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OIDC4VCI).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
+  metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
 });
 
 describe('Credential Request Client ', () => {
@@ -63,12 +69,6 @@ describe('Credential Request Client ', () => {
   });
 
   it('should build credential request correctly', async () => {
-    // const keyPair = await jose.generateKeyPair('ES256');
-    const { publicKey, privateKey } = await jose.generateKeyPair('ES256');
-    let obj = { publicKey, privateKey };
-    const objString = JSON.stringify(obj);
-    obj = JSON.parse(objString);
-    nock('https://www.example.com').get('/keys/1').reply(200, obj);
     const credReqClient = CredentialRequestClient.builder()
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
@@ -80,7 +80,7 @@ describe('Credential Request Client ', () => {
         proofOfPossessionVerifierCallback: proofOfPossessionVerifierCallbackFunction,
         proofOfPossessionCallbackArgs: { kid, ...jwtArgs },
       })
-      .withCredentialRequestClient(credReqClient)
+      .withEndpointMetadata(metadata)
       .build();
     await proofOfPossessionVerifierCallbackFunction({ ...proof, kid });
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
@@ -106,7 +106,7 @@ describe('Credential Request Client ', () => {
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
         proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
       })
-      .withCredentialRequestClient(credReqClient)
+      .withEndpointMetadata(metadata)
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
@@ -133,7 +133,7 @@ describe('Credential Request Client ', () => {
         proofOfPossessionCallback: proofOfPossessionCallbackFunction,
         proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
       })
-      .withCredentialRequestClient(credReqClient)
+      .withEndpointMetadata(metadata)
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
@@ -146,18 +146,13 @@ describe('Credential Request Client ', () => {
     async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<string> {
       throw new Error(JWS_NOT_VALID);
     }
-    const credReqClient = CredentialRequestClient.builder()
-      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
-      .build();
     await expect(
       new ProofOfPossessionBuilder()
         .withProofCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
           proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
         })
-        .withCredentialRequestClient(credReqClient)
+        .withEndpointMetadata(metadata)
         .build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
@@ -168,18 +163,13 @@ describe('Credential Request Client ', () => {
       throw new Error(JWS_NOT_VALID);
     }
 
-    const credReqClient = CredentialRequestClient.builder()
-      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
-      .build();
     await expect(
       new ProofOfPossessionBuilder()
         .withProofCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
           proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
         })
-        .withCredentialRequestClient(credReqClient)
+        .withEndpointMetadata(metadata)
         .build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });

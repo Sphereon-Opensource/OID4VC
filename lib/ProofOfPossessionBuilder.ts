@@ -1,11 +1,10 @@
-import { CredentialRequestClient } from './CredentialRequestClient';
 import { createProofOfPossession } from './functions';
-import { PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, ProofOfPossessionOpts } from './types';
+import { EndpointMetadata, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, ProofOfPossessionOpts } from './types';
 
 export class ProofOfPossessionBuilder {
   proofCallbackOpts?: ProofOfPossessionOpts;
   proof?: ProofOfPossession;
-  credentialRequestClient: CredentialRequestClient;
+  endpointMetadata: EndpointMetadata;
 
   withProofCallbackOpts(proofCallbackOpts: ProofOfPossessionOpts): ProofOfPossessionBuilder {
     this.proofCallbackOpts = proofCallbackOpts;
@@ -17,8 +16,8 @@ export class ProofOfPossessionBuilder {
     return this;
   }
 
-  withCredentialRequestClient(credentialRequestClient: CredentialRequestClient): ProofOfPossessionBuilder {
-    this.credentialRequestClient = credentialRequestClient;
+  withEndpointMetadata(endpointMetadata: EndpointMetadata): ProofOfPossessionBuilder {
+    this.endpointMetadata = endpointMetadata;
     return this;
   }
 
@@ -26,7 +25,7 @@ export class ProofOfPossessionBuilder {
     if (this.proof) {
       return Promise.resolve(this.proof);
     } else if (this.proofCallbackOpts) {
-      return await createProofOfPossession(this.proofCallbackOpts, this.credentialRequestClient);
+      return await createProofOfPossession(this.proofCallbackOpts, this.endpointMetadata);
     }
     throw new Error(PROOF_CANT_BE_CONSTRUCTED);
   }

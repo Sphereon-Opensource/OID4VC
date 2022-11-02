@@ -1,9 +1,9 @@
 import { JWTHeaderParameters } from 'jose';
 import { v4 as uuidv4 } from 'uuid';
 
-import { CredentialRequestClient } from '../CredentialRequestClient';
 import {
   BAD_PARAMS,
+  EndpointMetadata,
   JWS_NOT_VALID,
   JWTHeader,
   JWTPayload,
@@ -20,11 +20,11 @@ import {
  *         - jwtSignerCallback: function to sign the proof
  *         - jwtVerifyCallback: function to verify if JWT is valid
  */
-export async function createProofOfPossession(opts: ProofOfPossessionOpts, client: CredentialRequestClient): Promise<ProofOfPossession> {
+export async function createProofOfPossession(opts: ProofOfPossessionOpts, endpointMetadata: EndpointMetadata): Promise<ProofOfPossession> {
   if (!opts.proofOfPossessionCallback || !opts.proofOfPossessionCallbackArgs) {
     throw new Error(BAD_PARAMS);
   }
-  const signerArgs = setJWSDefaults(opts.proofOfPossessionCallbackArgs, client);
+  const signerArgs = setJWSDefaults(opts.proofOfPossessionCallbackArgs, endpointMetadata);
   const jwt = await opts.proofOfPossessionCallback({ ...signerArgs, kid: opts.proofOfPossessionCallbackArgs.kid });
   partiallyValidateJWS(jwt);
   const proof = {
@@ -43,19 +43,19 @@ function partiallyValidateJWS(jws: string): void {
   }
 }
 
-function setJWSDefaults(args: ProofOfPossessionCallbackArgs, client: CredentialRequestClient): { header: JWTHeader; payload: JWTPayload } {
+function setJWSDefaults(args: ProofOfPossessionCallbackArgs, endpointMetadata: EndpointMetadata): { header: JWTHeader; payload: JWTPayload } {
   const now = +new Date();
-  if (!client) {
-    throw new Error('No client provided');
+  if (!endpointMetadata) {
+    throw new Error('No endpointMetadata provided');
   }
-  const aud = client._issuanceRequestOpts.credentialEndpoint ? client._issuanceRequestOpts.credentialEndpoint : args.payload.aud;
+  const aud = endpointMetadata.credential_endpoint ? endpointMetadata.credential_endpoint : args.payload.aud;
   if (!aud) {
     throw new Error('No issuer url provided');
   }
   if (!args.kid) {
     throw new Error('No kid provided');
   }
-  const iss = client._issuanceRequestOpts.clientId ? client._issuanceRequestOpts.clientId : args.payload.iss;
+  const iss = endpointMetadata.issuer ? endpointMetadata.issuer : args.payload.iss;
   if (!iss) {
     throw new Error('No clientId provided');
   }
