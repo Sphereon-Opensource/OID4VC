@@ -48,14 +48,14 @@ function setJWSDefaults(args: ProofOfPossessionCallbackArgs, endpointMetadata: E
   if (!endpointMetadata) {
     throw new Error('No endpointMetadata provided');
   }
-  const aud = endpointMetadata.credential_endpoint ? endpointMetadata.credential_endpoint : args.payload.aud;
+  const aud = endpointMetadata.issuer ? endpointMetadata.issuer : args.payload.aud;
   if (!aud) {
     throw new Error('No issuer url provided');
   }
   if (!args.kid) {
     throw new Error('No kid provided');
   }
-  const iss = endpointMetadata.issuer ? endpointMetadata.issuer : args.payload.iss;
+  const iss = endpointMetadata.token_endpoint ? endpointMetadata.token_endpoint : args.payload.iss;
   if (!iss) {
     throw new Error('No clientId provided');
   }
