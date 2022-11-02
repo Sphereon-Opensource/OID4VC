@@ -89,6 +89,7 @@ describe('OID4VCI-Client should', () => {
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
           proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
         })
+        .withCredentialRequestClient(credReqClient)
         .build();
       const credResponse = (await credReqClient.acquireCredentialsUsingProof(proof, {})) as CredentialResponse;
       expect(credResponse.credential).toEqual(mockedVC);

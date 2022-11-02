@@ -1,6 +1,7 @@
 import { JWTHeaderParameters } from 'jose';
 import { v4 as uuidv4 } from 'uuid';
 
+import { CredentialRequestClient } from '../CredentialRequestClient';
 import {
   BAD_PARAMS,
   JWS_NOT_VALID,
@@ -19,24 +20,19 @@ import {
  *         - jwtSignerCallback: function to sign the proof
  *         - jwtVerifyCallback: function to verify if JWT is valid
  */
-export async function createProofOfPossession(opts: ProofOfPossessionOpts): Promise<ProofOfPossession> {
+export async function createProofOfPossession(opts: ProofOfPossessionOpts, client: CredentialRequestClient): Promise<ProofOfPossession> {
   if (!opts.proofOfPossessionCallback || !opts.proofOfPossessionCallbackArgs) {
     throw new Error(BAD_PARAMS);
   }
-  const signerArgs = setJWSDefaults(
-    opts.proofOfPossessionCallbackArgs,
-    opts.proofOfPossessionCallbackArgs.kid,
-    opts.proofOfPossessionCallbackArgs.issuerURL,
-    opts.proofOfPossessionCallbackArgs.clientId
-  );
-  const jwt = await opts.proofOfPossessionCallback(signerArgs);
+  const signerArgs = setJWSDefaults(opts.proofOfPossessionCallbackArgs, client);
+  const jwt = await opts.proofOfPossessionCallback({ ...signerArgs, kid: opts.proofOfPossessionCallbackArgs.kid });
   partiallyValidateJWS(jwt);
   const proof = {
     proof_type: ProofType.JWT,
     jwt,
   };
   if (opts.proofOfPossessionVerifierCallback) {
-    await opts.proofOfPossessionVerifierCallback({ jwt, publicKey: opts.proofOfPossessionCallbackArgs.publicKey });
+    await opts.proofOfPossessionVerifierCallback({ jwt, kid: opts.proofOfPossessionCallbackArgs.kid });
   }
   return proof;
 }
@@ -47,22 +43,19 @@ function partiallyValidateJWS(jws: string): void {
   }
 }
 
-function setJWSDefaults(
-  args: ProofOfPossessionCallbackArgs,
-  kid: string,
-  issuerUrl: string,
-  clientId?: string
-): { header: JWTHeader; payload: JWTPayload } {
+function setJWSDefaults(args: ProofOfPossessionCallbackArgs, client: CredentialRequestClient): { header: JWTHeader; payload: JWTPayload } {
   const now = +new Date();
-  const aud = args.payload.aud ? args.payload.aud : issuerUrl;
+  if (!client) {
+    throw new Error('No client provided');
+  }
+  const aud = client._issuanceRequestOpts.credentialEndpoint ? client._issuanceRequestOpts.credentialEndpoint : args.payload.aud;
   if (!aud) {
     throw new Error('No issuer url provided');
   }
-  const proof_kid = kid ? kid : args.header.kid;
-  if (!kid) {
+  if (!args.kid) {
     throw new Error('No kid provided');
   }
-  const iss = args.payload.iss ? args.payload.iss : clientId;
+  const iss = client._issuanceRequestOpts.clientId ? client._issuanceRequestOpts.clientId : args.payload.iss;
   if (!iss) {
     throw new Error('No clientId provided');
   }
@@ -77,7 +70,7 @@ function setJWSDefaults(
   const defaultHeader: JWTHeaderParameters = {
     alg: 'ES256',
     typ: 'JWT',
-    kid: proof_kid,
+    kid: args.kid,
   };
   args.payload = { ...defaultPayload, ...args.payload };
   args.header = { ...defaultHeader, ...args.header };

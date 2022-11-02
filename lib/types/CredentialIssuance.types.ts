@@ -57,11 +57,8 @@ export interface JWK {
 
 export interface ProofOfPossessionCallbackArgs {
   kid: string;
-  clientId?: string;
-  issuerURL?: string;
   header: JWTHeader;
   payload: JWTPayload;
-  [x: string]: unknown;
 }
 
 export interface ProofOfPossessionOpts {
@@ -96,7 +93,7 @@ export interface JWTPayload {
   exp?: number; // Not longer than 5 minutes
 }
 
-export type JWTSignerCallback = (args: { header?: JWTHeader; payload?: JWTPayload; [x: string]: unknown }) => Promise<string>;
-export type JWTVerifyCallback = (args: { [x: string]: unknown }) => Promise<void>;
+export type JWTSignerCallback = (args: ProofOfPossessionCallbackArgs) => Promise<string>;
+export type JWTVerifyCallback = (args: { jwt: string; kid: string }) => Promise<void>;
 
 export type Request = CredentialRequest;

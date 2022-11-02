@@ -193,11 +193,8 @@ export interface JWTPayload {
 
 export interface ProofOfPossessionCallbackArgs {
   kid: string;
-  clientId?: string;
-  issuerURL?: string;
   header: JWTHeader;
   payload: JWTPayload;
-  [x: string]: unknown;
 }
 
 export interface ProofOfPossessionOpts {
