@@ -157,7 +157,18 @@ const signJWT = async (args: JWTSignerArgs): Promise<string> => {
     .sign(privateKey);
 };
 ````
-
+Alongside signing, you can provide another callback function for verifying the created signature (optional) with populating `proofOfPossessionVerifierCallback`
+below is an example of such method. This example (like the previous one) uses `jose` to verify the jwt. 
+````typescript
+async function proofOfPossessionVerifierCallbackFunction(args: {
+  jws?: string | Uint8Array;
+  jwt?: string | Uint8Array;
+  publicKey: unknown;
+  [x: string]: unknown;
+}): Promise<void> {
+  await jose.compactVerify(args.jws ? args.jws : args.jwt, args.publicKey as KeyObject, args.options);
+}
+````
 The JWT Signer Interfaces:
 
 ````typescript
@@ -172,32 +183,32 @@ export interface JWTHeader {
 }
 
 export interface JWTPayload {
-  iss: string; // REQUIRED (string). The value of this claim MUST be the client_id of the client making the credential request.
+  iss?: string; // REQUIRED (string). The value of this claim MUST be the client_id of the client making the credential request.
   aud?: string; // REQUIRED (string). The value of this claim MUST be the issuer URL of credential issuer.
   iat?: number; // REQUIRED (number). The value of this claim MUST be the time at which the proof was issued using the syntax defined in [RFC7519].
   nonce?: string; // REQUIRED (string). The value type of this claim MUST be a string, where the value is a c_nonce provided by the credential issuer. //TODO: Marked as required not present in NGI flow
-  jti: string; // A new nonce chosen by the wallet. Used to prevent replay
+  jti?: string; // A new nonce chosen by the wallet. Used to prevent replay
   exp?: number; // Not longer than 5 minutes
 }
 
-export interface JWTSignerArgs {
+export interface ProofOfPossessionCallbackArgs {
+  kid: string;
+  clientId?: string;
+  issuerURL?: string;
   header: JWTHeader;
   payload: JWTPayload;
-  privateKey: KeyObject;
-  publicKey: KeyObject;
+  [x: string]: unknown;
 }
 
 export interface ProofOfPossessionOpts {
-  issuerURL?: string;
-  clientId?: string;
-  jwtSignerArgs: JWTSignerArgs;
-  jwtSignerCallback: JWTSignerCallback;
-  jwtVerifyCallback?: JWTVerifyCallback;
+  proofOfPossessionCallback: JWTSignerCallback;
+  proofOfPossessionVerifierCallback?: JWTVerifyCallback;
+  proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs;
 }
 
-export type JWTSignerCallback = (args: JWTSignerArgs) => Promise<string>;
+export type JWTSignerCallback = (args: { header?: JWTHeader; payload?: JWTPayload; [x: string]: unknown }) => Promise<string>;
 
-export type JWTVerifyCallback = (args: JWTVerifyArgs) => Promise<void>;
+export type JWTVerifyCallback = (args: { [x: string]: unknown }) => Promise<void>;
 ````
 
 Now it is time to request the actual Credential(s) from the Issuer. The example uses a DID:JWK .The DID:JWK should match
@@ -209,17 +220,12 @@ import { CredentialRequestClientBuilder, CredentialResponse, ProofOfPossessionOp
 const credentialRequestClient = CredentialRequestClientBuilder.fromIssuanceInitiation(initiationRequestWithUrl)
 
 const proofOpts: ProofOfPossessionOpts = {
-  jwtSignerArgs: {
-    header: {
-      kid: 'did:jwk:example-did'
-    },
-    payload: {
-      jti: 'random-nonce-provided-by-client'
-    },
-    privateKey,
-    publicKey
-  },
-  jwtSignerCallback: (args) => signJWT(args)
+  proofOfPossessionCallback: (args) => signJWT(args),
+  proofOfPossessionCallbackArgs: { 
+    kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', 
+    header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
+    payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'sphereon' }
+  }
 }
 
 // In 1 step:
