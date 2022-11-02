@@ -7,15 +7,11 @@ import {
   CredentialRequestClientBuilder,
   CredentialResponse,
   IssuanceInitiation,
-  MetadataClient,
   ProofOfPossession,
   ProofOfPossessionCallbackArgs,
   Typ,
-  WellKnownEndpoints,
 } from '../lib';
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
-
-import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -87,14 +83,16 @@ describe('OID4VCI-Client should', () => {
       // is not assignable to type 'ProofOfPossessionCallback'.
       // Types of parameters 'args' and 'args' are incompatible.
       // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
-      nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OIDC4VCI).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
-      const metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
       const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
         .withProofCallbackOpts({
           proofOfPossessionCallback: proofOfPossessionCallbackFunction,
           proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
         })
-        .withEndpointMetadata(metadata)
+        .withEndpointMetadata({
+          issuer: 'https://issuer.research.identiproof.io',
+          credential_endpoint: 'https://issuer.research.identiproof.io/credential',
+          token_endpoint: 'https://issuer.research.identiproof.io/token',
+        })
         .build();
       const credResponse = (await credReqClient.acquireCredentialsUsingProof(proof, {})) as CredentialResponse;
       expect(credResponse.credential).toEqual(mockedVC);
