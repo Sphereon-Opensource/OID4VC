@@ -1,13 +1,13 @@
 import { createProofOfPossession } from './functions';
-import { EndpointMetadata, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, ProofOfPossessionOpts } from './types';
+import { EndpointMetadata, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, ProofOfPossessionArgs } from './types';
 
 export class ProofOfPossessionBuilder {
   clientId?: string;
   endpointMetadata: EndpointMetadata;
   proof?: ProofOfPossession;
-  proofCallbackOpts?: ProofOfPossessionOpts;
+  proofCallbackOpts?: ProofOfPossessionArgs;
 
-  withProofCallbackOpts(proofCallbackOpts: ProofOfPossessionOpts): ProofOfPossessionBuilder {
+  withProofCallbackOpts(proofCallbackOpts: ProofOfPossessionArgs): ProofOfPossessionBuilder {
     this.proofCallbackOpts = proofCallbackOpts;
     return this;
   }

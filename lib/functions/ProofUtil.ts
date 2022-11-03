@@ -7,8 +7,8 @@ import {
   JWTHeader,
   JWTPayload,
   ProofOfPossession,
+  ProofOfPossessionArgs,
   ProofOfPossessionCallbackArgs,
-  ProofOfPossessionOpts,
   ProofType,
 } from '../types';
 
@@ -27,7 +27,7 @@ import {
  *  - Optional, clientId of the party requesting the credential
  */
 export async function createProofOfPossession(
-  opts: ProofOfPossessionOpts,
+  opts: ProofOfPossessionArgs,
   endpointMetadata: EndpointMetadata,
   clientId?: string
 ): Promise<ProofOfPossession> {

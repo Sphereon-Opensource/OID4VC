@@ -61,7 +61,7 @@ export interface ProofOfPossessionCallbackArgs {
   payload: JWTPayload;
 }
 
-export interface ProofOfPossessionOpts {
+export interface ProofOfPossessionArgs {
   proofOfPossessionCallback: JWTSignerCallback;
   proofOfPossessionVerifierCallback?: JWTVerifyCallback;
   proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs;

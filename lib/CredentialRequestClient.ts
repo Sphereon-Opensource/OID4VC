@@ -3,7 +3,7 @@ import { CredentialFormat } from '@sphereon/ssi-types';
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { isValidURL, post } from './functions';
-import { CredentialRequest, CredentialResponse, ErrorResponse, ProofOfPossession, ProofOfPossessionOpts, URL_NOT_VALID } from './types';
+import { CredentialRequest, CredentialResponse, ErrorResponse, ProofOfPossession, ProofOfPossessionArgs, URL_NOT_VALID } from './types';
 
 export class CredentialRequestClient {
   _issuanceRequestOpts: Partial<{
@@ -32,7 +32,7 @@ export class CredentialRequestClient {
   }
 
   public async acquireCredentialsUsingProof(
-    proof: ProofOfPossession | ProofOfPossessionOpts,
+    proof: ProofOfPossession | ProofOfPossessionArgs,
     opts?: {
       credentialType?: string | string[];
       format?: CredentialFormat | CredentialFormat[];
@@ -42,7 +42,7 @@ export class CredentialRequestClient {
   ): Promise<CredentialResponse | ErrorResponse> {
     const proofOfPossession =
       proof.proofOfPossessionCallback && proof.proofOfPossessionCallbackArgs
-        ? await new ProofOfPossessionBuilder().withProofCallbackOpts(proof as ProofOfPossessionOpts).build()
+        ? await new ProofOfPossessionBuilder().withProofCallbackOpts(proof as ProofOfPossessionArgs).build()
         : await new ProofOfPossessionBuilder().withProof(proof as ProofOfPossession).build();
     const request = await this.createCredentialRequest(proofOfPossession, { ...opts });
     return await this.acquireCredentialsUsingRequest(request, { ...opts });
@@ -68,7 +68,7 @@ export class CredentialRequestClient {
   }
 
   public async createCredentialRequest(
-    proof: ProofOfPossession | ProofOfPossessionOpts,
+    proof: ProofOfPossession | ProofOfPossessionArgs,
     opts?: {
       credentialType?: string | string[];
       format?: CredentialFormat | CredentialFormat[];
@@ -76,7 +76,7 @@ export class CredentialRequestClient {
   ): Promise<CredentialRequest> {
     const proofOfPossession =
       proof.proofOfPossessionCallback && proof.proofOfPossessionCallbackArgs
-        ? await new ProofOfPossessionBuilder().withProofCallbackOpts(proof as ProofOfPossessionOpts).build()
+        ? await new ProofOfPossessionBuilder().withProofCallbackOpts(proof as ProofOfPossessionArgs).build()
         : await new ProofOfPossessionBuilder().withProof(proof as ProofOfPossession).build();
     return {
       type: opts?.credentialType ? opts.credentialType : this._issuanceRequestOpts.credentialType,
