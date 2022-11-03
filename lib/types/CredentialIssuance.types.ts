@@ -68,8 +68,9 @@ export interface ProofOfPossessionOpts {
 }
 
 export enum Alg {
-  ES256 = 'ES256',
   EdDSA = 'EdDSA',
+  ES256 = 'ES256',
+  ES256K = 'ES256K',
 }
 
 export enum Typ {

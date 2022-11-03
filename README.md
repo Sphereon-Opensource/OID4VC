@@ -141,38 +141,14 @@ console.log(accessTokenResponse)
 
 #### Asking for the Verifiable Credential to be issued
 
-First of all we need to hook up a library that can sign JWTs. The library makes no assumptions as it will provide
-callbacks to perform the signature. In this example we will be using the jose library.
-
-````typescript
-
-const keyPair = await jose.generateKeyPair('ES256');
-const privateKey = keyPair.privateKey
-const publicKey = keyPair.publicKey
-
-const signJWT = async (args: JWTSignerArgs): Promise<string> => {
-  const { header, payload, privateKey } = args;
-  return await new jose.CompactSign(u8a.fromString(JSON.stringify({ ...payload })))
-    .setProtectedHeader({ ...header, alg: args.header.alg })
-    .sign(privateKey);
-};
-````
-Alongside signing, you can provide another callback function for verifying the created signature (optional) with populating `proofOfPossessionVerifierCallback`
-below is an example of such method. This example (like the previous one) uses `jose` to verify the jwt. 
-````typescript
-async function proofOfPossessionVerifierCallbackFunction(args: {
-  jws?: string | Uint8Array;
-  jwt?: string | Uint8Array;
-  publicKey: unknown;
-  [x: string]: unknown;
-}): Promise<void> {
-  await jose.compactVerify(args.jws ? args.jws : args.jwt, args.publicKey as KeyObject, args.options);
-}
-````
 The JWT Signer Interfaces:
 
 ````typescript
-export type Alg = 'ES256' | 'EdDSA';
+export enum Alg {
+  EdDSA = 'EdDSA',
+  ES256 = 'ES256',
+  ES256K = 'ES256K',
+}
 
 export interface JWTHeader {
   alg: Alg; // REQUIRED by the JWT signer
@@ -203,9 +179,9 @@ export interface ProofOfPossessionOpts {
   proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs;
 }
 
-export type JWTSignerCallback = (args: { header?: JWTHeader; payload?: JWTPayload; [x: string]: unknown }) => Promise<string>;
+export type JWTSignerCallback = (args: ProofOfPossessionCallbackArgs) => Promise<string>;
 
-export type JWTVerifyCallback = (args: { [x: string]: unknown }) => Promise<void>;
+export type JWTVerifyCallback = (args: { jwt: string; kid: string }) => Promise<void>;
 ````
 
 Now it is time to request the actual Credential(s) from the Issuer. The example uses a DID:JWK .The DID:JWK should match
@@ -319,53 +295,57 @@ Creates the ProofOfPossession object and JWT signature
 
 The callback function created using the `jose` library.
 
-```typescript
-// Must be JWS
-const signJWT = async (args: JWTSignerArgs): Promise<string> => {
-  const { header, payload, keyPair } = args;
-  return await new jose.CompactSign(u8a.fromString(JSON.stringify({ ...payload })))
-    // Only ES256 and EdDSA are supported
-    .setProtectedHeader({ ...header, alg: args.header.alg })
-    .sign(keyPair.privateKey);
-};
-```
 
-```typescript
-const verifyJWT = async (args: { jws: string | Uint8Array; key: KeyLike | Uint8Array; options?: VerifyOptions }): Promise<void> => {
-  // Throws an exception if JWT is not valid
-  await jose.compactVerify(args.jws, args.key, args.options);
-};
-```
+````typescript
+
+const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
+// Must be JWS
+async function proofOfPossessionCallbackFunction(args: ProofOfPossessionCallbackArgs): Promise<string> {
+  return await new jose.SignJWT({ ...args.payload })
+    .setProtectedHeader({ alg: 'ES256' })
+    .setIssuedAt()
+    .setIssuer(args.kid)
+    .setAudience(args.payload.aud)
+    .setExpirationTime('2h')
+    .sign(keypair.privateKey);
+}
+````
+Alongside signing, you can provide another callback function for verifying the created signature (optional) with populating `proofOfPossessionVerifierCallback`
+below is an example of such method. This example (like the previous one) uses `jose` to verify the jwt.
+````typescript
+async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; kid: string }): Promise<void> {
+  await jose.compactVerify(args.jwt, keypair.publicKey);
+}
+````
 
 The arguments requested by `jose` and `oidc4vci`
 
 ```typescript
 const keyPair = await jose.generateKeyPair('ES256');
 
-const jwtArgs: JWTSignerArgs = {
-  header: {
-    alg: 'ES256',
-    kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
-  },
-  payload: {
-    iss: 's6BhdRkqt3',
-    aud: 'https://server.example.com',
-    iat: 1659145924,
-    nonce: 'tZignsnFbp',
-  },
-  privateKey: keyPair.privateKey,
-  publicKey: keyPair.publicKey,
+const jwtArgs: ProofOfPossessionCallbackArgs = {
+  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
+  payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'sphereon' },
+  kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
 };
 ```
 
 The actual method call
 
 ```typescript
-const proof: ProofOfPossession = await createProofOfPossession({
-  jwtSignerArgs: jwtArgs,
-  jwtSignerCallback: (args) => signJWT(args),
-  jwtVerifyCallback: (args) => verifyJWT(args),
-});
+const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
+  .withProofCallbackOpts({
+    proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+    proofOfPossessionVerifierCallback: proofOfPossessionVerifierCallbackFunction,
+    proofOfPossessionCallbackArgs: {
+      header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
+      payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'sphereon' },
+      kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
+    },
+  })
+  .withEndpointMetadata(metadata)
+  .withClientId('sphereon:wallet')
+  .build();
 console.log(proof);
 // {
 //   "proof_type": "jwt",

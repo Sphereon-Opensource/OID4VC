@@ -22,7 +22,7 @@ import {
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, WALT_OID4VCI_METADATA } from './MetadataMocks';
-const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJqdGkiOiJ0WmlnbnNuRmJwMjIzIiwiYXVkIjoic3BoZXJlb24iLCJpc3MiOi';
+const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJzcGhlcmVvbiIsImlzcyI6ImRpZDpleGFtcGxlOmViZmViMWY3MT';
 
 const jwtArgs = {
   header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
@@ -81,6 +81,7 @@ describe('Credential Request Client ', () => {
         proofOfPossessionCallbackArgs: { kid, ...jwtArgs },
       })
       .withEndpointMetadata(metadata)
+      .withClientId('sphereon:wallet')
       .build();
     await proofOfPossessionVerifierCallbackFunction({ ...proof, kid });
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
@@ -107,6 +108,7 @@ describe('Credential Request Client ', () => {
         proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
       })
       .withEndpointMetadata(metadata)
+      .withClientId('sphereon:wallet')
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
@@ -134,6 +136,7 @@ describe('Credential Request Client ', () => {
         proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
       })
       .withEndpointMetadata(metadata)
+      .withClientId('sphereon:wallet')
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
@@ -153,6 +156,7 @@ describe('Credential Request Client ', () => {
           proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
         })
         .withEndpointMetadata(metadata)
+        .withClientId('sphereon:wallet')
         .build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
@@ -170,6 +174,7 @@ describe('Credential Request Client ', () => {
           proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
         })
         .withEndpointMetadata(metadata)
+        .withClientId('sphereon:wallet')
         .build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });

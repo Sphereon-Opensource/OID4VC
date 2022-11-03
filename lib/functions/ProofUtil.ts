@@ -1,5 +1,4 @@
 import { JWTHeaderParameters } from 'jose';
-import { v4 as uuidv4 } from 'uuid';
 
 import {
   BAD_PARAMS,
@@ -14,17 +13,28 @@ import {
 } from '../types';
 
 /**
- * createProofOfPossession creates and returns the ProofOfPossession object
- * @param opts
- *         - jwtSignerArgs: The arguments to create the signature
- *         - jwtSignerCallback: function to sign the proof
- *         - jwtVerifyCallback: function to verify if JWT is valid
+ *
+ * @param opts: ProofOfPossessionOpts
+ *  - proofOfPossessionCallback: JWTSignerCallback
+ *    Mandatory if you want to create (sign) ProofOfPossession
+ *  - proofOfPossessionVerifierCallback?: JWTVerifyCallback
+ *    If exists, verifies the ProofOfPossession
+ *  - proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs
+ *    arguments needed for signing ProofOfPossession
+ * @param endpointMetadata
+ *  - Mandatory for signing the ProofOfPossession
+ * @param clientId
+ *  - Optional, clientId of the party requesting the credential
  */
-export async function createProofOfPossession(opts: ProofOfPossessionOpts, endpointMetadata: EndpointMetadata): Promise<ProofOfPossession> {
+export async function createProofOfPossession(
+  opts: ProofOfPossessionOpts,
+  endpointMetadata: EndpointMetadata,
+  clientId?: string
+): Promise<ProofOfPossession> {
   if (!opts.proofOfPossessionCallback || !opts.proofOfPossessionCallbackArgs) {
     throw new Error(BAD_PARAMS);
   }
-  const signerArgs = setJWSDefaults(opts.proofOfPossessionCallbackArgs, endpointMetadata);
+  const signerArgs = setJWSDefaults(opts.proofOfPossessionCallbackArgs, endpointMetadata, clientId);
   const jwt = await opts.proofOfPossessionCallback({ ...signerArgs, kid: opts.proofOfPossessionCallbackArgs.kid });
   partiallyValidateJWS(jwt);
   const proof = {
@@ -43,7 +53,11 @@ function partiallyValidateJWS(jws: string): void {
   }
 }
 
-function setJWSDefaults(args: ProofOfPossessionCallbackArgs, endpointMetadata: EndpointMetadata): { header: JWTHeader; payload: JWTPayload } {
+function setJWSDefaults(
+  args: ProofOfPossessionCallbackArgs,
+  endpointMetadata: EndpointMetadata,
+  clientId?: string
+): { header: JWTHeader; payload: JWTPayload } {
   const now = +new Date();
   if (!endpointMetadata) {
     throw new Error('No endpointMetadata provided');
@@ -55,20 +69,21 @@ function setJWSDefaults(args: ProofOfPossessionCallbackArgs, endpointMetadata: E
   if (!args.kid) {
     throw new Error('No kid provided');
   }
-  const iss = endpointMetadata.token_endpoint ? endpointMetadata.token_endpoint : args.payload.iss;
+  const iss = clientId ? clientId : args.payload.iss;
   if (!iss) {
     throw new Error('No clientId provided');
   }
-  const jti = args.payload.jti ? args.payload.jti : uuidv4();
   const defaultPayload: Partial<JWTPayload> = {
-    jti,
     aud,
     iss,
     iat: args.payload.iat ? args.payload.iat : now / 1000 - 60, // Let's ensure we subtract 60 seconds for potential time offsets
     exp: args.payload.exp ? args.payload.exp : now / 1000 + 10 * 60,
   };
+  if (args.payload.jti) {
+    defaultPayload.jti = args.payload.jti;
+  }
   const defaultHeader: JWTHeaderParameters = {
-    alg: 'ES256',
+    alg: args.header.alg ? args.header.alg : 'ES256',
     typ: 'JWT',
     kid: args.kid,
   };
