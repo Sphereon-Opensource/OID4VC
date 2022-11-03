@@ -14,7 +14,7 @@ import {
 
 /**
  *
- * @param opts: ProofOfPossessionOpts
+ * @param opts: ProofOfPossessionArgs
  *  - proofOfPossessionCallback: JWTSignerCallback
  *    Mandatory if you want to create (sign) ProofOfPossession
  *  - proofOfPossessionVerifierCallback?: JWTVerifyCallback

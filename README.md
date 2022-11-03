@@ -188,11 +188,11 @@ Now it is time to request the actual Credential(s) from the Issuer. The example 
 the keypair created earlier.
 
 ````typescript
-import { CredentialRequestClientBuilder, CredentialResponse, ProofOfPossessionOpts } from './CredentialIssuance.types';
+import { CredentialRequestClientBuilder, CredentialResponse, ProofOfPossessionArgs } from './CredentialIssuance.types';
 
 const credentialRequestClient = CredentialRequestClientBuilder.fromIssuanceInitiation(initiationRequestWithUrl)
 
-const proofOpts: ProofOfPossessionOpts = {
+const proofOpts: ProofOfPossessionArgs = {
   proofOfPossessionCallback: (args) => signJWT(args),
   proofOfPossessionCallbackArgs: { 
     kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', 
