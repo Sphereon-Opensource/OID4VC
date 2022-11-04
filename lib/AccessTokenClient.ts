@@ -1,4 +1,5 @@
 import { ObjectUtils } from '@sphereon/ssi-types';
+import Debug from 'debug';
 
 import { MetadataClient } from './MetadataClient';
 import { convertJsonToURI, formPost } from './functions';
@@ -15,6 +16,8 @@ import {
   IssuerOpts,
   PRE_AUTH_CODE_LITERAL,
 } from './types';
+
+const debug = Debug('sphereon:oid4vci:token');
 
 export class AccessTokenClient {
   public async acquireAccessTokenUsingIssuanceInitiation(
@@ -92,21 +95,25 @@ export class AccessTokenClient {
         isPinRequired = issuanceInitiationRequest.user_pin_required;
       }
     }
+    debug(`Pin required for issuer ${issuanceInitiationRequest.issuer}: ${isPinRequired}`);
     return isPinRequired;
   }
 
   private assertNumericPin(isPinRequired?: boolean, pin?: string): void {
     if (isPinRequired) {
       if (!pin || !/^\d{1,8}$/.test(pin)) {
+        debug(`Pin is not 1 to 8 digits long`);
         throw new Error('A valid pin consisting of maximal 8 numeric characters must be present.');
       }
     } else if (pin) {
+      debug(`Pin set, whilst not required`);
       throw new Error('Cannot set a pin, when the pin is not required.');
     }
   }
 
   private assertNonEmptyPreAuthorizedCode(accessTokenRequest: AccessTokenRequest): void {
     if (!accessTokenRequest[PRE_AUTH_CODE_LITERAL]) {
+      debug(`No pre-authorized code present, whilst it is required`);
       throw new Error('Pre-authorization must be proven by presenting the pre-authorized code. Code must be present.');
     }
   }
@@ -139,10 +146,14 @@ export class AccessTokenClient {
     if (!url || !ObjectUtils.isString(url)) {
       throw new Error('No authorization server token URL present. Cannot acquire access token');
     }
+    debug(`Token endpoint determined to be ${url}`);
     return url;
   }
 
   private creatTokenURLFromURL(url: string, tokenEndpoint?: string): string {
+    if (url.startsWith('http://')) {
+      throw Error(`Unprotected token endpoints are not allowed ${url}`);
+    }
     const hostname = url.replace(/https?:\/\//, '').replace(/\/$/, '');
     const endpoint = tokenEndpoint ? (tokenEndpoint.startsWith('/') ? tokenEndpoint : tokenEndpoint.substring(1)) : '/token';
     // We always require https
@@ -150,6 +161,7 @@ export class AccessTokenClient {
   }
 
   private throwNotSupportedFlow(): void {
+    debug(`Only pre-authorized flow supported.`);
     throw new Error('Only pre-authorized-code flow is supported');
   }
 }

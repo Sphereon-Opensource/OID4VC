@@ -64,13 +64,13 @@ export async function post(
 
   try {
     // TODO: Remove the console.logs!
-    console.log(`START fetching url: ${url}`);
+    debug(`START fetching url: ${url}`);
     console.log('token (if any) and body:');
     console.log('==========================');
     console.log(opts.bearerToken);
     console.log(JSON.stringify(body));
     console.log('==========================');
-    console.log(`Headers: ${JSON.stringify(payload.headers)}`);
+    debug(`Headers: ${JSON.stringify(payload.headers)}`);
     const response = await fetch(url, payload);
     if (response && response.status >= 200 && response.status < 400) {
       const logResponse = response.clone();
@@ -80,7 +80,7 @@ export async function post(
       } catch (error) {
         console.log('success response did throw error: ' + error.message);
       }
-      console.log(`END fetching url: ${url}`);
+      debug(`END fetching url: ${url}`);
       return response;
     } else {
       if (response) {
@@ -101,12 +101,12 @@ export async function post(
   } catch (error) {
     const err = error as Error;
     console.log(`Error: ${JSON.stringify(err.stack)} ${error.message}`);
-    console.log(`END fetching url: ${url}`);
+    debug(`END fetching url: ${url}`);
     throw new Error(`${(error as Error).message}`);
   }
 
   console.log(`unexpected Error: ${JSON.stringify(message)}`);
-  console.log(`END fetching url: ${url}`);
+  debug(`END fetching url: ${url}`);
   throw new Error('unexpected error: ' + message);
 }
 
@@ -117,8 +117,8 @@ export function isValidURL(url: string): boolean {
       '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address
       '(\\:\\d+)?(\\/[-a-z\\d%_.~+:]*)*' + // validate port and path
       '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
-      '(\\#[-a-z\\d_]*)?$',
+      '(\\#[-a-z\\d_]*)?$', // validate fragment locator
     'i'
-  ); // validate fragment locator
+  );
   return !!urlPattern.test(url);
 }

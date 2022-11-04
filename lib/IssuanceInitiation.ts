@@ -1,9 +1,14 @@
+import Debug from 'debug';
+
 import { convertJsonToURI, convertURIToJsonObject } from './functions';
 import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from './types';
 
+const debug = Debug('sphereon:oid4vci:initiation');
 export class IssuanceInitiation {
   public static fromURI(issuanceInitiationURI: string): IssuanceInitiationWithBaseUrl {
+    debug(`issuance initiation URI: ${issuanceInitiationURI}`);
     if (!issuanceInitiationURI.includes('?')) {
+      debug(`Invalid issuance initiation URI: ${issuanceInitiationURI}`);
       throw new Error('Invalid Issuance Initiation Request Payload');
     }
     const baseUrl = issuanceInitiationURI.split('?')[0];

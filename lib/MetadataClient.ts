@@ -1,3 +1,5 @@
+import Debug from 'debug';
+
 import { getJson, NotFoundError } from './functions';
 import {
   EndpointMetadata,
@@ -8,6 +10,8 @@ import {
   OID4VCIServerMetadata,
   WellKnownEndpoints,
 } from './types';
+
+const debug = Debug('sphereon:oid4vci:metadata');
 
 export class MetadataClient {
   public static async;
@@ -39,9 +43,13 @@ export class MetadataClient {
     let oid4vciMetadata = await MetadataClient.retrieveOID4VCIServerMetadata(issuer);
 
     if (oid4vciMetadata) {
+      debug(`Issuer ${issuer} OID4VCI well-known server metadata\r\n${oid4vciMetadata}`);
       credential_endpoint = oid4vciMetadata.credential_endpoint;
       token_endpoint = oid4vciMetadata.token_endpoint;
       if (!token_endpoint && oid4vciMetadata.authorization_server) {
+        debug(
+          `Issuer ${issuer} OID4VCI metadata has separate authorization_server ${oid4vciMetadata.authorization_server} that contains the token endpoint`
+        );
         // Crossword uses this to separate the AS metadata. We fail when not found, since we now have no way of getting the token endpoint
         const asMetadata: OAuth2ASMetadata = await this.retrieveWellknown(oid4vciMetadata.authorization_server, WellKnownEndpoints.OAUTH_AS, {
           errorOnNotFound: true,
@@ -53,17 +61,21 @@ export class MetadataClient {
       let asConfig: Oauth2ASWithOID4VCIMetadata = await MetadataClient.retrieveWellknown(issuer, WellKnownEndpoints.OIDC_CONFIGURATION, {
         errorOnNotFound: false,
       });
-      if (!asConfig) {
+      if (asConfig) {
+        debug(`Issuer ${issuer} has OpenID Connect Server metadata in well-known location`);
+      } else {
         // Now oAuth2
         asConfig = await MetadataClient.retrieveWellknown(issuer, WellKnownEndpoints.OAUTH_AS, { errorOnNotFound: false });
       }
       if (asConfig) {
+        debug(`Issuer ${issuer} has oAuth2 Server metadata in well-known location`);
         oid4vciMetadata = asConfig; // TODO: Strip other info?
         credential_endpoint = oid4vciMetadata.credential_endpoint;
         token_endpoint = oid4vciMetadata.token_endpoint;
       }
     }
     if (!token_endpoint) {
+      debug(`Issuer ${issuer} does not have a token_endpoint listed in well-known locations!`);
       if (opts?.errorOnNotFound) {
         throw new Error(`Could not deduce the token endpoint for ${issuer}`);
       } else {
@@ -71,12 +83,14 @@ export class MetadataClient {
       }
     }
     if (!credential_endpoint) {
+      debug(`Issuer ${issuer} does not have a credential_endpoint listed in well-known locations!`);
       if (opts?.errorOnNotFound) {
         throw new Error(`Could not deduce the credential endpoint for ${issuer}`);
       } else {
         credential_endpoint = `${issuer}${issuer.endsWith('/') ? '' : '/'}credential`;
       }
     }
+    debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`);
     return {
       issuer,
       token_endpoint,

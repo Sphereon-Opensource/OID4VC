@@ -1,4 +1,8 @@
+import Debug from 'debug';
+
 import { BAD_PARAMS, JWS_NOT_VALID, JWTHeader, JWTPayload, JWTSignerArgs, ProofOfPossession, ProofOfPossessionOpts, ProofType } from '../types';
+
+const debug = Debug('sphereon:oid4vci:token');
 
 /**
  * createProofOfPossession creates and returns the ProofOfPossession object
@@ -9,20 +13,25 @@ import { BAD_PARAMS, JWS_NOT_VALID, JWTHeader, JWTPayload, JWTSignerArgs, ProofO
  */
 export async function createProofOfPossession(opts: ProofOfPossessionOpts): Promise<ProofOfPossession> {
   if (!opts.jwtSignerCallback || !opts.jwtSignerArgs) {
+    debug(`no jwt signer callback or arguments supplied!`);
     throw new Error(BAD_PARAMS);
   }
   const signerArgs = setJWSDefaults(opts.jwtSignerArgs, opts.issuerURL, opts.clientId);
   const jwt = await opts.jwtSignerCallback(signerArgs);
   try {
     if (opts.jwtVerifyCallback) {
+      debug(`Calling supplied verify callback....`);
       const algorithm = opts.jwtSignerArgs.header.alg;
       await opts.jwtVerifyCallback({ jws: jwt, key: opts.jwtSignerArgs.publicKey, algorithms: [algorithm] });
+      debug(`Supplied verify callback return success result`);
     } else {
       partiallyValidateJWS(jwt);
     }
   } catch {
+    debug(`JWS was not valid`);
     throw new Error(JWS_NOT_VALID);
   }
+  debug(`Proof of Possession JWT:\r\n${jwt}`);
   return {
     proof_type: ProofType.JWT,
     jwt,
