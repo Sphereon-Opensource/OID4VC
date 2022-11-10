@@ -55,16 +55,14 @@ export interface JWK {
   n?: string;
 }
 
-export interface ProofOfPossessionCallbackArgs {
-  kid: string;
-  header: JWTHeader;
-  payload: JWTPayload;
+export interface JwtArgs {
+  header?: JWTHeader;
+  payload?: JWTPayload;
 }
 
 export interface ProofOfPossessionArgs {
   proofOfPossessionCallback: JWTSignerCallback;
   proofOfPossessionVerifierCallback?: JWTVerifyCallback;
-  proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs;
 }
 
 export enum Alg {
@@ -94,7 +92,7 @@ export interface JWTPayload {
   exp?: number; // Not longer than 5 minutes
 }
 
-export type JWTSignerCallback = (args: ProofOfPossessionCallbackArgs) => Promise<string>;
+export type JWTSignerCallback = (jwtArgs: JwtArgs, kid: string) => Promise<string>;
 export type JWTVerifyCallback = (args: { jwt: string; kid: string }) => Promise<void>;
 
 export type Request = CredentialRequest;

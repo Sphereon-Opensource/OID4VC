@@ -40,10 +40,9 @@ export class CredentialRequestClient {
       overrideAccessToken?: string;
     }
   ): Promise<CredentialResponse | ErrorResponse> {
-    const proofOfPossession =
-      proof.proofOfPossessionCallback && proof.proofOfPossessionCallbackArgs
-        ? await new ProofOfPossessionBuilder().withProofCallbackOpts(proof as ProofOfPossessionArgs).build()
-        : await new ProofOfPossessionBuilder().withProof(proof as ProofOfPossession).build();
+    const proofOfPossession = proof.proofOfPossessionCallback
+      ? await ProofOfPossessionBuilder.fromProofCallbackArgs(proof as ProofOfPossessionArgs).build()
+      : await ProofOfPossessionBuilder.fromProof(proof as ProofOfPossession).build();
     const request = await this.createCredentialRequest(proofOfPossession, { ...opts });
     return await this.acquireCredentialsUsingRequest(request, { ...opts });
   }
@@ -74,10 +73,9 @@ export class CredentialRequestClient {
       format?: CredentialFormat | CredentialFormat[];
     }
   ): Promise<CredentialRequest> {
-    const proofOfPossession =
-      proof.proofOfPossessionCallback && proof.proofOfPossessionCallbackArgs
-        ? await new ProofOfPossessionBuilder().withProofCallbackOpts(proof as ProofOfPossessionArgs).build()
-        : await new ProofOfPossessionBuilder().withProof(proof as ProofOfPossession).build();
+    const proofOfPossession = proof.proofOfPossessionCallback
+      ? await ProofOfPossessionBuilder.fromProofCallbackArgs(proof as ProofOfPossessionArgs).build()
+      : await ProofOfPossessionBuilder.fromProof(proof as ProofOfPossession).build();
     return {
       type: opts?.credentialType ? opts.credentialType : this._issuanceRequestOpts.credentialType,
       format: opts?.format ? opts.format : this._issuanceRequestOpts.format,

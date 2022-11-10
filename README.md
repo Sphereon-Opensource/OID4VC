@@ -167,19 +167,17 @@ export interface JWTPayload {
   exp?: number; // Not longer than 5 minutes
 }
 
-export interface ProofOfPossessionCallbackArgs {
-  kid: string;
-  header: JWTHeader;
-  payload: JWTPayload;
+export interface JwtArgs {
+  header?: JWTHeader;
+  payload?: JWTPayload;
 }
 
 export interface ProofOfPossessionArgs {
   proofOfPossessionCallback: JWTSignerCallback;
   proofOfPossessionVerifierCallback?: JWTVerifyCallback;
-  proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs;
 }
 
-export type JWTSignerCallback = (args: ProofOfPossessionCallbackArgs) => Promise<string>;
+export type JWTSignerCallback = (jwtArgs: JwtArgs, kid: string) => Promise<string>;
 
 export type JWTVerifyCallback = (args: { jwt: string; kid: string }) => Promise<void>;
 ````
@@ -192,13 +190,8 @@ import { CredentialRequestClientBuilder, CredentialResponse, ProofOfPossessionAr
 
 const credentialRequestClient = CredentialRequestClientBuilder.fromIssuanceInitiation(initiationRequestWithUrl)
 
-const proofOpts: ProofOfPossessionArgs = {
-  proofOfPossessionCallback: (args) => signJWT(args),
-  proofOfPossessionCallbackArgs: { 
-    kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', 
-    header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
-    payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'sphereon' }
-  }
+const proofArgs: ProofOfPossessionArgs = {
+  proofOfPossessionCallback: (args, kid) => signJWT(args, kid)
 }
 
 // In 1 step:
@@ -295,16 +288,17 @@ Creates the ProofOfPossession object and JWT signature
 
 The callback function created using the `jose` library.
 
-
 ````typescript
+import { JwtArgs } from "./CredentialIssuance.types";
 
 const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
+
 // Must be JWS
-async function proofOfPossessionCallbackFunction(args: ProofOfPossessionCallbackArgs): Promise<string> {
-  return await new jose.SignJWT({ ...args.payload })
-    .setProtectedHeader({ alg: 'ES256' })
+async function proofOfPossessionCallbackFunction(args: JwtArgs, kid: string): Promise<string> {
+  return await new jose.SignJWT({...args.payload})
+    .setProtectedHeader({alg: 'ES256'})
     .setIssuedAt()
-    .setIssuer(args.kid)
+    .setIssuer(kid)
     .setAudience(args.payload.aud)
     .setExpirationTime('2h')
     .sign(keypair.privateKey);
@@ -321,12 +315,13 @@ async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; ki
 The arguments requested by `jose` and `oidc4vci`
 
 ```typescript
+import { JwtArgs } from "./CredentialIssuance.types";
+
 const keyPair = await jose.generateKeyPair('ES256');
 
-const jwtArgs: ProofOfPossessionCallbackArgs = {
-  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
-  payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'sphereon' },
-  kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
+const jwtArgs: JwtArgs = {
+  header: {alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT},
+  payload: {iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'sphereon'}
 };
 ```
 
@@ -336,15 +331,15 @@ The actual method call
 const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
   .withProofCallbackOpts({
     proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-    proofOfPossessionVerifierCallback: proofOfPossessionVerifierCallbackFunction,
-    proofOfPossessionCallbackArgs: {
-      header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
-      payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'sphereon' },
-      kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
-    },
+    proofOfPossessionVerifierCallback: proofOfPossessionVerifierCallbackFunction
   })
   .withEndpointMetadata(metadata)
   .withClientId('sphereon:wallet')
+  .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
+  .withJwtArgs({
+    header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
+    payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'sphereon' }
+  })
   .build();
 console.log(proof);
 // {

@@ -7,8 +7,8 @@ import {
   CredentialRequestClientBuilder,
   CredentialResponse,
   IssuanceInitiation,
+  JwtArgs,
   ProofOfPossession,
-  ProofOfPossessionCallbackArgs,
   Typ,
 } from '../lib';
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
@@ -74,8 +74,8 @@ describe('OID4VCI-Client should', () => {
         .withFormat('jwt_vc')
         .withTokenFromResponse(accessTokenResponse as AccessTokenResponse)
         .build();
-      async function proofOfPossessionCallbackFunction(args: ProofOfPossessionCallbackArgs): Promise<string> {
-        console.log(args);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      async function proofOfPossessionCallbackFunction(_args: JwtArgs, _kid: string): Promise<string> {
         return 'ey.val.ue';
       }
 
@@ -83,16 +83,16 @@ describe('OID4VCI-Client should', () => {
       // is not assignable to type 'ProofOfPossessionCallback'.
       // Types of parameters 'args' and 'args' are incompatible.
       // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
-      const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
-        .withProofCallbackOpts({
-          proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-          proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
-        })
+      const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromProofCallbackArgs({
+        proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+      })
         .withEndpointMetadata({
           issuer: 'https://issuer.research.identiproof.io',
           credential_endpoint: 'https://issuer.research.identiproof.io/credential',
           token_endpoint: 'https://issuer.research.identiproof.io/token',
         })
+        .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
+        .withJwtArgs(jwtArgs)
         .build();
       const credResponse = (await credReqClient.acquireCredentialsUsingProof(proof, {})) as CredentialResponse;
       expect(credResponse.credential).toEqual(mockedVC);

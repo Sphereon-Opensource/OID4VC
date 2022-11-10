@@ -13,16 +13,17 @@ import {
   ErrorResponse,
   IssuanceInitiation,
   JWS_NOT_VALID,
+  JwtArgs,
   MetadataClient,
   ProofOfPossession,
-  ProofOfPossessionCallbackArgs,
   Typ,
   WellKnownEndpoints,
 } from '../lib';
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, WALT_OID4VCI_METADATA } from './MetadataMocks';
-const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJzcGhlcmVvbiIsImlzcyI6ImRpZDpleGFtcGxlOmViZmViMWY3MT';
+
+const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJzcGhlcmVvbiIsImlhdCI6MTY2ODA3N';
 
 const jwtArgs = {
   header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
@@ -34,11 +35,11 @@ const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1';
 let keypair: KeyPair;
 let metadata: EndpointMetadata;
 
-async function proofOfPossessionCallbackFunction(args: ProofOfPossessionCallbackArgs): Promise<string> {
+async function proofOfPossessionCallbackFunction(args: JwtArgs, kid: string): Promise<string> {
   return await new jose.SignJWT({ ...args.payload })
     .setProtectedHeader({ alg: 'ES256' })
     .setIssuedAt()
-    .setIssuer(args.kid)
+    .setIssuer(kid)
     .setAudience(args.payload.aud)
     .setExpirationTime('2h')
     .sign(keypair.privateKey);
@@ -59,6 +60,11 @@ beforeAll(async () => {
   metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
 });
 
+beforeEach(() => {
+  ProofOfPossessionBuilder.fromProof(null);
+  ProofOfPossessionBuilder.fromProofCallbackArgs(null);
+});
+
 describe('Credential Request Client ', () => {
   it('should build correctly provided with correct params', function () {
     const credReqClient = CredentialRequestClient.builder()
@@ -74,14 +80,14 @@ describe('Credential Request Client ', () => {
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
-    const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
-      .withProofCallbackOpts({
-        proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-        proofOfPossessionVerifierCallback: proofOfPossessionVerifierCallbackFunction,
-        proofOfPossessionCallbackArgs: { kid, ...jwtArgs },
-      })
+    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromProofCallbackArgs({
+      proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+      proofOfPossessionVerifierCallback: proofOfPossessionVerifierCallbackFunction,
+    })
       .withEndpointMetadata(metadata)
       .withClientId('sphereon:wallet')
+      .withKid(kid)
+      .withJwtArgs(jwtArgs)
       .build();
     await proofOfPossessionVerifierCallbackFunction({ ...proof, kid });
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
@@ -102,13 +108,13 @@ describe('Credential Request Client ', () => {
       .withFormat('ldp_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
-    const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
-      .withProofCallbackOpts({
-        proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-        proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
-      })
+    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromProofCallbackArgs({
+      proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+    })
       .withEndpointMetadata(metadata)
       .withClientId('sphereon:wallet')
+      .withKid(kid)
+      .withJwtArgs(jwtArgs)
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
@@ -130,12 +136,12 @@ describe('Credential Request Client ', () => {
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
-    const proof: ProofOfPossession = await new ProofOfPossessionBuilder()
-      .withProofCallbackOpts({
-        proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-        proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
-      })
+    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromProofCallbackArgs({
+      proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+    })
       .withEndpointMetadata(metadata)
+      .withJwtArgs(jwtArgs)
+      .withKid(kid)
       .withClientId('sphereon:wallet')
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
@@ -146,35 +152,30 @@ describe('Credential Request Client ', () => {
 
   it('should fail creating a proof of possession with simple verification', async () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<string> {
+    async function proofOfPossessionCallbackFunction(_args: JwtArgs, _kid: string): Promise<string> {
       throw new Error(JWS_NOT_VALID);
     }
     await expect(
-      new ProofOfPossessionBuilder()
-        .withProofCallbackOpts({
-          proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-          proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
-        })
+      ProofOfPossessionBuilder.fromProofCallbackArgs({ proofOfPossessionCallback: proofOfPossessionCallbackFunction })
         .withEndpointMetadata(metadata)
         .withClientId('sphereon:wallet')
+        .withKid(kid)
         .build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
 
   it('should fail creating a proof of possession with verify callback function', async () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async function proofOfPossessionCallbackFunction(_args: ProofOfPossessionCallbackArgs): Promise<string> {
+    async function proofOfPossessionCallbackFunction(_args: JwtArgs, _kid: string): Promise<string> {
       throw new Error(JWS_NOT_VALID);
     }
 
     await expect(
-      new ProofOfPossessionBuilder()
-        .withProofCallbackOpts({
-          proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-          proofOfPossessionCallbackArgs: { kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', ...jwtArgs },
-        })
+      ProofOfPossessionBuilder.fromProofCallbackArgs({ proofOfPossessionCallback: proofOfPossessionCallbackFunction })
         .withEndpointMetadata(metadata)
         .withClientId('sphereon:wallet')
+        .withJwtArgs(jwtArgs)
+        .withKid(kid)
         .build()
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
