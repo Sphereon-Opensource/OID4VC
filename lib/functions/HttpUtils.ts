@@ -1,6 +1,9 @@
 import { fetch } from 'cross-fetch';
+import Debug from 'debug';
 
 import { Encoding } from '../types';
+
+const debug = Debug('sphereon:oid4vci:http');
 
 export class NotFoundError extends Error {
   constructor(message: string) {
@@ -11,15 +14,14 @@ export class NotFoundError extends Error {
 export async function getJson<T>(URL: string): Promise<T> {
   let message = '';
 
-  // TODO: Remove console.logs
-  console.log(`Well-known URL: URL`);
+  debug(`Fetching well-known URL: ${URL}`);
   const response = await fetch(URL);
   if (!response) {
     message = 'no response returned';
   } else {
     if (response.status && response.status < 400) {
       const json = await response.json();
-      // console.log(`Well-known response: ${JSON.stringify(json, null, 2)}`);
+      debug(`Well-knonw response: ${JSON.stringify(json, null, 2)}`);
       return json as T;
     } else if (response.status === 404) {
       throw new NotFoundError(`URL ${URL} was not found`);
@@ -27,7 +29,7 @@ export async function getJson<T>(URL: string): Promise<T> {
       message = `${response.status}:${response.statusText}, ${await response.text()}`;
     }
   }
-  console.log(`Well-known error: ${message}`);
+  debug(`Well-known url ${URL} gave an error: ${message}`);
   throw new Error('error: ' + message);
 }
 
@@ -62,21 +64,23 @@ export async function post(
 
   try {
     // TODO: Remove the console.logs!
-    console.log(`START fetching url: ${url}`);
-    console.log(`with Headers: ${JSON.stringify(payload.headers)}`);
-    console.log(`with body: ${body}`);
-    // console.log(`with payload: ${JSON.stringify(payload)}`);
+    debug(`START fetching url: ${url}`);
+    console.log('token (if any) and body:');
+    console.log('==========================');
+    console.log(opts.bearerToken);
+    console.log(JSON.stringify(body));
+    console.log('==========================');
+    debug(`Headers: ${JSON.stringify(payload.headers)}`);
     const response = await fetch(url, payload);
     if (response && response.status >= 200 && response.status < 400) {
       const logResponse = response.clone();
       try {
-        // console.log(`Success response with status ${logResponse.status}. Headers: ${JSON.stringify(logResponse.headers)}`);
-        console.log(`Success response: ${JSON.stringify(await logResponse.json(), null, 2)}`);
-      } catch (jsonerror) {
-        console.log('success response did throw error on serialization: ' + jsonerror.message);
-        console.log(`Success response: ${JSON.stringify(await logResponse.text(), null, 2)}`);
+        debug(`Success response with status ${logResponse.status}. Headers: ${JSON.stringify(logResponse.headers)}`);
+        console.log(`Success response: ${await logResponse.text()}`);
+      } catch (error) {
+        console.log('success response did throw error: ' + error.message);
       }
-      console.log(`END fetching url: ${url}`);
+      debug(`END fetching url: ${url}`);
       return response;
     } else {
       if (response) {
@@ -85,9 +89,9 @@ export async function post(
           `Response with status ${logResponse.status} and status text ${logResponse.statusText} with headers ${JSON.stringify(logResponse.headers)})}`
         );
         try {
-          message = `${logResponse.status}:${logResponse.statusText}, ${JSON.stringify(await logResponse.json())}`;
+          message = `${logResponse.status}:${logResponse.statusText}, response: ${await logResponse.text()}`;
         } catch (jsonerror) {
-          console.log(`accessing error body as json failed. Using text next.`);
+          console.log(`accessing error body as json failed. ${jsonerror.message}`);
           message = `${logResponse.status}:${logResponse.statusText}, ${await logResponse.text()}`;
         }
       } else {
@@ -97,24 +101,24 @@ export async function post(
   } catch (error) {
     const err = error as Error;
     console.log(`Error: ${JSON.stringify(err.stack)} ${error.message}`);
-    console.log(`END fetching url: ${url}`);
+    debug(`END fetching url: ${url}`);
     throw new Error(`${(error as Error).message}`);
   }
 
   console.log(`unexpected Error: ${JSON.stringify(message)}`);
-  console.log(`END fetching url: ${url}`);
+  debug(`END fetching url: ${url}`);
   throw new Error('unexpected error: ' + message);
 }
 
 export function isValidURL(url: string): boolean {
   const urlPattern = new RegExp(
-    '^(https:\\/\\/)?' + // validate protocol
+    '^(https?:\\/\\/)?' + // validate protocol
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
       '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address
-      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // validate port and path
+      '(\\:\\d+)?(\\/[-a-z\\d%_.~+:]*)*' + // validate port and path
       '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
-      '(\\#[-a-z\\d_]*)?$',
+      '(\\#[-a-z\\d_]*)?$', // validate fragment locator
     'i'
-  ); // validate fragment locator
+  );
   return !!urlPattern.test(url);
 }

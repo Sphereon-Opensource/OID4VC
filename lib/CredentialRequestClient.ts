@@ -1,9 +1,12 @@
 import { CredentialFormat } from '@sphereon/ssi-types';
+import Debug from 'debug';
 
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { isValidURL, post } from './functions';
 import { CredentialRequest, CredentialResponse, ErrorResponse, ProofOfPossession, ProofOfPossessionArgs, URL_NOT_VALID } from './types';
+
+const debug = Debug('sphereon:oid4vci:credential');
 
 export class CredentialRequestClient {
   _issuanceRequestOpts: Partial<{
@@ -55,11 +58,15 @@ export class CredentialRequestClient {
       ? opts.overrideCredentialEndpoint
       : this._issuanceRequestOpts.credentialEndpoint;
     if (!isValidURL(credentialEndpoint)) {
+      debug(`Invalid credential endpoint: ${credentialEndpoint}`);
       throw new Error(URL_NOT_VALID);
     }
+    debug(`Acquiring credential(s) from: ${credentialEndpoint}`);
     const requestToken: string = opts?.overrideAccessToken ? opts.overrideAccessToken : this._issuanceRequestOpts.token;
     const response = await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken });
+    // TODO: Move error to response
     const responseJson = await response.json();
+    debug(`Credential endpoint ${credentialEndpoint} response:\r\n${responseJson}`);
     if (responseJson.error) {
       return { ...responseJson } as ErrorResponse;
     }

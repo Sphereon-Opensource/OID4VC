@@ -1,6 +1,8 @@
-import { JWTHeaderParameters } from 'jose';
+import Debug from 'debug';
 
-import { Alg, BAD_PARAMS, EndpointMetadata, JWS_NOT_VALID, JwtArgs, JWTPayload, ProofOfPossession, ProofOfPossessionArgs, ProofType } from '../types';
+import { BAD_PARAMS, JWS_NOT_VALID, JWTHeader, JWTPayload, JWTSignerArgs, ProofOfPossession, ProofOfPossessionOpts, ProofType } from '../types';
+
+const debug = Debug('sphereon:oid4vci:token');
 
 /**
  *
@@ -30,6 +32,7 @@ export async function createProofOfPossession(
   clientId?: string
 ): Promise<ProofOfPossession> {
   if (!args.proofOfPossessionCallback) {
+    debug(`no jwt signer callback or arguments supplied!`);
     throw new Error(BAD_PARAMS);
   }
   const signerArgs = createJWT(kid, endpointMetadata, jwtArgs, clientId);
@@ -39,9 +42,16 @@ export async function createProofOfPossession(
     proof_type: ProofType.JWT,
     jwt,
   };
+  try {
   if (args.proofOfPossessionVerifierCallback) {
+    debug(`Calling supplied verify callback....`);
     await args.proofOfPossessionVerifierCallback({ jwt, kid: kid });
+    debug(`Supplied verify callback return success result`);
+  }} catch {
+    debug(`JWS was not valid`);
+    throw new Error(JWS_NOT_VALID);
   }
+  debug(`Proof of Possession JWT:\r\n${jwt}`);
   return proof;
 }
 
