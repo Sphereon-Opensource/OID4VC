@@ -1,6 +1,7 @@
 import Debug from 'debug';
+import { JWTHeaderParameters } from 'jose';
 
-import { BAD_PARAMS, JWS_NOT_VALID, JWTHeader, JWTPayload, JWTSignerArgs, ProofOfPossession, ProofOfPossessionOpts, ProofType } from '../types';
+import { Alg, BAD_PARAMS, EndpointMetadata, JWS_NOT_VALID, JwtArgs, JWTPayload, ProofOfPossession, ProofOfPossessionArgs, ProofType } from '../types';
 
 const debug = Debug('sphereon:oid4vci:token');
 
@@ -17,7 +18,7 @@ const debug = Debug('sphereon:oid4vci:token');
  *      Mandatory to create (sign) ProofOfPossession
  *    - proofOfPossessionVerifierCallback?: JWTVerifyCallback
  *      If exists, verifies the ProofOfPossession
- * @param kid: the kid refers to a DID URL which identifies a particular key in the DID Document that the Credential shall be bound t
+ * @param kid: the kid refers to a DID URL which identifies a particular key in the DID Document that the Credential shall be bound to
  * @param endpointMetadata
  *  - Mandatory for signing the ProofOfPossession
  * @param jwtArgs
@@ -43,11 +44,12 @@ export async function createProofOfPossession(
     jwt,
   };
   try {
-  if (args.proofOfPossessionVerifierCallback) {
-    debug(`Calling supplied verify callback....`);
-    await args.proofOfPossessionVerifierCallback({ jwt, kid: kid });
-    debug(`Supplied verify callback return success result`);
-  }} catch {
+    if (args.proofOfPossessionVerifierCallback) {
+      debug(`Calling supplied verify callback....`);
+      await args.proofOfPossessionVerifierCallback({ jwt, kid: kid });
+      debug(`Supplied verify callback return success result`);
+    }
+  } catch {
     debug(`JWS was not valid`);
     throw new Error(JWS_NOT_VALID);
   }
