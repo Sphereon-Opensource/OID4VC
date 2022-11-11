@@ -1,5 +1,3 @@
-import { KeyObject } from 'crypto';
-
 import { CredentialFormat, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 export interface CredentialRequest {
@@ -57,7 +55,25 @@ export interface JWK {
   n?: string;
 }
 
-export type Alg = 'ES256' | 'EdDSA';
+export interface JwtArgs {
+  header?: JWTHeader;
+  payload?: JWTPayload;
+}
+
+export interface ProofOfPossessionArgs {
+  proofOfPossessionCallback: JWTSignerCallback;
+  proofOfPossessionVerifierCallback?: JWTVerifyCallback;
+}
+
+export enum Alg {
+  EdDSA = 'EdDSA',
+  ES256 = 'ES256',
+  ES256K = 'ES256K',
+}
+
+export enum Typ {
+  JWT = 'JWT',
+}
 
 export interface JWTHeader {
   alg: Alg; // REQUIRED by the JWT signer
@@ -72,33 +88,11 @@ export interface JWTPayload {
   aud?: string; // REQUIRED (string). The value of this claim MUST be the issuer URL of credential issuer.
   iat?: number; // REQUIRED (number). The value of this claim MUST be the time at which the proof was issued using the syntax defined in [RFC7519].
   nonce?: string; // REQUIRED (string). The value type of this claim MUST be a string, where the value is a c_nonce provided by the credential issuer. //TODO: Marked as required not present in NGI flow
-  jti: string; // A new nonce chosen by the wallet. Used to prevent replay
+  jti?: string; // A new nonce chosen by the wallet. Used to prevent replay
   exp?: number; // Not longer than 5 minutes
 }
 
-export interface JWTSignerArgs {
-  header: JWTHeader;
-  payload: JWTPayload;
-  privateKey: KeyObject;
-  publicKey: KeyObject;
-}
-
-export interface JWTVerifyArgs {
-  jws: string;
-  key: KeyObject;
-  algorithms?: Alg[];
-}
-
-export interface ProofOfPossessionOpts {
-  issuerURL?: string;
-  clientId?: string;
-  jwtSignerArgs: JWTSignerArgs;
-  jwtSignerCallback: JWTSignerCallback;
-  jwtVerifyCallback?: JWTVerifyCallback;
-}
-
-export type JWTSignerCallback = (args: JWTSignerArgs) => Promise<string>;
-
-export type JWTVerifyCallback = (args: JWTVerifyArgs) => Promise<void>;
+export type JWTSignerCallback = (jwtArgs: JwtArgs, kid: string) => Promise<string>;
+export type JWTVerifyCallback = (args: { jwt: string; kid: string }) => Promise<void>;
 
 export type Request = CredentialRequest;
