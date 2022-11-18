@@ -1,5 +1,5 @@
 import { IssuanceInitiationRequestPayload } from './CredentialIssuance.types';
-import { EndpointMetadata, PRE_AUTH_CODE_LITERAL } from './Generic.types';
+import { EndpointMetadata, ErrorResponse, PRE_AUTH_CODE_LITERAL } from './Generic.types';
 
 export enum GrantTypes {
   AUTHORIZATION_CODE = 'authorization_code',
@@ -56,6 +56,12 @@ export interface AccessTokenRequest {
   redirect_uri?: string;
   scope?: string;
   user_pin?: string;
+}
+
+export interface OpenIDResponse<T> {
+  origResponse: Response;
+  successBody?: T;
+  errorBody?: ErrorResponse;
 }
 
 export interface AccessTokenResponse {

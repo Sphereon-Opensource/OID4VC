@@ -20,7 +20,7 @@ describe('Metadataclient with IdentiProof Issuer should', () => {
     nock.cleanAll();
   });
   it('succeed with OID4VCI and separate AS metadata', async () => {
-    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OIDC4VCI).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
 
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
 
@@ -31,7 +31,7 @@ describe('Metadataclient with IdentiProof Issuer should', () => {
   });
 
   it('succeed with OID4VCI and separate AS metadata from Initiation', async () => {
-    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OIDC4VCI).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
 
     const INITIATE_URI =
@@ -45,11 +45,11 @@ describe('Metadataclient with IdentiProof Issuer should', () => {
 
   it('Fail without OID4VCI and only AS metadata (no credential endpoint)', async () => {
     nock(IDENTIPROOF_ISSUER_URL)
-      .get(WellKnownEndpoints.OIDC4VCI)
+      .get(WellKnownEndpoints.OPENID4VCI_ISSUER)
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     nock(IDENTIPROOF_ISSUER_URL)
-      .get(WellKnownEndpoints.OIDC_CONFIGURATION)
+      .get(WellKnownEndpoints.OPENID_CONFIGURATION)
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     nock(IDENTIPROOF_ISSUER_URL)
@@ -62,21 +62,19 @@ describe('Metadataclient with IdentiProof Issuer should', () => {
   });
 
   it('Fail with OID4VCI and no AS metadata', async () => {
-    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OIDC4VCI).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
     nock(IDENTIPROOF_ISSUER_URL)
-      .get(WellKnownEndpoints.OIDC_CONFIGURATION)
+      .get(WellKnownEndpoints.OPENID_CONFIGURATION)
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, JSON.stringify({}));
-    await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL)).rejects.toThrowError(
-      'URL https://auth.research.identiproof.io/.well-known/oauth-authorization-server was not found'
-    );
+    await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL)).rejects.toThrowError('{"error": "not found"}');
   });
 });
 
 describe('Metadataclient with Spruce Issuer should', () => {
   it('succeed with OID4VCI and separate AS metadata', async () => {
-    nock(SPRUCE_ISSUER_URL).get(WellKnownEndpoints.OIDC4VCI).reply(200, JSON.stringify(SPRUCE_OID4VCI_METADATA));
+    nock(SPRUCE_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(SPRUCE_OID4VCI_METADATA));
 
     const metadata = await MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL);
     expect(metadata.credential_endpoint).toEqual('https://ngi-oidc4vci-test.spruceid.xyz/credential');
@@ -98,7 +96,7 @@ describe('Metadataclient with Spruce Issuer should', () => {
 
 describe('Metadataclient with Danubetech should', () => {
   it('succeed without OID4VCI and with OIDC metadata', async () => {
-    nock(DANUBE_ISSUER_URL).get(WellKnownEndpoints.OIDC_CONFIGURATION).reply(200, JSON.stringify(DANUBE_OIDC_METADATA));
+    nock(DANUBE_ISSUER_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(200, JSON.stringify(DANUBE_OIDC_METADATA));
 
     nock(DANUBE_ISSUER_URL)
       .get(/.well-known\/.*/)
@@ -124,7 +122,7 @@ describe('Metadataclient with Danubetech should', () => {
 
 describe('Metadataclient with Walt-id should', () => {
   it('succeed without OID4VCI and with OIDC metadata', async () => {
-    nock(WALT_ISSUER_URL).get(WellKnownEndpoints.OIDC4VCI).reply(200, JSON.stringify(WALT_OID4VCI_METADATA));
+    nock(WALT_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(WALT_OID4VCI_METADATA));
 
     nock(WALT_ISSUER_URL)
       .get(/.well-known\/.*/)

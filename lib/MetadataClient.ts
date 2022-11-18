@@ -1,17 +1,18 @@
 import Debug from 'debug';
 
-import { getJson, NotFoundError } from './functions';
+import { getJson } from './functions';
 import {
   EndpointMetadata,
   IssuanceInitiationRequestPayload,
   IssuanceInitiationWithBaseUrl,
   OAuth2ASMetadata,
   Oauth2ASWithOID4VCIMetadata,
-  OID4VCIServerMetadata,
+  OpenID4VCIServerMetadata,
+  OpenIDResponse,
   WellKnownEndpoints,
 } from './types';
 
-const debug = Debug('sphereon:oid4vci:metadata');
+const debug = Debug('sphereon:openid4vci:metadata');
 
 export class MetadataClient {
   public static async;
@@ -40,8 +41,8 @@ export class MetadataClient {
   public static async retrieveAllMetadata(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadata | undefined> {
     let token_endpoint;
     let credential_endpoint;
-    let oid4vciMetadata = await MetadataClient.retrieveOID4VCIServerMetadata(issuer);
-
+    const response = await MetadataClient.retrieveOpenID4VCIServerMetadata(issuer);
+    let oid4vciMetadata = response.successBody ? response.successBody : undefined;
     if (oid4vciMetadata) {
       debug(`Issuer ${issuer} OID4VCI well-known server metadata\r\n${oid4vciMetadata}`);
       credential_endpoint = oid4vciMetadata.credential_endpoint;
@@ -51,25 +52,35 @@ export class MetadataClient {
           `Issuer ${issuer} OID4VCI metadata has separate authorization_server ${oid4vciMetadata.authorization_server} that contains the token endpoint`
         );
         // Crossword uses this to separate the AS metadata. We fail when not found, since we now have no way of getting the token endpoint
-        const asMetadata: OAuth2ASMetadata = await this.retrieveWellknown(oid4vciMetadata.authorization_server, WellKnownEndpoints.OAUTH_AS, {
-          errorOnNotFound: true,
-        });
-        token_endpoint = asMetadata?.token_endpoint;
+        const response: OpenIDResponse<OAuth2ASMetadata> = await this.retrieveWellknown(
+          oid4vciMetadata.authorization_server,
+          WellKnownEndpoints.OAUTH_AS,
+          {
+            errorOnNotFound: true,
+          }
+        );
+        token_endpoint = response.successBody?.token_endpoint;
       }
     } else {
       // No specific OID4VCI endpoint. Either can be an OAuth2 AS or an OpenID IDP. Let's start with OIDC first
-      let asConfig: Oauth2ASWithOID4VCIMetadata = await MetadataClient.retrieveWellknown(issuer, WellKnownEndpoints.OIDC_CONFIGURATION, {
-        errorOnNotFound: false,
-      });
+      let response: OpenIDResponse<Oauth2ASWithOID4VCIMetadata> = await MetadataClient.retrieveWellknown(
+        issuer,
+        WellKnownEndpoints.OPENID_CONFIGURATION,
+        {
+          errorOnNotFound: false,
+        }
+      );
+      let asConfig = response.successBody;
       if (asConfig) {
         debug(`Issuer ${issuer} has OpenID Connect Server metadata in well-known location`);
       } else {
         // Now oAuth2
-        asConfig = await MetadataClient.retrieveWellknown(issuer, WellKnownEndpoints.OAUTH_AS, { errorOnNotFound: false });
+        response = await MetadataClient.retrieveWellknown(issuer, WellKnownEndpoints.OAUTH_AS, { errorOnNotFound: false });
+        asConfig = response.successBody;
       }
       if (asConfig) {
         debug(`Issuer ${issuer} has oAuth2 Server metadata in well-known location`);
-        oid4vciMetadata = asConfig; // TODO: Strip other info?
+        oid4vciMetadata = asConfig;
         credential_endpoint = oid4vciMetadata.credential_endpoint;
         token_endpoint = oid4vciMetadata.token_endpoint;
       }
@@ -104,9 +115,9 @@ export class MetadataClient {
    *
    * @param issuerHost The issuer hostname
    */
-  public static async retrieveOID4VCIServerMetadata(issuerHost: string): Promise<OID4VCIServerMetadata | undefined> {
+  public static async retrieveOpenID4VCIServerMetadata(issuerHost: string): Promise<OpenIDResponse<OpenID4VCIServerMetadata> | undefined> {
     // Since the server metadata endpoint is optional we are not going to throw an error.
-    return MetadataClient.retrieveWellknown(issuerHost, WellKnownEndpoints.OIDC4VCI, { errorOnNotFound: false });
+    return MetadataClient.retrieveWellknown(issuerHost, WellKnownEndpoints.OPENID4VCI_ISSUER, { errorOnNotFound: false });
   }
 
   /**
@@ -120,14 +131,15 @@ export class MetadataClient {
     host: string,
     endpointType: WellKnownEndpoints,
     opts?: { errorOnNotFound?: boolean }
-  ): Promise<T | undefined> {
-    try {
-      return await getJson(`${host.endsWith('/') ? host.slice(0, -1) : host}${endpointType}`);
-    } catch (error) {
-      if (!opts?.errorOnNotFound && error instanceof NotFoundError) {
-        return undefined;
+  ): Promise<OpenIDResponse<T>> {
+    const result: OpenIDResponse<T> = await getJson(`${host.endsWith('/') ? host.slice(0, -1) : host}${endpointType}`, {
+      exceptionOnHttpErrorStatus: opts?.errorOnNotFound,
+    });
+    if (result.origResponse.status === 404) {
+      if (opts?.errorOnNotFound) {
+        throw result.errorBody;
       }
-      throw error;
     }
+    return result;
   }
 }

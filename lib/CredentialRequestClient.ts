@@ -4,9 +4,9 @@ import Debug from 'debug';
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { isValidURL, post } from './functions';
-import { CredentialRequest, CredentialResponse, ErrorResponse, ProofOfPossession, ProofOfPossessionArgs, URL_NOT_VALID } from './types';
+import { CredentialRequest, CredentialResponse, OpenIDResponse, ProofOfPossession, ProofOfPossessionArgs, URL_NOT_VALID } from './types';
 
-const debug = Debug('sphereon:oid4vci:credential');
+const debug = Debug('sphereon:openid4vci:credential');
 
 export class CredentialRequestClient {
   _issuanceRequestOpts: Partial<{
@@ -42,7 +42,7 @@ export class CredentialRequestClient {
       overrideIssuerURL?: string;
       overrideAccessToken?: string;
     }
-  ): Promise<CredentialResponse | ErrorResponse> {
+  ): Promise<OpenIDResponse<CredentialResponse>> {
     const proofOfPossession = proof.proofOfPossessionCallback
       ? await ProofOfPossessionBuilder.fromProofCallbackArgs(proof as ProofOfPossessionArgs).build()
       : await ProofOfPossessionBuilder.fromProof(proof as ProofOfPossession).build();
@@ -53,7 +53,7 @@ export class CredentialRequestClient {
   public async acquireCredentialsUsingRequest(
     request: CredentialRequest,
     opts?: { overrideCredentialEndpoint?: string; overrideAccessToken?: string }
-  ): Promise<CredentialResponse | ErrorResponse> {
+  ): Promise<OpenIDResponse<CredentialResponse>> {
     const credentialEndpoint: string = opts?.overrideCredentialEndpoint
       ? opts.overrideCredentialEndpoint
       : this._issuanceRequestOpts.credentialEndpoint;
@@ -63,14 +63,9 @@ export class CredentialRequestClient {
     }
     debug(`Acquiring credential(s) from: ${credentialEndpoint}`);
     const requestToken: string = opts?.overrideAccessToken ? opts.overrideAccessToken : this._issuanceRequestOpts.token;
-    const response = await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken });
-    // TODO: Move error to response
-    const responseJson = await response.json();
-    debug(`Credential endpoint ${credentialEndpoint} response:\r\n${responseJson}`);
-    if (responseJson.error) {
-      return { ...responseJson } as ErrorResponse;
-    }
-    return { ...responseJson } as CredentialResponse;
+    const response: OpenIDResponse<CredentialResponse> = await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken });
+    debug(`Credential endpoint ${credentialEndpoint} response:\r\n${response}`);
+    return response;
   }
 
   public async createCredentialRequest(

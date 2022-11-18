@@ -3,7 +3,7 @@ import { CredentialFormat } from '@sphereon/ssi-types';
 import { OAuth2ASMetadata } from './OAuth2ASMetadata';
 
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2
-export interface OID4VCIServerMetadata {
+export interface OpenID4VCIServerMetadata {
   credential_endpoint: string; //REQUIRED. URL of the OP's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   credentials_supported: CredentialsSupported; //REQUIRED. A JSON object containing a list of key value pairs, where the key is a string serving as an abstract identifier of the Credential. This identifier is RECOMMENDED to be collision resistant - it can be globally unique, but does not have to be when naming conflicts are unlikely to arise in a given use case. The value is a JSON object. The JSON object MUST conform to the structure of the Section 11.2.1.
   credential_issuer?: CredentialIssuer; //  A JSON object containing display properties for the Credential issuer.
@@ -11,7 +11,7 @@ export interface OID4VCIServerMetadata {
   authorization_server?: string; //NON-SPEC compliant, but used by some issuers. URL of the AS. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
 }
 
-export type Oauth2ASWithOID4VCIMetadata = OAuth2ASMetadata & OID4VCIServerMetadata;
+export type Oauth2ASWithOID4VCIMetadata = OAuth2ASMetadata & OpenID4VCIServerMetadata;
 
 export interface CredentialIssuer {
   display?: IssuerDisplay; //OPTIONAL. An array of objects, where each object contains display properties of a Credential issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
@@ -60,7 +60,7 @@ export interface Claims {
   [claimId: string]: ClaimSupport;
 }
 
-export type OID4VCICredentialFormatTypes = CredentialFormat | 'mdl_iso' | 'ac_vc' | string;
+export type OpenID4VCICredentialFormatTypes = CredentialFormat | 'mdl_iso' | 'ac_vc' | string;
 
 export interface CredentialFormatSupport {
   types: string[]; //REQUIRED. Array of strings representing a format specific type of a Credential. This value corresponds to type in W3C [VC_DATA] and a doctype in ISO/IEC 18013-5 (mobile Driving License).
@@ -71,7 +71,7 @@ export interface CredentialFormatSupport {
 }
 
 export type Formats = {
-  [format in OID4VCICredentialFormatTypes]: CredentialFormatSupport;
+  [format in OpenID4VCICredentialFormatTypes]: CredentialFormatSupport;
 };
 
 export interface ClaimDisplay {

@@ -1,6 +1,6 @@
 import nock from 'nock';
 
-import { AccessTokenClient, AccessTokenRequest, AccessTokenResponse, GrantTypes } from '../lib';
+import { AccessTokenClient, AccessTokenRequest, AccessTokenResponse, GrantTypes, OpenIDResponse } from '../lib';
 
 import { UNIT_TEST_TIMEOUT } from './IT.spec';
 
@@ -31,11 +31,14 @@ describe('AccessTokenClient should', () => {
       };
       nock(MOCK_URL).post(/.*/).reply(200, JSON.stringify(body));
 
-      const accessTokenResponse: AccessTokenResponse = (await accessTokenClient.acquireAccessTokenUsingRequest(accessTokenIssuanceRequest, {
-        asOpts: { as: MOCK_URL },
-      })) as AccessTokenResponse;
+      const accessTokenResponse: OpenIDResponse<AccessTokenResponse> = await accessTokenClient.acquireAccessTokenUsingRequest(
+        accessTokenIssuanceRequest,
+        {
+          asOpts: { as: MOCK_URL },
+        }
+      );
 
-      expect(accessTokenResponse).toEqual(body);
+      expect(accessTokenResponse.successBody).toEqual(body);
     },
     UNIT_TEST_TIMEOUT
   );
@@ -92,7 +95,10 @@ describe('AccessTokenClient should', () => {
       nock(MOCK_URL).post(/.*/).reply(200, {});
 
       await expect(
-        accessTokenClient.acquireAccessTokenUsingRequest(accessTokenIssuanceRequest, { isPinRequired: true, asOpts: { as: MOCK_URL } })
+        accessTokenClient.acquireAccessTokenUsingRequest(accessTokenIssuanceRequest, {
+          isPinRequired: true,
+          asOpts: { as: MOCK_URL },
+        })
       ).rejects.toThrow('A valid pin consisting of maximal 8 numeric characters must be present.');
     },
     UNIT_TEST_TIMEOUT
@@ -113,7 +119,10 @@ describe('AccessTokenClient should', () => {
       nock(MOCK_URL).post(/.*/).reply(200, {});
 
       await expect(
-        accessTokenClient.acquireAccessTokenUsingRequest(accessTokenIssuanceRequest, { isPinRequired: true, asOpts: { as: MOCK_URL } })
+        accessTokenClient.acquireAccessTokenUsingRequest(accessTokenIssuanceRequest, {
+          isPinRequired: true,
+          asOpts: { as: MOCK_URL },
+        })
       ).rejects.toThrow(Error('A valid pin consisting of maximal 8 numeric characters must be present.'));
     },
     UNIT_TEST_TIMEOUT
@@ -141,9 +150,11 @@ describe('AccessTokenClient should', () => {
       };
       nock(MOCK_URL).post(/.*/).reply(200, body);
 
-      await expect(
-        accessTokenClient.acquireAccessTokenUsingRequest(accessTokenIssuanceRequest, { isPinRequired: true, asOpts: { as: MOCK_URL } })
-      ).resolves.toEqual(body);
+      const response = await accessTokenClient.acquireAccessTokenUsingRequest(accessTokenIssuanceRequest, {
+        isPinRequired: true,
+        asOpts: { as: MOCK_URL },
+      });
+      expect(response.successBody).toEqual(body);
     },
     UNIT_TEST_TIMEOUT
   );

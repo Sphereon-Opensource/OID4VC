@@ -9,21 +9,21 @@ import {
   AccessTokenResponse,
   AuthorizationServerOpts,
   EndpointMetadata,
-  ErrorResponse,
   GrantTypes,
   IssuanceInitiationRequestPayload,
   IssuanceInitiationWithBaseUrl,
   IssuerOpts,
+  OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
 } from './types';
 
-const debug = Debug('sphereon:oid4vci:token');
+const debug = Debug('sphereon:openid4vci:token');
 
 export class AccessTokenClient {
   public async acquireAccessTokenUsingIssuanceInitiation(
     issuanceInitiation: IssuanceInitiationWithBaseUrl,
     opts?: AccessTokenRequestOpts
-  ): Promise<AccessTokenResponse | ErrorResponse> {
+  ): Promise<OpenIDResponse<AccessTokenResponse>> {
     const { issuanceInitiationRequest } = issuanceInitiation;
 
     const isPinRequired = this.isPinRequiredValue(issuanceInitiationRequest);
@@ -39,7 +39,7 @@ export class AccessTokenClient {
   public async acquireAccessTokenUsingRequest(
     accessTokenRequest: AccessTokenRequest,
     opts?: { isPinRequired?: boolean; metadata?: EndpointMetadata; asOpts?: AuthorizationServerOpts; issuerOpts?: IssuerOpts }
-  ): Promise<AccessTokenResponse | ErrorResponse> {
+  ): Promise<OpenIDResponse<AccessTokenResponse>> {
     this.validate(accessTokenRequest, opts?.isPinRequired);
     const requestTokenURL = this.determineTokenURL(
       opts?.asOpts,
@@ -128,9 +128,8 @@ export class AccessTokenClient {
     }
   }
 
-  private async sendAuthCode(requestTokenURL: string, accessTokenRequest: AccessTokenRequest): Promise<AccessTokenResponse | ErrorResponse> {
-    const response = await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest));
-    return await response.json();
+  private async sendAuthCode(requestTokenURL: string, accessTokenRequest: AccessTokenRequest): Promise<OpenIDResponse<AccessTokenResponse>> {
+    return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest));
   }
 
   private determineTokenURL(asOpts?: AuthorizationServerOpts, issuerOpts?: IssuerOpts, metadata?: EndpointMetadata): string {

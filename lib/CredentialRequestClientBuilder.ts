@@ -7,7 +7,7 @@ import {
   EndpointMetadata,
   IssuanceInitiationRequestPayload,
   IssuanceInitiationWithBaseUrl,
-  OID4VCIServerMetadata,
+  OpenID4VCIServerMetadata,
 } from './types';
 
 export class CredentialRequestClientBuilder {
@@ -47,7 +47,7 @@ export class CredentialRequestClientBuilder {
     return CredentialRequestClientBuilder.fromIssuanceInitiationRequest(issuanceInitiation.issuanceInitiationRequest, metadata);
   }
 
-  public withCredentialEndpointFromMetadata(metadata: OID4VCIServerMetadata): CredentialRequestClientBuilder {
+  public withCredentialEndpointFromMetadata(metadata: OpenID4VCIServerMetadata): CredentialRequestClientBuilder {
     this.credentialEndpoint = metadata.credential_endpoint;
     return this;
   }

@@ -3,7 +3,7 @@ import Debug from 'debug';
 import { convertJsonToURI, convertURIToJsonObject } from './functions';
 import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from './types';
 
-const debug = Debug('sphereon:oid4vci:initiation');
+const debug = Debug('sphereon:openid4vci:initiation');
 export class IssuanceInitiation {
   public static fromURI(issuanceInitiationURI: string): IssuanceInitiationWithBaseUrl {
     debug(`issuance initiation URI: ${issuanceInitiationURI}`);

@@ -8,9 +8,7 @@ import {
   CredentialRequest,
   CredentialRequestClient,
   CredentialRequestClientBuilder,
-  CredentialResponse,
   EndpointMetadata,
-  ErrorResponse,
   IssuanceInitiation,
   JWS_NOT_VALID,
   JwtArgs,
@@ -56,17 +54,18 @@ async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; ki
 beforeAll(async () => {
   const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
   keypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject };
-  nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OIDC4VCI).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
-  metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
 });
 
-beforeEach(() => {
+beforeEach(async () => {
+  nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
+  metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
   ProofOfPossessionBuilder.fromProof(null);
   ProofOfPossessionBuilder.fromProofCallbackArgs(null);
 });
 
 describe('Credential Request Client ', () => {
   it('should build correctly provided with correct params', function () {
+    nock.cleanAll();
     const credReqClient = CredentialRequestClient.builder()
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
@@ -118,8 +117,8 @@ describe('Credential Request Client ', () => {
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
-    const result: ErrorResponse | CredentialResponse = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
-    expect(result['error']).toBe('unsupported_format');
+    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
+    expect(result.successBody['error']).toBe('unsupported_format');
   });
 
   it('should get success credential response', async function () {
@@ -146,8 +145,8 @@ describe('Credential Request Client ', () => {
       .build();
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
-    const result: ErrorResponse | CredentialResponse = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
-    expect(result['credential']).toEqual(mockedVC);
+    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
+    expect(result.successBody['credential']).toEqual(mockedVC);
   });
 
   it('should fail creating a proof of possession with simple verification', async () => {

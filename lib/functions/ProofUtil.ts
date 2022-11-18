@@ -3,7 +3,7 @@ import { JWTHeaderParameters } from 'jose';
 
 import { Alg, BAD_PARAMS, EndpointMetadata, JWS_NOT_VALID, JwtArgs, JWTPayload, ProofOfPossession, ProofOfPossessionArgs, ProofType } from '../types';
 
-const debug = Debug('sphereon:oid4vci:token');
+const debug = Debug('sphereon:openid4vci:token');
 
 /**
  *
@@ -25,13 +25,13 @@ const debug = Debug('sphereon:oid4vci:token');
  * @param clientId
  *  - Optional, clientId of the party requesting the credential
  */
-export async function createProofOfPossession(
+export const createProofOfPossession = async (
   args: ProofOfPossessionArgs,
   kid: string,
   endpointMetadata: EndpointMetadata,
   jwtArgs?: JwtArgs,
   clientId?: string
-): Promise<ProofOfPossession> {
+): Promise<ProofOfPossession> => {
   if (!args.proofOfPossessionCallback) {
     debug(`no jwt signer callback or arguments supplied!`);
     throw new Error(BAD_PARAMS);
@@ -55,15 +55,15 @@ export async function createProofOfPossession(
   }
   debug(`Proof of Possession JWT:\r\n${jwt}`);
   return proof;
-}
+};
 
-function partiallyValidateJWS(jws: string): void {
+const partiallyValidateJWS = (jws: string): void => {
   if (jws.split('.').length !== 3 || !jws.startsWith('ey')) {
     throw new Error(JWS_NOT_VALID);
   }
-}
+};
 
-function createJWT(kid: string, endpointMetadata: EndpointMetadata, jwtArgs?: JwtArgs, clientId?: string): JwtArgs {
+const createJWT = (kid: string, endpointMetadata: EndpointMetadata, jwtArgs?: JwtArgs, clientId?: string): JwtArgs => {
   if (!jwtArgs) {
     jwtArgs = {
       header: {
@@ -99,4 +99,4 @@ function createJWT(kid: string, endpointMetadata: EndpointMetadata, jwtArgs?: Jw
   jwtArgs.payload = { ...defaultPayload, ...jwtArgs.payload };
   jwtArgs.header = { ...defaultHeader, ...jwtArgs.header };
   return jwtArgs;
-}
+};
