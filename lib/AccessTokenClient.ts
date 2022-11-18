@@ -41,7 +41,7 @@ export class AccessTokenClient {
     opts?: { isPinRequired?: boolean; metadata?: EndpointMetadata; asOpts?: AuthorizationServerOpts; issuerOpts?: IssuerOpts }
   ): Promise<OpenIDResponse<AccessTokenResponse>> {
     this.validate(accessTokenRequest, opts?.isPinRequired);
-    const requestTokenURL = this.determineTokenURL(
+    const requestTokenURL = AccessTokenClient.determineTokenURL(
       opts?.asOpts,
       opts?.issuerOpts,
       opts?.metadata
@@ -132,7 +132,7 @@ export class AccessTokenClient {
     return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest));
   }
 
-  private determineTokenURL(asOpts?: AuthorizationServerOpts, issuerOpts?: IssuerOpts, metadata?: EndpointMetadata): string {
+  public static determineTokenURL(asOpts?: AuthorizationServerOpts, issuerOpts?: IssuerOpts, metadata?: EndpointMetadata): string {
     if (!asOpts && !issuerOpts) {
       throw new Error('Cannot determine token URL if no issuer and no Authorization Server values are present');
     }
@@ -149,7 +149,7 @@ export class AccessTokenClient {
     return url;
   }
 
-  private creatTokenURLFromURL(url: string, tokenEndpoint?: string): string {
+  private static creatTokenURLFromURL(url: string, tokenEndpoint?: string): string {
     if (url.startsWith('http://')) {
       throw Error(`Unprotected token endpoints are not allowed ${url}`);
     }

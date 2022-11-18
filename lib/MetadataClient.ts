@@ -106,7 +106,7 @@ export class MetadataClient {
       issuer,
       token_endpoint,
       credential_endpoint,
-      oid4vci_metadata: oid4vciMetadata,
+      openid4vci_metadata: oid4vciMetadata,
     };
   }
 
