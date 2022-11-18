@@ -55,14 +55,14 @@ export interface JWK {
   n?: string;
 }
 
-export interface JwtArgs {
+export interface Jwt {
   header?: JWTHeader;
   payload?: JWTPayload;
 }
 
-export interface ProofOfPossessionArgs {
-  proofOfPossessionCallback: JWTSignerCallback;
-  proofOfPossessionVerifierCallback?: JWTVerifyCallback;
+export interface ProofOfPossessionCallbacks {
+  signCallback: JWTSignerCallback;
+  verifyCallback?: JWTVerifyCallback;
 }
 
 export enum Alg {
@@ -76,7 +76,7 @@ export enum Typ {
 }
 
 export interface JWTHeader {
-  alg: Alg; // REQUIRED by the JWT signer
+  alg: Alg | string; // REQUIRED by the JWT signer
   typ?: string; //JWT always
   kid?: string; // CONDITIONAL. JWT header containing the key ID. If the Credential shall be bound to a DID, the kid refers to a DID URL which identifies a particular key in the DID Document that the Credential shall be bound to. MUST NOT be present if jwk or x5c is present.
   jwk?: JWK; // CONDITIONAL. JWT header containing the key material the new Credential shall be bound to. MUST NOT be present if kid or x5c is present.
@@ -92,7 +92,7 @@ export interface JWTPayload {
   exp?: number; // Not longer than 5 minutes
 }
 
-export type JWTSignerCallback = (jwtArgs: JwtArgs, kid: string) => Promise<string>;
+export type JWTSignerCallback = (jwtArgs: Jwt, kid: string) => Promise<string>;
 export type JWTVerifyCallback = (args: { jwt: string; kid: string }) => Promise<void>;
 
 export type Request = CredentialRequest;

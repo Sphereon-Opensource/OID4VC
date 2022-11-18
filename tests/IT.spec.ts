@@ -4,30 +4,68 @@ import {
   AccessTokenClient,
   AccessTokenResponse,
   Alg,
+  AuthzFlowType,
   CredentialRequestClientBuilder,
   IssuanceInitiation,
-  JwtArgs,
+  Jwt,
   ProofOfPossession,
   Typ,
 } from '../lib';
+import { OpenID4VCIClient } from '../lib/OpenID4VCIClient';
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
+
+import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
 const ISSUER_URL = 'https://issuer.research.identiproof.io';
-const jwtArgs = {
+const jwt = {
   header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
-  payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'sphereon' },
-  privateKey: undefined,
-  publicKey: undefined,
+  payload: { iss: 'test-clientId', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: ISSUER_URL },
 };
 
 describe('OID4VCI-Client should', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function proofOfPossessionCallbackFunction(_args: Jwt, _kid: string): Promise<string> {
+    return 'ey.val.ue';
+  }
+
+  // Access token mocks
+  const mockedAccessTokenResponse: AccessTokenResponse = {
+    access_token: 'ey6546.546654.64565',
+    authorization_pending: false,
+    c_nonce: 'c_nonce2022101300',
+    c_nonce_expires_in: 2025101300,
+    interval: 2025101300,
+    token_type: 'Bearer',
+  };
   const INITIATE_QR_DATA =
     'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true';
 
+  it('succeed with a full flow wit the client', async () => {
+    nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
+    nock(IDENTIPROOF_AS_URL).get('/.well-known/oauth-authorization-server').reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
+    nock(IDENTIPROOF_AS_URL)
+      .post(/oauth2\/token.*/)
+      .reply(200, JSON.stringify(mockedAccessTokenResponse));
+
+    const client = await OpenID4VCIClient.initiateFromURI(INITIATE_QR_DATA, AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
+
+    expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
+    expect(client.initiation).toBeDefined();
+    expect(client.serverMetadata).toBeDefined();
+    expect(client.getIssuer()).toEqual('https://issuer.research.identiproof.io');
+    expect(client.getCredentialEndpoint()).toEqual('https://issuer.research.identiproof.io/credential');
+    expect(client.getAccessTokenEndpoint()).toEqual('https://auth.research.identiproof.io/oauth2/token');
+
+    const accessToken = await client.acquireAccessToken({ pin: '1234', clientId: 'test-clientId' });
+    expect(accessToken).toEqual(mockedAccessTokenResponse);
+
+    // const credential = await client.acquireCredentials()
+  });
+
   it(
-    'succeed with a full flow',
+    'succeed with a full flow without the client',
     async () => {
       /* Convert the URI into an object */
       const initiationWithUrl = IssuanceInitiation.fromURI(INITIATE_QR_DATA);
@@ -41,15 +79,6 @@ describe('OID4VCI-Client should', () => {
         user_pin_required: 'true',
       });
 
-      // Access token mocks
-      const mockedAccessTokenResponse: AccessTokenResponse = {
-        access_token: 'ey6546.546654.64565',
-        authorization_pending: false,
-        c_nonce: 'c_nonce2022101300',
-        c_nonce_expires_in: 2025101300,
-        interval: 2025101300,
-        token_type: 'Bearer',
-      };
       nock(ISSUER_URL)
         .post(/token.*/)
         .reply(200, JSON.stringify(mockedAccessTokenResponse));
@@ -73,17 +102,13 @@ describe('OID4VCI-Client should', () => {
         .withFormat('jwt_vc')
         .withTokenFromResponse(accessTokenResponse.successBody)
         .build();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      async function proofOfPossessionCallbackFunction(_args: JwtArgs, _kid: string): Promise<string> {
-        return 'ey.val.ue';
-      }
 
       //TS2322: Type '(args: ProofOfPossessionCallbackArgs) => Promise<string>'
       // is not assignable to type 'ProofOfPossessionCallback'.
       // Types of parameters 'args' and 'args' are incompatible.
       // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
-      const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromProofCallbackArgs({
-        proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+      const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt(jwt, {
+        signCallback: proofOfPossessionCallbackFunction,
       })
         .withEndpointMetadata({
           issuer: 'https://issuer.research.identiproof.io',
@@ -91,7 +116,6 @@ describe('OID4VCI-Client should', () => {
           token_endpoint: 'https://issuer.research.identiproof.io/token',
         })
         .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
-        .withJwtArgs(jwtArgs)
         .build();
       const credResponse = await credReqClient.acquireCredentialsUsingProof(proof, {});
       expect(credResponse.successBody.credential).toEqual(mockedVC);
