@@ -76,14 +76,14 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   const iss = getJwtProperty('iss', false, jwtProps.clientId, existingJwt?.payload?.iss);
   const jti = getJwtProperty('jti', false, jwtProps.jti, existingJwt?.payload?.jti);
   const nonce = getJwtProperty('nonce', true, jwtProps.nonce, existingJwt?.payload?.nonce);
-  const alg = getJwtProperty('alg', false, jwtProps.alg, existingJwt.header.alg, 'ES256');
-  const kid = getJwtProperty('kid', true, jwtProps.kid, existingJwt.header.kid);
+  const alg = getJwtProperty('alg', false, jwtProps.alg, existingJwt?.header?.alg, 'ES256');
+  const kid = getJwtProperty('kid', true, jwtProps.kid, existingJwt?.header?.kid);
   const jwt = existingJwt ? existingJwt : {};
   const now = +new Date();
   const jwtPayload: Partial<JWTPayload> = {
     aud,
-    iat: jwt.payload.iat ? jwt.payload.iat : now / 1000 - 60, // Let's ensure we subtract 60 seconds for potential time offsets
-    exp: jwt.payload.exp ? jwt.payload.exp : now / 1000 + 10 * 60,
+    iat: jwt.payload?.iat ? jwt.payload.iat : now / 1000 - 60, // Let's ensure we subtract 60 seconds for potential time offsets
+    exp: jwt.payload?.exp ? jwt.payload.exp : now / 1000 + 10 * 60,
     nonce,
     ...(iss ? { iss } : {}),
     ...(jti ? { jti } : {}),

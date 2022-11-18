@@ -75,11 +75,11 @@ export class OpenID4VCIClient {
   }
 
   public async acquireCredentials(
-    proofCallbacks: ProofOfPossessionCallbacks,
+    credentialType: string | string[],
     kid: string,
     alg: Alg | string,
-    credentialType: string | string[],
-    opts?: { format?: CredentialFormat | CredentialFormat[]; clientId?: string; jti?: string }
+    proofCallbacks: ProofOfPossessionCallbacks,
+    opts?: { format?: CredentialFormat | CredentialFormat[]; jti?: string }
   ): Promise<CredentialResponse> {
     const reqbuilder = CredentialRequestClientBuilder.fromIssuanceInitiation(this.initiation, this.serverMetadata);
     reqbuilder.withClientId(this.clientId);
@@ -95,7 +95,7 @@ export class OpenID4VCIClient {
     const proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse(this.accessToken, proofCallbacks)
       .withIssuer(this.getIssuer())
       .withAlg(alg)
-      .withJti(opts.jti)
+      .withJti(opts?.jti)
       .withClientId(this.clientId)
       .withKid(kid);
 
