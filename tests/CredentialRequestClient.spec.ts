@@ -53,6 +53,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  nock.cleanAll()
   nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
   metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
 });
