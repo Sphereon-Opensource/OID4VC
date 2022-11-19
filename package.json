@@ -1,7 +1,7 @@
 {
   "name": "@sphereon/openid4vci-client",
-  "version": "0.2.1-unstable.0",
-  "description": "OpenID for Verifiable Credential Issuance (OID4VCI) client",
+  "version": "0.2.2-unstable.0",
+  "description": "OpenID for Verifiable Credential Issuance (OpenID4VCI) client",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
   "author": "Sphereon",
@@ -65,6 +65,9 @@
     "Verifiable Credentials",
     "OpenID",
     "OpenID for Verifiable Credential Issuance",
+    "OAuth2",
+    "SSI",
+    "OpenID4VCI",
     "OIDC4VCI",
     "OID4VCI"
   ]
