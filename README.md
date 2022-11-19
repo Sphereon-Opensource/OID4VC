@@ -14,9 +14,18 @@ OpenID4VCI!_
 
 A client to request and receive Verifiable Credentials using
 the [OpenID for Verifiable Credential Issuance](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) (
-OpenID4VCI) specification for receiving Verifiable Credentials as a Holder.
+OpenID4VCI) specification for receiving Verifiable Credentials as a holder/subject.
+
+OpenID4VCI defines an API designated as Credential Endpoint that is used to issue verifiable credentials and
+corresponding OAuth 2.0 based authorization mechanisms (see [RFC6749]) that a Wallet uses to obtain authorization to
+receive verifiable credentials. W3C formats as well as other Credential formats are supported. This allows existing
+OAuth 2.0 deployments and OpenID Connect OPs (see [OpenID.Core]) to extend their service and become Credential Issuers.
+It also allows new applications built using Verifiable Credentials to utilize OAuth 2.0 as integration and
+interoperability layer. This package provides holder/wallet support to interact with OpenID4VCI capable Issuer systems.
 
 # Flows
+
+The spec lists 2 flows. Currently only one is supported!
 
 ## Authorized Code Flow
 
