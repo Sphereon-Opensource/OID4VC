@@ -7,47 +7,61 @@ import {
   EndpointMetadata,
   IssuanceInitiationRequestPayload,
   IssuanceInitiationWithBaseUrl,
-  OID4VCIServerMetadata,
+  OpenID4VCIServerMetadata,
 } from './types';
 
 export class CredentialRequestClientBuilder {
   credentialEndpoint: string;
-  clientId: string;
   credentialType: string | string[];
   format: CredentialFormat | CredentialFormat[];
   token: string;
 
-  public static fromIssuanceInitiationURI(issuanceInitiationURI: string, metadata?: EndpointMetadata): CredentialRequestClientBuilder {
-    return CredentialRequestClientBuilder.fromIssuanceInitiationRequest(
-      convertURIToJsonObject(issuanceInitiationURI, {
+  public static fromIssuanceInitiationURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): CredentialRequestClientBuilder {
+    return CredentialRequestClientBuilder.fromIssuanceInitiationRequest({
+      request: convertURIToJsonObject(uri, {
         arrayTypeProperties: ['credential_type'],
         requiredProperties: ['issuer', 'credential_type'],
       }) as IssuanceInitiationRequestPayload,
-      metadata
-    );
+      metadata,
+    });
   }
 
-  public static fromIssuanceInitiationRequest(
-    issuanceInitiationRequest: IssuanceInitiationRequestPayload,
-    metadata?: EndpointMetadata
-  ): CredentialRequestClientBuilder {
+  public static fromIssuanceInitiationRequest({
+    request,
+    metadata,
+  }: {
+    request: IssuanceInitiationRequestPayload;
+    metadata?: EndpointMetadata;
+  }): CredentialRequestClientBuilder {
     const builder = new CredentialRequestClientBuilder();
-    builder.withCredentialEndpoint(metadata?.credential_endpoint ? metadata.credential_endpoint : `${issuanceInitiationRequest.issuer}/credential`);
+    builder.withCredentialEndpoint(
+      metadata?.credential_endpoint
+        ? metadata.credential_endpoint
+        : request.issuer.endsWith('/')
+        ? `${request.issuer}credential`
+        : `${request.issuer}/credential`
+    );
 
     //todo: This basically sets all types available during initiation. Probably the user only wants a subset. So do we want to do this?
-    builder.withCredentialType(issuanceInitiationRequest.credential_type);
+    builder.withCredentialType(request.credential_type);
 
     return builder;
   }
 
-  public static fromIssuanceInitiation(
-    issuanceInitiation: IssuanceInitiationWithBaseUrl,
-    metadata?: EndpointMetadata
-  ): CredentialRequestClientBuilder {
-    return CredentialRequestClientBuilder.fromIssuanceInitiationRequest(issuanceInitiation.issuanceInitiationRequest, metadata);
+  public static fromIssuanceInitiation({
+    initiation,
+    metadata,
+  }: {
+    initiation: IssuanceInitiationWithBaseUrl;
+    metadata?: EndpointMetadata;
+  }): CredentialRequestClientBuilder {
+    return CredentialRequestClientBuilder.fromIssuanceInitiationRequest({
+      request: initiation.issuanceInitiationRequest,
+      metadata,
+    });
   }
 
-  public withCredentialEndpointFromMetadata(metadata: OID4VCIServerMetadata): CredentialRequestClientBuilder {
+  public withCredentialEndpointFromMetadata(metadata: OpenID4VCIServerMetadata): CredentialRequestClientBuilder {
     this.credentialEndpoint = metadata.credential_endpoint;
     return this;
   }
@@ -64,11 +78,6 @@ export class CredentialRequestClientBuilder {
 
   public withFormat(format: CredentialFormat | CredentialFormat[]): CredentialRequestClientBuilder {
     this.format = format;
-    return this;
-  }
-
-  public withClientId(clientId: string): CredentialRequestClientBuilder {
-    this.clientId = clientId;
     return this;
   }
 

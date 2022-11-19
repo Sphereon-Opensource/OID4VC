@@ -6,36 +6,31 @@ import nock from 'nock';
 import {
   Alg,
   CredentialRequest,
-  CredentialRequestClient,
   CredentialRequestClientBuilder,
-  CredentialResponse,
-  EndpointMetadata,
-  ErrorResponse,
   IssuanceInitiation,
-  JWS_NOT_VALID,
-  JwtArgs,
+  Jwt,
   MetadataClient,
   ProofOfPossession,
   Typ,
+  URL_NOT_VALID,
   WellKnownEndpoints,
 } from '../lib';
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
 
-import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, WALT_OID4VCI_METADATA } from './MetadataMocks';
+import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';
 
-const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJzcGhlcmVvbiIsImlhdCI6MTY2OD';
+const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN';
 
-const jwtArgs = {
+const jwt: Jwt = {
   header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
-  payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'sphereon' },
+  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
 };
 
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1';
 
 let keypair: KeyPair;
-let metadata: EndpointMetadata;
 
-async function proofOfPossessionCallbackFunction(args: JwtArgs, kid: string): Promise<string> {
+async function proofOfPossessionCallbackFunction(args: Jwt, kid: string): Promise<string> {
   return await new jose.SignJWT({ ...args.payload })
     .setProtectedHeader({ alg: 'ES256' })
     .setIssuedAt()
@@ -49,77 +44,45 @@ interface KeyPair {
   publicKey: KeyObject;
   privateKey: KeyObject;
 }
-async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; kid: string }): Promise<void> {
-  await jose.compactVerify(args.jwt, keypair.publicKey);
-}
 
 beforeAll(async () => {
   const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
   keypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject };
-  nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OIDC4VCI).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
-  metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
 });
 
-beforeEach(() => {
-  ProofOfPossessionBuilder.fromProof(null);
-  ProofOfPossessionBuilder.fromProofCallbackArgs(null);
+beforeEach(async () => {
+  nock.cleanAll();
+  nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
 });
 
 describe('Credential Request Client ', () => {
-  it('should build correctly provided with correct params', function () {
-    const credReqClient = CredentialRequestClient.builder()
-      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .build();
-    expect(credReqClient._issuanceRequestOpts.credentialEndpoint).toBe('https://oidc4vci.demo.spruceid.com/credential');
-  });
-
-  it('should build credential request correctly', async () => {
-    const credReqClient = CredentialRequestClient.builder()
-      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
-      .build();
-    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromProofCallbackArgs({
-      proofOfPossessionCallback: proofOfPossessionCallbackFunction,
-      proofOfPossessionVerifierCallback: proofOfPossessionVerifierCallbackFunction,
-    })
-      .withEndpointMetadata(metadata)
-      .withClientId('sphereon:wallet')
-      .withKid(kid)
-      .withJwtArgs(jwtArgs)
-      .build();
-    await proofOfPossessionVerifierCallbackFunction({ ...proof, kid });
-    const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
-    expect(credentialRequest.proof.jwt).toContain(partialJWT);
-    expect(credentialRequest.type).toBe('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential');
-  });
-
   it('should get a failed credential response with an unsupported format', async function () {
     const basePath = 'https://sphereonjunit2022101301.com/';
-
     nock(basePath).post(/.*/).reply(200, {
       error: 'unsupported_format',
       error_description: 'This is a mock error message',
     });
 
-    const credReqClient = CredentialRequestClient.builder()
+    const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation({ initiation: INITIATION_TEST })
       .withCredentialEndpoint(basePath + '/credential')
       .withFormat('ldp_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
-    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromProofCallbackArgs({
-      proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+      jwt,
+      callbacks: {
+        signCallback: proofOfPossessionCallbackFunction,
+      },
     })
-      .withEndpointMetadata(metadata)
+      // .withEndpointMetadata(metadata)
       .withClientId('sphereon:wallet')
       .withKid(kid)
-      .withJwtArgs(jwtArgs)
       .build();
-    const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
+    expect(credReqClient.getCredentialEndpoint()).toEqual(basePath + '/credential');
+    const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof });
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
-    const result: ErrorResponse | CredentialResponse = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
-    expect(result['error']).toBe('unsupported_format');
+    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
+    expect(result.successBody['error']).toBe('unsupported_format');
   });
 
   it('should get success credential response', async function () {
@@ -131,53 +94,45 @@ describe('Credential Request Client ', () => {
         format: 'jwt-vc',
         credential: mockedVC,
       });
-    const credReqClient = CredentialRequestClient.builder()
+    const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiationRequest({ request: INITIATION_TEST.issuanceInitiationRequest })
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
-    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromProofCallbackArgs({
-      proofOfPossessionCallback: proofOfPossessionCallbackFunction,
+    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+      jwt,
+      callbacks: {
+        signCallback: proofOfPossessionCallbackFunction,
+      },
     })
-      .withEndpointMetadata(metadata)
-      .withJwtArgs(jwtArgs)
+      // .withEndpointMetadata(metadata)
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build();
-    const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest(proof);
+    const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, format: 'jwt' });
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
-    const result: ErrorResponse | CredentialResponse = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
-    expect(result['credential']).toEqual(mockedVC);
+    expect(credentialRequest.format).toEqual('jwt');
+    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
+    expect(result.successBody['credential']).toEqual(mockedVC);
   });
 
-  it('should fail creating a proof of possession with simple verification', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async function proofOfPossessionCallbackFunction(_args: JwtArgs, _kid: string): Promise<string> {
-      throw new Error(JWS_NOT_VALID);
-    }
-    await expect(
-      ProofOfPossessionBuilder.fromProofCallbackArgs({ proofOfPossessionCallback: proofOfPossessionCallbackFunction })
-        .withEndpointMetadata(metadata)
-        .withClientId('sphereon:wallet')
-        .withKid(kid)
-        .build()
-    ).rejects.toThrow(Error(JWS_NOT_VALID));
-  });
-
-  it('should fail creating a proof of possession with verify callback function', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async function proofOfPossessionCallbackFunction(_args: JwtArgs, _kid: string): Promise<string> {
-      throw new Error(JWS_NOT_VALID);
-    }
-
-    await expect(
-      ProofOfPossessionBuilder.fromProofCallbackArgs({ proofOfPossessionCallback: proofOfPossessionCallbackFunction })
-        .withEndpointMetadata(metadata)
-        .withClientId('sphereon:wallet')
-        .withJwtArgs(jwtArgs)
-        .withKid(kid)
-        .build()
-    ).rejects.toThrow(Error(JWS_NOT_VALID));
+  it('should fail with invalid url', async () => {
+    const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiationRequest({ request: INITIATION_TEST.issuanceInitiationRequest })
+      .withCredentialEndpoint('httpsf://oidc4vci.demo.spruceid.com/credential')
+      .withFormat('jwt_vc')
+      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
+      .build();
+    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+      jwt,
+      callbacks: {
+        signCallback: proofOfPossessionCallbackFunction,
+      },
+    })
+      // .withEndpointMetadata(metadata)
+      .withKid(kid)
+      .withClientId('sphereon:wallet')
+      .build();
+    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc', type: 'random', proof })).rejects.toThrow(Error(URL_NOT_VALID));
   });
 });
 
@@ -191,7 +146,10 @@ describe('Credential Request Client with Walt.id ', () => {
     expect(metadata.credential_endpoint).toEqual(WALT_OID4VCI_METADATA.credential_endpoint);
     expect(metadata.token_endpoint).toEqual(WALT_OID4VCI_METADATA.token_endpoint);
 
-    const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation(inititation, metadata).build();
+    const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation({
+      initiation: inititation,
+      metadata,
+    }).build();
     expect(credReqClient._issuanceRequestOpts.credentialEndpoint).toBe(WALT_OID4VCI_METADATA.credential_endpoint);
   });
 });

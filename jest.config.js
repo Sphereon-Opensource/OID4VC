@@ -17,7 +17,7 @@ module.exports = {
         "!lib/schemas/**",
         "!lib/**/*.d.ts",
         "!**/node_modules/**",
-        "!jest.config.cjs",
+        "!jest.config.js",
         "!generator/**",
         "!index.ts"
     ],

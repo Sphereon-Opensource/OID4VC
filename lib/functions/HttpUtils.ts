@@ -1,116 +1,86 @@
 import { fetch } from 'cross-fetch';
 import Debug from 'debug';
 
-import { Encoding } from '../types';
+import { Encoding, OpenIDResponse } from '../types';
 
-const debug = Debug('sphereon:oid4vci:http');
+const debug = Debug('sphereon:openid4vci:http');
 
-export class NotFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-  }
-}
+export const getJson = async <T>(
+  URL: string,
+  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit; exceptionOnHttpErrorStatus?: boolean }
+): Promise<OpenIDResponse<T>> => {
+  return await openIdFetch(URL, undefined, { method: 'GET', ...opts });
+};
 
-export async function getJson<T>(URL: string): Promise<T> {
-  let message = '';
-
-  debug(`Fetching well-known URL: ${URL}`);
-  const response = await fetch(URL);
-  if (!response) {
-    message = 'no response returned';
-  } else {
-    if (response.status && response.status < 400) {
-      const json = await response.json();
-      debug(`Well-knonw response: ${JSON.stringify(json, null, 2)}`);
-      return json as T;
-    } else if (response.status === 404) {
-      throw new NotFoundError(`URL ${URL} was not found`);
-    } else {
-      message = `${response.status}:${response.statusText}, ${await response.text()}`;
-    }
-  }
-  debug(`Well-known url ${URL} gave an error: ${message}`);
-  throw new Error('error: ' + message);
-}
-
-export async function formPost(
+export const formPost = async <T>(
   url: string,
   body: BodyInit,
-  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit }
-): Promise<Response> {
+  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit; exceptionOnHttpErrorStatus?: boolean }
+): Promise<OpenIDResponse<T>> => {
   return await post(url, body, opts?.contentType ? { ...opts } : { contentType: Encoding.FORM_URL_ENCODED, ...opts });
-}
+};
 
-export async function post(
+export const post = async <T>(
   url: string,
-  body: BodyInit,
-  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit }
-): Promise<Response> {
-  let message = '';
+  body?: BodyInit,
+  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit; exceptionOnHttpErrorStatus?: boolean }
+): Promise<OpenIDResponse<T>> => {
+  return await openIdFetch(url, body, { method: 'POST', ...opts });
+};
 
+const openIdFetch = async <T>(
+  url: string,
+  body?: BodyInit,
+  opts?: {
+    method?: string;
+    bearerToken?: string;
+    contentType?: string;
+    accept?: string;
+    customHeaders?: HeadersInit;
+    exceptionOnHttpErrorStatus?: boolean;
+  }
+): Promise<OpenIDResponse<T>> => {
   const headers = opts?.customHeaders ? opts.customHeaders : [];
-
   if (opts?.bearerToken) {
     headers['Authorization'] = `Bearer ${opts.bearerToken}`;
   }
-  headers['Content-Type'] = opts?.contentType ? opts.contentType : 'application/json';
-  headers['Accept'] = opts?.accept ? opts.accept : 'application/json';
+  const method = opts?.method ? opts.method : body ? 'POST' : 'GET';
+  const accept = opts?.accept ? opts.accept : 'application/json';
+  headers['Content-Type'] = opts?.contentType ? opts.contentType : method !== 'GET' ? 'application/json' : undefined;
+  headers['Accept'] = accept;
 
   const payload: RequestInit = {
-    method: 'POST',
+    method,
     headers,
     body,
   };
 
-  try {
-    // TODO: Remove the console.logs!
-    debug(`START fetching url: ${url}`);
-    console.log('token (if any) and body:');
-    console.log('==========================');
-    console.log(opts.bearerToken);
-    console.log(JSON.stringify(body));
-    console.log('==========================');
-    debug(`Headers: ${JSON.stringify(payload.headers)}`);
-    const response = await fetch(url, payload);
-    if (response && response.status >= 200 && response.status < 400) {
-      const logResponse = response.clone();
-      try {
-        debug(`Success response with status ${logResponse.status}. Headers: ${JSON.stringify(logResponse.headers)}`);
-        console.log(`Success response: ${await logResponse.text()}`);
-      } catch (error) {
-        console.log('success response did throw error: ' + error.message);
-      }
-      debug(`END fetching url: ${url}`);
-      return response;
-    } else {
-      if (response) {
-        const logResponse = response.clone();
-        console.log(
-          `Response with status ${logResponse.status} and status text ${logResponse.statusText} with headers ${JSON.stringify(logResponse.headers)})}`
-        );
-        try {
-          message = `${logResponse.status}:${logResponse.statusText}, response: ${await logResponse.text()}`;
-        } catch (jsonerror) {
-          console.log(`accessing error body as json failed. ${jsonerror.message}`);
-          message = `${logResponse.status}:${logResponse.statusText}, ${await logResponse.text()}`;
-        }
-      } else {
-        console.log(`No response received for ${url}`);
-      }
-    }
-  } catch (error) {
-    const err = error as Error;
-    console.log(`Error: ${JSON.stringify(err.stack)} ${error.message}`);
-    debug(`END fetching url: ${url}`);
-    throw new Error(`${(error as Error).message}`);
+  debug(`START fetching url: ${url}`);
+  if (body) {
+    debug(`Body:\r\n${JSON.stringify(body)}`);
   }
+  debug(`Headers:\r\n${JSON.stringify(payload.headers)}`);
+  const origResponse = await fetch(url, payload);
+  const clonedResponse = origResponse.clone();
+  const isJSONResponse = accept === 'application/json' || origResponse.headers['Content-Type'] === 'application/json';
+  const success = origResponse && origResponse.status >= 200 && origResponse.status < 400;
+  const responseBody = isJSONResponse ? await clonedResponse.json() : await clonedResponse.text();
 
-  console.log(`unexpected Error: ${JSON.stringify(message)}`);
+  debug(`${success ? 'success' : 'error'} status: ${clonedResponse.status}, body:\r\n${JSON.stringify(responseBody)}`);
+  if (!success && opts?.exceptionOnHttpErrorStatus) {
+    const error = JSON.stringify(responseBody);
+    throw new Error(error === '{}' ? '{"error": "not found"}' : error);
+  }
   debug(`END fetching url: ${url}`);
-  throw new Error('unexpected error: ' + message);
-}
 
-export function isValidURL(url: string): boolean {
+  return {
+    origResponse,
+    successBody: success ? responseBody : undefined,
+    errorBody: !success ? responseBody : undefined,
+  };
+};
+
+export const isValidURL = (url: string): boolean => {
   const urlPattern = new RegExp(
     '^(https?:\\/\\/)?' + // validate protocol
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
@@ -121,4 +91,4 @@ export function isValidURL(url: string): boolean {
     'i'
   );
   return !!urlPattern.test(url);
-}
+};

@@ -1,28 +1,64 @@
 import { createProofOfPossession } from './functions';
-import { EndpointMetadata, JwtArgs, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, ProofOfPossessionArgs } from './types';
+import {
+  AccessTokenResponse,
+  Alg,
+  EndpointMetadata,
+  Jwt,
+  NO_JWT_PROVIDED,
+  PROOF_CANT_BE_CONSTRUCTED,
+  ProofOfPossession,
+  ProofOfPossessionCallbacks,
+} from './types';
 
 export class ProofOfPossessionBuilder {
-  static proof?: ProofOfPossession;
-  static proofCallbackArgs?: ProofOfPossessionArgs;
+  private readonly proof?: ProofOfPossession;
+  private readonly callbacks?: ProofOfPossessionCallbacks;
 
-  endpointMetadata: EndpointMetadata;
-  kid: string;
-  clientId?: string;
-  popJwtArgs?: JwtArgs;
+  private kid: string;
+  private clientId?: string;
+  private issuer?: string;
+  private jwt?: Jwt;
+  private alg?: string;
+  private jti?: string;
+  private cNonce?: string;
 
-  static fromProofCallbackArgs(proofCallbackArgs: ProofOfPossessionArgs): ProofOfPossessionBuilder {
-    this.proofCallbackArgs = proofCallbackArgs;
-    return new ProofOfPossessionBuilder();
+  private constructor({
+    proof,
+    callbacks,
+    jwt,
+    accessTokenResponse,
+  }: {
+    proof?: ProofOfPossession;
+    callbacks?: ProofOfPossessionCallbacks;
+    accessTokenResponse?: AccessTokenResponse;
+    jwt?: Jwt;
+  }) {
+    this.proof = proof;
+    this.callbacks = callbacks;
+    if (jwt) {
+      this.withJwt(jwt);
+    }
+    if (accessTokenResponse) {
+      this.withAccessTokenResponse(accessTokenResponse);
+    }
+  }
+
+  static fromJwt({ jwt, callbacks }: { jwt: Jwt; callbacks: ProofOfPossessionCallbacks }): ProofOfPossessionBuilder {
+    return new ProofOfPossessionBuilder({ callbacks, jwt });
+  }
+
+  static fromAccessTokenResponse({
+    accessTokenResponse,
+    callbacks,
+  }: {
+    accessTokenResponse: AccessTokenResponse;
+    callbacks: ProofOfPossessionCallbacks;
+  }): ProofOfPossessionBuilder {
+    return new ProofOfPossessionBuilder({ callbacks, accessTokenResponse });
   }
 
   static fromProof(proof: ProofOfPossession): ProofOfPossessionBuilder {
-    this.proof = proof;
-    return new ProofOfPossessionBuilder();
-  }
-
-  withEndpointMetadata(endpointMetadata: EndpointMetadata): ProofOfPossessionBuilder {
-    this.endpointMetadata = endpointMetadata;
-    return this;
+    return new ProofOfPossessionBuilder({ proof });
   }
 
   withClientId(clientId: string): ProofOfPossessionBuilder {
@@ -35,26 +71,69 @@ export class ProofOfPossessionBuilder {
     return this;
   }
 
-  withJwtArgs(popJwtArgs: JwtArgs): ProofOfPossessionBuilder {
-    this.popJwtArgs = popJwtArgs;
+  withIssuer(issuer: string): ProofOfPossessionBuilder {
+    this.issuer = issuer;
     return this;
   }
+
+  withAlg(alg: Alg | string): ProofOfPossessionBuilder {
+    this.alg = alg;
+    return this;
+  }
+
+  withJti(jti: string): ProofOfPossessionBuilder {
+    this.jti = jti;
+    return this;
+  }
+
+  withAccessTokenNonce(cNonce: string): ProofOfPossessionBuilder {
+    this.cNonce = cNonce;
+    return this;
+  }
+
+  withAccessTokenResponse(accessToken: AccessTokenResponse): ProofOfPossessionBuilder {
+    this.withAccessTokenNonce(accessToken.c_nonce);
+    return this;
+  }
+
+  withEndpointMetadata(endpointMetadata: EndpointMetadata): ProofOfPossessionBuilder {
+    this.withIssuer(endpointMetadata.issuer);
+    return this;
+  }
+
+  withJwt(jwt: Jwt): ProofOfPossessionBuilder {
+    if (!jwt) {
+      throw new Error(NO_JWT_PROVIDED);
+    }
+    this.jwt = jwt;
+    if (jwt.header) {
+      this.withKid(jwt.header.kid);
+      this.withAlg(jwt.header.alg);
+    }
+    if (jwt.payload) {
+      this.withClientId(jwt.payload.iss);
+      this.withIssuer(jwt.payload.aud);
+      this.withJti(jwt.payload.jti);
+      this.withAccessTokenNonce(jwt.payload.nonce);
+    }
+    return this;
+  }
+
   public async build(): Promise<ProofOfPossession> {
-    if (ProofOfPossessionBuilder.proof) {
-      return Promise.resolve(ProofOfPossessionBuilder.proof);
-    } else if (ProofOfPossessionBuilder.proofCallbackArgs) {
-      if (!this.kid) {
-        throw new Error('No kid provided');
-      }
-      if (!this.endpointMetadata) {
-        throw new Error('No endpointMetadata provided');
-      }
+    if (this.proof) {
+      return Promise.resolve(this.proof);
+    } else if (this.callbacks) {
       return await createProofOfPossession(
-        ProofOfPossessionBuilder.proofCallbackArgs,
-        this.kid,
-        this.endpointMetadata,
-        this.popJwtArgs,
-        this.clientId
+        this.callbacks,
+        {
+          kid: this.kid,
+          jti: this.jti,
+          alg: this.alg,
+          issuer: this.issuer,
+          clientId: this.clientId,
+          nonce: this.cNonce,
+        },
+        this.jwt
       );
     }
     throw new Error(PROOF_CANT_BE_CONSTRUCTED);

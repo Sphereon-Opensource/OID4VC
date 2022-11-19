@@ -1,9 +1,9 @@
 import Debug from 'debug';
 import { JWTHeaderParameters } from 'jose';
 
-import { Alg, BAD_PARAMS, EndpointMetadata, JWS_NOT_VALID, JwtArgs, JWTPayload, ProofOfPossession, ProofOfPossessionArgs, ProofType } from '../types';
+import { BAD_PARAMS, JWS_NOT_VALID, Jwt, JWTPayload, ProofOfPossession, ProofOfPossessionCallbacks, ProofType } from '../types';
 
-const debug = Debug('sphereon:oid4vci:token');
+const debug = Debug('sphereon:openid4vci:token');
 
 /**
  *
@@ -13,7 +13,7 @@ const debug = Debug('sphereon:oid4vci:token');
  *    If exists, verifies the ProofOfPossession
  *  - proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs
  *    arguments needed for signing ProofOfPossession
- * @param args:
+ * @param callbacks:
  *    - proofOfPossessionCallback: JWTSignerCallback
  *      Mandatory to create (sign) ProofOfPossession
  *    - proofOfPossessionVerifierCallback?: JWTVerifyCallback
@@ -25,28 +25,27 @@ const debug = Debug('sphereon:oid4vci:token');
  * @param clientId
  *  - Optional, clientId of the party requesting the credential
  */
-export async function createProofOfPossession(
-  args: ProofOfPossessionArgs,
-  kid: string,
-  endpointMetadata: EndpointMetadata,
-  jwtArgs?: JwtArgs,
-  clientId?: string
-): Promise<ProofOfPossession> {
-  if (!args.proofOfPossessionCallback) {
+export const createProofOfPossession = async (
+  callbacks: ProofOfPossessionCallbacks,
+  jwtProps?: JwtProps,
+  existingJwt?: Jwt
+): Promise<ProofOfPossession> => {
+  if (!callbacks.signCallback) {
     debug(`no jwt signer callback or arguments supplied!`);
     throw new Error(BAD_PARAMS);
   }
-  const signerArgs = createJWT(kid, endpointMetadata, jwtArgs, clientId);
-  const jwt = await args.proofOfPossessionCallback(signerArgs, kid);
-  partiallyValidateJWS(jwt);
+  const signerArgs = createJWT(jwtProps, existingJwt);
+  const jwt = await callbacks.signCallback(signerArgs, signerArgs.header.kid);
   const proof = {
     proof_type: ProofType.JWT,
     jwt,
   };
+
   try {
-    if (args.proofOfPossessionVerifierCallback) {
+    partiallyValidateJWS(jwt);
+    if (callbacks.verifyCallback) {
       debug(`Calling supplied verify callback....`);
-      await args.proofOfPossessionVerifierCallback({ jwt, kid: kid });
+      await callbacks.verifyCallback({ jwt, kid: signerArgs.header.kid });
       debug(`Supplied verify callback return success result`);
     }
   } catch {
@@ -55,48 +54,68 @@ export async function createProofOfPossession(
   }
   debug(`Proof of Possession JWT:\r\n${jwt}`);
   return proof;
-}
+};
 
-function partiallyValidateJWS(jws: string): void {
+const partiallyValidateJWS = (jws: string): void => {
   if (jws.split('.').length !== 3 || !jws.startsWith('ey')) {
     throw new Error(JWS_NOT_VALID);
   }
+};
+
+export interface JwtProps {
+  kid?: string;
+  issuer?: string;
+  clientId?: string;
+  alg?: string;
+  jti?: string;
+  nonce?: string;
 }
 
-function createJWT(kid: string, endpointMetadata: EndpointMetadata, jwtArgs?: JwtArgs, clientId?: string): JwtArgs {
-  if (!jwtArgs) {
-    jwtArgs = {
-      header: {
-        alg: Alg.ES256,
-        typ: 'JWT',
-        kid: kid,
-      },
-      payload: {},
-    };
-  }
+const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
+  const aud = getJwtProperty('aud', true, jwtProps.issuer, existingJwt?.payload?.aud);
+  const iss = getJwtProperty('iss', false, jwtProps.clientId, existingJwt?.payload?.iss);
+  const jti = getJwtProperty('jti', false, jwtProps.jti, existingJwt?.payload?.jti);
+  const nonce = getJwtProperty('nonce', true, jwtProps.nonce, existingJwt?.payload?.nonce);
+  const alg = getJwtProperty('alg', false, jwtProps.alg, existingJwt?.header?.alg, 'ES256');
+  const kid = getJwtProperty('kid', true, jwtProps.kid, existingJwt?.header?.kid);
+  const jwt = existingJwt ? existingJwt : {};
   const now = +new Date();
-  const aud = jwtArgs.payload?.aud ? jwtArgs.payload.aud : endpointMetadata.issuer;
-  if (!aud) {
-    throw new Error('No issuer url provided');
-  }
-  const defaultPayload: Partial<JWTPayload> = {
+  const jwtPayload: Partial<JWTPayload> = {
     aud,
-    iat: jwtArgs.payload.iat ? jwtArgs.payload.iat : now / 1000 - 60, // Let's ensure we subtract 60 seconds for potential time offsets
-    exp: jwtArgs.payload.exp ? jwtArgs.payload.exp : now / 1000 + 10 * 60,
+    iat: jwt.payload?.iat ? jwt.payload.iat : now / 1000 - 60, // Let's ensure we subtract 60 seconds for potential time offsets
+    exp: jwt.payload?.exp ? jwt.payload.exp : now / 1000 + 10 * 60,
+    nonce,
+    ...(iss ? { iss } : {}),
+    ...(jti ? { jti } : {}),
   };
-  const iss = clientId ? clientId : jwtArgs.payload.iss ? jwtArgs.payload.iss : null;
-  if (iss) {
-    defaultPayload.iss = iss;
-  }
-  if (jwtArgs.payload.jti) {
-    defaultPayload.jti = jwtArgs.payload.jti;
-  }
-  const defaultHeader: JWTHeaderParameters = {
-    alg: jwtArgs.header.alg ? jwtArgs.header.alg : 'ES256',
+
+  const jwtHeader: JWTHeaderParameters = {
     typ: 'JWT',
-    kid: kid,
+    alg,
+    kid,
   };
-  jwtArgs.payload = { ...defaultPayload, ...jwtArgs.payload };
-  jwtArgs.header = { ...defaultHeader, ...jwtArgs.header };
-  return jwtArgs;
-}
+  return {
+    payload: { ...jwt.payload, ...jwtPayload },
+    header: { ...jwt.header, ...jwtHeader },
+  };
+};
+
+const getJwtProperty = (
+  propertyName: string,
+  required: boolean,
+  option?: string,
+  jwtProperty?: string,
+  defaultValue?: string
+): string | undefined => {
+  if (option && jwtProperty && option !== jwtProperty) {
+    throw Error(`Cannot have a property '${propertyName}' with value '${option}' and different JWT value '${jwtProperty}' at the same time`);
+  }
+  let result = jwtProperty ? jwtProperty : option;
+  if (!result) {
+    if (required) {
+      throw Error(`No ${propertyName} property provided either in a JWT or as option`);
+    }
+    result = defaultValue;
+  }
+  return result;
+};

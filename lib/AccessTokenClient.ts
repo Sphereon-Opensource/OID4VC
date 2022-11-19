@@ -9,72 +9,89 @@ import {
   AccessTokenResponse,
   AuthorizationServerOpts,
   EndpointMetadata,
-  ErrorResponse,
   GrantTypes,
   IssuanceInitiationRequestPayload,
-  IssuanceInitiationWithBaseUrl,
   IssuerOpts,
+  OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
 } from './types';
 
-const debug = Debug('sphereon:oid4vci:token');
+const debug = Debug('sphereon:openid4vci:token');
 
 export class AccessTokenClient {
-  public async acquireAccessTokenUsingIssuanceInitiation(
-    issuanceInitiation: IssuanceInitiationWithBaseUrl,
-    opts?: AccessTokenRequestOpts
-  ): Promise<AccessTokenResponse | ErrorResponse> {
+  public async acquireAccessTokenUsingIssuanceInitiation({
+    issuanceInitiation,
+    asOpts,
+    pin,
+    metadata,
+  }: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
     const { issuanceInitiationRequest } = issuanceInitiation;
 
     const isPinRequired = this.isPinRequiredValue(issuanceInitiationRequest);
-    const reqOpts = {
+    const issuerOpts = { issuer: issuanceInitiationRequest.issuer };
+
+    return await this.acquireAccessTokenUsingRequest({
+      accessTokenRequest: await this.createAccessTokenRequest({
+        issuanceInitiation,
+        asOpts,
+        pin,
+      }),
       isPinRequired,
-      issuerOpts: { issuer: issuanceInitiationRequest.issuer },
-      asOpts: opts?.asOpts ? { ...opts.asOpts } : undefined,
-      metadata: opts?.metadata,
-    };
-    return await this.acquireAccessTokenUsingRequest(await this.createAccessTokenRequest(issuanceInitiationRequest, opts), reqOpts);
+      metadata,
+      asOpts,
+      issuerOpts,
+    });
   }
 
-  public async acquireAccessTokenUsingRequest(
-    accessTokenRequest: AccessTokenRequest,
-    opts?: { isPinRequired?: boolean; metadata?: EndpointMetadata; asOpts?: AuthorizationServerOpts; issuerOpts?: IssuerOpts }
-  ): Promise<AccessTokenResponse | ErrorResponse> {
-    this.validate(accessTokenRequest, opts?.isPinRequired);
-    const requestTokenURL = this.determineTokenURL(
-      opts?.asOpts,
-      opts?.issuerOpts,
-      opts?.metadata
-        ? opts?.metadata
-        : opts?.issuerOpts?.fetchMetadata
-        ? await MetadataClient.retrieveAllMetadata(opts?.issuerOpts.issuer, { errorOnNotFound: false })
-        : undefined
-    );
+  public async acquireAccessTokenUsingRequest({
+    accessTokenRequest,
+    isPinRequired,
+    metadata,
+    asOpts,
+    issuerOpts,
+  }: {
+    accessTokenRequest: AccessTokenRequest;
+    isPinRequired?: boolean;
+    metadata?: EndpointMetadata;
+    asOpts?: AuthorizationServerOpts;
+    issuerOpts?: IssuerOpts;
+  }): Promise<OpenIDResponse<AccessTokenResponse>> {
+    this.validate(accessTokenRequest, isPinRequired);
+    const requestTokenURL = AccessTokenClient.determineTokenURL({
+      asOpts,
+      issuerOpts,
+      metadata: metadata
+        ? metadata
+        : issuerOpts?.fetchMetadata
+        ? await MetadataClient.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
+        : undefined,
+    });
     return this.sendAuthCode(requestTokenURL, accessTokenRequest);
   }
 
-  public async createAccessTokenRequest(
-    issuanceInitiationRequest: IssuanceInitiationRequestPayload,
-    opts?: AccessTokenRequestOpts
-  ): Promise<AccessTokenRequest> {
+  public async createAccessTokenRequest({ issuanceInitiation, asOpts, pin }: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
+    const issuanceInitiationRequest = issuanceInitiation.issuanceInitiationRequest;
     const request: Partial<AccessTokenRequest> = {};
-    if (opts?.asOpts?.clientId) {
-      request.client_id = opts.asOpts.clientId;
+    if (asOpts?.clientId) {
+      request.client_id = asOpts.clientId;
     }
-    if (this.isPinRequiredValue(issuanceInitiationRequest)) {
-      this.assertNumericPin(true, opts.pin);
-      request.user_pin = opts.pin;
-    }
+
+    this.assertNumericPin(this.isPinRequiredValue(issuanceInitiationRequest), pin);
+    request.user_pin = pin;
+
     if (issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL]) {
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
       request[PRE_AUTH_CODE_LITERAL] = issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL];
     }
     if (issuanceInitiationRequest.op_state) {
-      if (issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL]) {
-        throw new Error('Cannot have both a pre_authorized_code and a op_state in the same initiation request');
-      }
-      request.grant_type = GrantTypes.AUTHORIZATION_CODE;
       this.throwNotSupportedFlow();
+      /**
+       * Code is here for when we start to support this flow
+       */
+      // if (issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL]) {
+      //   throw new Error('Cannot have both a pre_authorized_code and a op_state in the same initiation request');
+      // }
+      // request.grant_type = GrantTypes.AUTHORIZATION_CODE;
     }
 
     return request as AccessTokenRequest;
@@ -128,21 +145,28 @@ export class AccessTokenClient {
     }
   }
 
-  private async sendAuthCode(requestTokenURL: string, accessTokenRequest: AccessTokenRequest): Promise<AccessTokenResponse | ErrorResponse> {
-    const response = await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest));
-    return await response.json();
+  private async sendAuthCode(requestTokenURL: string, accessTokenRequest: AccessTokenRequest): Promise<OpenIDResponse<AccessTokenResponse>> {
+    return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest));
   }
 
-  private determineTokenURL(asOpts?: AuthorizationServerOpts, issuerOpts?: IssuerOpts, metadata?: EndpointMetadata): string {
-    if (!asOpts && !issuerOpts) {
-      throw new Error('Cannot determine token URL if no issuer and no Authorization Server values are present');
+  public static determineTokenURL({
+    asOpts,
+    issuerOpts,
+    metadata,
+  }: {
+    asOpts?: AuthorizationServerOpts;
+    issuerOpts?: IssuerOpts;
+    metadata?: EndpointMetadata;
+  }): string {
+    if (!asOpts && !metadata?.token_endpoint && !issuerOpts) {
+      throw new Error('Cannot determine token URL if no issuer, metadata and no Authorization Server values are present');
     }
     const url =
       asOpts && asOpts.as
-        ? this.creatTokenURLFromURL(asOpts.as, asOpts.tokenEndpoint)
+        ? this.creatTokenURLFromURL(asOpts.as, asOpts?.allowInsecureEndpoints, asOpts.tokenEndpoint)
         : metadata?.token_endpoint
         ? metadata.token_endpoint
-        : this.creatTokenURLFromURL(issuerOpts.issuer, issuerOpts.tokenEndpoint);
+        : this.creatTokenURLFromURL(issuerOpts.issuer, asOpts?.allowInsecureEndpoints, issuerOpts.tokenEndpoint);
     if (!url || !ObjectUtils.isString(url)) {
       throw new Error('No authorization server token URL present. Cannot acquire access token');
     }
@@ -150,8 +174,8 @@ export class AccessTokenClient {
     return url;
   }
 
-  private creatTokenURLFromURL(url: string, tokenEndpoint?: string): string {
-    if (url.startsWith('http://')) {
+  private static creatTokenURLFromURL(url: string, allowInsecureEndpoints?: boolean, tokenEndpoint?: string): string {
+    if (allowInsecureEndpoints !== true && url.startsWith('http://')) {
       throw Error(`Unprotected token endpoints are not allowed ${url}`);
     }
     const hostname = url.replace(/https?:\/\//, '').replace(/\/$/, '');
