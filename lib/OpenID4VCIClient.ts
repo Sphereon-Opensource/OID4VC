@@ -22,12 +22,12 @@ export class OpenID4VCIClient {
   private readonly _flowType: AuthzFlowType;
   private readonly _initiation: IssuanceInitiationWithBaseUrl;
   private readonly _clientId?: string;
-  private readonly _kid: string;
-  private readonly _alg: string;
+  private _kid: string;
+  private _alg: string;
   private _serverMetadata: EndpointMetadata;
   private _accessToken: AccessTokenResponse;
 
-  private constructor(initiation: IssuanceInitiationWithBaseUrl, flowType: AuthzFlowType, kid: string, alg: Alg | string, clientId?: string) {
+  private constructor(initiation: IssuanceInitiationWithBaseUrl, flowType: AuthzFlowType, kid?: string, alg?: Alg | string, clientId?: string) {
     if (flowType !== AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW) {
       throw new Error(`Only pre-authorized code flow is support at present`);
     }
@@ -48,8 +48,8 @@ export class OpenID4VCIClient {
   }: {
     issuanceInitiationURI: string;
     flowType: AuthzFlowType;
-    kid: string;
-    alg: Alg | string;
+    kid?: string;
+    alg?: Alg | string;
     retrieveServerMetadata?: boolean;
     clientId?: string;
   }): Promise<OpenID4VCIClient> {
@@ -93,13 +93,24 @@ export class OpenID4VCIClient {
     credentialType,
     proofCallbacks,
     format,
+    kid,
+    alg,
     jti,
   }: {
     credentialType: string | string[];
     proofCallbacks: ProofOfPossessionCallbacks;
     format?: CredentialFormat | CredentialFormat[];
+    kid?: string;
+    alg?: Alg | string;
     jti?: string;
   }): Promise<CredentialResponse> {
+    if (alg) {
+      this._alg = alg;
+    }
+    if (kid) {
+      this._kid = kid;
+    }
+
     const requestBuilder = CredentialRequestClientBuilder.fromIssuanceInitiation({
       initiation: this.initiation,
       metadata: this.serverMetadata,
@@ -150,10 +161,16 @@ export class OpenID4VCIClient {
   }
 
   get kid(): string {
+    if (!this._kid) {
+      throw new Error('No value for kid is supplied');
+    }
     return this._kid;
   }
 
   get alg(): string {
+    if (!this._alg) {
+      throw new Error('No value for alg is supplied');
+    }
     return this._alg;
   }
 
