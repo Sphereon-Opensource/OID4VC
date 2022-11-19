@@ -1,20 +1,8 @@
 import { KeyObject } from 'crypto';
 
 import * as jose from 'jose';
-import nock from 'nock';
 
-import {
-  Alg,
-  CredentialRequest,
-  CredentialRequestClientBuilder,
-  EndpointMetadata,
-  Jwt,
-  MetadataClient,
-  OpenID4VCIServerMetadata,
-  ProofOfPossession,
-  Typ,
-  WellKnownEndpoints,
-} from '../lib';
+import { Alg, CredentialRequest, CredentialRequestClientBuilder, Jwt, OpenID4VCIServerMetadata, ProofOfPossession, Typ } from '../lib';
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST_URI, WALT_ISSUER_URL, WALT_OID4VCI_METADATA } from './MetadataMocks';
@@ -29,16 +17,10 @@ const jwt: Jwt = {
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1';
 
 let keypair: KeyPair;
-let metadata: EndpointMetadata;
 
 beforeAll(async () => {
   const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
   keypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject };
-});
-
-beforeEach(async () => {
-  nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
-  metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
 });
 
 async function proofOfPossessionCallbackFunction(args: Jwt, kid: string): Promise<string> {
@@ -87,7 +69,6 @@ describe('Credential Request Client Builder', () => {
         verifyCallback: proofOfPossessionVerifierCallbackFunction,
       },
     })
-      .withEndpointMetadata(metadata)
       .withClientId('sphereon:wallet')
       .withKid(kid)
       .build();

@@ -1,25 +1,11 @@
 import { KeyObject } from 'crypto';
 
 import * as jose from 'jose';
-import nock from 'nock';
 
-import {
-  Alg,
-  EndpointMetadata,
-  JWS_NOT_VALID,
-  Jwt,
-  MetadataClient,
-  NO_JWT_PROVIDED,
-  PROOF_CANT_BE_CONSTRUCTED,
-  ProofOfPossession,
-  Typ,
-  WellKnownEndpoints,
-} from '../lib';
+import { Alg, JWS_NOT_VALID, Jwt, NO_JWT_PROVIDED, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, Typ } from '../lib';
 import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
 
-import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
-
-// const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN';
+import { IDENTIPROOF_ISSUER_URL } from './MetadataMocks';
 
 const jwt: Jwt = {
   header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
@@ -29,7 +15,6 @@ const jwt: Jwt = {
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1';
 
 let keypair: KeyPair;
-let metadata: EndpointMetadata;
 
 async function proofOfPossessionCallbackFunction(args: Jwt, kid: string): Promise<string> {
   return await new jose.SignJWT({ ...args.payload })
@@ -51,16 +36,11 @@ beforeAll(async () => {
   keypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject };
 });
 
-beforeEach(async () => {
-  nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
-  metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
-});
-
 describe('ProofOfPossession Builder ', () => {
   it('should fail without supplied proof or callbacks', async function () {
     await expect(
       ProofOfPossessionBuilder.fromProof(undefined as never)
-        .withEndpointMetadata(metadata)
+        .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)
         .build()
@@ -71,7 +51,7 @@ describe('ProofOfPossession Builder ', () => {
     await expect(() =>
       ProofOfPossessionBuilder.fromJwt({ jwt, callbacks: { signCallback: proofOfPossessionCallbackFunction } })
         .withJwt(undefined)
-        .withEndpointMetadata(metadata)
+        .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)
         .build()
@@ -85,7 +65,7 @@ describe('ProofOfPossession Builder ', () => {
         signCallback: proofOfPossessionCallbackFunction,
       },
     })
-      .withEndpointMetadata(metadata)
+      .withIssuer(IDENTIPROOF_ISSUER_URL)
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build();
@@ -100,7 +80,7 @@ describe('ProofOfPossession Builder ', () => {
 
     await expect(
       ProofOfPossessionBuilder.fromJwt({ jwt, callbacks: { signCallback: proofOfPossessionCallbackFunction } })
-        .withEndpointMetadata(metadata)
+        .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)
         .build()
@@ -115,7 +95,7 @@ describe('ProofOfPossession Builder ', () => {
 
     await expect(
       ProofOfPossessionBuilder.fromJwt({ jwt, callbacks: { signCallback: proofOfPossessionCallbackFunction } })
-        .withEndpointMetadata(metadata)
+        .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)
         .build()
