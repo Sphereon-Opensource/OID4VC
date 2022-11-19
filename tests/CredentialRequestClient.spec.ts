@@ -7,7 +7,6 @@ import {
   Alg,
   CredentialRequest,
   CredentialRequestClientBuilder,
-  EndpointMetadata,
   IssuanceInitiation,
   Jwt,
   MetadataClient,
@@ -30,7 +29,6 @@ const jwt: Jwt = {
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1';
 
 let keypair: KeyPair;
-let metadata: EndpointMetadata;
 
 async function proofOfPossessionCallbackFunction(args: Jwt, kid: string): Promise<string> {
   return await new jose.SignJWT({ ...args.payload })
@@ -55,13 +53,11 @@ beforeAll(async () => {
 beforeEach(async () => {
   nock.cleanAll();
   nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
-  metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
 });
 
 describe('Credential Request Client ', () => {
   it('should get a failed credential response with an unsupported format', async function () {
     const basePath = 'https://sphereonjunit2022101301.com/';
-
     nock(basePath).post(/.*/).reply(200, {
       error: 'unsupported_format',
       error_description: 'This is a mock error message',
@@ -78,7 +74,7 @@ describe('Credential Request Client ', () => {
         signCallback: proofOfPossessionCallbackFunction,
       },
     })
-      .withEndpointMetadata(metadata)
+      // .withEndpointMetadata(metadata)
       .withClientId('sphereon:wallet')
       .withKid(kid)
       .build();
@@ -109,7 +105,7 @@ describe('Credential Request Client ', () => {
         signCallback: proofOfPossessionCallbackFunction,
       },
     })
-      .withEndpointMetadata(metadata)
+      // .withEndpointMetadata(metadata)
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build();
@@ -132,7 +128,7 @@ describe('Credential Request Client ', () => {
         signCallback: proofOfPossessionCallbackFunction,
       },
     })
-      .withEndpointMetadata(metadata)
+      // .withEndpointMetadata(metadata)
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build();
