@@ -70,6 +70,54 @@ describe('Metadataclient with IdentiProof Issuer should', () => {
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, JSON.stringify({}));
     await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL)).rejects.toThrowError('{"error": "not found"}');
   });
+
+  it('Fail if there is no token endpoint with errors enabled', async () => {
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
+    const meta = JSON.parse(JSON.stringify(IDENTIPROOF_AS_METADATA));
+    delete meta.token_endpoint;
+    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(meta));
+
+    await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
+      'Could not deduce the token endpoint for https://issuer.research.identiproof.io'
+    );
+  });
+
+  it('Fail if there is no credential endpoint with errors enabled', async () => {
+    const meta = JSON.parse(JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
+    delete meta.credential_endpoint;
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(meta));
+    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
+
+    await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
+      'Could not deduce the credential endpoint for https://issuer.research.identiproof.io'
+    );
+  });
+
+  it('Succeed with default value if there is no credential endpoint with errors disabled', async () => {
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
+    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
+
+    const metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
+    expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential');
+  });
+
+  it('Succeed with no well-known endpoints and errors disabled', async () => {
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(404, {});
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {});
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
+
+    const metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
+    expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential');
+  });
+
+  it('Fail when specific well-known is not found with errors enabled', async () => {
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(404, {});
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {});
+    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
+
+    const metadata = MetadataClient.retrieveWellknown(IDENTIPROOF_ISSUER_URL, WellKnownEndpoints.OPENID4VCI_ISSUER, { errorOnNotFound: true });
+    await expect(metadata).rejects.toThrowError('{"error": "not found"}');
+  });
 });
 
 describe('Metadataclient with Spruce Issuer should', () => {

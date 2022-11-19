@@ -1,4 +1,4 @@
-import { IssuanceInitiationRequestPayload } from './CredentialIssuance.types';
+import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from './CredentialIssuance.types';
 import { EndpointMetadata, ErrorResponse, PRE_AUTH_CODE_LITERAL } from './Generic.types';
 
 export enum GrantTypes {
@@ -17,6 +17,7 @@ export enum ResponseType {
 }
 
 export interface AuthorizationServerOpts {
+  allowInsecureEndpoints?: boolean;
   as?: string; // If not provided the issuer hostname will be used!
   tokenEndpoint?: string; // Allows to override the default '/token' endpoint
   clientId?: string;
@@ -29,6 +30,7 @@ export interface IssuerOpts {
 }
 
 export interface AccessTokenRequestOpts {
+  issuanceInitiation: IssuanceInitiationWithBaseUrl;
   asOpts?: AuthorizationServerOpts;
   metadata?: EndpointMetadata;
   pin?: string; // Pin-number. Only used when required

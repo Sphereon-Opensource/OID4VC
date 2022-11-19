@@ -57,7 +57,13 @@ describe('OID4VCI-Client should', () => {
         credential: mockedVC,
       });
 
-    const client = await OpenID4VCIClient.initiateFromURI(INITIATE_QR_DATA, AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
+    const client = await OpenID4VCIClient.initiateFromURI({
+      issuanceInitiationURI: INITIATE_QR_DATA,
+      flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
+      kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
+      alg: Alg.ES256,
+      clientId: 'test-clientId',
+    });
 
     expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
     expect(client.initiation).toBeDefined();
@@ -66,11 +72,14 @@ describe('OID4VCI-Client should', () => {
     expect(client.getCredentialEndpoint()).toEqual('https://issuer.research.identiproof.io/credential');
     expect(client.getAccessTokenEndpoint()).toEqual('https://auth.research.identiproof.io/oauth2/token');
 
-    const accessToken = await client.acquireAccessToken({ pin: '1234', clientId: 'test-clientId' });
+    const accessToken = await client.acquireAccessToken({ pin: '1234' });
     expect(accessToken).toEqual(mockedAccessTokenResponse);
 
-    const credentialResponse = await client.acquireCredentials('OpenBadgeCredential', 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', Alg.ES256, {
-      signCallback: proofOfPossessionCallbackFunction,
+    const credentialResponse = await client.acquireCredentials({
+      credentialType: 'OpenBadgeCredential',
+      proofCallbacks: {
+        signCallback: proofOfPossessionCallbackFunction,
+      },
     });
     expect(credentialResponse.credential).toEqual(mockedVC);
   });
@@ -79,10 +88,10 @@ describe('OID4VCI-Client should', () => {
     'succeed with a full flow without the client',
     async () => {
       /* Convert the URI into an object */
-      const initiationWithUrl = IssuanceInitiation.fromURI(INITIATE_QR_DATA);
+      const issuanceInitiation = IssuanceInitiation.fromURI(INITIATE_QR_DATA);
 
-      expect(initiationWithUrl.baseUrl).toEqual('openid-initiate-issuance://');
-      expect(initiationWithUrl.issuanceInitiationRequest).toEqual({
+      expect(issuanceInitiation.baseUrl).toEqual('openid-initiate-issuance://');
+      expect(issuanceInitiation.issuanceInitiationRequest).toEqual({
         credential_type: 'OpenBadgeCredentialUrl',
         issuer: ISSUER_URL,
         'pre-authorized_code':
@@ -96,9 +105,7 @@ describe('OID4VCI-Client should', () => {
 
       /* The actual access token calls */
       const accessTokenClient: AccessTokenClient = new AccessTokenClient();
-      const accessTokenResponse = await accessTokenClient.acquireAccessTokenUsingIssuanceInitiation(initiationWithUrl, {
-        pin: '1234',
-      });
+      const accessTokenResponse = await accessTokenClient.acquireAccessTokenUsingIssuanceInitiation({ issuanceInitiation, pin: '1234' });
       expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
       // Get the credential
       nock(ISSUER_URL)
@@ -107,7 +114,7 @@ describe('OID4VCI-Client should', () => {
           format: 'jwt-vc',
           credential: mockedVC,
         });
-      const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation(initiationWithUrl)
+      const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation({ initiation: issuanceInitiation })
         .withFormat('jwt_vc')
         .withTokenFromResponse(accessTokenResponse.successBody)
         .build();
@@ -116,8 +123,11 @@ describe('OID4VCI-Client should', () => {
       // is not assignable to type 'ProofOfPossessionCallback'.
       // Types of parameters 'args' and 'args' are incompatible.
       // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
-      const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt(jwt, {
-        signCallback: proofOfPossessionCallbackFunction,
+      const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+        jwt,
+        callbacks: {
+          signCallback: proofOfPossessionCallbackFunction,
+        },
       })
         .withEndpointMetadata({
           issuer: 'https://issuer.research.identiproof.io',
@@ -126,7 +136,7 @@ describe('OID4VCI-Client should', () => {
         })
         .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
         .build();
-      const credResponse = await credReqClient.acquireCredentialsUsingProof(proof, {});
+      const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof });
       expect(credResponse.successBody.credential).toEqual(mockedVC);
     },
     UNIT_TEST_TIMEOUT

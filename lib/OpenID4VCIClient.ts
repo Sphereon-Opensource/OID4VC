@@ -21,25 +21,40 @@ const debug = Debug('sphereon:openid4vci:flow');
 export class OpenID4VCIClient {
   private readonly _flowType: AuthzFlowType;
   private readonly _initiation: IssuanceInitiationWithBaseUrl;
+  private readonly _clientId?: string;
+  private readonly _kid: string;
+  private readonly _alg: string;
   private _serverMetadata: EndpointMetadata;
   private _accessToken: AccessTokenResponse;
-  private _clientId?: string;
 
-  private constructor(initiation: IssuanceInitiationWithBaseUrl, flowType: AuthzFlowType) {
+  private constructor(initiation: IssuanceInitiationWithBaseUrl, flowType: AuthzFlowType, kid: string, alg: Alg | string, clientId?: string) {
     if (flowType !== AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW) {
       throw new Error(`Only pre-authorized code flow is support at present`);
     }
     this._flowType = flowType;
     this._initiation = initiation;
+    this._kid = kid;
+    this._alg = alg;
+    this._clientId = clientId;
   }
 
-  public static async initiateFromURI(
-    issuanceInitiationURI: string,
-    flowType: AuthzFlowType,
-    opts?: { retrieveServerMetadata: boolean }
-  ): Promise<OpenID4VCIClient> {
-    const flow = new OpenID4VCIClient(IssuanceInitiation.fromURI(issuanceInitiationURI), flowType);
-    if (!opts || opts.retrieveServerMetadata !== false) {
+  public static async initiateFromURI({
+    issuanceInitiationURI,
+    flowType,
+    kid,
+    alg,
+    retrieveServerMetadata,
+    clientId,
+  }: {
+    issuanceInitiationURI: string;
+    flowType: AuthzFlowType;
+    kid: string;
+    alg: Alg | string;
+    retrieveServerMetadata?: boolean;
+    clientId?: string;
+  }): Promise<OpenID4VCIClient> {
+    const flow = new OpenID4VCIClient(IssuanceInitiation.fromURI(issuanceInitiationURI), flowType, kid, alg, clientId);
+    if (retrieveServerMetadata !== false) {
       await flow.retrieveServerMetadata();
     }
     return flow;
@@ -53,15 +68,15 @@ export class OpenID4VCIClient {
     return this._serverMetadata;
   }
 
-  public async acquireAccessToken(opts?: { clientId?: string; pin?: string }): Promise<AccessTokenResponse> {
+  public async acquireAccessToken({ pin }: { pin?: string }): Promise<AccessTokenResponse> {
     this.assertInitiation();
     if (!this._accessToken) {
       const accessTokenClient = new AccessTokenClient();
-      this._clientId = opts.clientId;
-      const response = await accessTokenClient.acquireAccessTokenUsingIssuanceInitiation(this._initiation, {
+      const response = await accessTokenClient.acquireAccessTokenUsingIssuanceInitiation({
+        issuanceInitiation: this._initiation,
         metadata: this._serverMetadata,
-        pin: opts?.pin,
-        asOpts: opts.clientId ? { clientId: opts.clientId } : {},
+        pin,
+        asOpts: { clientId: this.clientId },
       });
       if (response.errorBody) {
         debug(`Access token error:\r\n${response.errorBody}`);
@@ -74,15 +89,21 @@ export class OpenID4VCIClient {
     return this._accessToken;
   }
 
-  public async acquireCredentials(
-    credentialType: string | string[],
-    kid: string,
-    alg: Alg | string,
-    proofCallbacks: ProofOfPossessionCallbacks,
-    opts?: { format?: CredentialFormat | CredentialFormat[]; jti?: string }
-  ): Promise<CredentialResponse> {
-    const reqbuilder = CredentialRequestClientBuilder.fromIssuanceInitiation(this.initiation, this.serverMetadata);
-    reqbuilder.withClientId(this.clientId);
+  public async acquireCredentials({
+    credentialType,
+    proofCallbacks,
+    format,
+    jti,
+  }: {
+    credentialType: string | string[];
+    proofCallbacks: ProofOfPossessionCallbacks;
+    format?: CredentialFormat | CredentialFormat[];
+    jti?: string;
+  }): Promise<CredentialResponse> {
+    const requestBuilder = CredentialRequestClientBuilder.fromIssuanceInitiation({
+      initiation: this.initiation,
+      metadata: this.serverMetadata,
+    });
     if (this.serverMetadata?.openid4vci_metadata) {
       const metadata = this.serverMetadata.openid4vci_metadata;
       const types = Array.isArray(credentialType) ? credentialType : [credentialType];
@@ -91,15 +112,22 @@ export class OpenID4VCIClient {
       }
       // todo: Format check? We might end up with some disjoint type / format combinations supported by the server
     }
-    const credentialRequestClient = reqbuilder.build();
-    const proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse(this.accessToken, proofCallbacks)
+    const credentialRequestClient = requestBuilder.build();
+    const proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse({
+      accessTokenResponse: this.accessToken,
+      callbacks: proofCallbacks,
+    })
       .withIssuer(this.getIssuer())
-      .withAlg(alg)
-      .withJti(opts?.jti)
+      .withAlg(this.alg)
+      .withJti(jti)
       .withClientId(this.clientId)
-      .withKid(kid);
+      .withKid(this.kid);
 
-    const response = await credentialRequestClient.acquireCredentialsUsingProof(proofBuilder, { credentialType, ...opts });
+    const response = await credentialRequestClient.acquireCredentialsUsingProof({
+      proofInput: proofBuilder,
+      credentialType,
+      format,
+    });
     if (response.errorBody) {
       debug(`Access token error:\r\n${response.errorBody}`);
       throw Error(
@@ -121,6 +149,14 @@ export class OpenID4VCIClient {
     return this._serverMetadata;
   }
 
+  get kid(): string {
+    return this._kid;
+  }
+
+  get alg(): string {
+    return this._alg;
+  }
+
   get clientId(): string {
     return this._clientId;
   }
@@ -136,7 +172,9 @@ export class OpenID4VCIClient {
 
   public getAccessTokenEndpoint(): string {
     this.assertInitiation();
-    return this.serverMetadata ? this.serverMetadata.token_endpoint : AccessTokenClient.determineTokenURL({}, { issuer: this.getIssuer() });
+    return this.serverMetadata
+      ? this.serverMetadata.token_endpoint
+      : AccessTokenClient.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
   }
 
   public getCredentialEndpoint(): string {

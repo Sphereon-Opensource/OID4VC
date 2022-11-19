@@ -1,5 +1,14 @@
 import { createProofOfPossession } from './functions';
-import { AccessTokenResponse, Alg, EndpointMetadata, Jwt, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, ProofOfPossessionCallbacks } from './types';
+import {
+  AccessTokenResponse,
+  Alg,
+  EndpointMetadata,
+  Jwt,
+  NO_JWT_PROVIDED,
+  PROOF_CANT_BE_CONSTRUCTED,
+  ProofOfPossession,
+  ProofOfPossessionCallbacks,
+} from './types';
 
 export class ProofOfPossessionBuilder {
   private readonly proof?: ProofOfPossession;
@@ -13,27 +22,38 @@ export class ProofOfPossessionBuilder {
   private jti?: string;
   private cNonce?: string;
 
-  private constructor(opts: {
+  private constructor({
+    proof,
+    callbacks,
+    jwt,
+    accessTokenResponse,
+  }: {
     proof?: ProofOfPossession;
     callbacks?: ProofOfPossessionCallbacks;
     accessTokenResponse?: AccessTokenResponse;
     jwt?: Jwt;
   }) {
-    this.proof = opts.proof;
-    this.callbacks = opts.callbacks;
-    if (opts.jwt) {
-      this.withJwt(opts.jwt);
+    this.proof = proof;
+    this.callbacks = callbacks;
+    if (jwt) {
+      this.withJwt(jwt);
     }
-    if (opts.accessTokenResponse) {
-      this.withAccessTokenResponse(opts.accessTokenResponse);
+    if (accessTokenResponse) {
+      this.withAccessTokenResponse(accessTokenResponse);
     }
   }
 
-  static fromJwt(jwt: Jwt, callbacks: ProofOfPossessionCallbacks): ProofOfPossessionBuilder {
+  static fromJwt({ jwt, callbacks }: { jwt: Jwt; callbacks: ProofOfPossessionCallbacks }): ProofOfPossessionBuilder {
     return new ProofOfPossessionBuilder({ callbacks, jwt });
   }
 
-  static fromAccessTokenResponse(accessTokenResponse: AccessTokenResponse, callbacks: ProofOfPossessionCallbacks): ProofOfPossessionBuilder {
+  static fromAccessTokenResponse({
+    accessTokenResponse,
+    callbacks,
+  }: {
+    accessTokenResponse: AccessTokenResponse;
+    callbacks: ProofOfPossessionCallbacks;
+  }): ProofOfPossessionBuilder {
     return new ProofOfPossessionBuilder({ callbacks, accessTokenResponse });
   }
 
@@ -83,7 +103,7 @@ export class ProofOfPossessionBuilder {
 
   withJwt(jwt: Jwt): ProofOfPossessionBuilder {
     if (!jwt) {
-      throw new Error(`No JWT provided`);
+      throw new Error(NO_JWT_PROVIDED);
     }
     this.jwt = jwt;
     if (jwt.header) {

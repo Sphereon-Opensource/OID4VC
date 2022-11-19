@@ -11,7 +11,6 @@ const debug = Debug('sphereon:openid4vci:credential');
 export class CredentialRequestClient {
   _issuanceRequestOpts: Partial<{
     credentialEndpoint: string;
-    clientId: string;
     credentialType: string | string[];
     format: CredentialFormat | CredentialFormat[];
     proof: ProofOfPossession;
@@ -22,26 +21,20 @@ export class CredentialRequestClient {
     return this._issuanceRequestOpts.credentialEndpoint;
   }
 
-  public getClientId(): string {
-    return this._issuanceRequestOpts.clientId;
-  }
-
   public constructor(builder: CredentialRequestClientBuilder) {
     this._issuanceRequestOpts = { ...builder };
   }
 
-  public static builder(): CredentialRequestClientBuilder {
-    return new CredentialRequestClientBuilder();
-  }
-
-  public async acquireCredentialsUsingProof(
-    proofInput: ProofOfPossessionBuilder | ProofOfPossession,
-    opts?: {
-      credentialType?: string | string[];
-      format?: CredentialFormat | CredentialFormat[];
-    }
-  ): Promise<OpenIDResponse<CredentialResponse>> {
-    const request = await this.createCredentialRequest(proofInput, { ...opts });
+  public async acquireCredentialsUsingProof({
+    proofInput,
+    credentialType,
+    format,
+  }: {
+    proofInput: ProofOfPossessionBuilder | ProofOfPossession;
+    credentialType?: string | string[];
+    format?: CredentialFormat | CredentialFormat[];
+  }): Promise<OpenIDResponse<CredentialResponse>> {
+    const request = await this.createCredentialRequest({ proofInput, credentialType, format });
     return await this.acquireCredentialsUsingRequest(request);
   }
 
@@ -58,18 +51,20 @@ export class CredentialRequestClient {
     return response;
   }
 
-  public async createCredentialRequest(
-    proofInput: ProofOfPossessionBuilder | ProofOfPossession,
-    opts?: {
-      credentialType?: string | string[];
-      format?: CredentialFormat | CredentialFormat[];
-    }
-  ): Promise<CredentialRequest> {
+  public async createCredentialRequest({
+    proofInput,
+    credentialType,
+    format,
+  }: {
+    proofInput: ProofOfPossessionBuilder | ProofOfPossession;
+    credentialType?: string | string[];
+    format?: CredentialFormat | CredentialFormat[];
+  }): Promise<CredentialRequest> {
     const proof =
       'proof_type' in proofInput ? await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession).build() : await proofInput.build();
     return {
-      type: opts?.credentialType ? opts.credentialType : this._issuanceRequestOpts.credentialType,
-      format: opts?.format ? opts.format : this._issuanceRequestOpts.format,
+      type: credentialType ? credentialType : this._issuanceRequestOpts.credentialType,
+      format: format ? format : this._issuanceRequestOpts.format,
       proof,
     };
   }

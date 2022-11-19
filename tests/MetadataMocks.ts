@@ -3,6 +3,21 @@ export const IDENTIPROOF_AS_URL = 'https://auth.research.identiproof.io';
 export const SPRUCE_ISSUER_URL = 'https://ngi-oidc4vci-test.spruceid.xyz';
 export const DANUBE_ISSUER_URL = 'https://oidc4vc.uniissuer.io';
 export const WALT_ISSUER_URL = 'https://jff.walt.id/issuer-api/oidc';
+export const INITIATION_TEST_HTTPS_URI =
+  'https://server.example.com?issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy';
+export const INITIATION_TEST_URI =
+  'openid-initiate-issuance://?credential_type=OpenBadgeCredential&issuer=https%3A%2F%2Fjff%2Ewalt%2Eid%2Fissuer-api%2Foidc%2F&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
+
+export const INITIATION_TEST = {
+  baseUrl: 'openid-initiate-issuance://',
+  issuanceInitiationRequest: {
+    credential_type: 'OpenBadgeCredential',
+    issuer: 'https://jff.walt.id/issuer-api/oidc/',
+    'pre-authorized_code':
+      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
+    user_pin_required: 'false',
+  },
+};
 export const IDENTIPROOF_AS_METADATA = {
   issuer: 'https://auth.research.identiproof.io',
   authorization_endpoint: 'https://auth.research.identiproof.io/oauth2/authorize',

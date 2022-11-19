@@ -136,9 +136,8 @@ export class MetadataClient {
       exceptionOnHttpErrorStatus: opts?.errorOnNotFound,
     });
     if (result.origResponse.status === 404) {
-      if (opts?.errorOnNotFound) {
-        throw result.errorBody;
-      }
+      // We only get here when error on not found is false
+      debug(`host ${host} with endpoint type ${endpointType} was not found (404)`);
     }
     return result;
   }
