@@ -1,5 +1,18 @@
 # Release Notes
 
+
+## v0.3.0 - 2022-11-19
+Release with support for the pre-authorized code flow only!
+
+**WARNING: The package has been renamed to @sphereon/openid4vci-client!**
+
+- Added:
+  - Single main OpenID4VCI Client, not requiring implementation to have to use the low level classes/methods
+
+- Fixes:
+  - Several fixes and improvements
+
+
 ## v0.2.0 - 2022-11-04
 
 Release with support for the pre-authorized code flow only.
