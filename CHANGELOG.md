@@ -1,5 +1,17 @@
 # Release Notes
 
+## v0.3.1 - 2022-11-20
+Release with support for the pre-authorized code flow only!
+
+- Added:
+  - Allow deferring to set the kid, alg to the acquire credential method, to allow inspecting the Initiation Initiation and metadata first
+  - Allow deferring setting the clientId to the acquire access token, to allow inspecting the Issuer first
+  - Add methods to get supported credentials, optionally restricted to the Initiate Issuance Request types
+  - Relax c_nonce handling, as some Issuers do not implement it.
+
+- Fixes:
+  - Missing some exports
+
 
 ## v0.3.0 - 2022-11-19
 Release with support for the pre-authorized code flow only!
