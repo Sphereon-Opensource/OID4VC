@@ -75,7 +75,7 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   const aud = getJwtProperty('aud', true, jwtProps.issuer, existingJwt?.payload?.aud);
   const iss = getJwtProperty('iss', false, jwtProps.clientId, existingJwt?.payload?.iss);
   const jti = getJwtProperty('jti', false, jwtProps.jti, existingJwt?.payload?.jti);
-  const nonce = getJwtProperty('nonce', true, jwtProps.nonce, existingJwt?.payload?.nonce);
+  const nonce = getJwtProperty('nonce', false, jwtProps.nonce, existingJwt?.payload?.nonce); // Officially this is required, but some implementations don't have it
   const alg = getJwtProperty('alg', false, jwtProps.alg, existingJwt?.header?.alg, 'ES256');
   const kid = getJwtProperty('kid', true, jwtProps.kid, existingJwt?.header?.kid);
   const jwt = existingJwt ? existingJwt : {};

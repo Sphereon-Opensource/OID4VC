@@ -21,7 +21,7 @@ export interface CredentialIssuer {
 export interface CredentialMetadata {
   display?: CredentialDisplay[]; //OPTIONAL. An array of objects, where each object contains display properties of a certain Credential for a certain language. Below is a non-exhaustive list of parameters that MAY be included. Note that the display name of the Credential is obtained from display.name and individual claim names from claims.display.name values.
   formats: Formats; //REQUIRED. A JSON object containing a list of key value pairs, where the key is a string identifying the format of the Credential. Below is a non-exhaustive list of valid key values defined by this specification:
-  claims: Claims; //REQUIRED. A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential. The value is a JSON object detailing the specifics about the support for the claim
+  claims?: Claims; //REQUIRED. A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential. The value is a JSON object detailing the specifics about the support for the claim
 }
 
 export interface CredentialsSupported {
