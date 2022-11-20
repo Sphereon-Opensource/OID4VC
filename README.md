@@ -105,8 +105,8 @@ console.log(accessToken);
 ## Getting the credential
 
 Now it is time to get the credential. In order to achieve this, we will be using the metadata together with the access
-token, but first we will have to create a so called Proof of Possession. Please see
-tje [Proof of Posession](#proof-of-possession) chapter for more information.
+token, but first we will have to create a so-called Proof of Possession. Please see
+the [Proof of Posession](#proof-of-possession) chapter for more information.
 
 The Proof of Possession using a signature callback function. The example uses the `jose` library.
 
@@ -128,20 +128,6 @@ async function signCallback(args: JwtArgs, kid: string): Promise<string> {
 const callbacks: ProofOfPossessionCallbacks = {
   signCallback
 }
-
-const proofInput: ProofOfPossession = await ProofOfPossessionBuilder.fromAccessTokenResponse({
-  accessTokenResponse,
-  callbacks,
-})
-  .withEndpointMetadata(metadata)
-  .withClientId('test-clientid')
-  .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
-  .build();
-console.log(proofInput);
-// {
-//   "proof_type": "jwt",
-//   "jwt": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJpc3MiOiJzNkJoZFJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJpYXQiOjE2NTkxNDU5MjQsIm5vbmNlIjoidFppZ25zbkZicCJ9.btetOcsJ_VOePkwlFf2kyxm6hEUvPRimf3M-Dn3Lmzcmt5QiPToXNWxe_0fEJlRf4Ith55YGB43ScBe6ScZmD1gfLELYQF7LLg97yYlx_Iu8RLA2dS_7EWzLD3ZIzyUGf_uMq3HwXGJKL-ihroRpRBvxRLdZCy-j62nAzoTsBnlr6n79VjkGtlxIjN_CLGIQBhc3du3enghY6N4s3oXFrxWMl7UzGKdjCYN6vSagDb0MURjdiDCsK_yX4NyNd0nGpxqGhVgMpuhqEcqyU0qWPyHF-swtGG5JVAOJGd_YkJS5vbia8UdyOJXnAAdEE1E62a2yUPahNDxMh1iIpS0WO7y6QexWXdb5fmnWDst89T3ELS8Hj2Vzsw1XPyk9XR9JmiDzmEZdH05Wf4M9pXUG4-8_7StB6Lxc7_xDJdk6JPbzFgAIhJa4F_3rfPuwMseSEQvD6bDFowkIiUpt1vXGGVjVm3N4I4Th4_A2QpW4mDzcTKoZq9MKlDGXeLQBtiKXmqs10Jvzpp3O7kBwH7Qm6VUdBxk_-wsWplUZC4IvCfv23hy2SyFnh5zC6Wtw3UcbrSH6LcD7g-RNTKe4fRekyDxqLRdEm60BOozgBoTNhnetCrQ3e7HrApj9EP0vqNyXdtGGWCA011HVDnz6lVzf5yijJB8hOPpkgYGRmHdRQwI"
-// }
 ````
 
 Now it is time to get the actual credential
@@ -149,7 +135,10 @@ Now it is time to get the actual credential
 ````typescript
 const credentialResponse = await client.acquireCredentials({
   credentialType: 'OpenBadgeCredential',
-  proofCallbacks: callbacks
+  proofCallbacks: callbacks,
+  format: 'jwt_vc',
+  alg: Alg.ES256K,
+  kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#keys-1'
 });
 console.log(credentialResponse)
 // JWT format. (LDP/JSON-LD is also supported by the client)
