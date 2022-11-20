@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/openid4vci-client",
-  "version": "0.3.1-unstable",
+  "version": "0.3.1",
   "description": "OpenID for Verifiable Credential Issuance (OpenID4VCI) client",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
@@ -26,9 +26,9 @@
   },
   "dependencies": {
     "@sphereon/ssi-types": "0.8.1-unstable.86",
-    "debug": "^4.3.4",
     "bs58": "^5.0.0",
     "cross-fetch": "^3.1.5",
+    "debug": "^4.3.4",
     "uint8arrays": "^3.1.1"
   },
   "devDependencies": {
