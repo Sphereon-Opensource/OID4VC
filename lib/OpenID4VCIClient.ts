@@ -120,6 +120,7 @@ export class OpenID4VCIClient {
       initiation: this.initiation,
       metadata: this.serverMetadata,
     });
+    requestBuilder.withToken(this.accessTokenResponse.access_token);
     if (this.serverMetadata?.openid4vci_metadata) {
       const metadata = this.serverMetadata.openid4vci_metadata;
       const types = Array.isArray(credentialType) ? credentialType : [credentialType];
@@ -134,7 +135,6 @@ export class OpenID4VCIClient {
       callbacks: proofCallbacks,
     })
       .withIssuer(this.getIssuer())
-      .withAccessTokenResponse(this.accessTokenResponse)
       .withAlg(this.alg)
       .withJti(jti)
       .withClientId(this.clientId)
