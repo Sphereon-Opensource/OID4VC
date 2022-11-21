@@ -1,5 +1,16 @@
 # Release Notes
 
+## v0.3.2 - 2022-11-21
+Release with support for the pre-authorized code flow only!
+
+- Changed:
+  - renamed `jwtArgs` to `jwt` in the callback type
+  - Documentation updates/fixes
+
+- Fixes:
+  - The acquireCredential in the OpenID4VCIClient was not using the access token, resulting in auth issues.
+
+
 ## v0.3.1 - 2022-11-20
 Release with support for the pre-authorized code flow only!
 

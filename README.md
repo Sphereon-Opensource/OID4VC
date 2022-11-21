@@ -117,7 +117,7 @@ const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
 // Must be JWS
 async function signCallback(args: Jwt, kid: string): Promise<string> {
   return await new jose.SignJWT({ ...args.payload })
-    .setProtectedHeader({ args.header.alg })
+    .setProtectedHeader({ alg: args.header.alg })
     .setIssuedAt()
     .setIssuer(kid)
     .setAudience(args.payload.aud)
@@ -272,21 +272,21 @@ to sign the JWT and optionally a callback to verify the JWT.
 The signature of the callback functions you need to implement are:
 
 ````typescript
-export type JWTSignerCallback = (jwtArgs: Jwt, kid: string) => Promise<string>;
+export type JWTSignerCallback = (jwt: Jwt, kid: string) => Promise<string>;
 export type JWTVerifyCallback = (args: { jwt: string; kid: string }) => Promise<void>;
 ````
 
 This is an example of the signature callback function created using the `jose` library.
 
 ````typescript
-import { JwtArgs } from "./CredentialIssuance.types";
+import { Jwt } from "@sphereon/openid4vci-client";
 
 const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
 
 // Must be JWS
-async function signCallback(args: JwtArgs, kid: string): Promise<string> {
+async function signCallback(args: Jwt, kid: string): Promise<string> {
   return await new jose.SignJWT({ ...args.payload })
-    .setProtectedHeader({ alg: 'ES256' })
+    .setProtectedHeader({ alg: args.header.alg })
     .setIssuedAt()
     .setIssuer(kid)
     .setAudience(args.payload.aud)
