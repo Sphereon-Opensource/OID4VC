@@ -57,15 +57,15 @@ import { OpenID4VCIClient } from '@sphereon/openid4vci-client';
 const client = await OpenID4VCIClient.initiateFromURI({
   issuanceInitiationURI: 'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true',
   flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW, // The flow to use
-  kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#key-1', // Our DID
-  alg: Alg.ES256, // The signing Algorithm we will use
-  clientId: 'test-clientId', // The clientId if the Authrozation Service requires it
-  retrieveServerMetadata: true // Already retrieve the server metadata. Can also be done afterwards
+  kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#key-1', // Our DID.  You can defer this also to when the acquireCredential method is called
+  alg: Alg.ES256, // The signing Algorithm we will use. You can defer this also to when the acquireCredential method is called
+  clientId: 'test-clientId', // The clientId if the Authrozation Service requires it.  If a clientId is needed you can defer this also to when the acquireAccessToken method is called
+  retrieveServerMetadata: true // Already retrieve the server metadata. Can also be done afterwards by invoking a method yourself.
 });
 
 console.log(client.getIssuer()); // https://issuer.research.identiproof.io
-console.log(client.getCredentialEndpoint()); // 'https://issuer.research.identiproof.io/credential';
-console.log(client.getAccessTokenEndpoint()); // 'https://auth.research.identiproof.io/oauth2/token';
+console.log(client.getCredentialEndpoint()); // https://issuer.research.identiproof.io/credential
+console.log(client.getAccessTokenEndpoint()); // https://auth.research.identiproof.io/oauth2/token
 ````
 
 ## Server metadata
@@ -115,9 +115,9 @@ The Proof of Possession using a signature callback function. The example uses th
 const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
 
 // Must be JWS
-async function signCallback(args: JwtArgs, kid: string): Promise<string> {
+async function signCallback(args: Jwt, kid: string): Promise<string> {
   return await new jose.SignJWT({ ...args.payload })
-    .setProtectedHeader({ alg: 'ES256' })
+    .setProtectedHeader({ args.header.alg })
     .setIssuedAt()
     .setIssuer(kid)
     .setAudience(args.payload.aud)
@@ -140,7 +140,7 @@ const credentialResponse = await client.acquireCredentials({
   alg: Alg.ES256K,
   kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#keys-1'
 });
-console.log(credentialResponse)
+console.log(credentialResponse.credential)
 // JWT format. (LDP/JSON-LD is also supported by the client)
 // eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL2V4YW1wbGVzL3YxIl0sImlkIjoiaHR0cDovL2V4YW1wbGUuZWR1L2NyZWRlbnRpYWxzLzM3MzIiLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiVW5pdmVyc2l0eURlZ3JlZUNyZWRlbnRpYWwiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLmVkdS9pc3N1ZXJzLzU2NTA0OSIsImlzc3VhbmNlRGF0ZSI6IjIwMTAtMDEtMDFUMDA6MDA6MDBaIiwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEiLCJkZWdyZWUiOnsidHlwZSI6IkJhY2hlbG9yRGVncmVlIiwibmFtZSI6IkJhY2hlbG9yIG9mIFNjaWVuY2UgYW5kIEFydHMifX19LCJpc3MiOiJodHRwczovL2V4YW1wbGUuZWR1L2lzc3VlcnMvNTY1MDQ5IiwibmJmIjoxMjYyMzA0MDAwLCJqdGkiOiJodHRwOi8vZXhhbXBsZS5lZHUvY3JlZGVudGlhbHMvMzczMiIsInN1YiI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMSJ9.z5vgMTK1nfizNCg5N-niCOL3WUIAL7nXy-nGhDZYO_-PNGeE-0djCpWAMH8fD8eWSID5PfkPBYkx_dfLJnQ7NA
 ````
