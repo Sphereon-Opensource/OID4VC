@@ -92,7 +92,7 @@ export interface JWTPayload {
   exp?: number; // Not longer than 5 minutes
 }
 
-export type JWTSignerCallback = (jwtArgs: Jwt, kid: string) => Promise<string>;
+export type JWTSignerCallback = (jwt: Jwt, kid: string) => Promise<string>;
 export type JWTVerifyCallback = (args: { jwt: string; kid: string }) => Promise<void>;
 
 export type Request = CredentialRequest;
