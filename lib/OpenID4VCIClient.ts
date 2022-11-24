@@ -156,13 +156,13 @@ export class OpenID4VCIClient {
 
   getCredentialsSupported(restrictToInitiationTypes: boolean): CredentialsSupported {
     const credentialsSupported = this.serverMetadata.openid4vci_metadata.credentials_supported;
-    if (restrictToInitiationTypes !== false) {
+    if (restrictToInitiationTypes !== true) {
       return credentialsSupported;
     }
     const initiationTypes = this.getCredentialTypesFromInitiation();
     const supported: CredentialsSupported = {};
     for (const [key, value] of Object.entries(credentialsSupported)) {
-      if (key in initiationTypes) {
+      if (initiationTypes.includes(key)) {
         supported[key] = value;
       }
     }
