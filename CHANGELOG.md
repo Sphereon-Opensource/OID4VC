@@ -1,11 +1,13 @@
 # Release Notes
 
-## v0.3.3 - 2022-11-24
+## v0.3.4 - 2022-11-24
 Release with support for the pre-authorized code flow only!
 
 - Fixes:
   - Matching server metadata on Initiation Request types wasn't working
 
+## v0.3.3 - 2022-11-24
+Discard release because of a merge problem. 
 
 ## v0.3.2 - 2022-11-21
 Release with support for the pre-authorized code flow only!
