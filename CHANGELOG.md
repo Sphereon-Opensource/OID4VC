@@ -1,10 +1,11 @@
 # Release Notes
 
 ## v0.3.5 - 2023-01-10
-HTTP mediatype fix + move SSI-types to dev dependencies
+HTTP mediatype fix and HTTP response NodeJS16+ fix
 
 - Fixes:
   - The central HTTP client method incorrectly used an array instead of an object/record when no custom headers where supplied, resulting in incorrect headers. Fixed thanks to @karimStekelenburg from our friends at karimStekelenburg
+  - Fix HTTP response handling for newer NodeJS >=16 not cloning the response, used for debug/log purposes.
 
 - Changed:
   - Moved SSI-types to a dev dependency
