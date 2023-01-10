@@ -46,7 +46,7 @@ const openIdFetch = async <T>(
   }
   const method = opts?.method ? opts.method : body ? 'POST' : 'GET';
   const accept = opts?.accept ? opts.accept : 'application/json';
-  headers['Content-Type'] = opts?.contentType ? opts.contentType : method !== 'GET' ? 'application/json' : undefined;
+  // headers['Content-Type'] = opts?.contentType ? opts.contentType : method !== 'GET' ? 'application/json' : undefined;
   headers['Accept'] = accept;
 
   const payload: RequestInit = {
@@ -61,12 +61,12 @@ const openIdFetch = async <T>(
   }
   debug(`Headers:\r\n${JSON.stringify(payload.headers)}`);
   const origResponse = await fetch(url, payload);
-  const clonedResponse = origResponse.clone();
   const isJSONResponse = accept === 'application/json' || origResponse.headers['Content-Type'] === 'application/json';
   const success = origResponse && origResponse.status >= 200 && origResponse.status < 400;
-  const responseBody = isJSONResponse ? await clonedResponse.json() : await clonedResponse.text();
+  const responseText = await origResponse.text();
+  const responseBody = isJSONResponse ? JSON.parse(responseText) : responseText;
 
-  debug(`${success ? 'success' : 'error'} status: ${clonedResponse.status}, body:\r\n${JSON.stringify(responseBody)}`);
+  debug(`${success ? 'success' : 'error'} status: ${origResponse.status}, body:\r\n${JSON.stringify(responseBody)}`);
   if (!success && opts?.exceptionOnHttpErrorStatus) {
     const error = JSON.stringify(responseBody);
     throw new Error(error === '{}' ? '{"error": "not found"}' : error);

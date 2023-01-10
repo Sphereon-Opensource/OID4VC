@@ -1,5 +1,14 @@
 # Release Notes
 
+## v0.3.5 - 2023-01-10
+HTTP mediatype fix + move SSI-types to dev dependencies
+
+- Fixes:
+  - The central HTTP client method incorrectly used an array instead of an object/record when no custom headers where supplied, resulting in incorrect headers. Fixed thanks to @karimStekelenburg from our friends at karimStekelenburg
+
+- Changed:
+  - Moved SSI-types to a dev dependency
+
 ## v0.3.4 - 2022-11-24
 Release with support for the pre-authorized code flow only!
 
