@@ -40,7 +40,7 @@ const openIdFetch = async <T>(
     exceptionOnHttpErrorStatus?: boolean;
   }
 ): Promise<OpenIDResponse<T>> => {
-  const headers = opts?.customHeaders ? opts.customHeaders : [];
+  const headers = opts?.customHeaders ? opts.customHeaders : {};
   if (opts?.bearerToken) {
     headers['Authorization'] = `Bearer ${opts.bearerToken}`;
   }
