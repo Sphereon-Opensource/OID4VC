@@ -4,7 +4,7 @@
 HTTP mediatype fix and HTTP response NodeJS16+ fix
 
 - Fixes:
-  - The central HTTP client method incorrectly used an array instead of an object/record when no custom headers where supplied, resulting in incorrect headers. Fixed thanks to @karimStekelenburg from our friends at karimStekelenburg
+  - The central HTTP client method incorrectly used an array instead of an object/record when no custom headers where supplied, resulting in incorrect headers. Fixed thanks to @karimStekelenburg from our friends at @animo
   - Fix HTTP response handling for newer NodeJS >=16 not cloning the response, used for debug/log purposes.
 
 - Changed:
