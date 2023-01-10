@@ -138,16 +138,17 @@ describe('Credential Request Client ', () => {
 
 describe('Credential Request Client with Walt.id ', () => {
   it('should have correct metadata endpoints', async function () {
+    nock.cleanAll();
     const WALT_IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
-    const inititation = IssuanceInitiation.fromURI(WALT_IRR_URI);
+    const initiation = IssuanceInitiation.fromURI(WALT_IRR_URI);
 
-    const metadata = await MetadataClient.retrieveAllMetadataFromInitiation(inititation);
+    const metadata = await MetadataClient.retrieveAllMetadataFromInitiation(initiation);
     expect(metadata.credential_endpoint).toEqual(WALT_OID4VCI_METADATA.credential_endpoint);
     expect(metadata.token_endpoint).toEqual(WALT_OID4VCI_METADATA.token_endpoint);
 
     const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation({
-      initiation: inititation,
+      initiation,
       metadata,
     }).build();
     expect(credReqClient._issuanceRequestOpts.credentialEndpoint).toBe(WALT_OID4VCI_METADATA.credential_endpoint);
