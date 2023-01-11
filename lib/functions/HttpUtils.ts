@@ -46,8 +46,20 @@ const openIdFetch = async <T>(
   }
   const method = opts?.method ? opts.method : body ? 'POST' : 'GET';
   const accept = opts?.accept ? opts.accept : 'application/json';
-  // headers['Content-Type'] = opts?.contentType ? opts.contentType : method !== 'GET' ? 'application/json' : undefined;
   headers['Accept'] = accept;
+  if (headers['Content-Type']) {
+    if (opts?.contentType && opts.contentType !== headers['Content-Type']) {
+      throw Error(
+        `Mismatch in content-types from custom headers (${headers['Content-Type']}) and supplied content type option (${opts.contentType})`
+      );
+    }
+  } else {
+    if (opts?.contentType) {
+      headers['Content-Type'] = opts.contentType;
+    } else if (method !== 'GET') {
+      headers['Content-Type'] = 'application/json';
+    }
+  }
 
   const payload: RequestInit = {
     method,
