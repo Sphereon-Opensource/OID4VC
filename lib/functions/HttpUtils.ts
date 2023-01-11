@@ -46,7 +46,7 @@ const openIdFetch = async <T>(
   }
   const method = opts?.method ? opts.method : body ? 'POST' : 'GET';
   const accept = opts?.accept ? opts.accept : 'application/json';
-  // headers['Content-Type'] = opts?.contentType ? opts.contentType : method !== 'GET' ? 'application/json' : undefined;
+  headers['Content-Type'] = opts?.contentType ? opts.contentType : method !== 'GET' ? 'application/json' : undefined;
   headers['Accept'] = accept;
 
   const payload: RequestInit = {
