@@ -1,5 +1,18 @@
 # Release Notes
 
+## v0.3.6 - 2023-01-12
+Content-type fixes and allow localhost urls
+
+- Fixes:
+  - Re-add the content-type headers, inadvertently removed in the previous version. Added logic for corner-cases
+  - Re-add sss-types ad dependency as it seems it is needed at runtime.
+  - Allow localhost as a valid URL
+
+- Changed:
+  - Require http(s) schemes for URLs
+  - Update to ssi-types from current develop branch, instead of a unstable/feature branch
+
+
 ## v0.3.5 - 2023-01-10
 HTTP mediatype fix and HTTP response NodeJS16+ fix
 
