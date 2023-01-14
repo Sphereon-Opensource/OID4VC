@@ -417,7 +417,9 @@ the keypair created earlier.
 ````typescript
 import { CredentialRequestClientBuilder, CredentialResponse, ProofOfPossessionArgs } from '@sphereon/openid4vci-client';
 
-const credentialRequestClient = CredentialRequestClientBuilder.fromIssuanceInitiation(initiationRequestWithUrl, metadata)
+const credentialRequestClient = CredentialRequestClientBuilder
+                                    .fromIssuanceInitiation(initiationRequestWithUrl, metadata)
+                                    .build()
 
 // In 1 step:
 const credentialResponse: CredentialResponse = await credentialRequestClient.acquireCredentialsUsingProof({
