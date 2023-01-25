@@ -68,6 +68,7 @@ export interface OpenIDResponse<T> {
 
 export interface AccessTokenResponse {
   access_token: string;
+  scope?: string;
   token_type?: string;
   expires_in?: number; // in seconds
   c_nonce?: string;
