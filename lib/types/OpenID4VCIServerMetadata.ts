@@ -9,6 +9,7 @@ export interface OpenID4VCIServerMetadata {
   credential_issuer?: CredentialIssuer; //  A JSON object containing display properties for the Credential issuer.
   token_endpoint?: string; //NON-SPEC compliant, but used by several issuers. URL of the OP's Token Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   authorization_server?: string; //NON-SPEC compliant, but used by some issuers. URL of the AS. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
+  // TODO: The above authorization_server being used in the wild, serves roughly the same purpose as the below spec compliant endpoint. Look at how to use authorization_server as authorization_endpoint in case it is present
   authorization_endpoint?: string;
 }
 
