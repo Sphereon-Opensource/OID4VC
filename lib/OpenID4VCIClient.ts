@@ -70,17 +70,33 @@ export class OpenID4VCIClient {
     return this._serverMetadata;
   }
 
-  public async acquireAccessToken({ pin, clientId }: { pin?: string; clientId?: string }): Promise<AccessTokenResponse> {
+  public async acquireAccessToken({
+    pin,
+    clientId,
+    codeVerifier,
+    code,
+    redirectUri,
+  }: {
+    pin?: string;
+    clientId?: string;
+    codeVerifier?: string;
+    code?: string;
+    redirectUri?: string;
+  }): Promise<AccessTokenResponse> {
     this.assertInitiation();
     if (clientId) {
       this._clientId = clientId;
     }
     if (!this._accessTokenResponse) {
       const accessTokenClient = new AccessTokenClient();
+
       const response = await accessTokenClient.acquireAccessTokenUsingIssuanceInitiation({
         issuanceInitiation: this._initiation,
         metadata: this._serverMetadata,
         pin,
+        codeVerifier,
+        code,
+        redirectUri,
         asOpts: { clientId: this.clientId },
       });
       if (response.errorBody) {
@@ -91,6 +107,7 @@ export class OpenID4VCIClient {
       }
       this._accessTokenResponse = response.successBody;
     }
+
     return this._accessTokenResponse;
   }
 
