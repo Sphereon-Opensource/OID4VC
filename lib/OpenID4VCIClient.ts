@@ -6,9 +6,12 @@ import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder
 import { IssuanceInitiation } from './IssuanceInitiation';
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
+import { convertJsonToURI } from './functions';
 import {
   AccessTokenResponse,
   Alg,
+  AuthorizationRequest,
+  AuthorizationRequestOpts,
   AuthzFlowType,
   CredentialMetadata,
   CredentialResponse,
@@ -16,6 +19,7 @@ import {
   EndpointMetadata,
   IssuanceInitiationWithBaseUrl,
   ProofOfPossessionCallbacks,
+  ResponseType,
 } from './types';
 
 const debug = Debug('sphereon:openid4vci:flow');
@@ -30,9 +34,6 @@ export class OpenID4VCIClient {
   private _accessTokenResponse: AccessTokenResponse;
 
   private constructor(initiation: IssuanceInitiationWithBaseUrl, flowType: AuthzFlowType, kid?: string, alg?: Alg | string, clientId?: string) {
-    if (flowType !== AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW) {
-      throw new Error(`Only pre-authorized code flow is support at present`);
-    }
     this._flowType = flowType;
     this._initiation = initiation;
     this._kid = kid;
@@ -68,6 +69,53 @@ export class OpenID4VCIClient {
       this._serverMetadata = await MetadataClient.retrieveAllMetadataFromInitiation(this._initiation);
     }
     return this._serverMetadata;
+  }
+
+  public createAuthorizationRequestUrl({ clientId, codeChallengeMethod, codeChallenge, redirectUri, scope }: AuthorizationRequestOpts): string {
+    if (!scope) {
+      throw Error('Please provide a scope. authorization_details based requests are not supported at this time');
+    }
+
+    if (!this._serverMetadata.openid4vci_metadata.authorization_endpoint) {
+      throw Error('Server metadata does not contain authorization endpoint');
+    }
+
+    // make sure the first scope is 'openid'
+    if (scope.includes('openid')) {
+      // if the 'openid' scope is present, but isn't the first element,
+      // remove it and add it as the first element.
+      if (scope[0] !== 'openid') {
+        const index = scope.indexOf('openid');
+        scope.splice(index, 1);
+        scope.unshift('openid');
+      }
+    } else {
+      // if the 'openid' scope isn't present at all, add it
+      scope.unshift('openid');
+    }
+    if (scope.length < 2) {
+      throw Error("Scope array only contains the 'openid' scope. Please also provide a credential type");
+    }
+    console.log(scope);
+
+    const queryObj: AuthorizationRequest = {
+      response_type: ResponseType.AUTH_CODE,
+      client_id: clientId,
+      code_challenge_method: codeChallengeMethod,
+      code_challenge: codeChallenge,
+      redirect_uri: redirectUri,
+      scope: scope,
+    };
+
+    const authRequestUrl = convertJsonToURI(
+      { ...queryObj, scope: scope.join(' ') },
+      {
+        baseUrl: this._serverMetadata.openid4vci_metadata.authorization_endpoint,
+        uriTypeProperties: ['redirect_uri', 'scope'],
+      }
+    );
+
+    return authRequestUrl;
   }
 
   public async acquireAccessToken({
