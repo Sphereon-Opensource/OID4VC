@@ -16,6 +16,11 @@ export enum ResponseType {
   AUTH_CODE = 'code',
 }
 
+export enum CodeChallengeMethod {
+  TEXT = 'text',
+  SHA256 = 'S256',
+}
+
 export interface AuthorizationServerOpts {
   allowInsecureEndpoints?: boolean;
   as?: string; // If not provided the issuer hostname will be used!
@@ -33,14 +38,27 @@ export interface AccessTokenRequestOpts {
   issuanceInitiation: IssuanceInitiationWithBaseUrl;
   asOpts?: AuthorizationServerOpts;
   metadata?: EndpointMetadata;
+  codeVerifier?: string; // only required for authorization flow
+  code?: string; // only required for authorization flow
+  redirectUri?: string; // only required for authorization flow
   pin?: string; // Pin-number. Only used when required
 }
 
 export interface AuthorizationRequest {
   response_type: ResponseType.AUTH_CODE;
   client_id: string;
+  code_challenge: string;
+  code_challenge_method: CodeChallengeMethod;
   redirect_uri: string;
-  scope?: string;
+  scope?: string[];
+}
+
+export interface AuthorizationRequestOpts {
+  clientId: string;
+  codeChallenge: string;
+  codeChallengeMethod: CodeChallengeMethod;
+  redirectUri: string;
+  scope?: string[];
 }
 
 export interface AuthorizationGrantResponse {
@@ -52,6 +70,7 @@ export interface AuthorizationGrantResponse {
 
 export interface AccessTokenRequest {
   client_id?: string;
+  code?: string;
   code_verifier?: string;
   grant_type: GrantTypes;
   'pre-authorized_code': string;
