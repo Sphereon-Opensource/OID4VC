@@ -19,6 +19,6 @@ export interface EndpointMetadata {
   issuer: string;
   token_endpoint: string;
   credential_endpoint: string;
-  authorization_endpoint: string;
+  authorization_endpoint?: string;
   openid4vci_metadata?: OpenID4VCIServerMetadata;
 }
