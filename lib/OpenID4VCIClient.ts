@@ -96,7 +96,6 @@ export class OpenID4VCIClient {
     if (scope.length < 2) {
       throw Error("Scope array only contains the 'openid' scope. Please also provide a credential type");
     }
-    console.log(scope);
 
     const queryObj: AuthorizationRequest = {
       response_type: ResponseType.AUTH_CODE,

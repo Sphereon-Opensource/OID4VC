@@ -66,7 +66,6 @@ describe('OpenID4VCIClient should', () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     client._serverMetadata.openid4vci_metadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
-    console.log('set');
 
     const url = client.createAuthorizationRequestUrl({
       clientId: 'test-client',
@@ -85,7 +84,6 @@ describe('OpenID4VCIClient should', () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     client._serverMetadata.openid4vci_metadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
-    console.log('set');
 
     const url = client.createAuthorizationRequestUrl({
       clientId: 'test-client',
