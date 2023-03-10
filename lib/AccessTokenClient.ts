@@ -187,11 +187,13 @@ export class AccessTokenClient {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyPreAuthorizedCode(accessTokenRequest);
       this.assertNumericPin(isPinRequired, accessTokenRequest.user_pin);
-    } else {
+    } else if (accessTokenRequest.grant_type === GrantTypes.AUTHORIZATION_CODE) {
       this.assertAuthorizationGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyCodeVerifier(accessTokenRequest);
       this.assertNonEmptyCode(accessTokenRequest);
       this.assertNonEmptyRedirectUri(accessTokenRequest);
+    } else {
+      this.throwNotSupportedFlow;
     }
   }
 
