@@ -113,6 +113,9 @@ export class AccessTokenClient {
       request.redirect_uri = redirectUri;
       request.grant_type = GrantTypes.AUTHORIZATION_CODE;
     }
+    if (request.grant_type === GrantTypes.AUTHORIZATION_CODE && issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL]) {
+      throw Error('A pre_authorized_code flow cannot have an op_state in the initiation request');
+    }
 
     return request as AccessTokenRequest;
   }
