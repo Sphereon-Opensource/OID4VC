@@ -80,21 +80,9 @@ export class OpenID4VCIClient {
       throw Error('Server metadata does not contain authorization endpoint');
     }
 
-    // make sure the first scope is 'openid'
-    if (scope.includes('openid')) {
-      // if the 'openid' scope is present, but isn't the first element,
-      // remove it and add it as the first element.
-      if (scope[0] !== 'openid') {
-        const index = scope.indexOf('openid');
-        scope.splice(index, 1);
-        scope.unshift('openid');
-      }
-    } else {
-      // if the 'openid' scope isn't present at all, add it
-      scope.unshift('openid');
-    }
-    if (scope.length < 2) {
-      throw Error("Scope array only contains the 'openid' scope. Please also provide a credential type");
+    // add 'openid' scope if not present
+    if (!scope.includes('openid')) {
+      scope = `openid ${scope}`;
     }
 
     const queryObj: AuthorizationRequest = {
@@ -106,13 +94,10 @@ export class OpenID4VCIClient {
       scope: scope,
     };
 
-    const authRequestUrl = convertJsonToURI(
-      { ...queryObj, scope: scope.join(' ') },
-      {
-        baseUrl: this._serverMetadata.openid4vci_metadata.authorization_endpoint,
-        uriTypeProperties: ['redirect_uri', 'scope'],
-      }
-    );
+    const authRequestUrl = convertJsonToURI(queryObj, {
+      baseUrl: this._serverMetadata.openid4vci_metadata.authorization_endpoint,
+      uriTypeProperties: ['redirect_uri', 'scope'],
+    });
 
     return authRequestUrl;
   }

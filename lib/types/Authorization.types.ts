@@ -50,7 +50,7 @@ export interface AuthorizationRequest {
   code_challenge: string;
   code_challenge_method: CodeChallengeMethod;
   redirect_uri: string;
-  scope?: string[];
+  scope?: string;
 }
 
 export interface AuthorizationRequestOpts {
@@ -58,7 +58,7 @@ export interface AuthorizationRequestOpts {
   codeChallenge: string;
   codeChallengeMethod: CodeChallengeMethod;
   redirectUri: string;
-  scope?: string[];
+  scope?: string;
 }
 
 export interface AuthorizationGrantResponse {
