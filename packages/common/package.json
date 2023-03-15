@@ -1,13 +1,11 @@
 {
-  "name": "@sphereon/openid4vci",
-  "version": "1.0.0",
+  "name": "@sphereon/openid4vci-common",
+  "version": "0.0.1",
   "description": "",
   "main": "index.ts",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "client:test": "pnpm -F @sphereon/openid4vci-client run test",
-    "common:test": "pnpm -F @sphereon/openid4vci-common run test",
-    "test": "pnpm run test"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "Sphereon",

@@ -15,7 +15,7 @@ import {
   URL_NOT_VALID,
   WellKnownEndpoints,
 } from '../lib';
-import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
+import { ProofOfPossessionBuilder } from '../lib';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';
 

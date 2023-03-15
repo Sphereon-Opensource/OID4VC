@@ -18,11 +18,8 @@ const debug = Debug('sphereon:openid4vci:token');
  *      Mandatory to create (sign) ProofOfPossession
  *    - proofOfPossessionVerifierCallback?: JWTVerifyCallback
  *      If exists, verifies the ProofOfPossession
- * @param kid: the kid refers to a DID URL which identifies a particular key in the DID Document that the Credential shall be bound to
- * @param endpointMetadata
- *  - Mandatory for signing the ProofOfPossession
- * @param jwtArgs
- * @param clientId
+ * @param jwtProps
+ * @param existingJwt
  *  - Optional, clientId of the party requesting the credential
  */
 export const createProofOfPossession = async (

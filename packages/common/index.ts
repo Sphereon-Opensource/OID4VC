@@ -1,0 +1,1 @@
+console.log('@sphereon/openid4vci-common launched')

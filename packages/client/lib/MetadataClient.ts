@@ -37,6 +37,7 @@ export class MetadataClient {
   /**
    * Retrieve all metadata from an issuer
    * @param issuer The issuer URL
+   * @param opts
    */
   public static async retrieveAllMetadata(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadata | undefined> {
     let token_endpoint;

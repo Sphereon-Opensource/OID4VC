@@ -11,8 +11,8 @@ import {
   ProofOfPossession,
   Typ,
 } from '../lib';
-import { OpenID4VCIClient } from '../lib/OpenID4VCIClient';
-import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
+import { OpenID4VCIClient } from '../lib';
+import { ProofOfPossessionBuilder } from '../lib';
 
 import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
 

@@ -3,7 +3,7 @@ import { KeyObject } from 'crypto';
 import * as jose from 'jose';
 
 import { Alg, CredentialRequest, CredentialRequestClientBuilder, Jwt, OpenID4VCIServerMetadata, ProofOfPossession, Typ } from '../lib';
-import { ProofOfPossessionBuilder } from '../lib/ProofOfPossessionBuilder';
+import { ProofOfPossessionBuilder } from '../lib';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST_URI, WALT_ISSUER_URL, WALT_OID4VCI_METADATA } from './MetadataMocks';
 
