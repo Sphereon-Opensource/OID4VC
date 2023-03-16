@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "allowJs": true /* Allow javascript files to be compiled. */,
+    "declaration": true /* Generates corresponding '.d.ts' file. */,
+    "downlevelIteration": true /* Provide full support for iterables in 'for-of', spread, and destructuring when targeting 'ES5' or 'ES3'. */,
+    "strict": true /* Enable all strict type-checking options. */,
+    "noUnusedLocals": true /* Report errors on unused locals. */,
+    "noImplicitReturns": true /* Report error when not all code paths in function return a value. */,
+    "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */,
+
+    "baseUrl": "." /* Base directory to resolve non-absolute module names. */,
+    "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true /* Skip type checking of declaration files. */,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true /* Enables experimental support for ES7 decorators. */,
+    "emitDecoratorMetadata": true /* Enables experimental support for emitting type metadata for decorators. */,
+    "preserveConstEnums": true,
+    "declarationMap": true,
+    "composite": true
+  },
+  "exclude": ["**/__tests__/**/*", "**/dist/**/*", "**/build/**/*"]
+}

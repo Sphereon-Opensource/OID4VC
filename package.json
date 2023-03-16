@@ -20,6 +20,7 @@
     "issuer:test": "pnpm -F @sphereon/openid4vci-issuer run test",
     "issuer:build": "pnpm -F @sphereon/openid4vci-issuer build",
 
+    "prettier": "prettier --write \"{packages,__tests__,!dist}/**/*.{ts,tsx,js,json,md,yml}\"",
     "uninstall": "pnpm -r run uninstall"
   },
   "devDependencies": {

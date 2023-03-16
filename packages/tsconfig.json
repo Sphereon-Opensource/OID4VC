@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "client"
+    },
+    {
+      "path": "common"
+    },
+    {
+      "path": "issuer"
+    }
+  ]
+}

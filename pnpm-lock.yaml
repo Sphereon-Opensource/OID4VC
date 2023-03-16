@@ -71,7 +71,10 @@ importers:
       rimraf: 3.0.2
 
   packages/issuer:
-    specifiers: {}
+    specifiers:
+      '@sphereon/ssi-types': ^0.9.0
+    dependencies:
+      '@sphereon/ssi-types': 0.9.0
 
 packages:
 
@@ -823,6 +826,12 @@ packages:
 
   /@sphereon/ssi-types/0.8.1-unstable.280:
     resolution: {integrity: sha512-Y7g3S5sSc0EffNdKWVvWpvK7T5kah4TMjBJvDBMaG8SReFf4TE7Hi/Wz5UVa154xEMmb1aehzWlqrHtszskcCg==}
+    dependencies:
+      jwt-decode: 3.1.2
+    dev: false
+
+  /@sphereon/ssi-types/0.9.0:
+    resolution: {integrity: sha512-umCr/syNcmvMMbQ+i/r/mwjI1Qw2aFPp9AwBTvTo1ailAVaaJjJGPkkVz1K9/2NZATNdDiQ3A8yGzdVJoKh9pA==}
     dependencies:
       jwt-decode: 3.1.2
     dev: false

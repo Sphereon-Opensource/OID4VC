@@ -1,13 +1,18 @@
-import { ICredentialIssuerMetadataParametersV1_11 } from "./types/IVcIssuer";
+import { ICredentialIssuerMetadataParametersV1_11, IIssueCredentialRequest } from './types'
 
 export class VcIssuer {
-  _issuerMetadata: ICredentialIssuerMetadataParametersV1_11;
+  _issuerMetadata: ICredentialIssuerMetadataParametersV1_11
 
   constructor(issuerMetadata: ICredentialIssuerMetadataParametersV1_11) {
-    this._issuerMetadata = issuerMetadata;
+    this._issuerMetadata = issuerMetadata
   }
 
   public getIssuerMetadata() {
-    return this._issuerMetadata;
+    return this._issuerMetadata
+  }
+
+  public issueCredential(issueCredentialRequest: IIssueCredentialRequest) {
+    //TODO: validation of the credential issue request with metadata
+    //TODO: call the generate vc method
   }
 }

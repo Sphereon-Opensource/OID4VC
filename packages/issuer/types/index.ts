@@ -1,1 +1,1 @@
-export * from "./IVcIssuer";
+export * from './IVcIssuer'
