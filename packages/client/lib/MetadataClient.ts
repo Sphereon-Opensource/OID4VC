@@ -1,6 +1,3 @@
-import Debug from 'debug';
-
-import { getJson } from './functions';
 import {
   EndpointMetadata,
   IssuanceInitiationRequestPayload,
@@ -11,6 +8,9 @@ import {
   OpenIDResponse,
   WellKnownEndpoints,
 } from '@sphereon/openid4vci-common/lib';
+import Debug from 'debug';
+
+import { getJson } from './functions';
 
 const debug = Debug('sphereon:openid4vci:metadata');
 

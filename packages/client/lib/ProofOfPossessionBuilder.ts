@@ -1,4 +1,3 @@
-import { createProofOfPossession } from './functions';
 import {
   AccessTokenResponse,
   Alg,
@@ -9,6 +8,8 @@ import {
   ProofOfPossession,
   ProofOfPossessionCallbacks,
 } from '@sphereon/openid4vci-common/lib';
+
+import { createProofOfPossession } from './functions';
 
 export class ProofOfPossessionBuilder {
   private readonly proof?: ProofOfPossession;

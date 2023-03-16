@@ -1,7 +1,7 @@
+import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from '@sphereon/openid4vci-common/lib';
 import Debug from 'debug';
 
 import { convertJsonToURI, convertURIToJsonObject } from './functions';
-import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from '@sphereon/openid4vci-common/lib';
 
 const debug = Debug('sphereon:openid4vci:initiation');
 export class IssuanceInitiation {
