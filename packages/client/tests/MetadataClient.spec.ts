@@ -1,6 +1,7 @@
+import { WellKnownEndpoints } from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
-import { IssuanceInitiation, MetadataClient, WellKnownEndpoints } from '../lib';
+import { IssuanceInitiation, MetadataClient } from '../lib';
 
 import {
   DANUBE_ISSUER_URL,
