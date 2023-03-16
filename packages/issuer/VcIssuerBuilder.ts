@@ -1,5 +1,5 @@
 import { VcIssuer } from './VcIssuer'
-import {CredentialErrorResponse, ICredentialIssuerMetadataParametersV1_11, ICredentialSupportedV1_11, IIssuerDisplay} from './types'
+import { CredentialErrorResponse, ICredentialIssuerMetadataParametersV1_11, ICredentialSupportedV1_11, IIssuerDisplay } from './types'
 
 export class VcIssuerBuilder {
   credentialIssuer?: string
@@ -38,13 +38,9 @@ export class VcIssuerBuilder {
 
   public withCredentialsSupported(credentialSupported: ICredentialSupportedV1_11 | ICredentialSupportedV1_11[]): VcIssuerBuilder {
     if (!Array.isArray(credentialSupported))
-      this.credentialsSupported = this.credentialsSupported
-        ? [...this.credentialsSupported, credentialSupported]
-        : [credentialSupported]
+      this.credentialsSupported = this.credentialsSupported ? [...this.credentialsSupported, credentialSupported] : [credentialSupported]
     else {
-      this.credentialsSupported = this.credentialsSupported
-        ? [...this.credentialsSupported, ...credentialSupported]
-        : credentialSupported
+      this.credentialsSupported = this.credentialsSupported ? [...this.credentialsSupported, ...credentialSupported] : credentialSupported
     }
     return this
   }
@@ -54,7 +50,10 @@ export class VcIssuerBuilder {
       throw new Error(CredentialErrorResponse.invalid_request)
     }
     const metadata: ICredentialIssuerMetadataParametersV1_11 = {
-      credential_endpoint: this.credentialEndpoint, credential_issuer: this.credentialIssuer, credentials_supported: this.credentialsSupported}
+      credential_endpoint: this.credentialEndpoint,
+      credential_issuer: this.credentialIssuer,
+      credentials_supported: this.credentialsSupported,
+    }
     if (this.issuerDisplay) {
       metadata.display = this.issuerDisplay
     }

@@ -10,10 +10,11 @@ import {
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
 } from '@sphereon/openid4vci-common/lib';
-import { MetadataClient } from "./MetadataClient";
-import Debug from 'debug'
-import {convertJsonToURI, formPost} from "./functions";
-import {ObjectUtils} from "@sphereon/ssi-types";
+import { ObjectUtils } from '@sphereon/ssi-types';
+import Debug from 'debug';
+
+import { MetadataClient } from './MetadataClient';
+import { convertJsonToURI, formPost } from './functions';
 
 const debug = Debug('sphereon:openid4vci:token');
 
