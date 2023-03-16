@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "clean": "rimraf dist coverage",
-    "build": "tsc -p ../../tsconfig.build.json",
+    "build": "tsc",
     "test": "echo \"INFO: no test specified\" && exit 0",
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"{lib,tests}/**/*.ts\" --write",

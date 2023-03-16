@@ -34,7 +34,7 @@ export class VcIssuer {
     return false
   }
 
-  private async issueCredential(issueCredentialRequest: IIssueCredentialRequest): Promise<ICredentialSuccessResponse> {
+  private async issueCredential(_issueCredentialRequest: IIssueCredentialRequest): Promise<ICredentialSuccessResponse> {
     throw new Error('not implemented')
   }
 }
