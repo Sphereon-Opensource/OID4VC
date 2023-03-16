@@ -2,6 +2,7 @@
   "compilerOptions": {
     "incremental": true,
     "target": "ES6",
+    "outDir": "dist/main",
     "moduleResolution": "node",
     "module": "commonjs",
     "declaration": true,
@@ -33,13 +34,12 @@
     ]
   },
   "include": [
-    "packages/*/**/*.ts",
-    "lib/**/*.ts",
-    "tests/**/*.ts"
+    "packages/*/lib/**/*.ts",
+    "packages/*/tests/**/*.ts"
   ],
   "exclude": [
-    "node_modules/**",
-    "dist/**"
+    "**/dist/**/*",
+    "**/node_modules/**/*",
   ],
   "compileOnSave": false
 }
