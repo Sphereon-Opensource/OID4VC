@@ -38,13 +38,19 @@ export interface ProofOfPossession {
 }
 
 export type SearchValue = {
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   [Symbol.replace](string: string, replacer: (substring: string, ...args: any[]) => string): string;
 };
 
-export type EncodeJsonAsURIOpts = { uriTypeProperties?: string[]; arrayTypeProperties?: string[]; baseUrl?: string };
+export type EncodeJsonAsURIOpts = {
+  uriTypeProperties?: string[];
+  arrayTypeProperties?: string[];
+  baseUrl?: string;
+};
 
-export type DecodeURIAsJsonOpts = { requiredProperties?: string[]; arrayTypeProperties?: string[] };
+export type DecodeURIAsJsonOpts = {
+  requiredProperties?: string[];
+  arrayTypeProperties?: string[];
+};
 
 export interface JWK {
   kty?: string;
