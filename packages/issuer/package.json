@@ -2,13 +2,22 @@
   "name": "@sphereon/openid4vci-issuer",
   "version": "0.0.1",
   "description": "",
-  "main": "index.ts",
+  "source": "src/index.ts",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./dist/plugin.schema.json": "./dist/plugin.schema.json"
+  },
+  "types": "dist/index.d.ts",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "clean": "rimraf dist coverage",
-    "build": "tsc -p ../../tsconfig.build.json",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "uninstall": "rimraf dist coverage yarn.lock yarn-error.log package-lock.json node_modules"
+  },
+  "dependencies": {
+    "@sphereon/ssi-types": "^0.9.0"
   },
   "keywords": [
     "Sphereon",
@@ -23,7 +32,9 @@
   ],
   "author": "Sphereon",
   "license": "Apache-2.0",
-  "dependencies": {
-    "@sphereon/ssi-types": "^0.9.0"
-  }
+  "type": "module",
+  "moduleDirectories": [
+    "node_modules",
+    "src"
+  ]
 }

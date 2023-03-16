@@ -1,50 +1,69 @@
 import { VcIssuer } from './VcIssuer'
-import { ICredentialIssuerMetadataParametersV1_11, ICredentialSupportedV1_11, IIssuerDisplay } from './types'
+import {CredentialErrorResponse, ICredentialIssuerMetadataParametersV1_11, ICredentialSupportedV1_11, IIssuerDisplay} from './types'
 
 export class VcIssuerBuilder {
-  metadata: ICredentialIssuerMetadataParametersV1_11
+  credentialIssuer?: string
+  authorizationServer?: string
+  credentialEndpoint?: string
+  batchCredentialEndpoint?: string
+  issuerDisplay?: IIssuerDisplay[]
+  credentialsSupported?: ICredentialSupportedV1_11[]
 
   public withCredentialIssuer(issuer: string): VcIssuerBuilder {
-    this.metadata.credential_endpoint = issuer
+    this.credentialIssuer = issuer
     return this
   }
   public withAuthorizationServer(authorizationServer: string): VcIssuerBuilder {
-    this.metadata.authorization_server = authorizationServer
+    this.authorizationServer = authorizationServer
     return this
   }
 
   public withCredentialEndpoint(credentialEndpoint: string): VcIssuerBuilder {
-    this.metadata.credential_endpoint = credentialEndpoint
+    this.credentialEndpoint = credentialEndpoint
     return this
   }
 
   public withBatchCredentialEndpoint(batchCredentialEndpoint: string): VcIssuerBuilder {
-    this.metadata.batch_credential_endpoint = batchCredentialEndpoint
+    this.batchCredentialEndpoint = batchCredentialEndpoint
     return this
   }
 
   public withIssuerDisplay(issuerDisplay: IIssuerDisplay | IIssuerDisplay[]): VcIssuerBuilder {
-    if (!Array.isArray(issuerDisplay)) this.metadata.display = this.metadata.display ? [...this.metadata.display, issuerDisplay] : [issuerDisplay]
+    if (!Array.isArray(issuerDisplay)) this.issuerDisplay = this.issuerDisplay ? [...this.issuerDisplay, issuerDisplay] : [issuerDisplay]
     else {
-      this.metadata.display = this.metadata.display ? [...this.metadata.display, ...issuerDisplay] : issuerDisplay
+      this.issuerDisplay = this.issuerDisplay ? [...this.issuerDisplay, ...issuerDisplay] : issuerDisplay
     }
     return this
   }
 
   public withCredentialsSupported(credentialSupported: ICredentialSupportedV1_11 | ICredentialSupportedV1_11[]): VcIssuerBuilder {
     if (!Array.isArray(credentialSupported))
-      this.metadata.credentials_supported = this.metadata.credentials_supported
-        ? [...this.metadata.credentials_supported, credentialSupported]
+      this.credentialsSupported = this.credentialsSupported
+        ? [...this.credentialsSupported, credentialSupported]
         : [credentialSupported]
     else {
-      this.metadata.credentials_supported = this.metadata.credentials_supported
-        ? [...this.metadata.credentials_supported, ...credentialSupported]
+      this.credentialsSupported = this.credentialsSupported
+        ? [...this.credentialsSupported, ...credentialSupported]
         : credentialSupported
     }
     return this
   }
 
   public build(): VcIssuer {
-    return new VcIssuer(this.metadata)
+    if (!this.credentialEndpoint || !this.credentialIssuer || !this.credentialsSupported) {
+      throw new Error(CredentialErrorResponse.invalid_request)
+    }
+    const metadata: ICredentialIssuerMetadataParametersV1_11 = {
+      credential_endpoint: this.credentialEndpoint, credential_issuer: this.credentialIssuer, credentials_supported: this.credentialsSupported}
+    if (this.issuerDisplay) {
+      metadata.display = this.issuerDisplay
+    }
+    if (this.batchCredentialEndpoint) {
+      metadata.batch_credential_endpoint = this.batchCredentialEndpoint
+    }
+    if (this.authorizationServer) {
+      metadata.authorization_server = this.authorizationServer
+    }
+    return new VcIssuer(metadata)
   }
 }

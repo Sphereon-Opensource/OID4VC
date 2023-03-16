@@ -1,4 +1,10 @@
-import { ICredentialIssuerMetadataParametersV1_11, IIssueCredentialRequest } from './types'
+import {
+  CredentialErrorResponse,
+  CredentialFormat,
+  ICredentialIssuerMetadataParametersV1_11,
+  ICredentialSuccessResponse,
+  IIssueCredentialRequest,
+} from './types'
 
 export class VcIssuer {
   _issuerMetadata: ICredentialIssuerMetadataParametersV1_11
@@ -11,8 +17,24 @@ export class VcIssuer {
     return this._issuerMetadata
   }
 
-  public issueCredential(issueCredentialRequest: IIssueCredentialRequest) {
-    //TODO: validation of the credential issue request with metadata
-    //TODO: call the generate vc method
+  public async issueCredentialFromIssueRequest(issueCredentialRequest: IIssueCredentialRequest): Promise<ICredentialSuccessResponse> {
+    //TODO: do we want additional validations here?
+    if (this.isMetadataSupportCredentialRequestFormat(issueCredentialRequest.format)) {
+      return await this.issueCredential(issueCredentialRequest)
+    }
+    throw new Error(CredentialErrorResponse.unsupported_credential_format.valueOf())
+  }
+
+  private isMetadataSupportCredentialRequestFormat(requestFormat: CredentialFormat): boolean {
+    for (const credentialSupported of this._issuerMetadata.credentials_supported) {
+      if (credentialSupported.format === requestFormat) {
+        return true
+      }
+    }
+    return false
+  }
+
+  private async issueCredential(issueCredentialRequest: IIssueCredentialRequest): Promise<ICredentialSuccessResponse> {
+    throw new Error('not implemented')
   }
 }
