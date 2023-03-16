@@ -16,7 +16,7 @@ import {
   EndpointMetadata,
   IssuanceInitiationWithBaseUrl,
   ProofOfPossessionCallbacks,
-} from '@sphereon/openid4vci-common/types';
+} from '@sphereon/openid4vci-common/lib';
 
 const debug = Debug('sphereon:openid4vci:flow');
 

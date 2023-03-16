@@ -1,4 +1,4 @@
-import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, SearchValue } from '@sphereon/openid4vci-common/types';
+import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, SearchValue } from '@sphereon/openid4vci-common/lib';
 
 /**
  * @function encodeJsonAsURI encodes a Json object into a URI

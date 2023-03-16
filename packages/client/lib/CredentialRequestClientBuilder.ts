@@ -8,7 +8,7 @@ import {
   IssuanceInitiationRequestPayload,
   IssuanceInitiationWithBaseUrl,
   OpenID4VCIServerMetadata,
-} from '@sphereon/openid4vci-common/types';
+} from '@sphereon/openid4vci-common/lib';
 
 export class CredentialRequestClientBuilder {
   credentialEndpoint: string;

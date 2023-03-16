@@ -8,11 +8,11 @@
     "es6": true
   },
   "ignorePatterns": [
-    "build",
-    "coverage",
-    "dist",
-    "jest.config.js",
-    "node_modules"
+    "**/build",
+    "**/coverage",
+    "**/dist",
+    "**/jest.config.js",
+    "**/node_modules"
   ],
   "plugins": [
     "import",

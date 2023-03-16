@@ -8,7 +8,7 @@ import {
   PROOF_CANT_BE_CONSTRUCTED,
   ProofOfPossession,
   ProofOfPossessionCallbacks,
-} from '@sphereon/openid4vci-common/types';
+} from '@sphereon/openid4vci-common/lib';
 
 export class ProofOfPossessionBuilder {
   private readonly proof?: ProofOfPossession;

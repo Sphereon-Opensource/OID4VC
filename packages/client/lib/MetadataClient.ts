@@ -10,7 +10,7 @@ import {
   OpenID4VCIServerMetadata,
   OpenIDResponse,
   WellKnownEndpoints,
-} from '@sphereon/openid4vci-common/types';
+} from '@sphereon/openid4vci-common/lib';
 
 const debug = Debug('sphereon:openid4vci:metadata');
 

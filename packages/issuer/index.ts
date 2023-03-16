@@ -1,1 +1,1 @@
-console.log('@sphereon/openid4vci-issuer launched')
+export * from "./lib";
