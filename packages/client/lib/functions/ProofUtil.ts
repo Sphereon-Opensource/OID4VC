@@ -1,7 +1,7 @@
 import Debug from 'debug';
 import { JWTHeaderParameters } from 'jose';
 
-import { BAD_PARAMS, JWS_NOT_VALID, Jwt, JWTPayload, ProofOfPossession, ProofOfPossessionCallbacks, ProofType } from '../types';
+import { BAD_PARAMS, JWS_NOT_VALID, Jwt, JWTPayload, ProofOfPossession, ProofOfPossessionCallbacks, ProofType } from '@sphereon/openid4vci-common/types';
 
 const debug = Debug('sphereon:openid4vci:token');
 

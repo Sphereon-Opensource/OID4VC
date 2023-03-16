@@ -14,7 +14,7 @@ import {
   IssuerOpts,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
-} from './types';
+} from '@sphereon/openid4vci-common/types';
 
 const debug = Debug('sphereon:openid4vci:token');
 
