@@ -2,8 +2,8 @@ import { KeyObject } from 'crypto';
 
 import * as jose from 'jose';
 
-import { Alg, CredentialRequest, CredentialRequestClientBuilder, Jwt, OpenID4VCIServerMetadata, ProofOfPossession, Typ } from '../lib';
-import { ProofOfPossessionBuilder } from '../lib';
+import { CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '../lib';
+import {Alg, CredentialRequest, Jwt, OpenID4VCIServerMetadata, ProofOfPossession, Typ} from '@sphereon/openid4vci-common';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST_URI, WALT_ISSUER_URL, WALT_OID4VCI_METADATA } from './MetadataMocks';
 

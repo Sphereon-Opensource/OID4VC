@@ -4,17 +4,19 @@ import * as jose from 'jose';
 import nock from 'nock';
 
 import {
-  Alg,
-  CredentialRequest,
   CredentialRequestClientBuilder,
   IssuanceInitiation,
-  Jwt,
   MetadataClient,
+} from '../lib';
+
+import {  Alg,
+  CredentialRequest,
+  Jwt,
   ProofOfPossession,
   Typ,
   URL_NOT_VALID,
   WellKnownEndpoints,
-} from '../lib';
+} from '@sphereon/openid4vci-common';
 import { ProofOfPossessionBuilder } from '../lib';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';
