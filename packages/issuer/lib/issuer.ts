@@ -1,3 +1,3 @@
-export enum issuer{
-  issuer_type
+export enum issuer {
+  issuer_type,
 }
