@@ -2,17 +2,19 @@ import nock from 'nock';
 
 import {
   AccessTokenClient,
-  AccessTokenResponse,
-  Alg,
-  AuthzFlowType,
   CredentialRequestClientBuilder,
   IssuanceInitiation,
+  OpenID4VCIClient,
+  ProofOfPossessionBuilder,
+} from '../lib';
+
+import {  AccessTokenResponse,
+  Alg,
+  AuthzFlowType,
   Jwt,
   ProofOfPossession,
   Typ,
-} from '../lib';
-import { OpenID4VCIClient } from '../lib';
-import { ProofOfPossessionBuilder } from '../lib';
+} from '@sphereon/openid4vci-common';
 
 import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
 
