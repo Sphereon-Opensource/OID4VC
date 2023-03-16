@@ -6,9 +6,9 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "clean": "pnpm -r clean",
-    "test": "pnpm -r run test",
-
+    "fix": "pnpm -r run fix",
     "build": "pnpm -r build",
+    "test": "pnpm -r run test",
 
     "client:build": "pnpm -F @sphereon/openid4vci-client build",
     "client:test": "pnpm -F @sphereon/openid4vci-client run test",
@@ -21,6 +21,16 @@
   },
   "devDependencies": {
     "jose": "^4.10.0"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "files": [
+    "dist/main"
+  ],
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 150
   },
   "keywords": [
     "Sphereon",

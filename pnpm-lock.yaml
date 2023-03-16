@@ -66,16 +66,20 @@ importers:
   packages/common:
     specifiers:
       '@sphereon/ssi-types': ^0.8.1-next.123
+      npm-run-all: ^4.1.5
       rimraf: ^3.0.2
     dependencies:
       '@sphereon/ssi-types': 0.8.1-unstable.280
     devDependencies:
+      npm-run-all: 4.1.5
       rimraf: 3.0.2
 
   packages/issuer:
     specifiers:
+      npm-run-all: ^4.1.5
       rimraf: ^3.0.2
     devDependencies:
+      npm-run-all: 4.1.5
       rimraf: 3.0.2
 
 packages:

@@ -1,1 +1,1 @@
-export * from "./issuer";
+export * from './issuer';

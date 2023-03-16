@@ -1,7 +1,7 @@
+import { AccessTokenRequest, AccessTokenResponse, GrantTypes, OpenIDResponse } from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
 import { AccessTokenClient } from '../lib';
-import { AccessTokenRequest, AccessTokenResponse, GrantTypes, OpenIDResponse  } from '@sphereon/openid4vci-common'
 
 import { UNIT_TEST_TIMEOUT } from './IT.spec';
 import { INITIATION_TEST } from './MetadataMocks';

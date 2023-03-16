@@ -1,8 +1,8 @@
 import { KeyObject } from 'crypto';
 
+import { Alg, JWS_NOT_VALID, Jwt, NO_JWT_PROVIDED, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, Typ } from '@sphereon/openid4vci-common';
 import * as jose from 'jose';
 
-import { Alg, JWS_NOT_VALID, Jwt, NO_JWT_PROVIDED, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, Typ } from '@sphereon/openid4vci-common';
 import { ProofOfPossessionBuilder } from '../lib';
 
 import { IDENTIPROOF_ISSUER_URL } from './MetadataMocks';
