@@ -1,4 +1,4 @@
-import { AuthzFlowType } from '../lib';
+import { AuthzFlowType } from '@sphereon/openid4vci-common';
 
 describe('Authorization Flow Type determination', () => {
   it('should return authorization code flow type with a single credential_type', () => {
