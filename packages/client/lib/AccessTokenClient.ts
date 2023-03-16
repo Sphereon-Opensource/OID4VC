@@ -1,8 +1,3 @@
-import { ObjectUtils } from '@sphereon/ssi-types';
-import Debug from 'debug';
-
-import { MetadataClient } from './MetadataClient';
-import { convertJsonToURI, formPost } from './functions';
 import {
   AccessTokenRequest,
   AccessTokenRequestOpts,

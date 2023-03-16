@@ -8,6 +8,9 @@
     "clean": "rimraf dist coverage",
     "build": "tsc -p ../../tsconfig.build.json",
     "test": "echo \"INFO: no test specified\" && exit 0",
+    "fix": "run-s fix:*",
+    "fix:prettier": "prettier \"{lib,tests}/**/*.ts\" --write",
+    "fix:lint": "eslint . --ext .ts --fix",
     "uninstall": "rimraf dist coverage yarn.lock yarn-error.log package-lock.json node_modules"
   },
   "dependencies": {

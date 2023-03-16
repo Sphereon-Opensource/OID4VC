@@ -1,11 +1,3 @@
-import { CredentialFormat } from '@sphereon/ssi-types';
-import Debug from 'debug';
-
-import { AccessTokenClient } from './AccessTokenClient';
-import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
-import { IssuanceInitiation } from './IssuanceInitiation';
-import { MetadataClient } from './MetadataClient';
-import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import {
   AccessTokenResponse,
   Alg,
@@ -17,6 +9,14 @@ import {
   IssuanceInitiationWithBaseUrl,
   ProofOfPossessionCallbacks,
 } from '@sphereon/openid4vci-common/lib';
+import { CredentialFormat } from '@sphereon/ssi-types';
+import Debug from 'debug';
+
+import { AccessTokenClient } from './AccessTokenClient';
+import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
+import { IssuanceInitiation } from './IssuanceInitiation';
+import { MetadataClient } from './MetadataClient';
+import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 
 const debug = Debug('sphereon:openid4vci:flow');
 

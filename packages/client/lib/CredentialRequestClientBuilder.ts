@@ -1,7 +1,3 @@
-import { CredentialFormat } from '@sphereon/ssi-types';
-
-import { CredentialRequestClient } from './CredentialRequestClient';
-import { convertURIToJsonObject } from './functions';
 import {
   AccessTokenResponse,
   EndpointMetadata,
@@ -9,6 +5,10 @@ import {
   IssuanceInitiationWithBaseUrl,
   OpenID4VCIServerMetadata,
 } from '@sphereon/openid4vci-common/lib';
+import { CredentialFormat } from '@sphereon/ssi-types';
+
+import { CredentialRequestClient } from './CredentialRequestClient';
+import { convertURIToJsonObject } from './functions';
 
 export class CredentialRequestClientBuilder {
   credentialEndpoint: string;

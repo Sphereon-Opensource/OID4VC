@@ -34,7 +34,7 @@
     ]
   },
   "include": [
-    "packages/client/index.ts",
+    "packages/*/**/*.ts",
     "lib/**/*.ts",
     "tests/**/*.ts"
   ],

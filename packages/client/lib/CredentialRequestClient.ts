@@ -1,10 +1,10 @@
+import { CredentialRequest, CredentialResponse, OpenIDResponse, ProofOfPossession, URL_NOT_VALID } from '@sphereon/openid4vci-common/lib';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { isValidURL, post } from './functions';
-import { CredentialRequest, CredentialResponse, OpenIDResponse, ProofOfPossession, URL_NOT_VALID } from '@sphereon/openid4vci-common/lib';
 
 const debug = Debug('sphereon:openid4vci:credential');
 
