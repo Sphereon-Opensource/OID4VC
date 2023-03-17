@@ -9,7 +9,7 @@ import {
   IssuerOpts,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
-} from '@sphereon/openid4vci-common/lib';
+} from '@sphereon/openid4vci-common';
 import { ObjectUtils } from '@sphereon/ssi-types';
 import Debug from 'debug';
 

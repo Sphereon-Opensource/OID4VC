@@ -1,12 +1,4 @@
-import {
-  BAD_PARAMS,
-  JWS_NOT_VALID,
-  Jwt,
-  JWTPayload,
-  ProofOfPossession,
-  ProofOfPossessionCallbacks,
-  ProofType,
-} from '@sphereon/openid4vci-common/lib';
+import { BAD_PARAMS, JWS_NOT_VALID, Jwt, JWTPayload, ProofOfPossession, ProofOfPossessionCallbacks, ProofType } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 import { JWTHeaderParameters } from 'jose';
 

@@ -7,7 +7,7 @@ import {
   OpenID4VCIServerMetadata,
   OpenIDResponse,
   WellKnownEndpoints,
-} from '@sphereon/openid4vci-common/lib';
+} from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 
 import { getJson } from './functions';

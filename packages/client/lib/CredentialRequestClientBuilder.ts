@@ -4,7 +4,7 @@ import {
   IssuanceInitiationRequestPayload,
   IssuanceInitiationWithBaseUrl,
   OpenID4VCIServerMetadata,
-} from '@sphereon/openid4vci-common/lib';
+} from '@sphereon/openid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialRequestClient } from './CredentialRequestClient';

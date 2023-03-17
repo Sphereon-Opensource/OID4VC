@@ -1,4 +1,4 @@
-import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from '@sphereon/openid4vci-common/lib';
+import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 
 import { convertJsonToURI, convertURIToJsonObject } from './functions';

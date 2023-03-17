@@ -7,7 +7,7 @@ import {
   PROOF_CANT_BE_CONSTRUCTED,
   ProofOfPossession,
   ProofOfPossessionCallbacks,
-} from '@sphereon/openid4vci-common/lib';
+} from '@sphereon/openid4vci-common';
 
 import { createProofOfPossession } from './functions';
 

@@ -1,4 +1,4 @@
-import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, SearchValue } from '@sphereon/openid4vci-common/lib';
+import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, SearchValue } from '@sphereon/openid4vci-common';
 
 /**
  * @function encodeJsonAsURI encodes a Json object into a URI
@@ -51,7 +51,7 @@ export function convertJsonToURI(json: unknown, opts?: EncodeJsonAsURIOpts): str
 }
 
 /**
- * @function decodeUriAsJson decodes an URI into a Json object
+ * @function decodeUriAsJson decodes a URI into a Json object
  * @param uri string
  * @param opts:
  *          - requiredProperties: the required properties
