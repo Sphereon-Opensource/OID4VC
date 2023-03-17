@@ -1,5 +1,13 @@
 # Release Notes
 
+## v0.4.0 - 2023-03-17
+
+Adds initial support for the Authorized Code flow (auth request, server metadata, scopes, thanks to @karimStekelenburg. Be aware that not everything in the Authorized code flow is supported yet.
+
+- Added:
+  - Add initial support for Authorized Code flow, thanks to @karimStekelenburg. 
+  - Add method to encode the initiation url
+
 ## v0.3.6 - 2023-01-12
 Content-type fixes and allow localhost urls
 

@@ -1,6 +1,8 @@
 import {
   AccessTokenResponse,
   Alg,
+  AuthorizationRequest,
+  AuthorizationRequestOpts,
   AuthzFlowType,
   CredentialMetadata,
   CredentialResponse,
@@ -8,6 +10,7 @@ import {
   EndpointMetadata,
   IssuanceInitiationWithBaseUrl,
   ProofOfPossessionCallbacks,
+  ResponseType,
 } from '@sphereon/openid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
@@ -30,9 +33,6 @@ export class OpenID4VCIClient {
   private _accessTokenResponse: AccessTokenResponse;
 
   private constructor(initiation: IssuanceInitiationWithBaseUrl, flowType: AuthzFlowType, kid?: string, alg?: Alg | string, clientId?: string) {
-    if (flowType !== AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW) {
-      throw new Error(`Only pre-authorized code flow is support at present`);
-    }
     this._flowType = flowType;
     this._initiation = initiation;
     this._kid = kid;
@@ -70,17 +70,64 @@ export class OpenID4VCIClient {
     return this._serverMetadata;
   }
 
-  public async acquireAccessToken({ pin, clientId }: { pin?: string; clientId?: string }): Promise<AccessTokenResponse> {
+  public createAuthorizationRequestUrl({ clientId, codeChallengeMethod, codeChallenge, redirectUri, scope }: AuthorizationRequestOpts): string {
+    if (!scope) {
+      throw Error('Please provide a scope. authorization_details based requests are not supported at this time');
+    }
+
+    if (!this._serverMetadata.openid4vci_metadata.authorization_endpoint) {
+      throw Error('Server metadata does not contain authorization endpoint');
+    }
+
+    // add 'openid' scope if not present
+    if (!scope.includes('openid')) {
+      scope = `openid ${scope}`;
+    }
+
+    const queryObj: AuthorizationRequest = {
+      response_type: ResponseType.AUTH_CODE,
+      client_id: clientId,
+      code_challenge_method: codeChallengeMethod,
+      code_challenge: codeChallenge,
+      redirect_uri: redirectUri,
+      scope: scope,
+    };
+
+    const authRequestUrl = convertJsonToURI(queryObj, {
+      baseUrl: this._serverMetadata.openid4vci_metadata.authorization_endpoint,
+      uriTypeProperties: ['redirect_uri', 'scope'],
+    });
+
+    return authRequestUrl;
+  }
+
+  public async acquireAccessToken({
+    pin,
+    clientId,
+    codeVerifier,
+    code,
+    redirectUri,
+  }: {
+    pin?: string;
+    clientId?: string;
+    codeVerifier?: string;
+    code?: string;
+    redirectUri?: string;
+  }): Promise<AccessTokenResponse> {
     this.assertInitiation();
     if (clientId) {
       this._clientId = clientId;
     }
     if (!this._accessTokenResponse) {
       const accessTokenClient = new AccessTokenClient();
+
       const response = await accessTokenClient.acquireAccessTokenUsingIssuanceInitiation({
         issuanceInitiation: this._initiation,
         metadata: this._serverMetadata,
         pin,
+        codeVerifier,
+        code,
+        redirectUri,
         asOpts: { clientId: this.clientId },
       });
       if (response.errorBody) {
@@ -91,6 +138,7 @@ export class OpenID4VCIClient {
       }
       this._accessTokenResponse = response.successBody;
     }
+
     return this._accessTokenResponse;
   }
 
