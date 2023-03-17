@@ -12,7 +12,6 @@
   "collectCoverageFrom": [
     "packages/**/src/**/*.ts",
     "!**/examples/**",
-    "!packages/cli/**",
     "!**/types/**",
     "!**/dist/**",
     "!**/node_modules/**/__tests__/**",
@@ -29,7 +28,8 @@
   "coverageDirectory": "./coverage",
   "extensionsToTreatAsEsm": [".ts"],
   "testMatch": [
-    "**/__tests__/**/*.test.*"
+    "**/__tests__/**/*.test.*",
+    "**/tests/**/*.spec.*"
   ],
   "moduleNameMapper": {
     "^(\\.{1,2}/.*)\\.js$": "$1"
