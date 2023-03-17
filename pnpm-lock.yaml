@@ -3,10 +3,7 @@ lockfileVersion: 5.4
 importers:
 
   .:
-    specifiers:
-      jose: ^4.10.0
-    devDependencies:
-      jose: 4.13.1
+    specifiers: {}
 
   packages/client:
     specifiers:
@@ -3072,6 +3069,7 @@ packages:
 
   /jose/4.13.1:
     resolution: {integrity: sha512-MSJQC5vXco5Br38mzaQKiq9mwt7lwj2eXpgpRyQYNHYt2lq1PjkWa7DLXX0WVcQLE9HhMh3jPiufS7fhJf+CLQ==}
+    dev: false
 
   /js-sdsl/4.3.0:
     resolution: {integrity: sha512-mifzlm2+5nZ+lEcLJMoBK0/IH/bDg8XnJfd/Wq6IP+xoCjLZsTOnV2QpxlVbX9bMnkl5PdEjNtBJ9Cj1NjifhQ==}

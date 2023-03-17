@@ -1,33 +1,18 @@
 {
-  "name": "@sphereon/openid4vci",
-  "version": "1.0.0",
-  "description": "",
+  "name": "openid4vci-workspace",
+  "version": "0.4.0",
+  "description": "OpenID 4 Verifiable Credential Issuance modules",
   "main": "index.ts",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "clean": "pnpm -r clean",
     "fix": "pnpm -r run fix",
     "build": "pnpm -r build",
-    "test": "pnpm -r run test",
-
-    "client:build": "pnpm -F @sphereon/openid4vci-client build",
-    "client:test": "pnpm -F @sphereon/openid4vci-client run test",
-
-    "common:build": "pnpm -F @sphereon/openid4vci-common build",
-    "common:test": "pnpm -F @sphereon/openid4vci-common run test",
-
-    "issuer:build": "pnpm -F @sphereon/openid4vci-issuer build",
-    "issuer:test": "pnpm -F @sphereon/openid4vci-issuer run test"
-  },
-  "devDependencies": {
-    "jose": "^4.10.0"
+    "test": "pnpm -r run test"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
-  "files": [
-    "dist/main"
-  ],
   "prettier": {
     "singleQuote": true,
     "printWidth": 150
@@ -44,5 +29,6 @@
     "OID4VCI"
   ],
   "author": "Sphereon",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "private": true
 }
