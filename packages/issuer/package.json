@@ -13,7 +13,6 @@
     "preinstall": "npx only-allow pnpm",
     "clean": "rimraf dist coverage",
     "build": "tsc",
-    "test": "echo \"INFO: no test specified\" && exit 0",
     "uninstall": "rimraf dist coverage yarn.lock yarn-error.log package-lock.json node_modules"
   },
   "dependencies": {

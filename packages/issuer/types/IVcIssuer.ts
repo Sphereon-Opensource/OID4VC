@@ -21,19 +21,18 @@ export interface ICredentialSupportedV1_11 {
   cryptographic_binding_methods_supported?: ('jwk' | 'cose_key' | 'did' | string)[]
   cryptographic_suites_supported?: ('jwt_vc' | 'ldp_vc' | string)[]
   display?: ICredentialDisplay[]
-  //todo ask Niels about this parameter. this is present in both v1_11 and v1_09 example but no mention of it in the parameters list (https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-11.html#section-10.2.3.1)
   credentialSubject?: IIssuerCredentialSubject
 }
 
-interface IIssuerCredentialSubject {
+export interface IIssuerCredentialSubject {
   [x: string]: IIssuerCredentialSubjectDisplay
 }
 
-interface IIssuerCredentialSubjectDisplay {
+export interface IIssuerCredentialSubjectDisplay {
   display: IIssuerCredentialSubjectDisplayNameAndLocale[]
 }
 
-interface IIssuerCredentialSubjectDisplayNameAndLocale {
+export interface IIssuerCredentialSubjectDisplayNameAndLocale {
   name: string
   locale?: string
 }

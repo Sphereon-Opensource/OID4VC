@@ -7,17 +7,14 @@
     "preinstall": "npx only-allow pnpm",
     "clean": "pnpm -r clean",
     "fix": "pnpm -r fix",
-    "test": "pnpm -r run test",
+    "test": "cross-env NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --verbose --config=jest.json",
 
     "build": "pnpm -r build",
 
-    "client:test": "pnpm -F @sphereon/openid4vci-client run test",
     "client:build": "pnpm -F @sphereon/openid4vci-client build",
 
-    "common:test": "pnpm -F @sphereon/openid4vci-common run test",
     "common:build": "pnpm -F @sphereon/openid4vci-common build",
 
-    "issuer:test": "pnpm -F @sphereon/openid4vci-issuer run test",
     "issuer:build": "pnpm -F @sphereon/openid4vci-issuer build",
 
     "prettier": "prettier --write \"{packages,__tests__,!dist}/**/*.{ts,tsx,js,json,md,yml}\"",

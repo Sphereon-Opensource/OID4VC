@@ -4,7 +4,7 @@ import {
   ICredentialIssuerMetadataParametersV1_11,
   ICredentialSuccessResponse,
   IIssueCredentialRequest,
-} from './types'
+} from '../types'
 
 export class VcIssuer {
   _issuerMetadata: ICredentialIssuerMetadataParametersV1_11
