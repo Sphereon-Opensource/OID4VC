@@ -1,10 +1,10 @@
 {
   "name": "@sphereon/openid4vci-issuer",
   "version": "0.0.1",
-  "description": "",
-  "main": "index.ts",
+  "description": "OpenID 4 Verifiable Credential Issuance modules' issuer",
+  "main": "dist/main/index.js",
+  "types": "dist/main/index.d.ts",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "clean": "rimraf dist coverage",
     "build": "tsc -p ../../tsconfig.build.json",
     "test": "echo \"INFO: no test specified\" && exit 0",
@@ -14,11 +14,10 @@
     "uninstall": "rimraf dist coverage yarn.lock yarn-error.log package-lock.json node_modules"
   },
   "devDependencies": {
-    "rimraf": "^3.0.2",
-    "npm-run-all": "^4.1.5"
+    "rimraf": "^3.0.2"
   },
   "engines": {
-    "node": ">=14"
+    "node": "=16"
   },
   "files": [
     "dist/main"

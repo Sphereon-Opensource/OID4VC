@@ -11,7 +11,7 @@
     "test": "pnpm -r run test"
   },
   "engines": {
-    "node": ">=16"
+    "node": "=16"
   },
   "prettier": {
     "singleQuote": true,
