@@ -29,9 +29,9 @@
     "listFiles": false
     /* Print names of files part of the compilation. */,
     "pretty": true,
-    /*"lib": [
-      "ES2017"
-    ]*/
+    "lib": [
+      "ES2018"
+    ]
   },
   "include": [
     "packages/*/*.ts",
