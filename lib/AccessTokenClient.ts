@@ -102,9 +102,6 @@ export class AccessTokenClient {
     }
     if (issuanceInitiationRequest.op_state) {
       this.throwNotSupportedFlow();
-      if (issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL]) {
-        throw new Error('Cannot have both a pre_authorized_code and a op_state in the same initiation request');
-      }
       request.grant_type = GrantTypes.AUTHORIZATION_CODE;
     }
     if (codeVerifier) {
