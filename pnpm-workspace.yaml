@@ -1,5 +1,3 @@
+prefer-workspace-packages: true
 packages:
-  # include packages in subfolders (e.g. apps/** and packages/**)
-  - 'packages/**'
-# exclude some directories
-# - '!**/test/**'
+  - 'packages/*'

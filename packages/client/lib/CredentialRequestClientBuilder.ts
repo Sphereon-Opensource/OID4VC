@@ -4,17 +4,21 @@ import {
   IssuanceInitiationRequestPayload,
   IssuanceInitiationWithBaseUrl,
   OpenID4VCIServerMetadata,
-} from '@sphereon/openid4vci-common/lib';
+} from '@sphereon/openid4vci-common';
+import { CredentialFormat } from '@sphereon/ssi-types';
+
+import { CredentialRequestClient } from './CredentialRequestClient';
+import { convertURIToJsonObject } from './functions';
 import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialRequestClient } from './CredentialRequestClient';
 import { convertURIToJsonObject } from './functions';
 
 export class CredentialRequestClientBuilder {
-  credentialEndpoint: string;
-  credentialType: string | string[];
-  format: CredentialFormat | CredentialFormat[];
-  token: string;
+  credentialEndpoint?: string;
+  credentialType?: string | string[];
+  format?: CredentialFormat | CredentialFormat[];
+  token?: string;
 
   public static fromIssuanceInitiationURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): CredentialRequestClientBuilder {
     return CredentialRequestClientBuilder.fromIssuanceInitiationRequest({

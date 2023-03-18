@@ -7,7 +7,10 @@ import {
   OpenID4VCIServerMetadata,
   OpenIDResponse,
   WellKnownEndpoints,
-} from '@sphereon/openid4vci-common/lib';
+} from '@sphereon/openid4vci-common';
+import Debug from 'debug';
+
+import { getJson } from './functions';
 import Debug from 'debug';
 
 import { getJson } from './functions';
@@ -15,8 +18,6 @@ import { getJson } from './functions';
 const debug = Debug('sphereon:openid4vci:metadata');
 
 export class MetadataClient {
-  public static async;
-
   /**
    * Retrieve metadata using the Initiation obtained from a previous step
    *
@@ -39,11 +40,11 @@ export class MetadataClient {
    * @param issuer The issuer URL
    * @param opts
    */
-  public static async retrieveAllMetadata(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadata | undefined> {
+  public static async retrieveAllMetadata(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadata> {
     let token_endpoint;
     let credential_endpoint;
     const response = await MetadataClient.retrieveOpenID4VCIServerMetadata(issuer);
-    let oid4vciMetadata = response.successBody ? response.successBody : undefined;
+    let oid4vciMetadata = response?.successBody;
     if (oid4vciMetadata) {
       debug(`Issuer ${issuer} OID4VCI well-known server metadata\r\n${oid4vciMetadata}`);
       credential_endpoint = oid4vciMetadata.credential_endpoint;

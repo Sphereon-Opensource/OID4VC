@@ -23,7 +23,12 @@ beforeAll(async () => {
   keypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject };
 });
 
-async function proofOfPossessionCallbackFunction(args: Jwt, kid: string): Promise<string> {
+async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promise<string> {
+  if (!args.payload.aud) {
+    throw Error('aud required');
+  } else if (!kid) {
+    throw Error('kid required');
+  }
   return await new jose.SignJWT({ ...args.payload })
     .setProtectedHeader({ alg: 'ES256' })
     .setIssuedAt()
@@ -38,7 +43,7 @@ interface KeyPair {
   privateKey: KeyObject;
 }
 
-async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; kid: string }): Promise<void> {
+async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; kid?: string }): Promise<void> {
   await jose.compactVerify(args.jwt, keypair.publicKey);
 }
 
@@ -50,10 +55,10 @@ describe('Credential Request Client Builder', () => {
       .withCredentialType('credentialType')
       .withToken('token')
       .build();
-    expect(credReqClient._issuanceRequestOpts.credentialEndpoint).toBe('https://oidc4vci.demo.spruceid.com/credential');
-    expect(credReqClient._issuanceRequestOpts.format).toBe('jwt_vc');
-    expect(credReqClient._issuanceRequestOpts.credentialType).toBe('credentialType');
-    expect(credReqClient._issuanceRequestOpts.token).toBe('token');
+    expect(credReqClient.issuanceRequestOpts.credentialEndpoint).toBe('https://oidc4vci.demo.spruceid.com/credential');
+    expect(credReqClient.issuanceRequestOpts.format).toBe('jwt_vc');
+    expect(credReqClient.issuanceRequestOpts.credentialType).toBe('credentialType');
+    expect(credReqClient.issuanceRequestOpts.token).toBe('token');
   });
 
   it('should build credential request correctly', async () => {
@@ -82,7 +87,7 @@ describe('Credential Request Client Builder', () => {
     const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiationURI({ uri: INITIATION_TEST_URI, metadata: WALT_OID4VCI_METADATA })
       .withFormat('jwt_vc')
       .build();
-    expect(credReqClient._issuanceRequestOpts.credentialEndpoint).toBe(`${WALT_ISSUER_URL}/credential`);
+    expect(credReqClient.issuanceRequestOpts.credentialEndpoint).toBe(`${WALT_ISSUER_URL}/credential`);
   });
 
   it('should build correctly with endpoint from metadata', async () => {
@@ -90,6 +95,6 @@ describe('Credential Request Client Builder', () => {
       .withFormat('jwt_vc')
       .withCredentialEndpointFromMetadata(IDENTIPROOF_OID4VCI_METADATA as unknown as OpenID4VCIServerMetadata)
       .build();
-    expect(credReqClient._issuanceRequestOpts.credentialEndpoint).toBe(`${IDENTIPROOF_ISSUER_URL}/credential`);
+    expect(credReqClient.issuanceRequestOpts.credentialEndpoint).toBe(`${IDENTIPROOF_ISSUER_URL}/credential`);
   });
 });

@@ -1,4 +1,4 @@
-import { convertJsonToURI, convertURIToJsonObject } from '../lib';
+import { convertJsonToURI, convertURIToJsonObject } from '..';
 
 describe('JSON To URI', () => {
   it('should parse an object into open-id-URI with a single credential_type', () => {

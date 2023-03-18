@@ -7,7 +7,9 @@ import {
   PROOF_CANT_BE_CONSTRUCTED,
   ProofOfPossession,
   ProofOfPossessionCallbacks,
-} from '@sphereon/openid4vci-common/lib';
+} from '@sphereon/openid4vci-common';
+
+import { createProofOfPossession } from './functions';
 
 import { createProofOfPossession } from './functions';
 
@@ -15,7 +17,7 @@ export class ProofOfPossessionBuilder {
   private readonly proof?: ProofOfPossession;
   private readonly callbacks?: ProofOfPossessionCallbacks;
 
-  private kid: string;
+  private kid?: string;
   private clientId?: string;
   private issuer?: string;
   private jwt?: Jwt;
@@ -93,7 +95,9 @@ export class ProofOfPossessionBuilder {
   }
 
   withAccessTokenResponse(accessToken: AccessTokenResponse): ProofOfPossessionBuilder {
-    this.withAccessTokenNonce(accessToken.c_nonce);
+    if (accessToken.c_nonce) {
+      this.withAccessTokenNonce(accessToken.c_nonce);
+    }
     return this;
   }
 
@@ -108,14 +112,16 @@ export class ProofOfPossessionBuilder {
     }
     this.jwt = jwt;
     if (jwt.header) {
-      this.withKid(jwt.header.kid);
+      if (jwt.header.kid) {
+        this.withKid(jwt.header.kid);
+      }
       this.withAlg(jwt.header.alg);
     }
     if (jwt.payload) {
-      this.withClientId(jwt.payload.iss);
-      this.withIssuer(jwt.payload.aud);
-      this.withJti(jwt.payload.jti);
-      this.withAccessTokenNonce(jwt.payload.nonce);
+      if (jwt.payload.iss) this.withClientId(jwt.payload.iss);
+      if (jwt.payload.aud) this.withIssuer(jwt.payload.aud);
+      if (jwt.payload.jti) this.withJti(jwt.payload.jti);
+      if (jwt.payload.nonce) this.withAccessTokenNonce(jwt.payload.nonce);
     }
     return this;
   }

@@ -4,16 +4,16 @@
     "ts",
     "tsx",
     "js",
-    "jsx",
-    "json",
-    "jsonld"
+    "jsx"
   ],
   "collectCoverage": true,
   "collectCoverageFrom": [
     "packages/**/src/**/*.ts",
+    "packages/**/lib/**/*.ts",
     "!**/examples/**",
     "!**/types/**",
     "!**/dist/**",
+    "!**/coverage/**",
     "!**/node_modules/**/__tests__/**",
     "!**/node_modules/**/*.test.ts",
     "!**/node_modules/**",
@@ -26,23 +26,17 @@
   ],
   "coverageProvider": "v8",
   "coverageDirectory": "./coverage",
-  "extensionsToTreatAsEsm": [".ts"],
-  "testMatch": [
-    "**/__tests__/**/*.test.*",
-    "**/tests/**/*.spec.*"
-  ],
-  "moduleNameMapper": {
-    "^(\\.{1,2}/.*)\\.js$": "$1"
-  },
   "transform": {
-    "^.+\\.m?tsx?$": [
-      "ts-jest",
-      {
-        "useESM": true,
-        "tsconfig": "./packages/tsconfig-base.json"
-      }
+    "\\.jsx?$": "babel-jest",
+    "\\.tsx?$": ["ts-jest", {
+      "tsconfig": "./packages/tsconfig-base.json"
+    }
     ]
   },
+  "testMatch": [
+    "**/__tests__/**/*.spec.*",
+    "**/tests/**/*.spec.*"
+  ],
   "testEnvironment": "node",
   "automock": false,
   "verbose": true

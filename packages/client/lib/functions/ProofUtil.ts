@@ -1,12 +1,4 @@
-import {
-  BAD_PARAMS,
-  JWS_NOT_VALID,
-  Jwt,
-  JWTPayload,
-  ProofOfPossession,
-  ProofOfPossessionCallbacks,
-  ProofType,
-} from '@sphereon/openid4vci-common/lib';
+import { BAD_PARAMS, JWS_NOT_VALID, Jwt, JWTPayload, ProofOfPossession, ProofOfPossessionCallbacks, ProofType } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 import { JWTHeaderParameters } from 'jose';
 
@@ -76,13 +68,14 @@ export interface JwtProps {
 }
 
 const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
-  const aud = getJwtProperty('aud', true, jwtProps.issuer, existingJwt?.payload?.aud);
-  const iss = getJwtProperty('iss', false, jwtProps.clientId, existingJwt?.payload?.iss);
-  const jti = getJwtProperty('jti', false, jwtProps.jti, existingJwt?.payload?.jti);
-  const nonce = getJwtProperty('nonce', false, jwtProps.nonce, existingJwt?.payload?.nonce); // Officially this is required, but some implementations don't have it
-  const alg = getJwtProperty('alg', false, jwtProps.alg, existingJwt?.header?.alg, 'ES256');
-  const kid = getJwtProperty('kid', true, jwtProps.kid, existingJwt?.header?.kid);
-  const jwt = existingJwt ? existingJwt : {};
+  const aud = getJwtProperty('aud', true, jwtProps?.issuer, existingJwt?.payload?.aud);
+  const iss = getJwtProperty('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss);
+  const jti = getJwtProperty('jti', false, jwtProps?.jti, existingJwt?.payload?.jti);
+  const nonce = getJwtProperty('nonce', false, jwtProps?.nonce, existingJwt?.payload?.nonce); // Officially this is required, but some implementations don't have it
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const alg = getJwtProperty('alg', false, jwtProps?.alg, existingJwt?.header?.alg, 'ES256')!;
+  const kid = getJwtProperty('kid', true, jwtProps?.kid, existingJwt?.header?.kid);
+  const jwt: Partial<Jwt> = existingJwt ? existingJwt : {};
   const now = +new Date();
   const jwtPayload: Partial<JWTPayload> = {
     aud,

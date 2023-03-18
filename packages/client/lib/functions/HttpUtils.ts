@@ -1,4 +1,4 @@
-import { Encoding, OpenIDResponse } from '@sphereon/openid4vci-common/lib';
+import { Encoding, OpenIDResponse } from '@sphereon/openid4vci-common';
 import { fetch } from 'cross-fetch';
 import Debug from 'debug';
 
@@ -6,7 +6,7 @@ const debug = Debug('sphereon:openid4vci:http');
 
 export const getJson = async <T>(
   URL: string,
-  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit; exceptionOnHttpErrorStatus?: boolean }
+  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: Record<string, string>; exceptionOnHttpErrorStatus?: boolean }
 ): Promise<OpenIDResponse<T>> => {
   return await openIdFetch(URL, undefined, { method: 'GET', ...opts });
 };
@@ -14,7 +14,7 @@ export const getJson = async <T>(
 export const formPost = async <T>(
   url: string,
   body: BodyInit,
-  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit; exceptionOnHttpErrorStatus?: boolean }
+  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: Record<string, string>; exceptionOnHttpErrorStatus?: boolean }
 ): Promise<OpenIDResponse<T>> => {
   return await post(url, body, opts?.contentType ? { ...opts } : { contentType: Encoding.FORM_URL_ENCODED, ...opts });
 };
@@ -22,7 +22,7 @@ export const formPost = async <T>(
 export const post = async <T>(
   url: string,
   body?: BodyInit,
-  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: HeadersInit; exceptionOnHttpErrorStatus?: boolean }
+  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: Record<string, string>; exceptionOnHttpErrorStatus?: boolean }
 ): Promise<OpenIDResponse<T>> => {
   return await openIdFetch(url, body, { method: 'POST', ...opts });
 };
@@ -35,11 +35,11 @@ const openIdFetch = async <T>(
     bearerToken?: string;
     contentType?: string;
     accept?: string;
-    customHeaders?: HeadersInit;
+    customHeaders?: Record<string, string>;
     exceptionOnHttpErrorStatus?: boolean;
   }
 ): Promise<OpenIDResponse<T>> => {
-  const headers = opts?.customHeaders ? opts.customHeaders : {};
+  const headers: Record<string, string> = opts?.customHeaders ?? {};
   if (opts?.bearerToken) {
     headers['Authorization'] = `Bearer ${opts.bearerToken}`;
   }
@@ -72,7 +72,7 @@ const openIdFetch = async <T>(
   }
   debug(`Headers:\r\n${JSON.stringify(payload.headers)}`);
   const origResponse = await fetch(url, payload);
-  const isJSONResponse = accept === 'application/json' || origResponse.headers['Content-Type'] === 'application/json';
+  const isJSONResponse = accept === 'application/json' || origResponse.headers.get('Content-Type') === 'application/json';
   const success = origResponse && origResponse.status >= 200 && origResponse.status < 400;
   const responseText = await origResponse.text();
   const responseBody = isJSONResponse ? JSON.parse(responseText) : responseText;

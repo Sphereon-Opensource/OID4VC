@@ -1,7 +1,7 @@
 import { AccessTokenResponse, Alg, AuthzFlowType, Jwt, ProofOfPossession, Typ } from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
-import { AccessTokenClient, CredentialRequestClientBuilder, IssuanceInitiation, OpenID4VCIClient, ProofOfPossessionBuilder } from '../lib';
+import { AccessTokenClient, CredentialRequestClientBuilder, IssuanceInitiation, OpenID4VCIClient, ProofOfPossessionBuilder } from '..';
 
 import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
 
@@ -15,7 +15,7 @@ const jwt = {
 
 describe('OID4VCI-Client should', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function proofOfPossessionCallbackFunction(_args: Jwt, _kid: string): Promise<string> {
+  async function proofOfPossessionCallbackFunction(_args: Jwt, _kid?: string): Promise<string> {
     return 'ey.val.ue';
   }
 
@@ -105,7 +105,8 @@ describe('OID4VCI-Client should', () => {
         });
       const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation({ initiation: issuanceInitiation })
         .withFormat('jwt_vc')
-        .withTokenFromResponse(accessTokenResponse.successBody)
+
+        .withTokenFromResponse(accessTokenResponse.successBody!)
         .build();
 
       //TS2322: Type '(args: ProofOfPossessionCallbackArgs) => Promise<string>'
@@ -126,7 +127,7 @@ describe('OID4VCI-Client should', () => {
         .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
         .build();
       const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof });
-      expect(credResponse.successBody.credential).toEqual(mockedVC);
+      expect(credResponse.successBody?.credential).toEqual(mockedVC);
     },
     UNIT_TEST_TIMEOUT
   );

@@ -1,4 +1,4 @@
-import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, SearchValue } from '@sphereon/openid4vci-common/lib';
+import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, SearchValue } from '@sphereon/openid4vci-common';
 
 /**
  * @function encodeJsonAsURI encodes a Json object into a URI
@@ -7,7 +7,8 @@ import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, SearchValue } fro
  *          - urlTypeProperties: a list of properties of which the value is a URL
  *          - arrayTypeProperties: a list of properties which are an array
  */
-export function convertJsonToURI(json: unknown, opts?: EncodeJsonAsURIOpts): string {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function convertJsonToURI(json: { [s: string]: any } | ArrayLike<any> | string, opts?: EncodeJsonAsURIOpts): string {
   if (typeof json === 'string') {
     return convertJsonToURI(JSON.parse(json), opts);
   }
@@ -51,22 +52,22 @@ export function convertJsonToURI(json: unknown, opts?: EncodeJsonAsURIOpts): str
 }
 
 /**
- * @function decodeUriAsJson decodes an URI into a Json object
+ * @function decodeUriAsJson decodes a URI into a Json object
  * @param uri string
  * @param opts:
  *          - requiredProperties: the required properties
  *          - arrayTypeProperties: properties that can show up more that once
  */
 export function convertURIToJsonObject(uri: string, opts?: DecodeURIAsJsonOpts): unknown {
-  if (!uri || !opts?.requiredProperties.every((p) => uri.includes(p))) {
+  if (!uri || !opts?.requiredProperties?.every((p) => uri.includes(p))) {
     throw new Error(BAD_PARAMS);
   }
   const uriComponents = getURIComponentsAsArray(uri, opts?.arrayTypeProperties);
   return decodeJsonProperties(uriComponents);
 }
 
-function decodeJsonProperties(parts: string[]): unknown {
-  const json: unknown = {};
+function decodeJsonProperties(parts: string[] | string[][]): unknown {
+  const json: { [s: string]: any } | ArrayLike<any> = {};
   for (const key in parts) {
     const value = parts[key];
     if (!value) {
@@ -99,26 +100,31 @@ function decodeJsonProperties(parts: string[]): unknown {
 /**
  * @function get URI Components as Array
  * @param uri string
- * @param arrayType array of string containing array like keys
+ * @param arrayTypes array of string containing array like keys
  */
-function getURIComponentsAsArray(uri: string, arrayType?: string[]): string[] {
+function getURIComponentsAsArray(uri: string, arrayTypes?: string[]): string[] | string[][] {
   const parts = uri.includes('?') ? uri.split('?')[1] : uri.includes('://') ? uri.split('://')[1] : uri;
-  const json: string[] = [];
-  const dict = parts.split('&');
+  const json: string[] | string[][] = [];
+  const dict: string[] = parts.split('&');
   for (const entry of dict) {
-    const pair = entry.split('=');
-    if (arrayType?.includes(pair[0])) {
-      if (json[pair[0]] !== undefined) {
-        json[pair[0]].push(pair[1]);
+    const pair: string[] = entry.split('=');
+    const p0: any = pair[0];
+    const p1: any = pair[1];
+    if (arrayTypes?.includes(p0)) {
+      const key = json[p0];
+      if (Array.isArray(key)) {
+        key.push(p1);
       } else {
-        json[pair[0]] = [pair[1]];
+        json[p0] = [p1];
       }
       continue;
     }
-    json[pair[0]] = pair[1];
+    json[p0] = p1;
   }
   return json;
 }
+
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * @function customEncodeURIComponent is used to encode chars that are not encoded by default

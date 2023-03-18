@@ -9,7 +9,12 @@ import {
   IssuerOpts,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
-} from '@sphereon/openid4vci-common/lib';
+} from '@sphereon/openid4vci-common';
+import { ObjectUtils } from '@sphereon/ssi-types';
+import Debug from 'debug';
+
+import { MetadataClient } from './MetadataClient';
+import { convertJsonToURI, formPost } from './functions';
 import { ObjectUtils } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
@@ -23,6 +28,9 @@ export class AccessTokenClient {
     issuanceInitiation,
     asOpts,
     pin,
+    codeVerifier,
+    code,
+    redirectUri,
     metadata,
   }: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
     const { issuanceInitiationRequest } = issuanceInitiation;
@@ -34,6 +42,9 @@ export class AccessTokenClient {
       accessTokenRequest: await this.createAccessTokenRequest({
         issuanceInitiation,
         asOpts,
+        codeVerifier,
+        code,
+        redirectUri,
         pin,
       }),
       isPinRequired,
@@ -69,8 +80,16 @@ export class AccessTokenClient {
     return this.sendAuthCode(requestTokenURL, accessTokenRequest);
   }
 
-  public async createAccessTokenRequest({ issuanceInitiation, asOpts, pin }: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
+  public async createAccessTokenRequest({
+    issuanceInitiation,
+    asOpts,
+    pin,
+    codeVerifier,
+    code,
+    redirectUri,
+  }: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
     const issuanceInitiationRequest = issuanceInitiation.issuanceInitiationRequest;
+    issuanceInitiationRequest;
     const request: Partial<AccessTokenRequest> = {};
     if (asOpts?.clientId) {
       request.client_id = asOpts.clientId;
@@ -80,18 +99,24 @@ export class AccessTokenClient {
     request.user_pin = pin;
 
     if (issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL]) {
+      if (codeVerifier) {
+        throw new Error('Cannot pass a code_verifier when flow type is pre-authorized');
+      }
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
       request[PRE_AUTH_CODE_LITERAL] = issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL];
     }
     if (issuanceInitiationRequest.op_state) {
       this.throwNotSupportedFlow();
-      /**
-       * Code is here for when we start to support this flow
-       */
-      // if (issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL]) {
-      //   throw new Error('Cannot have both a pre_authorized_code and a op_state in the same initiation request');
-      // }
-      // request.grant_type = GrantTypes.AUTHORIZATION_CODE;
+      request.grant_type = GrantTypes.AUTHORIZATION_CODE;
+    }
+    if (codeVerifier) {
+      request.code_verifier = codeVerifier;
+      request.code = code;
+      request.redirect_uri = redirectUri;
+      request.grant_type = GrantTypes.AUTHORIZATION_CODE;
+    }
+    if (request.grant_type === GrantTypes.AUTHORIZATION_CODE && issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL]) {
+      throw Error('A pre_authorized_code flow cannot have an op_state in the initiation request');
     }
 
     return request as AccessTokenRequest;
@@ -100,6 +125,12 @@ export class AccessTokenClient {
   private assertPreAuthorizedGrantType(grantType: GrantTypes): void {
     if (GrantTypes.PRE_AUTHORIZED_CODE !== grantType) {
       throw new Error("grant type must be 'urn:ietf:params:oauth:grant-type:pre-authorized_code'");
+    }
+  }
+
+  private assertAuthorizationGrantType(grantType: GrantTypes): void {
+    if (GrantTypes.AUTHORIZATION_CODE !== grantType) {
+      throw new Error("grant type must be 'authorization_code'");
     }
   }
 
@@ -135,13 +166,39 @@ export class AccessTokenClient {
     }
   }
 
+  private assertNonEmptyCodeVerifier(accessTokenRequest: AccessTokenRequest): void {
+    if (!accessTokenRequest.code_verifier) {
+      debug('No code_verifier present, whilst it is required');
+      throw new Error('Authorization flow requires the code_verifier to be present');
+    }
+  }
+
+  private assertNonEmptyCode(accessTokenRequest: AccessTokenRequest): void {
+    if (!accessTokenRequest.code) {
+      debug('No code present, whilst it is required');
+      throw new Error('Authorization flow requires the code to be present');
+    }
+  }
+
+  private assertNonEmptyRedirectUri(accessTokenRequest: AccessTokenRequest): void {
+    if (!accessTokenRequest.redirect_uri) {
+      debug('No redirect_uri present, whilst it is required');
+      throw new Error('Authorization flow requires the redirect_uri to be present');
+    }
+  }
+
   private validate(accessTokenRequest: AccessTokenRequest, isPinRequired?: boolean): void {
     if (accessTokenRequest.grant_type === GrantTypes.PRE_AUTHORIZED_CODE) {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyPreAuthorizedCode(accessTokenRequest);
       this.assertNumericPin(isPinRequired, accessTokenRequest.user_pin);
+    } else if (accessTokenRequest.grant_type === GrantTypes.AUTHORIZATION_CODE) {
+      this.assertAuthorizationGrantType(accessTokenRequest.grant_type);
+      this.assertNonEmptyCodeVerifier(accessTokenRequest);
+      this.assertNonEmptyCode(accessTokenRequest);
+      this.assertNonEmptyRedirectUri(accessTokenRequest);
     } else {
-      this.throwNotSupportedFlow();
+      this.throwNotSupportedFlow;
     }
   }
 
@@ -161,12 +218,18 @@ export class AccessTokenClient {
     if (!asOpts && !metadata?.token_endpoint && !issuerOpts) {
       throw new Error('Cannot determine token URL if no issuer, metadata and no Authorization Server values are present');
     }
-    const url =
-      asOpts && asOpts.as
-        ? this.creatTokenURLFromURL(asOpts.as, asOpts?.allowInsecureEndpoints, asOpts.tokenEndpoint)
-        : metadata?.token_endpoint
-        ? metadata.token_endpoint
-        : this.creatTokenURLFromURL(issuerOpts.issuer, asOpts?.allowInsecureEndpoints, issuerOpts.tokenEndpoint);
+    let url;
+    if (asOpts && asOpts.as) {
+      url = this.creatTokenURLFromURL(asOpts.as, asOpts?.allowInsecureEndpoints, asOpts.tokenEndpoint);
+    } else if (metadata?.token_endpoint) {
+      url = metadata.token_endpoint;
+    } else {
+      if (!issuerOpts) {
+        throw Error('Either authorization server options, a token endpoint or issuer options are required at this point');
+      }
+      url = this.creatTokenURLFromURL(issuerOpts.issuer, asOpts?.allowInsecureEndpoints, issuerOpts.tokenEndpoint);
+    }
+
     if (!url || !ObjectUtils.isString(url)) {
       throw new Error('No authorization server token URL present. Cannot acquire access token');
     }
