@@ -9,10 +9,6 @@ import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialRequestClient } from './CredentialRequestClient';
 import { convertURIToJsonObject } from './functions';
-import { CredentialFormat } from '@sphereon/ssi-types';
-
-import { CredentialRequestClient } from './CredentialRequestClient';
-import { convertURIToJsonObject } from './functions';
 
 export class CredentialRequestClientBuilder {
   credentialEndpoint?: string;

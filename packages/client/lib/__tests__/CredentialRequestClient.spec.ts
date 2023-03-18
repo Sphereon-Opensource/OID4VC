@@ -4,8 +4,8 @@ import { Alg, CredentialRequest, Jwt, ProofOfPossession, Typ, URL_NOT_VALID, Wel
 import * as jose from 'jose';
 import nock from 'nock';
 
-import { CredentialRequestClientBuilder, IssuanceInitiation, MetadataClient } from '../lib';
-import { ProofOfPossessionBuilder } from '../lib';
+import { CredentialRequestClientBuilder, IssuanceInitiation, MetadataClient } from '..';
+import { ProofOfPossessionBuilder } from '..';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';
 

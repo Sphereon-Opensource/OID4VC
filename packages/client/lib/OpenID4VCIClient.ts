@@ -21,14 +21,6 @@ import { IssuanceInitiation } from './IssuanceInitiation';
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { convertJsonToURI } from './functions';
-import { CredentialFormat } from '@sphereon/ssi-types';
-import Debug from 'debug';
-
-import { AccessTokenClient } from './AccessTokenClient';
-import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
-import { IssuanceInitiation } from './IssuanceInitiation';
-import { MetadataClient } from './MetadataClient';
-import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 
 const debug = Debug('sphereon:openid4vci:flow');
 

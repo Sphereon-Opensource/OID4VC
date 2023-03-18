@@ -1,5 +1,5 @@
-import { VcIssuerBuilder } from '../lib/VcIssuerBuilder'
 import { CredentialSupportedV1_11Builder } from '../lib/CredentialSupportedV1_11Builder'
+import { VcIssuerBuilder } from '../lib/VcIssuerBuilder'
 import { CredentialErrorResponse, ICredentialSupportedV1_11 } from '../types'
 
 describe('VcIssuer builder should', () => {
@@ -70,7 +70,7 @@ describe('VcIssuer builder should', () => {
           locale: 'en-US',
         })
         .withCredentialsSupported(credentialsSupported)
-        .build(),
+        .build()
     ).toThrowError(CredentialErrorResponse.invalid_request)
   })
 
@@ -80,7 +80,7 @@ describe('VcIssuer builder should', () => {
         .withCryptographicSuitesSupported('ES256K')
         .withCryptographicBindingMethod('did')
         .withId('UniversityDegree_JWT')
-        .build(),
+        .build()
     ).toThrowError(CredentialErrorResponse.invalid_request)
   })
 })

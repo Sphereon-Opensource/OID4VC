@@ -11,9 +11,6 @@ import {
 import Debug from 'debug';
 
 import { getJson } from './functions';
-import Debug from 'debug';
-
-import { getJson } from './functions';
 
 const debug = Debug('sphereon:openid4vci:metadata');
 

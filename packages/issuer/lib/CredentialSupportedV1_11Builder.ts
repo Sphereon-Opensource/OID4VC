@@ -5,7 +5,7 @@ import {
   ICredentialSupportedV1_11,
   IIssuerCredentialSubject,
   IIssuerCredentialSubjectDisplayNameAndLocale,
-} from '../types'
+} from './types'
 
 export class CredentialSupportedV1_11Builder {
   format?: CredentialFormat
@@ -58,7 +58,7 @@ export class CredentialSupportedV1_11Builder {
 
   withIssuerCredentialSubjectDisplay(
     subjectProperty: string,
-    credentialSubjectDisplayNameAndLocale: IIssuerCredentialSubjectDisplayNameAndLocale | IIssuerCredentialSubjectDisplayNameAndLocale[],
+    credentialSubjectDisplayNameAndLocale: IIssuerCredentialSubjectDisplayNameAndLocale | IIssuerCredentialSubjectDisplayNameAndLocale[]
   ): CredentialSupportedV1_11Builder {
     if (!this.credentialSubject) {
       this.credentialSubject = {}

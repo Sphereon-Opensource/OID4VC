@@ -15,11 +15,6 @@ import Debug from 'debug';
 
 import { MetadataClient } from './MetadataClient';
 import { convertJsonToURI, formPost } from './functions';
-import { ObjectUtils } from '@sphereon/ssi-types';
-import Debug from 'debug';
-
-import { MetadataClient } from './MetadataClient';
-import { convertJsonToURI, formPost } from './functions';
 
 const debug = Debug('sphereon:openid4vci:token');
 

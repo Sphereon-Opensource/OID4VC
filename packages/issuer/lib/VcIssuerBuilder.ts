@@ -1,5 +1,5 @@
 import { VcIssuer } from './VcIssuer'
-import { CredentialErrorResponse, ICredentialIssuerMetadataParametersV1_11, ICredentialSupportedV1_11, IIssuerDisplay } from '../types'
+import { CredentialErrorResponse, ICredentialIssuerMetadataParametersV1_11, ICredentialSupportedV1_11, IIssuerDisplay } from './types'
 
 export class VcIssuerBuilder {
   credentialIssuer?: string

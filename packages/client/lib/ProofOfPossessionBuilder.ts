@@ -11,8 +11,6 @@ import {
 
 import { createProofOfPossession } from './functions';
 
-import { createProofOfPossession } from './functions';
-
 export class ProofOfPossessionBuilder {
   private readonly proof?: ProofOfPossession;
   private readonly callbacks?: ProofOfPossessionCallbacks;
