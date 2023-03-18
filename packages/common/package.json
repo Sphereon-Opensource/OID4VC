@@ -1,0 +1,45 @@
+{
+  "name": "@sphereon/openid4vci-common",
+  "version": "0.5.0-unstable.0",
+  "description": "OpenID 4 Verifiable Credential Issuance Common Types",
+  "source": "lib/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@sphereon/ssi-types": "^0.9.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "files": [
+    "lib/**/*",
+    "dist/**/*"
+  ],
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 150
+  },
+  "keywords": [
+    "Sphereon",
+    "Verifiable Credentials",
+    "OpenID",
+    "OpenID for Verifiable Credential Issuance",
+    "OAuth2",
+    "SSI",
+    "OpenID4VCI",
+    "OIDC4VCI",
+    "OID4VCI"
+  ],
+  "author": "Sphereon",
+  "license": "Apache-2.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}
