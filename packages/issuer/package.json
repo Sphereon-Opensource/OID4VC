@@ -31,5 +31,8 @@
   ],
   "author": "Sphereon",
   "license": "Apache-2.0",
-  "private": false
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  }
 }
