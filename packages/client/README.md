@@ -50,23 +50,24 @@ client you can use to finish the pre-authorized code flows.
 This initiates the client using a URI obtained from the Issuer using a link (URL) or QR code typically. We are also
 already fetching the Server Metadata
 
-````typescript
+```typescript
 import { OpenID4VCIClient } from '@sphereon/openid4vci-client';
 
 // The client is initiated from a URI. This URI is provided by the Issuer, typically as a URL or QR code.
 const client = await OpenID4VCIClient.initiateFromURI({
-  issuanceInitiationURI: 'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true',
+  issuanceInitiationURI:
+    'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true',
   flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW, // The flow to use
   kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#key-1', // Our DID.  You can defer this also to when the acquireCredential method is called
   alg: Alg.ES256, // The signing Algorithm we will use. You can defer this also to when the acquireCredential method is called
   clientId: 'test-clientId', // The clientId if the Authrozation Service requires it.  If a clientId is needed you can defer this also to when the acquireAccessToken method is called
-  retrieveServerMetadata: true // Already retrieve the server metadata. Can also be done afterwards by invoking a method yourself.
+  retrieveServerMetadata: true, // Already retrieve the server metadata. Can also be done afterwards by invoking a method yourself.
 });
 
 console.log(client.getIssuer()); // https://issuer.research.identiproof.io
 console.log(client.getCredentialEndpoint()); // https://issuer.research.identiproof.io/credential
 console.log(client.getAccessTokenEndpoint()); // https://auth.research.identiproof.io/oauth2/token
-````
+```
 
 ## Server metadata
 
@@ -75,11 +76,11 @@ information about supported Credentials, and their cryptographic suites and form
 The code above already retrieved the metadata, so it will not be fetched again. If you however not used
 the `retrieveServerMetadata` option, you can use this method to fetch it from the Issuer:
 
-````typescript
+```typescript
 import { OpenID4VCIClient } from '@sphereon/openid4vci-client';
 
-const metadata = await client.retrieveServerMetadata()
-````
+const metadata = await client.retrieveServerMetadata();
+```
 
 ## Access token from Authorization Server
 
@@ -87,7 +88,7 @@ Next we need to get an Access token from the OAuth2 Authorization Server using t
 found from the metadata if the server supports it. Otherwise a default location based on the issuer value from the
 Initiate Issuance Request is used.
 
-````typescript
+```typescript
 const accessToken = await client.acquireAccessToken({ pin: '1234' });
 console.log(accessToken);
 /**
@@ -100,7 +101,7 @@ console.log(accessToken);
  *   token_type: 'Bearer',
  * }
  */
-````
+```
 
 ## Getting the credential
 
@@ -110,8 +111,7 @@ the [Proof of Posession](#proof-of-possession) chapter for more information.
 
 The Proof of Possession using a signature callback function. The example uses the `jose` library.
 
-````typescript
-
+```typescript
 const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
 
 // Must be JWS
@@ -126,24 +126,24 @@ async function signCallback(args: Jwt, kid: string): Promise<string> {
 }
 
 const callbacks: ProofOfPossessionCallbacks = {
-  signCallback
-}
-````
+  signCallback,
+};
+```
 
 Now it is time to get the actual credential
 
-````typescript
+```typescript
 const credentialResponse = await client.acquireCredentials({
   credentialType: 'OpenBadgeCredential',
   proofCallbacks: callbacks,
   format: 'jwt_vc',
   alg: Alg.ES256K,
-  kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#keys-1'
+  kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#keys-1',
 });
-console.log(credentialResponse.credential)
+console.log(credentialResponse.credential);
 // JWT format. (LDP/JSON-LD is also supported by the client)
 // eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL2V4YW1wbGVzL3YxIl0sImlkIjoiaHR0cDovL2V4YW1wbGUuZWR1L2NyZWRlbnRpYWxzLzM3MzIiLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiVW5pdmVyc2l0eURlZ3JlZUNyZWRlbnRpYWwiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLmVkdS9pc3N1ZXJzLzU2NTA0OSIsImlzc3VhbmNlRGF0ZSI6IjIwMTAtMDEtMDFUMDA6MDA6MDBaIiwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEiLCJkZWdyZWUiOnsidHlwZSI6IkJhY2hlbG9yRGVncmVlIiwibmFtZSI6IkJhY2hlbG9yIG9mIFNjaWVuY2UgYW5kIEFydHMifX19LCJpc3MiOiJodHRwczovL2V4YW1wbGUuZWR1L2lzc3VlcnMvNTY1MDQ5IiwibmJmIjoxMjYyMzA0MDAwLCJqdGkiOiJodHRwOi8vZXhhbXBsZS5lZHUvY3JlZGVudGlhbHMvMzczMiIsInN1YiI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMSJ9.z5vgMTK1nfizNCg5N-niCOL3WUIAL7nXy-nGhDZYO_-PNGeE-0djCpWAMH8fD8eWSID5PfkPBYkx_dfLJnQ7NA
-````
+```
 
 # Using individual classes and methods instead of the client
 
@@ -191,12 +191,12 @@ OpenID4VCI well-known location is not found, the OIDC/OAuth2 well-known location
 
 Example:
 
-````typescript
+```typescript
 import { MetadataClient } from '@sphereon/openid4vci-client';
 
 const metadata = await MetadataClient.retrieveAllMetadataFromInitiation(initiationRequestWithUrl);
 
-console.log(metadata)
+console.log(metadata);
 /**
  * {
  *  issuer: 'https://server.example.com',
@@ -220,7 +220,7 @@ console.log(metadata)
  *  },
  * }
  */
-````
+```
 
 ## Acquiring the Access Token
 
@@ -233,24 +233,24 @@ resolved. So the token endpoint would become https://<issuer-hostname>/token.
 The library allows to pass in a different value for the AS token endpoint as well, so you already can use a different AS
 if you know the AS upfront. If no AS is provided the issuer value from the Issuance Initiation Request will be used.
 
-````typescript
+```typescript
 import { AccessTokenClient, AuthorizationServerOpts } from '@sphereon/openid4vci-client';
 
-const clientId = "abcd" // This can be a random value or a clientId assigned by the Authorization Server (depends on the environment)
-const pin = 1234 // A pincode which is shown out of band typically. Only use when the pin-code is required from the Issuance Initiation object.
+const clientId = 'abcd'; // This can be a random value or a clientId assigned by the Authorization Server (depends on the environment)
+const pin = 1234; // A pincode which is shown out of band typically. Only use when the pin-code is required from the Issuance Initiation object.
 
 // Allows to override the Authorization Server and provide other AS options. By default the issuer value will be used
 const asOpts: AuthorizationServerOpts = {
-  clientId
-}
+  clientId,
+};
 
 const accessTokenResponse = AccessTokenClient.acquireAccessTokenUsingIssuanceInitiation({
   issuanceInitiation: initiationRequestWithUrl,
   asOpts,
   pin,
-  metadata
-})
-console.log(accessTokenResponse)
+  metadata,
+});
+console.log(accessTokenResponse);
 /**
  * {
  *      access_token: "eyJhbGciOiJSUzI1NiIsInR5cCI6Ikp..sHQ"
@@ -258,8 +258,7 @@ console.log(accessTokenResponse)
  *      expires_in: 86400
  * }
  */
-
-````
+```
 
 # Proof of Possession
 
@@ -271,15 +270,15 @@ Initiate Issuance Request, Server metadata and some methods from the builder. Bo
 to sign the JWT and optionally a callback to verify the JWT.
 The signature of the callback functions you need to implement are:
 
-````typescript
+```typescript
 export type JWTSignerCallback = (jwt: Jwt, kid: string) => Promise<string>;
 export type JWTVerifyCallback = (args: { jwt: string; kid: string }) => Promise<void>;
-````
+```
 
 This is an example of the signature callback function created using the `jose` library.
 
-````typescript
-import { Jwt } from "@sphereon/openid4vci-client";
+```typescript
+import { Jwt } from '@sphereon/openid4vci-client';
 
 const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
 
@@ -293,22 +292,22 @@ async function signCallback(args: Jwt, kid: string): Promise<string> {
     .setExpirationTime('2h')
     .sign(keypair.privateKey);
 }
-````
+```
 
 Alongside signing, you can optionally provide another callback function for verifying the created signature with
 populating `verifyCallback`. The method is expected to throw errors in case problems with the JWT or it's signature are
 found.
 below is an example of such method. This example (like the previous one) uses `jose` to verify the jwt.
 
-````typescript
+```typescript
 async function verifyCallback(args: { jwt: string; kid: string }): Promise<void> {
   await jose.compactVerify(args.jwt, keypair.publicKey);
 }
-````
+```
 
 Some important interface around Proof of Possession:
 
-````typescript
+```typescript
 export enum Alg {
   EdDSA = 'EdDSA',
   ES256 = 'ES256',
@@ -336,18 +335,17 @@ export interface Jwt {
   header?: JWTHeader;
   payload?: JWTPayload;
 }
-
-````
+```
 
 The arguments requested by `jose` and `@sphereon/openid4vci-client`
 
 ```typescript
-import { Jwt, ProofOfPossessionCallbacks } from "@sphereon/openid4vci-client";
+import { Jwt, ProofOfPossessionCallbacks } from '@sphereon/openid4vci-client';
 
 const callbacks: ProofOfPossessionCallbacks = {
   signCallback,
-  verifyCallback
-}
+  verifyCallback,
+};
 
 const keyPair = await jose.generateKeyPair('ES256');
 ```
@@ -381,58 +379,54 @@ You can build/create a JWT yourself. You would still use the callbacks to sign t
 have to use the `c_nonce` value from the Access Token response as `nonce` value!. You can provide another nonce using
 the `jti` property.
 
-````typescript
-import { Jwt, ProofOfPossessionBuilder, ProofOfPossessionCallbacks } from "@sphereon/openid4vci-client";
+```typescript
+import { Jwt, ProofOfPossessionBuilder, ProofOfPossessionCallbacks } from '@sphereon/openid4vci-client';
 
 const callbacks: ProofOfPossessionCallbacks = {
   signCallback,
-  verifyCallback
-}
+  verifyCallback,
+};
 
 const keyPair = await jose.generateKeyPair('ES256');
 
 // If you directly want to use a JWT, instead of using method on the ProofOfPossessionBuilder you can create JWT:
 const jwt: Jwt = {
   header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#1', typ: Typ.JWT },
-  payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'https://issuer.example.com' }
+  payload: { iss: 's6BhdRkqt3', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: 'https://issuer.example.com' },
 };
 
 const proofInput: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
   jwt,
   callbacks,
-})
-  .build();
+}).build();
 console.log(proofInput);
 // {
 //   "proof_type": "jwt",
 //   "jwt": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEifQ.eyJpc3MiOiJzNkJoZFJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJpYXQiOjE2NTkxNDU5MjQsIm5vbmNlIjoidFppZ25zbkZicCJ9.btetOcsJ_VOePkwlFf2kyxm6hEUvPRimf3M-Dn3Lmzcmt5QiPToXNWxe_0fEJlRf4Ith55YGB43ScBe6ScZmD1gfLELYQF7LLg97yYlx_Iu8RLA2dS_7EWzLD3ZIzyUGf_uMq3HwXGJKL-ihroRpRBvxRLdZCy-j62nAzoTsBnlr6n79VjkGtlxIjN_CLGIQBhc3du3enghY6N4s3oXFrxWMl7UzGKdjCYN6vSagDb0MURjdiDCsK_yX4NyNd0nGpxqGhVgMpuhqEcqyU0qWPyHF-swtGG5JVAOJGd_YkJS5vbia8UdyOJXnAAdEE1E62a2yUPahNDxMh1iIpS0WO7y6QexWXdb5fmnWDst89T3ELS8Hj2Vzsw1XPyk9XR9JmiDzmEZdH05Wf4M9pXUG4-8_7StB6Lxc7_xDJdk6JPbzFgAIhJa4F_3rfPuwMseSEQvD6bDFowkIiUpt1vXGGVjVm3N4I4Th4_A2QpW4mDzcTKoZq9MKlDGXeLQBtiKXmqs10Jvzpp3O7kBwH7Qm6VUdBxk_-wsWplUZC4IvCfv23hy2SyFnh5zC6Wtw3UcbrSH6LcD7g-RNTKe4fRekyDxqLRdEm60BOozgBoTNhnetCrQ3e7HrApj9EP0vqNyXdtGGWCA011HVDnz6lVzf5yijJB8hOPpkgYGRmHdRQwI"
 // }
-````
+```
 
 ## Credential Issuance
 
 Now it is time to request the actual Credential(s) from the Issuer. The example uses a DID:JWK. The DID:JWK should match
 the keypair created earlier.
 
-````typescript
+```typescript
 import { CredentialRequestClientBuilder, CredentialResponse, ProofOfPossessionArgs } from '@sphereon/openid4vci-client';
 
-const credentialRequestClient = CredentialRequestClientBuilder
-                                    .fromIssuanceInitiation(initiationRequestWithUrl, metadata)
-                                    .build()
+const credentialRequestClient = CredentialRequestClientBuilder.fromIssuanceInitiation(initiationRequestWithUrl, metadata).build();
 
 // In 1 step:
 const credentialResponse: CredentialResponse = await credentialRequestClient.acquireCredentialsUsingProof({
   proofInput,
   credentialType: 'OpenBadgeCredential', // Needs to match a type from the Initiate Issance Request!
-  format: 'jwt_vc' // Allows us to override the format
-})
-
+  format: 'jwt_vc', // Allows us to override the format
+});
 
 // Or in 2 steps:
 // const credentialRequest: CredentialRequest = await credentialRequestClient.createCredentialRequest(proofOpts, { format: 'jwt_vc' }) // Allows us to override the format
 // const credentialResponse: CredentialResponse = await credentialRequestClient.acquireCredentialsUsingRequest(credentialRequest)
-````
+```
 
 # Helper Functions
 

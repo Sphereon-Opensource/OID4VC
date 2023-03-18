@@ -20,6 +20,7 @@ import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder
 import { IssuanceInitiation } from './IssuanceInitiation';
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
+import { convertJsonToURI } from './functions';
 
 const debug = Debug('sphereon:openid4vci:flow');
 
@@ -27,10 +28,10 @@ export class OpenID4VCIClient {
   private readonly _flowType: AuthzFlowType;
   private readonly _initiation: IssuanceInitiationWithBaseUrl;
   private _clientId?: string;
-  private _kid: string;
-  private _alg: string;
-  private _serverMetadata: EndpointMetadata;
-  private _accessTokenResponse: AccessTokenResponse;
+  private _kid: string | undefined;
+  private _alg: Alg | string | undefined;
+  private _serverMetadata: EndpointMetadata | undefined;
+  private _accessTokenResponse: AccessTokenResponse | undefined;
 
   private constructor(initiation: IssuanceInitiationWithBaseUrl, flowType: AuthzFlowType, kid?: string, alg?: Alg | string, clientId?: string) {
     this._flowType = flowType;
@@ -75,7 +76,7 @@ export class OpenID4VCIClient {
       throw Error('Please provide a scope. authorization_details based requests are not supported at this time');
     }
 
-    if (!this._serverMetadata.openid4vci_metadata.authorization_endpoint) {
+    if (!this._serverMetadata?.openid4vci_metadata?.authorization_endpoint) {
       throw Error('Server metadata does not contain authorization endpoint');
     }
 
@@ -133,7 +134,12 @@ export class OpenID4VCIClient {
       if (response.errorBody) {
         debug(`Access token error:\r\n${response.errorBody}`);
         throw Error(
-          `Retrieving an access token from ${this._serverMetadata.token_endpoint} for issuer ${this._initiation.issuanceInitiationRequest.issuer} failed with status: ${response.origResponse.status}`
+          `Retrieving an access token from ${this._serverMetadata?.token_endpoint} for issuer ${this._initiation.issuanceInitiationRequest.issuer} failed with status: ${response.origResponse.status}`
+        );
+      } else if (!response.successBody) {
+        debug(`Access token error. No succes body`);
+        throw Error(
+          `Retrieving an access token from ${this._serverMetadata?.token_endpoint} for issuer ${this._initiation.issuanceInitiationRequest.issuer} failed as there was no success response body`
         );
       }
       this._accessTokenResponse = response.successBody;
@@ -184,27 +190,36 @@ export class OpenID4VCIClient {
     })
       .withIssuer(this.getIssuer())
       .withAlg(this.alg)
-      .withJti(jti)
       .withClientId(this.clientId)
       .withKid(this.kid);
 
+    if (jti) {
+      proofBuilder.withJti(jti);
+    }
     const response = await credentialRequestClient.acquireCredentialsUsingProof({
       proofInput: proofBuilder,
       credentialType,
       format,
     });
     if (response.errorBody) {
-      debug(`Access token error:\r\n${response.errorBody}`);
+      debug(`Credential request error:\r\n${response.errorBody}`);
       throw Error(
-        `Retrieving a credential from ${this._serverMetadata.credential_endpoint} for issuer ${this._initiation.issuanceInitiationRequest.issuer} failed with status: ${response.origResponse.status}`
+        `Retrieving a credential from ${this._serverMetadata?.credential_endpoint} for issuer ${this._initiation.issuanceInitiationRequest.issuer} failed with status: ${response.origResponse.status}`
+      );
+    } else if (!response.successBody) {
+      debug(`Credential request error. No success body`);
+      throw Error(
+        `Retrieving a credential from ${this._serverMetadata?.credential_endpoint} for issuer ${this._initiation.issuanceInitiationRequest.issuer} failed as there was no success response body`
       );
     }
     return response.successBody;
   }
 
   getCredentialsSupported(restrictToInitiationTypes: boolean): CredentialsSupported {
-    const credentialsSupported = this.serverMetadata.openid4vci_metadata.credentials_supported;
-    if (restrictToInitiationTypes === false) {
+    const credentialsSupported = this.serverMetadata?.openid4vci_metadata?.credentials_supported;
+    if (!credentialsSupported) {
+      return {};
+    } else if (restrictToInitiationTypes === false) {
       return credentialsSupported;
     }
     const initiationTypes = this.getCredentialTypesFromInitiation();
@@ -237,7 +252,8 @@ export class OpenID4VCIClient {
 
   get serverMetadata(): EndpointMetadata {
     this.assertServerMetadata();
-    return this._serverMetadata;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this._serverMetadata!;
   }
 
   get kid(): string {
@@ -257,12 +273,16 @@ export class OpenID4VCIClient {
   }
 
   get clientId(): string {
+    if (!this._clientId) {
+      throw Error('No client id present');
+    }
     return this._clientId;
   }
 
   get accessTokenResponse(): AccessTokenResponse {
     this.assertAccessToken();
-    return this._accessTokenResponse;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this._accessTokenResponse!;
   }
 
   public getIssuer(): string {

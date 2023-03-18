@@ -1,32 +1,23 @@
 {
   "name": "@sphereon/openid4vci-issuer",
-  "version": "0.0.1",
-  "description": "OpenID 4 Verifiable Credential Issuance modules' issuer",
-  "main": "dist/main/index.js",
-  "types": "dist/main/index.d.ts",
+  "version": "0.5.0-unstable.0",
+  "description": "OpenID 4 Verifiable Credential Issuance issuer",
+  "source": "lib/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "clean": "rimraf dist coverage",
-    "build": "tsc -p ../../tsconfig.build.json",
-    "test": "echo \"INFO: no test specified\" && exit 0",
-    "fix": "run-s fix:*",
-    "fix:prettier": "prettier \"{lib,tests}/**/*.ts\" --write",
-    "fix:lint": "eslint . --ext .ts --fix",
-    "uninstall": "rimraf dist coverage yarn.lock yarn-error.log package-lock.json node_modules"
+    "build": "tsc"
   },
   "devDependencies": {
-    "npm-run-all": "^4.1.5",
-    "rimraf": "^3.0.2"
+    "@types/jest": "^29.5.0"
   },
   "engines": {
-    "node": "=16"
+    "node": ">=16"
   },
   "files": [
-    "dist/main"
+    "lib/**/*",
+    "dist/**/*"
   ],
-  "prettier": {
-    "singleQuote": true,
-    "printWidth": 150
-  },
   "keywords": [
     "Sphereon",
     "Verifiable Credentials",
@@ -39,5 +30,6 @@
     "OID4VCI"
   ],
   "author": "Sphereon",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "private": false
 }

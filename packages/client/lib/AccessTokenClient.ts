@@ -213,12 +213,18 @@ export class AccessTokenClient {
     if (!asOpts && !metadata?.token_endpoint && !issuerOpts) {
       throw new Error('Cannot determine token URL if no issuer, metadata and no Authorization Server values are present');
     }
-    const url =
-      asOpts && asOpts.as
-        ? this.creatTokenURLFromURL(asOpts.as, asOpts?.allowInsecureEndpoints, asOpts.tokenEndpoint)
-        : metadata?.token_endpoint
-        ? metadata.token_endpoint
-        : this.creatTokenURLFromURL(issuerOpts.issuer, asOpts?.allowInsecureEndpoints, issuerOpts.tokenEndpoint);
+    let url;
+    if (asOpts && asOpts.as) {
+      url = this.creatTokenURLFromURL(asOpts.as, asOpts?.allowInsecureEndpoints, asOpts.tokenEndpoint);
+    } else if (metadata?.token_endpoint) {
+      url = metadata.token_endpoint;
+    } else {
+      if (!issuerOpts) {
+        throw Error('Either authorization server options, a token endpoint or issuer options are required at this point');
+      }
+      url = this.creatTokenURLFromURL(issuerOpts.issuer, asOpts?.allowInsecureEndpoints, issuerOpts.tokenEndpoint);
+    }
+
     if (!url || !ObjectUtils.isString(url)) {
       throw new Error('No authorization server token URL present. Cannot acquire access token');
     }

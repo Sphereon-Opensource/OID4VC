@@ -4,8 +4,10 @@ import { Alg, CredentialRequest, Jwt, ProofOfPossession, Typ, URL_NOT_VALID, Wel
 import * as jose from 'jose';
 import nock from 'nock';
 
-import { CredentialRequestClientBuilder, IssuanceInitiation, MetadataClient } from '../lib';
-import { ProofOfPossessionBuilder } from '../lib';
+import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder';
+import { IssuanceInitiation } from '../IssuanceInitiation';
+import { MetadataClient } from '../MetadataClient';
+import { ProofOfPossessionBuilder } from '../ProofOfPossessionBuilder';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';
 
@@ -20,7 +22,12 @@ const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1';
 
 let keypair: KeyPair;
 
-async function proofOfPossessionCallbackFunction(args: Jwt, kid: string): Promise<string> {
+async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promise<string> {
+  if (!args.payload.aud) {
+    throw Error('aud required');
+  } else if (!kid) {
+    throw Error('kid required');
+  }
   return await new jose.SignJWT({ ...args.payload })
     .setProtectedHeader({ alg: 'ES256' })
     .setIssuedAt()
@@ -48,7 +55,7 @@ beforeEach(async () => {
 describe('Credential Request Client ', () => {
   it('should get a failed credential response with an unsupported format', async function () {
     const basePath = 'https://sphereonjunit2022101301.com/';
-    nock(basePath).post(/.*/).reply(200, {
+    nock(basePath).post(/.*/).reply(500, {
       error: 'unsupported_format',
       error_description: 'This is a mock error message',
     });
@@ -72,7 +79,7 @@ describe('Credential Request Client ', () => {
     const credentialRequest: CredentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof });
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
     const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
-    expect(result.successBody['error']).toBe('unsupported_format');
+    expect(result?.errorBody?.error).toBe('unsupported_format');
   });
 
   it('should get success credential response', async function () {
@@ -103,7 +110,7 @@ describe('Credential Request Client ', () => {
     expect(credentialRequest.proof.jwt.includes(partialJWT)).toBeTruthy();
     expect(credentialRequest.format).toEqual('jwt');
     const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
-    expect(result.successBody['credential']).toEqual(mockedVC);
+    expect(result?.successBody?.credential).toEqual(mockedVC);
   });
 
   it('should fail with invalid url', async () => {
@@ -141,6 +148,6 @@ describe('Credential Request Client with Walt.id ', () => {
       initiation,
       metadata,
     }).build();
-    expect(credReqClient._issuanceRequestOpts.credentialEndpoint).toBe(WALT_OID4VCI_METADATA.credential_endpoint);
+    expect(credReqClient.issuanceRequestOpts.credentialEndpoint).toBe(WALT_OID4VCI_METADATA.credential_endpoint);
   });
 });

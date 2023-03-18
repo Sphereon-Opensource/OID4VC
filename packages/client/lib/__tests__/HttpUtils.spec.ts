@@ -1,4 +1,4 @@
-import { isValidURL } from '../lib';
+import { isValidURL } from '../functions';
 
 describe('httputils.isValidURL', () => {
   it('Should return true for http://localhost', () => {

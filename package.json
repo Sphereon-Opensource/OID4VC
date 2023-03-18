@@ -1,20 +1,44 @@
 {
   "name": "openid4vci-workspace",
   "version": "0.5.0-unstable.0",
-  "description": "OpenID for Verifiable Credential Issuance modules",
+  "description": "OpenID for Verifiable Credential Issuance workspace",
+  "author": "Sphereon",
+  "license": "Apache-2.0",
+  "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "clean": "pnpm -r clean",
-    "fix": "pnpm -r run fix",
-    "build": "pnpm -r build",
-    "test": "pnpm -r run test"
+    "fix": "pnpm run-s fix:*",
+    "fix:lint": "eslint . --fix --ext .ts",
+    "fix:prettier": "prettier --write \"{packages,__tests__,!dist}/**/*.{ts,tsx,js,json,md,yml}\"",
+    "build": "pnpm -r --stream build",
+    "test:ci": "jest --config=jest.json",
+    "test": "jest --verbose --config=jest.json --coverage=true --detectOpenHandles",
+    "clean": "rimraf --glob **/dist **/coverage **/pnpm-lock.yaml packages/**/node_modules node_modules",
+    "publish:latest": "lerna publish --conventional-commits --include-merged-tags --create-release github --yes --dist-tag latest --registry https://registry.npmjs.org",
+    "publish:next": "lerna publish --conventional-prerelease --force-publish --canary --no-git-tag-version --include-merged-tags --preid next --pre-dist-tag next --yes --registry https://registry.npmjs.org",
+    "publish:unstable": "lerna publish --conventional-prerelease --force-publish --canary --no-git-tag-version --include-merged-tags --preid unstable --pre-dist-tag unstable --yes --registry https://registry.npmjs.org"
   },
   "engines": {
     "node": ">=16"
   },
   "prettier": {
+    "endOfLine": "auto",
+    "semi": false,
     "singleQuote": true,
     "printWidth": 150
+  },
+  "devDependencies": {
+    "@types/debug" : "^4.1.7",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^18.15.3",
+    "rimraf": "^4.4.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "4.9.5",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.0.5",
+    "lerna": "^6.5.1",
+    "lerna-changelog": "^2.2.0",
+    "prettier": "^2.7.1"
   },
   "keywords": [
     "Sphereon",
@@ -26,8 +50,5 @@
     "OpenID4VCI",
     "OIDC4VCI",
     "OID4VCI"
-  ],
-  "author": "Sphereon",
-  "license": "Apache-2.0",
-  "private": true
+  ]
 }

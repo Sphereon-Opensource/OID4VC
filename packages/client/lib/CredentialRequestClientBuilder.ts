@@ -11,10 +11,10 @@ import { CredentialRequestClient } from './CredentialRequestClient';
 import { convertURIToJsonObject } from './functions';
 
 export class CredentialRequestClientBuilder {
-  credentialEndpoint: string;
-  credentialType: string | string[];
-  format: CredentialFormat | CredentialFormat[];
-  token: string;
+  credentialEndpoint?: string;
+  credentialType?: string | string[];
+  format?: CredentialFormat | CredentialFormat[];
+  token?: string;
 
   public static fromIssuanceInitiationURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): CredentialRequestClientBuilder {
     return CredentialRequestClientBuilder.fromIssuanceInitiationRequest({

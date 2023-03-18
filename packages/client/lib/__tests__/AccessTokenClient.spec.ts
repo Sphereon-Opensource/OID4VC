@@ -1,7 +1,7 @@
-import { AccessTokenRequest, AccessTokenResponse, GrantTypes, OpenIDResponse } from '@sphereon/openid4vci-common';
+import { AccessTokenRequest, AccessTokenRequestOpts, AccessTokenResponse, GrantTypes, OpenIDResponse } from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
-import { AccessTokenClient, AccessTokenRequest, AccessTokenRequestOpts, AccessTokenResponse, GrantTypes, OpenIDResponse } from '../lib';
+import { AccessTokenClient } from '../AccessTokenClient';
 
 import { UNIT_TEST_TIMEOUT } from './IT.spec';
 import { INITIATION_TEST } from './MetadataMocks';
@@ -106,7 +106,6 @@ describe('AccessTokenClient should', () => {
       const accessTokenRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
         'pre-authorized_code': '20221013',
-        user_pin: null,
       } as AccessTokenRequest;
 
       nock(MOCK_URL).post(/.*/).reply(200, {});
