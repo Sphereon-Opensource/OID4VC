@@ -4,7 +4,7 @@ import {
   AuthorizationRequest,
   AuthorizationRequestOpts,
   AuthzFlowType,
-  CredentialMetadata,
+  CredentialMetadataV1_09,
   CredentialResponse,
   CredentialsSupported,
   EndpointMetadata,
@@ -232,7 +232,7 @@ export class OpenID4VCIClient {
     return supported;
   }
 
-  getCredentialMetadata(type: string): CredentialMetadata {
+  getCredentialMetadata(type: string): CredentialMetadataV1_09 {
     return this.getCredentialsSupported(false)[type];
   }
 

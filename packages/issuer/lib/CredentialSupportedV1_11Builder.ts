@@ -1,20 +1,20 @@
-import { invalid_request } from '@sphereon/openid4vci-common'
-
 import {
   CredentialFormat,
   ICredentialDisplay,
   ICredentialSupportedV1_11,
-  IIssuerCredentialSubject,
   IIssuerCredentialSubjectDisplayNameAndLocale,
-} from './types'
+  IIssuerCredentialSubjectV1_11,
+  invalid_request,
+} from '@sphereon/openid4vci-common'
 
 export class CredentialSupportedV1_11Builder {
   format?: CredentialFormat
   id?: string
+  types?: string[]
   cryptographicBindingMethodsSupported?: ('jwk' | 'cose_key' | 'did' | string)[]
   cryptographicSuitesSupported?: ('jwt_vc' | 'ldp_vc' | string)[]
   display?: ICredentialDisplay[]
-  credentialSubject?: IIssuerCredentialSubject
+  credentialSubject?: IIssuerCredentialSubjectV1_11
 
   withFormat(credentialFormat: CredentialFormat): CredentialSupportedV1_11Builder {
     this.format = credentialFormat
@@ -26,6 +26,18 @@ export class CredentialSupportedV1_11Builder {
     return this
   }
 
+  withTypes(type: string| string[]): CredentialSupportedV1_11Builder {
+    if (!Array.isArray(type)) {
+      this.types = this.types
+          ? [...this.types, type]
+          : [type]
+    } else {
+      this.cryptographicBindingMethodsSupported = this.cryptographicBindingMethodsSupported
+          ? [...this.cryptographicBindingMethodsSupported, ...type]
+          : type
+    }
+    return this
+  }
   withCryptographicBindingMethod(method: string | string[]): CredentialSupportedV1_11Builder {
     if (!Array.isArray(method)) {
       this.cryptographicBindingMethodsSupported = this.cryptographicBindingMethodsSupported

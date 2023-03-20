@@ -1,7 +1,12 @@
-import { invalid_request, invalid_token } from '@sphereon/openid4vci-common'
+import {
+  ICredentialIssuerMetadataParametersV1_11,
+  ICredentialSupportedV1_11,
+  IIssuerDisplay,
+  invalid_request,
+  invalid_token,
+} from '@sphereon/openid4vci-common'
 
 import { VcIssuer } from './VcIssuer'
-import { ICredentialIssuerMetadataParametersV1_11, ICredentialSupportedV1_11, IIssuerDisplay } from './types'
 
 export class VcIssuerBuilder {
   credentialIssuer?: string

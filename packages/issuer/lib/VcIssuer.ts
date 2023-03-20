@@ -1,6 +1,12 @@
-import { unsupported_credential_format } from '@sphereon/openid4vci-common'
+import {
+  encodeJsonAsURI,
+  ICredentialIssuerMetadataParametersV1_11,
+  ICredentialSuccessResponse,
+  IIssueCredentialRequest,
+  unsupported_credential_format,
+} from '@sphereon/openid4vci-common'
 
-import { CredentialFormat, ICredentialIssuerMetadataParametersV1_11, ICredentialSuccessResponse, IIssueCredentialRequest } from './types'
+import { v4 as uuidv4 } from 'uuid'
 
 export class VcIssuer {
   _issuerMetadata: ICredentialIssuerMetadataParametersV1_11
@@ -16,9 +22,27 @@ export class VcIssuer {
     return this._issuerMetadata
   }
 
-  public async createCredentialOfferDeeplink(): Promise<string> {
-    // return 'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true';
-    return `openid-initiate-issuance://?issuer=${this._issuerMetadata.credential_issuer}&credential_type=${this._issuerMetadata.credentials_supported[0].id}&re-authorized_code=${this._preAuthorizedCode}&user_pin_required=${this._userPinRequired}`
+  public createCredentialOfferDeeplink(): string {
+    // openid-credential-offer://credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com
+    // %22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCr
+    // edential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...
+    // FYUaBy%22%7D
+    const types: string[] = []
+    this._issuerMetadata.credentials_supported.map(cs=> {
+      if(cs.types) types.push(...cs.types)
+    })
+    return `openid-credential-offer://?credential_offer=${encodeJsonAsURI({
+      credential_issuer: this._issuerMetadata.credential_issuer,
+      credentials: { 
+        format: this._issuerMetadata.credentials_supported.map(cs=>cs.format),
+        types: types,
+        //fixme: @nklomp I've placed this here for now, but later we need to have the concept of sessions and in there we have to keep track of the id 
+        issuer_state: uuidv4()
+      },
+      grants: {
+        authorization_code: this._preAuthorizedCode
+      }
+    })}`
   }
 
   public async issueCredentialFromIssueRequest(issueCredentialRequest: IIssueCredentialRequest): Promise<ICredentialSuccessResponse> {
@@ -29,7 +53,7 @@ export class VcIssuer {
     throw new Error(unsupported_credential_format)
   }
 
-  private isMetadataSupportCredentialRequestFormat(requestFormat: CredentialFormat): boolean {
+  private isMetadataSupportCredentialRequestFormat(requestFormat: string): boolean {
     for (const credentialSupported of this._issuerMetadata.credentials_supported) {
       if (credentialSupported.format === requestFormat) {
         return true
