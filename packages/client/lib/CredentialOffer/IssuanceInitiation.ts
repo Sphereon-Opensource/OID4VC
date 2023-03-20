@@ -1,10 +1,16 @@
-import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from '@sphereon/openid4vci-common/lib';
+import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 
-import { convertJsonToURI, convertURIToJsonObject } from './functions';
+import { convertJsonToURI, convertURIToJsonObject } from '../functions';
+import {CredentialOfferStrategy} from "./index";
 
 const debug = Debug('sphereon:openid4vci:initiation');
-export class IssuanceInitiation {
+export class IssuanceInitiation implements CredentialOfferStrategy {
+
+  public getCredentialOffer(issuanceInitiationURI: string) : IssuanceInitiationWithBaseUrl {
+    return IssuanceInitiation.fromURI(issuanceInitiationURI);
+  }
+
   public static fromURI(issuanceInitiationURI: string): IssuanceInitiationWithBaseUrl {
     debug(`issuance initiation URI: ${issuanceInitiationURI}`);
     if (!issuanceInitiationURI.includes('?')) {

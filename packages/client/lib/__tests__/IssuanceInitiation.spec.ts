@@ -1,4 +1,4 @@
-import { IssuanceInitiation } from '../IssuanceInitiation';
+import { IssuanceInitiation } from '../CredentialOffer';
 
 import { INITIATION_TEST, INITIATION_TEST_HTTPS_URI, INITIATION_TEST_URI } from './MetadataMocks';
 

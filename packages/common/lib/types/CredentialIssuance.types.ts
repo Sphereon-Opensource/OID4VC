@@ -1,4 +1,5 @@
 import { CredentialFormat, W3CVerifiableCredential } from '@sphereon/ssi-types';
+import {CredentialOffer} from "./CredentialOffer.types";
 
 export interface CredentialRequest {
   //TODO: handling list is out of scope for now
@@ -13,8 +14,7 @@ export interface CredentialResponse {
   format: CredentialFormat;
 }
 
-export interface IssuanceInitiationWithBaseUrl {
-  baseUrl: string;
+export interface IssuanceInitiationWithBaseUrl extends CredentialOffer {
   issuanceInitiationRequest: IssuanceInitiationRequestPayload;
 }
 

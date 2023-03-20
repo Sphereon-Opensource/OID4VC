@@ -33,7 +33,7 @@ describe('OID4VCI-Client should', () => {
   const INITIATE_QR_DATA =
     'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true';
 
-  it('succeed with a full flow wit the client', async () => {
+  function succeedWithAFullFlowWithClientSetup() {
     nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
     nock(IDENTIPROOF_AS_URL).get('/.well-known/oauth-authorization-server').reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
     nock(IDENTIPROOF_AS_URL)
@@ -46,16 +46,36 @@ describe('OID4VCI-Client should', () => {
         credential: mockedVC,
       });
 
-    const client = await OpenID4VCIClient.initiateFromURI({
-      issuanceInitiationURI: INITIATE_QR_DATA,
+  }
+
+  it('succeed with a full flow with the client using OIDCVCI version 9', async () => {
+    succeedWithAFullFlowWithClientSetup();
+    const client = await OpenID4VCIClient.credentialOffer({
+      credentialOfferURI: INITIATE_QR_DATA,
       flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
       alg: Alg.ES256,
       clientId: 'test-clientId',
     });
+    await assertionOfsucceedWithAFullFlowWithClient(client);
+  });
+
+  it('succeed with a full flow wit the client using OIDCVCI version 11', async () => {
+    succeedWithAFullFlowWithClientSetup();
+    const client = await OpenID4VCIClient.credentialOffer({
+      credentialOfferURI: INITIATE_QR_DATA,
+      flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
+      kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
+      alg: Alg.ES256,
+      clientId: 'test-clientId',
+    });
+    await assertionOfsucceedWithAFullFlowWithClient(client);
+  });
+
+  async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
 
     expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
-    expect(client.initiation).toBeDefined();
+    expect(client.credentialOffer).toBeDefined();
     expect(client.serverMetadata).toBeDefined();
     expect(client.getIssuer()).toEqual('https://issuer.research.identiproof.io');
     expect(client.getCredentialEndpoint()).toEqual('https://issuer.research.identiproof.io/credential');
@@ -71,7 +91,8 @@ describe('OID4VCI-Client should', () => {
       },
     });
     expect(credentialResponse.credential).toEqual(mockedVC);
-  });
+
+  }
 
   it(
     'succeed with a full flow without the client',
