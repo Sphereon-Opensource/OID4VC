@@ -1,6 +1,4 @@
-import { CredentialSupportedV1_11Builder } from '../lib/CredentialSupportedV1_11Builder'
-import { VcIssuerBuilder } from '../lib/VcIssuerBuilder'
-import { CredentialErrorResponse, ICredentialSupportedV1_11 } from '../types'
+import { CredentialErrorResponse, CredentialSupportedV1_11Builder, ICredentialSupportedV1_11, VcIssuerBuilder } from '../lib'
 
 describe('VcIssuer builder should', () => {
   it('generate a VcIssuer', () => {
