@@ -1,5 +1,6 @@
+import { invalid_request } from '@sphereon/openid4vci-common'
+
 import {
-  CredentialErrorResponse,
   CredentialFormat,
   ICredentialDisplay,
   ICredentialSupportedV1_11,
@@ -81,7 +82,7 @@ export class CredentialSupportedV1_11Builder {
 
   public build(): ICredentialSupportedV1_11 {
     if (!this.format) {
-      throw new Error(CredentialErrorResponse.invalid_request)
+      throw new Error(invalid_request)
     }
     const credentialSupported: ICredentialSupportedV1_11 = {
       format: this.format,

@@ -1,4 +1,6 @@
-import { CredentialErrorResponse, CredentialSupportedV1_11Builder, ICredentialSupportedV1_11, VcIssuerBuilder } from '../lib'
+import { invalid_request } from '@sphereon/openid4vci-common'
+
+import { CredentialSupportedV1_11Builder, ICredentialSupportedV1_11, VcIssuerBuilder } from '../lib'
 
 describe('VcIssuer builder should', () => {
   it('generate a VcIssuer', () => {
@@ -23,6 +25,7 @@ describe('VcIssuer builder should', () => {
       })
       .build()
     const vcIssuer = new VcIssuerBuilder()
+      .withPreAuthorizedCode('4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp')
       .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer('https://credential-issuer')
@@ -61,6 +64,7 @@ describe('VcIssuer builder should', () => {
       .build()
     expect(() =>
       new VcIssuerBuilder()
+        .withPreAuthorizedCode('4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp')
         .withAuthorizationServer('https://authorization-server')
         .withCredentialEndpoint('https://credential-endpoint')
         .withIssuerDisplay({
@@ -69,7 +73,7 @@ describe('VcIssuer builder should', () => {
         })
         .withCredentialsSupported(credentialsSupported)
         .build()
-    ).toThrowError(CredentialErrorResponse.invalid_request)
+    ).toThrowError(invalid_request)
   })
 
   it('fail to generate a CredentialSupportedV1_11', () => {
@@ -79,6 +83,6 @@ describe('VcIssuer builder should', () => {
         .withCryptographicBindingMethod('did')
         .withId('UniversityDegree_JWT')
         .build()
-    ).toThrowError(CredentialErrorResponse.invalid_request)
+    ).toThrowError(invalid_request)
   })
 })

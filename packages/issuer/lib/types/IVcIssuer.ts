@@ -72,11 +72,3 @@ export interface ICredentialSuccessResponse {
   c_nonce?: string
   c_nonce_expires_in?: number
 }
-
-export enum CredentialErrorResponse {
-  invalid_request = 'invalid_request', // Credential Request was malformed. One or more of the parameters (i.e. format, proof) are missing or malformed.
-  invalid_token = 'invalid_token', // Credential Request contains the wrong Access Token or the Access Token is missing
-  unsupported_credential_type = 'unsupported_credential_type', // requested credential type is not supported
-  unsupported_credential_format = 'unsupported_credential_format', // requested credential format is not supported
-  invalid_or_missing_proof = 'invalid_or_missing_proof', // Credential Request did not contain a proof, or proof was invalid, i.e. it was not bound to a Credential Issuer provided nonce
-}
