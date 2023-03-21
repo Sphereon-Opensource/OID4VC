@@ -1,4 +1,4 @@
-import { WellKnownEndpoints } from '@sphereon/openid4vci-common';
+import {IssuanceInitiationRequestPayload, WellKnownEndpoints} from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
 import { IssuanceInitiation } from '../CredentialOffer';
@@ -17,7 +17,7 @@ import {
   WALT_OID4VCI_METADATA,
 } from './MetadataMocks';
 
-describe('Metadataclient with IdentiProof Issuer should', () => {
+describe('MetadataClient with IdentiProof Issuer should', () => {
   beforeAll(() => {
     nock.cleanAll();
   });
@@ -39,7 +39,7 @@ describe('Metadataclient with IdentiProof Issuer should', () => {
     const INITIATE_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
     const initiation = IssuanceInitiation.fromURI(INITIATE_URI);
-    const metadata = await MetadataClient.retrieveAllMetadataFromInitiation(initiation);
+    const metadata = await MetadataClient.retrieveAllMetadata((initiation.credentialOfferPayload as IssuanceInitiationRequestPayload).issuer);
     expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential');
     expect(metadata.token_endpoint).toEqual('https://auth.research.identiproof.io/oauth2/token');
     expect(metadata.openid4vci_metadata).toEqual(IDENTIPROOF_OID4VCI_METADATA);

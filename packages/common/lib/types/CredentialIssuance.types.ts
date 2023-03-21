@@ -15,10 +15,13 @@ export interface CredentialResponse {
 }
 
 export interface IssuanceInitiationWithBaseUrl extends CredentialOffer {
-  issuanceInitiationRequest: IssuanceInitiationRequestPayload;
+  credentialOfferPayload: CredentialOfferPayload;
 }
 
-export interface IssuanceInitiationRequestPayload {
+export interface CredentialOfferPayload {
+}
+
+export interface IssuanceInitiationRequestPayload extends CredentialOfferPayload {
   issuer: string; //(url) REQUIRED The issuer URL of the Credential issuer, the Wallet is requested to obtain one or more Credentials from.
   credential_type: string[] | string; //(url) REQUIRED A JSON string denoting the type of the Credential the Wallet shall request
   'pre-authorized_code'?: string; //CONDITIONAL the code representing the issuer's authorization for the Wallet to obtain Credentials of a certain type. This code MUST be short-lived and single-use. MUST be present in a pre-authorized code flow.
