@@ -3,7 +3,6 @@ import {
   ICredentialSupportedV1_11,
   IIssuerDisplay,
   invalid_request,
-  invalid_token,
 } from '@sphereon/openid4vci-common'
 
 import { VcIssuer } from './VcIssuer'
@@ -15,7 +14,6 @@ export class VcIssuerBuilder {
   batchCredentialEndpoint?: string
   issuerDisplay?: IIssuerDisplay[]
   credentialsSupported?: ICredentialSupportedV1_11[]
-  preAuthorizedCode?: string
   userPinRequired?: boolean
 
   public withCredentialIssuer(issuer: string): VcIssuerBuilder {
@@ -54,20 +52,12 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withPreAuthorizedCode(preAuthorizedCode: string): VcIssuerBuilder {
-    this.preAuthorizedCode = preAuthorizedCode
-    return this
-  }
-
   public withUserPinRequired(userPinRequired: boolean): VcIssuerBuilder {
     this.userPinRequired = userPinRequired
     return this
   }
 
   public build(): VcIssuer {
-    if (!this.preAuthorizedCode) {
-      throw new Error(invalid_token)
-    }
     if (!this.credentialEndpoint || !this.credentialIssuer || !this.credentialsSupported) {
       throw new Error(invalid_request)
     }
@@ -88,6 +78,6 @@ export class VcIssuerBuilder {
     if (this.authorizationServer) {
       metadata.authorization_server = this.authorizationServer
     }
-    return new VcIssuer(metadata, this.preAuthorizedCode, this.userPinRequired)
+    return new VcIssuer(metadata, this.userPinRequired)
   }
 }

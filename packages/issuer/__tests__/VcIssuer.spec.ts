@@ -1,6 +1,7 @@
 import { ICredentialSupportedV1_11 } from '@sphereon/openid4vci-common'
 
 import { CredentialSupportedV1_11Builder, VcIssuerBuilder } from '../lib'
+import {createCredentialOfferDeeplink} from "../lib/functions/CredentialOffer";
 
 describe('VcIssuer should', () => {
   it('create a CredentialOffer deeplink', () => {
@@ -29,9 +30,6 @@ describe('VcIssuer should', () => {
       })
       .build()
     const vcIssuer = new VcIssuerBuilder()
-      .withPreAuthorizedCode(
-        '4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp'
-      )
       .withUserPinRequired(true)
       .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
@@ -43,7 +41,7 @@ describe('VcIssuer should', () => {
       .withCredentialsSupported(credentialsSupported)
       .build()
 
-    const deeplink = vcIssuer.createCredentialOfferDeeplink()
+    const deeplink = createCredentialOfferDeeplink('4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp', vcIssuer._issuerMetadata)
     const urlParams = new URLSearchParams(deeplink)
     expect(urlParams.get('grants')).toBeDefined()
   })

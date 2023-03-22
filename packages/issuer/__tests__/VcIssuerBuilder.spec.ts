@@ -25,9 +25,6 @@ describe('VcIssuer builder should', () => {
       })
       .build()
     const vcIssuer = new VcIssuerBuilder()
-      .withPreAuthorizedCode(
-        '4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp'
-      )
       .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer('https://credential-issuer')
@@ -66,9 +63,6 @@ describe('VcIssuer builder should', () => {
       .build()
     expect(() =>
       new VcIssuerBuilder()
-        .withPreAuthorizedCode(
-          '4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp'
-        )
         .withAuthorizationServer('https://authorization-server')
         .withCredentialEndpoint('https://credential-endpoint')
         .withIssuerDisplay({
