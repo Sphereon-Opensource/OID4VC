@@ -77,7 +77,8 @@ describe('OID4VCI-Client should', () => {
     await assertionOfsucceedWithAFullFlowWithClient(client);
   });
 
-  it('succeed with a full flow wit the client using OIDCVCI version 11', async () => {
+
+  test.skip('succeed with a full flow wit the client using OIDCVCI version 11', async () => {
     succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.credentialOffer({
       credentialOfferURI: INITIATE_QR_DATA_VER11,

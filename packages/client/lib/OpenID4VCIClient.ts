@@ -68,7 +68,8 @@ export class OpenID4VCIClient {
   }): Promise<OpenID4VCIClient> {
 
     const flow = new OpenID4VCIClient(credentialOfferURI, flowType, kid, alg, clientId);
-    if (retrieveServerMetadata) {
+    // noinspection PointlessBooleanExpressionJS
+    if (retrieveServerMetadata !== false) {
       await flow.retrieveServerMetadata();
     }
     return flow;

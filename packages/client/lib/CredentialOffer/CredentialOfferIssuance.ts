@@ -17,7 +17,7 @@ export class CredentialOfferIssuance implements CredentialOfferStrategy {
   }
 
   public fromURI(credentialOfferURI: string): CredentialOfferWithBaseURL {
-    throw new Error(`not yet implemented${credentialOfferURI}`)
+    throw new Error(`not yet implemented : ${credentialOfferURI}`)
   }
 
   public async getServerMetaData(): Promise<EndpointMetadata> {
