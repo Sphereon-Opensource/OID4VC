@@ -1,5 +1,5 @@
 {
-  "name": "@sphereon/oidvci",
+  "name": "@sphereon/openid4vci",
   "version": "0.5.0-unstable.0",
   "description": "OpenID 4 Verifiable Credential Issuance - Issuer",
   "source": "lib/index.ts",
