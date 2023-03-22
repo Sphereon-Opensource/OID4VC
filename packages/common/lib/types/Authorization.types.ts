@@ -1,13 +1,14 @@
+import { CredentialFormat } from '@sphereon/ssi-types';
+
 import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from './CredentialIssuance.types';
 import { EndpointMetadata, ErrorResponse, PRE_AUTH_CODE_LITERAL } from './Generic.types';
-import {CredentialFormat} from "@sphereon/ssi-types";
 
 export interface AuthorizationDetails {
-  type: 'openid_credential' | string
+  type: 'openid_credential' | string;
   // If the Credential Issuer metadata contains an authorization_server parameter, the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.
-  locations?: string | string[]
-  format: CredentialFormat | CredentialFormat[]
-  [s: string]: unknown
+  locations?: string | string[];
+  format: CredentialFormat | CredentialFormat[];
+  [s: string]: unknown;
 }
 
 export enum GrantTypes {
@@ -58,7 +59,7 @@ export interface AuthorizationRequest {
   client_id: string;
   code_challenge: string;
   code_challenge_method: CodeChallengeMethod;
-  authorization_details?: string
+  authorization_details?: string;
   redirect_uri: string;
   scope?: string;
 }
@@ -67,7 +68,7 @@ export interface AuthorizationRequestOpts {
   clientId: string;
   codeChallenge: string;
   codeChallengeMethod: CodeChallengeMethod;
-  authorizationDetails?: AuthorizationDetails | AuthorizationDetails[]
+  authorizationDetails?: AuthorizationDetails | AuthorizationDetails[];
   redirectUri: string;
   scope?: string;
 }

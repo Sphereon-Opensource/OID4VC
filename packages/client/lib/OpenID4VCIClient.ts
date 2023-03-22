@@ -1,6 +1,7 @@
 import {
   AccessTokenResponse,
-  Alg, AuthorizationDetails,
+  Alg,
+  AuthorizationDetails,
   AuthorizationRequest,
   AuthorizationRequestOpts,
   AuthzFlowType,
@@ -71,8 +72,14 @@ export class OpenID4VCIClient {
     return this._serverMetadata;
   }
 
-  public createAuthorizationRequestUrl({ clientId, codeChallengeMethod, codeChallenge, authorizationDetails, redirectUri, scope }: AuthorizationRequestOpts): string {
-
+  public createAuthorizationRequestUrl({
+    clientId,
+    codeChallengeMethod,
+    codeChallenge,
+    authorizationDetails,
+    redirectUri,
+    scope,
+  }: AuthorizationRequestOpts): string {
     // Scope and authorization_details can be used in the same authorization request
     // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
     if (!scope && !authorizationDetails) {
@@ -88,7 +95,7 @@ export class OpenID4VCIClient {
       scope = `openid ${scope}`;
     }
 
-    this.addLocations(authorizationDetails );
+    this.addLocations(authorizationDetails);
 
     const queryObj: AuthorizationRequest = {
       response_type: ResponseType.AUTH_CODE,
@@ -102,7 +109,7 @@ export class OpenID4VCIClient {
 
     const authRequestUrl = convertJsonToURI(queryObj, {
       baseUrl: this._serverMetadata.openid4vci_metadata.authorization_endpoint,
-      uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details']
+      uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details'],
     });
 
     return authRequestUrl;
@@ -112,10 +119,10 @@ export class OpenID4VCIClient {
     if (authorizationDetails && this.serverMetadata.openid4vci_metadata?.authorization_server) {
       if (Array.isArray(authorizationDetails)) {
         authorizationDetails.forEach((value, index, array) => {
-          array[index].locations = this.serverMetadata.issuer
-        })
+          array[index].locations = this.serverMetadata.issuer;
+        });
       } else {
-        authorizationDetails.locations = this.serverMetadata.issuer
+        authorizationDetails.locations = this.serverMetadata.issuer;
       }
     }
   }
