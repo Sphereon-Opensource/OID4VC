@@ -1,8 +1,15 @@
-import {CredentialOffer, CredentialOfferWithBaseURL, EndpointMetadata} from "@sphereon/openid4vci-common";
+import {CredentialOffer, CredentialOfferWithBaseURL, EndpointMetadata, OIDCVCIVersion} from "@sphereon/openid4vci-common";
 import {CredentialOfferStrategy} from "./CredentialOfferStrategy";
-import {CredentialRequestClientBuilder} from "../CredentialRequestClientBuilder";
 
 export class CredentialOfferIssuance implements CredentialOfferStrategy {
+  readonly version: OIDCVCIVersion;
+  private readonly _credentialOfferWithBaseURL: CredentialOfferWithBaseURL;
+
+  public constructor(credentialOfferURI: string) {
+    this.version = OIDCVCIVersion.VER_11;
+    this._credentialOfferWithBaseURL = this.fromURI(credentialOfferURI);
+  }
+
 
   public getCredentialOffer(credentialOfferURI: string): CredentialOffer {
     return this.fromURI(credentialOfferURI);
@@ -12,22 +19,25 @@ export class CredentialOfferIssuance implements CredentialOfferStrategy {
     throw new Error('not yet implemented.')
   }
 
-  public async getServerMetaData(credentialOfferWithBaseURL: CredentialOfferWithBaseURL): Promise<EndpointMetadata> {
+  public async getServerMetaData(): Promise<EndpointMetadata> {
     throw new Error('not yet implemented.')
   }
 
-  public getCredentialTypes(issuanceInitiation: CredentialOffer): string[] {
+  public getCredentialTypes(): string[] {
     return [];
   }
 
-  getIssuer(credentialOffer: CredentialOffer): string {
+  public getIssuer(): string {
     return "";
   }
 
-  getCredentialRequestClientBuilder(
-    credentialOffer: CredentialOffer,
-    metadata?: EndpointMetadata
-  ): CredentialRequestClientBuilder {
-    throw new Error('not yet implemented.')
+  public assertIssuerData(): void {
+    if (!this._credentialOfferWithBaseURL) {
+      throw Error(`No issuance initiation present`);
+    }
+  }
+
+  get credentialOfferWithBaseURL(): CredentialOfferWithBaseURL {
+    return this._credentialOfferWithBaseURL;
   }
 }

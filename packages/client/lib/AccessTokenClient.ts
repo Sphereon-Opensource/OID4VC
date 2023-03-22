@@ -5,7 +5,7 @@ import {
   AuthorizationServerOpts,
   EndpointMetadata,
   GrantTypes,
-  IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl,
+  IssuanceInitiationRequestPayload,
   IssuerOpts,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
@@ -20,7 +20,7 @@ const debug = Debug('sphereon:openid4vci:token');
 
 export class AccessTokenClient {
   public async acquireAccessTokenUsingIssuanceInitiation({
-    credentialOffer,
+    issuanceInitiation,
     asOpts,
     pin,
     codeVerifier,
@@ -28,15 +28,14 @@ export class AccessTokenClient {
     redirectUri,
     metadata,
   }: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
-    const { credentialOfferPayload } = (credentialOffer as IssuanceInitiationWithBaseUrl);
+    const { issuanceInitiationRequest } = issuanceInitiation;
 
-    let issuanceInitiationRequestPayload = credentialOfferPayload as IssuanceInitiationRequestPayload;
-    const isPinRequired = this.isPinRequiredValue(issuanceInitiationRequestPayload);
-    const issuerOpts = { issuer: issuanceInitiationRequestPayload.issuer };
+    const isPinRequired = this.isPinRequiredValue(issuanceInitiationRequest);
+    const issuerOpts = { issuer: issuanceInitiationRequest.issuer };
 
     return await this.acquireAccessTokenUsingRequest({
       accessTokenRequest: await this.createAccessTokenRequest({
-        credentialOffer,
+        issuanceInitiation,
         asOpts,
         codeVerifier,
         code,
@@ -77,16 +76,15 @@ export class AccessTokenClient {
   }
 
   public async createAccessTokenRequest({
-    credentialOffer,
+    issuanceInitiation,
     asOpts,
     pin,
     codeVerifier,
     code,
     redirectUri,
   }: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
-    const { credentialOfferPayload } = (credentialOffer as IssuanceInitiationWithBaseUrl);
-
-    let issuanceInitiationRequest = credentialOfferPayload as IssuanceInitiationRequestPayload;
+    const issuanceInitiationRequest = issuanceInitiation.issuanceInitiationRequest;
+    issuanceInitiationRequest;
     const request: Partial<AccessTokenRequest> = {};
     if (asOpts?.clientId) {
       request.client_id = asOpts.clientId;

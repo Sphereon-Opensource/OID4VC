@@ -2,14 +2,21 @@ import {
   AccessTokenResponse,
   Alg,
   AuthzFlowType,
-  IssuanceInitiationRequestPayload,
-  Jwt,
+  Jwt, OIDCVCIVersion,
   ProofOfPossession,
   Typ
 } from '@sphereon/openid4vci-common';
+// @ts-ignore
 import nock from 'nock';
 
-import { AccessTokenClient, IssuanceInitiation, OpenID4VCIClient, ProofOfPossessionBuilder } from '..';
+import {
+  AccessTokenClient,
+  CredentialOfferIssuance,
+  CredentialRequestClientBuilder,
+  IssuanceInitiation,
+  OpenID4VCIClient,
+  ProofOfPossessionBuilder
+} from '..';
 
 import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
 
@@ -86,7 +93,11 @@ describe('OID4VCI-Client should', () => {
   async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
 
     expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
-    expect(client.credentialOffer).toBeDefined();
+    if(client.strategy.version === OIDCVCIVersion.VER_11) {
+      expect((client.strategy as CredentialOfferIssuance).credentialOfferWithBaseURL).toBeDefined();
+    } else {
+      expect((client.strategy as IssuanceInitiation).issuanceInitiationWithBaseUrl).toBeDefined();
+    }
     expect(client.serverMetadata).toBeDefined();
     expect(client.getIssuer()).toEqual('https://issuer.research.identiproof.io');
     expect(client.getCredentialEndpoint()).toEqual('https://issuer.research.identiproof.io/credential');
@@ -109,10 +120,10 @@ describe('OID4VCI-Client should', () => {
     'succeed with a full flow without the client',
     async () => {
       /* Convert the URI into an object */
-      const credentialOffer = IssuanceInitiation.fromURI(INITIATE_QR_DATA_VER9);
+      const issuanceInitiation = (new IssuanceInitiation(INITIATE_QR_DATA_VER9) as IssuanceInitiation).issuanceInitiationWithBaseUrl;
 
-      expect(credentialOffer.baseUrl).toEqual('openid-initiate-issuance://');
-      expect(credentialOffer.credentialOfferPayload).toEqual({
+      expect(issuanceInitiation.baseUrl).toEqual('openid-initiate-issuance://');
+      expect(issuanceInitiation.issuanceInitiationRequest).toEqual({
         credential_type: 'OpenBadgeCredentialUrl',
         issuer: ISSUER_URL,
         'pre-authorized_code':
@@ -126,7 +137,7 @@ describe('OID4VCI-Client should', () => {
 
       /* The actual access token calls */
       const accessTokenClient: AccessTokenClient = new AccessTokenClient();
-      const accessTokenResponse = await accessTokenClient.acquireAccessTokenUsingIssuanceInitiation({ credentialOffer, pin: '1234' });
+      const accessTokenResponse = await accessTokenClient.acquireAccessTokenUsingIssuanceInitiation({ issuanceInitiation, pin: '1234' });
       expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
       // Get the credential
       nock(ISSUER_URL)
@@ -135,8 +146,7 @@ describe('OID4VCI-Client should', () => {
           format: 'jwt-vc',
           credential: mockedVC,
         });
-      const credentialOfferPayload = credentialOffer.credentialOfferPayload as IssuanceInitiationRequestPayload;
-      const credReqClient = new IssuanceInitiation().getCredentialRequestClientBuilder(credentialOfferPayload)
+      const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation({ initiation: issuanceInitiation})
         .withFormat('jwt_vc')
 
         .withTokenFromResponse(accessTokenResponse.successBody!)

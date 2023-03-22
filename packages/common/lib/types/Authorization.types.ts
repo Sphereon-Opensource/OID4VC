@@ -1,6 +1,5 @@
-import { IssuanceInitiationRequestPayload } from './CredentialIssuance.types';
+import {IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl} from './CredentialIssuance.types';
 import { EndpointMetadata, ErrorResponse, PRE_AUTH_CODE_LITERAL } from './Generic.types';
-import {CredentialOffer} from "./CredentialOffer.types";
 
 export enum GrantTypes {
   AUTHORIZATION_CODE = 'authorization_code',
@@ -36,7 +35,7 @@ export interface IssuerOpts {
 }
 
 export interface AccessTokenRequestOpts {
-  credentialOffer: CredentialOffer;
+  issuanceInitiation: IssuanceInitiationWithBaseUrl;
   asOpts?: AuthorizationServerOpts;
   metadata?: EndpointMetadata;
   codeVerifier?: string; // only required for authorization flow
