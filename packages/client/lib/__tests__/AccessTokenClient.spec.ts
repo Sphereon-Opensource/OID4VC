@@ -186,7 +186,7 @@ describe('AccessTokenClient should', () => {
 
     await expect(() =>
       accessTokenClient.acquireAccessTokenUsingIssuanceInitiation({
-        credentialOffer: INITIATION_TEST,
+        issuanceInitiation: INITIATION_TEST,
         pin: '1234',
       })
     ).rejects.toThrow(Error('Cannot set a pin, when the pin is not required.'));
@@ -198,7 +198,7 @@ describe('AccessTokenClient should', () => {
     nock(MOCK_URL).post(/.*/).reply(200, {});
 
     const requestOpts: AccessTokenRequestOpts = {
-      credentialOffer: INITIATION_TEST,
+      issuanceInitiation: INITIATION_TEST,
       pin: undefined,
       codeVerifier: 'RylyWGQ-dzpObnEcoMBDIH9cTAwZXk1wYzktKxsOFgA',
       code: 'LWCt225yj7gzT2cWeMP4hXj4B4oIYkEiGs4T6pfez91',

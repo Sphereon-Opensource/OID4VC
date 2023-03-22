@@ -7,7 +7,7 @@ describe('Issuance Initiation', () => {
 
     expect(new IssuanceInitiation(INITIATION_TEST_HTTPS_URI).issuanceInitiationWithBaseUrl).toEqual({
       baseUrl: 'https://server.example.com',
-      credentialOfferPayload: {
+      issuanceInitiationRequest: {
         credential_type: ['https://did.example.org/healthCard', 'https://did.example.org/driverLicense'],
         issuer: 'https://server.example.com',
         op_state: 'eyJhbGciOiJSU0Et...FYUaBy',
