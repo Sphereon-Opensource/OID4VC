@@ -1,6 +1,6 @@
 import {
   AccessTokenResponse,
-  Alg,
+  Alg, AuthorizationDetails,
   AuthorizationRequest,
   AuthorizationRequestOpts,
   AuthzFlowType,
@@ -71,9 +71,12 @@ export class OpenID4VCIClient {
     return this._serverMetadata;
   }
 
-  public createAuthorizationRequestUrl({ clientId, codeChallengeMethod, codeChallenge, redirectUri, scope }: AuthorizationRequestOpts): string {
-    if (!scope) {
-      throw Error('Please provide a scope. authorization_details based requests are not supported at this time');
+  public createAuthorizationRequestUrl({ clientId, codeChallengeMethod, codeChallenge, authorizationDetails, redirectUri, scope }: AuthorizationRequestOpts): string {
+
+    // Scope and authorization_details can be used in the same authorization request
+    // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
+    if (!scope && !authorizationDetails) {
+      throw Error('Please provide a scope or authorization_details');
     }
 
     if (!this._serverMetadata?.openid4vci_metadata?.authorization_endpoint) {
@@ -81,25 +84,40 @@ export class OpenID4VCIClient {
     }
 
     // add 'openid' scope if not present
-    if (!scope.includes('openid')) {
+    if (scope && !scope.includes('openid')) {
       scope = `openid ${scope}`;
     }
+
+    this.addLocations(authorizationDetails );
 
     const queryObj: AuthorizationRequest = {
       response_type: ResponseType.AUTH_CODE,
       client_id: clientId,
       code_challenge_method: codeChallengeMethod,
       code_challenge: codeChallenge,
+      authorization_details: JSON.stringify(authorizationDetails),
       redirect_uri: redirectUri,
       scope: scope,
     };
 
     const authRequestUrl = convertJsonToURI(queryObj, {
       baseUrl: this._serverMetadata.openid4vci_metadata.authorization_endpoint,
-      uriTypeProperties: ['redirect_uri', 'scope'],
+      uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details']
     });
 
     return authRequestUrl;
+  }
+
+  private addLocations(authorizationDetails?: AuthorizationDetails | AuthorizationDetails[]): void {
+    if (authorizationDetails && this.serverMetadata.openid4vci_metadata?.authorization_server) {
+      if (Array.isArray(authorizationDetails)) {
+        authorizationDetails.forEach((value, index, array) => {
+          array[index].locations = this.serverMetadata.issuer
+        })
+      } else {
+        authorizationDetails.locations = this.serverMetadata.issuer
+      }
+    }
   }
 
   public async acquireAccessToken({
