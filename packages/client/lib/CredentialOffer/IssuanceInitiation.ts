@@ -6,9 +6,10 @@ import {
 } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 
-import { convertJsonToURI, convertURIToJsonObject } from '../functions';
-import {CredentialOfferStrategy} from "./index";
 import {MetadataClient} from "../MetadataClient";
+import { convertJsonToURI, convertURIToJsonObject } from '../functions';
+
+import {CredentialOfferStrategy} from "./index";
 
 const debug = Debug('sphereon:openid4vci:initiation');
 export class IssuanceInitiation implements CredentialOfferStrategy {
@@ -43,7 +44,7 @@ export class IssuanceInitiation implements CredentialOfferStrategy {
   }
 
   public toURI(): string {
-    let credentialOfferPayload = this._issuanceInitiationWithBaseUrl.issuanceInitiationRequest;
+    const credentialOfferPayload = this._issuanceInitiationWithBaseUrl.issuanceInitiationRequest;
     return convertJsonToURI(credentialOfferPayload, {
       baseUrl: this._issuanceInitiationWithBaseUrl.baseUrl,
       arrayTypeProperties: ['credential_type'],
@@ -57,7 +58,7 @@ export class IssuanceInitiation implements CredentialOfferStrategy {
   }
 
   public getCredentialTypes(): string[] {
-    let credentialOfferPayload = this._issuanceInitiationWithBaseUrl.issuanceInitiationRequest;
+    const credentialOfferPayload = this._issuanceInitiationWithBaseUrl.issuanceInitiationRequest;
     return typeof credentialOfferPayload.credential_type === 'string'
         ? [credentialOfferPayload.credential_type]
         : credentialOfferPayload.credential_type;

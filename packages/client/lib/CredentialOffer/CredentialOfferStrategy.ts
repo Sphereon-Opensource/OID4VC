@@ -1,6 +1,7 @@
 import {EndpointMetadata, OIDCVCIVersion} from "@sphereon/openid4vci-common";
-import {IssuanceInitiation} from "./IssuanceInitiation";
+
 import {CredentialOfferIssuance} from "./CredentialOfferIssuance";
+import {IssuanceInitiation} from "./IssuanceInitiation";
 
 export interface CredentialOfferStrategy {
   readonly version: OIDCVCIVersion;

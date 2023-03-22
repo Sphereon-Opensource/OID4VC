@@ -6,7 +6,6 @@ import {
   ProofOfPossession,
   Typ
 } from '@sphereon/openid4vci-common';
-// @ts-ignore
 import nock from 'nock';
 
 import {

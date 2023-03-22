@@ -25,12 +25,12 @@ describe('Issuance Initiation', () => {
   });
 
   it('Should return URI from Issuance Initiation Request', () => {
-    let issuanceInitiation = new IssuanceInitiation(INITIATION_TEST_HTTPS_URI);
+    const issuanceInitiation = new IssuanceInitiation(INITIATION_TEST_HTTPS_URI);
     expect(issuanceInitiation.toURI()).toEqual(INITIATION_TEST_HTTPS_URI);
   });
 
   it('Should throw error on invalid URI', () => {
-    let issuanceInitiationURI = INITIATION_TEST_HTTPS_URI.replace('?', '');
+    const issuanceInitiationURI = INITIATION_TEST_HTTPS_URI.replace('?', '');
     expect(() => new IssuanceInitiation(issuanceInitiationURI).issuanceInitiationWithBaseUrl).toThrowError('Invalid Issuance Initiation Request Payload');
   });
 });

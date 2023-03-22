@@ -19,9 +19,9 @@ import Debug from 'debug';
 
 import {AccessTokenClient} from './AccessTokenClient';
 import {CredentialOfferIssuance, CredentialOfferStrategy, discoverOIDCVCIVersion, getStrategy, IssuanceInitiation} from './CredentialOffer';
+import {CredentialRequestClientBuilder} from "./CredentialRequestClientBuilder";
 import {ProofOfPossessionBuilder} from './ProofOfPossessionBuilder';
 import {convertJsonToURI} from './functions';
-import {CredentialRequestClientBuilder} from "./CredentialRequestClientBuilder";
 
 const debug = Debug('sphereon:openid4vci:flow');
 
@@ -131,7 +131,7 @@ export class OpenID4VCIClient {
     if (!this._accessTokenResponse) {
       const accessTokenClient = new AccessTokenClient();
 
-      let accessTokenRequestOpts: AccessTokenRequestOpts = {
+      const accessTokenRequestOpts: AccessTokenRequestOpts = {
         issuanceInitiation: this.getIssuanceInitiation(),
         metadata: this._serverMetadata,
         pin,

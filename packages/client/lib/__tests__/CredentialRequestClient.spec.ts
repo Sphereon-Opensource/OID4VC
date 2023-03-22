@@ -11,7 +11,6 @@ import {
   WellKnownEndpoints
 } from '@sphereon/openid4vci-common';
 import * as jose from 'jose';
-// @ts-ignore
 import nock from 'nock';
 
 import { CredentialRequestClientBuilder, IssuanceInitiation, MetadataClient } from '..';

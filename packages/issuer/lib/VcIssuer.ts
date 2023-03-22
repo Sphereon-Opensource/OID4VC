@@ -5,7 +5,6 @@ import {
   IIssueCredentialRequest,
   unsupported_credential_format,
 } from '@sphereon/openid4vci-common'
-
 import { v4 as uuidv4 } from 'uuid'
 
 export class VcIssuer {

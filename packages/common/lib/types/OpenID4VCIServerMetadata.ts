@@ -1,7 +1,7 @@
 import { W3CVerifiableCredential } from '@sphereon/ssi-types';
 
-import { OAuth2ASMetadata } from './OAuth2ASMetadata';
 import {CredentialOffer} from "./CredentialIssuance.types";
+import { OAuth2ASMetadata } from './OAuth2ASMetadata';
 
 export interface IssuerMetadata {
 }

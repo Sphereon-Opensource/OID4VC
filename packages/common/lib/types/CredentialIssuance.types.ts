@@ -1,4 +1,5 @@
 import { CredentialFormat, W3CVerifiableCredential } from '@sphereon/ssi-types';
+
 import {IssuerMetadata} from "./OpenID4VCIServerMetadata";
 
 export interface CredentialRequest {
@@ -14,7 +15,9 @@ export interface CredentialResponse {
   format: CredentialFormat;
 }
 
-export interface CredentialOffer {}
+export interface CredentialOffer {
+
+}
 
 export interface IssuanceInitiationWithBaseUrl extends CredentialOffer {
   baseUrl: string;
