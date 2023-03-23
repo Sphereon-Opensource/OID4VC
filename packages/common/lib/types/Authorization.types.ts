@@ -6,8 +6,8 @@ import { EndpointMetadata, ErrorResponse, PRE_AUTH_CODE_LITERAL } from './Generi
 export interface AuthorizationDetails {
   type: 'openid_credential' | string;
   // If the Credential Issuer metadata contains an authorization_server parameter, the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.
-  locations?: string | string[];
-  format: CredentialFormat | CredentialFormat[];
+  locations?: string[];
+  format: CredentialFormat;
   [s: string]: unknown;
 }
 
@@ -68,7 +68,7 @@ export interface AuthorizationRequestOpts {
   clientId: string;
   codeChallenge: string;
   codeChallengeMethod: CodeChallengeMethod;
-  authorizationDetails?: AuthorizationDetails | AuthorizationDetails[];
+  authorizationDetails?: AuthorizationDetails[];
   redirectUri: string;
   scope?: string;
 }

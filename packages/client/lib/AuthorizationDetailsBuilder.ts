@@ -13,17 +13,13 @@ export class AuthorizationDetailsBuilder {
     return this;
   }
 
-  withFormats(format: CredentialFormat | CredentialFormat[]): AuthorizationDetailsBuilder {
-    if (this.authorizationDetails.format && Array.isArray(this.authorizationDetails.format)) {
-      this.authorizationDetails.format.push(...format);
-    } else {
-      this.authorizationDetails.format = format;
-    }
+  withFormats(format: CredentialFormat): AuthorizationDetailsBuilder {
+    this.authorizationDetails.format = format;
     return this;
   }
 
-  withLocations(locations: string | string[]): AuthorizationDetailsBuilder {
-    if (this.authorizationDetails.locations && Array.isArray(this.authorizationDetails.locations)) {
+  withLocations(locations: string[]): AuthorizationDetailsBuilder {
+    if (this.authorizationDetails.locations) {
       this.authorizationDetails.locations.push(...locations);
     } else {
       this.authorizationDetails.locations = locations;
