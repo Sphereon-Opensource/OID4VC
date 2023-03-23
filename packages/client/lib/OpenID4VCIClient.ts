@@ -110,14 +110,12 @@ export class OpenID4VCIClient {
       scope = `openid ${scope}`;
     }
 
-    this.handlerAuthorizationDetails(authorizationDetails);
-
     const queryObj: AuthorizationRequest = {
       response_type: ResponseType.AUTH_CODE,
       client_id: clientId,
       code_challenge_method: codeChallengeMethod,
       code_challenge: codeChallenge,
-      authorization_details: JSON.stringify(authorizationDetails),
+      authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
       redirect_uri: redirectUri,
       scope: scope,
     };
@@ -130,7 +128,7 @@ export class OpenID4VCIClient {
     return authRequestUrl;
   }
 
-  private handlerAuthorizationDetails(authorizationDetails?: AuthDetails | AuthDetails[]): AuthDetails | AuthDetails[] | undefined {
+  private handleAuthorizationDetails(authorizationDetails?: AuthDetails | AuthDetails[]): AuthDetails | AuthDetails[] | undefined {
     if (authorizationDetails) {
       if (Array.isArray(authorizationDetails)) {
         return authorizationDetails.map((value) => this.handleLocations({ ...value }));
