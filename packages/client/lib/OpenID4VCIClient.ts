@@ -2,7 +2,8 @@ import {
   AccessTokenResponse,
   Alg,
   AuthorizationRequest,
-  AuthzFlowType, CodeChallengeMethod,
+  AuthzFlowType,
+  CodeChallengeMethod,
   CredentialMetadata,
   CredentialResponse,
   CredentialsSupported,
@@ -133,10 +134,10 @@ export class OpenID4VCIClient {
       if (Array.isArray(authorizationDetails)) {
         return authorizationDetails.map((value) => this.handleLocations({ ...value }));
       } else {
-        return this.handleLocations({...authorizationDetails});
+        return this.handleLocations({ ...authorizationDetails });
       }
     }
-    return authorizationDetails
+    return authorizationDetails;
   }
   private handleLocations(authorizationDetails: AuthDetails) {
     if (authorizationDetails && this.serverMetadata.openid4vci_metadata?.authorization_server) {
@@ -144,13 +145,13 @@ export class OpenID4VCIClient {
         if (Array.isArray(authorizationDetails.locations)) {
           (authorizationDetails.locations as string[]).push(this.serverMetadata.issuer);
         } else {
-          authorizationDetails.locations = [authorizationDetails.locations as string, this.serverMetadata.issuer]
+          authorizationDetails.locations = [authorizationDetails.locations as string, this.serverMetadata.issuer];
         }
       } else {
-        authorizationDetails.locations = this.serverMetadata.issuer
+        authorizationDetails.locations = this.serverMetadata.issuer;
       }
     }
-    return authorizationDetails
+    return authorizationDetails;
   }
 
   public async acquireAccessToken({

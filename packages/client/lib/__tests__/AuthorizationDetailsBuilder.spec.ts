@@ -2,11 +2,7 @@ import { AuthorizationDetailsBuilder } from '../AuthorizationDetailsBuilder';
 
 describe('AuthorizationDetailsBuilder test', () => {
   it('should create AuthorizationDetails object from arrays', () => {
-    const actual = new AuthorizationDetailsBuilder()
-      .withFormats('jwt_vc')
-      .withLocations(['test1', 'test2'])
-      .withType('openid_credential')
-      .build();
+    const actual = new AuthorizationDetailsBuilder().withFormats('jwt_vc').withLocations(['test1', 'test2']).withType('openid_credential').build();
     expect(actual).toEqual({
       type: 'openid_credential',
       format: 'jwt_vc',
