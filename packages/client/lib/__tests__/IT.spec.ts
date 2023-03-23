@@ -10,9 +10,9 @@ import nock from 'nock';
 
 import {
   AccessTokenClient,
-  CredentialOfferIssuance,
+  CredentialOfferClient,
   CredentialRequestClientBuilder,
-  IssuanceInitiation,
+  IssuanceInitiationClient,
   OpenID4VCIClient,
   ProofOfPossessionBuilder
 } from '..';
@@ -93,10 +93,10 @@ describe('OID4VCI-Client should', () => {
   async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
 
     expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
-    if(client.strategy.version === OpenId4VCIVersion.VER_11) {
-      expect((client.strategy as CredentialOfferIssuance).credentialOfferWithBaseURL).toBeDefined();
+    if(client.credentialIssuanceOfferInitiationClient.version === OpenId4VCIVersion.VER_11) {
+      expect((client.credentialIssuanceOfferInitiationClient as CredentialOfferClient).credentialOfferWithBaseURL).toBeDefined();
     } else {
-      expect((client.strategy as IssuanceInitiation).issuanceInitiationWithBaseUrl).toBeDefined();
+      expect((client.credentialIssuanceOfferInitiationClient as IssuanceInitiationClient).issuanceInitiationWithBaseUrl).toBeDefined();
     }
     expect(client.serverMetadata).toBeDefined();
     expect(client.getIssuer()).toEqual('https://issuer.research.identiproof.io');
@@ -120,7 +120,7 @@ describe('OID4VCI-Client should', () => {
     'succeed with a full flow without the client',
     async () => {
       /* Convert the URI into an object */
-      const issuanceInitiation = (new IssuanceInitiation(INITIATE_QR_DATA_VER9) as IssuanceInitiation).issuanceInitiationWithBaseUrl;
+      const issuanceInitiation = (new IssuanceInitiationClient(INITIATE_QR_DATA_VER9) as IssuanceInitiationClient).issuanceInitiationWithBaseUrl;
 
       expect(issuanceInitiation.baseUrl).toEqual('openid-initiate-issuance://');
       expect(issuanceInitiation.issuanceInitiationRequest).toEqual({

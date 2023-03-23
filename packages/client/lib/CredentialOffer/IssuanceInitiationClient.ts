@@ -9,14 +9,20 @@ import Debug from 'debug';
 import {MetadataClient} from "../MetadataClient";
 import { convertJsonToURI, convertURIToJsonObject } from '../functions';
 
-import {CredentialOfferClient} from "./index";
+import {CredentialIssuanceOfferInitiationClient} from "./index";
 
 const debug = Debug('sphereon:openid4vci:initiation');
 
-export class IssuanceInitiation implements CredentialOfferClient {
-  public static readonly version: OpenId4VCIVersion.VER_9;
+export class IssuanceInitiationClient implements CredentialIssuanceOfferInitiationClient {
+  public readonly _version: OpenId4VCIVersion;
+  private readonly _issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl;
 
-  public static fromURI(issuanceInitiationURI: string): IssuanceInitiationWithBaseUrl {
+  public constructor(issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl){
+    this._version = OpenId4VCIVersion.VER_9;
+    this._issuanceInitiationWithBaseUrl = issuanceInitiationWithBaseUrl;
+  }
+
+  public static fromURI(issuanceInitiationURI: string): IssuanceInitiationClient {
     debug(`issuance initiation URI: ${issuanceInitiationURI}`);
     if (!issuanceInitiationURI.includes('?')) {
       debug(`Invalid issuance initiation URI: ${issuanceInitiationURI}`);
@@ -28,10 +34,10 @@ export class IssuanceInitiation implements CredentialOfferClient {
       requiredProperties: ['issuer', 'credential_type'],
     }) as IssuanceInitiationRequestPayload;
 
-    return {
+    return new IssuanceInitiationClient({
       baseUrl,
       issuanceInitiationRequest,
-    };
+    });
   }
 
   public static toURI(issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl): string {
@@ -65,20 +71,29 @@ export class IssuanceInitiation implements CredentialOfferClient {
     return await MetadataClient.retrieveAllMetadata(issuer, opts);
   }
 
-  public static getCredentialTypes(issuanceInitiationRequestPayload: IssuanceInitiationRequestPayload): string[] {
-    return typeof issuanceInitiationRequestPayload.credential_type === 'string'
-        ? [issuanceInitiationRequestPayload.credential_type]
-        : issuanceInitiationRequestPayload.credential_type;
+  public getCredentialTypes(): string[] {
+    const issuanceInitiationRequest = this._issuanceInitiationWithBaseUrl.issuanceInitiationRequest;
+    return typeof issuanceInitiationRequest.credential_type === 'string'
+        ? [issuanceInitiationRequest.credential_type]
+        : issuanceInitiationRequest.credential_type;
   }
 
-  public static getIssuer(initiation: IssuanceInitiationWithBaseUrl): string {
-    return initiation.issuanceInitiationRequest.issuer;
+  public getIssuer(): string {
+    return this._issuanceInitiationWithBaseUrl.issuanceInitiationRequest.issuer;
   }
 
-  public static assertIssuerData(initiation: IssuanceInitiationWithBaseUrl): void {
-    if (!initiation) {
+  public assertIssuerData(): void {
+    if (!this._issuanceInitiationWithBaseUrl) {
       throw Error(`No issuance initiation present`);
     }
+  }
+
+  get issuanceInitiationWithBaseUrl() {
+    return this._issuanceInitiationWithBaseUrl;
+  }
+
+  get version() {
+    return this._version;
   }
 
 }

@@ -153,16 +153,16 @@ bit more control and options, at the expense of a bit more complexity.
 ## Issuance Initiation
 
 Issuance is started from a so-called Issuance Initiation Request by the Issuer. This typically is URI, exposed
-as a link or a QR code. You can call the `IssuanceInitiation.fromURI(uri)` method to parse the URI into a Json object
+as a link or a QR code. You can call the `IssuanceInitiationClient.fromURI(uri)` method to parse the URI into a Json object
 containing the baseUrl and a `IssuanceInitiationRequest` JSON object
 
 ```typescript
-import { IssuanceInitiation } from '@sphereon/openid4vci-client';
+import { IssuanceInitiationClient } from '@sphereon/openid4vci-client';
 
 const initiationURI =
   'https://issuer.example.com?issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy';
 
-const initiationRequestWithUrl = IssuanceInitiation.fromURI(initiationURI);
+const initiationRequestWithUrl = IssuanceInitiationClient.fromURI(initiationURI);
 console.log(initiationRequestWithUrl);
 
 /**

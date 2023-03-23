@@ -1,3 +1,3 @@
+export * from './CredentialIssuanceOfferInitiationClient';
+export * from './IssuanceInitiationClient';
 export * from './CredentialOfferClient';
-export * from './IssuanceInitiation';
-export * from './CredentialOfferIssuance';

@@ -1,23 +1,64 @@
-import {OpenId4VCIVersion, URLSchemes} from "@sphereon/openid4vci-common";
+import {
+  CredentialOfferWithBaseURL,
+  EndpointMetadata,
+  OpenId4VCIVersion,
+} from "@sphereon/openid4vci-common";
 
-import {CredentialOfferIssuance} from "./CredentialOfferIssuance";
-import {IssuanceInitiation} from "./IssuanceInitiation";
+import {CredentialIssuanceOfferInitiationClient} from "./CredentialIssuanceOfferInitiationClient";
+import Debug from "debug";
 
-export interface CredentialOfferClient {
-}
+const debug = Debug('sphereon:openid4vci:credentialOffer');
 
-export function getStrategy(credentialOfferURI: string): CredentialOfferClient {
-  if (OpenId4VCIVersion.VER_9 === getOpenId4VCIVersion(credentialOfferURI)) {
-    return IssuanceInitiation.fromURI(credentialOfferURI);
+export class CredentialOfferClient implements CredentialIssuanceOfferInitiationClient {
+
+  public readonly _version: OpenId4VCIVersion;
+  private readonly _credentialOfferWithBaseURL: CredentialOfferWithBaseURL
+
+  public constructor(issuanceInitiationURI: string, credentialOfferWithBaseURL: CredentialOfferWithBaseURL){
+    this._version = OpenId4VCIVersion.VER_11;
+    this._credentialOfferWithBaseURL = credentialOfferWithBaseURL;
   }
 
-  return CredentialOfferIssuance.fromURI(credentialOfferURI);
-}
-
-export function getOpenId4VCIVersion(credentialOfferURI: string): OpenId4VCIVersion {
-  if (credentialOfferURI.startsWith(URLSchemes.INITIATE_ISSUANCE)) {
-    return OpenId4VCIVersion.VER_9;
+  public static fromURI(credentialOfferURI: string): CredentialOfferClient {
+    // FIXME implement the function
+    debug(`\'fromURI\' is not implemented yet: ${credentialOfferURI}`);
+    throw new Error(`\'fromURI\' is not implemented yet: ${credentialOfferURI}`)
   }
 
-  return OpenId4VCIVersion.VER_11
+  public static async getServerMetaData(credentialOfferWithBaseURL: CredentialOfferWithBaseURL): Promise<EndpointMetadata> {
+    throw new Error('\'getServerMetaData\': Not implemented yet.')
+  }
+
+  public static getCredentialTypes(): string[] {
+    return [];
+  }
+
+  public static getIssuer(): string {
+    return "";
+  }
+
+  public static assertIssuerData(credentialOfferWithBaseURL: CredentialOfferWithBaseURL): void {
+    if (credentialOfferWithBaseURL) {
+      throw Error(`No credential offer present`);
+    }
+  }
+
+  get credentialOfferWithBaseURL() {
+    return this._credentialOfferWithBaseURL;
+  }
+
+  get version() {
+    return this._version;
+  }
+
+  assertIssuerData(): void {
+  }
+
+  getCredentialTypes(): string[] {
+    return [];
+  }
+
+  getIssuer(): string {
+    return "";
+  }
 }
