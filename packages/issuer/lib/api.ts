@@ -106,7 +106,7 @@ export class RestAPI {
   private registerTokenRequestEndpoint() {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    this.express.pose('/token', (request, response) => {
+    this.express.post('/token', (request, response) => {
       return RestAPI.sendErrorResponse(response, 501, 'Not implemented')
     })
   }
