@@ -8,7 +8,7 @@ export interface IssuerMetadata {
 
 export interface CredentialOfferWithBaseURL extends CredentialOffer {
   baseUrl: string;
-  credentialOfferPayload: ICredentialIssuerMetadataParametersV1_11;
+  credentialIssuerMetadata: ICredentialIssuerMetadataParametersV1_11;
 }
 
 export interface ICredentialIssuerMetadataParametersV1_11 extends IssuerMetadata {

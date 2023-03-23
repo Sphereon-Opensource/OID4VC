@@ -2,7 +2,7 @@ import {
   AccessTokenResponse,
   Alg,
   AuthzFlowType,
-  Jwt, OIDCVCIVersion,
+  Jwt, OpenId4VCIVersion,
   ProofOfPossession,
   Typ
 } from '@sphereon/openid4vci-common';
@@ -93,7 +93,7 @@ describe('OID4VCI-Client should', () => {
   async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
 
     expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
-    if(client.strategy.version === OIDCVCIVersion.VER_11) {
+    if(client.strategy.version === OpenId4VCIVersion.VER_11) {
       expect((client.strategy as CredentialOfferIssuance).credentialOfferWithBaseURL).toBeDefined();
     } else {
       expect((client.strategy as IssuanceInitiation).issuanceInitiationWithBaseUrl).toBeDefined();

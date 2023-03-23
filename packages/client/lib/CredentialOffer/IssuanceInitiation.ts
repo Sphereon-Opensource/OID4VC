@@ -2,30 +2,21 @@ import {
   EndpointMetadata,
   IssuanceInitiationRequestPayload,
   IssuanceInitiationWithBaseUrl,
-  OIDCVCIVersion
+  OpenId4VCIVersion
 } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 
 import {MetadataClient} from "../MetadataClient";
 import { convertJsonToURI, convertURIToJsonObject } from '../functions';
 
-import {CredentialOfferStrategy} from "./index";
+import {CredentialOfferClient} from "./index";
 
 const debug = Debug('sphereon:openid4vci:initiation');
-export class IssuanceInitiation implements CredentialOfferStrategy {
-  readonly version: OIDCVCIVersion;
-  private readonly _issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl;
 
-  public constructor(issuanceInitiationURI: string){
-    this.version = OIDCVCIVersion.VER_9;
-    this._issuanceInitiationWithBaseUrl = this.fromURI(issuanceInitiationURI);
-  }
+export class IssuanceInitiation implements CredentialOfferClient {
+  public static readonly version: OpenId4VCIVersion.VER_9;
 
-  public getPayload() : IssuanceInitiationWithBaseUrl {
-    return this._issuanceInitiationWithBaseUrl;
-  }
-
-  private fromURI(issuanceInitiationURI: string): IssuanceInitiationWithBaseUrl {
+  public static fromURI(issuanceInitiationURI: string): IssuanceInitiationWithBaseUrl {
     debug(`issuance initiation URI: ${issuanceInitiationURI}`);
     if (!issuanceInitiationURI.includes('?')) {
       debug(`Invalid issuance initiation URI: ${issuanceInitiationURI}`);
@@ -43,38 +34,51 @@ export class IssuanceInitiation implements CredentialOfferStrategy {
     };
   }
 
-  public toURI(): string {
-    const credentialOfferPayload = this._issuanceInitiationWithBaseUrl.issuanceInitiationRequest;
+  public static toURI(issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl): string {
+    const credentialOfferPayload = issuanceInitiationWithBaseUrl.issuanceInitiationRequest;
     return convertJsonToURI(credentialOfferPayload, {
-      baseUrl: this._issuanceInitiationWithBaseUrl.baseUrl,
+      baseUrl: issuanceInitiationWithBaseUrl.baseUrl,
       arrayTypeProperties: ['credential_type'],
       uriTypeProperties: ['issuer', 'credential_type'],
     });
   }
 
-  public async getServerMetaData(): Promise<EndpointMetadata> {
-    const {issuer} = this._issuanceInitiationWithBaseUrl.issuanceInitiationRequest;
-    return await MetadataClient.retrieveAllMetadata(issuer);
+  /**
+   * Retrieve metadata using the Initiation obtained from a previous step
+   *
+   * @param initiation
+   */
+  public static async getServerMetaDataFromInitiation(initiation: IssuanceInitiationWithBaseUrl): Promise<EndpointMetadata> {
+    return this.getServerFromInitiationRequest(initiation.issuanceInitiationRequest);
   }
 
-  public getCredentialTypes(): string[] {
-    const credentialOfferPayload = this._issuanceInitiationWithBaseUrl.issuanceInitiationRequest;
-    return typeof credentialOfferPayload.credential_type === 'string'
-        ? [credentialOfferPayload.credential_type]
-        : credentialOfferPayload.credential_type;
+  /**
+   * Retrieve the metadata using the initiation request obtained from a previous step
+   * @param initiationRequest
+   */
+  public static async getServerFromInitiationRequest(initiationRequest: IssuanceInitiationRequestPayload): Promise<EndpointMetadata> {
+    return this.getServerMetaData(initiationRequest.issuer);
   }
 
-  public getIssuer(): string {
-    return this._issuanceInitiationWithBaseUrl.issuanceInitiationRequest.issuer;
+
+  public static async getServerMetaData(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadata> {
+    return await MetadataClient.retrieveAllMetadata(issuer, opts);
   }
 
-  public assertIssuerData(): void {
-    if (!this._issuanceInitiationWithBaseUrl) {
+  public static getCredentialTypes(issuanceInitiationRequestPayload: IssuanceInitiationRequestPayload): string[] {
+    return typeof issuanceInitiationRequestPayload.credential_type === 'string'
+        ? [issuanceInitiationRequestPayload.credential_type]
+        : issuanceInitiationRequestPayload.credential_type;
+  }
+
+  public static getIssuer(initiation: IssuanceInitiationWithBaseUrl): string {
+    return initiation.issuanceInitiationRequest.issuer;
+  }
+
+  public static assertIssuerData(initiation: IssuanceInitiationWithBaseUrl): void {
+    if (!initiation) {
       throw Error(`No issuance initiation present`);
     }
   }
 
-  get issuanceInitiationWithBaseUrl(): IssuanceInitiationWithBaseUrl {
-    return this._issuanceInitiationWithBaseUrl;
-  }
 }

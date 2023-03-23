@@ -1,4 +1,3 @@
-export * from './CredentialOfferStrategy';
-export * from './CredentialOfferUtil';
+export * from './CredentialOfferClient';
 export * from './IssuanceInitiation';
 export * from './CredentialOfferIssuance';

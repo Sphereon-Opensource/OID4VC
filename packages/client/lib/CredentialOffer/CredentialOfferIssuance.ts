@@ -1,44 +1,39 @@
-import {CredentialOffer, CredentialOfferWithBaseURL, EndpointMetadata, OIDCVCIVersion} from "@sphereon/openid4vci-common";
+import {
+  CredentialOfferWithBaseURL,
+  EndpointMetadata,
+  OpenId4VCIVersion,
+} from "@sphereon/openid4vci-common";
 
-import {CredentialOfferStrategy} from "./CredentialOfferStrategy";
+import {CredentialOfferClient} from "./CredentialOfferClient";
+import Debug from "debug";
 
-export class CredentialOfferIssuance implements CredentialOfferStrategy {
-  readonly version: OIDCVCIVersion;
-  private readonly _credentialOfferWithBaseURL: CredentialOfferWithBaseURL;
+const debug = Debug('sphereon:openid4vci:credentialOffer');
 
-  public constructor(credentialOfferURI: string) {
-    this.version = OIDCVCIVersion.VER_11;
-    this._credentialOfferWithBaseURL = this.fromURI(credentialOfferURI);
+export class CredentialOfferIssuance implements CredentialOfferClient {
+
+  public static readonly version: OpenId4VCIVersion.VER_11;
+
+  public static fromURI(credentialOfferURI: string): CredentialOfferWithBaseURL {
+    // FIXME implement the function
+    debug(`\'fromURI\' is not implemented yet: ${credentialOfferURI}`);
+    throw new Error(`\'fromURI\' is not implemented yet: ${credentialOfferURI}`)
   }
 
-
-  public getCredentialOffer(credentialOfferURI: string): CredentialOffer {
-    return this.fromURI(credentialOfferURI);
+  public static async getServerMetaData(): Promise<EndpointMetadata> {
+    throw new Error('\'getServerMetaData\': Not implemented yet.')
   }
 
-  public fromURI(credentialOfferURI: string): CredentialOfferWithBaseURL {
-    throw new Error(`not yet implemented : ${credentialOfferURI}`)
-  }
-
-  public async getServerMetaData(): Promise<EndpointMetadata> {
-    throw new Error('not yet implemented.')
-  }
-
-  public getCredentialTypes(): string[] {
+  public static getCredentialTypes(): string[] {
     return [];
   }
 
-  public getIssuer(): string {
+  public static getIssuer(): string {
     return "";
   }
 
-  public assertIssuerData(): void {
-    if (!this._credentialOfferWithBaseURL) {
-      throw Error(`No issuance initiation present`);
+  public static assertIssuerData(credentialOfferWithBaseURL: CredentialOfferWithBaseURL): void {
+    if (credentialOfferWithBaseURL) {
+      throw Error(`No credential offer present`);
     }
-  }
-
-  get credentialOfferWithBaseURL(): CredentialOfferWithBaseURL {
-    return this._credentialOfferWithBaseURL;
   }
 }

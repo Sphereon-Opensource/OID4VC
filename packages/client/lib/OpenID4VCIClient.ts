@@ -10,7 +10,7 @@ import {
   CredentialsSupported,
   EndpointMetadata,
   IssuanceInitiationWithBaseUrl,
-  OIDCVCIVersion,
+  OpenId4VCIVersion,
   ProofOfPossessionCallbacks,
   ResponseType,
 } from '@sphereon/openid4vci-common';
@@ -18,7 +18,7 @@ import {CredentialFormat} from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import {AccessTokenClient} from './AccessTokenClient';
-import {CredentialOfferIssuance, CredentialOfferStrategy, discoverOIDCVCIVersion, getStrategy, IssuanceInitiation} from './CredentialOffer';
+import {CredentialOfferIssuance, CredentialOfferClient, getOpenId4VCIVersion, getStrategy, IssuanceInitiation} from './CredentialOffer';
 import {CredentialRequestClientBuilder} from "./CredentialRequestClientBuilder";
 import {ProofOfPossessionBuilder} from './ProofOfPossessionBuilder';
 import {convertJsonToURI} from './functions';
@@ -32,8 +32,8 @@ export class OpenID4VCIClient {
   private _alg: Alg | string | undefined;
   private _serverMetadata: EndpointMetadata | undefined;
   private _accessTokenResponse: AccessTokenResponse | undefined;
-  private readonly _oidcvciVersion: OIDCVCIVersion;
-  private readonly _strategy: CredentialOfferStrategy;
+  private readonly _openID4VCIVersion: OpenId4VCIVersion;
+  private readonly _strategy: CredentialOfferClient;
 
   private constructor(
       credentialOfferURI: string,
@@ -43,12 +43,12 @@ export class OpenID4VCIClient {
       clientId?: string
   ) {
     this._flowType = flowType;
-    this._oidcvciVersion = discoverOIDCVCIVersion(credentialOfferURI);
+    this._openID4VCIVersion = getOpenId4VCIVersion(credentialOfferURI);
     this._kid = kid;
     this._alg = alg;
     this._clientId = clientId;
 
-    this._strategy = getStrategy(this._oidcvciVersion, credentialOfferURI);
+    this._strategy = getStrategy(credentialOfferURI);
   }
 
   public static async credentialOffer({
@@ -160,7 +160,7 @@ export class OpenID4VCIClient {
   }
 
   private getIssuanceInitiation(): IssuanceInitiationWithBaseUrl {
-    if (this._strategy.version === OIDCVCIVersion.VER_11) {
+    if (this._strategy.version === OpenId4VCIVersion.VER_11) {
       const credentialOfferWithBaseURL = (this._strategy as CredentialOfferIssuance).credentialOfferWithBaseURL;
 
       return {
@@ -335,7 +335,7 @@ export class OpenID4VCIClient {
     }
   }
 
-  get strategy(): CredentialOfferStrategy {
+  get strategy(): CredentialOfferClient {
     return this._strategy;
   }
 }
