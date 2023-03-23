@@ -93,7 +93,7 @@ describe('OID4VCI-Client should', () => {
   async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
 
     expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
-    if(client.credentialIssuanceOfferInitiationClient.version === OpenId4VCIVersion.VER_11) {
+    if(client.credentialIssuanceOfferInitiationClient._version === OpenId4VCIVersion.VER_11) {
       expect((client.credentialIssuanceOfferInitiationClient as CredentialOfferClient).credentialOfferWithBaseURL).toBeDefined();
     } else {
       expect((client.credentialIssuanceOfferInitiationClient as IssuanceInitiationClient).issuanceInitiationWithBaseUrl).toBeDefined();
@@ -120,7 +120,7 @@ describe('OID4VCI-Client should', () => {
     'succeed with a full flow without the client',
     async () => {
       /* Convert the URI into an object */
-      const issuanceInitiation = (new IssuanceInitiationClient(INITIATE_QR_DATA_VER9) as IssuanceInitiationClient).issuanceInitiationWithBaseUrl;
+      const issuanceInitiation = (IssuanceInitiationClient.fromURI(INITIATE_QR_DATA_VER9) as IssuanceInitiationClient).issuanceInitiationWithBaseUrl;
 
       expect(issuanceInitiation.baseUrl).toEqual('openid-initiate-issuance://');
       expect(issuanceInitiation.issuanceInitiationRequest).toEqual({

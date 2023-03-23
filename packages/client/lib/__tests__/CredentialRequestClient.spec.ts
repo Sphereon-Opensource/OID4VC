@@ -145,7 +145,7 @@ describe('Credential Request Client with Walt.id ', () => {
     nock.cleanAll();
     const WALT_IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
-    const initiation: IssuanceInitiationWithBaseUrl = new IssuanceInitiationClient(WALT_IRR_URI).issuanceInitiationWithBaseUrl;
+    const initiation: IssuanceInitiationWithBaseUrl = IssuanceInitiationClient.fromURI(WALT_IRR_URI).issuanceInitiationWithBaseUrl;
 
     const credentialOferPayload = initiation.issuanceInitiationRequest;
     const metadata = await MetadataClient.retrieveAllMetadata(credentialOferPayload.issuer);
