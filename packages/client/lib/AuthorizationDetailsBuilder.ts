@@ -27,6 +27,15 @@ export class AuthorizationDetailsBuilder {
     return this;
   }
 
+  addLocation(location: string): AuthorizationDetailsBuilder {
+    if (this.authorizationDetails.locations) {
+      this.authorizationDetails.locations.push(location)
+    } else {
+      this.authorizationDetails.locations = [location]
+    }
+    return this
+  }
+
   build(): AuthorizationDetails {
     if (this.authorizationDetails.format && this.authorizationDetails.type) {
       return this.authorizationDetails as AuthorizationDetails;
