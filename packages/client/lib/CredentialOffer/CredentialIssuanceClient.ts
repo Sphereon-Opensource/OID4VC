@@ -3,14 +3,14 @@ import {OpenId4VCIVersion, URLSchemes} from "@sphereon/openid4vci-common";
 import {CredentialOfferClient} from "./CredentialOfferClient";
 import {IssuanceInitiationClient} from "./IssuanceInitiationClient";
 
-export interface CredentialIssuanceOfferInitiationClient {
+export interface CredentialIssuanceClient {
   readonly _version: OpenId4VCIVersion;
   getIssuer(): string
   assertIssuerData(): void;
   getCredentialTypes(): string[];
 }
 
-export function getStrategy(credentialOfferURI: string): CredentialIssuanceOfferInitiationClient {
+export function getStrategy(credentialOfferURI: string): CredentialIssuanceClient {
   if (OpenId4VCIVersion.VER_9 === getOpenId4VCIVersion(credentialOfferURI)) {
     return IssuanceInitiationClient.fromURI(credentialOfferURI);
   }

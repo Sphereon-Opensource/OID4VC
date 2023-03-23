@@ -4,12 +4,12 @@ import {
   OpenId4VCIVersion,
 } from "@sphereon/openid4vci-common";
 
-import {CredentialIssuanceOfferInitiationClient} from "./CredentialIssuanceOfferInitiationClient";
+import {CredentialIssuanceClient} from "./CredentialIssuanceClient";
 import Debug from "debug";
 
 const debug = Debug('sphereon:openid4vci:credentialOffer');
 
-export class CredentialOfferClient implements CredentialIssuanceOfferInitiationClient {
+export class CredentialOfferClient implements CredentialIssuanceClient {
 
   public readonly _version: OpenId4VCIVersion;
   private readonly _credentialOfferWithBaseURL: CredentialOfferWithBaseURL

@@ -9,11 +9,11 @@ import Debug from 'debug';
 import {MetadataClient} from "../MetadataClient";
 import { convertJsonToURI, convertURIToJsonObject } from '../functions';
 
-import {CredentialIssuanceOfferInitiationClient} from "./index";
+import {CredentialIssuanceClient} from "./index";
 
 const debug = Debug('sphereon:openid4vci:initiation');
 
-export class IssuanceInitiationClient implements CredentialIssuanceOfferInitiationClient {
+export class IssuanceInitiationClient implements CredentialIssuanceClient {
   public readonly _version: OpenId4VCIVersion;
   private readonly _issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl;
 

@@ -65,9 +65,9 @@ describe('OID4VCI-Client should', () => {
 
   }
 
-  it('succeed with a full flow with the client using OIDCVCI version 9', async () => {
+  it('succeed with a full flow with the client using OpenID4VCI version 9', async () => {
     succeedWithAFullFlowWithClientSetup();
-    const client = await OpenID4VCIClient.credentialOffer({
+    const client = await OpenID4VCIClient.fromURI({
       credentialOfferURI: INITIATE_QR_DATA_VER9,
       flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
@@ -78,9 +78,9 @@ describe('OID4VCI-Client should', () => {
   });
 
 
-  test.skip('succeed with a full flow wit the client using OIDCVCI version 11', async () => {
+  test.skip('succeed with a full flow wit the client using OpenID4VCI version 11', async () => {
     succeedWithAFullFlowWithClientSetup();
-    const client = await OpenID4VCIClient.credentialOffer({
+    const client = await OpenID4VCIClient.fromURI({
       credentialOfferURI: INITIATE_QR_DATA_VER11,
       flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
@@ -93,10 +93,10 @@ describe('OID4VCI-Client should', () => {
   async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
 
     expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
-    if(client.credentialIssuanceOfferInitiationClient._version === OpenId4VCIVersion.VER_11) {
-      expect((client.credentialIssuanceOfferInitiationClient as CredentialOfferClient).credentialOfferWithBaseURL).toBeDefined();
+    if(client.credentialIssuanceClient._version === OpenId4VCIVersion.VER_11) {
+      expect((client.credentialIssuanceClient as CredentialOfferClient).credentialOfferWithBaseURL).toBeDefined();
     } else {
-      expect((client.credentialIssuanceOfferInitiationClient as IssuanceInitiationClient).issuanceInitiationWithBaseUrl).toBeDefined();
+      expect((client.credentialIssuanceClient as IssuanceInitiationClient).issuanceInitiationWithBaseUrl).toBeDefined();
     }
     expect(client.serverMetadata).toBeDefined();
     expect(client.getIssuer()).toEqual('https://issuer.research.identiproof.io');
