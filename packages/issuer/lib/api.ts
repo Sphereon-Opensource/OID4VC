@@ -128,10 +128,6 @@ export class RestAPI {
       return response.send(createCredentialOfferDeeplink(preAuthorizedCode, this._vcIssuer._issuerMetadata))
     })
   }
-  /*
-      private timeout(ms: number) {
-          return new Promise(resolve => setTimeout(resolve, ms));
-      }*/
 }
 
 export default new RestAPI().express
