@@ -1,9 +1,11 @@
 import {
+  getKidFromJWT,
   ICredentialIssuerMetadataParametersV1_11,
   ICredentialSuccessResponse,
   IIssueCredentialRequest,
   unsupported_credential_format,
 } from '@sphereon/openid4vci-common'
+import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 export class VcIssuer {
   _issuerMetadata: ICredentialIssuerMetadataParametersV1_11
@@ -34,7 +36,21 @@ export class VcIssuer {
     return false
   }
 
-  private async issueCredential(_issueCredentialRequest: IIssueCredentialRequest): Promise<ICredentialSuccessResponse> {
-    throw new Error('not implemented')
+  private async issueCredential(issueCredentialRequest: IIssueCredentialRequest): Promise<ICredentialSuccessResponse> {
+    const credential: ICredential = {
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
+      issuanceDate: new Date().toUTCString(),
+      issuer: process.env.issuer_did as string,
+      type: issueCredentialRequest.types,
+      credentialSubject: {
+        id: getKidFromJWT(issueCredentialRequest.proof.jwt as string),
+        given_name: 'John Doe',
+      },
+    }
+    return {
+      //todo: sign the credential here
+      credential: credential as W3CVerifiableCredential,
+      format: issueCredentialRequest.format,
+    }
   }
 }

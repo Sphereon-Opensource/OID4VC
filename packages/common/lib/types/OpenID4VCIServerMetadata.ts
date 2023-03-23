@@ -19,7 +19,7 @@ export interface IIssuerDisplay {
 export interface ICredentialSupportedV1_11 {
   format: OpenID4VCICredentialFormatTypes;
   id?: string;
-  types?: string[]
+  types?: string[];
   //todo find a better way of handling the general string. the general string is for supporting various did methods here: did:web, did:example, ....
   cryptographic_binding_methods_supported?: ('jwk' | 'cose_key' | 'did' | string)[];
   cryptographic_suites_supported?: ('jwt_vc' | 'ldp_vc' | string)[];

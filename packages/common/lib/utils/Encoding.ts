@@ -1,6 +1,13 @@
 import { parse } from 'querystring';
 
-import { BAD_PARAMS } from '../index';
+import jwt_decode from 'jwt-decode';
+
+import { BAD_PARAMS, JWTHeader } from '../index';
+
+export function getKidFromJWT(jwt: string): string {
+  const header: JWTHeader = jwt_decode(jwt);
+  return header.kid as string;
+}
 
 export function decodeUriAsJson(uri: string) {
   if (!uri) {

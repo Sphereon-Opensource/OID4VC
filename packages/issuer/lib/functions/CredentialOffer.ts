@@ -1,6 +1,5 @@
-import {encodeJsonAsURI, ICredentialIssuerMetadataParametersV1_11, invalid_token} from "@sphereon/openid4vci-common";
-import {v4 as uuidv4} from "uuid";
-
+import { encodeJsonAsURI, ICredentialIssuerMetadataParametersV1_11, invalid_token } from '@sphereon/openid4vci-common'
+import { v4 as uuidv4 } from 'uuid'
 
 export function createCredentialOfferDeeplink(preAuthorizedCode: string, issuerMetadata: ICredentialIssuerMetadataParametersV1_11): string {
   // openid-credential-offer://credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com
@@ -12,19 +11,19 @@ export function createCredentialOfferDeeplink(preAuthorizedCode: string, issuerM
   }
 
   const types: string[] = []
-  issuerMetadata.credentials_supported.map(cs=> {
-    if(cs.types) types.push(...cs.types)
+  issuerMetadata.credentials_supported.map((cs) => {
+    if (cs.types) types.push(...cs.types)
   })
   return `openid-credential-offer://?credential_offer=${encodeJsonAsURI({
     credential_issuer: issuerMetadata.credential_issuer,
     credentials: {
-      format: issuerMetadata.credentials_supported.map(cs=>cs.format),
+      format: issuerMetadata.credentials_supported.map((cs) => cs.format),
       types: types,
-      //fixme: @nklomp I've placed this here for now, but later we need to have the concept of sessions and in there we have to keep track of the id 
-      issuer_state: uuidv4()
+      //fixme: @nklomp I've placed this here for now, but later we need to have the concept of sessions and in there we have to keep track of the id
+      issuer_state: uuidv4(),
     },
     grants: {
-      authorization_code: preAuthorizedCode
-    }
+      authorization_code: preAuthorizedCode,
+    },
   })}`
 }

@@ -1,9 +1,4 @@
-import {
-  ICredentialIssuerMetadataParametersV1_11,
-  ICredentialSupportedV1_11,
-  IIssuerDisplay,
-  invalid_request,
-} from '@sphereon/openid4vci-common'
+import { ICredentialIssuerMetadataParametersV1_11, ICredentialSupportedV1_11, IIssuerDisplay, invalid_request } from '@sphereon/openid4vci-common'
 
 import { VcIssuer } from './VcIssuer'
 
