@@ -172,7 +172,7 @@ export class OpenID4VCIClient {
         baseUrl: credentialOfferWithBaseURL.baseUrl,
         issuanceInitiationRequest: {
           issuer: credentialOfferWithBaseURL.credentialIssuerMetadata.credential_issuer,
-          credential_type: [], // TODO confirm with Sadjad.
+          credential_type: [], // FIXME populate value properly.
           'pre-authorized_code': '', // FIXME add the value.
           user_pin_required: false, // FIXME add the value.
           op_state: '', // FIXME add the value.
