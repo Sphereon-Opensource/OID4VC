@@ -1,17 +1,13 @@
 import { W3CVerifiableCredential } from '@sphereon/ssi-types';
 
-import {CredentialOffer} from "./CredentialIssuance.types";
 import { OAuth2ASMetadata } from './OAuth2ASMetadata';
 
-export interface IssuerMetadata {
-}
-
-export interface CredentialOfferWithBaseURL extends CredentialOffer {
+export interface CredentialOfferWithBaseURL {
   baseUrl: string;
   credentialIssuerMetadata: ICredentialIssuerMetadataParametersV1_11;
 }
 
-export interface ICredentialIssuerMetadataParametersV1_11 extends IssuerMetadata {
+export interface ICredentialIssuerMetadataParametersV1_11 {
   credential_issuer: string;
   authorization_server?: string;
   credential_endpoint: string;

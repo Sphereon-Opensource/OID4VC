@@ -1,7 +1,5 @@
 import { CredentialFormat, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
-import {IssuerMetadata} from "./OpenID4VCIServerMetadata";
-
 export interface CredentialRequest {
   //TODO: handling list is out of scope for now
   type: string | string[];
@@ -15,16 +13,12 @@ export interface CredentialResponse {
   format: CredentialFormat;
 }
 
-export interface CredentialOffer {
-
-}
-
-export interface IssuanceInitiationWithBaseUrl extends CredentialOffer {
+export interface IssuanceInitiationWithBaseUrl {
   baseUrl: string;
   issuanceInitiationRequest: IssuanceInitiationRequestPayload;
 }
 
-export interface IssuanceInitiationRequestPayload extends IssuerMetadata {
+export interface IssuanceInitiationRequestPayload {
   issuer: string; //(url) REQUIRED The issuer URL of the Credential issuer, the Wallet is requested to obtain one or more Credentials from.
   credential_type: string[] | string; //(url) REQUIRED A JSON string denoting the type of the Credential the Wallet shall request
   'pre-authorized_code'?: string; //CONDITIONAL the code representing the issuer's authorization for the Wallet to obtain Credentials of a certain type. This code MUST be short-lived and single-use. MUST be present in a pre-authorized code flow.
