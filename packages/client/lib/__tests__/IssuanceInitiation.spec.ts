@@ -4,7 +4,6 @@ import { INITIATION_TEST, INITIATION_TEST_HTTPS_URI, INITIATION_TEST_URI } from 
 
 describe('Issuance Initiation', () => {
   it('Should return Issuance Initiation Request with base URL from https URI', () => {
-
     expect(IssuanceInitiationClient.fromURI(INITIATION_TEST_HTTPS_URI).issuanceInitiationWithBaseUrl).toEqual({
       baseUrl: 'https://server.example.com',
       issuanceInitiationRequest: {
@@ -30,6 +29,8 @@ describe('Issuance Initiation', () => {
 
   it('Should throw error on invalid URI', () => {
     const issuanceInitiationURI = INITIATION_TEST_HTTPS_URI.replace('?', '');
-    expect(() => IssuanceInitiationClient.fromURI(issuanceInitiationURI).issuanceInitiationWithBaseUrl).toThrowError('Invalid Issuance Initiation Request Payload');
+    expect(() => IssuanceInitiationClient.fromURI(issuanceInitiationURI).issuanceInitiationWithBaseUrl).toThrowError(
+      'Invalid Issuance Initiation Request Payload'
+    );
   });
 });

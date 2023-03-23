@@ -1,11 +1,4 @@
-import {
-  AccessTokenResponse,
-  Alg,
-  AuthzFlowType,
-  Jwt, OpenId4VCIVersion,
-  ProofOfPossession,
-  Typ
-} from '@sphereon/openid4vci-common';
+import { AccessTokenResponse, Alg, AuthzFlowType, Jwt, OpenId4VCIVersion, ProofOfPossession, Typ } from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
 import {
@@ -14,7 +7,7 @@ import {
   CredentialRequestClientBuilder,
   IssuanceInitiationClient,
   OpenID4VCIClient,
-  ProofOfPossessionBuilder
+  ProofOfPossessionBuilder,
 } from '..';
 
 import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
@@ -48,7 +41,7 @@ describe('OID4VCI-Client should', () => {
     'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true';
 
   const INITIATE_QR_DATA_VER11 =
-  'openid-credential-offer://credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D'
+    'openid-credential-offer://credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D';
 
   function succeedWithAFullFlowWithClientSetup() {
     nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
@@ -62,7 +55,6 @@ describe('OID4VCI-Client should', () => {
         format: 'jwt-vc',
         credential: mockedVC,
       });
-
   }
 
   it('succeed with a full flow with the client using OpenID4VCI version 9', async () => {
@@ -77,7 +69,6 @@ describe('OID4VCI-Client should', () => {
     await assertionOfsucceedWithAFullFlowWithClient(client);
   });
 
-
   test.skip('succeed with a full flow wit the client using OpenID4VCI version 11', async () => {
     succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
@@ -91,9 +82,8 @@ describe('OID4VCI-Client should', () => {
   });
 
   async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
-
     expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
-    if(client.credentialIssuanceClient._version === OpenId4VCIVersion.VER_11) {
+    if (client.credentialIssuanceClient._version === OpenId4VCIVersion.VER_11) {
       expect((client.credentialIssuanceClient as CredentialOfferClient).credentialOfferWithBaseURL).toBeDefined();
     } else {
       expect((client.credentialIssuanceClient as IssuanceInitiationClient).issuanceInitiationWithBaseUrl).toBeDefined();
@@ -113,7 +103,6 @@ describe('OID4VCI-Client should', () => {
       },
     });
     expect(credentialResponse.credential).toEqual(mockedVC);
-
   }
 
   it(
@@ -146,7 +135,7 @@ describe('OID4VCI-Client should', () => {
           format: 'jwt-vc',
           credential: mockedVC,
         });
-      const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation({ initiation: issuanceInitiation})
+      const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation({ initiation: issuanceInitiation })
         .withFormat('jwt_vc')
 
         .withTokenFromResponse(accessTokenResponse.successBody!)

@@ -9,10 +9,7 @@ describe('VcIssuer should', () => {
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
       .withId('UniversityDegree_JWT')
-      .withTypes([
-        "VerifiableCredential",
-        "UniversityDegreeCredential"
-      ])
+      .withTypes(['VerifiableCredential', 'UniversityDegreeCredential'])
       .withCredentialDisplay({
         name: 'University Credential',
         locale: 'en-US',

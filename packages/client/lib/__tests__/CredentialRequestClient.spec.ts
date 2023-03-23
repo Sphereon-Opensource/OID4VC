@@ -8,7 +8,7 @@ import {
   ProofOfPossession,
   Typ,
   URL_NOT_VALID,
-  WellKnownEndpoints
+  WellKnownEndpoints,
 } from '@sphereon/openid4vci-common';
 import * as jose from 'jose';
 import nock from 'nock';

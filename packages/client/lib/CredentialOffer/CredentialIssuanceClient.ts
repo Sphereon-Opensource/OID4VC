@@ -1,27 +1,11 @@
-import {OpenId4VCIVersion, URLSchemes} from "@sphereon/openid4vci-common";
-
-import {CredentialOfferClient} from "./CredentialOfferClient";
-import {IssuanceInitiationClient} from "./IssuanceInitiationClient";
+import { OpenId4VCIVersion } from '@sphereon/openid4vci-common';
 
 export interface CredentialIssuanceClient {
   readonly _version: OpenId4VCIVersion;
-  getIssuer(): string
+
+  getIssuer(): string;
+
   assertIssuerData(): void;
+
   getCredentialTypes(): string[];
-}
-
-export function getStrategy(credentialOfferURI: string): CredentialIssuanceClient {
-  if (OpenId4VCIVersion.VER_9 === getOpenId4VCIVersion(credentialOfferURI)) {
-    return IssuanceInitiationClient.fromURI(credentialOfferURI);
-  }
-
-  return CredentialOfferClient.fromURI(credentialOfferURI);
-}
-
-export function getOpenId4VCIVersion(credentialOfferURI: string): OpenId4VCIVersion {
-  if (credentialOfferURI.startsWith(URLSchemes.INITIATE_ISSUANCE)) {
-    return OpenId4VCIVersion.VER_9;
-  }
-
-  return OpenId4VCIVersion.VER_11
 }

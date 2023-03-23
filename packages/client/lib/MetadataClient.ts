@@ -13,7 +13,6 @@ import { getJson } from './functions';
 const debug = Debug('sphereon:openid4vci:metadata');
 
 export class MetadataClient {
-
   /**
    * Retrieve all metadata from an issuer
    * @param issuer The issuer URL

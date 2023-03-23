@@ -27,20 +27,20 @@ export class VcIssuer {
     // edential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...
     // FYUaBy%22%7D
     const types: string[] = []
-    this._issuerMetadata.credentials_supported.map(cs=> {
-      if(cs.types) types.push(...cs.types)
+    this._issuerMetadata.credentials_supported.map((cs) => {
+      if (cs.types) types.push(...cs.types)
     })
     return `openid-credential-offer://?credential_offer=${encodeJsonAsURI({
       credential_issuer: this._issuerMetadata.credential_issuer,
-      credentials: { 
-        format: this._issuerMetadata.credentials_supported.map(cs=>cs.format),
+      credentials: {
+        format: this._issuerMetadata.credentials_supported.map((cs) => cs.format),
         types: types,
-        //fixme: @nklomp I've placed this here for now, but later we need to have the concept of sessions and in there we have to keep track of the id 
-        issuer_state: uuidv4()
+        //fixme: @nklomp I've placed this here for now, but later we need to have the concept of sessions and in there we have to keep track of the id
+        issuer_state: uuidv4(),
       },
       grants: {
-        authorization_code: this._preAuthorizedCode
-      }
+        authorization_code: this._preAuthorizedCode,
+      },
     })}`
   }
 

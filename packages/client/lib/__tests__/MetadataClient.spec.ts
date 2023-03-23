@@ -1,4 +1,4 @@
-import {WellKnownEndpoints} from '@sphereon/openid4vci-common';
+import { WellKnownEndpoints } from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
 import { IssuanceInitiationClient } from '../CredentialOffer';

@@ -1,15 +1,10 @@
-import {
-  EndpointMetadata,
-  IssuanceInitiationRequestPayload,
-  IssuanceInitiationWithBaseUrl,
-  OpenId4VCIVersion
-} from '@sphereon/openid4vci-common';
+import { EndpointMetadata, IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl, OpenId4VCIVersion } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 
-import {MetadataClient} from "../MetadataClient";
+import { MetadataClient } from '../MetadataClient';
 import { convertJsonToURI, convertURIToJsonObject } from '../functions';
 
-import {CredentialIssuanceClient} from "./index";
+import { CredentialIssuanceClient } from './index';
 
 const debug = Debug('sphereon:openid4vci:initiation');
 
@@ -17,7 +12,7 @@ export class IssuanceInitiationClient implements CredentialIssuanceClient {
   public readonly _version: OpenId4VCIVersion;
   private readonly _issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl;
 
-  public constructor(issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl){
+  public constructor(issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl) {
     this._version = OpenId4VCIVersion.VER_9;
     this._issuanceInitiationWithBaseUrl = issuanceInitiationWithBaseUrl;
   }
@@ -66,7 +61,6 @@ export class IssuanceInitiationClient implements CredentialIssuanceClient {
     return this.getServerMetaData(initiationRequest.issuer);
   }
 
-
   public static async getServerMetaData(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadata> {
     return await MetadataClient.retrieveAllMetadata(issuer, opts);
   }
@@ -74,8 +68,8 @@ export class IssuanceInitiationClient implements CredentialIssuanceClient {
   public getCredentialTypes(): string[] {
     const issuanceInitiationRequest = this._issuanceInitiationWithBaseUrl.issuanceInitiationRequest;
     return typeof issuanceInitiationRequest.credential_type === 'string'
-        ? [issuanceInitiationRequest.credential_type]
-        : issuanceInitiationRequest.credential_type;
+      ? [issuanceInitiationRequest.credential_type]
+      : issuanceInitiationRequest.credential_type;
   }
 
   public getIssuer(): string {
@@ -95,5 +89,4 @@ export class IssuanceInitiationClient implements CredentialIssuanceClient {
   get version() {
     return this._version;
   }
-
 }

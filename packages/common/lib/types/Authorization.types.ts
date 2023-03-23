@@ -1,4 +1,4 @@
-import {IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl} from './CredentialIssuance.types';
+import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from './CredentialIssuance.types';
 import { EndpointMetadata, ErrorResponse, PRE_AUTH_CODE_LITERAL } from './Generic.types';
 
 export enum GrantTypes {

@@ -4,4 +4,4 @@ export * from './Generic.types';
 export * from './OAuth2ASMetadata';
 export * from './OpenID4VCIErrors';
 export * from './OpenID4VCIServerMetadata';
-export * from './OpenID4VCIVersions.types'
+export * from './OpenID4VCIVersions.types';

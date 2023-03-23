@@ -26,15 +26,13 @@ export class CredentialSupportedV1_11Builder {
     return this
   }
 
-  withTypes(type: string| string[]): CredentialSupportedV1_11Builder {
+  withTypes(type: string | string[]): CredentialSupportedV1_11Builder {
     if (!Array.isArray(type)) {
-      this.types = this.types
-          ? [...this.types, type]
-          : [type]
+      this.types = this.types ? [...this.types, type] : [type]
     } else {
       this.cryptographicBindingMethodsSupported = this.cryptographicBindingMethodsSupported
-          ? [...this.cryptographicBindingMethodsSupported, ...type]
-          : type
+        ? [...this.cryptographicBindingMethodsSupported, ...type]
+        : type
     }
     return this
   }

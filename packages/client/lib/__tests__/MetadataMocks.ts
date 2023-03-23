@@ -1,4 +1,4 @@
-import {IssuanceInitiationWithBaseUrl} from "@sphereon/openid4vci-common";
+import { IssuanceInitiationWithBaseUrl } from '@sphereon/openid4vci-common';
 
 export const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io';
 export const IDENTIPROOF_AS_URL = 'https://auth.research.identiproof.io';
