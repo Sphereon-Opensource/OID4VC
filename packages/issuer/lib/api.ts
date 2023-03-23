@@ -114,7 +114,7 @@ export class RestAPI {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.express.get('/credential-request', async (request, response) => {
-      this._vcIssuer.issueCredentialFromIssueRequest(request as IIssueCredentialRequest)
+      this._vcIssuer.issueCredentialFromIssueRequest(request as unknown as IIssueCredentialRequest)
     })
   }
 
