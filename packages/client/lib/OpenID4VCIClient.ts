@@ -2,8 +2,8 @@ import {
   AccessTokenResponse,
   Alg,
   AuthorizationRequest,
-  AuthorizationRequestOpts,
   AuthzFlowType,
+  CodeChallengeMethod,
   CredentialMetadata,
   CredentialResponse,
   CredentialsSupported,
@@ -23,6 +23,23 @@ import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { convertJsonToURI } from './functions';
 
 const debug = Debug('sphereon:openid4vci:flow');
+
+interface AuthDetails {
+  type: 'openid_credential' | string;
+  locations?: string | string[];
+  format: CredentialFormat | CredentialFormat[];
+
+  [s: string]: unknown;
+}
+
+interface AuthRequestOpts {
+  clientId: string;
+  codeChallenge: string;
+  codeChallengeMethod: CodeChallengeMethod;
+  authorizationDetails?: AuthDetails | AuthDetails[];
+  redirectUri: string;
+  scope?: string;
+}
 
 export class OpenID4VCIClient {
   private readonly _flowType: AuthzFlowType;
@@ -71,9 +88,18 @@ export class OpenID4VCIClient {
     return this._serverMetadata;
   }
 
-  public createAuthorizationRequestUrl({ clientId, codeChallengeMethod, codeChallenge, redirectUri, scope }: AuthorizationRequestOpts): string {
-    if (!scope) {
-      throw Error('Please provide a scope. authorization_details based requests are not supported at this time');
+  public createAuthorizationRequestUrl({
+    clientId,
+    codeChallengeMethod,
+    codeChallenge,
+    authorizationDetails,
+    redirectUri,
+    scope,
+  }: AuthRequestOpts): string {
+    // Scope and authorization_details can be used in the same authorization request
+    // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
+    if (!scope && !authorizationDetails) {
+      throw Error('Please provide a scope or authorization_details');
     }
 
     if (!this._serverMetadata?.openid4vci_metadata?.authorization_endpoint) {
@@ -81,7 +107,7 @@ export class OpenID4VCIClient {
     }
 
     // add 'openid' scope if not present
-    if (!scope.includes('openid')) {
+    if (scope && !scope.includes('openid')) {
       scope = `openid ${scope}`;
     }
 
@@ -90,16 +116,45 @@ export class OpenID4VCIClient {
       client_id: clientId,
       code_challenge_method: codeChallengeMethod,
       code_challenge: codeChallenge,
+      authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
       redirect_uri: redirectUri,
       scope: scope,
     };
 
     const authRequestUrl = convertJsonToURI(queryObj, {
       baseUrl: this._serverMetadata.openid4vci_metadata.authorization_endpoint,
-      uriTypeProperties: ['redirect_uri', 'scope'],
+      uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details'],
     });
 
     return authRequestUrl;
+  }
+
+  private handleAuthorizationDetails(authorizationDetails?: AuthDetails | AuthDetails[]): AuthDetails | AuthDetails[] | undefined {
+    if (authorizationDetails) {
+      if (Array.isArray(authorizationDetails)) {
+        return authorizationDetails.map((value) => this.handleLocations({ ...value }));
+      } else {
+        return this.handleLocations({ ...authorizationDetails });
+      }
+    }
+    return authorizationDetails;
+  }
+  private handleLocations(authorizationDetails: AuthDetails) {
+    if (
+      authorizationDetails &&
+      (this.serverMetadata.openid4vci_metadata?.authorization_server || this.serverMetadata.openid4vci_metadata?.authorization_endpoint)
+    ) {
+      if (authorizationDetails.locations) {
+        if (Array.isArray(authorizationDetails.locations)) {
+          (authorizationDetails.locations as string[]).push(this.serverMetadata.issuer);
+        } else {
+          authorizationDetails.locations = [authorizationDetails.locations as string, this.serverMetadata.issuer];
+        }
+      } else {
+        authorizationDetails.locations = this.serverMetadata.issuer;
+      }
+    }
+    return authorizationDetails;
   }
 
   public async acquireAccessToken({
