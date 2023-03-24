@@ -140,7 +140,10 @@ export class OpenID4VCIClient {
     return authorizationDetails;
   }
   private handleLocations(authorizationDetails: AuthDetails) {
-    if (authorizationDetails && this.serverMetadata.openid4vci_metadata?.authorization_server) {
+    if (
+      authorizationDetails &&
+      (this.serverMetadata.openid4vci_metadata?.authorization_server || this.serverMetadata.openid4vci_metadata?.authorization_endpoint)
+    ) {
       if (authorizationDetails.locations) {
         if (Array.isArray(authorizationDetails.locations)) {
           (authorizationDetails.locations as string[]).push(this.serverMetadata.issuer);

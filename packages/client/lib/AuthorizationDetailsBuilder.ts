@@ -29,11 +29,11 @@ export class AuthorizationDetailsBuilder {
 
   addLocation(location: string): AuthorizationDetailsBuilder {
     if (this.authorizationDetails.locations) {
-      this.authorizationDetails.locations.push(location)
+      this.authorizationDetails.locations.push(location);
     } else {
-      this.authorizationDetails.locations = [location]
+      this.authorizationDetails.locations = [location];
     }
-    return this
+    return this;
   }
 
   build(): AuthorizationDetails {
