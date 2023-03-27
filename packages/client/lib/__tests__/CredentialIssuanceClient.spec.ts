@@ -39,8 +39,9 @@ describe('CredentialIssuanceClient should', () => {
   it(
     'get exception for mixed attributes in URL',
     async () => {
-      expect(() => CredentialOfferUtil.getOpenId4VCIVersion(INITIATE_QR_DATA_MIXED))
-        .toThrow(Error('Invalid param. Some keys have been used from version9 version while \'credential_issuer\' is used from version11'));
+      expect(() => CredentialOfferUtil.getOpenId4VCIVersion(INITIATE_QR_DATA_MIXED)).toThrow(
+        Error("Invalid param. Some keys have been used from version9 version while 'credential_issuer' is used from version11")
+      );
     },
     UNIT_TEST_TIMEOUT
   );

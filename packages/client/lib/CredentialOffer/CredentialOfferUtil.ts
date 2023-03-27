@@ -46,12 +46,7 @@ export class CredentialOfferUtil {
     return credentialOfferURI.split('?')[0];
   }
 
-  public static getVersion(
-      credentialOfferURI: string,
-      expectedVersion: OpenId4VCIVersion,
-      predeterminedVersion: OpenId4VCIVersion,
-      param: string
-  ) {
+  public static getVersion(credentialOfferURI: string, expectedVersion: OpenId4VCIVersion, predeterminedVersion: OpenId4VCIVersion, param: string) {
     if (credentialOfferURI.includes(param)) {
       return CredentialOfferUtil.recordVersion(predeterminedVersion, expectedVersion, param);
     }

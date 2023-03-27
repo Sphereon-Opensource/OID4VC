@@ -19,10 +19,10 @@ import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';
 import { CredentialIssuanceClient, CredentialOfferClient, IssuanceInitiationClient } from './CredentialOffer';
+import { CredentialOfferUtil } from './CredentialOffer/CredentialOfferUtil';
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { convertJsonToURI } from './functions';
-import {CredentialOfferUtil} from "./CredentialOffer/CredentialOfferUtil";
 
 const debug = Debug('sphereon:openid4vci:flow');
 

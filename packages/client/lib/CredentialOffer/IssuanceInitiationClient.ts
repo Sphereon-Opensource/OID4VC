@@ -12,7 +12,7 @@ export class IssuanceInitiationClient implements CredentialIssuanceClient {
   public readonly _version: OpenId4VCIVersion;
   private readonly _issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl;
 
-  public constructor(issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl) {
+  private constructor(issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl) {
     this._version = OpenId4VCIVersion.VER_9;
     this._issuanceInitiationWithBaseUrl = issuanceInitiationWithBaseUrl;
   }
