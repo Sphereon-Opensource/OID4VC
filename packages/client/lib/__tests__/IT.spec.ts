@@ -2,9 +2,9 @@ import { AccessTokenResponse, Alg, AuthzFlowType, Jwt, OpenId4VCIVersion, ProofO
 import nock from 'nock';
 
 import {
-  AccessTokenClient,
   CredentialOfferClient,
-  CredentialRequestClientBuilder,
+  IssuanceCredentialRequestClientBuilder,
+  IssuanceInitiationAccessTokenClient,
   IssuanceInitiationClient,
   OpenID4VCIClient,
   ProofOfPossessionBuilder,
@@ -125,8 +125,8 @@ describe('OID4VCI-Client should', () => {
         .reply(200, JSON.stringify(mockedAccessTokenResponse));
 
       /* The actual access token calls */
-      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
-      const accessTokenResponse = await accessTokenClient.acquireAccessTokenUsingIssuanceInitiation({ issuanceInitiation, pin: '1234' });
+      const accessTokenClient: IssuanceInitiationAccessTokenClient = new IssuanceInitiationAccessTokenClient();
+      const accessTokenResponse = await accessTokenClient.acquireAccessToken({ issuanceInitiation: issuanceInitiation, pin: '1234' });
       expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
       // Get the credential
       nock(ISSUER_URL)
@@ -135,7 +135,7 @@ describe('OID4VCI-Client should', () => {
           format: 'jwt-vc',
           credential: mockedVC,
         });
-      const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation({ initiation: issuanceInitiation })
+      const credReqClient = IssuanceCredentialRequestClientBuilder.fromIssuanceInitiation({ initiation: issuanceInitiation })
         .withFormat('jwt_vc')
 
         .withTokenFromResponse(accessTokenResponse.successBody!)

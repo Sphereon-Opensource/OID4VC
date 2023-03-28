@@ -1,8 +1,5 @@
 import {
-  CredentialOfferWithBaseURL,
   EndpointMetadata,
-  IssuanceInitiationRequestPayload,
-  IssuanceInitiationWithBaseUrl,
   OAuth2ASMetadata,
   Oauth2ASWithOID4VCIMetadata,
   OpenID4VCIServerMetadata,
@@ -11,37 +8,11 @@ import {
 } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 
-import { getJson } from './functions';
+import { getJson } from '../functions';
 
 const debug = Debug('sphereon:openid4vci:metadata');
 
 export class MetadataClient {
-  /**
-   * Retrieve metadata using the Initiation obtained from a previous step
-   *
-   * @param initiation
-   */
-  public static async getServerMetaDataFromInitiation(initiation: IssuanceInitiationWithBaseUrl): Promise<EndpointMetadata> {
-    return MetadataClient.getServerFromInitiationRequest(initiation.issuanceInitiationRequest);
-  }
-
-  /**
-   * Retrieve metadata using the credentialOfferWithBaseURL obtained from a previous step
-   *
-   * @param credentialOfferWithBaseURL
-   */
-  public static async getServerMetaDataFromCredentialOffer(credentialOfferWithBaseURL: CredentialOfferWithBaseURL): Promise<EndpointMetadata> {
-    throw new Error('Not implemented yet.');
-  }
-
-  /**
-   * Retrieve the metadata using the initiation request obtained from a previous step
-   * @param initiationRequest
-   */
-  public static async getServerFromInitiationRequest(initiationRequest: IssuanceInitiationRequestPayload): Promise<EndpointMetadata> {
-    return MetadataClient.retrieveAllMetadata(initiationRequest.issuer);
-  }
-
   /**
    * Retrieve all metadata from an issuer
    * @param issuer The issuer URL

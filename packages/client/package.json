@@ -45,9 +45,6 @@
   "engines": {
     "node": ">=16"
   },
-  "engines": {
-    "node": ">=14"
-  },
   "files": [
     "lib/**/*",
     "dist/**/*"

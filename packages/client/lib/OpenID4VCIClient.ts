@@ -1,5 +1,4 @@
 import {
-  AccessTokenRequestOpts,
   AccessTokenResponse,
   Alg,
   AuthorizationRequest,
@@ -9,7 +8,6 @@ import {
   CredentialResponse,
   CredentialsSupported,
   EndpointMetadata,
-  IssuanceInitiationWithBaseUrl,
   OpenId4VCIVersion,
   ProofOfPossessionCallbacks,
   ResponseType,
@@ -17,11 +15,13 @@ import {
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
-import { AccessTokenClient } from './AccessTokenClient';
+import { AccessTokenClientUtil } from './AccessTokenClient';
+import { IssuanceInitiationAccessTokenClient } from './AccessTokenClient';
 import { CredentialIssuanceClient, CredentialOfferClient, IssuanceInitiationClient } from './CredentialOffer';
 import { CredentialOfferUtil } from './CredentialOffer/CredentialOfferUtil';
-import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
-import { MetadataClient } from './MetadataClient';
+import { CredentialIssuanceRequestClientBuilder, OfferCredentialRequestClientBuilder } from './CredentialRequestClient';
+import { IssuanceCredentialRequestClientBuilder } from './CredentialRequestClient';
+import { CredentialOfferMetadataClient, IssuanceInitiationMetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { convertJsonToURI } from './functions';
 
@@ -92,12 +92,12 @@ export class OpenID4VCIClient {
     if (!this._serverMetadata) {
       if (this._openID4VCIVersion === OpenId4VCIVersion.VER_9) {
         const issuanceInitiationClient = this._credentialIssuanceClient as IssuanceInitiationClient;
-        this._serverMetadata = await MetadataClient.getServerMetaDataFromInitiation(issuanceInitiationClient.issuanceInitiationWithBaseUrl);
+        this._serverMetadata = await IssuanceInitiationMetadataClient.getServerMetaData(issuanceInitiationClient.issuanceInitiationWithBaseUrl);
         return this._serverMetadata;
       }
 
       const credentialOfferClient = this._credentialIssuanceClient as CredentialOfferClient;
-      this._serverMetadata = await MetadataClient.getServerMetaDataFromCredentialOffer(credentialOfferClient.credentialOfferWithBaseURL);
+      this._serverMetadata = await CredentialOfferMetadataClient.getServerMetaData(credentialOfferClient.credentialOfferWithBaseURL);
     }
     return this._serverMetadata;
   }
@@ -187,18 +187,20 @@ export class OpenID4VCIClient {
       this._clientId = clientId;
     }
     if (!this._accessTokenResponse) {
-      const accessTokenClient = new AccessTokenClient();
+      const accessTokenClient = AccessTokenClientUtil.determineAccessTokenClient(this._openID4VCIVersion);
 
-      const accessTokenRequestOpts: AccessTokenRequestOpts = {
-        issuanceInitiation: this.getIssuanceInitiation(),
-        metadata: this._serverMetadata,
+      const accessTokenRequest = accessTokenClient.getAccessTokenRequest(
+        this._credentialIssuanceClient,
+        this._serverMetadata!,
         pin,
+        clientId,
         codeVerifier,
         code,
-        redirectUri,
-        asOpts: { clientId: this.clientId },
-      };
-      const response = await accessTokenClient.acquireAccessTokenUsingIssuanceInitiation(accessTokenRequestOpts);
+        redirectUri
+      );
+
+      const response = await accessTokenClient.acquireAccessToken(accessTokenRequest);
+
       if (response.errorBody) {
         debug(`Access token error:\r\n${response.errorBody}`);
         throw Error(
@@ -218,25 +220,6 @@ export class OpenID4VCIClient {
     }
 
     return this._accessTokenResponse;
-  }
-
-  private getIssuanceInitiation(): IssuanceInitiationWithBaseUrl {
-    if (this._credentialIssuanceClient._version === OpenId4VCIVersion.VER_11) {
-      const credentialOfferWithBaseURL = (this._credentialIssuanceClient as CredentialOfferClient).credentialOfferWithBaseURL;
-
-      return {
-        baseUrl: credentialOfferWithBaseURL.baseUrl,
-        issuanceInitiationRequest: {
-          issuer: credentialOfferWithBaseURL.credentialIssuerMetadata.credential_issuer,
-          credential_type: [], // FIXME populate value properly.
-          'pre-authorized_code': '', // FIXME add the value.
-          user_pin_required: false, // FIXME add the value.
-          op_state: '', // FIXME add the value.
-        },
-      };
-    }
-
-    return (this._credentialIssuanceClient as IssuanceInitiationClient).issuanceInitiationWithBaseUrl;
   }
 
   public async acquireCredentials({
@@ -261,10 +244,19 @@ export class OpenID4VCIClient {
       this._kid = kid;
     }
 
-    const requestBuilder = CredentialRequestClientBuilder.fromIssuanceInitiationRequest({
-      request: this.getIssuanceInitiation().issuanceInitiationRequest,
-      metadata: this.serverMetadata,
-    });
+    let requestBuilder: CredentialIssuanceRequestClientBuilder;
+    if (this._openID4VCIVersion === OpenId4VCIVersion.VER_9) {
+      requestBuilder = IssuanceCredentialRequestClientBuilder.fromIssuanceInitiation({
+        initiation: (this._credentialIssuanceClient as IssuanceInitiationClient).issuanceInitiationWithBaseUrl,
+        metadata: this.serverMetadata,
+      });
+    } else {
+      requestBuilder = OfferCredentialRequestClientBuilder.fromCredentialOffer({
+        credentialOfferWithBaseURL: (this._credentialIssuanceClient as CredentialOfferClient).credentialOfferWithBaseURL,
+        metadata: this.serverMetadata,
+      });
+    }
+
     requestBuilder.withToken(this.accessTokenResponse.access_token);
     if (this.serverMetadata?.openid4vci_metadata) {
       const metadata = this.serverMetadata.openid4vci_metadata;
@@ -338,7 +330,7 @@ export class OpenID4VCIClient {
     return this._flowType;
   }
 
-  get serverMetadata(): EndpointMetadata {
+  public get serverMetadata(): EndpointMetadata {
     this.assertServerMetadata();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this._serverMetadata!;
@@ -382,7 +374,7 @@ export class OpenID4VCIClient {
     this._credentialIssuanceClient.assertIssuerData();
     return this.serverMetadata
       ? this.serverMetadata.token_endpoint
-      : AccessTokenClient.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
+      : IssuanceInitiationAccessTokenClient.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
   }
 
   public getCredentialEndpoint(): string {

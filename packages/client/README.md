@@ -234,7 +234,7 @@ The library allows to pass in a different value for the AS token endpoint as wel
 if you know the AS upfront. If no AS is provided the issuer value from the Issuance Initiation Request will be used.
 
 ```typescript
-import { AccessTokenClient, AuthorizationServerOpts } from '@sphereon/openid4vci-client';
+import { IssuanceInitiationAccessTokenClient, AuthorizationServerOpts } from '@sphereon/openid4vci-client';
 
 const clientId = 'abcd'; // This can be a random value or a clientId assigned by the Authorization Server (depends on the environment)
 const pin = 1234; // A pincode which is shown out of band typically. Only use when the pin-code is required from the Issuance Initiation object.
@@ -244,7 +244,7 @@ const asOpts: AuthorizationServerOpts = {
   clientId,
 };
 
-const accessTokenResponse = AccessTokenClient.acquireAccessTokenUsingIssuanceInitiation({
+const accessTokenResponse = IssuanceInitiationAccessTokenClient.acquireAccessTokenUsingIssuanceInitiation({
   issuanceInitiation: initiationRequestWithUrl,
   asOpts,
   pin,
