@@ -1,7 +1,6 @@
-import { EndpointMetadata, IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl, OpenId4VCIVersion } from '@sphereon/openid4vci-common';
+import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl, OpenId4VCIVersion } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 
-import { MetadataClient } from '../MetadataClient';
 import { convertJsonToURI, convertURIToJsonObject } from '../functions';
 
 import { CredentialIssuanceClient } from './index';
@@ -42,27 +41,6 @@ export class IssuanceInitiationClient implements CredentialIssuanceClient {
       arrayTypeProperties: ['credential_type'],
       uriTypeProperties: ['issuer', 'credential_type'],
     });
-  }
-
-  /**
-   * Retrieve metadata using the Initiation obtained from a previous step
-   *
-   * @param initiation
-   */
-  public static async getServerMetaDataFromInitiation(initiation: IssuanceInitiationWithBaseUrl): Promise<EndpointMetadata> {
-    return this.getServerFromInitiationRequest(initiation.issuanceInitiationRequest);
-  }
-
-  /**
-   * Retrieve the metadata using the initiation request obtained from a previous step
-   * @param initiationRequest
-   */
-  public static async getServerFromInitiationRequest(initiationRequest: IssuanceInitiationRequestPayload): Promise<EndpointMetadata> {
-    return this.getServerMetaData(initiationRequest.issuer);
-  }
-
-  public static async getServerMetaData(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadata> {
-    return await MetadataClient.retrieveAllMetadata(issuer, opts);
   }
 
   public getCredentialTypes(): string[] {

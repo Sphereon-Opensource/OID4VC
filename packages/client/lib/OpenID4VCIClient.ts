@@ -21,6 +21,7 @@ import { AccessTokenClient } from './AccessTokenClient';
 import { CredentialIssuanceClient, CredentialOfferClient, IssuanceInitiationClient } from './CredentialOffer';
 import { CredentialOfferUtil } from './CredentialOffer/CredentialOfferUtil';
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
+import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { convertJsonToURI } from './functions';
 
@@ -43,7 +44,7 @@ export class OpenID4VCIClient {
     this._alg = alg;
     this._clientId = clientId;
 
-    this._credentialIssuanceClient = CredentialOfferUtil.getStrategy(credentialOfferURI);
+    this._credentialIssuanceClient = CredentialOfferUtil.determineCredentialIssuanceClient(credentialOfferURI);
   }
 
   public static async fromURI({
@@ -74,12 +75,12 @@ export class OpenID4VCIClient {
     if (!this._serverMetadata) {
       if (this._openID4VCIVersion === OpenId4VCIVersion.VER_9) {
         const issuanceInitiationClient = this._credentialIssuanceClient as IssuanceInitiationClient;
-        this._serverMetadata = await IssuanceInitiationClient.getServerMetaDataFromInitiation(issuanceInitiationClient.issuanceInitiationWithBaseUrl);
+        this._serverMetadata = await MetadataClient.getServerMetaDataFromInitiation(issuanceInitiationClient.issuanceInitiationWithBaseUrl);
         return this._serverMetadata;
       }
 
       const credentialOfferClient = this._credentialIssuanceClient as CredentialOfferClient;
-      this._serverMetadata = await CredentialOfferClient.getServerMetaData(credentialOfferClient.credentialOfferWithBaseURL);
+      this._serverMetadata = await MetadataClient.getServerMetaDataFromCredentialOffer(credentialOfferClient.credentialOfferWithBaseURL);
     }
     return this._serverMetadata;
   }

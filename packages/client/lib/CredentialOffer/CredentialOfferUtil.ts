@@ -5,7 +5,7 @@ import { CredentialOfferClient } from './CredentialOfferClient';
 import { IssuanceInitiationClient } from './IssuanceInitiationClient';
 
 export class CredentialOfferUtil {
-  public static getStrategy(credentialOfferURI: string): CredentialIssuanceClient {
+  public static determineCredentialIssuanceClient(credentialOfferURI: string): CredentialIssuanceClient {
     if (OpenId4VCIVersion.VER_9 === CredentialOfferUtil.getOpenId4VCIVersion(credentialOfferURI)) {
       return IssuanceInitiationClient.fromURI(credentialOfferURI);
     }
