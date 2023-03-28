@@ -11,7 +11,6 @@
     "packages/**/src/**/*.ts",
     "packages/**/lib/**/*.ts",
     "!**/examples/**",
-    "!packages/cli/**",
     "!**/types/**",
     "!**/dist/**",
     "!**/coverage/**",
@@ -25,6 +24,7 @@
     "lcov",
     "json"
   ],
+  "coverageProvider": "v8",
   "coverageDirectory": "./coverage",
   "transform": {
     "\\.jsx?$": "babel-jest",

@@ -1,10 +1,10 @@
 import {
   AccessTokenRequest,
-  AccessTokenRequestOpts,
   AccessTokenResponse,
   AuthorizationServerOpts,
   EndpointMetadata,
   GrantTypes,
+  IssuanceInitiationAccessTokenRequestOpts,
   IssuanceInitiationRequestPayload,
   IssuerOpts,
   OpenIDResponse,
@@ -13,38 +13,55 @@ import {
 import { ObjectUtils } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
-import { MetadataClient } from './MetadataClient';
-import { convertJsonToURI, formPost } from './functions';
+import { IssuanceInitiationClient } from '../CredentialOffer';
+import { MetadataClient } from '../MetadataClient';
+import { convertJsonToURI, formPost } from '../functions';
+
+import { AccessTokenClient } from './AccessTokenClient';
 
 const debug = Debug('sphereon:openid4vci:token');
 
-export class AccessTokenClient {
-  public async acquireAccessTokenUsingIssuanceInitiation({
-    issuanceInitiation,
-    asOpts,
-    pin,
-    codeVerifier,
-    code,
-    redirectUri,
-    metadata,
-  }: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
-    const { issuanceInitiationRequest } = issuanceInitiation;
+export class IssuanceInitiationAccessTokenClient implements AccessTokenClient {
+  getAccessTokenRequest = (
+    issuanceInitiationClient: IssuanceInitiationClient,
+    metadata: EndpointMetadata,
+    pin?: string,
+    clientId?: string,
+    codeVerifier?: string,
+    code?: string,
+    redirectUri?: string
+  ): IssuanceInitiationAccessTokenRequestOpts => {
+    return {
+      issuanceInitiation: issuanceInitiationClient.issuanceInitiationWithBaseUrl,
+      metadata: metadata,
+      pin,
+      codeVerifier,
+      code,
+      redirectUri,
+      asOpts: { clientId: clientId },
+    };
+  };
 
-    const isPinRequired = this.isPinRequiredValue(issuanceInitiationRequest);
-    const issuerOpts = { issuer: issuanceInitiationRequest.issuer };
+  public async acquireAccessToken(accessTokenRequestOpts: IssuanceInitiationAccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
+    const accessTokenRequestOptions = accessTokenRequestOpts as IssuanceInitiationAccessTokenRequestOpts;
+    const issuanceInitiation = accessTokenRequestOptions.issuanceInitiation;
+    const req: IssuanceInitiationRequestPayload = issuanceInitiation.issuanceInitiationRequest;
+
+    const isPinRequired = this.isPinRequiredValue(req);
+    const issuerOpts = { issuer: req.issuer };
 
     return await this.acquireAccessTokenUsingRequest({
       accessTokenRequest: await this.createAccessTokenRequest({
-        issuanceInitiation,
-        asOpts,
-        codeVerifier,
-        code,
-        redirectUri,
-        pin,
+        issuanceInitiation: issuanceInitiation,
+        asOpts: accessTokenRequestOptions.asOpts,
+        codeVerifier: accessTokenRequestOptions.codeVerifier,
+        code: accessTokenRequestOptions.code,
+        redirectUri: accessTokenRequestOptions.redirectUri,
+        pin: accessTokenRequestOptions.pin,
       }),
       isPinRequired,
-      metadata,
-      asOpts,
+      metadata: accessTokenRequestOptions.metadata,
+      asOpts: accessTokenRequestOptions.asOpts,
       issuerOpts,
     });
   }
@@ -63,7 +80,7 @@ export class AccessTokenClient {
     issuerOpts?: IssuerOpts;
   }): Promise<OpenIDResponse<AccessTokenResponse>> {
     this.validate(accessTokenRequest, isPinRequired);
-    const requestTokenURL = AccessTokenClient.determineTokenURL({
+    const requestTokenURL = IssuanceInitiationAccessTokenClient.determineTokenURL({
       asOpts,
       issuerOpts,
       metadata: metadata
@@ -82,7 +99,7 @@ export class AccessTokenClient {
     codeVerifier,
     code,
     redirectUri,
-  }: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
+  }: IssuanceInitiationAccessTokenRequestOpts): Promise<AccessTokenRequest> {
     const issuanceInitiationRequest = issuanceInitiation.issuanceInitiationRequest;
     issuanceInitiationRequest;
     const request: Partial<AccessTokenRequest> = {};

@@ -7,17 +7,19 @@ import {
 } from '@sphereon/openid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 
-import { CredentialRequestClient } from './CredentialRequestClient';
-import { convertURIToJsonObject } from './functions';
+import { convertURIToJsonObject } from '../functions';
 
-export class CredentialRequestClientBuilder {
+import { CredentialIssuanceRequestClientBuilder } from './CredentialIssuanceRequestClientBuilder';
+import { CredentialRequestClient } from './CredentialRequestClient';
+
+export class IssuanceCredentialRequestClientBuilder implements CredentialIssuanceRequestClientBuilder {
   credentialEndpoint?: string;
   credentialType?: string | string[];
   format?: CredentialFormat | CredentialFormat[];
   token?: string;
 
-  public static fromIssuanceInitiationURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): CredentialRequestClientBuilder {
-    return CredentialRequestClientBuilder.fromIssuanceInitiationRequest({
+  public static fromIssuanceInitiationURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): IssuanceCredentialRequestClientBuilder {
+    return IssuanceCredentialRequestClientBuilder.fromIssuanceInitiationRequest({
       request: convertURIToJsonObject(uri, {
         arrayTypeProperties: ['credential_type'],
         requiredProperties: ['issuer', 'credential_type'],
@@ -32,8 +34,8 @@ export class CredentialRequestClientBuilder {
   }: {
     request: IssuanceInitiationRequestPayload;
     metadata?: EndpointMetadata;
-  }): CredentialRequestClientBuilder {
-    const builder = new CredentialRequestClientBuilder();
+  }): IssuanceCredentialRequestClientBuilder {
+    const builder = new IssuanceCredentialRequestClientBuilder();
     builder.withCredentialEndpoint(
       metadata?.credential_endpoint
         ? metadata.credential_endpoint
@@ -54,39 +56,39 @@ export class CredentialRequestClientBuilder {
   }: {
     initiation: IssuanceInitiationWithBaseUrl;
     metadata?: EndpointMetadata;
-  }): CredentialRequestClientBuilder {
-    return CredentialRequestClientBuilder.fromIssuanceInitiationRequest({
+  }): IssuanceCredentialRequestClientBuilder {
+    return IssuanceCredentialRequestClientBuilder.fromIssuanceInitiationRequest({
       request: initiation.issuanceInitiationRequest,
       metadata,
     });
   }
 
-  public withCredentialEndpointFromMetadata(metadata: OpenID4VCIServerMetadata): CredentialRequestClientBuilder {
+  public withCredentialEndpointFromMetadata(metadata: OpenID4VCIServerMetadata): IssuanceCredentialRequestClientBuilder {
     this.credentialEndpoint = metadata.credential_endpoint;
     return this;
   }
 
-  public withCredentialEndpoint(credentialEndpoint: string): CredentialRequestClientBuilder {
+  public withCredentialEndpoint(credentialEndpoint: string): IssuanceCredentialRequestClientBuilder {
     this.credentialEndpoint = credentialEndpoint;
     return this;
   }
 
-  public withCredentialType(credentialType: string | string[]): CredentialRequestClientBuilder {
+  public withCredentialType(credentialType: string | string[]): IssuanceCredentialRequestClientBuilder {
     this.credentialType = credentialType;
     return this;
   }
 
-  public withFormat(format: CredentialFormat | CredentialFormat[]): CredentialRequestClientBuilder {
+  public withFormat(format: CredentialFormat | CredentialFormat[]): IssuanceCredentialRequestClientBuilder {
     this.format = format;
     return this;
   }
 
-  public withToken(accessToken: string): CredentialRequestClientBuilder {
+  public withToken(accessToken: string): IssuanceCredentialRequestClientBuilder {
     this.token = accessToken;
     return this;
   }
 
-  public withTokenFromResponse(response: AccessTokenResponse): CredentialRequestClientBuilder {
+  public withTokenFromResponse(response: AccessTokenResponse): IssuanceCredentialRequestClientBuilder {
     this.token = response.access_token;
     return this;
   }
