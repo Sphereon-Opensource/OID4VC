@@ -11,6 +11,9 @@ export interface OpenID4VCIServerMetadata {
   authorization_server?: string; //NON-SPEC compliant, but used by some issuers. URL of the AS. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   // TODO: The above authorization_server being used in the wild, serves roughly the same purpose as the below spec compliant endpoint. Look at how to use authorization_server as authorization_endpoint in case it is present
   authorization_endpoint?: string;
+  pushed_authorization_request_endpoint?: string; // The URL of the pushed authorization request endpoint at which a client can post an authorization request to exchange for a request_uri value usable at the authorization server
+  // Note that the presence of pushed_authorization_request_endpoint is sufficient for a client to determine that it may use the PAR flow. A request_uri value obtained from the PAR endpoint is usable at the authorization endpoint regardless of other authorization server metadata such as request_uri_parameter_supported or require_request_uri_registration
+  require_pushed_authorization_endpoint?: boolean; // Boolean parameter indicating whether the authorization server accepts authorization request data only via PAR. If omitted, the default value is false.
 }
 
 export type Oauth2ASWithOID4VCIMetadata = OAuth2ASMetadata & OpenID4VCIServerMetadata;

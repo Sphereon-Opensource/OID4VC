@@ -9,6 +9,7 @@ import {
   CredentialsSupported,
   EndpointMetadata,
   IssuanceInitiationWithBaseUrl,
+  OpenIDResponse,
   ProofOfPossessionCallbacks,
   ResponseType,
 } from '@sphereon/openid4vci-common';
@@ -20,7 +21,7 @@ import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder
 import { IssuanceInitiation } from './IssuanceInitiation';
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
-import { convertJsonToURI } from './functions';
+import { convertJsonToURI, formPost } from './functions';
 
 const debug = Debug('sphereon:openid4vci:flow');
 
@@ -129,7 +130,40 @@ export class OpenID4VCIClient {
     return authRequestUrl;
   }
 
-  private handleAuthorizationDetails(authorizationDetails?: AuthDetails | AuthDetails[]): AuthDetails | AuthDetails[] | undefined {
+  public async acquireAuthorizationCode(
+    { clientId, codeChallengeMethod, codeChallenge, authorizationDetails, redirectUri, scope }: AuthRequestOpts
+  ): Promise<OpenIDResponse<unknown>> {
+    // Scope and authorization_details can be used in the same authorization request
+    // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
+    if (!scope && !authorizationDetails) {
+      throw Error('Please provide a scope or authorization_details');
+    }
+
+    // Authorization servers supporting PAR SHOULD include the URL of their pushed authorization request endpoint in their authorization server metadata document
+    // Note that the presence of pushed_authorization_request_endpoint is sufficient for a client to determine that it may use the PAR flow.
+    // What happens if it doesn't ???
+    if (!this._serverMetadata?.openid4vci_metadata?.pushed_authorization_request_endpoint) {
+      throw Error('Server metadata does not contain pushed authorization request endpoint');
+    }
+
+    // add 'openid' scope if not present
+    if (scope && !scope.includes('openid')) {
+      scope = `openid ${scope}`;
+    }
+
+    const queryObj: AuthorizationRequest = {
+      response_type: ResponseType.AUTH_CODE,
+      client_id: clientId,
+      code_challenge_method: codeChallengeMethod,
+      code_challenge: codeChallenge,
+      authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
+      redirect_uri: redirectUri,
+      scope: scope,
+    };
+    return await formPost(this._serverMetadata.openid4vci_metadata.pushed_authorization_request_endpoint, JSON.stringify(queryObj));
+  }
+
+  public handleAuthorizationDetails(authorizationDetails?: AuthDetails | AuthDetails[]): AuthDetails | AuthDetails[] | undefined {
     if (authorizationDetails) {
       if (Array.isArray(authorizationDetails)) {
         return authorizationDetails.map((value) => this.handleLocations({ ...value }));

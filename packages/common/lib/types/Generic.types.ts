@@ -20,5 +20,7 @@ export interface EndpointMetadata {
   token_endpoint: string;
   credential_endpoint: string;
   authorization_endpoint?: string;
+  pushed_authorization_request_endpoint?: string;
+  require_pushed_authorization_endpoint?: boolean;
   openid4vci_metadata?: OpenID4VCIServerMetadata;
 }
