@@ -3,9 +3,9 @@ import {
   AccessTokenRequestOpts,
   AccessTokenResponse,
   AuthorizationServerOpts,
+  CommonCredentialOfferRequestPayload,
   EndpointMetadata,
   GrantTypes,
-  IssuanceInitiationRequestPayload,
   IssuerOpts,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
@@ -19,8 +19,8 @@ import { convertJsonToURI, formPost } from './functions';
 const debug = Debug('sphereon:openid4vci:token');
 
 export class AccessTokenClient {
-  public async acquireAccessTokenUsingIssuanceInitiation({
-    issuanceInitiation,
+  public async acquireAccessTokenUsingCredentialOffer({
+    credentialOffer,
     asOpts,
     pin,
     codeVerifier,
@@ -28,14 +28,14 @@ export class AccessTokenClient {
     redirectUri,
     metadata,
   }: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
-    const { issuanceInitiationRequest } = issuanceInitiation;
+    const { request } = credentialOffer;
 
-    const isPinRequired = this.isPinRequiredValue(issuanceInitiationRequest);
-    const issuerOpts = { issuer: issuanceInitiationRequest.issuer };
+    const isPinRequired = this.isPinRequiredValue(request);
+    const issuerOpts = { issuer: request.issuer };
 
     return await this.acquireAccessTokenUsingRequest({
       accessTokenRequest: await this.createAccessTokenRequest({
-        issuanceInitiation,
+        credentialOffer: credentialOffer,
         asOpts,
         codeVerifier,
         code,
@@ -76,32 +76,32 @@ export class AccessTokenClient {
   }
 
   public async createAccessTokenRequest({
-    issuanceInitiation,
+    credentialOffer,
     asOpts,
     pin,
     codeVerifier,
     code,
     redirectUri,
   }: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
-    const issuanceInitiationRequest = issuanceInitiation.issuanceInitiationRequest;
-    issuanceInitiationRequest;
+    const credentialOfferRequest = credentialOffer.request;
     const request: Partial<AccessTokenRequest> = {};
     if (asOpts?.clientId) {
       request.client_id = asOpts.clientId;
     }
 
-    this.assertNumericPin(this.isPinRequiredValue(issuanceInitiationRequest), pin);
+    this.assertNumericPin(this.isPinRequiredValue(credentialOfferRequest), pin);
     request.user_pin = pin;
 
-    if (issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL]) {
+    if (credentialOfferRequest[PRE_AUTH_CODE_LITERAL]) {
       if (codeVerifier) {
         throw new Error('Cannot pass a code_verifier when flow type is pre-authorized');
       }
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
-      request[PRE_AUTH_CODE_LITERAL] = issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL];
+      request[PRE_AUTH_CODE_LITERAL] = credentialOfferRequest[PRE_AUTH_CODE_LITERAL];
     }
-    if (issuanceInitiationRequest.op_state) {
+    if ('op_state' in credentialOfferRequest || 'issuer_state' in credentialOfferRequest) {
       this.throwNotSupportedFlow();
+      // Not implemented yet
       request.grant_type = GrantTypes.AUTHORIZATION_CODE;
     }
     if (codeVerifier) {
@@ -110,7 +110,7 @@ export class AccessTokenClient {
       request.redirect_uri = redirectUri;
       request.grant_type = GrantTypes.AUTHORIZATION_CODE;
     }
-    if (request.grant_type === GrantTypes.AUTHORIZATION_CODE && issuanceInitiationRequest[PRE_AUTH_CODE_LITERAL]) {
+    if (request.grant_type === GrantTypes.AUTHORIZATION_CODE && credentialOfferRequest[PRE_AUTH_CODE_LITERAL]) {
       throw Error('A pre_authorized_code flow cannot have an op_state in the initiation request');
     }
 
@@ -129,7 +129,7 @@ export class AccessTokenClient {
     }
   }
 
-  private isPinRequiredValue(issuanceInitiationRequest: IssuanceInitiationRequestPayload): boolean {
+  private isPinRequiredValue(issuanceInitiationRequest: CommonCredentialOfferRequestPayload): boolean {
     let isPinRequired = false;
     if (issuanceInitiationRequest !== undefined) {
       if (typeof issuanceInitiationRequest.user_pin_required === 'string') {

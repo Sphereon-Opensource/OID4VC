@@ -1,5 +1,6 @@
 export * from './Authorization.types';
 export * from './CredentialIssuance.types';
+export * from './OpenID4VCIVersions.types';
 export * from './Generic.types';
 export * from './OAuth2ASMetadata';
 export * from './OpenID4VCIErrors';

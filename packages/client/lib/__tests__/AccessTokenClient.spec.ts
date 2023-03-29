@@ -184,8 +184,8 @@ describe('AccessTokenClient should', () => {
     nock(MOCK_URL).post(/.*/).reply(200, {});
 
     await expect(() =>
-      accessTokenClient.acquireAccessTokenUsingIssuanceInitiation({
-        issuanceInitiation: INITIATION_TEST,
+      accessTokenClient.acquireAccessTokenUsingCredentialOffer({
+        credentialOffer: INITIATION_TEST,
         pin: '1234',
       })
     ).rejects.toThrow(Error('Cannot set a pin, when the pin is not required.'));
@@ -197,14 +197,14 @@ describe('AccessTokenClient should', () => {
     nock(MOCK_URL).post(/.*/).reply(200, {});
 
     const requestOpts: AccessTokenRequestOpts = {
-      issuanceInitiation: INITIATION_TEST,
+      credentialOffer: INITIATION_TEST,
       pin: undefined,
       codeVerifier: 'RylyWGQ-dzpObnEcoMBDIH9cTAwZXk1wYzktKxsOFgA',
       code: 'LWCt225yj7gzT2cWeMP4hXj4B4oIYkEiGs4T6pfez91',
       redirectUri: 'http://example.com/cb',
     };
 
-    await expect(() => accessTokenClient.acquireAccessTokenUsingIssuanceInitiation(requestOpts)).rejects.toThrow(
+    await expect(() => accessTokenClient.acquireAccessTokenUsingCredentialOffer(requestOpts)).rejects.toThrow(
       Error('Cannot pass a code_verifier when flow type is pre-authorized')
     );
   });

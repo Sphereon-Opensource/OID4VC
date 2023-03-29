@@ -54,7 +54,7 @@ already fetching the Server Metadata
 import { OpenID4VCIClient } from '@sphereon/openid4vci-client';
 
 // The client is initiated from a URI. This URI is provided by the Issuer, typically as a URL or QR code.
-const client = await OpenID4VCIClient.initiateFromURI({
+const client = await OpenID4VCIClient.fromURI({
   issuanceInitiationURI:
     'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true',
   flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW, // The flow to use
@@ -153,22 +153,22 @@ bit more control and options, at the expense of a bit more complexity.
 ## Issuance Initiation
 
 Issuance is started from a so-called Issuance Initiation Request by the Issuer. This typically is URI, exposed
-as a link or a QR code. You can call the `IssuanceInitiation.fromURI(uri)` method to parse the URI into a Json object
+as a link or a QR code. You can call the `CredentialOffer.fromURI(uri)` method to parse the URI into a Json object
 containing the baseUrl and a `IssuanceInitiationRequest` JSON object
 
 ```typescript
-import { IssuanceInitiation } from '@sphereon/openid4vci-client';
+import { CredentialOffer } from '@sphereon/openid4vci-client';
 
 const initiationURI =
   'https://issuer.example.com?issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy';
 
-const initiationRequestWithUrl = IssuanceInitiation.fromURI(initiationURI);
+const initiationRequestWithUrl = CredentialOffer.fromURI(initiationURI);
 console.log(initiationRequestWithUrl);
 
 /**
  * {
  *    "baseUrl": "https://server.example.com",
- *    "issuanceInitiationRequest": {
+ *    "request": {
  *      "credential_type": [
  *        "https://did.example.org/healthCard",
  *        "https://did.example.org/driverLicense"
@@ -194,7 +194,7 @@ Example:
 ```typescript
 import { MetadataClient } from '@sphereon/openid4vci-client';
 
-const metadata = await MetadataClient.retrieveAllMetadataFromInitiation(initiationRequestWithUrl);
+const metadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(initiationRequestWithUrl);
 
 console.log(metadata);
 /**
@@ -244,8 +244,8 @@ const asOpts: AuthorizationServerOpts = {
   clientId,
 };
 
-const accessTokenResponse = AccessTokenClient.acquireAccessTokenUsingIssuanceInitiation({
-  issuanceInitiation: initiationRequestWithUrl,
+const accessTokenResponse = AccessTokenClient.acquireAccessTokenUsingCredentialOffer({
+  credentialOffer: initiationRequestWithUrl,
   asOpts,
   pin,
   metadata,
@@ -414,7 +414,7 @@ the keypair created earlier.
 ```typescript
 import { CredentialRequestClientBuilder, CredentialResponse, ProofOfPossessionArgs } from '@sphereon/openid4vci-client';
 
-const credentialRequestClient = CredentialRequestClientBuilder.fromIssuanceInitiation(initiationRequestWithUrl, metadata).build();
+const credentialRequestClient = CredentialRequestClientBuilder.fromCredentialOffer(initiationRequestWithUrl, metadata).build();
 
 // In 1 step:
 const credentialResponse: CredentialResponse = await credentialRequestClient.acquireCredentialsUsingProof({

@@ -1,6 +1,6 @@
 import { CredentialFormat } from '@sphereon/ssi-types';
 
-import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl } from './CredentialIssuance.types';
+import { CredentialOfferRequestWithBaseUrl, IssuanceInitiationRequestPayloadV9 } from './CredentialIssuance.types';
 import { EndpointMetadata, ErrorResponse, PRE_AUTH_CODE_LITERAL } from './Generic.types';
 
 export interface AuthorizationDetails {
@@ -45,7 +45,7 @@ export interface IssuerOpts {
 }
 
 export interface AccessTokenRequestOpts {
-  issuanceInitiation: IssuanceInitiationWithBaseUrl;
+  credentialOffer: CredentialOfferRequestWithBaseUrl;
   asOpts?: AuthorizationServerOpts;
   metadata?: EndpointMetadata;
   codeVerifier?: string; // only required for authorization flow
@@ -115,7 +115,7 @@ export enum AuthzFlowType {
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace AuthzFlowType {
-  export function valueOf(request: IssuanceInitiationRequestPayload): AuthzFlowType {
+  export function valueOf(request: IssuanceInitiationRequestPayloadV9): AuthzFlowType {
     if (request[PRE_AUTH_CODE_LITERAL]) {
       return AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW;
     }

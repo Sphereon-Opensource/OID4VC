@@ -6,7 +6,7 @@ Adds initial support for the Authorized Code flow (auth request, server metadata
 
 - Added:
   - Add initial support for Authorized Code flow, thanks to @karimStekelenburg.
-  - Add method to encode the initiation url
+  - Add method to encode the credentialOffer url
 
 ## v0.3.6 - 2023-01-12
 
