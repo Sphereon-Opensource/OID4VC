@@ -4,7 +4,7 @@ import nock from 'nock';
 import {
   CredentialOfferClient,
   IssuanceCredentialRequestClientBuilder,
-  IssuanceInitiationAccessTokenClient,
+  AccessTokenClient,
   IssuanceInitiationClient,
   OpenID4VCIClient,
   ProofOfPossessionBuilder,
@@ -125,7 +125,7 @@ describe('OID4VCI-Client should', () => {
         .reply(200, JSON.stringify(mockedAccessTokenResponse));
 
       /* The actual access token calls */
-      const accessTokenClient: IssuanceInitiationAccessTokenClient = new IssuanceInitiationAccessTokenClient();
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
       const accessTokenResponse = await accessTokenClient.acquireAccessToken({ issuanceInitiation: issuanceInitiation, pin: '1234' });
       expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
       // Get the credential

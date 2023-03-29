@@ -46,20 +46,14 @@ export interface IssuerOpts {
 }
 
 export interface AccessTokenRequestOpts {
+  issuanceInitiation?: IssuanceInitiationWithBaseUrl;
+  credentialIssuance?: CredentialOfferWithBaseURL;
   asOpts?: AuthorizationServerOpts;
   metadata?: EndpointMetadata;
   codeVerifier?: string; // only required for authorization flow
   code?: string; // only required for authorization flow
   redirectUri?: string; // only required for authorization flow
   pin?: string; // Pin-number. Only used when required
-}
-
-export interface IssuanceInitiationAccessTokenRequestOpts extends AccessTokenRequestOpts {
-  issuanceInitiation: IssuanceInitiationWithBaseUrl;
-}
-
-export interface CredentialOfferAccessTokenRequestOpts_V11 extends AccessTokenRequestOpts {
-  credentialIssuance: CredentialOfferWithBaseURL;
 }
 
 export interface AuthorizationRequest {

@@ -15,8 +15,6 @@ import {
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
-import { AccessTokenClientUtil } from './AccessTokenClient';
-import { IssuanceInitiationAccessTokenClient } from './AccessTokenClient';
 import { CredentialIssuanceClient, CredentialOfferClient, IssuanceInitiationClient } from './CredentialOffer';
 import { CredentialOfferUtil } from './CredentialOffer';
 import { CredentialIssuanceRequestClientBuilder, OfferCredentialRequestClientBuilder } from './CredentialRequestClient';
@@ -24,6 +22,7 @@ import { IssuanceCredentialRequestClientBuilder } from './CredentialRequestClien
 import { CredentialOfferMetadataClient, IssuanceInitiationMetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { convertJsonToURI } from './functions';
+import {AccessTokenClient} from "./AccessTokenClient";
 
 const debug = Debug('sphereon:openid4vci:flow');
 
@@ -187,19 +186,17 @@ export class OpenID4VCIClient {
       this._clientId = clientId;
     }
     if (!this._accessTokenResponse) {
-      const accessTokenClient = AccessTokenClientUtil.determineAccessTokenClient(this._openID4VCIVersion);
+      const accessTokenClient = new AccessTokenClient();
 
-      const accessTokenRequest = accessTokenClient.getAccessTokenRequest(
-        this._credentialIssuanceClient,
-        this._serverMetadata!,
+      const response = await accessTokenClient.acquireAccessToken({
+        issuanceInitiation: (this._credentialIssuanceClient as IssuanceInitiationClient).issuanceInitiationWithBaseUrl, // FIXME After implementing the Version 11 this step will require changes.
+        metadata: this._serverMetadata,
         pin,
-        clientId,
         codeVerifier,
         code,
-        redirectUri
-      );
-
-      const response = await accessTokenClient.acquireAccessToken(accessTokenRequest);
+        redirectUri,
+        asOpts: { clientId: this.clientId },
+      });
 
       if (response.errorBody) {
         debug(`Access token error:\r\n${response.errorBody}`);
@@ -374,7 +371,7 @@ export class OpenID4VCIClient {
     this._credentialIssuanceClient.assertIssuerData();
     return this.serverMetadata
       ? this.serverMetadata.token_endpoint
-      : IssuanceInitiationAccessTokenClient.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
+      : AccessTokenClient.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
   }
 
   public getCredentialEndpoint(): string {

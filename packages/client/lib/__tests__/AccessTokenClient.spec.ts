@@ -2,19 +2,19 @@ import {
   AccessTokenRequest,
   AccessTokenResponse,
   GrantTypes,
-  IssuanceInitiationAccessTokenRequestOpts,
+  AccessTokenRequestOpts,
   OpenIDResponse,
 } from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
-import { IssuanceInitiationAccessTokenClient } from '../AccessTokenClient';
+import { AccessTokenClient } from '../AccessTokenClient';
 
 import { UNIT_TEST_TIMEOUT } from './IT.spec';
 import { INITIATION_TEST } from './MetadataMocks';
 
 const MOCK_URL = 'https://sphereonjunit20221013.com/';
 
-describe('IssuanceInitiationAccessTokenClient.ts should', () => {
+describe('AccessTokenClient should', () => {
   beforeEach(() => {
     nock.cleanAll();
   });
@@ -22,7 +22,7 @@ describe('IssuanceInitiationAccessTokenClient.ts should', () => {
   it(
     'get Access Token for with pre-authorized code without resulting in errors',
     async () => {
-      const accessTokenClient: IssuanceInitiationAccessTokenClient = new IssuanceInitiationAccessTokenClient();
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
 
       const accessTokenRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
@@ -53,7 +53,7 @@ describe('IssuanceInitiationAccessTokenClient.ts should', () => {
   it(
     'get Access Token for authorization code without resulting in errors',
     async () => {
-      const accessTokenClient: IssuanceInitiationAccessTokenClient = new IssuanceInitiationAccessTokenClient();
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
 
       const accessTokenRequest: AccessTokenRequest = {
         client_id: 'test-client',
@@ -84,7 +84,7 @@ describe('IssuanceInitiationAccessTokenClient.ts should', () => {
   it(
     'get error for incorrect code',
     async () => {
-      const accessTokenClient: IssuanceInitiationAccessTokenClient = new IssuanceInitiationAccessTokenClient();
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
 
       const accessTokenRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
@@ -107,7 +107,7 @@ describe('IssuanceInitiationAccessTokenClient.ts should', () => {
   it(
     'get error for incorrect pin',
     async () => {
-      const accessTokenClient: IssuanceInitiationAccessTokenClient = new IssuanceInitiationAccessTokenClient();
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
 
       const accessTokenRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
@@ -130,7 +130,7 @@ describe('IssuanceInitiationAccessTokenClient.ts should', () => {
   it(
     'get error for incorrectly long pin',
     async () => {
-      const accessTokenClient: IssuanceInitiationAccessTokenClient = new IssuanceInitiationAccessTokenClient();
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
 
       const accessTokenRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
@@ -155,7 +155,7 @@ describe('IssuanceInitiationAccessTokenClient.ts should', () => {
   it(
     'get success for correct length of pin',
     async () => {
-      const accessTokenClient: IssuanceInitiationAccessTokenClient = new IssuanceInitiationAccessTokenClient();
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
 
       const accessTokenRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
@@ -185,7 +185,7 @@ describe('IssuanceInitiationAccessTokenClient.ts should', () => {
   );
 
   it('get error for using a pin when not requested', async () => {
-    const accessTokenClient: IssuanceInitiationAccessTokenClient = new IssuanceInitiationAccessTokenClient();
+    const accessTokenClient: AccessTokenClient = new AccessTokenClient();
 
     nock(MOCK_URL).post(/.*/).reply(200, {});
 
@@ -198,11 +198,11 @@ describe('IssuanceInitiationAccessTokenClient.ts should', () => {
   });
 
   it('get error if code_verifier is present when flow type is pre-authorized', async () => {
-    const accessTokenClient: IssuanceInitiationAccessTokenClient = new IssuanceInitiationAccessTokenClient();
+    const accessTokenClient: AccessTokenClient = new AccessTokenClient();
 
     nock(MOCK_URL).post(/.*/).reply(200, {});
 
-    const requestOpts: IssuanceInitiationAccessTokenRequestOpts = {
+    const requestOpts: AccessTokenRequestOpts = {
       issuanceInitiation: INITIATION_TEST,
       pin: undefined,
       codeVerifier: 'RylyWGQ-dzpObnEcoMBDIH9cTAwZXk1wYzktKxsOFgA',
@@ -217,7 +217,7 @@ describe('IssuanceInitiationAccessTokenClient.ts should', () => {
 
   it('get error if no as, issuer and metadata values are present', async () => {
     await expect(() =>
-      IssuanceInitiationAccessTokenClient.determineTokenURL({
+        AccessTokenClient.determineTokenURL({
         asOpts: undefined,
         issuerOpts: undefined,
         metadata: undefined,
