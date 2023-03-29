@@ -21,14 +21,14 @@ export class MetadataClient {
    * @param issuanceOffer
    */
   public static async getServerMetaData(issuanceOffer: IssuanceInitiationWithBaseUrl | CredentialOfferWithBaseURL): Promise<EndpointMetadata> {
-    return MetadataClient.getServerFromInitiationRequest((issuanceOffer as IssuanceInitiationWithBaseUrl).issuanceInitiationRequest); // FIXME implement version 11 change here.
+    return MetadataClient.retrieveAllMetadataFromInitiationRequest((issuanceOffer as IssuanceInitiationWithBaseUrl).issuanceInitiationRequest); // FIXME implement version 11 change here.
   }
 
   /**
    * Retrieve the metadata using the initiation request obtained from a previous step
    * @param initiationRequest
    */
-  public static async getServerFromInitiationRequest(initiationRequest: IssuanceInitiationRequestPayload): Promise<EndpointMetadata> {
+  public static async retrieveAllMetadataFromInitiationRequest(initiationRequest: IssuanceInitiationRequestPayload): Promise<EndpointMetadata> {
     return MetadataClient.retrieveAllMetadata(initiationRequest.issuer);
   }
 
