@@ -1,6 +1,5 @@
 import { OpenId4VCIVersion } from '@sphereon/openid4vci-common';
-
-import { CredentialOfferUtil } from '../CredentialOffer';
+import {CredentialOfferUtil} from "../CredentialOfferUtil";
 
 export const UNIT_TEST_TIMEOUT = 30000;
 

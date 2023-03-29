@@ -1,17 +1,6 @@
 import { OpenId4VCIVersion, DefaultURISchemes } from '@sphereon/openid4vci-common';
 
-import { CredentialIssuanceClient } from './CredentialIssuanceClient';
-import { CredentialOfferClient } from './CredentialOfferClient';
-import { IssuanceInitiationClient } from './IssuanceInitiationClient';
-
 export class CredentialOfferUtil {
-  public static determineCredentialIssuanceClient(credentialOfferURI: string): CredentialIssuanceClient {
-    if (OpenId4VCIVersion.VER_9 === CredentialOfferUtil.getOpenId4VCIVersion(credentialOfferURI)) {
-      return IssuanceInitiationClient.fromURI(credentialOfferURI);
-    }
-
-    return CredentialOfferClient.fromURI(credentialOfferURI);
-  }
 
   public static getOpenId4VCIVersion(uri: string): OpenId4VCIVersion {
     let version: OpenId4VCIVersion = OpenId4VCIVersion.VER_UNKNOWN;

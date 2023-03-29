@@ -1,16 +1,23 @@
-import { AccessTokenResponse, Alg, AuthzFlowType, Jwt, OpenId4VCIVersion, ProofOfPossession, Typ } from '@sphereon/openid4vci-common';
+import {
+  AccessTokenResponse,
+  Alg,
+  AuthzFlowType,
+  IssuanceInitiationWithBaseUrl,
+  Jwt,
+  ProofOfPossession,
+  Typ
+} from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
 import {
-  CredentialOfferClient,
   IssuanceCredentialRequestClientBuilder,
   AccessTokenClient,
-  IssuanceInitiationClient,
   OpenID4VCIClient,
   ProofOfPossessionBuilder,
 } from '..';
 
 import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
+import {IssuanceInitiation} from "../IssuanceInitiation";
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -80,11 +87,7 @@ describe('OID4VCI-Client should', () => {
 
   async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
     expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
-    if (client.credentialIssuanceClient._version === OpenId4VCIVersion.VER_11) {
-      expect((client.credentialIssuanceClient as CredentialOfferClient).credentialOfferWithBaseURL).toBeDefined();
-    } else {
-      expect((client.credentialIssuanceClient as IssuanceInitiationClient).issuanceInitiationWithBaseUrl).toBeDefined();
-    }
+    expect(client.issuanceOffer).toBeDefined();
     expect(client.serverMetadata).toBeDefined();
     expect(client.getIssuer()).toEqual('https://issuer.research.identiproof.io');
     expect(client.getCredentialEndpoint()).toEqual('https://issuer.research.identiproof.io/credential');
@@ -106,7 +109,7 @@ describe('OID4VCI-Client should', () => {
     'succeed with a full flow without the client',
     async () => {
       /* Convert the URI into an object */
-      const issuanceInitiation = (IssuanceInitiationClient.fromURI(INITIATE_QR) as IssuanceInitiationClient).issuanceInitiationWithBaseUrl;
+      const issuanceInitiation: IssuanceInitiationWithBaseUrl = IssuanceInitiation.fromURI(INITIATE_QR);
 
       expect(issuanceInitiation.baseUrl).toEqual('openid-initiate-issuance://');
       expect(issuanceInitiation.issuanceInitiationRequest).toEqual({

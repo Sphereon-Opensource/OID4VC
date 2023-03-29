@@ -4,10 +4,10 @@ import {
   AuthorizationRequest,
   AuthzFlowType,
   CodeChallengeMethod,
-  CredentialMetadataV1_09,
+  CredentialMetadataV1_09, CredentialOfferWithBaseURL,
   CredentialResponse,
   CredentialsSupported,
-  EndpointMetadata,
+  EndpointMetadata, IssuanceInitiationWithBaseUrl,
   OpenId4VCIVersion,
   ProofOfPossessionCallbacks,
   ResponseType,
@@ -15,14 +15,14 @@ import {
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
-import { CredentialIssuanceClient, CredentialOfferClient, IssuanceInitiationClient } from './CredentialOffer';
-import { CredentialOfferUtil } from './CredentialOffer';
-import { CredentialIssuanceRequestClientBuilder, OfferCredentialRequestClientBuilder } from './CredentialRequestClient';
+import { CredentialIssuanceRequestClientBuilder } from './CredentialRequestClient';
 import { IssuanceCredentialRequestClientBuilder } from './CredentialRequestClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { convertJsonToURI } from './functions';
 import {AccessTokenClient} from "./AccessTokenClient";
 import {MetadataClient} from "./MetadataClient";
+import {IssuanceInitiation} from "./IssuanceInitiation";
+import {CredentialOfferUtil} from "./CredentialOfferUtil";
 
 const debug = Debug('sphereon:openid4vci:flow');
 
@@ -45,13 +45,13 @@ interface AuthRequestOpts {
 
 export class OpenID4VCIClient {
   private readonly _flowType: AuthzFlowType;
+  private readonly _issuanceOffer: IssuanceInitiationWithBaseUrl | CredentialOfferWithBaseURL;
   private _clientId?: string;
   private _kid: string | undefined;
   private _alg: Alg | string | undefined;
   private _serverMetadata: EndpointMetadata | undefined;
   private _accessTokenResponse: AccessTokenResponse | undefined;
   private readonly _openID4VCIVersion: OpenId4VCIVersion;
-  private readonly _credentialIssuanceClient: CredentialIssuanceClient;
 
   private constructor(credentialOfferURI: string, flowType: AuthzFlowType, kid?: string, alg?: Alg | string, clientId?: string) {
     this._flowType = flowType;
@@ -60,7 +60,15 @@ export class OpenID4VCIClient {
     this._alg = alg;
     this._clientId = clientId;
 
-    this._credentialIssuanceClient = CredentialOfferUtil.determineCredentialIssuanceClient(credentialOfferURI);
+    this._issuanceOffer = this.determineCredentialIssuanceClient(credentialOfferURI);
+  }
+
+  public determineCredentialIssuanceClient(credentialOfferURI: string): IssuanceInitiationWithBaseUrl | CredentialOfferWithBaseURL {
+    if (OpenId4VCIVersion.VER_9 === CredentialOfferUtil.getOpenId4VCIVersion(credentialOfferURI)) {
+      return IssuanceInitiation.fromURI(credentialOfferURI);
+    }
+
+    throw new Error('Version 11 not yet implemeneted'); // FIXME implement version 11.
   }
 
   public static async fromURI({
@@ -87,18 +95,15 @@ export class OpenID4VCIClient {
   }
 
   public async retrieveServerMetadata(): Promise<EndpointMetadata> {
-    this._credentialIssuanceClient.assertIssuerData();
+    this.assertIssuerData();
     if (!this._serverMetadata) {
       if (this._openID4VCIVersion === OpenId4VCIVersion.VER_9) {
-        const issuanceInitiationClient = this._credentialIssuanceClient as IssuanceInitiationClient;
-        this._serverMetadata = await MetadataClient.getServerMetaData(issuanceInitiationClient.issuanceInitiationWithBaseUrl);
+        this._serverMetadata = await MetadataClient.getServerMetaData(this._issuanceOffer as IssuanceInitiationWithBaseUrl);
         return this._serverMetadata;
       }
-
-      const credentialOfferClient = this._credentialIssuanceClient as CredentialOfferClient;
-      this._serverMetadata = await MetadataClient.getServerMetaData(credentialOfferClient.credentialOfferWithBaseURL);
     }
-    return this._serverMetadata;
+
+    throw new Error('Not yet implemented.');
   }
 
   public createAuthorizationRequestUrl({
@@ -181,7 +186,7 @@ export class OpenID4VCIClient {
     code?: string;
     redirectUri?: string;
   }): Promise<AccessTokenResponse> {
-    this._credentialIssuanceClient.assertIssuerData();
+    this.assertIssuerData();
     if (clientId) {
       this._clientId = clientId;
     }
@@ -189,7 +194,7 @@ export class OpenID4VCIClient {
       const accessTokenClient = new AccessTokenClient();
 
       const response = await accessTokenClient.acquireAccessToken({
-        issuanceInitiation: (this._credentialIssuanceClient as IssuanceInitiationClient).issuanceInitiationWithBaseUrl, // FIXME After implementing the Version 11 this step will require changes.
+        issuanceInitiation: this._issuanceOffer as IssuanceInitiationWithBaseUrl, // FIXME After implementing the Version 11 this step will require changes.
         metadata: this._serverMetadata,
         pin,
         codeVerifier,
@@ -203,14 +208,14 @@ export class OpenID4VCIClient {
         throw Error(
           `Retrieving an access token from ${
             this._serverMetadata?.token_endpoint
-          } for issuer ${this._credentialIssuanceClient.getIssuer()} failed with status: ${response.origResponse.status}`
+          } for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}`
         );
       } else if (!response.successBody) {
         debug(`Access token error. No succes body`);
         throw Error(
           `Retrieving an access token from ${
             this._serverMetadata?.token_endpoint
-          } for issuer ${this._credentialIssuanceClient.getIssuer()} failed as there was no success response body`
+          } for issuer ${this.getIssuer()} failed as there was no success response body`
         );
       }
       this._accessTokenResponse = response.successBody;
@@ -244,14 +249,11 @@ export class OpenID4VCIClient {
     let requestBuilder: CredentialIssuanceRequestClientBuilder;
     if (this._openID4VCIVersion === OpenId4VCIVersion.VER_9) {
       requestBuilder = IssuanceCredentialRequestClientBuilder.fromIssuanceInitiation({
-        initiation: (this._credentialIssuanceClient as IssuanceInitiationClient).issuanceInitiationWithBaseUrl,
+        initiation: this._issuanceOffer as IssuanceInitiationWithBaseUrl,
         metadata: this.serverMetadata,
       });
     } else {
-      requestBuilder = OfferCredentialRequestClientBuilder.fromCredentialOffer({
-        credentialOfferWithBaseURL: (this._credentialIssuanceClient as CredentialOfferClient).credentialOfferWithBaseURL,
-        metadata: this.serverMetadata,
-      });
+      throw new Error('Not yet implemented');
     }
 
     requestBuilder.withToken(this.accessTokenResponse.access_token);
@@ -286,14 +288,14 @@ export class OpenID4VCIClient {
       throw Error(
         `Retrieving a credential from ${
           this._serverMetadata?.credential_endpoint
-        } for issuer ${this._credentialIssuanceClient.getIssuer()} failed with status: ${response.origResponse.status}`
+        } for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}`
       );
     } else if (!response.successBody) {
       debug(`Credential request error. No success body`);
       throw Error(
         `Retrieving a credential from ${
           this._serverMetadata?.credential_endpoint
-        } for issuer ${this._credentialIssuanceClient.getIssuer()} failed as there was no success response body`
+        } for issuer ${this.getIssuer()} failed as there was no success response body`
       );
     }
     return response.successBody;
@@ -303,13 +305,10 @@ export class OpenID4VCIClient {
     const credentialsSupported = this.serverMetadata?.openid4vci_metadata?.credentials_supported;
     if (!credentialsSupported) {
       return {};
-    } else {
-      // noinspection PointlessBooleanExpressionJS
-      if (!restrictToInitiationTypes === false) {
+    } else if (!restrictToInitiationTypes === false) {
         return credentialsSupported;
-      }
     }
-    const initiationTypes = this._credentialIssuanceClient.getCredentialTypes();
+    const initiationTypes = this.getCredentialTypes();
     const supported: CredentialsSupported = {};
     for (const [key, value] of Object.entries(credentialsSupported)) {
       if (initiationTypes.includes(key)) {
@@ -323,8 +322,19 @@ export class OpenID4VCIClient {
     return this.getCredentialsSupported(false)[type];
   }
 
+  getCredentialTypes(): string[] {
+    const issuanceInitiationWithBaseUrl = this._issuanceOffer as IssuanceInitiationWithBaseUrl;
+    return typeof issuanceInitiationWithBaseUrl.issuanceInitiationRequest.credential_type === 'string'
+        ? [issuanceInitiationWithBaseUrl.issuanceInitiationRequest.credential_type]
+        : issuanceInitiationWithBaseUrl.issuanceInitiationRequest.credential_type;
+  }
+
   get flowType(): AuthzFlowType {
     return this._flowType;
+  }
+
+  get issuanceOffer(): IssuanceInitiationWithBaseUrl | CredentialOfferWithBaseURL {
+    return this._issuanceOffer;
   }
 
   public get serverMetadata(): EndpointMetadata {
@@ -334,7 +344,7 @@ export class OpenID4VCIClient {
   }
 
   get kid(): string {
-    this._credentialIssuanceClient.assertIssuerData();
+    this.assertIssuerData();
     if (!this._kid) {
       throw new Error('No value for kid is supplied');
     }
@@ -342,7 +352,7 @@ export class OpenID4VCIClient {
   }
 
   get alg(): string {
-    this._credentialIssuanceClient.assertIssuerData();
+    this.assertIssuerData();
     if (!this._alg) {
       throw new Error('No value for alg is supplied');
     }
@@ -363,20 +373,26 @@ export class OpenID4VCIClient {
   }
 
   public getIssuer(): string {
-    this._credentialIssuanceClient.assertIssuerData();
-    return this._serverMetadata ? this.serverMetadata.issuer : this._credentialIssuanceClient.getIssuer();
+    this.assertIssuerData();
+    return this._serverMetadata ? this.serverMetadata.issuer : this.getIssuer();
   }
 
   public getAccessTokenEndpoint(): string {
-    this._credentialIssuanceClient.assertIssuerData();
+    this.assertIssuerData();
     return this.serverMetadata
       ? this.serverMetadata.token_endpoint
       : AccessTokenClient.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
   }
 
   public getCredentialEndpoint(): string {
-    this._credentialIssuanceClient.assertIssuerData();
+    this.assertIssuerData();
     return this.serverMetadata ? this.serverMetadata.credential_endpoint : `${this.getIssuer()}/credential`;
+  }
+
+  private assertIssuerData(): void {
+    if (!this._issuanceOffer) {
+      throw Error(`No issuance initiation or credential offer present`);
+    }
   }
 
   private assertServerMetadata(): void {
@@ -391,11 +407,8 @@ export class OpenID4VCIClient {
     }
   }
 
-  get credentialIssuanceClient(): CredentialIssuanceClient {
-    return this._credentialIssuanceClient;
-  }
-
   get openID4VCIVersion(): OpenId4VCIVersion {
     return this._openID4VCIVersion;
   }
+
 }

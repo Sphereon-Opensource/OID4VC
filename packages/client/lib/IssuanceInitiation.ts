@@ -1,13 +1,11 @@
 import { IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl, OpenId4VCIVersion } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 
-import { convertJsonToURI, convertURIToJsonObject } from '../functions';
-
-import { CredentialIssuanceClient } from './index';
+import { convertJsonToURI, convertURIToJsonObject } from './functions';
 
 const debug = Debug('sphereon:openid4vci:initiation');
 
-export class IssuanceInitiationClient implements CredentialIssuanceClient {
+export class IssuanceInitiation {
   public readonly _version: OpenId4VCIVersion;
   private readonly _issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl;
 
@@ -16,7 +14,7 @@ export class IssuanceInitiationClient implements CredentialIssuanceClient {
     this._issuanceInitiationWithBaseUrl = issuanceInitiationWithBaseUrl;
   }
 
-  public static fromURI(issuanceInitiationURI: string): IssuanceInitiationClient {
+  public static fromURI(issuanceInitiationURI: string): IssuanceInitiationWithBaseUrl {
     debug(`issuance initiation URI: ${issuanceInitiationURI}`);
     if (!issuanceInitiationURI.includes('?')) {
       debug(`Invalid issuance initiation URI: ${issuanceInitiationURI}`);
@@ -28,10 +26,10 @@ export class IssuanceInitiationClient implements CredentialIssuanceClient {
       requiredProperties: ['issuer', 'credential_type'],
     }) as IssuanceInitiationRequestPayload;
 
-    return new IssuanceInitiationClient({
+    return {
       baseUrl,
       issuanceInitiationRequest,
-    });
+    };
   }
 
   public static toURI(issuanceInitiationWithBaseUrl: IssuanceInitiationWithBaseUrl): string {

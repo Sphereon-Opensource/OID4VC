@@ -5516,7 +5516,7 @@ packages:
       read-pkg-up: 9.1.0
       redent: 4.0.0
       trim-newlines: 4.1.1
-      type-fest: 3.7.1
+      type-fest: 3.7.2
       yargs-parser: 21.1.1
     dev: true
 
@@ -7818,8 +7818,8 @@ packages:
     engines: {node: '>=12.20'}
     dev: true
 
-  /type-fest/3.7.1:
-    resolution: {integrity: sha512-8LZNdvuztgxCF4eYpEmPYUPS0lbbByM2qHcp2oMxHZhWLIQB9QE36EeQ1PKwsUIDZXEP8HCBEmkBbT1//kLU4Q==}
+  /type-fest/3.7.2:
+    resolution: {integrity: sha512-f9BHrLjRJ4MYkfOsnC/53PNDzZJcVo14MqLp2+hXE39p5bgwqohxR5hDZztwxlbxmIVuvC2EFAKrAkokq23PLA==}
     engines: {node: '>=14.16'}
     dev: true
 
