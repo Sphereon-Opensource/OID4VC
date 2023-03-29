@@ -58,6 +58,6 @@ export class CredentialOfferUtil {
       return potentialVersion;
     }
 
-    throw new Error(`Invalid param. Some keys have been used from ${determinedVersion} version while '${key}' is used from ${potentialVersion}`);
+    throw new Error(`Invalid param. Some keys have been used from version: ${determinedVersion} version while '${key}' is used from version: ${potentialVersion}`);
   }
 }

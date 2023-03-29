@@ -5,7 +5,7 @@ import { CredentialOfferUtil } from '../CredentialOffer';
 export const UNIT_TEST_TIMEOUT = 30000;
 
 describe('CredentialIssuanceClient should', () => {
-  const INITIATE_QR_DATA_VER9 =
+  const INITIATE_QR =
     'openid-initiate-issuance://?' +
     'issuer=https%3A%2F%2Fissuer.research.identiproof.io&' +
     'credential_type=OpenBadgeCredentialUrl&' +
@@ -16,14 +16,14 @@ describe('CredentialIssuanceClient should', () => {
     'openid-initiate-issuance://?' +
     'credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D';
 
-  const CREDENTIAL_OFFER_QR_DATA_VER11 =
+  const CREDENTIAL_OFFER_QR =
     'openid-credential-offer://?' +
     'credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D';
 
   it(
     'get version 9 with sample URL',
     async () => {
-      expect(CredentialOfferUtil.getOpenId4VCIVersion(INITIATE_QR_DATA_VER9)).toEqual(OpenId4VCIVersion.VER_9);
+      expect(CredentialOfferUtil.getOpenId4VCIVersion(INITIATE_QR)).toEqual(OpenId4VCIVersion.VER_9);
     },
     UNIT_TEST_TIMEOUT
   );
@@ -31,7 +31,7 @@ describe('CredentialIssuanceClient should', () => {
   it(
     'get version 11 with sample URL',
     async () => {
-      expect(CredentialOfferUtil.getOpenId4VCIVersion(CREDENTIAL_OFFER_QR_DATA_VER11)).toEqual(OpenId4VCIVersion.VER_11);
+      expect(CredentialOfferUtil.getOpenId4VCIVersion(CREDENTIAL_OFFER_QR)).toEqual(OpenId4VCIVersion.VER_11);
     },
     UNIT_TEST_TIMEOUT
   );
@@ -40,7 +40,7 @@ describe('CredentialIssuanceClient should', () => {
     'get exception for mixed attributes in URL',
     async () => {
       expect(() => CredentialOfferUtil.getOpenId4VCIVersion(INITIATE_QR_DATA_MIXED)).toThrow(
-        Error("Invalid param. Some keys have been used from version9 version while 'credential_issuer' is used from version11")
+        Error("Invalid param. Some keys have been used from version: 9 version while 'credential_issuer' is used from version: 11")
       );
     },
     UNIT_TEST_TIMEOUT
