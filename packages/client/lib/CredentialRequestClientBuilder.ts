@@ -22,7 +22,7 @@ export class CredentialRequestClientBuilder {
       request: convertURIToJsonObject(uri, {
         arrayTypeProperties: ['credential_type'],
         requiredProperties: ['issuer', 'credential_type'],
-      }) as IssuanceInitiationRequestPayloadV9,
+      }) as IssuanceInitiationRequestPayloadV9 | CredentialOfferRequestPayloadV11,
       metadata,
     });
   }
