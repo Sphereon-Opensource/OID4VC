@@ -37,10 +37,10 @@ describe('OID4VCI-Client should', () => {
   };
   const mockedVC =
     'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL2V4YW1wbGVzL3YxIl0sImlkIjoiaHR0cDovL2V4YW1wbGUuZWR1L2NyZWRlbnRpYWxzLzM3MzIiLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiVW5pdmVyc2l0eURlZ3JlZUNyZWRlbnRpYWwiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLmVkdS9pc3N1ZXJzLzU2NTA0OSIsImlzc3VhbmNlRGF0ZSI6IjIwMTAtMDEtMDFUMDA6MDA6MDBaIiwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEiLCJkZWdyZWUiOnsidHlwZSI6IkJhY2hlbG9yRGVncmVlIiwibmFtZSI6IkJhY2hlbG9yIG9mIFNjaWVuY2UgYW5kIEFydHMifX19LCJpc3MiOiJodHRwczovL2V4YW1wbGUuZWR1L2lzc3VlcnMvNTY1MDQ5IiwibmJmIjoxMjYyMzA0MDAwLCJqdGkiOiJodHRwOi8vZXhhbXBsZS5lZHUvY3JlZGVudGlhbHMvMzczMiIsInN1YiI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMSJ9.z5vgMTK1nfizNCg5N-niCOL3WUIAL7nXy-nGhDZYO_-PNGeE-0djCpWAMH8fD8eWSID5PfkPBYkx_dfLJnQ7NA';
-  const INITIATE_QR_DATA_VER9 =
+  const INITIATE_QR =
     'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true';
 
-  const INITIATE_QR_DATA_VER11 =
+  const OFFER_QR =
     'openid-credential-offer://credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D';
 
   function succeedWithAFullFlowWithClientSetup() {
@@ -60,7 +60,7 @@ describe('OID4VCI-Client should', () => {
   it('succeed with a full flow with the client using OpenID4VCI version 9', async () => {
     succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
-      credentialOfferURI: INITIATE_QR_DATA_VER9,
+      uri: INITIATE_QR,
       flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
       alg: Alg.ES256,
@@ -72,7 +72,7 @@ describe('OID4VCI-Client should', () => {
   test.skip('succeed with a full flow wit the client using OpenID4VCI version 11', async () => {
     succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
-      credentialOfferURI: INITIATE_QR_DATA_VER11,
+      uri: OFFER_QR,
       flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
       alg: Alg.ES256,
@@ -109,7 +109,7 @@ describe('OID4VCI-Client should', () => {
     'succeed with a full flow without the client',
     async () => {
       /* Convert the URI into an object */
-      const issuanceInitiation = (IssuanceInitiationClient.fromURI(INITIATE_QR_DATA_VER9) as IssuanceInitiationClient).issuanceInitiationWithBaseUrl;
+      const issuanceInitiation = (IssuanceInitiationClient.fromURI(INITIATE_QR) as IssuanceInitiationClient).issuanceInitiationWithBaseUrl;
 
       expect(issuanceInitiation.baseUrl).toEqual('openid-initiate-issuance://');
       expect(issuanceInitiation.issuanceInitiationRequest).toEqual({

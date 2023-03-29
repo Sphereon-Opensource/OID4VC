@@ -65,21 +65,21 @@ export class OpenID4VCIClient {
   }
 
   public static async fromURI({
-    credentialOfferURI,
+    uri,
     flowType,
     kid,
     alg,
     retrieveServerMetadata,
     clientId,
   }: {
-    credentialOfferURI: string;
+    uri: string;
     flowType: AuthzFlowType;
     kid?: string;
     alg?: Alg | string;
     retrieveServerMetadata?: boolean;
     clientId?: string;
   }): Promise<OpenID4VCIClient> {
-    const flow = new OpenID4VCIClient(credentialOfferURI, flowType, kid, alg, clientId);
+    const flow = new OpenID4VCIClient(uri, flowType, kid, alg, clientId);
     // noinspection PointlessBooleanExpressionJS
     if (retrieveServerMetadata !== false) {
       await flow.retrieveServerMetadata();

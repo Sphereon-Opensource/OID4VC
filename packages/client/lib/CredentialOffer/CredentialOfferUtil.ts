@@ -1,4 +1,4 @@
-import { OpenId4VCIVersion, URLSchemes } from '@sphereon/openid4vci-common';
+import { OpenId4VCIVersion, DefaultURISchemes } from '@sphereon/openid4vci-common';
 
 import { CredentialIssuanceClient } from './CredentialIssuanceClient';
 import { CredentialOfferClient } from './CredentialOfferClient';
@@ -35,7 +35,7 @@ export class CredentialOfferUtil {
 
   public static getVersionFromScheme(credentialOfferURI: string, openId4VCIVersion: OpenId4VCIVersion) {
     const scheme = CredentialOfferUtil.getScheme(credentialOfferURI);
-    if (credentialOfferURI.startsWith(URLSchemes.CREDENTIAL_OFFER)) {
+    if (credentialOfferURI.startsWith(DefaultURISchemes.CREDENTIAL_OFFER)) {
       return CredentialOfferUtil.recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_11, scheme);
     } else {
       return CredentialOfferUtil.recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_9, scheme);

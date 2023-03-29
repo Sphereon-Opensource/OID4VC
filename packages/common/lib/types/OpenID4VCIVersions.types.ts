@@ -1,10 +1,10 @@
 export enum OpenId4VCIVersion {
-  VER_9 = 'version9',
-  VER_11 = 'version11',
-  VER_UNKNOWN = 'unknown version',
+  VER_9 = 9,
+  VER_11 = 11,
+  VER_UNKNOWN = -1,
 }
 
-export enum URLSchemes {
+export enum DefaultURISchemes {
   INITIATE_ISSUANCE = 'openid-initiate-issuance',
   CREDENTIAL_OFFER = 'openid-credential-offer',
 }

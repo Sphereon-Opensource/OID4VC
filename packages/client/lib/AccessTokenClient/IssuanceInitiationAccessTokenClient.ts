@@ -33,18 +33,17 @@ export class IssuanceInitiationAccessTokenClient implements AccessTokenClient {
   ): IssuanceInitiationAccessTokenRequestOpts => {
     return {
       issuanceInitiation: issuanceInitiationClient.issuanceInitiationWithBaseUrl,
-      metadata: metadata,
+      metadata,
       pin,
       codeVerifier,
       code,
       redirectUri,
-      asOpts: { clientId: clientId },
+      asOpts: { clientId },
     };
   };
 
   public async acquireAccessToken(accessTokenRequestOpts: IssuanceInitiationAccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
-    const accessTokenRequestOptions = accessTokenRequestOpts as IssuanceInitiationAccessTokenRequestOpts;
-    const issuanceInitiation = accessTokenRequestOptions.issuanceInitiation;
+    const issuanceInitiation = accessTokenRequestOpts.issuanceInitiation;
     const req: IssuanceInitiationRequestPayload = issuanceInitiation.issuanceInitiationRequest;
 
     const isPinRequired = this.isPinRequiredValue(req);
@@ -53,15 +52,15 @@ export class IssuanceInitiationAccessTokenClient implements AccessTokenClient {
     return await this.acquireAccessTokenUsingRequest({
       accessTokenRequest: await this.createAccessTokenRequest({
         issuanceInitiation: issuanceInitiation,
-        asOpts: accessTokenRequestOptions.asOpts,
-        codeVerifier: accessTokenRequestOptions.codeVerifier,
-        code: accessTokenRequestOptions.code,
-        redirectUri: accessTokenRequestOptions.redirectUri,
-        pin: accessTokenRequestOptions.pin,
+        asOpts: accessTokenRequestOpts.asOpts,
+        codeVerifier: accessTokenRequestOpts.codeVerifier,
+        code: accessTokenRequestOpts.code,
+        redirectUri: accessTokenRequestOpts.redirectUri,
+        pin: accessTokenRequestOpts.pin,
       }),
       isPinRequired,
-      metadata: accessTokenRequestOptions.metadata,
-      asOpts: accessTokenRequestOptions.asOpts,
+      metadata: accessTokenRequestOpts.metadata,
+      asOpts: accessTokenRequestOpts.asOpts,
       issuerOpts,
     });
   }
