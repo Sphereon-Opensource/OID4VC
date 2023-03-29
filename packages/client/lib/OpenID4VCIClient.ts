@@ -19,10 +19,10 @@ import { CredentialIssuanceClient, CredentialOfferClient, IssuanceInitiationClie
 import { CredentialOfferUtil } from './CredentialOffer';
 import { CredentialIssuanceRequestClientBuilder, OfferCredentialRequestClientBuilder } from './CredentialRequestClient';
 import { IssuanceCredentialRequestClientBuilder } from './CredentialRequestClient';
-import { CredentialOfferMetadataClient, IssuanceInitiationMetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { convertJsonToURI } from './functions';
 import {AccessTokenClient} from "./AccessTokenClient";
+import {MetadataClient} from "./MetadataClient";
 
 const debug = Debug('sphereon:openid4vci:flow');
 
@@ -91,12 +91,12 @@ export class OpenID4VCIClient {
     if (!this._serverMetadata) {
       if (this._openID4VCIVersion === OpenId4VCIVersion.VER_9) {
         const issuanceInitiationClient = this._credentialIssuanceClient as IssuanceInitiationClient;
-        this._serverMetadata = await IssuanceInitiationMetadataClient.getServerMetaData(issuanceInitiationClient.issuanceInitiationWithBaseUrl);
+        this._serverMetadata = await MetadataClient.getServerMetaData(issuanceInitiationClient.issuanceInitiationWithBaseUrl);
         return this._serverMetadata;
       }
 
       const credentialOfferClient = this._credentialIssuanceClient as CredentialOfferClient;
-      this._serverMetadata = await CredentialOfferMetadataClient.getServerMetaData(credentialOfferClient.credentialOfferWithBaseURL);
+      this._serverMetadata = await MetadataClient.getServerMetaData(credentialOfferClient.credentialOfferWithBaseURL);
     }
     return this._serverMetadata;
   }

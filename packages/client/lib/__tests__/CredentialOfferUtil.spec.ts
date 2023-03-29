@@ -4,7 +4,7 @@ import { CredentialOfferUtil } from '../CredentialOffer';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
-describe('CredentialIssuanceClient should', () => {
+describe('CredentialOfferUtil should', () => {
   const INITIATE_QR =
     'openid-initiate-issuance://?' +
     'issuer=https%3A%2F%2Fissuer.research.identiproof.io&' +
