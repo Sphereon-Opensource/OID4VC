@@ -29,7 +29,7 @@ export class AccessTokenClient {
       redirectUri,
       metadata,
     }: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
-    const { issuanceInitiationRequest } = issuanceInitiation!;
+    const { issuanceInitiationRequest } = issuanceInitiation!; // FIXME to implement version 11 change here.
 
     const isPinRequired = this.isPinRequiredValue(issuanceInitiationRequest);
     const issuerOpts = { issuer: issuanceInitiationRequest.issuer };
@@ -84,7 +84,7 @@ export class AccessTokenClient {
     code,
     redirectUri,
   }: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
-    const issuanceInitiationRequest = issuanceInitiation!.issuanceInitiationRequest;
+    const issuanceInitiationRequest = issuanceInitiation!.issuanceInitiationRequest; // FIXME to implement version 11 change here.
     const request: Partial<AccessTokenRequest> = {};
     if (asOpts?.clientId) {
       request.client_id = asOpts.clientId;
