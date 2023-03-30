@@ -288,10 +288,8 @@ export class OpenID4VCIClient {
     const credentialsSupported = this.serverMetadata?.openid4vci_metadata?.credentials_supported;
     if (!credentialsSupported) {
       return {};
-    } else { // noinspection PointlessBooleanExpressionJS
-      if (restrictToInitiationTypes === false) {
-              return credentialsSupported;
-          }
+    } else if (!restrictToInitiationTypes === false) {
+      return credentialsSupported;
     }
     const initiationTypes = this.getCredentialTypes();
     const supported: CredentialsSupported = {};
