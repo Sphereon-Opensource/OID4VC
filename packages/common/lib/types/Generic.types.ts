@@ -87,49 +87,48 @@ export interface IssuerCredentialDefinition {
   credentialSubject: IssuerCredentialSubject;
 }
 
-//todo: change this back to AuthorizationRequest once merged with latest changes from develop
-export interface AbstractAuthorizationRequest {
+export interface CommonAuthorizationRequest {
   response_type: ResponseType.AUTH_CODE;
   client_id: string;
   code_challenge: string;
   code_challenge_method: CodeChallengeMethod;
   redirect_uri: string;
   scope?: string;
-  authorization_details?: AbstractAuthorizationDetails[];
+  authorization_details?: CommonAuthorizationDetails[];
   wallet_issuer?: string;
   user_hint?: string;
 }
 
-export interface AuthorizationRequestJwtVcJson extends AbstractAuthorizationRequest {
+export interface AuthorizationRequestJwtVcJson extends CommonAuthorizationRequest {
   authorization_details?: AuthorizationDetailsJwtVcJson[];
 }
 
-export interface AuthorizationRequestJwtVcJsonLdAndLdpVc extends AbstractAuthorizationRequest {
+export interface AuthorizationRequestJwtVcJsonLdAndLdpVc extends CommonAuthorizationRequest {
   authorization_details?: AuthorizationDetailsJwtVcJsonLdAndLdpVc[];
 }
 
-export interface AuthorizationRequestMsoDoc extends AbstractAuthorizationRequest {
+export interface AuthorizationRequestMsoDoc extends CommonAuthorizationRequest {
   authorization_details?: AuthorizationDetailsMsoDoc[];
 }
 
-export interface AbstractAuthorizationDetails {
+export interface CommonAuthorizationDetails {
   type: 'openid_credential' | string;
   format: CredentialFormatEnum;
 }
 
-export interface AuthorizationDetailsJwtVcJson extends AbstractAuthorizationDetails {
+export interface AuthorizationDetailsJwtVcJson extends CommonAuthorizationDetails {
   format: CredentialFormatEnum.jwt_vc_json;
   types: string[];
   credentialSubject?: IssuerCredentialSubject;
 }
 
-export interface AuthorizationDetailsJwtVcJsonLdAndLdpVc extends AbstractAuthorizationDetails {
+export interface AuthorizationDetailsJwtVcJsonLdAndLdpVc extends CommonAuthorizationDetails {
   format: CredentialFormatEnum.ldp_vc | CredentialFormatEnum.jwt_vc_json_ld;
   types: string[];
   credential_definition: IssuerCredentialDefinition;
 }
 
-export interface AuthorizationDetailsMsoDoc extends AbstractAuthorizationDetails {
+export interface AuthorizationDetailsMsoDoc extends CommonAuthorizationDetails {
   format: CredentialFormatEnum.mso_mdoc;
   doctype: string;
   claims?: MsoClaims;
@@ -147,8 +146,7 @@ export enum GrantType {
   PASSWORD = 'password',
 }
 
-//todo: change this back to AccessTokenRequest once merged with latest changes from develop
-export interface GenericAccessTokenRequest {
+export interface CommonAccessTokenRequest {
   client_id?: string;
   code?: string;
   code_verifier?: string;
@@ -166,8 +164,7 @@ export enum TokenErrorResponse {
   invalid_scope = 'invalid_scope',
 }
 
-//todo: change this back to AccessTokenResponse once merged with latest changes from develop
-export interface GenericAccessTokenResponse {
+export interface CommonAccessTokenResponse {
   access_token: string;
   scope?: string;
   token_type?: string;
@@ -185,25 +182,23 @@ export interface ErrorResponse extends Response {
   state?: string;
 }
 
-//todo: change this back to CredentialRequest once merged with latest changes from develop
-export interface AbstractCredentialRequest {
+export interface CommonCredentialRequest {
   format: string;
   proof?: ProofOfPossession;
 }
 
-export interface CredentialRequestJwtVcJson extends AbstractCredentialRequest {
+export interface CredentialRequestJwtVcJson extends CommonCredentialRequest {
   format: CredentialFormatEnum.jwt_vc_json;
   types: string[];
   credentialSubject?: IssuerCredentialSubject;
 }
 
-export interface CredentialRequestJwtVcJsonLdAndLdpVc extends AbstractCredentialRequest {
+export interface CredentialRequestJwtVcJsonLdAndLdpVc extends CommonCredentialRequest {
   format: CredentialFormatEnum.jwt_vc_json_ld | CredentialFormatEnum.ldp_vc;
   credential_definition: IssuerCredentialDefinition;
 }
 
-//todo: change this back to CredentialResponse once merged with latest changes from develop
-export interface AbstractCredentialResponse {
+export interface CommonCredentialResponse {
   format: string;
   credential?: W3CVerifiableCredential;
   acceptance_token?: string;
@@ -211,7 +206,7 @@ export interface AbstractCredentialResponse {
   c_nonce_expires_in?: string;
 }
 
-export interface CredentialResponseJwtVcJsonLdAndLdpVc extends AbstractCredentialResponse {
+export interface CredentialResponseJwtVcJsonLdAndLdpVc extends CommonCredentialResponse {
   format: CredentialFormatEnum.jwt_vc_json_ld | CredentialFormatEnum.ldp_vc;
   credential: IVerifiableCredential;
 }

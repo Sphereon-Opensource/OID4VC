@@ -1,4 +1,4 @@
-import { AbstractAuthorizationDetails, AbstractAuthorizationRequest, CredentialOfferCredentialJwtVcJson } from './Generic.types';
+import { CommonAuthorizationDetails, CommonAuthorizationRequest, CredentialOfferCredentialJwtVcJson } from './Generic.types';
 import { CredentialOfferV1_0_11 } from './v1_0_11.types';
 
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-09.html#name-issuance-initiation-request
@@ -11,11 +11,11 @@ export interface CredentialOfferV1_0_09 {
   op_state?: string; //(JWT) OPTIONAL String value created by the Credential Issuer and opaque to the Wallet that is used to bind the subsequent authentication request with the Credential Issuer to a context set up during previous steps
 }
 
-export interface AuthorizationRequestV1_0_09 extends AbstractAuthorizationRequest {
+export interface AuthorizationRequestV1_0_09 extends CommonAuthorizationRequest {
   op_state?: string;
 }
 
-export interface AuthorizationDetailsJwtVcJsonV1_0_09 extends AbstractAuthorizationDetails {
+export interface AuthorizationDetailsJwtVcJsonV1_0_09 extends CommonAuthorizationDetails {
   // If the Credential Issuer metadata contains an authorization_server parameter, the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.
   locations?: string[];
   types: string[];
@@ -24,7 +24,7 @@ export interface AuthorizationDetailsJwtVcJsonV1_0_09 extends AbstractAuthorizat
   [key: string]: unknown;
 }
 
-export function isAuthorizationRequestV1_0_09(request: AbstractAuthorizationRequest): boolean {
+export function isAuthorizationRequestV1_0_09(request: CommonAuthorizationRequest): boolean {
   return request && 'op_state' in request;
 }
 

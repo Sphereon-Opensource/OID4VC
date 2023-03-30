@@ -1,4 +1,4 @@
-import { AbstractAuthorizationRequest, CredentialFormatEnum, CredentialOfferCredential, Grant, IssuerCredentialDefinition } from './Generic.types';
+import { CommonAuthorizationRequest, CredentialFormatEnum, CredentialOfferCredential, Grant, IssuerCredentialDefinition } from './Generic.types';
 import { CredentialOfferV1_0_09 } from './v1_0_09.types';
 
 export interface CredentialOfferV1_0_11 {
@@ -13,7 +13,7 @@ export interface InnerCredentialOfferV1_0_11 {
   grants?: Grant;
 }
 
-export interface AuthorizationRequestV1_0_11 extends AbstractAuthorizationRequest {
+export interface AuthorizationRequestV1_0_11 extends CommonAuthorizationRequest {
   issuer_state?: string;
 }
 
@@ -31,7 +31,7 @@ export interface CredentialOfferJwtVcJsonV1_0_11 extends InnerCredentialOfferV1_
   )[];
 }
 
-export function isAuthorizationRequestV1_0_11(request: AbstractAuthorizationRequest): boolean {
+export function isAuthorizationRequestV1_0_11(request: CommonAuthorizationRequest): boolean {
   return request && 'issuer_state' in request;
 }
 
