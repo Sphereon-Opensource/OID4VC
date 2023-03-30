@@ -1,5 +1,5 @@
 import { AbstractAuthorizationRequest, CredentialFormatEnum, CredentialOfferCredential, Grant, IssuerCredentialDefinition } from './Generic.types';
-import {CredentialOfferV1_0_09} from "./v1_0_09.types";
+import { CredentialOfferV1_0_09 } from './v1_0_09.types';
 
 export interface CredentialOfferV1_0_11 {
   credential_offer?: InnerCredentialOfferV1_0_11;
