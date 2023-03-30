@@ -4,7 +4,8 @@
     "rootDir": "lib",
     "outDir": "dist",
     "declarationDir": "dist",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "moduleResolution": "Node"
   },
   "references": [
     {

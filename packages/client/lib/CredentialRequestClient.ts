@@ -2,14 +2,14 @@ import { CredentialRequest, CredentialResponse, OpenIDResponse, ProofOfPossessio
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
-import { ProofOfPossessionBuilder } from '../ProofOfPossessionBuilder';
-import { isValidURL, post } from '../functions';
+import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
+import { isValidURL, post } from './functions';
+import {CredentialRequestClientBuilder} from "./CredentialRequestClientBuilder";
 
-import { IssuanceCredentialRequestClientBuilder } from './IssuanceCredentialRequestClientBuilder';
 
 const debug = Debug('sphereon:openid4vci:credential');
 
-export interface IssuanceRequestOpts {
+export interface CredentialRequestOpts {
   credentialEndpoint: string;
   credentialType: string | string[];
   format: CredentialFormat | CredentialFormat[];
@@ -18,18 +18,18 @@ export interface IssuanceRequestOpts {
 }
 
 export class CredentialRequestClient {
-  private readonly _issuanceRequestOpts: Partial<IssuanceRequestOpts>;
+  private readonly _credentialRequestOpts: Partial<CredentialRequestOpts>;
 
-  get issuanceRequestOpts(): IssuanceRequestOpts {
-    return this._issuanceRequestOpts as IssuanceRequestOpts;
+  get credentialRequestOpts(): CredentialRequestOpts {
+    return this._credentialRequestOpts as CredentialRequestOpts;
   }
 
   public getCredentialEndpoint(): string {
-    return this.issuanceRequestOpts.credentialEndpoint;
+    return this.credentialRequestOpts.credentialEndpoint;
   }
 
-  public constructor(builder: IssuanceCredentialRequestClientBuilder) {
-    this._issuanceRequestOpts = { ...builder };
+  public constructor(builder: CredentialRequestClientBuilder) {
+    this._credentialRequestOpts = { ...builder };
   }
 
   public async acquireCredentialsUsingProof({
@@ -46,13 +46,13 @@ export class CredentialRequestClient {
   }
 
   public async acquireCredentialsUsingRequest(request: CredentialRequest): Promise<OpenIDResponse<CredentialResponse>> {
-    const credentialEndpoint: string = this.issuanceRequestOpts.credentialEndpoint;
+    const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint;
     if (!isValidURL(credentialEndpoint)) {
       debug(`Invalid credential endpoint: ${credentialEndpoint}`);
       throw new Error(URL_NOT_VALID);
     }
     debug(`Acquiring credential(s) from: ${credentialEndpoint}`);
-    const requestToken: string = this.issuanceRequestOpts.token;
+    const requestToken: string = this.credentialRequestOpts.token;
     const response: OpenIDResponse<CredentialResponse> = await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken });
     debug(`Credential endpoint ${credentialEndpoint} response:\r\n${response}`);
     return response;
@@ -70,8 +70,8 @@ export class CredentialRequestClient {
     const proof =
       'proof_type' in proofInput ? await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession).build() : await proofInput.build();
     return {
-      type: credentialType ? credentialType : this.issuanceRequestOpts.credentialType,
-      format: format ? format : this.issuanceRequestOpts.format,
+      type: credentialType ? credentialType : this.credentialRequestOpts.credentialType,
+      format: format ? format : this.credentialRequestOpts.format,
       proof,
     };
   }

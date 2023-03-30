@@ -1,5 +1,5 @@
-import { OpenId4VCIVersion } from '@sphereon/openid4vci-common';
-import {CredentialOfferUtil} from "../CredentialOfferUtil";
+import {determineSpecVersionFromURI} from "../functions";
+import {OpenId4VCIVersion} from "../types";
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -22,7 +22,7 @@ describe('CredentialOfferUtil should', () => {
   it(
     'get version 9 with sample URL',
     async () => {
-      expect(CredentialOfferUtil.getOpenId4VCIVersion(INITIATE_QR)).toEqual(OpenId4VCIVersion.VER_9);
+      expect(determineSpecVersionFromURI(INITIATE_QR)).toEqual(OpenId4VCIVersion.VER_9);
     },
     UNIT_TEST_TIMEOUT
   );
@@ -30,7 +30,7 @@ describe('CredentialOfferUtil should', () => {
   it(
     'get version 11 with sample URL',
     async () => {
-      expect(CredentialOfferUtil.getOpenId4VCIVersion(CREDENTIAL_OFFER_QR)).toEqual(OpenId4VCIVersion.VER_11);
+      expect(determineSpecVersionFromURI(CREDENTIAL_OFFER_QR)).toEqual(OpenId4VCIVersion.VER_11);
     },
     UNIT_TEST_TIMEOUT
   );
@@ -38,7 +38,7 @@ describe('CredentialOfferUtil should', () => {
   it(
     'get exception for mixed attributes in URL',
     async () => {
-      expect(() => CredentialOfferUtil.getOpenId4VCIVersion(INITIATE_QR_DATA_MIXED)).toThrow(
+      expect(() => determineSpecVersionFromURI(INITIATE_QR_DATA_MIXED)).toThrow(
         Error("Invalid param. Some keys have been used from version: 9 version while 'credential_issuer' is used from version: 11")
       );
     },
@@ -48,7 +48,7 @@ describe('CredentialOfferUtil should', () => {
   it(
     'get version 11 as default value',
     async () => {
-      expect(CredentialOfferUtil.getOpenId4VCIVersion('')).toEqual(OpenId4VCIVersion.VER_11);
+      expect(determineSpecVersionFromURI('')).toEqual(OpenId4VCIVersion.VER_11);
     },
     UNIT_TEST_TIMEOUT
   );

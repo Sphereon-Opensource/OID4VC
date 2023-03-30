@@ -1,4 +1,4 @@
-import { IssuanceInitiationWithBaseUrl } from '@sphereon/openid4vci-common';
+import {CredentialOfferRequestWithBaseUrl, OpenId4VCIVersion} from '@sphereon/openid4vci-common';
 
 export const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io';
 export const IDENTIPROOF_AS_URL = 'https://auth.research.identiproof.io';
@@ -10,15 +10,16 @@ export const INITIATION_TEST_HTTPS_URI =
 export const INITIATION_TEST_URI =
   'openid-initiate-issuance://?credential_type=OpenBadgeCredential&issuer=https%3A%2F%2Fjff%2Ewalt%2Eid%2Fissuer-api%2Foidc%2F&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
 
-export const INITIATION_TEST: IssuanceInitiationWithBaseUrl = {
+export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
   baseUrl: 'openid-initiate-issuance://',
-  issuanceInitiationRequest: {
+  request: {
     credential_type: 'OpenBadgeCredential',
     issuer: 'https://jff.walt.id/issuer-api/oidc/',
     'pre-authorized_code':
       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
     user_pin_required: 'false',
   },
+  version: OpenId4VCIVersion.VER_9
 };
 export const IDENTIPROOF_AS_METADATA = {
   issuer: 'https://auth.research.identiproof.io',

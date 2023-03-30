@@ -1780,8 +1780,8 @@ packages:
     resolution: {integrity: sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==}
     dev: true
 
-  /@yarnpkg/parsers/3.0.0-rc.41:
-    resolution: {integrity: sha512-Qenu313thHJTriR1PqECfPhNVtem1DowFw8r9xRn09T35c4iF+3lO66nB5PUsMCW/mnHux7ZtAStQzxX1waXlw==}
+  /@yarnpkg/parsers/3.0.0-rc.42:
+    resolution: {integrity: sha512-eW9Mbegmb5bJjwawJM9ghjUjUqciNMhC6L7XrQPF/clXS5bbP66MstsgCT5hy9VlfUh/CfBT+0Wucf531dMjHA==}
     engines: {node: '>=14.15.0'}
     dependencies:
       js-yaml: 3.14.1
@@ -2196,8 +2196,8 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001472
-      electron-to-chromium: 1.4.342
+      caniuse-lite: 1.0.30001473
+      electron-to-chromium: 1.4.345
       node-releases: 2.0.10
       update-browserslist-db: 1.0.10_browserslist@4.21.5
     dev: true
@@ -2374,8 +2374,8 @@ packages:
     engines: {node: '>=14.16'}
     dev: true
 
-  /caniuse-lite/1.0.30001472:
-    resolution: {integrity: sha512-xWC/0+hHHQgj3/vrKYY0AAzeIUgr7L9wlELIcAvZdDUHlhL/kNxMdnQLOSOQfP8R51ZzPhmHdyMkI0MMpmxCfg==}
+  /caniuse-lite/1.0.30001473:
+    resolution: {integrity: sha512-ewDad7+D2vlyy+E4UJuVfiBsU69IL+8oVmTuZnH5Q6CIUbxNfI50uVpRHbUPDD6SUaN2o0Lh4DhTrvLG/Tn1yg==}
     dev: true
 
   /chalk/2.4.2:
@@ -2986,8 +2986,8 @@ packages:
       jake: 10.8.5
     dev: true
 
-  /electron-to-chromium/1.4.342:
-    resolution: {integrity: sha512-dTei3VResi5bINDENswBxhL+N0Mw5YnfWyTqO75KGsVldurEkhC9+CelJVAse8jycWyP8pv3VSj4BSyP8wTWJA==}
+  /electron-to-chromium/1.4.345:
+    resolution: {integrity: sha512-znGhOQK2TUYLICgS25uaM0a7pHy66rSxbre7l762vg9AUoCcJK+Bu+HCPWpjL/U/kK8/Hf+6E0szAUJSyVYb3Q==}
     dev: true
 
   /emittery/0.13.1:
@@ -6129,10 +6129,10 @@ packages:
       '@nrwl/tao': 15.8.9
       '@parcel/watcher': 2.0.4
       '@yarnpkg/lockfile': 1.1.0
-      '@yarnpkg/parsers': 3.0.0-rc.41
+      '@yarnpkg/parsers': 3.0.0-rc.42
       '@zkochan/js-yaml': 0.0.6
       axios: 1.3.4
-      chalk: 4.1.2
+      chalk: 4.1.0
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       cliui: 7.0.4
@@ -6155,7 +6155,7 @@ packages:
       strong-log-transformer: 2.1.0
       tar-stream: 2.2.0
       tmp: 0.2.1
-      tsconfig-paths: 4.1.2
+      tsconfig-paths: 4.2.0
       tslib: 2.5.0
       v8-compile-cache: 2.3.0
       yargs: 17.7.1
@@ -7723,8 +7723,8 @@ packages:
       strip-bom: 3.0.0
     dev: true
 
-  /tsconfig-paths/4.1.2:
-    resolution: {integrity: sha512-uhxiMgnXQp1IR622dUXI+9Ehnws7i/y6xvpZB9IbUVOPy0muvdvgXeZOn88UcGPiT98Vp3rJPTa8bFoalZ3Qhw==}
+  /tsconfig-paths/4.2.0:
+    resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
     engines: {node: '>=6'}
     dependencies:
       json5: 2.2.3

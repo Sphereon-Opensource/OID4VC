@@ -1,6 +1,7 @@
 import {
-  CredentialOfferWithBaseURL,
-  EndpointMetadata, IssuanceInitiationRequestPayload, IssuanceInitiationWithBaseUrl,
+  CommonCredentialOfferRequestPayload,
+  CredentialOfferRequestWithBaseUrl,
+  EndpointMetadata,
   OAuth2ASMetadata,
   Oauth2ASWithOID4VCIMetadata,
   OpenID4VCIServerMetadata,
@@ -14,22 +15,21 @@ import { getJson } from './functions';
 const debug = Debug('sphereon:openid4vci:metadata');
 
 export class MetadataClient {
-
   /**
    * Retrieve metadata using the Initiation obtained from a previous step
    *
-   * @param issuanceOffer
+   * @param credentialOffer
    */
-  public static async getServerMetaData(issuanceOffer: IssuanceInitiationWithBaseUrl | CredentialOfferWithBaseURL): Promise<EndpointMetadata> {
-    return MetadataClient.retrieveAllMetadataFromInitiationRequest((issuanceOffer as IssuanceInitiationWithBaseUrl).issuanceInitiationRequest); // FIXME implement version 11 change here.
+  public static async retrieveAllMetadataFromCredentialOffer(credentialOffer: CredentialOfferRequestWithBaseUrl): Promise<EndpointMetadata> {
+    return MetadataClient.retrieveAllMetadataFromCredentialOfferRequest(credentialOffer.request);
   }
 
   /**
-   * Retrieve the metadata using the initiation request obtained from a previous step
-   * @param initiationRequest
+   * Retrieve the metada using the initiation request obtained from a previous step
+   * @param request
    */
-  public static async retrieveAllMetadataFromInitiationRequest(initiationRequest: IssuanceInitiationRequestPayload): Promise<EndpointMetadata> {
-    return MetadataClient.retrieveAllMetadata(initiationRequest.issuer);
+  public static async retrieveAllMetadataFromCredentialOfferRequest(request: CommonCredentialOfferRequestPayload): Promise<EndpointMetadata> {
+    return MetadataClient.retrieveAllMetadata(request.issuer);
   }
 
   /**

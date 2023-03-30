@@ -2,7 +2,7 @@ import {
   AccessTokenResponse,
   Alg,
   AuthzFlowType,
-  IssuanceInitiationWithBaseUrl,
+  CredentialOfferRequestWithBaseUrl,
   Jwt,
   ProofOfPossession,
   Typ
@@ -10,14 +10,14 @@ import {
 import nock from 'nock';
 
 import {
-  IssuanceCredentialRequestClientBuilder,
+  CredentialRequestClientBuilder,
   AccessTokenClient,
   OpenID4VCIClient,
   ProofOfPossessionBuilder,
 } from '..';
 
 import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
-import {IssuanceInitiation} from "../IssuanceInitiation";
+import {CredentialOffer} from "../CredentialOffer";
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -87,7 +87,7 @@ describe('OID4VCI-Client should', () => {
 
   async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
     expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
-    expect(client.issuanceOffer).toBeDefined();
+    expect(client.credentialOffer).toBeDefined();
     expect(client.serverMetadata).toBeDefined();
     expect(client.getIssuer()).toEqual('https://issuer.research.identiproof.io');
     expect(client.getCredentialEndpoint()).toEqual('https://issuer.research.identiproof.io/credential');
@@ -109,10 +109,10 @@ describe('OID4VCI-Client should', () => {
     'succeed with a full flow without the client',
     async () => {
       /* Convert the URI into an object */
-      const issuanceInitiation: IssuanceInitiationWithBaseUrl = IssuanceInitiation.fromURI(INITIATE_QR);
+      const credentialOffer: CredentialOfferRequestWithBaseUrl = CredentialOffer.fromURI(INITIATE_QR);
 
-      expect(issuanceInitiation.baseUrl).toEqual('openid-initiate-issuance://');
-      expect(issuanceInitiation.issuanceInitiationRequest).toEqual({
+      expect(credentialOffer.baseUrl).toEqual('openid-initiate-issuance://');
+      expect(credentialOffer.request).toEqual({
         credential_type: 'OpenBadgeCredentialUrl',
         issuer: ISSUER_URL,
         'pre-authorized_code':
@@ -126,7 +126,7 @@ describe('OID4VCI-Client should', () => {
 
       /* The actual access token calls */
       const accessTokenClient: AccessTokenClient = new AccessTokenClient();
-      const accessTokenResponse = await accessTokenClient.acquireAccessToken({ issuanceInitiation: issuanceInitiation, pin: '1234' });
+      const accessTokenResponse = await accessTokenClient.acquireAccessToken({ credentialOffer: credentialOffer, pin: '1234' });
       expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
       // Get the credential
       nock(ISSUER_URL)
@@ -135,7 +135,7 @@ describe('OID4VCI-Client should', () => {
           format: 'jwt-vc',
           credential: mockedVC,
         });
-      const credReqClient = IssuanceCredentialRequestClientBuilder.fromIssuanceInitiation({ initiation: issuanceInitiation })
+      const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: credentialOffer })
         .withFormat('jwt_vc')
 
         .withTokenFromResponse(accessTokenResponse.successBody!)
