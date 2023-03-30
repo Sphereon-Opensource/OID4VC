@@ -33,11 +33,12 @@ This flow isn't supported yet!
 
 ## Pre-authorized Code Flow
 
-The pre-authorized code flow assumes the user is using an out of bound mechanism outside the issuance flow to
+The pre-authorized code flow assumes the user is using an out-of-band mechanism outside the issuance flow to
 authenticate first.
 
 The below diagram shows the steps involved in the pre-authorized code flow. Note that wallet inner functionalities (like
-saving VCs) are out of scope for this library. Also This library doesn't involve any functionalities of a VC Issuer
+saving VCs) are out of scope for this library.
+
 ![Flow diagram](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Sphereon-Opensource/OID4VCI-client/develop/docs/preauthorized-code-flow.puml)
 
 # OpenID4VCI Client
@@ -54,8 +55,8 @@ already fetching the Server Metadata
 import { OpenID4VCIClient } from '@sphereon/openid4vci-client';
 
 // The client is initiated from a URI. This URI is provided by the Issuer, typically as a URL or QR code.
-const client = await OpenID4VCIClient.initiateFromURI({
-  issuanceInitiationURI:
+const client = await OpenID4VCIClient.fromURI({
+  uri:
     'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true',
   flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW, // The flow to use
   kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#key-1', // Our DID.  You can defer this also to when the acquireCredential method is called
@@ -153,29 +154,30 @@ bit more control and options, at the expense of a bit more complexity.
 ## Issuance Initiation
 
 Issuance is started from a so-called Issuance Initiation Request by the Issuer. This typically is URI, exposed
-as a link or a QR code. You can call the `IssuanceInitiation.fromURI(uri)` method to parse the URI into a Json object
-containing the baseUrl and a `IssuanceInitiationRequest` JSON object
+as a link or a QR code. You can call the `CredentialOffer.fromURI(uri)` method to parse the URI into a Json object
+containing the baseUrl and a `uri` JSON object
 
 ```typescript
-import { IssuanceInitiation } from '@sphereon/openid4vci-client';
+import { CredentialOffer } from '@sphereon/openid4vci-client';
 
 const initiationURI =
   'https://issuer.example.com?issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy';
 
-const initiationRequestWithUrl = IssuanceInitiation.fromURI(initiationURI);
+const initiationRequestWithUrl = CredentialOffer.fromURI(initiationURI);
 console.log(initiationRequestWithUrl);
 
 /**
  * {
  *    "baseUrl": "https://server.example.com",
- *    "issuanceInitiationRequest": {
+ *    "request": {
  *      "credential_type": [
  *        "https://did.example.org/healthCard",
  *        "https://did.example.org/driverLicense"
  *      ],
  *      "issuer": "https://server.example.com",
  *      "op_state": "eyJhbGciOiJSU0Et...FYUaBy"
- *    }
+ *    },
+ *   "version": 9
  * }
  */
 ```
@@ -194,7 +196,7 @@ Example:
 ```typescript
 import { MetadataClient } from '@sphereon/openid4vci-client';
 
-const metadata = await MetadataClient.retrieveAllMetadataFromInitiation(initiationRequestWithUrl);
+const metadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(initiationRequestWithUrl);
 
 console.log(metadata);
 /**
@@ -225,8 +227,8 @@ console.log(metadata);
 ## Acquiring the Access Token
 
 Now you will need to get an access token from the oAuth2 Authorization Server (AS), using some values from
-the `IssuanceInitiationRequest` payload.
-For now you can use the issuer hostname for the AS, as there is no way to know the AS from the Issuance Initiation for
+the `IssuanceInitiationRequestPayloadV9` payload.
+For now, you can use the issuer hostname for the AS, as there is no way to know the AS from the Issuance Initiation for
 known until the
 following [OpenID Ticket](https://bitbucket.org/openid/connect/issues/1632/issuer-metadata-clarification-needed) is
 resolved. So the token endpoint would become https://<issuer-hostname>/token.
@@ -243,9 +245,9 @@ const pin = 1234; // A pincode which is shown out of band typically. Only use wh
 const asOpts: AuthorizationServerOpts = {
   clientId,
 };
-
-const accessTokenResponse = AccessTokenClient.acquireAccessTokenUsingIssuanceInitiation({
-  issuanceInitiation: initiationRequestWithUrl,
+  
+const accessTokenResponse = AccessTokenClient.acquireAccessTokenUsingRequest({
+  credentialOffer,
   asOpts,
   pin,
   metadata,
@@ -414,7 +416,7 @@ the keypair created earlier.
 ```typescript
 import { CredentialRequestClientBuilder, CredentialResponse, ProofOfPossessionArgs } from '@sphereon/openid4vci-client';
 
-const credentialRequestClient = CredentialRequestClientBuilder.fromIssuanceInitiation(initiationRequestWithUrl, metadata).build();
+const credentialRequestClient = CredentialRequestClientBuilder.fromCredentialOfferRequest(initiationRequestWithUrl, metadata).build();
 
 // In 1 step:
 const credentialResponse: CredentialResponse = await credentialRequestClient.acquireCredentialsUsingProof({
@@ -475,4 +477,20 @@ console.log(decodedJson);
 //   credential_type: ['https://did.example.org/healthCard', 'https://did.example1.org/driverLicense'],
 //   op_state: 'eyJhbGciOiJSU0Et...FYUaBy'
 // }
+```
+
+## determineSpecVersionFromURI(uri: string): OpenId4VCIVersion 
+
+
+```typescript
+const CREDENTIAL_OFFER_QR =
+    'openid-credential-offer://?' +
+    'credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D';
+
+let openId4VCIVersion = determineSpecVersionFromURI(CREDENTIAL_OFFER_QR);
+console.log(openId4VCIVersion);
+
+/**
+ * 11
+ */
 ```
