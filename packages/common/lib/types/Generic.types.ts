@@ -171,6 +171,7 @@ export enum TokenErrorResponse {
   invalid_request = 'invalid_request',
   invalid_grant = 'invalid_grant',
   invalid_client = 'invalid_client', // this code has been added only in v1_0-11, but I've added this to the common interface. @nklomp is this ok?
+  invalid_scope = 'invalid_scope'
 }
 
 //todo: change this back to AccessTokenResponse once merged with latest changes from develop
