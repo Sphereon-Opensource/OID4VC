@@ -92,6 +92,7 @@ importers:
 
   packages/issuer:
     specifiers:
+      '@sphereon/openid4vci-common': workspace:../common
       '@types/body-parser': ^1.19.2
       '@types/cookie-parser': ^1.4.3
       '@types/dotenv-flow': ^3.2.0
@@ -105,6 +106,7 @@ importers:
       express: ^4.18.2
       uuid: ^9.0.0
     dependencies:
+      '@sphereon/openid4vci-common': link:../common
       body-parser: 1.20.2
       cookie-parser: 1.4.6
       dotenv-flow: 3.2.0
