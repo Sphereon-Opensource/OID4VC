@@ -4,11 +4,12 @@ import * as dotenv from 'dotenv-flow'
 import express, { Express, Request, Response } from 'express'
 import { v4 as uuidv4 } from "uuid";
 import * as fs from 'fs'
-import {AuthorizationRequest} from "@sphereon/openid4vci-common";
+import * as path from 'path'
+import { AuthorizationRequest } from "@sphereon/openid4vci-common";
 import * as http from 'http'
 import * as https from 'https'
-const key = fs.readFileSync(process.env.PRIVATE_KEY, 'utf-8')
-const cert = fs.readFileSync(process.env.x509_CERTIFICATE, 'utf-8')
+const key = fs.readFileSync(path.join(__dirname, process.env.PRIVATE_KEY || './privkey.pem'), 'utf-8')
+const cert = fs.readFileSync(path.join(__dirname, process.env.x509_CERTIFICATE || './chain.pem'), 'utf-8')
 
 export class AuthServer {
   public readonly app: Express

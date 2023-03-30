@@ -9,6 +9,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@sphereon/openid4vci-common": "workspace",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "dotenv-flow": "^3.2.0",
