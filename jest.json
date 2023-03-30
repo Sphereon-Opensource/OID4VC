@@ -11,6 +11,7 @@
     "packages/**/src/**/*.ts",
     "packages/**/lib/**/*.ts",
     "!**/examples/**",
+    "!packages/cli/**",
     "!**/types/**",
     "!**/dist/**",
     "!**/coverage/**",
