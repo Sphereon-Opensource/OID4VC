@@ -487,7 +487,7 @@ const CREDENTIAL_OFFER_URI =
     'openid-credential-offer://?' +
     'credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D';
 
-let openId4VCIVersion = determineSpecVersionFromURI(CREDENTIAL_OFFER_QR);
+const openId4VCIVersion = determineSpecVersionFromURI(CREDENTIAL_OFFER_URI);
 console.log(openId4VCIVersion);
 
 /**
