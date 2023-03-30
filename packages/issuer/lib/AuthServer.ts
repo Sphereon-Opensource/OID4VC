@@ -1,13 +1,15 @@
+import * as fs from 'fs'
+import * as http from 'http'
+import * as https from 'https'
+import * as path from 'path'
+
+import { AuthorizationRequest } from '@sphereon/openid4vci-common'
 import * as bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import * as dotenv from 'dotenv-flow'
 import express, { Express, Request, Response } from 'express'
-import { v4 as uuidv4 } from "uuid";
-import * as fs from 'fs'
-import * as path from 'path'
-import { AuthorizationRequest } from "@sphereon/openid4vci-common";
-import * as http from 'http'
-import * as https from 'https'
+import { v4 as uuidv4 } from 'uuid'
+
 const key = fs.readFileSync(path.join(__dirname, process.env.PRIVATE_KEY || './privkey.pem'), 'utf-8')
 const cert = fs.readFileSync(path.join(__dirname, process.env.x509_CERTIFICATE || './chain.pem'), 'utf-8')
 
@@ -48,17 +50,21 @@ export class AuthServer {
   }
 
   private validateRequestBody({
-      required,
-      conditional,
-      body
-  }: { required?: string[], conditional?: string[], body: Pick<Request, 'body'>}): string | undefined {
+    required,
+    conditional,
+    body,
+  }: {
+    required?: string[]
+    conditional?: string[]
+    body: Pick<Request, 'body'>
+  }): string | undefined {
     const keys = Object.keys(body)
     let message
-    if (required && !required.every(k => keys.includes(k))) {
+    if (required && !required.every((k) => keys.includes(k))) {
       message = `Request must contain ${required.toString()}`
     }
-    if (conditional && !conditional.some(k => keys.includes(k))) {
-      message = message ? `and request must contain ether ${conditional.toString()}`: `Request must contain ether ${conditional.toString()}`
+    if (conditional && !conditional.some((k) => keys.includes(k))) {
+      message = message ? `and request must contain ether ${conditional.toString()}` : `Request must contain ether ${conditional.toString()}`
     }
     return message
   }
@@ -73,29 +79,26 @@ export class AuthServer {
         if (message) {
           res.status(400).json({
             error: 'invalid_request',
-            error_description: message
+            error_description: message,
           })
         }
       } else {
-        res.status(400).send({ error: 'invalid_request',
-          error_description: 'Request body must be present'})
+        res.status(400).send({ error: 'invalid_request', error_description: 'Request body must be present' })
       }
 
       // Search for the registered client
       const client = {
         scope: ['openid', 'test'],
-        redirectUris: ['http://localhost:8080/*', 'https://www.test.com/*', 'https://test.nl', 'http://*/chart']
+        redirectUris: ['http://localhost:8080/*', 'https://www.test.com/*', 'https://test.nl', 'http://*/chart'],
       }
 
       const matched = client.redirectUris.filter((s: string) => new RegExp(s.replace('*', '.*')).test(req.body.redirect_uri))
       if (!matched.length) {
-        res.status(400).send({ error: 'invalid_request',
-          error_description: 'redirect_uri is not valid for the given client'})
+        res.status(400).send({ error: 'invalid_request', error_description: 'redirect_uri is not valid for the given client' })
       }
 
-      if(!req.body.scope.split(',').every((scope: string) => client.scope.includes(scope))) {
-        res.status(400).send({ error: 'invalid_scope',
-          error_description: 'scope is not valid for the given client'})
+      if (!req.body.scope.split(',').every((scope: string) => client.scope.includes(scope))) {
+        res.status(400).send({ error: 'invalid_scope', error_description: 'scope is not valid for the given client' })
       }
 
       // No need to process authorization_details at the moment

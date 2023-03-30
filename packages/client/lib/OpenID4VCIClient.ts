@@ -130,9 +130,14 @@ export class OpenID4VCIClient {
     return authRequestUrl;
   }
 
-  public async acquireAuthorizationCode(
-    { clientId, codeChallengeMethod, codeChallenge, authorizationDetails, redirectUri, scope }: AuthRequestOpts
-  ): Promise<OpenIDResponse<unknown>> {
+  public async acquireAuthorizationCode({
+    clientId,
+    codeChallengeMethod,
+    codeChallenge,
+    authorizationDetails,
+    redirectUri,
+    scope,
+  }: AuthRequestOpts): Promise<OpenIDResponse<unknown>> {
     // Scope and authorization_details can be used in the same authorization request
     // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
     if (!scope && !authorizationDetails) {
