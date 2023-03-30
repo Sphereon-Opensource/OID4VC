@@ -95,6 +95,7 @@ importers:
       '@sphereon/openid4vci-common': workspace:../common
       '@types/body-parser': ^1.19.2
       '@types/cookie-parser': ^1.4.3
+      '@types/cors': ^2.8.13
       '@types/dotenv-flow': ^3.2.0
       '@types/express': ^4.17.17
       '@types/jest': ^29.5.0
@@ -102,6 +103,7 @@ importers:
       '@types/uuid': ^9.0.1
       body-parser: ^1.20.2
       cookie-parser: ^1.4.6
+      cors: ^2.8.5
       dotenv-flow: ^3.2.0
       express: ^4.18.2
       uuid: ^9.0.0
@@ -109,12 +111,14 @@ importers:
       '@sphereon/openid4vci-common': link:../common
       body-parser: 1.20.2
       cookie-parser: 1.4.6
+      cors: 2.8.5
       dotenv-flow: 3.2.0
       express: 4.18.2
       uuid: 9.0.0
     devDependencies:
       '@types/body-parser': 1.19.2
       '@types/cookie-parser': 1.4.3
+      '@types/cors': 2.8.13
       '@types/dotenv-flow': 3.2.0
       '@types/express': 4.17.17
       '@types/jest': 29.5.0
@@ -1448,6 +1452,12 @@ packages:
       '@types/express': 4.17.17
     dev: true
 
+  /@types/cors/2.8.13:
+    resolution: {integrity: sha512-RG8AStHlUiV5ysZQKq97copd2UmVYw3/pRMLefISZ3S1hK104Cwm7iLQ3fTKx+lsUH2CE8FlLaYeEA2LSeqYUA==}
+    dependencies:
+      '@types/node': 18.15.3
+    dev: true
+
   /@types/debug/4.1.7:
     resolution: {integrity: sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==}
     dependencies:
@@ -2665,6 +2675,14 @@ packages:
   /core-util-is/1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
     dev: true
+
+  /cors/2.8.5:
+    resolution: {integrity: sha512-KIHbLJqu73RGr/hnbrO9uBeixNGuvSQjul/jdFvS/KFSIH1hWVd1ng7zOHx+YrEfInLG7q4n6GHQ9cDtxv/P6g==}
+    engines: {node: '>= 0.10'}
+    dependencies:
+      object-assign: 4.1.1
+      vary: 1.1.2
+    dev: false
 
   /cosmiconfig/7.0.0:
     resolution: {integrity: sha512-pondGvTuVYDk++upghXJabWzL6Kxu6f26ljFw64Swq9v6sQPUL3EUlVDV56diOjpCayKihL6hVe8exIACU4XcA==}
@@ -5967,7 +5985,6 @@ packages:
   /object-assign/4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
-    dev: true
 
   /object-inspect/1.12.3:
     resolution: {integrity: sha512-geUvdk7c+eizMNUDkRpW1wJwgfOiOeHbxBR/hLXK1aT6zmVSO0jsQcs7fj6MGw89jC/cjGfLcNOrtMYtGqm81g==}
