@@ -40,13 +40,13 @@ export class AuthServer {
   private pushedAuthorizationEndpoint() {
     const handleHttpStatus400 = async (req: Request, res: Response, next: NextFunction) => {
       if (!req.body) {
-        res.status(400).send({ error: 'invalid_request', error_description: 'Request body must be present' })
+        return res.status(400).send({ error: 'invalid_request', error_description: 'Request body must be present' })
       }
       const required = ['client_id', 'code_challenge_method', 'code_challenge', 'redirect_uri']
       const conditional = ['authorization_details', 'scope']
       const message = validateRequestBody({ required, conditional, body: req.body })
       if (message) {
-        res.status(400).json({
+        return res.status(400).json({
           error: 'invalid_request',
           error_description: message,
         })
@@ -58,16 +58,16 @@ export class AuthServer {
       // Fake client for testing
       const client = {
         scope: ['openid', 'test'],
-        redirectUris: ['http://localhost:8080/*', 'https://www.test.com/*', 'https://test.nl', 'http://*/chart'],
+        redirectUris: ['http://localhost:8080/*', 'https://www.test.com/*', 'https://test.nl', 'http://*/chart', 'http:*'],
       }
 
       const matched = client.redirectUris.filter((s: string) => new RegExp(s.replace('*', '.*')).test(req.body.redirect_uri))
       if (!matched.length) {
-        res.status(400).send({ error: 'invalid_request', error_description: 'redirect_uri is not valid for the given client' })
+        return res.status(400).send({ error: 'invalid_request', error_description: 'redirect_uri is not valid for the given client' })
       }
 
       if (!req.body.scope.split(',').every((scope: string) => client.scope.includes(scope))) {
-        res.status(400).send({ error: 'invalid_scope', error_description: 'scope is not valid for the given client' })
+        return res.status(400).send({ error: 'invalid_scope', error_description: 'scope is not valid for the given client' })
       }
 
       //TODO Implement authorization_details verification
@@ -80,7 +80,7 @@ export class AuthServer {
         this.authRequestsData.delete(requestUri)
       }, expiresIn * 1000)
 
-      res.status(201).json({ request_uri: requestUri, expires_in: expiresIn })
+      return res.status(201).json({ request_uri: requestUri, expires_in: expiresIn })
     })
   }
 }
