@@ -24,11 +24,13 @@ export interface NameAndLocale {
   locale?: string;
 }
 
-export interface Display extends NameAndLocale {
+export interface LogoAndColor {
   logo?: CredentialLogo;
   background_color?: string;
   text_color?: string;
 }
+
+export type Display = NameAndLocale & LogoAndColor & { [key: string]: string };
 
 export interface IssuerMetadata {
   credential_endpoint: string;
@@ -38,7 +40,7 @@ export interface IssuerMetadata {
 }
 
 export interface CredentialIssuerMetadataSupportedCredentials {
-  format: CredentialFormatEnum;
+  format: CredentialFormatEnum | string;
   id?: string;
   cryptographic_binding_methods_supported?: string[];
   cryptographic_suites_supported?: string[];
@@ -69,12 +71,6 @@ export interface MsoClaims {
     };
   };
 }
-export interface SupportedCredentialIssuerMetadataMsoMdoc extends CredentialIssuerMetadataSupportedCredentials {
-  format: CredentialFormatEnum.mso_mdoc;
-  doctype: string;
-  claims?: MsoClaims;
-  order?: string[];
-}
 
 export interface CredentialOfferCredential {
   format: CredentialFormatEnum;
@@ -83,10 +79,6 @@ export interface CredentialOfferCredential {
 export interface CredentialOfferCredentialJwtVcJson extends CredentialOfferCredential {
   format: CredentialFormatEnum.jwt_vc_json;
   types: string[];
-}
-export interface CredentialOfferCredentialMsoMdoc extends CredentialOfferCredential {
-  format: CredentialFormatEnum.mso_mdoc;
-  doctype: string;
 }
 
 export interface IssuerCredentialDefinition {
@@ -121,7 +113,7 @@ export interface AuthorizationRequestMsoDoc extends AbstractAuthorizationRequest
 }
 
 export interface AbstractAuthorizationDetails {
-  type: 'openid_credential';
+  type: 'openid_credential' | string;
   format: CredentialFormatEnum;
 }
 
@@ -171,7 +163,7 @@ export enum TokenErrorResponse {
   invalid_request = 'invalid_request',
   invalid_grant = 'invalid_grant',
   invalid_client = 'invalid_client', // this code has been added only in v1_0-11, but I've added this to the common interface. @nklomp is this ok?
-  invalid_scope = 'invalid_scope'
+  invalid_scope = 'invalid_scope',
 }
 
 //todo: change this back to AccessTokenResponse once merged with latest changes from develop
