@@ -61,17 +61,6 @@ export interface SupportedCredentialIssuerMetadataJwtVcJson extends CredentialIs
   order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
 }
 
-export interface MsoClaims {
-  // key is a certain namespace as defined in [ISO.18013-5] (or any profile of it) examples: "org.iso.18013.5.1", "org.iso.18013.5.1.aamva"
-  [key: string]: {
-    [key: string]: {
-      mandatory?: boolean;
-      value_type?: string;
-      display?: Display[];
-    };
-  };
-}
-
 export interface CredentialOfferCredential {
   format: CredentialFormatEnum;
 }
@@ -126,12 +115,6 @@ export interface AuthorizationDetailsJwtVcJsonLdAndLdpVc extends CommonAuthoriza
   format: CredentialFormatEnum.ldp_vc | CredentialFormatEnum.jwt_vc_json_ld;
   types: string[];
   credential_definition: IssuerCredentialDefinition;
-}
-
-export interface AuthorizationDetailsMsoDoc extends CommonAuthorizationDetails {
-  format: CredentialFormatEnum.mso_mdoc;
-  doctype: string;
-  claims?: MsoClaims;
 }
 
 export interface CredentialOfferCredentialDefinition {
@@ -211,25 +194,13 @@ export interface CredentialResponseJwtVcJsonLdAndLdpVc extends CommonCredentialR
   credential: IVerifiableCredential;
 }
 
-export interface IssuerCredentialSubjectDisplay {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+export type IssuerCredentialSubjectDisplay = CredentialSubjectDisplay & Record<string, CredentialSubjectDisplay>
+
+export interface CredentialSubjectDisplay {
   mandatory?: boolean;
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   value_type?: string;
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   display?: NameAndLocale[];
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   order?: string[]; // An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
-  [key: string]: {
-    mandatory?: boolean;
-    value_type?: string;
-    display?: NameAndLocale[];
-    order?: string[]; // An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
-  };
 }
 
 export interface IssuerCredentialSubject {
