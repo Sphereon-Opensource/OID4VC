@@ -8,6 +8,9 @@
   "scripts": {
     "build": "tsc"
   },
+  "dependencies": {
+    "@sphereon/openid4vci-common": "workspace:../common"
+  },
   "devDependencies": {
     "@types/jest": "^29.5.0"
   },

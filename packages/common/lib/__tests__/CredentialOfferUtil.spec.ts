@@ -1,5 +1,5 @@
-import {determineSpecVersionFromURI} from "../functions";
-import {OpenId4VCIVersion} from "../types";
+import { determineSpecVersionFromURI } from '../functions';
+import { OpenId4VCIVersion } from '../types';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 

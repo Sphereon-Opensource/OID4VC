@@ -1,6 +1,6 @@
 import { CredentialFormat } from '@sphereon/ssi-types';
 
-import {CommonCredentialOfferRequestPayload, CredentialOfferRequestWithBaseUrl} from './CredentialIssuance.types';
+import { CommonCredentialOfferRequestPayload, CredentialOfferRequestWithBaseUrl } from './CredentialIssuance.types';
 import { EndpointMetadata, ErrorResponse, PRE_AUTH_CODE_LITERAL } from './Generic.types';
 
 export interface AuthorizationDetails {

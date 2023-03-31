@@ -94,7 +94,10 @@ importers:
 
   packages/issuer:
     specifiers:
+      '@sphereon/openid4vci-common': workspace:../common
       '@types/jest': ^29.5.0
+    dependencies:
+      '@sphereon/openid4vci-common': link:../common
     devDependencies:
       '@types/jest': 29.5.0
 
