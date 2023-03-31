@@ -46,6 +46,6 @@ function recordVersion(determinedVersion: OpenId4VCIVersion, potentialVersion: O
   }
 
   throw new Error(
-      `Invalid param. Some keys have been used from version: ${determinedVersion} version while '${key}' is used from version: ${potentialVersion}`
+    `Invalid param. Some keys have been used from version: ${determinedVersion} version while '${key}' is used from version: ${potentialVersion}`
   );
 }

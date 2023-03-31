@@ -51,7 +51,7 @@ export class AuthServer {
           error_description: message,
         })
       }
-      next()
+      return next()
     }
 
     this.app.post('/par', handleHttpStatus400, (req: Request, res: Response) => {

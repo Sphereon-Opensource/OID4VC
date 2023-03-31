@@ -8,8 +8,8 @@ import {
 } from '@sphereon/openid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 
+import { CredentialRequestClient } from './CredentialRequestClient';
 import { convertURIToJsonObject } from './functions';
-import {CredentialRequestClient} from "./CredentialRequestClient";
 
 export class CredentialRequestClientBuilder {
   credentialEndpoint?: string;

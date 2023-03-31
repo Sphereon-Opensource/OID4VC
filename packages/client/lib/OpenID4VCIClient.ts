@@ -16,12 +16,12 @@ import {
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
-import {AccessTokenClient} from './AccessTokenClient';
-import {CredentialOffer} from './CredentialOffer';
-import {CredentialRequestClientBuilder} from './CredentialRequestClientBuilder';
-import {MetadataClient} from './MetadataClient';
-import {ProofOfPossessionBuilder} from './ProofOfPossessionBuilder';
-import {convertJsonToURI, formPost} from './functions';
+import { AccessTokenClient } from './AccessTokenClient';
+import { CredentialOffer } from './CredentialOffer';
+import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
+import { MetadataClient } from './MetadataClient';
+import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
+import { convertJsonToURI, formPost } from './functions';
 
 const debug = Debug('sphereon:openid4vci:flow');
 
@@ -93,7 +93,7 @@ export class OpenID4VCIClient {
     if (!this._serverMetadata) {
       this._serverMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this._credentialOffer);
     }
-        return this._serverMetadata;
+    return this._serverMetadata;
   }
 
   public createAuthorizationRequestUrl({
@@ -234,9 +234,9 @@ export class OpenID4VCIClient {
       if (response.errorBody) {
         debug(`Access token error:\r\n${response.errorBody}`);
         throw Error(
-          `Retrieving an access token from ${
-            this._serverMetadata?.token_endpoint
-          } for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}`
+          `Retrieving an access token from ${this._serverMetadata?.token_endpoint} for issuer ${this.getIssuer()} failed with status: ${
+            response.origResponse.status
+          }`
         );
       } else if (!response.successBody) {
         debug(`Access token error. No succes body`);
@@ -276,8 +276,8 @@ export class OpenID4VCIClient {
 
     const requestBuilder = CredentialRequestClientBuilder.fromCredentialOffer({
       credentialOffer: this.credentialOffer,
-        metadata: this.serverMetadata,
-      });
+      metadata: this.serverMetadata,
+    });
     requestBuilder.withToken(this.accessTokenResponse.access_token);
     if (this.serverMetadata?.openid4vci_metadata) {
       const metadata = this.serverMetadata.openid4vci_metadata;
@@ -308,9 +308,9 @@ export class OpenID4VCIClient {
     if (response.errorBody) {
       debug(`Credential request error:\r\n${response.errorBody}`);
       throw Error(
-        `Retrieving a credential from ${
-          this._serverMetadata?.credential_endpoint
-        } for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}`
+        `Retrieving a credential from ${this._serverMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${
+          response.origResponse.status
+        }`
       );
     } else if (!response.successBody) {
       debug(`Credential request error. No success body`);
@@ -346,8 +346,8 @@ export class OpenID4VCIClient {
 
   getCredentialTypes(): string[] {
     return typeof this.credentialOffer.request.credential_type === 'string'
-        ? [this.credentialOffer.request.credential_type]
-        : this.credentialOffer.request.credential_type;
+      ? [this.credentialOffer.request.credential_type]
+      : this.credentialOffer.request.credential_type;
   }
 
   get flowType(): AuthzFlowType {

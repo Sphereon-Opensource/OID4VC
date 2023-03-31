@@ -2,10 +2,9 @@ import { CredentialRequest, CredentialResponse, OpenIDResponse, ProofOfPossessio
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
+import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { isValidURL, post } from './functions';
-import {CredentialRequestClientBuilder} from "./CredentialRequestClientBuilder";
-
 
 const debug = Debug('sphereon:openid4vci:credential');
 

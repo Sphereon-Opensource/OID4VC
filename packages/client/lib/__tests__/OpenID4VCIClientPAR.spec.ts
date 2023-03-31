@@ -10,8 +10,8 @@ describe('OpenID4VCIClient', () => {
   beforeEach(async () => {
     nock(MOCK_URL).get(/.*/).reply(200, {});
     nock(`${MOCK_URL}`).post('/v1/auth/par').reply(201, { code: 'test_code' });
-    client = await OpenID4VCIClient.initiateFromURI({
-      issuanceInitiationURI: 'openid-initiate-issuance://?issuer=https://server.example.com&credential_type=TestCredential',
+    client = await OpenID4VCIClient.fromURI({
+      uri: 'openid-initiate-issuance://?issuer=https://server.example.com&credential_type=TestCredential',
       flowType: AuthzFlowType.AUTHORIZATION_CODE_FLOW,
     });
   });
