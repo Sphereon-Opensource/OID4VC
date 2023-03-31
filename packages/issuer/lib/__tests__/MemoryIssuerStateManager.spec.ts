@@ -33,7 +33,7 @@ describe('MemoryIssuerStateManager', () => {
     expect(memoryIssuerStateManager.getState(String(2))).toBeDefined()
   })
   it('should delete all expired states', () => {
-    memoryIssuerStateManager.clearExpiredStates(+new Date())
+    memoryIssuerStateManager.clearExpiredStates(+new Date() + 10000)
     // yesterday should be expired
     expect(memoryIssuerStateManager.getState(String(0))).toBeUndefined()
     // today should be expired because the method parameter is a few milliseconds ahead
