@@ -96,10 +96,6 @@ export interface AuthorizationRequestJwtVcJsonLdAndLdpVc extends CommonAuthoriza
   authorization_details?: AuthorizationDetailsJwtVcJsonLdAndLdpVc[];
 }
 
-export interface AuthorizationRequestMsoDoc extends CommonAuthorizationRequest {
-  authorization_details?: AuthorizationDetailsMsoDoc[];
-}
-
 export interface CommonAuthorizationDetails {
   type: 'openid_credential' | string;
   format: CredentialFormatEnum;
