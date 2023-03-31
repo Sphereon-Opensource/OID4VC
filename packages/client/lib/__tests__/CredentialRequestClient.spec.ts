@@ -1,15 +1,22 @@
 import { KeyObject } from 'crypto';
 
-import { Alg, CredentialRequest, Jwt, ProofOfPossession, Typ, URL_NOT_VALID, WellKnownEndpoints } from '@sphereon/openid4vci-common';
+import {
+  Alg,
+  CredentialRequest,
+  Jwt,
+  ProofOfPossession,
+  Typ,
+  URL_NOT_VALID,
+  WellKnownEndpoints,
+} from '@sphereon/openid4vci-common';
 import * as jose from 'jose';
 import nock from 'nock';
 
-import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder';
-import { IssuanceInitiation } from '../IssuanceInitiation';
-import { MetadataClient } from '../MetadataClient';
-import { ProofOfPossessionBuilder } from '../ProofOfPossessionBuilder';
+import { CredentialRequestClientBuilder, MetadataClient } from '..';
+import { ProofOfPossessionBuilder } from '..';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';
+import {CredentialOffer} from "../CredentialOffer";
 
 const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN';
 
@@ -60,7 +67,7 @@ describe('Credential Request Client ', () => {
       error_description: 'This is a mock error message',
     });
 
-    const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation({ initiation: INITIATION_TEST })
+    const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: INITIATION_TEST })
       .withCredentialEndpoint(basePath + '/credential')
       .withFormat('ldp_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
@@ -91,7 +98,7 @@ describe('Credential Request Client ', () => {
         format: 'jwt-vc',
         credential: mockedVC,
       });
-    const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiationRequest({ request: INITIATION_TEST.issuanceInitiationRequest })
+    const credReqClient = CredentialRequestClientBuilder.fromCredentialOfferRequest({ request: INITIATION_TEST.request })
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
@@ -114,7 +121,7 @@ describe('Credential Request Client ', () => {
   });
 
   it('should fail with invalid url', async () => {
-    const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiationRequest({ request: INITIATION_TEST.issuanceInitiationRequest })
+    const credReqClient = CredentialRequestClientBuilder.fromCredentialOfferRequest({ request: INITIATION_TEST.request })
       .withCredentialEndpoint('httpsf://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
@@ -138,16 +145,17 @@ describe('Credential Request Client with Walt.id ', () => {
     nock.cleanAll();
     const WALT_IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
-    const initiation = IssuanceInitiation.fromURI(WALT_IRR_URI);
+    const credentialOffer = CredentialOffer.fromURI(WALT_IRR_URI);
 
-    const metadata = await MetadataClient.retrieveAllMetadataFromInitiation(initiation);
+    const request = credentialOffer.request;
+    const metadata = await MetadataClient.retrieveAllMetadata(request.issuer);
     expect(metadata.credential_endpoint).toEqual(WALT_OID4VCI_METADATA.credential_endpoint);
     expect(metadata.token_endpoint).toEqual(WALT_OID4VCI_METADATA.token_endpoint);
 
-    const credReqClient = CredentialRequestClientBuilder.fromIssuanceInitiation({
-      initiation,
+    const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({
+      credentialOffer,
       metadata,
     }).build();
-    expect(credReqClient.issuanceRequestOpts.credentialEndpoint).toBe(WALT_OID4VCI_METADATA.credential_endpoint);
+    expect(credReqClient.credentialRequestOpts.credentialEndpoint).toBe(WALT_OID4VCI_METADATA.credential_endpoint);
   });
 });

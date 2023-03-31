@@ -1,14 +1,15 @@
 import {
   AccessTokenResponse,
+  CredentialOfferRequestPayloadV11,
+  CredentialOfferRequestWithBaseUrl,
   EndpointMetadata,
-  IssuanceInitiationRequestPayload,
-  IssuanceInitiationWithBaseUrl,
+  IssuanceInitiationRequestPayloadV9,
   OpenID4VCIServerMetadata,
 } from '@sphereon/openid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 
-import { CredentialRequestClient } from './CredentialRequestClient';
 import { convertURIToJsonObject } from './functions';
+import {CredentialRequestClient} from "./CredentialRequestClient";
 
 export class CredentialRequestClientBuilder {
   credentialEndpoint?: string;
@@ -16,21 +17,21 @@ export class CredentialRequestClientBuilder {
   format?: CredentialFormat | CredentialFormat[];
   token?: string;
 
-  public static fromIssuanceInitiationURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): CredentialRequestClientBuilder {
-    return CredentialRequestClientBuilder.fromIssuanceInitiationRequest({
+  public static fromURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): CredentialRequestClientBuilder {
+    return CredentialRequestClientBuilder.fromCredentialOfferRequest({
       request: convertURIToJsonObject(uri, {
         arrayTypeProperties: ['credential_type'],
         requiredProperties: ['issuer', 'credential_type'],
-      }) as IssuanceInitiationRequestPayload,
+      }) as IssuanceInitiationRequestPayloadV9 | CredentialOfferRequestPayloadV11,
       metadata,
     });
   }
 
-  public static fromIssuanceInitiationRequest({
+  public static fromCredentialOfferRequest({
     request,
     metadata,
   }: {
-    request: IssuanceInitiationRequestPayload;
+    request: IssuanceInitiationRequestPayloadV9 | CredentialOfferRequestPayloadV11;
     metadata?: EndpointMetadata;
   }): CredentialRequestClientBuilder {
     const builder = new CredentialRequestClientBuilder();
@@ -48,15 +49,15 @@ export class CredentialRequestClientBuilder {
     return builder;
   }
 
-  public static fromIssuanceInitiation({
-    initiation,
+  public static fromCredentialOffer({
+    credentialOffer,
     metadata,
   }: {
-    initiation: IssuanceInitiationWithBaseUrl;
+    credentialOffer: CredentialOfferRequestWithBaseUrl;
     metadata?: EndpointMetadata;
   }): CredentialRequestClientBuilder {
-    return CredentialRequestClientBuilder.fromIssuanceInitiationRequest({
-      request: initiation.issuanceInitiationRequest,
+    return CredentialRequestClientBuilder.fromCredentialOfferRequest({
+      request: credentialOffer.request,
       metadata,
     });
   }
