@@ -2,7 +2,7 @@ import { AuthorizationDetails } from '@sphereon/openid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 
 export class AuthorizationDetailsBuilder {
-  private authorizationDetails: Partial<AuthorizationDetails>;
+  private readonly authorizationDetails: Partial<AuthorizationDetails>;
 
   constructor() {
     this.authorizationDetails = {};

@@ -1,4 +1,10 @@
-import { AccessTokenRequest, AccessTokenRequestOpts, AccessTokenResponse, GrantTypes, OpenIDResponse } from '@sphereon/openid4vci-common';
+import {
+  AccessTokenRequest,
+  AccessTokenResponse,
+  GrantTypes,
+  AccessTokenRequestOpts,
+  OpenIDResponse,
+} from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
 import { AccessTokenClient } from '../AccessTokenClient';
@@ -184,8 +190,8 @@ describe('AccessTokenClient should', () => {
     nock(MOCK_URL).post(/.*/).reply(200, {});
 
     await expect(() =>
-      accessTokenClient.acquireAccessTokenUsingIssuanceInitiation({
-        issuanceInitiation: INITIATION_TEST,
+      accessTokenClient.acquireAccessToken({
+        credentialOffer: INITIATION_TEST,
         pin: '1234',
       })
     ).rejects.toThrow(Error('Cannot set a pin, when the pin is not required.'));
@@ -197,21 +203,21 @@ describe('AccessTokenClient should', () => {
     nock(MOCK_URL).post(/.*/).reply(200, {});
 
     const requestOpts: AccessTokenRequestOpts = {
-      issuanceInitiation: INITIATION_TEST,
+      credentialOffer: INITIATION_TEST,
       pin: undefined,
       codeVerifier: 'RylyWGQ-dzpObnEcoMBDIH9cTAwZXk1wYzktKxsOFgA',
       code: 'LWCt225yj7gzT2cWeMP4hXj4B4oIYkEiGs4T6pfez91',
       redirectUri: 'http://example.com/cb',
     };
 
-    await expect(() => accessTokenClient.acquireAccessTokenUsingIssuanceInitiation(requestOpts)).rejects.toThrow(
+    await expect(() => accessTokenClient.acquireAccessToken(requestOpts)).rejects.toThrow(
       Error('Cannot pass a code_verifier when flow type is pre-authorized')
     );
   });
 
   it('get error if no as, issuer and metadata values are present', async () => {
     await expect(() =>
-      AccessTokenClient.determineTokenURL({
+        AccessTokenClient.determineTokenURL({
         asOpts: undefined,
         issuerOpts: undefined,
         metadata: undefined,
