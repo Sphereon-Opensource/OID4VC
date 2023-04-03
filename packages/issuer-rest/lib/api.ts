@@ -4,20 +4,16 @@ import {
   CredentialRequest,
   Display,
   IssuerCredentialSubjectDisplay,
+  IssuerMetadata,
 } from '@sphereon/openid4vci-common'
+import { createCredentialOfferDeeplink, CredentialSupportedV1_11Builder, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import * as dotenv from 'dotenv-flow'
 import express, { Express, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 
-import { VcIssuer } from './VcIssuer'
-import { CredentialSupportedV1_11Builder, VcIssuerBuilder } from './builder'
-import { createCredentialOfferDeeplink } from './functions'
-
-function buildVcIssuer() {
+function buildVCIFromEnvironment() {
   const credentialsSupported: CredentialIssuerMetadataSupportedCredentials = new CredentialSupportedV1_11Builder()
     .withCryptographicSuitesSupported(process.env.cryptographic_suites_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
@@ -63,9 +59,9 @@ export class RestAPI {
   // @ts-ignore
   private tokenToId: Map<string, string> = new Map()
 
-  constructor() {
+  constructor(opts?: { metadata: IssuerMetadata; userPinRequired: boolean }) {
     dotenv.config()
-    this._vcIssuer = buildVcIssuer()
+    this._vcIssuer = opts ? (this._vcIssuer = new VcIssuer(opts.metadata, opts.userPinRequired)) : buildVCIFromEnvironment()
     this.express = express()
     const port = process.env.PORT || 3000
     const secret = process.env.COOKIE_SIGNING_KEY
@@ -117,7 +113,7 @@ export class RestAPI {
   private registerCredentialRequestEndpoint() {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    this.express.get('/credential-request', async (request, response) => {
+    this.express.post('/credential-request', async (request, response) => {
       this._vcIssuer.issueCredentialFromIssueRequest(request as unknown as CredentialRequest)
     })
   }

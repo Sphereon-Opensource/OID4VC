@@ -98,6 +98,22 @@ importers:
     specifiers:
       '@sphereon/openid4vci-common': workspace:*
       '@sphereon/ssi-types': ^0.9.0
+      '@types/jest': ^29.5.0
+      '@types/uuid': ^9.0.1
+      uuid: ^9.0.0
+    dependencies:
+      '@sphereon/openid4vci-common': link:../common
+      '@sphereon/ssi-types': 0.9.0
+      uuid: 9.0.0
+    devDependencies:
+      '@types/jest': 29.5.0
+      '@types/uuid': 9.0.1
+
+  packages/issuer-rest:
+    specifiers:
+      '@sphereon/openid4vci-common': workspace:*
+      '@sphereon/openid4vci-issuer': workspace:*
+      '@sphereon/ssi-types': ^0.9.0
       '@types/body-parser': ^1.19.2
       '@types/cookie-parser': ^1.4.3
       '@types/dotenv-flow': ^3.2.0
@@ -111,6 +127,7 @@ importers:
       uuid: ^9.0.0
     dependencies:
       '@sphereon/openid4vci-common': link:../common
+      '@sphereon/openid4vci-issuer': link:../issuer
       '@sphereon/ssi-types': 0.9.0
       body-parser: 1.20.2
       cookie-parser: 1.4.6
@@ -6445,7 +6462,7 @@ packages:
       '@yarnpkg/parsers': 3.0.0-rc.42
       '@zkochan/js-yaml': 0.0.6
       axios: 1.3.4
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       cliui: 7.0.4
