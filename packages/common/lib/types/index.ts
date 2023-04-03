@@ -7,5 +7,5 @@ export * from './OAuth2ASMetadata';
 export * from './OpenID4VCIErrors';
 export * from './OpenID4VCIServerMetadata';
 export * from './OpenID4VCIVersions.types';
-export { IssuerState } from './IssuerStateManager.types';
-export { IIssuerStateManager } from './IssuerStateManager.types';
+export { CredentialOfferState } from './CredentialOfferStateManager.types';
+export { ICredentialOfferStateManager } from './CredentialOfferStateManager.types';
