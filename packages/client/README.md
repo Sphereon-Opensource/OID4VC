@@ -56,8 +56,7 @@ import { OpenID4VCIClient } from '@sphereon/openid4vci-client';
 
 // The client is initiated from a URI. This URI is provided by the Issuer, typically as a URL or QR code.
 const client = await OpenID4VCIClient.fromURI({
-  uri:
-    'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true',
+  uri: 'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true',
   flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW, // The flow to use
   kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#key-1', // Our DID.  You can defer this also to when the acquireCredential method is called
   alg: Alg.ES256, // The signing Algorithm we will use. You can defer this also to when the acquireCredential method is called
@@ -245,7 +244,7 @@ const pin = 1234; // A pincode which is shown out of band typically. Only use wh
 const asOpts: AuthorizationServerOpts = {
   clientId,
 };
-  
+
 const accessTokenResponse = AccessTokenClient.acquireAccessTokenUsingRequest({
   credentialOffer,
   asOpts,
@@ -479,13 +478,12 @@ console.log(decodedJson);
 // }
 ```
 
-## determineSpecVersionFromURI(uri: string): OpenId4VCIVersion 
-
+## determineSpecVersionFromURI(uri: string): OpenId4VCIVersion
 
 ```typescript
 const CREDENTIAL_OFFER_URI =
-    'openid-credential-offer://?' +
-    'credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D';
+  'openid-credential-offer://?' +
+  'credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D';
 
 const openId4VCIVersion = determineSpecVersionFromURI(CREDENTIAL_OFFER_URI);
 console.log(openId4VCIVersion);

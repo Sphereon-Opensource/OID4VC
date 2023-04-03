@@ -1,6 +1,6 @@
-import {CredentialIssuerMetadataSupportedCredentials, Display, IssuerMetadata, TokenErrorResponse} from "@sphereon/openid4vci-common";
+import { CredentialIssuerMetadataSupportedCredentials, Display, IssuerMetadata, TokenErrorResponse } from '@sphereon/openid4vci-common'
 
-import { VcIssuer } from "../VcIssuer";
+import { VcIssuer } from '../VcIssuer'
 
 export class VcIssuerBuilder {
   credentialIssuer?: string
@@ -44,7 +44,9 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withCredentialsSupported(credentialSupported: CredentialIssuerMetadataSupportedCredentials | CredentialIssuerMetadataSupportedCredentials[]): VcIssuerBuilder {
+  public withCredentialsSupported(
+    credentialSupported: CredentialIssuerMetadataSupportedCredentials | CredentialIssuerMetadataSupportedCredentials[]
+  ): VcIssuerBuilder {
     if (!Array.isArray(credentialSupported))
       this.credentialsSupported = this.credentialsSupported ? [...this.credentialsSupported, credentialSupported] : [credentialSupported]
     else {

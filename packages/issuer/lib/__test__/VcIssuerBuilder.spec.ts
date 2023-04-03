@@ -3,7 +3,7 @@ import {
   CredentialIssuerMetadataSupportedCredentials,
   Display,
   IssuerCredentialSubjectDisplay,
-  TokenErrorResponse
+  TokenErrorResponse,
 } from '@sphereon/openid4vci-common'
 
 import { CredentialSupportedV1_11Builder, VcIssuerBuilder } from '../index'

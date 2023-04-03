@@ -1,6 +1,5 @@
 import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
-import { CodeChallengeMethod, ResponseType } from './Authorization.types';
 import { ProofOfPossession } from './CredentialIssuance.types';
 import { OpenID4VCIServerMetadata } from './OpenID4VCIServerMetadata';
 
@@ -37,9 +36,9 @@ export interface IssuerMetadata {
   batch_credential_endpoint?: string;
   credentials_supported: CredentialIssuerMetadataSupportedCredentials[];
   credential_issuer: string;
-  authorization_server?: string
-  token_endpoint?: string
-  display?: (NameAndLocale & { [key: string]: string })[]
+  authorization_server?: string;
+  token_endpoint?: string;
+  display?: (NameAndLocale & { [key: string]: string })[];
 }
 
 export interface CredentialIssuerMetadataSupportedCredentials {
@@ -77,45 +76,6 @@ export interface IssuerCredentialDefinition {
   '@context': ICredentialContextType[];
   types: string[];
   credentialSubject: IssuerCredentialSubject;
-}
-
-export interface CommonAuthorizationRequest {
-  response_type: ResponseType.AUTH_CODE;
-  client_id: string;
-  code_challenge: string;
-  code_challenge_method: CodeChallengeMethod;
-  redirect_uri: string;
-  scope?: string;
-  authorization_details?: CommonAuthorizationDetails[];
-  wallet_issuer?: string;
-  user_hint?: string;
-}
-
-export interface AuthorizationRequestJwtVcJson extends CommonAuthorizationRequest {
-  authorization_details?: AuthorizationDetailsJwtVcJson[];
-}
-
-export interface AuthorizationRequestJwtVcJsonLdAndLdpVc extends CommonAuthorizationRequest {
-  authorization_details?: AuthorizationDetailsJwtVcJsonLdAndLdpVc[];
-}
-
-export interface CommonAuthorizationDetails {
-  type: 'openid_credential' | string;
-  format: CredentialFormatEnum;
-  // If the Credential Issuer metadata contains an authorization_server parameter, the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.
-  locations?: string[];
-}
-
-export interface AuthorizationDetailsJwtVcJson extends CommonAuthorizationDetails {
-  format: CredentialFormatEnum.jwt_vc_json;
-  types: string[];
-  credentialSubject?: IssuerCredentialSubject;
-}
-
-export interface AuthorizationDetailsJwtVcJsonLdAndLdpVc extends CommonAuthorizationDetails {
-  format: CredentialFormatEnum.ldp_vc | CredentialFormatEnum.jwt_vc_json_ld;
-  types: string[];
-  credential_definition: IssuerCredentialDefinition;
 }
 
 export interface CredentialOfferCredentialDefinition {
@@ -195,7 +155,7 @@ export interface CredentialResponseJwtVcJsonLdAndLdpVc extends CommonCredentialR
   credential: IVerifiableCredential;
 }
 
-export type IssuerCredentialSubjectDisplay = CredentialSubjectDisplay & Record<string, CredentialSubjectDisplay>
+export type IssuerCredentialSubjectDisplay = CredentialSubjectDisplay & Record<string, CredentialSubjectDisplay>;
 
 export interface CredentialSubjectDisplay {
   mandatory?: boolean;

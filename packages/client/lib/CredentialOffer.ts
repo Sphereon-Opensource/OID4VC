@@ -1,17 +1,16 @@
 import {
-  IssuanceInitiationRequestPayloadV9,
+  CredentialOfferRequestPayloadV11,
   CredentialOfferRequestWithBaseUrl,
+  IssuanceInitiationRequestPayloadV9,
   OpenId4VCIVersion,
-  CredentialOfferRequestPayloadV11
 } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 
-import {convertJsonToURI, convertURIToJsonObject, determineSpecVersionFromURI} from './functions';
+import { convertJsonToURI, convertURIToJsonObject, determineSpecVersionFromURI } from './functions';
 
 const debug = Debug('sphereon:openid4vci:initiation');
 
 export class CredentialOffer {
-
   public static fromURI(uri: string): CredentialOfferRequestWithBaseUrl {
     debug(`issuance initiation URI: ${uri}`);
     if (!uri.includes('?')) {
@@ -26,9 +25,9 @@ export class CredentialOffer {
     }) as IssuanceInitiationRequestPayloadV9;
 
     const request =
-        version < OpenId4VCIVersion.VER_11.valueOf()
-            ? (issuanceInitiationRequest as IssuanceInitiationRequestPayloadV9)
-            : (issuanceInitiationRequest as CredentialOfferRequestPayloadV11);
+      version < OpenId4VCIVersion.VER_11.valueOf()
+        ? (issuanceInitiationRequest as IssuanceInitiationRequestPayloadV9)
+        : (issuanceInitiationRequest as CredentialOfferRequestPayloadV11);
 
     return {
       baseUrl,
@@ -45,5 +44,4 @@ export class CredentialOffer {
       uriTypeProperties: ['issuer', 'credential_type'],
     });
   }
-
 }

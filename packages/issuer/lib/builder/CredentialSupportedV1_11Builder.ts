@@ -2,7 +2,8 @@ import {
   CredentialFormatEnum,
   CredentialIssuerMetadataSupportedCredentials,
   Display,
-  IssuerCredentialSubject, IssuerCredentialSubjectDisplay,
+  IssuerCredentialSubject,
+  IssuerCredentialSubjectDisplay,
   SupportedCredentialIssuerMetadataJwtVcJson,
   SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc,
   TokenErrorResponse,
@@ -68,7 +69,7 @@ export class CredentialSupportedV1_11Builder {
     return this
   }
 
- withIssuerCredentialSubjectDisplay(
+  withIssuerCredentialSubjectDisplay(
     subjectProperty: string,
     issuerCredentialSubjectDisplay: IssuerCredentialSubjectDisplay
   ): CredentialSupportedV1_11Builder {
@@ -87,7 +88,8 @@ export class CredentialSupportedV1_11Builder {
       format: this.format,
     }
     if (this.credentialSubject) {
-      (credentialSupported as (SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc | SupportedCredentialIssuerMetadataJwtVcJson)).credentialSubject = this.credentialSubject
+      ;(credentialSupported as SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc | SupportedCredentialIssuerMetadataJwtVcJson).credentialSubject =
+        this.credentialSubject
     }
     if (this.cryptographicSuitesSupported) {
       credentialSupported.cryptographic_suites_supported = this.cryptographicSuitesSupported
@@ -99,7 +101,8 @@ export class CredentialSupportedV1_11Builder {
       credentialSupported.id = this.id
     }
     if (this.display) {
-      (credentialSupported as (SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc | SupportedCredentialIssuerMetadataJwtVcJson)).display = this.display
+      ;(credentialSupported as SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc | SupportedCredentialIssuerMetadataJwtVcJson).display =
+        this.display
     }
     return credentialSupported
   }

@@ -1,22 +1,14 @@
 import { KeyObject } from 'crypto';
 
-import {
-  Alg,
-  CredentialRequest,
-  Jwt,
-  ProofOfPossession,
-  Typ,
-  URL_NOT_VALID,
-  WellKnownEndpoints,
-} from '@sphereon/openid4vci-common';
+import { Alg, CredentialRequest, Jwt, ProofOfPossession, Typ, URL_NOT_VALID, WellKnownEndpoints } from '@sphereon/openid4vci-common';
 import * as jose from 'jose';
 import nock from 'nock';
 
 import { CredentialRequestClientBuilder, MetadataClient } from '..';
 import { ProofOfPossessionBuilder } from '..';
+import { CredentialOffer } from '../CredentialOffer';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';
-import {CredentialOffer} from "../CredentialOffer";
 
 const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN';
 

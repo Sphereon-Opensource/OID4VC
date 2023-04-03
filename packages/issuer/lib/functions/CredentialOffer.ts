@@ -16,9 +16,9 @@ export function createCredentialOfferDeeplink(preAuthorizedCode: string, issuerM
     throw new Error(TokenErrorResponse.invalid_request)
   }
 
-  const types: string[] = [];
+  const types: string[] = []
   issuerMetadata.credentials_supported.map((cs) => {
-    if (cs.format!=CredentialFormatEnum.mso_mdoc) types.push(...(cs['types' as keyof CredentialIssuerMetadataSupportedCredentials]) as string[])
+    if (cs.format != CredentialFormatEnum.mso_mdoc) types.push(...(cs['types' as keyof CredentialIssuerMetadataSupportedCredentials] as string[]))
   })
   return `openid-credential-offer://?credential_offer=${encodeJsonAsURI({
     credential_issuer: issuerMetadata.credential_issuer,

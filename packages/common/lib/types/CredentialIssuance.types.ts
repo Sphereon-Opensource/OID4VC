@@ -1,5 +1,6 @@
 import { CredentialFormat, W3CVerifiableCredential } from '@sphereon/ssi-types';
-import {OpenId4VCIVersion} from "./OpenID4VCIVersions.types";
+
+import { OpenId4VCIVersion } from './OpenID4VCIVersions.types';
 
 export interface CredentialRequest {
   //TODO: handling list is out of scope for now

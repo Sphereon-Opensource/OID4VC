@@ -1,4 +1,5 @@
-import { CommonAuthorizationDetails, CommonAuthorizationRequest, CredentialOfferCredentialJwtVcJson } from './Generic.types';
+import { CommonAuthorizationDetails, CommonAuthorizationRequest } from './Authorization.types';
+import { CredentialOfferCredentialJwtVcJson } from './Generic.types';
 import { CredentialOfferV1_0_11 } from './v1_0_11.types';
 
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-09.html#name-issuance-initiation-request

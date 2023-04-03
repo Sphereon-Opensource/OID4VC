@@ -1,4 +1,4 @@
-import {CredentialRequest, CredentialResponse, getKidFromJWT, IssuerMetadata, TokenErrorResponse} from "@sphereon/openid4vci-common";
+import { CredentialRequest, CredentialResponse, getKidFromJWT, IssuerMetadata, TokenErrorResponse } from '@sphereon/openid4vci-common'
 import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 export class VcIssuer {
@@ -25,8 +25,7 @@ export class VcIssuer {
     for (const credentialSupported of this._issuerMetadata.credentials_supported) {
       if (!Array.isArray(requestFormat) && credentialSupported.format === requestFormat) {
         return true
-      }
-      else if (Array.isArray(requestFormat)) {
+      } else if (Array.isArray(requestFormat)) {
         for (const format of requestFormat as string[]) {
           if (credentialSupported.format === format) {
             return true
@@ -42,7 +41,7 @@ export class VcIssuer {
       '@context': ['https://www.w3.org/2018/credentials/v1'],
       issuanceDate: new Date().toUTCString(),
       issuer: process.env.issuer_did as string,
-      type: Array.isArray(issueCredentialRequest.type)?issueCredentialRequest.type: [issueCredentialRequest.type],
+      type: Array.isArray(issueCredentialRequest.type) ? issueCredentialRequest.type : [issueCredentialRequest.type],
       credentialSubject: {
         id: getKidFromJWT(issueCredentialRequest.proof.jwt as string),
         given_name: 'John Doe',

@@ -3,9 +3,9 @@ import {
   AccessTokenRequestOpts,
   AccessTokenResponse,
   AuthorizationServerOpts,
+  CommonCredentialOfferRequestPayload,
   EndpointMetadata,
   GrantTypes,
-  CommonCredentialOfferRequestPayload,
   IssuerOpts,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
@@ -19,17 +19,15 @@ import { convertJsonToURI, formPost } from './functions';
 const debug = Debug('sphereon:openid4vci:token');
 
 export class AccessTokenClient {
-
-  public async acquireAccessToken(
-    {
-      credentialOffer,
-      asOpts,
-      pin,
-      codeVerifier,
-      code,
-      redirectUri,
-      metadata,
-    }: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
+  public async acquireAccessToken({
+    credentialOffer,
+    asOpts,
+    pin,
+    codeVerifier,
+    code,
+    redirectUri,
+    metadata,
+  }: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
     const { request } = credentialOffer;
 
     const isPinRequired = this.isPinRequiredValue(request);
