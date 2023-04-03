@@ -25,7 +25,7 @@ export class CredentialOffer {
     }) as IssuanceInitiationRequestPayloadV9;
 
     const request =
-      version < OpenId4VCIVersion.VER_11.valueOf()
+      version < OpenId4VCIVersion.VER_1_0_11.valueOf()
         ? (issuanceInitiationRequest as IssuanceInitiationRequestPayloadV9)
         : (issuanceInitiationRequest as CredentialOfferRequestPayloadV11);
 
