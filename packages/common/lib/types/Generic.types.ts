@@ -3,7 +3,6 @@ import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential 
 import { CodeChallengeMethod, ResponseType } from './Authorization.types';
 import { ProofOfPossession } from './CredentialIssuance.types';
 import { OpenID4VCIServerMetadata } from './OpenID4VCIServerMetadata';
-import { CredentialOfferPayloadV1_0_11 } from './v1_0_11.types';
 
 /**
  * Important Note: please be aware that these Common interfaces are based on versions v1_0.11 and v1_0.09
@@ -236,23 +235,4 @@ export interface EndpointMetadata {
   credential_endpoint: string;
   authorization_endpoint?: string;
   openid4vci_metadata?: OpenID4VCIServerMetadata;
-}
-
-export interface IssuerState {
-  credentialOffer: CredentialOfferPayloadV1_0_11;
-  createdOn: number;
-}
-
-export interface IIssuerStateManager {
-  setState(issuerState: string, payload: IssuerState): Map<string, IssuerState>;
-
-  getState(issuerState: string): IssuerState | undefined;
-
-  hasState(issuerState: string): boolean;
-
-  deleteState(issuerState: string): boolean;
-
-  clearExpiredStates(timestamp?: number): void; // clears all expired states compared against timestamp if provided, otherwise current timestamp
-
-  clearAllStates(): void; // clears all states
 }
