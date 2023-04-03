@@ -37,6 +37,11 @@ export class VcIssuerBuilder {
   }
 
   public withIssuerDisplay(issuerDisplay: Display[] | Display): VcIssuerBuilder {
+    this.issuerDisplay = Array.isArray(issuerDisplay) ? issuerDisplay : [issuerDisplay]
+    return this
+  }
+
+  public addIssuerDisplay(issuerDisplay: Display[] | Display): VcIssuerBuilder {
     if (!Array.isArray(issuerDisplay)) this.issuerDisplay = this.issuerDisplay ? [...this.issuerDisplay, issuerDisplay] : [issuerDisplay]
     else {
       this.issuerDisplay = this.issuerDisplay ? [...this.issuerDisplay, ...issuerDisplay] : issuerDisplay
@@ -45,6 +50,13 @@ export class VcIssuerBuilder {
   }
 
   public withCredentialsSupported(
+    credentialSupported: CredentialIssuerMetadataSupportedCredentials | CredentialIssuerMetadataSupportedCredentials[]
+  ): VcIssuerBuilder {
+    this.credentialsSupported = Array.isArray(credentialSupported) ? credentialSupported : [credentialSupported]
+    return this
+  }
+
+  public addCredentialsSupported(
     credentialSupported: CredentialIssuerMetadataSupportedCredentials | CredentialIssuerMetadataSupportedCredentials[]
   ): VcIssuerBuilder {
     if (!Array.isArray(credentialSupported))

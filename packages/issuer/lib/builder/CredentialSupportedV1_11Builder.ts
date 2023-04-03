@@ -28,7 +28,7 @@ export class CredentialSupportedV1_11Builder {
     return this
   }
 
-  withTypes(type: string | string[]): CredentialSupportedV1_11Builder {
+  addTypes(type: string | string[]): CredentialSupportedV1_11Builder {
     if (!Array.isArray(type)) {
       this.types = this.types ? [...this.types, type] : [type]
     } else {
@@ -38,7 +38,13 @@ export class CredentialSupportedV1_11Builder {
     }
     return this
   }
-  withCryptographicBindingMethod(method: string | string[]): CredentialSupportedV1_11Builder {
+
+  withTypes(type: string | string[]): CredentialSupportedV1_11Builder {
+    this.types = Array.isArray(type) ? type : [type]
+    return this
+  }
+
+  addCryptographicBindingMethod(method: string | string[]): CredentialSupportedV1_11Builder {
     if (!Array.isArray(method)) {
       this.cryptographicBindingMethodsSupported = this.cryptographicBindingMethodsSupported
         ? [...this.cryptographicBindingMethodsSupported, method]
@@ -51,7 +57,12 @@ export class CredentialSupportedV1_11Builder {
     return this
   }
 
-  withCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedV1_11Builder {
+  withCryptographicBindingMethod(method: string | string[]): CredentialSupportedV1_11Builder {
+    this.cryptographicBindingMethodsSupported = Array.isArray(method) ? method : [method]
+    return this
+  }
+
+  addCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedV1_11Builder {
     if (!Array.isArray(suit)) {
       this.cryptographicSuitesSupported = this.cryptographicSuitesSupported ? [...this.cryptographicSuitesSupported, suit] : [suit]
     } else {
@@ -60,12 +71,22 @@ export class CredentialSupportedV1_11Builder {
     return this
   }
 
-  withCredentialDisplay(credentialDisplay: Display | Display[]): CredentialSupportedV1_11Builder {
+  withCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedV1_11Builder {
+    this.cryptographicSuitesSupported = Array.isArray(suit) ? suit : [suit]
+    return this
+  }
+
+  addCredentialDisplay(credentialDisplay: Display | Display[]): CredentialSupportedV1_11Builder {
     if (!Array.isArray(credentialDisplay)) {
       this.display = this.display ? [...this.display, credentialDisplay] : [credentialDisplay]
     } else {
       this.display = this.display ? [...this.display, ...credentialDisplay] : credentialDisplay
     }
+    return this
+  }
+
+  withCredentialDisplay(credentialDisplay: Display | Display[]): CredentialSupportedV1_11Builder {
+    this.display = Array.isArray(credentialDisplay) ? credentialDisplay : [credentialDisplay]
     return this
   }
 
