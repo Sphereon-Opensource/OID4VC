@@ -36,7 +36,10 @@ export interface IssuerMetadata {
   credential_endpoint: string;
   batch_credential_endpoint?: string;
   credentials_supported: CredentialIssuerMetadataSupportedCredentials[];
-  credential_issuer: Display;
+  credential_issuer: string;
+  authorization_server?: string
+  token_endpoint?: string
+  display?: (NameAndLocale & { [key: string]: string })[]
 }
 
 export interface CredentialIssuerMetadataSupportedCredentials {
@@ -99,6 +102,8 @@ export interface AuthorizationRequestJwtVcJsonLdAndLdpVc extends CommonAuthoriza
 export interface CommonAuthorizationDetails {
   type: 'openid_credential' | string;
   format: CredentialFormatEnum;
+  // If the Credential Issuer metadata contains an authorization_server parameter, the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.
+  locations?: string[];
 }
 
 export interface AuthorizationDetailsJwtVcJson extends CommonAuthorizationDetails {

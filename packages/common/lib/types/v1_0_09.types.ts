@@ -16,8 +16,6 @@ export interface AuthorizationRequestV1_0_09 extends CommonAuthorizationRequest 
 }
 
 export interface AuthorizationDetailsJwtVcJsonV1_0_09 extends CommonAuthorizationDetails {
-  // If the Credential Issuer metadata contains an authorization_server parameter, the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.
-  locations?: string[];
   types: string[];
   // fixme: we don't support this property in the current flow for jff. so I commented it out
   //CredentialSubject?: IssuerCredentialSubject;

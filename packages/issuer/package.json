@@ -8,8 +8,14 @@
   "scripts": {
     "build": "tsc"
   },
+  "dependencies": {
+    "@sphereon/openid4vci-common": "workspace:../common",
+    "@sphereon/ssi-types": "^0.9.0",
+    "uuid": "^9.0.0"
+  },
   "devDependencies": {
-    "@types/jest": "^29.5.0"
+    "@types/jest": "^29.5.0",
+    "@types/uuid": "^9.0.1"
   },
   "engines": {
     "node": ">=16"

@@ -2,9 +2,9 @@ import { CredentialRequest, CredentialResponse, OpenIDResponse, ProofOfPossessio
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
+import {CredentialRequestClientBuilder} from "./CredentialRequestClientBuilder";
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { isValidURL, post } from './functions';
-import {CredentialRequestClientBuilder} from "./CredentialRequestClientBuilder";
 
 
 const debug = Debug('sphereon:openid4vci:credential');
@@ -71,7 +71,7 @@ export class CredentialRequestClient {
       'proof_type' in proofInput ? await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession).build() : await proofInput.build();
     return {
       type: credentialType ? credentialType : this.credentialRequestOpts.credentialType,
-      format: format ? format : this.credentialRequestOpts.format,
+      format: format ? format as string : this.credentialRequestOpts.format as string,
       proof,
     };
   }

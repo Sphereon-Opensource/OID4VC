@@ -4,8 +4,7 @@ import {OpenId4VCIVersion} from "./OpenID4VCIVersions.types";
 export interface CredentialRequest {
   //TODO: handling list is out of scope for now
   type: string | string[];
-  //TODO: handling list is out of scope for now
-  format: CredentialFormat | CredentialFormat[];
+  format: CredentialFormat;
   proof: ProofOfPossession;
 }
 
