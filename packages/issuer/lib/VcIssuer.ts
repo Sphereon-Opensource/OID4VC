@@ -6,7 +6,7 @@ import {
   IssuerMetadata,
   TokenErrorResponse,
 } from '@sphereon/openid4vci-common'
-import { ICredential, IIssuerId, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 export class VcIssuer {
   _issuerMetadata: IssuerMetadata
@@ -63,7 +63,7 @@ export class VcIssuer {
     return {
       //todo: sign the credential here
       credential: credential as W3CVerifiableCredential,
-      format: issueCredentialRequest.format,
+      format: issueCredentialRequest.format as string,
     }
   }
 }
