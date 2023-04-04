@@ -53,7 +53,7 @@ export class VcIssuer {
     const credential: ICredential = {
       '@context': ['https://www.w3.org/2018/credentials/v1'],
       issuanceDate: new Date().toUTCString(),
-      issuer: process.env.issuer_did as IIssuerId,
+      issuer: process.env.issuer_did as string,
       type: Array.isArray(issueCredentialRequest.type) ? issueCredentialRequest.type : [issueCredentialRequest.type],
       credentialSubject: {
         id: getKidFromJWT(issueCredentialRequest.proof.jwt as string),
@@ -63,7 +63,7 @@ export class VcIssuer {
     return {
       //todo: sign the credential here
       credential: credential as W3CVerifiableCredential,
-      format: issueCredentialRequest.format as string,
+      format: issueCredentialRequest.format,
     }
   }
 }

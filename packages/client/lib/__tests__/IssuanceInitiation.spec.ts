@@ -13,7 +13,7 @@ describe('Issuance Initiation', () => {
         issuer: 'https://server.example.com',
         op_state: 'eyJhbGciOiJSU0Et...FYUaBy',
       },
-      version: OpenId4VCIVersion.VER_9,
+      version: OpenId4VCIVersion.VER_1_0_09,
     });
   });
 

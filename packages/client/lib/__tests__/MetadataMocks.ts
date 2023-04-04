@@ -19,7 +19,7 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
     user_pin_required: 'false',
   },
-  version: OpenId4VCIVersion.VER_9,
+  version: OpenId4VCIVersion.VER_1_0_09,
 };
 export const IDENTIPROOF_AS_METADATA = {
   issuer: 'https://auth.research.identiproof.io',
