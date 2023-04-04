@@ -8,7 +8,8 @@ import {
   CredentialResponse,
   EndpointMetadata,
   IssuerCredentialSubject,
-  IssuerCredentialSubjectDisplay, OpenIDResponse,
+  IssuerCredentialSubjectDisplay,
+  OpenIDResponse,
   ProofOfPossessionCallbacks,
   ResponseType,
 } from '@sphereon/openid4vci-common';
