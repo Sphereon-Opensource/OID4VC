@@ -22,8 +22,8 @@ import { CredentialSupportedV1_11Builder, VcIssuerBuilder } from './builder'
 import { validateRequestBody } from './expressUtils'
 import { createCredentialOfferDeeplink } from './functions'
 
-const key = fs.readFileSync(path.join(__dirname, process.env.PRIVATE_KEY || './privkey.pem'), 'utf-8')
-const cert = fs.readFileSync(path.join(__dirname, process.env.x509_CERTIFICATE || './chain.pem'), 'utf-8')
+const key = fs.readFileSync(process.env.PRIVATE_KEY || path.join(__dirname, './privkey.pem'), 'utf-8')
+const cert = fs.readFileSync(process.env.x509_CERTIFICATE || path.join(__dirname, './chain.pem'), 'utf-8')
 const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90
 
 function buildVcIssuer() {
