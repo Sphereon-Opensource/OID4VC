@@ -1,6 +1,6 @@
-import { CommonAuthorizationDetails, CommonAuthorizationRequest } from './Authorization.types';
+import { CommonAuthorizationRequest } from './Authorization.types';
+import { CredentialOfferPayload } from './CredentialIssuance.types';
 import { CredentialOfferCredentialJwtVcJson } from './Generic.types';
-import { CredentialOfferV1_0_11 } from './v1_0_11.types';
 
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-09.html#name-issuance-initiation-request
 export interface CredentialOfferV1_0_09 {
@@ -16,17 +16,10 @@ export interface AuthorizationRequestV1_0_09 extends CommonAuthorizationRequest 
   op_state?: string;
 }
 
-export interface AuthorizationDetailsJwtVcJsonV1_0_09 extends CommonAuthorizationDetails {
-  types: string[];
-  // fixme: we don't support this property in the current flow for jff. so I commented it out
-  //CredentialSubject?: IssuerCredentialSubject;
-  [key: string]: unknown;
-}
-
 export function isAuthorizationRequestV1_0_09(request: CommonAuthorizationRequest): boolean {
   return request && 'op_state' in request;
 }
 
-export function isCredentialOfferV1_0_09(request: CredentialOfferV1_0_09 | CredentialOfferV1_0_11): boolean {
-  return request && 'issuer' in request && 'op_state' in request;
+export function isCredentialOfferV1_0_09(request: CredentialOfferPayload): boolean {
+  return request && ('issuer' in request || 'op_state' in request);
 }

@@ -1,4 +1,4 @@
-import { CommonCredentialOfferRequestPayload, CredentialOfferRequestWithBaseUrl } from './CredentialIssuance.types';
+import { CredentialOfferPayload, CredentialOfferRequestWithBaseUrl } from './CredentialIssuance.types';
 import {
   CredentialFormatEnum,
   EndpointMetadata,
@@ -15,10 +15,14 @@ export interface CommonAuthorizationRequest {
   code_challenge_method: CodeChallengeMethod;
   redirect_uri: string;
   scope?: string;
-  authorization_details?: CommonAuthorizationDetails[];
+  authorization_details?:
+    | (AuthorizationDetailsJwtVcJson | AuthorizationRequestJwtVcJsonLdAndLdpVc | string)[]
+    | (AuthorizationDetailsJwtVcJson | AuthorizationRequestJwtVcJsonLdAndLdpVc | string);
   wallet_issuer?: string;
   user_hint?: string;
 }
+
+export type AuthorizationRequest = AuthorizationRequestJwtVcJson | AuthorizationDetailsJwtVcJsonLdAndLdpVc;
 
 export interface AuthorizationRequestJwtVcJson extends CommonAuthorizationRequest {
   authorization_details?: AuthorizationDetailsJwtVcJson[];
@@ -33,18 +37,15 @@ export interface CommonAuthorizationDetails {
   format: CredentialFormatEnum;
   // If the Credential Issuer metadata contains an authorization_server parameter, the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.
   locations?: string[];
+  types: string[];
   [key: string]: any;
 }
 
 export interface AuthorizationDetailsJwtVcJson extends CommonAuthorizationDetails {
-  format: CredentialFormatEnum.jwt_vc_json;
-  types: string[];
   credentialSubject?: IssuerCredentialSubject;
 }
 
 export interface AuthorizationDetailsJwtVcJsonLdAndLdpVc extends CommonAuthorizationDetails {
-  format: CredentialFormatEnum.ldp_vc | CredentialFormatEnum.jwt_vc_json_ld;
-  types: string[];
   credential_definition: IssuerCredentialDefinition;
 }
 
@@ -89,16 +90,6 @@ export interface AccessTokenRequestOpts {
   code?: string; // only required for authorization flow
   redirectUri?: string; // only required for authorization flow
   pin?: string; // Pin-number. Only used when required
-}
-
-export interface AuthorizationRequest {
-  response_type: ResponseType.AUTH_CODE;
-  client_id: string;
-  code_challenge: string;
-  code_challenge_method: CodeChallengeMethod;
-  authorization_details?: string;
-  redirect_uri: string;
-  scope?: string;
 }
 
 export interface AuthorizationRequestOpts {
@@ -152,8 +143,8 @@ export enum AuthzFlowType {
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace AuthzFlowType {
-  export function valueOf(request: CommonCredentialOfferRequestPayload): AuthzFlowType {
-    if (request[PRE_AUTH_CODE_LITERAL]) {
+  export function valueOf(request: CredentialOfferPayload): AuthzFlowType {
+    if (PRE_AUTH_CODE_LITERAL in request) {
       return AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW;
     }
     return AuthzFlowType.AUTHORIZATION_CODE_FLOW;
