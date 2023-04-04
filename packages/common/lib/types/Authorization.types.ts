@@ -15,12 +15,12 @@ export interface CommonAuthorizationRequest {
   code_challenge_method: CodeChallengeMethod;
   redirect_uri: string;
   scope?: string;
-  authorization_details?:
-    | (AuthorizationDetailsJwtVcJson | AuthorizationRequestJwtVcJsonLdAndLdpVc | string)[]
-    | (AuthorizationDetailsJwtVcJson | AuthorizationRequestJwtVcJsonLdAndLdpVc | string);
+  authorization_details?: AuthorizationDetails[] | AuthorizationDetails;
   wallet_issuer?: string;
   user_hint?: string;
 }
+
+export type AuthorizationDetails = AuthorizationDetailsJwtVcJson | AuthorizationRequestJwtVcJsonLdAndLdpVc | string;
 
 export type AuthorizationRequest = AuthorizationRequestJwtVcJson | AuthorizationDetailsJwtVcJsonLdAndLdpVc;
 
@@ -96,7 +96,7 @@ export interface AuthorizationRequestOpts {
   clientId: string;
   codeChallenge: string;
   codeChallengeMethod: CodeChallengeMethod;
-  authorizationDetails?: CommonAuthorizationDetails[];
+  authorizationDetails?: AuthorizationDetails[];
   redirectUri: string;
   scope?: string;
 }

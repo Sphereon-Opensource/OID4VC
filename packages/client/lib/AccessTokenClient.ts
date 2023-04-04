@@ -140,14 +140,8 @@ export class AccessTokenClient {
       throw new Error(TokenErrorResponse.invalid_request);
     }
     const issuer = getIssuerFromCredentialOfferPayload(requestPayload);
-    console.log(
-      `>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\nisCredentialOfferV1_0_09?${isCredentialOfferV1_0_09(requestPayload)}\n${JSON.stringify(
-        requestPayload
-      )}\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<`
-    );
     if (isCredentialOfferV1_0_09(requestPayload)) {
       requestPayload = requestPayload as CredentialOfferV1_0_09;
-      console.log(`>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${requestPayload.user_pin_required}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<`);
       if (typeof requestPayload.user_pin_required === 'string') {
         isPinRequired = requestPayload.user_pin_required.toLowerCase() === 'true';
       } else if (typeof requestPayload.user_pin_required === 'boolean') {
