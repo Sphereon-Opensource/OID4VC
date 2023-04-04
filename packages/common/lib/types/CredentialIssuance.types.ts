@@ -7,13 +7,13 @@ import { CredentialOfferPayloadV1_0_11 } from './v1_0_11.types';
 export interface CredentialRequest {
   //TODO: handling list is out of scope for now
   type: string | string[];
-  format: CredentialFormat;
+  format: CredentialFormat | CredentialFormat[];
   proof: ProofOfPossession;
 }
 
 export interface CredentialResponse {
   credential: W3CVerifiableCredential;
-  format: CredentialFormat;
+  format: CredentialFormat | CredentialFormat[];
 }
 
 export interface CredentialOfferRequestWithBaseUrl {
