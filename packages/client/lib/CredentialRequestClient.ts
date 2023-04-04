@@ -70,7 +70,7 @@ export class CredentialRequestClient {
       'proof_type' in proofInput ? await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession).build() : await proofInput.build();
     return {
       type: credentialType ? credentialType : this.credentialRequestOpts.credentialType,
-      format: format ? format : this.credentialRequestOpts.format,
+      format: format ? (format as string) : (this.credentialRequestOpts.format as string),
       proof,
     };
   }
