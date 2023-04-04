@@ -135,7 +135,7 @@ export class OpenID4VCIClient {
     });
   }
 
-  public async acquireAuthorizationCode({
+  public async acquirePushedAuthorizationRequestURI({
     clientId,
     codeChallengeMethod,
     codeChallenge,
