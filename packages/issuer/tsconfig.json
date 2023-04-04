@@ -3,9 +3,7 @@
   "compilerOptions": {
     "rootDir": "./lib",
     "outDir": "./dist",
-    "declarationDir": "./dist",
-    "esModuleInterop": true,
-    "moduleResolution": "Node"
+    "declarationDir": "./dist"
   },
   "references": [
     {
