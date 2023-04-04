@@ -1,4 +1,5 @@
-import { CommonAuthorizationRequest, CredentialFormatEnum, CredentialOfferCredential, Grant, IssuerCredentialDefinition } from './Generic.types';
+import { CommonAuthorizationRequest } from './Authorization.types';
+import { CredentialFormatEnum, CredentialOfferCredential, Grant, IssuerCredentialDefinition } from './Generic.types';
 import { CredentialOfferV1_0_09 } from './v1_0_09.types';
 
 export interface CredentialOfferV1_0_11 {
