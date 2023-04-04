@@ -4,11 +4,11 @@ import {
   AuthorizationRequest,
   AuthzFlowType,
   CodeChallengeMethod,
-  CredentialMetadata,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
-  CredentialsSupported,
   EndpointMetadata,
+  IssuerCredentialSubject,
+  IssuerCredentialSubjectDisplay,
   ProofOfPossessionCallbacks,
   ResponseType,
 } from '@sphereon/openid4vci-common';
@@ -284,7 +284,7 @@ export class OpenID4VCIClient {
     return response.successBody;
   }
 
-  getCredentialsSupported(restrictToInitiationTypes: boolean): CredentialsSupported {
+  getCredentialsSupported(restrictToInitiationTypes: boolean): IssuerCredentialSubject {
     const credentialsSupported = this.serverMetadata?.openid4vci_metadata?.credentials_supported;
     if (!credentialsSupported) {
       return {};
@@ -292,7 +292,7 @@ export class OpenID4VCIClient {
       return credentialsSupported;
     }
     const initiationTypes = this.getCredentialTypes();
-    const supported: CredentialsSupported = {};
+    const supported: IssuerCredentialSubject = {};
     for (const [key, value] of Object.entries(credentialsSupported)) {
       if (initiationTypes.includes(key)) {
         supported[key] = value;
@@ -301,7 +301,7 @@ export class OpenID4VCIClient {
     return supported;
   }
 
-  getCredentialMetadata(type: string): CredentialMetadata {
+  getCredentialMetadata(type: string): IssuerCredentialSubjectDisplay {
     return this.getCredentialsSupported(false)[type];
   }
 

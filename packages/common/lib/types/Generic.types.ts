@@ -23,13 +23,15 @@ export interface NameAndLocale {
   locale?: string;
 }
 
+export type NameAndLocaleExtended = NameAndLocale & { [key: string]: unknown };
+
 export interface LogoAndColor {
   logo?: CredentialLogo;
   background_color?: string;
   text_color?: string;
 }
 
-export type Display = NameAndLocale & LogoAndColor & { [key: string]: string };
+export type Display = NameAndLocaleExtended & LogoAndColor;
 
 export interface IssuerMetadata {
   credential_endpoint: string;
@@ -38,7 +40,7 @@ export interface IssuerMetadata {
   credential_issuer: string;
   authorization_server?: string;
   token_endpoint?: string;
-  display?: (NameAndLocale & { [key: string]: string })[];
+  display?: NameAndLocaleExtended[];
 }
 
 export interface CredentialIssuerMetadataSupportedCredentials {
@@ -160,7 +162,7 @@ export type IssuerCredentialSubjectDisplay = CredentialSubjectDisplay & Record<s
 export interface CredentialSubjectDisplay {
   mandatory?: boolean;
   value_type?: string;
-  display?: NameAndLocale[];
+  display?: NameAndLocaleExtended[];
   order?: string[]; // An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
 }
 
