@@ -17,10 +17,10 @@ import * as dotenv from 'dotenv-flow'
 import express, { Express, NextFunction, Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 
-import { VcIssuer } from './VcIssuer'
-import { CredentialSupportedV1_11Builder, VcIssuerBuilder } from './builder'
+import { VcIssuer } from '@sphereon/openid4vci-issuer'
+import { CredentialSupportedV1_11Builder, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
 import { validateRequestBody } from './expressUtils'
-import { createCredentialOfferDeeplink } from './functions'
+import { createCredentialOfferDeeplink } from '@sphereon/openid4vci-issuer'
 
 const key = fs.readFileSync(process.env.PRIVATE_KEY || path.join(__dirname, './privkey.pem'), 'utf-8')
 const cert = fs.readFileSync(process.env.x509_CERTIFICATE || path.join(__dirname, './chain.pem'), 'utf-8')

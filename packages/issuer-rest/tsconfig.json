@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig-base.json",
+  "compilerOptions": {
+    "rootDir": "./lib",
+    "outDir": "./dist",
+    "declarationDir": "./dist"
+  },
+  "references": [
+    {
+      "path": "../common"
+    },
+    {
+      "path": "../issuer"
+    }
+  ]
+}
