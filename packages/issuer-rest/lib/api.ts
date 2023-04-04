@@ -9,7 +9,9 @@ import {
   CredentialRequest,
   Display,
   IssuerCredentialSubjectDisplay,
+  IssuerMetadata,
 } from '@sphereon/openid4vci-common'
+import { createCredentialOfferDeeplink, CredentialSupportedV1_11Builder, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
@@ -17,16 +19,13 @@ import * as dotenv from 'dotenv-flow'
 import express, { Express, NextFunction, Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 
-import { VcIssuer } from '@sphereon/openid4vci-issuer'
-import { CredentialSupportedV1_11Builder, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
 import { validateRequestBody } from './expressUtils'
-import { createCredentialOfferDeeplink } from '@sphereon/openid4vci-issuer'
 
 const key = fs.readFileSync(process.env.PRIVATE_KEY || path.join(__dirname, './privkey.pem'), 'utf-8')
 const cert = fs.readFileSync(process.env.x509_CERTIFICATE || path.join(__dirname, './chain.pem'), 'utf-8')
 const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90
 
-function buildVcIssuer() {
+function buildVCIFromEnvironment() {
   const credentialsSupported: CredentialIssuerMetadataSupportedCredentials = new CredentialSupportedV1_11Builder()
     .withCryptographicSuitesSupported(process.env.cryptographic_suites_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
@@ -71,9 +70,9 @@ export class RestAPI {
   private tokenToId: Map<string, string> = new Map()
   private authRequestsData: Map<string, AuthorizationRequest> = new Map()
 
-  constructor() {
+  constructor(opts?: { metadata: IssuerMetadata; userPinRequired: boolean }) {
     dotenv.config()
-    this._vcIssuer = buildVcIssuer()
+    this._vcIssuer = opts ? (this._vcIssuer = new VcIssuer(opts.metadata, opts.userPinRequired)) : buildVCIFromEnvironment()
     this.express = express()
     const port = process.env.PORT || 3443
     const secret = process.env.COOKIE_SIGNING_KEY
