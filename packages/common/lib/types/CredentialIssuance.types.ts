@@ -1,4 +1,4 @@
-import { CredentialFormat, W3CVerifiableCredential } from '@sphereon/ssi-types';
+import { CredentialFormat, ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 import { OpenId4VCIVersion } from './OpenID4VCIVersions.types';
 import { CredentialOfferV1_0_09 } from './v1_0_09.types';
@@ -101,3 +101,8 @@ export type JWTSignerCallback = (jwt: Jwt, kid?: string) => Promise<string>;
 export type JWTVerifyCallback = (args: { jwt: string; kid?: string }) => Promise<void>;
 
 export type Request = CredentialRequest;
+
+export type CredentialIssuerCallback = (opts: {
+  credentialRequest?: CredentialRequest;
+  credential?: ICredential;
+}) => Promise<W3CVerifiableCredential>;
