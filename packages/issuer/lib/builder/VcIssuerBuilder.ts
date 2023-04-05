@@ -7,6 +7,7 @@ import {
 } from '@sphereon/openid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
+import { MemoryCredentialOfferStateManager } from '../state-manager/MemoryCredentialOfferStateManager'
 
 export class VcIssuerBuilder {
   credentialIssuer?: string
@@ -79,8 +80,13 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withInMemoryCredentialOfferStates(iCredentialOfferStateManager: ICredentialOfferStateManager): VcIssuerBuilder {
+  public withCredentialOfferStateManager(iCredentialOfferStateManager: ICredentialOfferStateManager): VcIssuerBuilder {
     this.credentialOfferStateManager = iCredentialOfferStateManager
+    return this
+  }
+
+  public withInMemoryCredentialOfferState(): VcIssuerBuilder {
+    this.withCredentialOfferStateManager(new MemoryCredentialOfferStateManager())
     return this
   }
 

@@ -39,7 +39,7 @@ describe('VcIssuer builder', () => {
         name: 'example issuer',
         locale: 'en-US',
       })
-      .withInMemoryCredentialOfferStates(new MemoryCredentialOfferStateManager())
+      .withInMemoryCredentialOfferState()
       .withCredentialsSupported(credentialsSupported)
       .build()
 
@@ -121,7 +121,7 @@ describe('VcIssuer builder', () => {
         locale: 'en-US',
       })
       .withCredentialsSupported(credentialsSupported)
-      .withInMemoryCredentialOfferStates(new MemoryCredentialOfferStateManager())
+      .withCredentialOfferStateManager(new MemoryCredentialOfferStateManager())
       .build()
     expect(vcIssuer).toBeDefined()
     const now = +new Date()
