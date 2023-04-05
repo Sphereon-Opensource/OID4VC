@@ -39,6 +39,7 @@ describe('VcIssuer builder', () => {
         name: 'example issuer',
         locale: 'en-US',
       })
+      .withInMemoryCredentialOfferStates(new MemoryCredentialOfferStateManager())
       .withCredentialsSupported(credentialsSupported)
       .build()
 
