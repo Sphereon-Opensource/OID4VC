@@ -8,7 +8,7 @@ describe('AuthorizationDetailsBuilder test', () => {
       .withFormats('jwt_vc' as CredentialFormatEnum)
       .withLocations(['test1', 'test2'])
       .withType('openid_credential')
-      .build();
+      .buildJwtVcJson();
     expect(actual).toEqual({
       type: 'openid_credential',
       format: 'jwt_vc',
@@ -20,7 +20,7 @@ describe('AuthorizationDetailsBuilder test', () => {
       .withFormats('jwt_vc' as CredentialFormatEnum)
       .withLocations(['test1'])
       .withType('openid_credential')
-      .build();
+      .buildJwtVcJson();
     expect(actual).toEqual({
       type: 'openid_credential',
       format: 'jwt_vc',
@@ -31,7 +31,7 @@ describe('AuthorizationDetailsBuilder test', () => {
     const actual = new AuthorizationDetailsBuilder()
       .withFormats('jwt_vc' as CredentialFormatEnum)
       .withType('openid_credential')
-      .build();
+      .buildJwtVcJson();
     expect(actual).toEqual({
       type: 'openid_credential',
       format: 'jwt_vc',
@@ -42,19 +42,19 @@ describe('AuthorizationDetailsBuilder test', () => {
       new AuthorizationDetailsBuilder()
         .withFormats('jwt_vc' as CredentialFormatEnum)
         .withLocations(['test1'])
-        .build();
+        .buildJwtVcJson();
     }).toThrow(Error('Type and format are required properties'));
   });
   it('should fail if format is missing', () => {
     expect(() => {
-      new AuthorizationDetailsBuilder().withType('openid_credential').withLocations(['test1']).build();
+      new AuthorizationDetailsBuilder().withType('openid_credential').withLocations(['test1']).buildJwtVcJson();
     }).toThrow(Error('Type and format are required properties'));
   });
   it('should be able to add random field to the object', () => {
     const actual = new AuthorizationDetailsBuilder()
       .withFormats('jwt_vc' as CredentialFormatEnum)
       .withType('openid_credential')
-      .build();
+      .buildJwtVcJson();
     actual['random'] = 'test';
     expect(actual).toEqual({
       type: 'openid_credential',

@@ -1,4 +1,4 @@
-import { DefaultURISchemes, OpenId4VCIVersion } from '../types';
+import { CredentialOfferPayload, DefaultURISchemes, OpenId4VCIVersion, TokenErrorResponse } from '../types';
 
 export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
   let version: OpenId4VCIVersion = OpenId4VCIVersion.VER_UNKNOWN;
@@ -48,4 +48,11 @@ function recordVersion(determinedVersion: OpenId4VCIVersion, potentialVersion: O
   throw new Error(
     `Invalid param. Some keys have been used from version: ${determinedVersion} version while '${key}' is used from version: ${potentialVersion}`
   );
+}
+
+export function getIssuerFromCredentialOfferPayload(request: CredentialOfferPayload): string {
+  if (!request || !('issuer' in request) || 'credential_issuer' in request) {
+    throw new Error(TokenErrorResponse.invalid_request);
+  }
+  return 'issuer' in request ? request.issuer : request['credential_issuer'];
 }

@@ -1,39 +1,28 @@
-import { CredentialFormat, W3CVerifiableCredential } from '@sphereon/ssi-types';
+import { CredentialFormat, ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 import { OpenId4VCIVersion } from './OpenID4VCIVersions.types';
+import { CredentialOfferV1_0_09 } from './v1_0_09.types';
+import { CredentialOfferPayloadV1_0_11 } from './v1_0_11.types';
 
 export interface CredentialRequest {
   //TODO: handling list is out of scope for now
   type: string | string[];
-  format: CredentialFormat;
+  format: CredentialFormat | CredentialFormat[];
   proof: ProofOfPossession;
 }
 
 export interface CredentialResponse {
   credential: W3CVerifiableCredential;
-  format: CredentialFormat;
+  format: CredentialFormat | CredentialFormat[];
 }
 
 export interface CredentialOfferRequestWithBaseUrl {
   baseUrl: string;
-  request: IssuanceInitiationRequestPayloadV9 | CredentialOfferRequestPayloadV11;
+  request: CredentialOfferV1_0_09 | CredentialOfferPayloadV1_0_11;
   version: OpenId4VCIVersion;
 }
 
-export interface CommonCredentialOfferRequestPayload {
-  issuer: string; //(url) REQUIRED The issuer URL of the Credential issuer, the Wallet is requested to obtain one or more Credentials from.
-  credential_type: string[] | string; //(url) REQUIRED A JSON string denoting the type of the Credential the Wallet shall request
-  'pre-authorized_code'?: string; //CONDITIONAL the code representing the issuer's authorization for the Wallet to obtain Credentials of a certain type. This code MUST be short-lived and single-use. MUST be present in a pre-authorized code flow.
-  user_pin_required?: boolean | string; //OPTIONAL Boolean value specifying whether the issuer expects presentation of a user PIN along with the Token Request in a pre-authorized code flow. Default is false.
-}
-
-export interface IssuanceInitiationRequestPayloadV9 extends CommonCredentialOfferRequestPayload {
-  op_state?: string; //(JWT) OPTIONAL String value created by the Credential Issuer and opaque to the Wallet that is used to bind the subsequent authentication request with the Credential Issuer to a context set up during previous steps
-}
-
-export interface CredentialOfferRequestPayloadV11 extends CommonCredentialOfferRequestPayload {
-  issuer_state?: string; //(JWT) OPTIONAL String value created by the Credential Issuer and opaque to the Wallet that is used to bind the subsequent authentication request with the Credential Issuer to a context set up during previous steps
-}
+export type CredentialOfferPayload = CredentialOfferV1_0_09 | CredentialOfferPayloadV1_0_11;
 
 export enum ProofType {
   JWT = 'jwt',
@@ -112,3 +101,8 @@ export type JWTSignerCallback = (jwt: Jwt, kid?: string) => Promise<string>;
 export type JWTVerifyCallback = (args: { jwt: string; kid?: string }) => Promise<void>;
 
 export type Request = CredentialRequest;
+
+export type CredentialIssuerCallback = (opts: {
+  credentialRequest?: CredentialRequest;
+  credential?: ICredential;
+}) => Promise<W3CVerifiableCredential>;

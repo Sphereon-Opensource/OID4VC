@@ -1,7 +1,8 @@
 import {
-  CommonCredentialOfferRequestPayload,
+  CredentialOfferPayload,
   CredentialOfferRequestWithBaseUrl,
   EndpointMetadata,
+  getIssuerFromCredentialOfferPayload,
   OAuth2ASMetadata,
   Oauth2ASWithOID4VCIMetadata,
   OpenID4VCIServerMetadata,
@@ -28,8 +29,8 @@ export class MetadataClient {
    * Retrieve the metada using the initiation request obtained from a previous step
    * @param request
    */
-  public static async retrieveAllMetadataFromCredentialOfferRequest(request: CommonCredentialOfferRequestPayload): Promise<EndpointMetadata> {
-    return MetadataClient.retrieveAllMetadata(request.issuer);
+  public static async retrieveAllMetadataFromCredentialOfferRequest(request: CredentialOfferPayload): Promise<EndpointMetadata> {
+    return MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(request));
   }
 
   /**
