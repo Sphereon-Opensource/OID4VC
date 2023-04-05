@@ -20,15 +20,21 @@ export class CredentialOffer {
     }
     const baseUrl = uri.split('?')[0];
     const version = determineSpecVersionFromURI(uri);
-    const issuanceInitiationRequest: CredentialOfferPayload = convertURIToJsonObject(uri, {
-      arrayTypeProperties: ['credential_type'],
-      requiredProperties: ['issuer', 'credential_type'],
-    }) as CredentialOfferV1_0_09;
+    const issuanceInitiationRequest: CredentialOfferPayload =
+      version < OpenId4VCIVersion.VER_1_0_11
+        ? (convertURIToJsonObject(uri, {
+            arrayTypeProperties: ['credential_type'],
+            requiredProperties: ['issuer', 'credential_type'],
+          }) as CredentialOfferV1_0_09)
+        : (convertURIToJsonObject(uri, {
+            arrayTypeProperties: ['credentials'],
+            requiredProperties: ['credentials', 'credential_issuer'],
+          }) as CredentialOfferPayloadV1_0_11);
 
     const request =
       version < OpenId4VCIVersion.VER_1_0_11.valueOf()
         ? (issuanceInitiationRequest as CredentialOfferV1_0_09)
-        : (issuanceInitiationRequest as unknown as CredentialOfferPayloadV1_0_11);
+        : (issuanceInitiationRequest as CredentialOfferPayloadV1_0_11);
 
     return {
       baseUrl,

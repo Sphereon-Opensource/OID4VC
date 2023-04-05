@@ -1,4 +1,4 @@
-import { CredentialOfferRequestWithBaseUrl, OpenId4VCIVersion } from '@sphereon/openid4vci-common';
+import { CredentialOfferRequestWithBaseUrl, CredentialOfferV1_0_09, OpenId4VCIVersion } from '@sphereon/openid4vci-common';
 
 export const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io';
 export const IDENTIPROOF_AS_URL = 'https://auth.research.identiproof.io';
@@ -18,7 +18,7 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
     'pre-authorized_code':
       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
     user_pin_required: 'false',
-  },
+  } as CredentialOfferV1_0_09,
   version: OpenId4VCIVersion.VER_1_0_09,
 };
 export const IDENTIPROOF_AS_METADATA = {
