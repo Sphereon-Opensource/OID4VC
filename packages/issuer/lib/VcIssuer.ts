@@ -12,15 +12,15 @@ export class VcIssuer {
   _issuerMetadata: IssuerMetadata
   _userPinRequired?: boolean
   _issuerCallback?: CredentialIssuerCallback
-  private readonly _iCredentialOfferStateManager?: ICredentialOfferStateManager
-  constructor(issuerMetadata: IssuerMetadata, userPinRequired?: boolean, iCredentialOfferStateManager?: ICredentialOfferStateManager) {
+  private readonly _stateManager: ICredentialOfferStateManager
+  constructor(issuerMetadata: IssuerMetadata, iCredentialOfferStateManager: ICredentialOfferStateManager, userPinRequired?: boolean) {
     this._issuerMetadata = issuerMetadata
     this._userPinRequired = userPinRequired
-    this._iCredentialOfferStateManager = iCredentialOfferStateManager
+    this._stateManager = iCredentialOfferStateManager
   }
 
-  public get credentialOfferStateManager(): ICredentialOfferStateManager | undefined {
-    return this._iCredentialOfferStateManager
+  public get credentialOfferStateManager(): ICredentialOfferStateManager {
+    return this._stateManager
   }
 
   public getIssuerMetadata() {

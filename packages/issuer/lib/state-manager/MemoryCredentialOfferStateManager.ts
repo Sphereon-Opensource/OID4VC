@@ -32,7 +32,7 @@ export class MemoryCredentialOfferStateManager implements ICredentialOfferStateM
     return this.credentialOfferStateManager.has(state)
   }
 
-  async setState(state: string, payload: CredentialOfferState): Promise<Map<string, CredentialOfferState>> {
-    return this.credentialOfferStateManager.set(state, payload)
+  async setState(state: string, payload: CredentialOfferState): Promise<void> {
+    this.credentialOfferStateManager.set(state, payload)
   }
 }

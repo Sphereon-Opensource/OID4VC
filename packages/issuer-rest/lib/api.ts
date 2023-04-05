@@ -7,6 +7,7 @@ import {
   CredentialIssuerMetadataSupportedCredentials,
   CredentialRequest,
   Display,
+  ICredentialOfferStateManager,
   IssuerCredentialSubjectDisplay,
   IssuerMetadata,
 } from '@sphereon/openid4vci-common'
@@ -67,9 +68,9 @@ export class RestAPI {
   // @ts-ignore
   private tokenToId: Map<string, string> = new Map()
 
-  constructor(opts?: { metadata: IssuerMetadata; userPinRequired: boolean }) {
+  constructor(opts?: { metadata: IssuerMetadata; stateManager: ICredentialOfferStateManager; userPinRequired: boolean }) {
     dotenv.config()
-    this._vcIssuer = opts ? (this._vcIssuer = new VcIssuer(opts.metadata, opts.userPinRequired)) : buildVCIFromEnvironment()
+    this._vcIssuer = opts ? (this._vcIssuer = new VcIssuer(opts.metadata, opts.stateManager, opts.userPinRequired)) : buildVCIFromEnvironment()
     this.express = express()
     const port = process.env.PORT || 3443
     const secret = process.env.COOKIE_SIGNING_KEY

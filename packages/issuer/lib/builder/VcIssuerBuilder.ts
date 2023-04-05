@@ -88,6 +88,9 @@ export class VcIssuerBuilder {
     if (!this.credentialEndpoint || !this.credentialIssuer || !this.credentialsSupported) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
+    if (!this.credentialOfferStateManager) {
+      throw new Error(TokenErrorResponse.invalid_request)
+    }
     if (!this.userPinRequired) {
       this.userPinRequired = false
     }
@@ -108,6 +111,6 @@ export class VcIssuerBuilder {
     if (this.tokenEndpoint) {
       metadata.token_endpoint = this.tokenEndpoint
     }
-    return new VcIssuer(metadata, this.userPinRequired, this.credentialOfferStateManager)
+    return new VcIssuer(metadata, this.credentialOfferStateManager, this.userPinRequired)
   }
 }

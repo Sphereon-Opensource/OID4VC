@@ -6,7 +6,7 @@ export interface CredentialOfferState {
 }
 
 export interface ICredentialOfferStateManager {
-  setState(state: string, payload: CredentialOfferState): Promise<Map<string, CredentialOfferState>>;
+  setState(state: string, payload: CredentialOfferState): Promise<void>;
 
   getState(state: string): Promise<CredentialOfferState | undefined>;
 
