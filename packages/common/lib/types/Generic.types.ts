@@ -67,6 +67,7 @@ export interface SupportedCredentialIssuerMetadataJwtVcJson extends CredentialIs
 
 export interface CredentialOfferCredential {
   format: CredentialFormatEnum;
+  types: string[];
 }
 
 export interface CredentialOfferCredentialJwtVcJson extends CredentialOfferCredential {
@@ -176,7 +177,7 @@ export interface CredentialResponseJwtVcJson {
 
 export interface Grant {
   authorization_code?: GrantAuthorizationCode;
-  'urn:ietf:params:oauth:grant-type:pre-authorized_code': GrantUrnIetf;
+  'urn:ietf:params:oauth:grant-type:pre-authorized_code'?: GrantUrnIetf;
 }
 
 export interface GrantAuthorizationCode {

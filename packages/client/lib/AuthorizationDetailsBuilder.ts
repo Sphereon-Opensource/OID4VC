@@ -1,7 +1,8 @@
-import { CommonAuthorizationDetails, CredentialFormatEnum } from '@sphereon/openid4vci-common';
+import { AuthorizationDetailsJwtVcJson, CredentialFormatEnum } from '@sphereon/openid4vci-common';
 
+//todo: refactor this builder to be able to create ldp details as well
 export class AuthorizationDetailsBuilder {
-  private readonly authorizationDetails: Partial<CommonAuthorizationDetails>;
+  private readonly authorizationDetails: Partial<AuthorizationDetailsJwtVcJson>;
 
   constructor() {
     this.authorizationDetails = {};
@@ -35,9 +36,9 @@ export class AuthorizationDetailsBuilder {
     return this;
   }
 
-  build(): CommonAuthorizationDetails {
+  build(): AuthorizationDetailsJwtVcJson {
     if (this.authorizationDetails.format && this.authorizationDetails.type) {
-      return this.authorizationDetails as CommonAuthorizationDetails;
+      return this.authorizationDetails as AuthorizationDetailsJwtVcJson;
     }
     throw new Error('Type and format are required properties');
   }

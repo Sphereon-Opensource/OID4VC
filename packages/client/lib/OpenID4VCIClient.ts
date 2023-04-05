@@ -1,10 +1,11 @@
 import {
   AccessTokenResponse,
   Alg,
-  AuthorizationRequest,
+  AuthorizationRequestV1_0_09,
   AuthzFlowType,
   CodeChallengeMethod,
   CredentialOfferRequestWithBaseUrl,
+  CredentialOfferV1_0_09,
   CredentialResponse,
   EndpointMetadata,
   IssuerCredentialSubject,
@@ -17,7 +18,7 @@ import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';
 import { CredentialOffer } from './CredentialOffer';
-import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
+import { CredentialRequestV1_0_09ClientBuilder } from './CredentialRequestV1_0_09ClientBuilder';
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { convertJsonToURI } from './functions';
@@ -118,7 +119,7 @@ export class OpenID4VCIClient {
       scope = `openid ${scope}`;
     }
 
-    const queryObj: AuthorizationRequest = {
+    const queryObj = {
       response_type: ResponseType.AUTH_CODE,
       client_id: clientId,
       code_challenge_method: codeChallengeMethod,
@@ -126,7 +127,7 @@ export class OpenID4VCIClient {
       authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
       redirect_uri: redirectUri,
       scope: scope,
-    };
+    } as AuthorizationRequestV1_0_09;
 
     return convertJsonToURI(queryObj, {
       baseUrl: this._serverMetadata.openid4vci_metadata.authorization_endpoint,
@@ -235,7 +236,7 @@ export class OpenID4VCIClient {
       this._kid = kid;
     }
 
-    const requestBuilder = CredentialRequestClientBuilder.fromCredentialOffer({
+    const requestBuilder = CredentialRequestV1_0_09ClientBuilder.fromCredentialOffer({
       credentialOffer: this.credentialOffer,
       metadata: this.serverMetadata,
     });
@@ -306,9 +307,9 @@ export class OpenID4VCIClient {
   }
 
   getCredentialTypes(): string[] {
-    return typeof this.credentialOffer.request.credential_type === 'string'
-      ? [this.credentialOffer.request.credential_type]
-      : this.credentialOffer.request.credential_type;
+    return typeof (this.credentialOffer.request as CredentialOfferV1_0_09).credential_type === 'string'
+      ? [(this.credentialOffer.request as CredentialOfferV1_0_09).credential_type as string]
+      : ((this.credentialOffer.request as CredentialOfferV1_0_09).credential_type as string[]);
   }
 
   get flowType(): AuthzFlowType {

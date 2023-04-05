@@ -1,4 +1,5 @@
 import {
+  CredentialIssuerCallback,
   CredentialRequest,
   CredentialResponse,
   getKidFromJWT,
@@ -11,6 +12,7 @@ import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 export class VcIssuer {
   _issuerMetadata: IssuerMetadata
   _userPinRequired?: boolean
+  _issuerCallback?: CredentialIssuerCallback
   private readonly _iCredentialOfferStateManager?: ICredentialOfferStateManager
   constructor(issuerMetadata: IssuerMetadata, userPinRequired?: boolean, iCredentialOfferStateManager?: ICredentialOfferStateManager) {
     this._issuerMetadata = issuerMetadata
@@ -29,7 +31,10 @@ export class VcIssuer {
   public async issueCredentialFromIssueRequest(issueCredentialRequest: CredentialRequest): Promise<CredentialResponse> {
     //TODO: do we want additional validations here?
     if (this.isMetadataSupportCredentialRequestFormat(issueCredentialRequest.format)) {
-      return await this.issueCredential(issueCredentialRequest)
+      return {
+        credential: await this.issueCredential({ credentialRequest: issueCredentialRequest }),
+        format: issueCredentialRequest.format,
+      }
     }
     throw new Error(TokenErrorResponse.invalid_request)
   }
@@ -48,22 +53,10 @@ export class VcIssuer {
     }
     return false
   }
-
-  private async issueCredential(issueCredentialRequest: CredentialRequest): Promise<CredentialResponse> {
-    const credential: ICredential = {
-      '@context': ['https://www.w3.org/2018/credentials/v1'],
-      issuanceDate: new Date().toUTCString(),
-      issuer: process.env.issuer_did as string,
-      type: Array.isArray(issueCredentialRequest.type) ? issueCredentialRequest.type : [issueCredentialRequest.type],
-      credentialSubject: {
-        id: getKidFromJWT(issueCredentialRequest.proof.jwt as string),
-        given_name: 'John Doe',
-      },
+  private async issueCredential(opts: { credentialRequest?: CredentialRequest; credential?: ICredential }): Promise<W3CVerifiableCredential> {
+    if ((!opts.credential && !opts.credentialRequest) || !this._issuerCallback) {
+      throw new Error('Issuer not configured correctly.')
     }
-    return {
-      //todo: sign the credential here
-      credential: credential as W3CVerifiableCredential,
-      format: issueCredentialRequest.format as string,
-    }
+    return await this._issuerCallback(opts)
   }
 }

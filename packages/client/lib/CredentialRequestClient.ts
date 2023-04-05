@@ -2,7 +2,7 @@ import { CredentialRequest, CredentialResponse, OpenIDResponse, ProofOfPossessio
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
-import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
+import { CredentialRequestV1_0_09ClientBuilder } from './CredentialRequestV1_0_09ClientBuilder';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { isValidURL, post } from './functions';
 
@@ -27,7 +27,7 @@ export class CredentialRequestClient {
     return this.credentialRequestOpts.credentialEndpoint;
   }
 
-  public constructor(builder: CredentialRequestClientBuilder) {
+  public constructor(builder: CredentialRequestV1_0_09ClientBuilder) {
     this._credentialRequestOpts = { ...builder };
   }
 
