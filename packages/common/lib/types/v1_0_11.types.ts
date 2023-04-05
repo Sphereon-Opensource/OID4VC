@@ -52,10 +52,12 @@ export interface AuthorizationRequestV1_0_11 extends AuthorizationDetailsJwtVcJs
   issuer_state?: string;
 }
 
+// todo https://sphereon.atlassian.net/browse/VDX-185
 export function isAuthorizationRequestV1_0_11(request: CommonAuthorizationRequest): boolean {
   return request && 'issuer_state' in request;
 }
 
+// TODO https://sphereon.atlassian.net/browse/VDX-184
 export function isCredentialOfferV1_0_11(request: CredentialOfferPayload | CredentialOfferV1_0_11): boolean {
   return request && ('credential_offer' in request || 'credential_offer_uri' in request || 'credential_issuer' in request);
 }

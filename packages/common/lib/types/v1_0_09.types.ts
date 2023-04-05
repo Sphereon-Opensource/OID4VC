@@ -16,10 +16,12 @@ export interface AuthorizationRequestV1_0_09 extends CommonAuthorizationRequest 
   op_state?: string;
 }
 
+// todo https://sphereon.atlassian.net/browse/VDX-185
 export function isAuthorizationRequestV1_0_09(request: CommonAuthorizationRequest): boolean {
   return request && 'op_state' in request;
 }
 
+// TODO https://sphereon.atlassian.net/browse/VDX-184
 export function isCredentialOfferV1_0_09(request: CredentialOfferPayload): boolean {
   return request && ('issuer' in request || 'op_state' in request);
 }
