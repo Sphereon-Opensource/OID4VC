@@ -163,7 +163,8 @@ export class OpenID4VCIClient {
       scope = `openid ${scope}`;
     }
 
-    const queryObj: AuthorizationRequest = {
+    //fixme: handle this for v11
+    const queryObj: AuthorizationRequestV1_0_09 = {
       response_type: ResponseType.AUTH_CODE,
       client_id: clientId,
       code_challenge_method: codeChallengeMethod,

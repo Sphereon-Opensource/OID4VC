@@ -9,7 +9,7 @@ describe('OpenID4VCIClient', () => {
 
   beforeEach(async () => {
     nock(MOCK_URL).get(/.*/).reply(200, {});
-    nock(`${MOCK_URL}`).post('/v1/auth/par').reply(201, { request_uri: "test_uri", expires_in: 90 });
+    nock(`${MOCK_URL}`).post('/v1/auth/par').reply(201, { request_uri: 'test_uri', expires_in: 90 });
     client = await OpenID4VCIClient.fromURI({
       uri: 'openid-initiate-issuance://?issuer=https://server.example.com&credential_type=TestCredential',
       flowType: AuthzFlowType.AUTHORIZATION_CODE_FLOW,
@@ -29,7 +29,7 @@ describe('OpenID4VCIClient', () => {
       scope: 'openid TestCredential',
       redirectUri: 'http://localhost:8881/cb',
     });
-    expect(actual.successBody).toEqual({ request_uri: "test_uri", expires_in: 90 });
+    expect(actual.successBody).toEqual({ request_uri: 'test_uri', expires_in: 90 });
   });
 
   it('should fail when pushed_authorization_request_endpoint is not present', async () => {
@@ -73,7 +73,7 @@ describe('OpenID4VCIClient', () => {
       ],
       redirectUri: 'http://localhost:8881/cb',
     });
-    expect(actual.successBody).toEqual({ request_uri: "test_uri", expires_in: 90 });
+    expect(actual.successBody).toEqual({ request_uri: 'test_uri', expires_in: 90 });
   });
 
   it('should not fail when only scope is present', async () => {
@@ -85,7 +85,7 @@ describe('OpenID4VCIClient', () => {
       scope: 'openid TestCredential',
       redirectUri: 'http://localhost:8881/cb',
     });
-    expect(actual.successBody).toEqual({ request_uri: "test_uri", expires_in: 90 });
+    expect(actual.successBody).toEqual({ request_uri: 'test_uri', expires_in: 90 });
   });
 
   it('should not fail when both authorization_details and scope are present', async () => {
@@ -107,6 +107,6 @@ describe('OpenID4VCIClient', () => {
       scope: 'openid TestCredential',
       redirectUri: 'http://localhost:8881/cb',
     });
-    expect(actual.successBody).toEqual({ request_uri: "test_uri", expires_in: 90 });
+    expect(actual.successBody).toEqual({ request_uri: 'test_uri', expires_in: 90 });
   });
 });
