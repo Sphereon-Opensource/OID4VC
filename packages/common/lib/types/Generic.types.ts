@@ -37,7 +37,7 @@ export interface IssuerMetadata {
   credential_endpoint: string;
   batch_credential_endpoint?: string;
   credentials_supported: CredentialIssuerMetadataSupportedCredentials[];
-  credential_issuer: string;
+  credential_issuer: string; // REQUIRED. The URL of the Credential Issuer, the Wallet is requested to obtain one or more Credentials from.
   authorization_server?: string;
   token_endpoint?: string;
   display?: NameAndLocaleExtended[];
@@ -181,11 +181,22 @@ export interface Grant {
 }
 
 export interface GrantAuthorizationCode {
+  /**
+   * OPTIONAL. String value created by the Credential Issuer and opaque to the Wallet that is used to bind the subsequent
+   * Authorization Request with the Credential Issuer to a context set up during previous steps.
+   */
   issuer_state?: string;
 }
 
 export interface GrantUrnIetf {
+  /**
+   * REQUIRED. The code representing the Credential Issuer's authorization for the Wallet to obtain Credentials of a certain type.
+   */
   'pre-authorized_code': string;
+  /**
+   * OPTIONAL. Boolean value specifying whether the Credential Issuer expects presentation of a user PIN along with the Token Request
+   * in a Pre-Authorized Code Flow. Default is false.
+   */
   user_pin_required: boolean;
 }
 
