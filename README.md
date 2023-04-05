@@ -36,42 +36,7 @@ The OpenID4VCI client is typically used in wallet type of applications, where th
 
 The OpenID4VCI issuer is used in issuer type applications, where an organization is issuiing the credential(s). More info can be found in the client [README](./packages/issuer/README.md). This package is currently undergoing development, and not ready to be used yet!
 
-export class MemoryCredentialOfferStateManager implements ICredentialOfferStateManager {
-private readonly credentialOfferStateManager: Map<string, CredentialOfferState>
-constructor() {
-this.credentialOfferStateManager = new Map()
-}
 
-async clearAllStates(): Promise<void> {
-this.credentialOfferStateManager.clear()
-}
-
-async clearExpiredStates(timestamp?: number): Promise<void> {
-const states = Array.from(this.credentialOfferStateManager.entries())
-timestamp = timestamp ?? +new Date()
-for (const [issuerState, state] of states) {
-if (state.createdOn < timestamp) {
-this.credentialOfferStateManager.delete(issuerState)
-}
-}
-}
-
-async deleteState(state: string): Promise<boolean> {
-return this.credentialOfferStateManager.delete(state)
-}
-
-async getState(state: string): Promise<CredentialOfferState | undefined> {
-return this.credentialOfferStateManager.get(state)
-}
-
-async hasState(state: string): Promise<boolean> {
-return this.credentialOfferStateManager.has(state)
-}
-
-async setState(state: string, payload: CredentialOfferState): Promise<Map<string, CredentialOfferState>> {
-return this.credentialOfferStateManager.set(state, payload)
-}
-}
 # Flows
 
 The spec lists 2 flows:
