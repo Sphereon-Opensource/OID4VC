@@ -6,7 +6,6 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "start": "ts-node packages/issuer/lib/AuthServer.ts",
     "preinstall": "npx only-allow pnpm",
     "fix": "pnpm run-s fix:*",
     "fix:lint": "eslint . --fix --ext .ts",

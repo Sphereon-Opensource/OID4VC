@@ -12,6 +12,7 @@ import {
   IssuerCredentialSubjectDisplay,
   OpenIDResponse,
   ProofOfPossessionCallbacks,
+  PushedAuthorizationResponse,
   ResponseType,
 } from '@sphereon/openid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
@@ -144,7 +145,7 @@ export class OpenID4VCIClient {
     authorizationDetails,
     redirectUri,
     scope,
-  }: AuthRequestOpts): Promise<OpenIDResponse<unknown>> {
+  }: AuthRequestOpts): Promise<OpenIDResponse<PushedAuthorizationResponse>> {
     // Scope and authorization_details can be used in the same authorization request
     // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
     if (!scope && !authorizationDetails) {

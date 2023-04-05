@@ -8,7 +8,7 @@ export const validateRequestBody = ({
   required?: string[]
   conditional?: string[]
   body: Pick<Request, 'body'>
-}): string | undefined => {
+}): void => {
   const keys = Object.keys(body)
   let message
   if (required && !required.every((k) => keys.includes(k))) {
@@ -17,5 +17,7 @@ export const validateRequestBody = ({
   if (conditional && !conditional.some((k) => keys.includes(k))) {
     message = message ? `and request must contain ether ${conditional.toString()}` : `Request must contain ether ${conditional.toString()}`
   }
-  return message
+  if (message) {
+    throw new Error(message)
+  }
 }

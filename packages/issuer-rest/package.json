@@ -6,6 +6,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "start": "ts-node lib/api.ts",
     "build": "tsc"
   },
   "dependencies": {

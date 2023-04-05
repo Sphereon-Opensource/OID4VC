@@ -131,18 +131,19 @@ export class RestAPI {
       }
       const required = ['client_id', 'code_challenge_method', 'code_challenge', 'redirect_uri']
       const conditional = ['authorization_details', 'scope']
-      const message = validateRequestBody({ required, conditional, body: req.body })
-      if (message) {
+      try {
+        validateRequestBody({ required, conditional, body: req.body })
+      } catch (e: unknown) {
         return res.status(400).json({
           error: 'invalid_request',
-          error_description: message,
+          error_description: (e as Error).message,
         })
       }
       return next()
     }
 
     this.express.post('/par', handleHttpStatus400, (req: Request, res: Response) => {
-      // Fake client for testing, it needs to come from a registered client
+      // FIXME Fake client for testing, it needs to come from a registered client
       const client = {
         scope: ['openid', 'test'],
         redirectUris: ['http://localhost:8080/*', 'https://www.test.com/*', 'https://test.nl', 'http://*/chart', 'http:*'],
