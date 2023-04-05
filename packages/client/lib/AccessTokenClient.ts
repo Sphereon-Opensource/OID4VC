@@ -149,7 +149,9 @@ export class AccessTokenClient {
       }
     } else if (isCredentialOfferV1_0_11(requestPayload)) {
       requestPayload = requestPayload as CredentialOfferPayloadV1_0_11;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       if ('grants' in requestPayload && 'urn:ietf:params:oauth:grant-type:pre-authorized_code' in requestPayload.grants!) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         isPinRequired = requestPayload!.grants!['urn:ietf:params:oauth:grant-type:pre-authorized_code']!.user_pin_required;
       }
     }

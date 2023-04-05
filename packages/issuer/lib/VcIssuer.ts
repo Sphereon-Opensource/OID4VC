@@ -2,7 +2,6 @@ import {
   CredentialIssuerCallback,
   CredentialRequest,
   CredentialResponse,
-  getKidFromJWT,
   ICredentialOfferStateManager,
   IssuerMetadata,
   TokenErrorResponse,
