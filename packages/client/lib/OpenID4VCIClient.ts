@@ -307,6 +307,7 @@ export class OpenID4VCIClient {
     return this.getCredentialsSupported(false)[type];
   }
 
+  // todo https://sphereon.atlassian.net/browse/VDX-184
   getCredentialTypes(): string[] {
     return typeof (this.credentialOffer.request as CredentialOfferV1_0_09).credential_type === 'string'
       ? [(this.credentialOffer.request as CredentialOfferV1_0_09).credential_type as string]
