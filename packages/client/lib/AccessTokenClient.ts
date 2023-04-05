@@ -37,7 +37,7 @@ export class AccessTokenClient {
     const { request } = credentialOffer;
 
     const isPinRequired = this.isPinRequiredValue(request);
-    const issuerOpts = { issuer: 'issuer' in request ? request.issuer : 'credential_issuer' in request ? request.credential_issuer : '' };
+    const issuerOpts = { issuer: getIssuerFromCredentialOfferPayload(request) };
 
     return await this.acquireAccessTokenUsingRequest({
       accessTokenRequest: await this.createAccessTokenRequest({
@@ -103,6 +103,7 @@ export class AccessTokenClient {
         throw new Error('Cannot pass a code_verifier when flow type is pre-authorized');
       }
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
+      //todo: handle this for v11
       request[PRE_AUTH_CODE_LITERAL] = (credentialOfferRequest as CredentialOfferV1_0_09)[PRE_AUTH_CODE_LITERAL];
     }
     if ('op_state' in credentialOfferRequest || 'issuer_state' in credentialOfferRequest) {
@@ -115,6 +116,7 @@ export class AccessTokenClient {
       request.redirect_uri = redirectUri;
       request.grant_type = GrantTypes.AUTHORIZATION_CODE;
     }
+    //todo: handle this for v11
     if (request.grant_type === GrantTypes.AUTHORIZATION_CODE && (credentialOfferRequest as CredentialOfferV1_0_09)[PRE_AUTH_CODE_LITERAL]) {
       throw Error('A pre_authorized_code flow cannot have an op_state in the initiation request');
     }

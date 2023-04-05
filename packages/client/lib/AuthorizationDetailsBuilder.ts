@@ -36,7 +36,8 @@ export class AuthorizationDetailsBuilder {
     return this;
   }
 
-  build(): AuthorizationDetailsJwtVcJson {
+  //todo: we have to consider one thing, if this is a general purpose builder, we want to support ldp types here as well. and for that we need a few checks.
+  buildJwtVcJson(): AuthorizationDetailsJwtVcJson {
     if (this.authorizationDetails.format && this.authorizationDetails.type) {
       return this.authorizationDetails as AuthorizationDetailsJwtVcJson;
     }

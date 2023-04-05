@@ -119,6 +119,7 @@ export class OpenID4VCIClient {
       scope = `openid ${scope}`;
     }
 
+    //fixme: handle this for v11
     const queryObj = {
       response_type: ResponseType.AUTH_CODE,
       client_id: clientId,
