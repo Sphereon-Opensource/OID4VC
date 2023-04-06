@@ -4,17 +4,24 @@ import { v4 as uuidv4 } from 'uuid'
 export function createCredentialOfferURI(
   issuerMetadata?: IssuerMetadata,
   // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
-  opts?: { state?: string; credentialOffer?: CredentialOfferPayload; preAuthorizedCode?: string; userPinRequired?: boolean }
+  opts?: {
+    state?: string
+    credentialOffer?: CredentialOfferPayload
+    credentialOfferUri?: string
+    scheme?: string
+    preAuthorizedCode?: string
+    userPinRequired?: boolean
+  }
 ): string {
-  // openid-credential-offer://credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com
-  // %22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCr
-  // edential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...
-  // FYUaBy%22%7D
-  if (!issuerMetadata && !opts?.credentialOffer) {
+  if (!issuerMetadata && !opts?.credentialOffer && !opts?.credentialOfferUri) {
     throw new Error('You have to provide issuerMetadata or credentialOffer object for creating a deeplink')
   }
+  const scheme = opts?.scheme ? opts.scheme : 'openid-credential-offer'
+  if (opts?.credentialOfferUri) {
+    return `${scheme}://?credential_offer_uri=${opts?.credentialOfferUri}`
+  }
   if (opts?.credentialOffer) {
-    return `openid-credential-offer://?credential_offer=${encodeJsonAsURI(opts.credentialOffer)}`
+    return `${scheme}://?credential_offer=${encodeJsonAsURI(opts.credentialOffer)}`
   }
   const credentialOfferPayload = {
     credential_issuer: issuerMetadata?.credential_issuer,
@@ -34,5 +41,5 @@ export function createCredentialOfferURI(
       user_pin_required: opts.userPinRequired ? opts.userPinRequired : false,
     }
   }
-  return `openid-credential-offer://?credential_offer=${encodeJsonAsURI(credentialOfferPayload)}`
+  return `${scheme}://?credential_offer=${encodeJsonAsURI(credentialOfferPayload)}`
 }
