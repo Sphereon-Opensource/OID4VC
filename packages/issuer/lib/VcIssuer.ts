@@ -16,11 +16,11 @@ export class VcIssuer {
 
   constructor(issuerMetadata: IssuerMetadata, args?: { userPinRequired?: boolean; stateManager: ICredentialOfferStateManager; callback?: CredentialIssuerCallback }) {
     this._issuerMetadata = issuerMetadata
-    this._stateManager = stateManager
+    this._stateManager = args?.stateManager
     this._userPinRequired = args && args.userPinRequired ? args.userPinRequired : false
-    this._issuerCallback = args && args.callback ? args.callback : undefined
+    this._issuerCallback = args?.callback
   }
-  
+
   public get credentialOfferStateManager(): ICredentialOfferStateManager {
     return this._stateManager
   }
