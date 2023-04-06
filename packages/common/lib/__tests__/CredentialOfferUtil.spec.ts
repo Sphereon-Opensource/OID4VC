@@ -1,5 +1,5 @@
-import {determineSpecVersionFromURI} from "../functions";
-import {OpenId4VCIVersion} from "../types";
+import { determineSpecVersionFromURI } from '../functions';
+import { OpenId4VCIVersion } from '../types';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -22,7 +22,7 @@ describe('CredentialOfferUtil should', () => {
   it(
     'get version 9 with sample URL',
     async () => {
-      expect(determineSpecVersionFromURI(INITIATE_QR)).toEqual(OpenId4VCIVersion.VER_9);
+      expect(determineSpecVersionFromURI(INITIATE_QR)).toEqual(OpenId4VCIVersion.VER_1_0_09);
     },
     UNIT_TEST_TIMEOUT
   );
@@ -30,7 +30,7 @@ describe('CredentialOfferUtil should', () => {
   it(
     'get version 11 with sample URL',
     async () => {
-      expect(determineSpecVersionFromURI(CREDENTIAL_OFFER_QR)).toEqual(OpenId4VCIVersion.VER_11);
+      expect(determineSpecVersionFromURI(CREDENTIAL_OFFER_QR)).toEqual(OpenId4VCIVersion.VER_1_0_11);
     },
     UNIT_TEST_TIMEOUT
   );
@@ -39,7 +39,7 @@ describe('CredentialOfferUtil should', () => {
     'get exception for mixed attributes in URL',
     async () => {
       expect(() => determineSpecVersionFromURI(INITIATE_QR_DATA_MIXED)).toThrow(
-        Error("Invalid param. Some keys have been used from version: 9 version while 'credential_issuer' is used from version: 11")
+        Error("Invalid param. Some keys have been used from version: 1009 version while 'credential_issuer' is used from version: 1011")
       );
     },
     UNIT_TEST_TIMEOUT
@@ -48,7 +48,7 @@ describe('CredentialOfferUtil should', () => {
   it(
     'get version 11 as default value',
     async () => {
-      expect(determineSpecVersionFromURI('')).toEqual(OpenId4VCIVersion.VER_11);
+      expect(determineSpecVersionFromURI('')).toEqual(OpenId4VCIVersion.VER_1_0_11);
     },
     UNIT_TEST_TIMEOUT
   );

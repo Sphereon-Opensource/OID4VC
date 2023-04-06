@@ -1,4 +1,4 @@
-import { DefaultURISchemes, OpenId4VCIVersion } from '../types';
+import { CredentialOfferPayload, DefaultURISchemes, OpenId4VCIVersion, TokenErrorResponse } from '../types';
 
 export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
   let version: OpenId4VCIVersion = OpenId4VCIVersion.VER_UNKNOWN;
@@ -6,16 +6,16 @@ export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
   if (uri) {
     version = determineSpecVersionFromScheme(uri, version);
 
-    version = getVersion(uri, OpenId4VCIVersion.VER_9, version, 'pre-authorized_code');
-    version = getVersion(uri, OpenId4VCIVersion.VER_11, version, 'credential_issuer');
-    version = getVersion(uri, OpenId4VCIVersion.VER_11, version, 'cryptographic_binding_methods_supported');
-    version = getVersion(uri, OpenId4VCIVersion.VER_11, version, 'cryptographic_suites_supported');
-    version = getVersion(uri, OpenId4VCIVersion.VER_11, version, 'credentialSubject');
+    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_09, version, 'pre-authorized_code');
+    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_11, version, 'credential_issuer');
+    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_11, version, 'cryptographic_binding_methods_supported');
+    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_11, version, 'cryptographic_suites_supported');
+    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_11, version, 'credentialSubject');
 
     return version;
   }
 
-  version = recordVersion(version, OpenId4VCIVersion.VER_11, getScheme(uri));
+  version = recordVersion(version, OpenId4VCIVersion.VER_1_0_11, getScheme(uri));
 
   return version;
 }
@@ -23,9 +23,9 @@ export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
 export function determineSpecVersionFromScheme(credentialOfferURI: string, openId4VCIVersion: OpenId4VCIVersion) {
   const scheme = getScheme(credentialOfferURI);
   if (credentialOfferURI.startsWith(DefaultURISchemes.CREDENTIAL_OFFER)) {
-    return recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_11, scheme);
+    return recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_1_0_11, scheme);
   } else {
-    return recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_9, scheme);
+    return recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_1_0_09, scheme);
   }
 }
 
@@ -46,6 +46,13 @@ function recordVersion(determinedVersion: OpenId4VCIVersion, potentialVersion: O
   }
 
   throw new Error(
-      `Invalid param. Some keys have been used from version: ${determinedVersion} version while '${key}' is used from version: ${potentialVersion}`
+    `Invalid param. Some keys have been used from version: ${determinedVersion} version while '${key}' is used from version: ${potentialVersion}`
   );
+}
+
+export function getIssuerFromCredentialOfferPayload(request: CredentialOfferPayload): string {
+  if (!request || !('issuer' in request) || 'credential_issuer' in request) {
+    throw new Error(TokenErrorResponse.invalid_request);
+  }
+  return 'issuer' in request ? request.issuer : request['credential_issuer'];
 }

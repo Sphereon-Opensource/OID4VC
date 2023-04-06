@@ -1,7 +1,8 @@
+import { OpenId4VCIVersion } from '@sphereon/openid4vci-common';
+
 import { CredentialOffer } from '../CredentialOffer';
 
 import { INITIATION_TEST, INITIATION_TEST_HTTPS_URI, INITIATION_TEST_URI } from './MetadataMocks';
-import {OpenId4VCIVersion} from "@sphereon/openid4vci-common";
 
 describe('Issuance Initiation', () => {
   it('Should return Issuance Initiation Request with base URL from https URI', () => {
@@ -12,7 +13,7 @@ describe('Issuance Initiation', () => {
         issuer: 'https://server.example.com',
         op_state: 'eyJhbGciOiJSU0Et...FYUaBy',
       },
-      version: OpenId4VCIVersion.VER_9
+      version: OpenId4VCIVersion.VER_1_0_09,
     });
   });
 
@@ -31,8 +32,6 @@ describe('Issuance Initiation', () => {
 
   it('Should throw error on invalid URI', () => {
     const issuanceInitiationURI = INITIATION_TEST_HTTPS_URI.replace('?', '');
-    expect(() => CredentialOffer.fromURI(issuanceInitiationURI)).toThrowError(
-      'Invalid Issuance Initiation Request Payload'
-    );
+    expect(() => CredentialOffer.fromURI(issuanceInitiationURI)).toThrowError('Invalid Issuance Initiation Request Payload');
   });
 });

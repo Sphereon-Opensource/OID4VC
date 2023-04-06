@@ -1,17 +1,17 @@
 import {
-  IssuanceInitiationRequestPayloadV9,
+  CredentialOfferPayload,
+  CredentialOfferPayloadV1_0_09,
+  CredentialOfferPayloadV1_0_11,
   CredentialOfferRequestWithBaseUrl,
   OpenId4VCIVersion,
-  CredentialOfferRequestPayloadV11
 } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 
-import {convertJsonToURI, convertURIToJsonObject, determineSpecVersionFromURI} from './functions';
+import { convertJsonToURI, convertURIToJsonObject, determineSpecVersionFromURI } from './functions';
 
 const debug = Debug('sphereon:openid4vci:initiation');
 
 export class CredentialOffer {
-
   public static fromURI(uri: string): CredentialOfferRequestWithBaseUrl {
     debug(`issuance initiation URI: ${uri}`);
     if (!uri.includes('?')) {
@@ -20,15 +20,21 @@ export class CredentialOffer {
     }
     const baseUrl = uri.split('?')[0];
     const version = determineSpecVersionFromURI(uri);
-    const issuanceInitiationRequest = convertURIToJsonObject(uri, {
-      arrayTypeProperties: ['credential_type'],
-      requiredProperties: ['issuer', 'credential_type'],
-    }) as IssuanceInitiationRequestPayloadV9;
+    const issuanceInitiationRequest: CredentialOfferPayload =
+      version < OpenId4VCIVersion.VER_1_0_11
+        ? (convertURIToJsonObject(uri, {
+            arrayTypeProperties: ['credential_type'],
+            requiredProperties: ['issuer', 'credential_type'],
+          }) as CredentialOfferPayloadV1_0_09)
+        : (convertURIToJsonObject(uri, {
+            arrayTypeProperties: ['credentials'],
+            requiredProperties: ['credentials', 'credential_issuer'],
+          }) as CredentialOfferPayloadV1_0_11);
 
     const request =
-        version < OpenId4VCIVersion.VER_11.valueOf()
-            ? (issuanceInitiationRequest as IssuanceInitiationRequestPayloadV9)
-            : (issuanceInitiationRequest as CredentialOfferRequestPayloadV11);
+      version < OpenId4VCIVersion.VER_1_0_11.valueOf()
+        ? (issuanceInitiationRequest as CredentialOfferPayloadV1_0_09)
+        : (issuanceInitiationRequest as CredentialOfferPayloadV1_0_11);
 
     return {
       baseUrl,
@@ -45,5 +51,4 @@ export class CredentialOffer {
       uriTypeProperties: ['issuer', 'credential_type'],
     });
   }
-
 }

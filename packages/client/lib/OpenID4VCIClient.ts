@@ -1,26 +1,28 @@
 import {
   AccessTokenResponse,
   Alg,
-  AuthorizationRequest,
+  AuthorizationRequestV1_0_09,
   AuthzFlowType,
   CodeChallengeMethod,
-  CredentialMetadata,
+  CredentialOfferPayloadV1_0_09,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
-  CredentialsSupported,
+  CredentialSupported,
   EndpointMetadata,
+  IssuerCredentialSubject,
   ProofOfPossessionCallbacks,
   ResponseType,
 } from '@sphereon/openid4vci-common';
-import {CredentialFormat} from '@sphereon/ssi-types';
+import { CredentialSupportedTypeV1_0_08, CredentialSupportedV1_0_08 } from '@sphereon/openid4vci-common/dist/types/v1_0_08.types';
+import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
-import {AccessTokenClient} from './AccessTokenClient';
-import {CredentialOffer} from './CredentialOffer';
-import {CredentialRequestClientBuilder} from './CredentialRequestClientBuilder';
-import {MetadataClient} from './MetadataClient';
-import {ProofOfPossessionBuilder} from './ProofOfPossessionBuilder';
-import {convertJsonToURI} from './functions';
+import { AccessTokenClient } from './AccessTokenClient';
+import { CredentialOffer } from './CredentialOffer';
+import { CredentialRequestClientBuilderV1_0_09 } from './CredentialRequestClientBuilderV1_0_09';
+import { MetadataClient } from './MetadataClient';
+import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
+import { convertJsonToURI } from './functions';
 
 const debug = Debug('sphereon:openid4vci:flow');
 
@@ -92,7 +94,7 @@ export class OpenID4VCIClient {
     if (!this._serverMetadata) {
       this._serverMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this._credentialOffer);
     }
-        return this._serverMetadata;
+    return this._serverMetadata;
   }
 
   public createAuthorizationRequestUrl({
@@ -108,8 +110,11 @@ export class OpenID4VCIClient {
     if (!scope && !authorizationDetails) {
       throw Error('Please provide a scope or authorization_details');
     }
-
-    if (!this._serverMetadata?.openid4vci_metadata?.authorization_endpoint) {
+    // todo: handling this because of the support for v1_0-08
+    if (this._serverMetadata && this._serverMetadata.openid4vci_metadata && 'authorization_endpoint' in this._serverMetadata.openid4vci_metadata) {
+      this._serverMetadata.authorization_endpoint = this._serverMetadata.openid4vci_metadata.authorization_endpoint as string;
+    }
+    if (!this._serverMetadata?.authorization_endpoint) {
       throw Error('Server metadata does not contain authorization endpoint');
     }
 
@@ -118,7 +123,8 @@ export class OpenID4VCIClient {
       scope = `openid ${scope}`;
     }
 
-    const queryObj: AuthorizationRequest = {
+    //fixme: handle this for v11
+    const queryObj = {
       response_type: ResponseType.AUTH_CODE,
       client_id: clientId,
       code_challenge_method: codeChallengeMethod,
@@ -126,10 +132,10 @@ export class OpenID4VCIClient {
       authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
       redirect_uri: redirectUri,
       scope: scope,
-    };
+    } as AuthorizationRequestV1_0_09;
 
     return convertJsonToURI(queryObj, {
-      baseUrl: this._serverMetadata.openid4vci_metadata.authorization_endpoint,
+      baseUrl: this._serverMetadata.authorization_endpoint,
       uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details'],
     });
   }
@@ -145,10 +151,7 @@ export class OpenID4VCIClient {
     return authorizationDetails;
   }
   private handleLocations(authorizationDetails: AuthDetails) {
-    if (
-      authorizationDetails &&
-      (this.serverMetadata.openid4vci_metadata?.authorization_server || this.serverMetadata.openid4vci_metadata?.authorization_endpoint)
-    ) {
+    if (authorizationDetails && (this.serverMetadata.openid4vci_metadata?.authorization_server || this.serverMetadata.authorization_endpoint)) {
       if (authorizationDetails.locations) {
         if (Array.isArray(authorizationDetails.locations)) {
           (authorizationDetails.locations as string[]).push(this.serverMetadata.issuer);
@@ -195,9 +198,9 @@ export class OpenID4VCIClient {
       if (response.errorBody) {
         debug(`Access token error:\r\n${response.errorBody}`);
         throw Error(
-          `Retrieving an access token from ${
-            this._serverMetadata?.token_endpoint
-          } for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}`
+          `Retrieving an access token from ${this._serverMetadata?.token_endpoint} for issuer ${this.getIssuer()} failed with status: ${
+            response.origResponse.status
+          }`
         );
       } else if (!response.successBody) {
         debug(`Access token error. No succes body`);
@@ -235,16 +238,31 @@ export class OpenID4VCIClient {
       this._kid = kid;
     }
 
-    const requestBuilder = CredentialRequestClientBuilder.fromCredentialOffer({
+    const requestBuilder = CredentialRequestClientBuilderV1_0_09.fromCredentialOffer({
       credentialOffer: this.credentialOffer,
-        metadata: this.serverMetadata,
-      });
+      metadata: this.serverMetadata,
+    });
     requestBuilder.withToken(this.accessTokenResponse.access_token);
     if (this.serverMetadata?.openid4vci_metadata) {
       const metadata = this.serverMetadata.openid4vci_metadata;
       const types = Array.isArray(credentialType) ? credentialType : [credentialType];
-      if (types.some((type) => !metadata.credentials_supported || !metadata.credentials_supported[type])) {
-        throw Error(`Not all credential types ${JSON.stringify(credentialType)} are supported by issuer ${this.getIssuer()}`);
+      if (metadata.credentials_supported && Array.isArray(metadata.credentials_supported)) {
+        for (const type of types) {
+          let typeSupported = false;
+          for (const credentialSupported of metadata.credentials_supported) {
+            if (credentialSupported.types.indexOf(type) != -1) {
+              typeSupported = true;
+            }
+          }
+          if (!typeSupported) {
+            throw Error(`Not all credential types ${JSON.stringify(credentialType)} are supported by issuer ${this.getIssuer()}`);
+          }
+        }
+      } else if (metadata.credentials_supported && !Array.isArray(metadata.credentials_supported)) {
+        const credentialsSupported = metadata.credentials_supported as CredentialSupportedTypeV1_0_08;
+        if (types.some((type) => !metadata.credentials_supported || !credentialsSupported[type])) {
+          throw Error(`Not all credential types ${JSON.stringify(credentialType)} are supported by issuer ${this.getIssuer()}`);
+        }
       }
       // todo: Format check? We might end up with some disjoint type / format combinations supported by the server
     }
@@ -269,9 +287,9 @@ export class OpenID4VCIClient {
     if (response.errorBody) {
       debug(`Credential request error:\r\n${response.errorBody}`);
       throw Error(
-        `Retrieving a credential from ${
-          this._serverMetadata?.credential_endpoint
-        } for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}`
+        `Retrieving a credential from ${this._serverMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${
+          response.origResponse.status
+        }`
       );
     } else if (!response.successBody) {
       debug(`Credential request error. No success body`);
@@ -284,31 +302,57 @@ export class OpenID4VCIClient {
     return response.successBody;
   }
 
-  getCredentialsSupported(restrictToInitiationTypes: boolean): CredentialsSupported {
+  getCredentialsSupported(restrictToInitiationTypes: boolean, supportedType?: string): CredentialSupported[] {
     const credentialsSupported = this.serverMetadata?.openid4vci_metadata?.credentials_supported;
     if (!credentialsSupported) {
-      return {};
-    } else if (restrictToInitiationTypes === false) {
+      return [];
+    } else if (!restrictToInitiationTypes) {
       return credentialsSupported;
     }
-    const initiationTypes = this.getCredentialTypes();
-    const supported: CredentialsSupported = {};
-    for (const [key, value] of Object.entries(credentialsSupported)) {
-      if (initiationTypes.includes(key)) {
-        supported[key] = value;
+    /**
+     * the following (not array part is a legacy code from version 1_0-08 which jff implementors used)
+     */
+    if (!Array.isArray(credentialsSupported)) {
+      const credentialsSupportedV8: CredentialSupportedV1_0_08 = credentialsSupported as CredentialSupportedV1_0_08;
+      const initiationTypes = supportedType ? [supportedType] : this.getCredentialTypes();
+      const supported: IssuerCredentialSubject = {};
+      for (const [key, value] of Object.entries(credentialsSupportedV8)) {
+        if (initiationTypes.includes(key)) {
+          supported[key] = value;
+        }
+      }
+      // todo: fix this later. we're returning CredentialSupportedV1_0_08 as a list of CredentialSupported (for v09 onward)
+      return supported as unknown as CredentialSupported[];
+    }
+    const initiationTypes = supportedType ? [supportedType] : this.getCredentialTypes();
+    const credentialSupportedOverlap: CredentialSupported[] = [];
+    for (const supported of credentialsSupported) {
+      const supportedTypeOverlap: string[] = [];
+      for (const type of supported.types) {
+        initiationTypes.includes(type);
+        supportedTypeOverlap.push(type);
+      }
+      if (supportedTypeOverlap.length > 0) {
+        credentialSupportedOverlap.push({
+          types: supportedTypeOverlap,
+          format: supported.format,
+          cryptographic_suites_supported: supported.cryptographic_suites_supported,
+          cryptographic_binding_methods_supported: supported.cryptographic_binding_methods_supported,
+        });
       }
     }
-    return supported;
+    return credentialSupportedOverlap;
   }
 
-  getCredentialMetadata(type: string): CredentialMetadata {
-    return this.getCredentialsSupported(false)[type];
+  getCredentialMetadata(type: string): CredentialSupported[] {
+    return this.getCredentialsSupported(false, type);
   }
 
+  // todo https://sphereon.atlassian.net/browse/VDX-184
   getCredentialTypes(): string[] {
-    return typeof this.credentialOffer.request.credential_type === 'string'
-        ? [this.credentialOffer.request.credential_type]
-        : this.credentialOffer.request.credential_type;
+    return typeof (this.credentialOffer.request as CredentialOfferPayloadV1_0_09).credential_type === 'string'
+      ? [(this.credentialOffer.request as CredentialOfferPayloadV1_0_09).credential_type as string]
+      : ((this.credentialOffer.request as CredentialOfferPayloadV1_0_09).credential_type as string[]);
   }
 
   get flowType(): AuthzFlowType {

@@ -1,10 +1,4 @@
-import {
-  AccessTokenRequest,
-  AccessTokenResponse,
-  GrantTypes,
-  AccessTokenRequestOpts,
-  OpenIDResponse,
-} from '@sphereon/openid4vci-common';
+import { AccessTokenRequest, AccessTokenRequestOpts, AccessTokenResponse, GrantTypes, OpenIDResponse } from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
 import { AccessTokenClient } from '../AccessTokenClient';
@@ -217,7 +211,7 @@ describe('AccessTokenClient should', () => {
 
   it('get error if no as, issuer and metadata values are present', async () => {
     await expect(() =>
-        AccessTokenClient.determineTokenURL({
+      AccessTokenClient.determineTokenURL({
         asOpts: undefined,
         issuerOpts: undefined,
         metadata: undefined,

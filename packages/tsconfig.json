@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig-base.json",
   "files": [],
-  "references": [{ "path": "common" }, { "path": "issuer" }, { "path": "client" }]
+  "references": [{ "path": "common" }, { "path": "issuer" }, { "path": "client" }, { "path": "issuer-rest" }]
 }
