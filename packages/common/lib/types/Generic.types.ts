@@ -21,9 +21,8 @@ export enum CredentialFormatEnum {
 export interface NameAndLocale {
   name?: string;
   locale?: string;
+  [key: string]: unknown;
 }
-
-export type NameAndLocaleExtended = NameAndLocale & { [key: string]: unknown };
 
 export interface LogoAndColor {
   logo?: CredentialLogo;
@@ -31,7 +30,7 @@ export interface LogoAndColor {
   text_color?: string;
 }
 
-export type Display = NameAndLocaleExtended & LogoAndColor;
+export type Display = NameAndLocale & LogoAndColor;
 
 export interface IssuerMetadata {
   credential_endpoint: string;
@@ -40,7 +39,7 @@ export interface IssuerMetadata {
   credential_issuer: string; // REQUIRED. The URL of the Credential Issuer, the Wallet is requested to obtain one or more Credentials from.
   authorization_server?: string;
   token_endpoint?: string;
-  display?: NameAndLocaleExtended[];
+  display?: Display[];
 }
 
 export interface CredentialIssuerMetadataSupportedCredentials {
@@ -163,7 +162,7 @@ export type IssuerCredentialSubjectDisplay = CredentialSubjectDisplay & Record<s
 export interface CredentialSubjectDisplay {
   mandatory?: boolean;
   value_type?: string;
-  display?: NameAndLocaleExtended[];
+  display?: Display[];
   order?: string[]; // An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
 }
 

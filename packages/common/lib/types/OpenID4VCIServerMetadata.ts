@@ -1,6 +1,6 @@
 import { CredentialFormat } from '@sphereon/ssi-types';
 
-import { Display, IssuerCredentialSubject, NameAndLocaleExtended } from './Generic.types';
+import { Display, IssuerCredentialSubject } from './Generic.types';
 import { OAuth2ASMetadata } from './OAuth2ASMetadata';
 
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2
@@ -17,7 +17,7 @@ export interface OpenID4VCIServerMetadata {
 export type Oauth2ASWithOID4VCIMetadata = OAuth2ASMetadata & OpenID4VCIServerMetadata;
 
 export interface CredentialIssuer {
-  display?: NameAndLocaleExtended; //OPTIONAL. An array of objects, where each object contains display properties of a Credential issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
+  display?: Display; //OPTIONAL. An array of objects, where each object contains display properties of a Credential issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
 }
 
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-metadata-object
