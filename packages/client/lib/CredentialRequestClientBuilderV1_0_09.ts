@@ -1,8 +1,8 @@
 import {
   AccessTokenResponse,
   CredentialOfferPayload,
+  CredentialOfferPayloadV1_0_09,
   CredentialOfferRequestWithBaseUrl,
-  CredentialOfferV1_0_09,
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
   IssuerMetadata,
@@ -43,7 +43,7 @@ export class CredentialRequestClientBuilderV1_0_09 {
 
     //todo: This basically sets all types available during initiation. Probably the user only wants a subset. So do we want to do this?
     //todo: handle this for v11
-    builder.withCredentialType((request as CredentialOfferV1_0_09).credential_type);
+    builder.withCredentialType((request as CredentialOfferPayloadV1_0_09).credential_type);
 
     return builder;
   }

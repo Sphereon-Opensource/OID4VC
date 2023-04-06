@@ -1,7 +1,7 @@
 import { CredentialFormat, ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 import { OpenId4VCIVersion } from './OpenID4VCIVersions.types';
-import { CredentialOfferV1_0_09 } from './v1_0_09.types';
+import { CredentialOfferPayloadV1_0_09 } from './v1_0_09.types';
 import { CredentialOfferPayloadV1_0_11 } from './v1_0_11.types';
 
 export interface CredentialRequest {
@@ -18,11 +18,11 @@ export interface CredentialResponse {
 
 export interface CredentialOfferRequestWithBaseUrl {
   baseUrl: string;
-  request: CredentialOfferV1_0_09 | CredentialOfferPayloadV1_0_11;
+  request: CredentialOfferPayloadV1_0_09 | CredentialOfferPayloadV1_0_11;
   version: OpenId4VCIVersion;
 }
 
-export type CredentialOfferPayload = CredentialOfferV1_0_09 | CredentialOfferPayloadV1_0_11;
+export type CredentialOfferPayload = CredentialOfferPayloadV1_0_09 | CredentialOfferPayloadV1_0_11;
 
 export enum ProofType {
   JWT = 'jwt',

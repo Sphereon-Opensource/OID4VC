@@ -3,7 +3,7 @@ import { CredentialOfferPayload } from './CredentialIssuance.types';
 import { CredentialOfferFormat } from './Generic.types';
 
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-09.html#name-issuance-initiation-request
-export interface CredentialOfferV1_0_09 {
+export interface CredentialOfferPayloadV1_0_09 {
   issuer: string; //(url) REQUIRED The issuer URL of the Credential issuer, the Wallet is requested to obtain one or more Credentials from.
   credential_type: string[] | string; //(url) REQUIRED A JSON string denoting the type of the Credential the Wallet shall request
   credentials: CredentialOfferFormat[];
