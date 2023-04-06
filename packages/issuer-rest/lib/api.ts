@@ -6,7 +6,7 @@ import {
   IssuerCredentialSubjectDisplay,
   IssuerMetadata,
 } from '@sphereon/openid4vci-common'
-import { createCredentialOfferDeeplink, CredentialSupportedV1_11Builder, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
+import { createCredentialOfferDeeplink, CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import * as dotenv from 'dotenv-flow'
@@ -14,7 +14,7 @@ import express, { Express, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 
 function buildVCIFromEnvironment() {
-  const credentialsSupported: CredentialSupported = new CredentialSupportedV1_11Builder()
+  const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
     .withCryptographicSuitesSupported(process.env.cryptographic_suites_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
     .withFormat(process.env.credential_supported_format as unknown as CredentialFormatEnum)
