@@ -1,17 +1,27 @@
+import * as fs from 'fs'
+import https from 'https'
+import * as path from 'path'
+
 import {
   CredentialFormatEnum,
   CredentialRequest,
   CredentialSupported,
   Display,
+  ICredentialOfferStateManager,
   IssuerCredentialSubjectDisplay,
   IssuerMetadata,
 } from '@sphereon/openid4vci-common'
 import { createCredentialOfferURI, CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
+import { MemoryCredentialOfferStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager/MemoryCredentialOfferStateManager'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
+import cors from 'cors'
 import * as dotenv from 'dotenv-flow'
 import express, { Express, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
+
+const key = fs.readFileSync(process.env.PRIVATE_KEY || path.join(__dirname, './privkey.pem'), 'utf-8')
+const cert = fs.readFileSync(process.env.x509_CERTIFICATE || path.join(__dirname, './chain.pem'), 'utf-8')
 
 function buildVCIFromEnvironment() {
   const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
@@ -48,48 +58,44 @@ function buildVCIFromEnvironment() {
       locale: process.env.issuer_locale as string,
     })
     .withCredentialsSupported(credentialsSupported)
+    .withInMemoryCredentialOfferState()
     .build()
 }
 
 export class RestAPI {
-  public express: Express
+  public readonly express: Express
   private _vcIssuer: VcIssuer
   //fixme: use this map for now as an internal mechanism for preAuthorizedCode to ids
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   private tokenToId: Map<string, string> = new Map()
 
-  constructor(opts?: { metadata: IssuerMetadata; userPinRequired: boolean }) {
+  constructor(opts?: { metadata: IssuerMetadata; stateManager: ICredentialOfferStateManager; userPinRequired: boolean }) {
     dotenv.config()
     // todo: we probably want to pass a dummy issuance callback function here
-    this._vcIssuer = opts ? (this._vcIssuer = new VcIssuer(opts.metadata, { userPinRequired: opts.userPinRequired })) : buildVCIFromEnvironment()
+    this._vcIssuer = opts
+      ? (this._vcIssuer = new VcIssuer(opts.metadata, {
+          userPinRequired: opts.userPinRequired,
+          stateManager: opts.stateManager ?? new MemoryCredentialOfferStateManager(),
+        }))
+      : buildVCIFromEnvironment()
     this.express = express()
-    const port = process.env.PORT || 3000
+    const port = process.env.PORT || 3443
     const secret = process.env.COOKIE_SIGNING_KEY
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.express.use((req, res, next) => {
-      res.header('Access-Control-Allow-Origin', '*')
-      // Request methods you wish to allow
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE')
-
-      // Request headers you wish to allow
-      res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type')
-
-      // Set to true if you need the website to include cookies in the requests sent
-      // to the API (e.g. in case you use sessions)
-      res.setHeader('Access-Control-Allow-Credentials', 'true')
-      next()
-    })
+    this.express.use(cors())
     this.express.use(bodyParser.urlencoded({ extended: true }))
     this.express.use(bodyParser.json())
     this.express.use(cookieParser(secret))
-    this.express.listen(port as number, '0.0.0.0', () => console.log(`Listening on port ${port}`))
+
     this.registerMetadataEndpoint()
     this.registerTokenRequestEndpoint()
     this.registerCredentialRequestEndpoint()
     this.registerCredentialOfferEndpoint()
+    const credentials = { key, cert }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const httpsServer = https.createServer(credentials, this.express as any)
+    httpsServer.listen(port as number, '0.0.0.0', () => console.log(`HTTPS server listening on port ${port}`))
   }
 
   private static sendErrorResponse(response: Response, statusCode: number, message: string) {
@@ -98,30 +104,23 @@ export class RestAPI {
   }
 
   private registerMetadataEndpoint() {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     this.express.get('/metadata', (request, response) => {
       return response.send(this._vcIssuer._issuerMetadata)
     })
   }
   private registerTokenRequestEndpoint() {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     this.express.post('/token', (request, response) => {
       return RestAPI.sendErrorResponse(response, 501, 'Not implemented')
     })
   }
   private registerCredentialRequestEndpoint() {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.express.post('/credential-request', async (request: CredentialRequest, response) => {
-      return response.send(await this._vcIssuer.issueCredentialFromIssueRequest(request as unknown as CredentialRequest))
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    this.express.get('/credential-request', async (request, _response) => {
+      this._vcIssuer.issueCredentialFromIssueRequest(request as unknown as CredentialRequest)
     })
   }
 
   private registerCredentialOfferEndpoint() {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     this.express.get('/credential-offer/:pre_authorized_code', async (request, response) => {
       const preAuthorizedCode = request.params.pre_authorized_code
       const id = uuidv4()

@@ -1,15 +1,31 @@
-import { CredentialIssuerCallback, CredentialRequest, CredentialResponse, IssuerMetadata, TokenErrorResponse } from '@sphereon/openid4vci-common'
+import {
+  CredentialIssuerCallback,
+  CredentialRequest,
+  CredentialResponse,
+  ICredentialOfferStateManager,
+  IssuerMetadata,
+  TokenErrorResponse,
+} from '@sphereon/openid4vci-common'
 import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 export class VcIssuer {
   _issuerMetadata: IssuerMetadata
   _userPinRequired?: boolean
   _issuerCallback?: CredentialIssuerCallback
+  private readonly _stateManager: ICredentialOfferStateManager
 
-  constructor(issuerMetadata: IssuerMetadata, args?: { userPinRequired?: boolean; callback?: CredentialIssuerCallback }) {
+  constructor(
+    issuerMetadata: IssuerMetadata,
+    args: { userPinRequired?: boolean; stateManager: ICredentialOfferStateManager; callback?: CredentialIssuerCallback }
+  ) {
     this._issuerMetadata = issuerMetadata
+    this._stateManager = args.stateManager
     this._userPinRequired = args && args.userPinRequired ? args.userPinRequired : false
-    this._issuerCallback = args && args.callback ? args.callback : undefined
+    this._issuerCallback = args?.callback
+  }
+
+  public get credentialOfferStateManager(): ICredentialOfferStateManager {
+    return this._stateManager
   }
 
   public getIssuerMetadata() {

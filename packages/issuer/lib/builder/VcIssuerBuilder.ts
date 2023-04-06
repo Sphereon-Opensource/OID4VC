@@ -1,6 +1,14 @@
-import { CredentialIssuerCallback, CredentialSupported, Display, IssuerMetadata, TokenErrorResponse } from '@sphereon/openid4vci-common'
+import {
+  CredentialIssuerCallback,
+  CredentialSupported,
+  Display,
+  ICredentialOfferStateManager,
+  IssuerMetadata,
+  TokenErrorResponse,
+} from '@sphereon/openid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
+import { MemoryCredentialOfferStateManager } from '../state-manager/MemoryCredentialOfferStateManager'
 
 export class VcIssuerBuilder {
   credentialIssuer?: string
@@ -11,6 +19,7 @@ export class VcIssuerBuilder {
   issuerDisplay?: Display[]
   credentialsSupported?: CredentialSupported[]
   userPinRequired?: boolean
+  credentialOfferStateManager?: ICredentialOfferStateManager
   issuerCallback?: CredentialIssuerCallback
 
   public withCredentialIssuer(issuer: string): VcIssuerBuilder {
@@ -69,6 +78,16 @@ export class VcIssuerBuilder {
     return this
   }
 
+  public withCredentialOfferStateManager(iCredentialOfferStateManager: ICredentialOfferStateManager): VcIssuerBuilder {
+    this.credentialOfferStateManager = iCredentialOfferStateManager
+    return this
+  }
+
+  public withInMemoryCredentialOfferState(): VcIssuerBuilder {
+    this.withCredentialOfferStateManager(new MemoryCredentialOfferStateManager())
+    return this
+  }
+
   withIssuerCallback(cb: CredentialIssuerCallback): VcIssuerBuilder {
     this.issuerCallback = cb
     return this
@@ -76,6 +95,9 @@ export class VcIssuerBuilder {
 
   public build(): VcIssuer {
     if (!this.credentialEndpoint || !this.credentialIssuer || !this.credentialsSupported) {
+      throw new Error(TokenErrorResponse.invalid_request)
+    }
+    if (!this.credentialOfferStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
     if (!this.userPinRequired) {
@@ -98,6 +120,10 @@ export class VcIssuerBuilder {
     if (this.tokenEndpoint) {
       metadata.token_endpoint = this.tokenEndpoint
     }
-    return new VcIssuer(metadata, { userPinRequired: this.userPinRequired, callback: this.issuerCallback })
+    return new VcIssuer(metadata, {
+      userPinRequired: this.userPinRequired,
+      callback: this.issuerCallback,
+      stateManager: this.credentialOfferStateManager,
+    })
   }
 }
