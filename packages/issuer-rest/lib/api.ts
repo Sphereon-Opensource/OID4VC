@@ -6,7 +6,7 @@ import {
   IssuerCredentialSubjectDisplay,
   IssuerMetadata,
 } from '@sphereon/openid4vci-common'
-import { createCredentialOfferDeeplink, CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
+import { createCredentialOfferURI, CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import * as dotenv from 'dotenv-flow'
@@ -127,7 +127,7 @@ export class RestAPI {
       const id = uuidv4()
       this.tokenToId.set(preAuthorizedCode, id)
       return response.send(
-        createCredentialOfferDeeplink(this._vcIssuer._issuerMetadata, {
+        createCredentialOfferURI(this._vcIssuer._issuerMetadata, {
           preAuthorizedCode: preAuthorizedCode,
         })
       )

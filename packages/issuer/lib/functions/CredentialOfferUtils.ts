@@ -1,7 +1,7 @@
 import { CredentialOfferPayload, CredentialOfferPayloadV1_0_11, encodeJsonAsURI, IssuerMetadata } from '@sphereon/openid4vci-common'
 import { v4 as uuidv4 } from 'uuid'
 
-export function createCredentialOfferDeeplink(
+export function createCredentialOfferURI(
   issuerMetadata?: IssuerMetadata,
   opts?: { state?: string; credentialOffer?: CredentialOfferPayload; preAuthorizedCode?: string; userPinRequired?: boolean }
 ): string {
