@@ -12,6 +12,7 @@ import {
   IssuerMetadata,
 } from '@sphereon/openid4vci-common'
 import { createCredentialOfferURI, CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
+import { MemoryCredentialOfferStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager/MemoryCredentialOfferStateManager'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
@@ -57,6 +58,7 @@ function buildVCIFromEnvironment() {
       locale: process.env.issuer_locale as string,
     })
     .withCredentialsSupported(credentialsSupported)
+    .withInMemoryCredentialOfferState()
     .build()
 }
 
@@ -71,7 +73,12 @@ export class RestAPI {
   constructor(opts?: { metadata: IssuerMetadata; stateManager: ICredentialOfferStateManager; userPinRequired: boolean }) {
     dotenv.config()
     // todo: we probably want to pass a dummy issuance callback function here
-    this._vcIssuer = opts ? (this._vcIssuer = new VcIssuer(opts.metadata, { userPinRequired: opts.userPinRequired })) : buildVCIFromEnvironment()
+    this._vcIssuer = opts
+      ? (this._vcIssuer = new VcIssuer(opts.metadata, {
+          userPinRequired: opts.userPinRequired,
+          stateManager: opts.stateManager ?? new MemoryCredentialOfferStateManager(),
+        }))
+      : buildVCIFromEnvironment()
     this.express = express()
     const port = process.env.PORT || 3443
     const secret = process.env.COOKIE_SIGNING_KEY

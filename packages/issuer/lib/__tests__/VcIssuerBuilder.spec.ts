@@ -86,7 +86,7 @@ describe('VcIssuer builder should', () => {
     ).toThrowError(TokenErrorResponse.invalid_request)
   })
   it('should successfully attach an instance of the ICredentialOfferStateManager to the VcIssuer instance', async () => {
-    const credentialsSupported: CredentialIssuerMetadataSupportedCredentials = new CredentialSupportedV1_11Builder()
+    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat(CredentialFormatEnum.jwt_vc_json)

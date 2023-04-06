@@ -1,4 +1,11 @@
-import { CredentialIssuerCallback, CredentialSupported, Display, ICredentialOfferStateManager, IssuerMetadata, TokenErrorResponse } from '@sphereon/openid4vci-common'
+import {
+  CredentialIssuerCallback,
+  CredentialSupported,
+  Display,
+  ICredentialOfferStateManager,
+  IssuerMetadata,
+  TokenErrorResponse,
+} from '@sphereon/openid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
 import { MemoryCredentialOfferStateManager } from '../state-manager/MemoryCredentialOfferStateManager'
@@ -80,7 +87,7 @@ export class VcIssuerBuilder {
     this.withCredentialOfferStateManager(new MemoryCredentialOfferStateManager())
     return this
   }
-  
+
   withIssuerCallback(cb: CredentialIssuerCallback): VcIssuerBuilder {
     this.issuerCallback = cb
     return this
@@ -113,6 +120,10 @@ export class VcIssuerBuilder {
     if (this.tokenEndpoint) {
       metadata.token_endpoint = this.tokenEndpoint
     }
-    return new VcIssuer(metadata, { userPinRequired: this.userPinRequired, callback: this.issuerCallback, stateManager:  this.credentialOfferStateManager })
+    return new VcIssuer(metadata, {
+      userPinRequired: this.userPinRequired,
+      callback: this.issuerCallback,
+      stateManager: this.credentialOfferStateManager,
+    })
   }
 }
