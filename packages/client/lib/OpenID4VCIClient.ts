@@ -304,15 +304,17 @@ export class OpenID4VCIClient {
 
   getCredentialsSupported(restrictToInitiationTypes: boolean, supportedType?: string): CredentialSupported[] {
     const credentialsSupported = this.serverMetadata?.openid4vci_metadata?.credentials_supported;
+    if (!credentialsSupported) {
+      return [];
+    } else if (!restrictToInitiationTypes) {
+      return credentialsSupported;
+    }
     /**
      * the following (not array part is a legacy code from version 1_0-08 which jff implementors used)
      */
-    if (credentialsSupported && !Array.isArray(credentialsSupported)) {
-      if (!restrictToInitiationTypes) {
-        return credentialsSupported;
-      }
+    if (!Array.isArray(credentialsSupported)) {
       const credentialsSupportedV8: CredentialSupportedV1_0_08 = credentialsSupported as CredentialSupportedV1_0_08;
-      const initiationTypes = this.getCredentialTypes();
+      const initiationTypes = supportedType ? [supportedType] : this.getCredentialTypes();
       const supported: IssuerCredentialSubject = {};
       for (const [key, value] of Object.entries(credentialsSupportedV8)) {
         if (initiationTypes.includes(key)) {
@@ -321,11 +323,6 @@ export class OpenID4VCIClient {
       }
       // todo: fix this later. we're returning CredentialSupportedV1_0_08 as a list of CredentialSupported (for v09 onward)
       return supported as unknown as CredentialSupported[];
-    }
-    if (!credentialsSupported) {
-      return [];
-    } else if (!restrictToInitiationTypes) {
-      return credentialsSupported;
     }
     const initiationTypes = supportedType ? [supportedType] : this.getCredentialTypes();
     const credentialSupportedOverlap: CredentialSupported[] = [];
