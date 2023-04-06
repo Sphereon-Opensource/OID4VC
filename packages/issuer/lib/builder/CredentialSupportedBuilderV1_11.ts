@@ -4,8 +4,6 @@ import {
   Display,
   IssuerCredentialSubject,
   IssuerCredentialSubjectDisplay,
-  SupportedCredentialIssuerMetadataJwtVcJson,
-  SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc,
   TokenErrorResponse,
 } from '@sphereon/openid4vci-common'
 
@@ -105,12 +103,11 @@ export class CredentialSupportedBuilderV1_11 {
     if (!this.format) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    const credentialSupported: CredentialSupported = {
+    const credentialSupported: Partial<CredentialSupported> = {
       format: this.format,
     }
     if (this.credentialSubject) {
-      ;(credentialSupported as SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc | SupportedCredentialIssuerMetadataJwtVcJson).credentialSubject =
-        this.credentialSubject
+      credentialSupported.credentialSubject = this.credentialSubject
     }
     if (this.cryptographicSuitesSupported) {
       credentialSupported.cryptographic_suites_supported = this.cryptographicSuitesSupported
@@ -122,9 +119,8 @@ export class CredentialSupportedBuilderV1_11 {
       credentialSupported.id = this.id
     }
     if (this.display) {
-      ;(credentialSupported as SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc | SupportedCredentialIssuerMetadataJwtVcJson).display =
-        this.display
+      credentialSupported.display = this.display
     }
-    return credentialSupported
+    return credentialSupported as CredentialSupported
   }
 }

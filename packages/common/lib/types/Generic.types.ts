@@ -1,7 +1,6 @@
 import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 import { ProofOfPossession } from './CredentialIssuance.types';
-import { OpenID4VCIServerMetadata } from './OpenID4VCIServerMetadata';
 
 /**
  * Important Note: please be aware that these Common interfaces are based on versions v1_0.11 and v1_0.09
@@ -42,27 +41,29 @@ export interface IssuerMetadata {
   display?: Display[];
 }
 
-export interface CredentialSupported {
-  format: CredentialFormatEnum | string;
-  id?: string;
-  cryptographic_binding_methods_supported?: string[];
-  cryptographic_suites_supported?: string[];
+export interface CredentialSupportedBrief {
+  types: string[]; // REQUIRED. JSON array designating the types a certain credential type supports
+  cryptographic_binding_methods_supported?: string[]; // OPTIONAL. Array of case sensitive strings that identify how the Credential is bound to the identifier of the End-User who possesses the Credential
+  cryptographic_suites_supported?: string[]; // OPTIONAL. Array of case sensitive strings that identify the cryptographic suites that are supported for the cryptographic_binding_methods_supported
 }
-
-export interface SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc extends CredentialSupported {
-  format: CredentialFormatEnum.ldp_vc;
-  '@context': ICredentialContextType[];
-  types: string[];
-  credentialSubject?: IssuerCredentialSubject;
-  display?: Display[];
-}
-
-export interface SupportedCredentialIssuerMetadataJwtVcJson extends CredentialSupported {
-  types: string[];
-  credentialSubject?: IssuerCredentialSubject;
-  display?: Display[];
+export type CommonCredentialSupported = CredentialSupportedBrief & {
+  format: CredentialFormatEnum | string; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
+  id?: string; // OPTIONAL. A JSON string identifying the respective object. The value MUST be unique across all credentials_supported entries in the Credential Issuer Metadata
+  display?: Display[]; // OPTIONAL. An array of objects, where each object contains the display properties of the supported credential for a certain language
+  /**
+   * following properties are non-mso_mdoc specific and we might wanna rethink them when we're going to support mso_mdoc
+   */
+  credentialSubject?: IssuerCredentialSubject; // OPTIONAL. A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential. The value MAY be a dictionary, which allows to represent the full (potentially deeply nested) structure of the verifiable credential to be issued.
   order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
+};
+
+export interface CredentialSupportedJwtVcJsonLdAndLdpVc extends CommonCredentialSupported {
+  '@context': ICredentialContextType[]; // REQUIRED. JSON array as defined in [VC_DATA], Section 4.1.
 }
+
+export type CredentialSupportedJwtVcJson = CommonCredentialSupported;
+
+export type CredentialSupported = CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc;
 
 export interface CredentialOfferFormat {
   format: CredentialFormatEnum;
@@ -207,5 +208,5 @@ export interface EndpointMetadata {
   token_endpoint: string;
   credential_endpoint: string;
   authorization_endpoint?: string;
-  openid4vci_metadata?: OpenID4VCIServerMetadata;
+  openid4vci_metadata?: IssuerMetadata;
 }

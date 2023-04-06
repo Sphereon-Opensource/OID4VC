@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 export function createCredentialOfferURI(
   issuerMetadata?: IssuerMetadata,
+  // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
   opts?: { state?: string; credentialOffer?: CredentialOfferPayload; preAuthorizedCode?: string; userPinRequired?: boolean }
 ): string {
   // openid-credential-offer://credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com
