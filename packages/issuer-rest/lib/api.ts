@@ -61,7 +61,8 @@ export class RestAPI {
 
   constructor(opts?: { metadata: IssuerMetadata; userPinRequired: boolean }) {
     dotenv.config()
-    this._vcIssuer = opts ? (this._vcIssuer = new VcIssuer(opts.metadata, opts.userPinRequired)) : buildVCIFromEnvironment()
+    // todo: we probably want to pass a dummy issuance callback function here
+    this._vcIssuer = opts ? (this._vcIssuer = new VcIssuer(opts.metadata, { userPinRequired: opts.userPinRequired })) : buildVCIFromEnvironment()
     this.express = express()
     const port = process.env.PORT || 3000
     const secret = process.env.COOKIE_SIGNING_KEY
