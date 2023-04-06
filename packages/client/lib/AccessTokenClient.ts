@@ -4,8 +4,8 @@ import {
   AccessTokenResponse,
   AuthorizationServerOpts,
   CredentialOfferPayload,
+  CredentialOfferPayloadV1_0_09,
   CredentialOfferPayloadV1_0_11,
-  CredentialOfferV1_0_09,
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
   GrantTypes,
@@ -104,7 +104,7 @@ export class AccessTokenClient {
       }
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
       //todo: handle this for v11
-      request[PRE_AUTH_CODE_LITERAL] = (credentialOfferRequest as CredentialOfferV1_0_09)[PRE_AUTH_CODE_LITERAL];
+      request[PRE_AUTH_CODE_LITERAL] = (credentialOfferRequest as CredentialOfferPayloadV1_0_09)[PRE_AUTH_CODE_LITERAL];
     }
     if ('op_state' in credentialOfferRequest || 'issuer_state' in credentialOfferRequest) {
       this.throwNotSupportedFlow();
@@ -117,7 +117,7 @@ export class AccessTokenClient {
       request.grant_type = GrantTypes.AUTHORIZATION_CODE;
     }
     //todo: handle this for v11
-    if (request.grant_type === GrantTypes.AUTHORIZATION_CODE && (credentialOfferRequest as CredentialOfferV1_0_09)[PRE_AUTH_CODE_LITERAL]) {
+    if (request.grant_type === GrantTypes.AUTHORIZATION_CODE && (credentialOfferRequest as CredentialOfferPayloadV1_0_09)[PRE_AUTH_CODE_LITERAL]) {
       throw Error('A pre_authorized_code flow cannot have an op_state in the initiation request');
     }
 
@@ -143,7 +143,7 @@ export class AccessTokenClient {
     }
     const issuer = getIssuerFromCredentialOfferPayload(requestPayload);
     if (isCredentialOfferV1_0_09(requestPayload)) {
-      requestPayload = requestPayload as CredentialOfferV1_0_09;
+      requestPayload = requestPayload as CredentialOfferPayloadV1_0_09;
       if (typeof requestPayload.user_pin_required === 'string') {
         isPinRequired = requestPayload.user_pin_required.toLowerCase() === 'true';
       } else if (typeof requestPayload.user_pin_required === 'boolean') {

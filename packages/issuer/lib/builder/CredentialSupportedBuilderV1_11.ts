@@ -1,15 +1,13 @@
 import {
   CredentialFormatEnum,
-  CredentialIssuerMetadataSupportedCredentials,
+  CredentialSupported,
   Display,
   IssuerCredentialSubject,
   IssuerCredentialSubjectDisplay,
-  SupportedCredentialIssuerMetadataJwtVcJson,
-  SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc,
   TokenErrorResponse,
 } from '@sphereon/openid4vci-common'
 
-export class CredentialSupportedV1_11Builder {
+export class CredentialSupportedBuilderV1_11 {
   format?: CredentialFormatEnum
   id?: string
   types?: string[]
@@ -18,17 +16,17 @@ export class CredentialSupportedV1_11Builder {
   display?: Display[]
   credentialSubject?: IssuerCredentialSubject
 
-  withFormat(credentialFormat: CredentialFormatEnum): CredentialSupportedV1_11Builder {
+  withFormat(credentialFormat: CredentialFormatEnum): CredentialSupportedBuilderV1_11 {
     this.format = credentialFormat
     return this
   }
 
-  withId(id: string): CredentialSupportedV1_11Builder {
+  withId(id: string): CredentialSupportedBuilderV1_11 {
     this.id = id
     return this
   }
 
-  addTypes(type: string | string[]): CredentialSupportedV1_11Builder {
+  addTypes(type: string | string[]): CredentialSupportedBuilderV1_11 {
     if (!Array.isArray(type)) {
       this.types = this.types ? [...this.types, type] : [type]
     } else {
@@ -39,12 +37,12 @@ export class CredentialSupportedV1_11Builder {
     return this
   }
 
-  withTypes(type: string | string[]): CredentialSupportedV1_11Builder {
+  withTypes(type: string | string[]): CredentialSupportedBuilderV1_11 {
     this.types = Array.isArray(type) ? type : [type]
     return this
   }
 
-  addCryptographicBindingMethod(method: string | string[]): CredentialSupportedV1_11Builder {
+  addCryptographicBindingMethod(method: string | string[]): CredentialSupportedBuilderV1_11 {
     if (!Array.isArray(method)) {
       this.cryptographicBindingMethodsSupported = this.cryptographicBindingMethodsSupported
         ? [...this.cryptographicBindingMethodsSupported, method]
@@ -57,12 +55,12 @@ export class CredentialSupportedV1_11Builder {
     return this
   }
 
-  withCryptographicBindingMethod(method: string | string[]): CredentialSupportedV1_11Builder {
+  withCryptographicBindingMethod(method: string | string[]): CredentialSupportedBuilderV1_11 {
     this.cryptographicBindingMethodsSupported = Array.isArray(method) ? method : [method]
     return this
   }
 
-  addCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedV1_11Builder {
+  addCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedBuilderV1_11 {
     if (!Array.isArray(suit)) {
       this.cryptographicSuitesSupported = this.cryptographicSuitesSupported ? [...this.cryptographicSuitesSupported, suit] : [suit]
     } else {
@@ -71,12 +69,12 @@ export class CredentialSupportedV1_11Builder {
     return this
   }
 
-  withCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedV1_11Builder {
+  withCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedBuilderV1_11 {
     this.cryptographicSuitesSupported = Array.isArray(suit) ? suit : [suit]
     return this
   }
 
-  addCredentialDisplay(credentialDisplay: Display | Display[]): CredentialSupportedV1_11Builder {
+  addCredentialDisplay(credentialDisplay: Display | Display[]): CredentialSupportedBuilderV1_11 {
     if (!Array.isArray(credentialDisplay)) {
       this.display = this.display ? [...this.display, credentialDisplay] : [credentialDisplay]
     } else {
@@ -85,7 +83,7 @@ export class CredentialSupportedV1_11Builder {
     return this
   }
 
-  withCredentialDisplay(credentialDisplay: Display | Display[]): CredentialSupportedV1_11Builder {
+  withCredentialDisplay(credentialDisplay: Display | Display[]): CredentialSupportedBuilderV1_11 {
     this.display = Array.isArray(credentialDisplay) ? credentialDisplay : [credentialDisplay]
     return this
   }
@@ -93,7 +91,7 @@ export class CredentialSupportedV1_11Builder {
   withIssuerCredentialSubjectDisplay(
     subjectProperty: string,
     issuerCredentialSubjectDisplay: IssuerCredentialSubjectDisplay
-  ): CredentialSupportedV1_11Builder {
+  ): CredentialSupportedBuilderV1_11 {
     if (!this.credentialSubject) {
       this.credentialSubject = {}
     }
@@ -101,16 +99,15 @@ export class CredentialSupportedV1_11Builder {
     return this
   }
 
-  public build(): CredentialIssuerMetadataSupportedCredentials {
+  public build(): CredentialSupported {
     if (!this.format) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    const credentialSupported: CredentialIssuerMetadataSupportedCredentials = {
+    const credentialSupported: Partial<CredentialSupported> = {
       format: this.format,
     }
     if (this.credentialSubject) {
-      ;(credentialSupported as SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc | SupportedCredentialIssuerMetadataJwtVcJson).credentialSubject =
-        this.credentialSubject
+      credentialSupported.credentialSubject = this.credentialSubject
     }
     if (this.cryptographicSuitesSupported) {
       credentialSupported.cryptographic_suites_supported = this.cryptographicSuitesSupported
@@ -122,9 +119,8 @@ export class CredentialSupportedV1_11Builder {
       credentialSupported.id = this.id
     }
     if (this.display) {
-      ;(credentialSupported as SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc | SupportedCredentialIssuerMetadataJwtVcJson).display =
-        this.display
+      credentialSupported.display = this.display
     }
-    return credentialSupported
+    return credentialSupported as CredentialSupported
   }
 }

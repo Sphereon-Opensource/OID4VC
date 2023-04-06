@@ -1,1 +1,1 @@
-export * from './CredentialOffer'
+export * from './CredentialOfferUtils'

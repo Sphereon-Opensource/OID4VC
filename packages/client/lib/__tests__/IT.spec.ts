@@ -1,7 +1,7 @@
 import { AccessTokenResponse, Alg, AuthzFlowType, CredentialOfferRequestWithBaseUrl, Jwt, ProofOfPossession, Typ } from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
-import { AccessTokenClient, CredentialRequestV1_0_09ClientBuilder, OpenID4VCIClient, ProofOfPossessionBuilder } from '..';
+import { AccessTokenClient, CredentialRequestClientBuilderV1_0_09, OpenID4VCIClient, ProofOfPossessionBuilder } from '..';
 import { CredentialOffer } from '../CredentialOffer';
 
 import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
@@ -124,7 +124,7 @@ describe('OID4VCI-Client should', () => {
           format: 'jwt-vc',
           credential: mockedVC,
         });
-      const credReqClient = CredentialRequestV1_0_09ClientBuilder.fromCredentialOffer({ credentialOffer: credentialOffer })
+      const credReqClient = CredentialRequestClientBuilderV1_0_09.fromCredentialOffer({ credentialOffer: credentialOffer })
         .withFormat('jwt_vc')
 
         .withTokenFromResponse(accessTokenResponse.successBody!)

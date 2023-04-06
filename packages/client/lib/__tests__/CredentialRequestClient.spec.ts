@@ -13,7 +13,7 @@ import {
 import * as jose from 'jose';
 import nock from 'nock';
 
-import { CredentialRequestV1_0_09ClientBuilder, MetadataClient } from '..';
+import { CredentialRequestClientBuilderV1_0_09, MetadataClient } from '..';
 import { ProofOfPossessionBuilder } from '..';
 import { CredentialOffer } from '../CredentialOffer';
 
@@ -68,7 +68,7 @@ describe('Credential Request Client ', () => {
       error_description: 'This is a mock error message',
     });
 
-    const credReqClient = CredentialRequestV1_0_09ClientBuilder.fromCredentialOffer({ credentialOffer: INITIATION_TEST })
+    const credReqClient = CredentialRequestClientBuilderV1_0_09.fromCredentialOffer({ credentialOffer: INITIATION_TEST })
       .withCredentialEndpoint(basePath + '/credential')
       .withFormat('ldp_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
@@ -99,7 +99,7 @@ describe('Credential Request Client ', () => {
         format: 'jwt-vc',
         credential: mockedVC,
       });
-    const credReqClient = CredentialRequestV1_0_09ClientBuilder.fromCredentialOfferRequest({ request: INITIATION_TEST.request })
+    const credReqClient = CredentialRequestClientBuilderV1_0_09.fromCredentialOfferRequest({ request: INITIATION_TEST.request })
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
@@ -122,7 +122,7 @@ describe('Credential Request Client ', () => {
   });
 
   it('should fail with invalid url', async () => {
-    const credReqClient = CredentialRequestV1_0_09ClientBuilder.fromCredentialOfferRequest({ request: INITIATION_TEST.request })
+    const credReqClient = CredentialRequestClientBuilderV1_0_09.fromCredentialOfferRequest({ request: INITIATION_TEST.request })
       .withCredentialEndpoint('httpsf://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
@@ -153,7 +153,7 @@ describe('Credential Request Client with Walt.id ', () => {
     expect(metadata.credential_endpoint).toEqual(WALT_OID4VCI_METADATA.credential_endpoint);
     expect(metadata.token_endpoint).toEqual(WALT_OID4VCI_METADATA.token_endpoint);
 
-    const credReqClient = CredentialRequestV1_0_09ClientBuilder.fromCredentialOffer({
+    const credReqClient = CredentialRequestClientBuilderV1_0_09.fromCredentialOffer({
       credentialOffer,
       metadata,
     }).build();
