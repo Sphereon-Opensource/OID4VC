@@ -1,4 +1,4 @@
-import { CredentialSupported, Display, IssuerMetadata, TokenErrorResponse } from '@sphereon/openid4vci-common'
+import { CredentialIssuerCallback, CredentialSupported, Display, IssuerMetadata, TokenErrorResponse } from '@sphereon/openid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
 
@@ -11,6 +11,7 @@ export class VcIssuerBuilder {
   issuerDisplay?: Display[]
   credentialsSupported?: CredentialSupported[]
   userPinRequired?: boolean
+  issuerCallback?: CredentialIssuerCallback
 
   public withCredentialIssuer(issuer: string): VcIssuerBuilder {
     this.credentialIssuer = issuer
@@ -68,6 +69,11 @@ export class VcIssuerBuilder {
     return this
   }
 
+  withIssuerCallback(cb: CredentialIssuerCallback): VcIssuerBuilder {
+    this.issuerCallback = cb
+    return this
+  }
+
   public build(): VcIssuer {
     if (!this.credentialEndpoint || !this.credentialIssuer || !this.credentialsSupported) {
       throw new Error(TokenErrorResponse.invalid_request)
@@ -92,6 +98,6 @@ export class VcIssuerBuilder {
     if (this.tokenEndpoint) {
       metadata.token_endpoint = this.tokenEndpoint
     }
-    return new VcIssuer(metadata, this.userPinRequired)
+    return new VcIssuer(metadata, { userPinRequired: this.userPinRequired, callback: this.issuerCallback })
   }
 }

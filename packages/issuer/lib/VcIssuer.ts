@@ -6,9 +6,10 @@ export class VcIssuer {
   _userPinRequired?: boolean
   _issuerCallback?: CredentialIssuerCallback
 
-  constructor(issuerMetadata: IssuerMetadata, userPinRequired?: boolean) {
+  constructor(issuerMetadata: IssuerMetadata, args?: { userPinRequired?: boolean; callback?: CredentialIssuerCallback }) {
     this._issuerMetadata = issuerMetadata
-    this._userPinRequired = userPinRequired
+    this._userPinRequired = args && args.userPinRequired ? args.userPinRequired : false
+    this._issuerCallback = args && args.callback ? args.callback : undefined
   }
 
   public getIssuerMetadata() {
