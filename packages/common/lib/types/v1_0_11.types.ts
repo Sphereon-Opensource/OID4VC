@@ -1,6 +1,6 @@
 import { AuthorizationDetailsJwtVcJson, CommonAuthorizationRequest } from './Authorization.types';
 import { CredentialOfferPayload } from './CredentialIssuance.types';
-import { CredentialOfferCredential, Grant, IssuerCredentialDefinition } from './Generic.types';
+import { CredentialOfferFormat, Grant, IssuerCredentialDefinition } from './Generic.types';
 
 export interface CredentialOfferV1_0_11 {
   credential_offer?: CommonCredentialOfferPayloadV1_0_11;
@@ -19,7 +19,7 @@ export interface CommonCredentialOfferPayloadV1_0_11 {
    * credentials_supported Credential Issuer metadata parameter.
    * When processing, the Wallet MUST resolve this string value to the respective object.
    */
-  credentials?: (CredentialOfferCredential | string)[];
+  credentials?: (CredentialOfferFormat | string)[];
   /**
    * OPTIONAL. A JSON object indicating to the Wallet the Grant Types the Credential Issuer's AS is prepared
    * to process for this credential offer. Every grant is represented by a key and an object.
@@ -43,7 +43,7 @@ export interface CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11 extends CommonCredent
 }
 
 export interface CredentialOfferJwtVcJsonV1_0_11 extends CommonCredentialOfferPayloadV1_0_11 {
-  credentials: (CredentialOfferCredential | string)[]; // look at CommonCredentialOfferPayloadV1_0_11.credentials
+  credentials: (CredentialOfferFormat | string)[]; // look at CommonCredentialOfferPayloadV1_0_11.credentials
 }
 
 export type CredentialOfferPayloadV1_0_11 = CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11 | CredentialOfferJwtVcJsonV1_0_11;

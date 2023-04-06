@@ -126,7 +126,11 @@ export class RestAPI {
       const preAuthorizedCode = request.params.pre_authorized_code
       const id = uuidv4()
       this.tokenToId.set(preAuthorizedCode, id)
-      return response.send(createCredentialOfferDeeplink(preAuthorizedCode, this._vcIssuer._issuerMetadata))
+      return response.send(
+        createCredentialOfferDeeplink(this._vcIssuer._issuerMetadata, {
+          preAuthorizedCode: preAuthorizedCode,
+        })
+      )
     })
   }
 }

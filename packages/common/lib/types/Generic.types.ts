@@ -64,13 +64,8 @@ export interface SupportedCredentialIssuerMetadataJwtVcJson extends CredentialSu
   order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
 }
 
-export interface CredentialOfferCredential {
+export interface CredentialOfferFormat {
   format: CredentialFormatEnum;
-  types: string[];
-}
-
-export interface CredentialOfferCredentialJwtVcJson extends CredentialOfferCredential {
-  format: CredentialFormatEnum.jwt_vc_json;
   types: string[];
 }
 
