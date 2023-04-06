@@ -1,4 +1,4 @@
-import { CredentialIssuerMetadataSupportedCredentials, Display, IssuerMetadata, TokenErrorResponse } from '@sphereon/openid4vci-common'
+import { CredentialSupported, Display, IssuerMetadata, TokenErrorResponse } from '@sphereon/openid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
 
@@ -9,7 +9,7 @@ export class VcIssuerBuilder {
   batchCredentialEndpoint?: string
   tokenEndpoint?: string
   issuerDisplay?: Display[]
-  credentialsSupported?: CredentialIssuerMetadataSupportedCredentials[]
+  credentialsSupported?: CredentialSupported[]
   userPinRequired?: boolean
 
   public withCredentialIssuer(issuer: string): VcIssuerBuilder {
@@ -49,16 +49,12 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withCredentialsSupported(
-    credentialSupported: CredentialIssuerMetadataSupportedCredentials | CredentialIssuerMetadataSupportedCredentials[]
-  ): VcIssuerBuilder {
+  public withCredentialsSupported(credentialSupported: CredentialSupported | CredentialSupported[]): VcIssuerBuilder {
     this.credentialsSupported = Array.isArray(credentialSupported) ? credentialSupported : [credentialSupported]
     return this
   }
 
-  public addCredentialsSupported(
-    credentialSupported: CredentialIssuerMetadataSupportedCredentials | CredentialIssuerMetadataSupportedCredentials[]
-  ): VcIssuerBuilder {
+  public addCredentialsSupported(credentialSupported: CredentialSupported | CredentialSupported[]): VcIssuerBuilder {
     if (!Array.isArray(credentialSupported))
       this.credentialsSupported = this.credentialsSupported ? [...this.credentialsSupported, credentialSupported] : [credentialSupported]
     else {

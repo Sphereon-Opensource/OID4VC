@@ -1,7 +1,7 @@
 import {
   CredentialFormatEnum,
-  CredentialIssuerMetadataSupportedCredentials,
   CredentialRequest,
+  CredentialSupported,
   Display,
   IssuerCredentialSubjectDisplay,
   IssuerMetadata,
@@ -14,7 +14,7 @@ import express, { Express, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 
 function buildVCIFromEnvironment() {
-  const credentialsSupported: CredentialIssuerMetadataSupportedCredentials = new CredentialSupportedV1_11Builder()
+  const credentialsSupported: CredentialSupported = new CredentialSupportedV1_11Builder()
     .withCryptographicSuitesSupported(process.env.cryptographic_suites_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
     .withFormat(process.env.credential_supported_format as unknown as CredentialFormatEnum)

@@ -1,6 +1,6 @@
 import {
   CredentialFormatEnum,
-  CredentialIssuerMetadataSupportedCredentials,
+  CredentialSupported,
   Display,
   IssuerCredentialSubject,
   IssuerCredentialSubjectDisplay,
@@ -101,11 +101,11 @@ export class CredentialSupportedV1_11Builder {
     return this
   }
 
-  public build(): CredentialIssuerMetadataSupportedCredentials {
+  public build(): CredentialSupported {
     if (!this.format) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    const credentialSupported: CredentialIssuerMetadataSupportedCredentials = {
+    const credentialSupported: CredentialSupported = {
       format: this.format,
     }
     if (this.credentialSubject) {

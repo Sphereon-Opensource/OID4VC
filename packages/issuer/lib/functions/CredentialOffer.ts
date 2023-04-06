@@ -1,10 +1,4 @@
-import {
-  CredentialFormatEnum,
-  CredentialIssuerMetadataSupportedCredentials,
-  encodeJsonAsURI,
-  IssuerMetadata,
-  TokenErrorResponse,
-} from '@sphereon/openid4vci-common'
+import { CredentialFormatEnum, CredentialSupported, encodeJsonAsURI, IssuerMetadata, TokenErrorResponse } from '@sphereon/openid4vci-common'
 import { v4 as uuidv4 } from 'uuid'
 
 export function createCredentialOfferDeeplink(preAuthorizedCode: string, issuerMetadata: IssuerMetadata): string {
@@ -18,7 +12,7 @@ export function createCredentialOfferDeeplink(preAuthorizedCode: string, issuerM
 
   const types: string[] = []
   issuerMetadata.credentials_supported.map((cs) => {
-    if (cs.format != CredentialFormatEnum.mso_mdoc) types.push(...(cs['types' as keyof CredentialIssuerMetadataSupportedCredentials] as string[]))
+    if (cs.format != CredentialFormatEnum.mso_mdoc) types.push(...(cs['types' as keyof CredentialSupported] as string[]))
   })
   return `openid-credential-offer://?credential_offer=${encodeJsonAsURI({
     credential_issuer: issuerMetadata.credential_issuer,

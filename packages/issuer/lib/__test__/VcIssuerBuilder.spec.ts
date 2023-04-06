@@ -1,16 +1,10 @@
-import {
-  CredentialFormatEnum,
-  CredentialIssuerMetadataSupportedCredentials,
-  Display,
-  IssuerCredentialSubjectDisplay,
-  TokenErrorResponse,
-} from '@sphereon/openid4vci-common'
+import { CredentialFormatEnum, CredentialSupported, Display, IssuerCredentialSubjectDisplay, TokenErrorResponse } from '@sphereon/openid4vci-common'
 
 import { CredentialSupportedV1_11Builder, VcIssuerBuilder } from '../index'
 
 describe('VcIssuer builder should', () => {
   it('generate a VcIssuer', () => {
-    const credentialsSupported: CredentialIssuerMetadataSupportedCredentials = new CredentialSupportedV1_11Builder()
+    const credentialsSupported: CredentialSupported = new CredentialSupportedV1_11Builder()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat(CredentialFormatEnum.jwt_vc_json)
@@ -47,7 +41,7 @@ describe('VcIssuer builder should', () => {
   })
 
   it('fail to generate a VcIssuer', () => {
-    const credentialsSupported: CredentialIssuerMetadataSupportedCredentials = new CredentialSupportedV1_11Builder()
+    const credentialsSupported: CredentialSupported = new CredentialSupportedV1_11Builder()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat(CredentialFormatEnum.jwt_vc_json)

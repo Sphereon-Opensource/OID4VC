@@ -35,21 +35,21 @@ export type Display = NameAndLocale & LogoAndColor;
 export interface IssuerMetadata {
   credential_endpoint: string;
   batch_credential_endpoint?: string;
-  credentials_supported: CredentialIssuerMetadataSupportedCredentials[];
+  credentials_supported: CredentialSupported[];
   credential_issuer: string; // REQUIRED. The URL of the Credential Issuer, the Wallet is requested to obtain one or more Credentials from.
   authorization_server?: string;
   token_endpoint?: string;
   display?: Display[];
 }
 
-export interface CredentialIssuerMetadataSupportedCredentials {
+export interface CredentialSupported {
   format: CredentialFormatEnum | string;
   id?: string;
   cryptographic_binding_methods_supported?: string[];
   cryptographic_suites_supported?: string[];
 }
 
-export interface SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc extends CredentialIssuerMetadataSupportedCredentials {
+export interface SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc extends CredentialSupported {
   format: CredentialFormatEnum.ldp_vc;
   '@context': ICredentialContextType[];
   types: string[];
@@ -57,7 +57,7 @@ export interface SupportedCredentialIssuerMetadataJwtVcJsonLdAndLdpVc extends Cr
   display?: Display[];
 }
 
-export interface SupportedCredentialIssuerMetadataJwtVcJson extends CredentialIssuerMetadataSupportedCredentials {
+export interface SupportedCredentialIssuerMetadataJwtVcJson extends CredentialSupported {
   types: string[];
   credentialSubject?: IssuerCredentialSubject;
   display?: Display[];
