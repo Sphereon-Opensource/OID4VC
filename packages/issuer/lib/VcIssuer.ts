@@ -13,12 +13,14 @@ export class VcIssuer {
   _userPinRequired?: boolean
   _issuerCallback?: CredentialIssuerCallback
   private readonly _stateManager: ICredentialOfferStateManager
-  constructor(issuerMetadata: IssuerMetadata, iCredentialOfferStateManager: ICredentialOfferStateManager, userPinRequired?: boolean) {
-    this._issuerMetadata = issuerMetadata
-    this._userPinRequired = userPinRequired
-    this._stateManager = iCredentialOfferStateManager
-  }
 
+  constructor(issuerMetadata: IssuerMetadata, args?: { userPinRequired?: boolean; stateManager: ICredentialOfferStateManager; callback?: CredentialIssuerCallback }) {
+    this._issuerMetadata = issuerMetadata
+    this._stateManager = stateManager
+    this._userPinRequired = args && args.userPinRequired ? args.userPinRequired : false
+    this._issuerCallback = args && args.callback ? args.callback : undefined
+  }
+  
   public get credentialOfferStateManager(): ICredentialOfferStateManager {
     return this._stateManager
   }
@@ -27,11 +29,19 @@ export class VcIssuer {
     return this._issuerMetadata
   }
 
-  public async issueCredentialFromIssueRequest(issueCredentialRequest: CredentialRequest): Promise<CredentialResponse> {
+  /**
+   * issueCredentialFromIssueRequest
+   * @param issueCredentialRequest a credential issuance request
+   * @param issuerCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
+   */
+  public async issueCredentialFromIssueRequest(
+    issueCredentialRequest: CredentialRequest,
+    issuerCallback?: CredentialIssuerCallback
+  ): Promise<CredentialResponse> {
     //TODO: do we want additional validations here?
     if (this.isMetadataSupportCredentialRequestFormat(issueCredentialRequest.format)) {
       return {
-        credential: await this.issueCredential({ credentialRequest: issueCredentialRequest }),
+        credential: await this.issueCredential({ credentialRequest: issueCredentialRequest }, issuerCallback),
         format: issueCredentialRequest.format,
       }
     }
@@ -52,10 +62,13 @@ export class VcIssuer {
     }
     return false
   }
-  private async issueCredential(opts: { credentialRequest?: CredentialRequest; credential?: ICredential }): Promise<W3CVerifiableCredential> {
+  private async issueCredential(
+    opts: { credentialRequest?: CredentialRequest; credential?: ICredential },
+    issuerCallback?: CredentialIssuerCallback
+  ): Promise<W3CVerifiableCredential> {
     if ((!opts.credential && !opts.credentialRequest) || !this._issuerCallback) {
       throw new Error('Issuer not configured correctly.')
     }
-    return await this._issuerCallback(opts)
+    return issuerCallback ? await issuerCallback(opts) : this._issuerCallback(opts)
   }
 }

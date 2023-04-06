@@ -1,17 +1,11 @@
-import {
-  CredentialFormatEnum,
-  CredentialIssuerMetadataSupportedCredentials,
-  Display,
-  IssuerCredentialSubjectDisplay,
-  TokenErrorResponse,
-} from '@sphereon/openid4vci-common'
+import { CredentialFormatEnum, CredentialSupported, Display, IssuerCredentialSubjectDisplay, TokenErrorResponse } from '@sphereon/openid4vci-common'
 
-import { CredentialSupportedV1_11Builder, VcIssuerBuilder } from '../index'
+import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../index'
 import { MemoryCredentialOfferStateManager } from '../state-manager/MemoryCredentialOfferStateManager'
 
-describe('VcIssuer builder', () => {
-  it('should generate a VcIssuer', () => {
-    const credentialsSupported: CredentialIssuerMetadataSupportedCredentials = new CredentialSupportedV1_11Builder()
+describe('VcIssuer builder should', () => {
+  it('generate a VcIssuer', () => {
+    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat(CredentialFormatEnum.jwt_vc_json)
@@ -48,8 +42,8 @@ describe('VcIssuer builder', () => {
     expect(vcIssuer.getIssuerMetadata().credentials_supported[0].id).toEqual('UniversityDegree_JWT')
   })
 
-  it('should fail to generate a VcIssuer', () => {
-    const credentialsSupported: CredentialIssuerMetadataSupportedCredentials = new CredentialSupportedV1_11Builder()
+  it('fail to generate a VcIssuer', () => {
+    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat(CredentialFormatEnum.jwt_vc_json)
@@ -82,9 +76,9 @@ describe('VcIssuer builder', () => {
     ).toThrowError(TokenErrorResponse.invalid_request)
   })
 
-  it('should fail to generate a CredentialSupportedV1_11', () => {
+  it('fail to generate a CredentialSupportedV1_11', () => {
     expect(() =>
-      new CredentialSupportedV1_11Builder()
+      new CredentialSupportedBuilderV1_11()
         .withCryptographicSuitesSupported('ES256K')
         .withCryptographicBindingMethod('did')
         .withId('UniversityDegree_JWT')

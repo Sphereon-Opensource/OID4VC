@@ -1,6 +1,6 @@
 export * from './AccessTokenClient';
 export * from './CredentialRequestClient';
-export * from './CredentialRequestV1_0_09ClientBuilder';
+export * from './CredentialRequestClientBuilderV1_0_09';
 export * from './functions';
 export * from './MetadataClient';
 export * from './OpenID4VCIClient';

@@ -1,25 +1,25 @@
 import {
   AccessTokenResponse,
   CredentialOfferPayload,
+  CredentialOfferPayloadV1_0_09,
   CredentialOfferRequestWithBaseUrl,
-  CredentialOfferV1_0_09,
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
-  OpenID4VCIServerMetadata,
+  IssuerMetadata,
 } from '@sphereon/openid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialRequestClient } from './CredentialRequestClient';
 import { convertURIToJsonObject } from './functions';
 
-export class CredentialRequestV1_0_09ClientBuilder {
+export class CredentialRequestClientBuilderV1_0_09 {
   credentialEndpoint?: string;
   credentialType?: string | string[];
   format?: CredentialFormat | CredentialFormat[];
   token?: string;
 
-  public static fromURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): CredentialRequestV1_0_09ClientBuilder {
-    return CredentialRequestV1_0_09ClientBuilder.fromCredentialOfferRequest({
+  public static fromURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): CredentialRequestClientBuilderV1_0_09 {
+    return CredentialRequestClientBuilderV1_0_09.fromCredentialOfferRequest({
       request: convertURIToJsonObject(uri, {
         arrayTypeProperties: ['credential_type'],
         requiredProperties: ['issuer', 'credential_type'],
@@ -34,8 +34,8 @@ export class CredentialRequestV1_0_09ClientBuilder {
   }: {
     request: CredentialOfferPayload;
     metadata?: EndpointMetadata;
-  }): CredentialRequestV1_0_09ClientBuilder {
-    const builder = new CredentialRequestV1_0_09ClientBuilder();
+  }): CredentialRequestClientBuilderV1_0_09 {
+    const builder = new CredentialRequestClientBuilderV1_0_09();
     const issuer = getIssuerFromCredentialOfferPayload(request);
     builder.withCredentialEndpoint(
       metadata?.credential_endpoint ? metadata.credential_endpoint : issuer.endsWith('/') ? `${issuer}credential` : `${issuer}/credential`
@@ -43,7 +43,7 @@ export class CredentialRequestV1_0_09ClientBuilder {
 
     //todo: This basically sets all types available during initiation. Probably the user only wants a subset. So do we want to do this?
     //todo: handle this for v11
-    builder.withCredentialType((request as CredentialOfferV1_0_09).credential_type);
+    builder.withCredentialType((request as CredentialOfferPayloadV1_0_09).credential_type);
 
     return builder;
   }
@@ -54,39 +54,39 @@ export class CredentialRequestV1_0_09ClientBuilder {
   }: {
     credentialOffer: CredentialOfferRequestWithBaseUrl;
     metadata?: EndpointMetadata;
-  }): CredentialRequestV1_0_09ClientBuilder {
-    return CredentialRequestV1_0_09ClientBuilder.fromCredentialOfferRequest({
+  }): CredentialRequestClientBuilderV1_0_09 {
+    return CredentialRequestClientBuilderV1_0_09.fromCredentialOfferRequest({
       request: credentialOffer.request,
       metadata,
     });
   }
 
-  public withCredentialEndpointFromMetadata(metadata: OpenID4VCIServerMetadata): CredentialRequestV1_0_09ClientBuilder {
+  public withCredentialEndpointFromMetadata(metadata: IssuerMetadata): CredentialRequestClientBuilderV1_0_09 {
     this.credentialEndpoint = metadata.credential_endpoint;
     return this;
   }
 
-  public withCredentialEndpoint(credentialEndpoint: string): CredentialRequestV1_0_09ClientBuilder {
+  public withCredentialEndpoint(credentialEndpoint: string): CredentialRequestClientBuilderV1_0_09 {
     this.credentialEndpoint = credentialEndpoint;
     return this;
   }
 
-  public withCredentialType(credentialType: string | string[]): CredentialRequestV1_0_09ClientBuilder {
+  public withCredentialType(credentialType: string | string[]): CredentialRequestClientBuilderV1_0_09 {
     this.credentialType = credentialType;
     return this;
   }
 
-  public withFormat(format: CredentialFormat | CredentialFormat[]): CredentialRequestV1_0_09ClientBuilder {
+  public withFormat(format: CredentialFormat | CredentialFormat[]): CredentialRequestClientBuilderV1_0_09 {
     this.format = format;
     return this;
   }
 
-  public withToken(accessToken: string): CredentialRequestV1_0_09ClientBuilder {
+  public withToken(accessToken: string): CredentialRequestClientBuilderV1_0_09 {
     this.token = accessToken;
     return this;
   }
 
-  public withTokenFromResponse(response: AccessTokenResponse): CredentialRequestV1_0_09ClientBuilder {
+  public withTokenFromResponse(response: AccessTokenResponse): CredentialRequestClientBuilderV1_0_09 {
     this.token = response.access_token;
     return this;
   }

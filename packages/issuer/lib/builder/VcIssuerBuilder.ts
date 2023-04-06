@@ -1,10 +1,4 @@
-import {
-  CredentialIssuerMetadataSupportedCredentials,
-  Display,
-  ICredentialOfferStateManager,
-  IssuerMetadata,
-  TokenErrorResponse,
-} from '@sphereon/openid4vci-common'
+import { CredentialIssuerCallback, CredentialSupported, Display, ICredentialOfferStateManager, IssuerMetadata, TokenErrorResponse } from '@sphereon/openid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
 import { MemoryCredentialOfferStateManager } from '../state-manager/MemoryCredentialOfferStateManager'
@@ -16,9 +10,10 @@ export class VcIssuerBuilder {
   batchCredentialEndpoint?: string
   tokenEndpoint?: string
   issuerDisplay?: Display[]
-  credentialsSupported?: CredentialIssuerMetadataSupportedCredentials[]
+  credentialsSupported?: CredentialSupported[]
   userPinRequired?: boolean
   credentialOfferStateManager?: ICredentialOfferStateManager
+  issuerCallback?: CredentialIssuerCallback
 
   public withCredentialIssuer(issuer: string): VcIssuerBuilder {
     this.credentialIssuer = issuer
@@ -57,16 +52,12 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withCredentialsSupported(
-    credentialSupported: CredentialIssuerMetadataSupportedCredentials | CredentialIssuerMetadataSupportedCredentials[]
-  ): VcIssuerBuilder {
+  public withCredentialsSupported(credentialSupported: CredentialSupported | CredentialSupported[]): VcIssuerBuilder {
     this.credentialsSupported = Array.isArray(credentialSupported) ? credentialSupported : [credentialSupported]
     return this
   }
 
-  public addCredentialsSupported(
-    credentialSupported: CredentialIssuerMetadataSupportedCredentials | CredentialIssuerMetadataSupportedCredentials[]
-  ): VcIssuerBuilder {
+  public addCredentialsSupported(credentialSupported: CredentialSupported | CredentialSupported[]): VcIssuerBuilder {
     if (!Array.isArray(credentialSupported))
       this.credentialsSupported = this.credentialsSupported ? [...this.credentialsSupported, credentialSupported] : [credentialSupported]
     else {
@@ -87,6 +78,11 @@ export class VcIssuerBuilder {
 
   public withInMemoryCredentialOfferState(): VcIssuerBuilder {
     this.withCredentialOfferStateManager(new MemoryCredentialOfferStateManager())
+    return this
+  }
+  
+  withIssuerCallback(cb: CredentialIssuerCallback): VcIssuerBuilder {
+    this.issuerCallback = cb
     return this
   }
 
@@ -117,6 +113,6 @@ export class VcIssuerBuilder {
     if (this.tokenEndpoint) {
       metadata.token_endpoint = this.tokenEndpoint
     }
-    return new VcIssuer(metadata, this.credentialOfferStateManager, this.userPinRequired)
+    return new VcIssuer(metadata, { userPinRequired: this.userPinRequired, callback: this.issuerCallback, stateManager:  this.credentialOfferStateManager })
   }
 }

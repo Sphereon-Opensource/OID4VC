@@ -4,14 +4,14 @@ import * as path from 'path'
 
 import {
   CredentialFormatEnum,
-  CredentialIssuerMetadataSupportedCredentials,
   CredentialRequest,
+  CredentialSupported,
   Display,
   ICredentialOfferStateManager,
   IssuerCredentialSubjectDisplay,
   IssuerMetadata,
 } from '@sphereon/openid4vci-common'
-import { createCredentialOfferDeeplink, CredentialSupportedV1_11Builder, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
+import { createCredentialOfferURI, CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
@@ -23,7 +23,7 @@ const key = fs.readFileSync(process.env.PRIVATE_KEY || path.join(__dirname, './p
 const cert = fs.readFileSync(process.env.x509_CERTIFICATE || path.join(__dirname, './chain.pem'), 'utf-8')
 
 function buildVCIFromEnvironment() {
-  const credentialsSupported: CredentialIssuerMetadataSupportedCredentials = new CredentialSupportedV1_11Builder()
+  const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
     .withCryptographicSuitesSupported(process.env.cryptographic_suites_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
     .withFormat(process.env.credential_supported_format as unknown as CredentialFormatEnum)
@@ -70,7 +70,8 @@ export class RestAPI {
 
   constructor(opts?: { metadata: IssuerMetadata; stateManager: ICredentialOfferStateManager; userPinRequired: boolean }) {
     dotenv.config()
-    this._vcIssuer = opts ? (this._vcIssuer = new VcIssuer(opts.metadata, opts.stateManager, opts.userPinRequired)) : buildVCIFromEnvironment()
+    // todo: we probably want to pass a dummy issuance callback function here
+    this._vcIssuer = opts ? (this._vcIssuer = new VcIssuer(opts.metadata, { userPinRequired: opts.userPinRequired })) : buildVCIFromEnvironment()
     this.express = express()
     const port = process.env.PORT || 3443
     const secret = process.env.COOKIE_SIGNING_KEY
@@ -117,7 +118,11 @@ export class RestAPI {
       const preAuthorizedCode = request.params.pre_authorized_code
       const id = uuidv4()
       this.tokenToId.set(preAuthorizedCode, id)
-      return response.send(createCredentialOfferDeeplink(preAuthorizedCode, this._vcIssuer._issuerMetadata))
+      return response.send(
+        createCredentialOfferURI(this._vcIssuer._issuerMetadata, {
+          preAuthorizedCode: preAuthorizedCode,
+        })
+      )
     })
   }
 }
