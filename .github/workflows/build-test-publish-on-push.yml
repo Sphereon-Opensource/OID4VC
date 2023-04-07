@@ -76,6 +76,9 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> .npmrc
 #          npm whoami
 
+      - name: diff
+        run: git diff
+
       - name: publish @latest when on main
         if: github.ref == 'refs/heads/main'
         run: pnpm publish:latest
