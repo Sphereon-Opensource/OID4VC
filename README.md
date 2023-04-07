@@ -5,7 +5,7 @@
   <br>
 </h1>
 
-[![CI](https://github.com/Sphereon-Opensource/openid4vci/actions/workflows/build-test-on-pr.yml/badge.svg)](https://github.com/Sphereon-Opensource/openid4vci/actions/workflows/build-test-on-pr.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/openid4vci/branch/develop/graph/badge.svg)](https://codecov.io/gh/Sphereon-Opensource/openid4vci) [![NPM Version](https://img.shields.io/npm/v/@sphereon/openid4vci.svg)](https://npm.im/@sphereon/openid4vci)
+[![CI](https://github.com/Sphereon-Opensource/OpenID4VCI/actions/workflows/build-test-on-pr.yml/badge.svg)](https://github.com/Sphereon-Opensource/OpenID4VCI/actions/workflows/build-test-on-pr.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/OpenID4VCI/branch/develop/graph/badge.svg)](https://codecov.io/gh/Sphereon-Opensource/OpenID4VCI) [![NPM Version](https://img.shields.io/npm/v/@sphereon/openid4vci.svg)](https://npm.im/@sphereon/openid4vci)
 
 _IMPORTANT the packages are in an early development stage and currently only supports the pre-authorized code flow of
 OpenID4VCI! Work is underway for the Authorized Flows as well, but not fully supported yet_
