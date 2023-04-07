@@ -42,18 +42,18 @@ export class MetadataClient {
     let token_endpoint;
     let credential_endpoint;
     const response = await MetadataClient.retrieveOpenID4VCIServerMetadata(issuer);
-    let oid4vciMetadata = response?.successBody;
-    if (oid4vciMetadata) {
-      debug(`Issuer ${issuer} OID4VCI well-known server metadata\r\n${oid4vciMetadata}`);
-      credential_endpoint = oid4vciMetadata.credential_endpoint;
-      token_endpoint = oid4vciMetadata.token_endpoint;
-      if (!token_endpoint && oid4vciMetadata.authorization_server) {
+    let issuerMetadata = response?.successBody;
+    if (issuerMetadata) {
+      debug(`Issuer ${issuer} OID4VCI well-known server metadata\r\n${issuerMetadata}`);
+      credential_endpoint = issuerMetadata.credential_endpoint;
+      token_endpoint = issuerMetadata.token_endpoint;
+      if (!token_endpoint && issuerMetadata.authorization_server) {
         debug(
-          `Issuer ${issuer} OID4VCI metadata has separate authorization_server ${oid4vciMetadata.authorization_server} that contains the token endpoint`
+          `Issuer ${issuer} OID4VCI metadata has separate authorization_server ${issuerMetadata.authorization_server} that contains the token endpoint`
         );
         // Crossword uses this to separate the AS metadata. We fail when not found, since we now have no way of getting the token endpoint
         const response: OpenIDResponse<OAuth2ASMetadata> = await this.retrieveWellknown(
-          oid4vciMetadata.authorization_server,
+          issuerMetadata.authorization_server,
           WellKnownEndpoints.OAUTH_AS,
           {
             errorOnNotFound: true,
@@ -80,9 +80,9 @@ export class MetadataClient {
       }
       if (asConfig) {
         debug(`Issuer ${issuer} has oAuth2 Server metadata in well-known location`);
-        oid4vciMetadata = asConfig;
-        credential_endpoint = oid4vciMetadata.credential_endpoint;
-        token_endpoint = oid4vciMetadata.token_endpoint;
+        issuerMetadata = asConfig;
+        credential_endpoint = issuerMetadata.credential_endpoint;
+        token_endpoint = issuerMetadata.token_endpoint;
       }
     }
     if (!token_endpoint) {
@@ -106,7 +106,7 @@ export class MetadataClient {
       issuer,
       token_endpoint,
       credential_endpoint,
-      openid4vci_metadata: oid4vciMetadata,
+      issuerMetadata,
     };
   }
 

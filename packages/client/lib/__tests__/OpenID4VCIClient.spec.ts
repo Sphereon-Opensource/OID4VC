@@ -23,7 +23,7 @@ describe('OpenID4VCIClient should', () => {
   it('should create successfully construct an authorization request url', async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    client._serverMetadata.openid4vci_metadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client._endpointMetadata?.issuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
     const url = client.createAuthorizationRequestUrl({
       clientId: 'test-client',
       codeChallengeMethod: CodeChallengeMethod.SHA256,
@@ -51,7 +51,7 @@ describe('OpenID4VCIClient should', () => {
   it("injects 'openid' as the first scope if not provided", async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    client._serverMetadata.openid4vci_metadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client._endpointMetadata?.issuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
 
     const url = client.createAuthorizationRequestUrl({
       clientId: 'test-client',
@@ -69,7 +69,7 @@ describe('OpenID4VCIClient should', () => {
   it('throw an error if no scope and no authorization_details is provided', async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    client._serverMetadata.openid4vci_metadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client._endpointMetadata?.issuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
 
     expect(() => {
       client.createAuthorizationRequestUrl({
@@ -83,7 +83,7 @@ describe('OpenID4VCIClient should', () => {
   it('create an authorization request url with authorization_details array property', async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    client._serverMetadata.openid4vci_metadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client._endpointMetadata.issuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
 
     expect(
       client.createAuthorizationRequestUrl({
@@ -114,7 +114,7 @@ describe('OpenID4VCIClient should', () => {
   it('create an authorization request url with authorization_details object property', async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    client._serverMetadata.openid4vci_metadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client._endpointMetadata.issuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
 
     expect(
       client.createAuthorizationRequestUrl({
@@ -138,7 +138,7 @@ describe('OpenID4VCIClient should', () => {
   it('create an authorization request url with authorization_details and scope', async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    client._serverMetadata.openid4vci_metadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client._endpointMetadata.issuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
 
     expect(
       client.createAuthorizationRequestUrl({

@@ -10,7 +10,9 @@ import {
   CredentialSupported,
   EndpointMetadata,
   IssuerCredentialSubject,
+  OpenIDResponse,
   ProofOfPossessionCallbacks,
+  PushedAuthorizationResponse,
   ResponseType,
 } from '@sphereon/openid4vci-common';
 import { CredentialSupportedTypeV1_0_08, CredentialSupportedV1_0_08 } from '@sphereon/openid4vci-common/dist/types/v1_0_08.types';
@@ -22,7 +24,7 @@ import { CredentialOffer } from './CredentialOffer';
 import { CredentialRequestClientBuilderV1_0_09 } from './CredentialRequestClientBuilderV1_0_09';
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
-import { convertJsonToURI } from './functions';
+import { convertJsonToURI, formPost } from './functions';
 
 const debug = Debug('sphereon:openid4vci:flow');
 
@@ -49,7 +51,7 @@ export class OpenID4VCIClient {
   private _clientId?: string;
   private _kid: string | undefined;
   private _alg: Alg | string | undefined;
-  private _serverMetadata: EndpointMetadata | undefined;
+  private _endpointMetadata: EndpointMetadata | undefined;
   private _accessTokenResponse: AccessTokenResponse | undefined;
 
   private constructor(
@@ -91,10 +93,10 @@ export class OpenID4VCIClient {
 
   public async retrieveServerMetadata(): Promise<EndpointMetadata> {
     this.assertIssuerData();
-    if (!this._serverMetadata) {
-      this._serverMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this._credentialOffer);
+    if (!this._endpointMetadata) {
+      this._endpointMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this._credentialOffer);
     }
-    return this._serverMetadata;
+    return this._endpointMetadata;
   }
 
   public createAuthorizationRequestUrl({
@@ -111,10 +113,10 @@ export class OpenID4VCIClient {
       throw Error('Please provide a scope or authorization_details');
     }
     // todo: handling this because of the support for v1_0-08
-    if (this._serverMetadata && this._serverMetadata.openid4vci_metadata && 'authorization_endpoint' in this._serverMetadata.openid4vci_metadata) {
-      this._serverMetadata.authorization_endpoint = this._serverMetadata.openid4vci_metadata.authorization_endpoint as string;
+    if (this._endpointMetadata && this._endpointMetadata.issuerMetadata && 'authorization_endpoint' in this._endpointMetadata.issuerMetadata) {
+      this._endpointMetadata.authorization_endpoint = this._endpointMetadata.issuerMetadata.authorization_endpoint as string;
     }
-    if (!this._serverMetadata?.authorization_endpoint) {
+    if (!this._endpointMetadata?.authorization_endpoint) {
       throw Error('Server metadata does not contain authorization endpoint');
     }
 
@@ -135,12 +137,52 @@ export class OpenID4VCIClient {
     } as AuthorizationRequestV1_0_09;
 
     return convertJsonToURI(queryObj, {
-      baseUrl: this._serverMetadata.authorization_endpoint,
+      baseUrl: this._endpointMetadata.authorization_endpoint,
       uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details'],
     });
   }
 
-  private handleAuthorizationDetails(authorizationDetails?: AuthDetails | AuthDetails[]): AuthDetails | AuthDetails[] | undefined {
+  public async acquirePushedAuthorizationRequestURI({
+    clientId,
+    codeChallengeMethod,
+    codeChallenge,
+    authorizationDetails,
+    redirectUri,
+    scope,
+  }: AuthRequestOpts): Promise<OpenIDResponse<PushedAuthorizationResponse>> {
+    // Scope and authorization_details can be used in the same authorization request
+    // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
+    if (!scope && !authorizationDetails) {
+      throw Error('Please provide a scope or authorization_details');
+    }
+
+    // Authorization servers supporting PAR SHOULD include the URL of their pushed authorization request endpoint in their authorization server metadata document
+    // Note that the presence of pushed_authorization_request_endpoint is sufficient for a client to determine that it may use the PAR flow.
+    // What happens if it doesn't ???
+    if (!this._endpointMetadata?.issuerMetadata || !('pushed_authorization_request_endpoint' in this._endpointMetadata.issuerMetadata)) {
+      throw Error('Server metadata does not contain pushed authorization request endpoint');
+    }
+
+    // add 'openid' scope if not present
+    if (scope && !scope.includes('openid')) {
+      scope = `openid ${scope}`;
+    }
+
+    //fixme: handle this for v11
+    const queryObj: AuthorizationRequestV1_0_09 = {
+      response_type: ResponseType.AUTH_CODE,
+      client_id: clientId,
+      code_challenge_method: codeChallengeMethod,
+      code_challenge: codeChallenge,
+      authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
+      redirect_uri: redirectUri,
+      scope: scope,
+    };
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return await formPost(this._endpointMetadata.issuerMetadata.pushed_authorization_request_endpoint!, JSON.stringify(queryObj));
+  }
+
+  public handleAuthorizationDetails(authorizationDetails?: AuthDetails | AuthDetails[]): AuthDetails | AuthDetails[] | undefined {
     if (authorizationDetails) {
       if (Array.isArray(authorizationDetails)) {
         return authorizationDetails.map((value) => this.handleLocations({ ...value }));
@@ -151,15 +193,15 @@ export class OpenID4VCIClient {
     return authorizationDetails;
   }
   private handleLocations(authorizationDetails: AuthDetails) {
-    if (authorizationDetails && (this.serverMetadata.openid4vci_metadata?.authorization_server || this.serverMetadata.authorization_endpoint)) {
+    if (authorizationDetails && (this.endpointMetadata.issuerMetadata?.authorization_server || this.endpointMetadata.authorization_endpoint)) {
       if (authorizationDetails.locations) {
         if (Array.isArray(authorizationDetails.locations)) {
-          (authorizationDetails.locations as string[]).push(this.serverMetadata.issuer);
+          (authorizationDetails.locations as string[]).push(this.endpointMetadata.issuer);
         } else {
-          authorizationDetails.locations = [authorizationDetails.locations as string, this.serverMetadata.issuer];
+          authorizationDetails.locations = [authorizationDetails.locations as string, this.endpointMetadata.issuer];
         }
       } else {
-        authorizationDetails.locations = this.serverMetadata.issuer;
+        authorizationDetails.locations = this.endpointMetadata.issuer;
       }
     }
     return authorizationDetails;
@@ -187,7 +229,7 @@ export class OpenID4VCIClient {
 
       const response = await accessTokenClient.acquireAccessToken({
         credentialOffer: this.credentialOffer,
-        metadata: this._serverMetadata,
+        metadata: this._endpointMetadata,
         pin,
         codeVerifier,
         code,
@@ -198,7 +240,7 @@ export class OpenID4VCIClient {
       if (response.errorBody) {
         debug(`Access token error:\r\n${response.errorBody}`);
         throw Error(
-          `Retrieving an access token from ${this._serverMetadata?.token_endpoint} for issuer ${this.getIssuer()} failed with status: ${
+          `Retrieving an access token from ${this._endpointMetadata?.token_endpoint} for issuer ${this.getIssuer()} failed with status: ${
             response.origResponse.status
           }`
         );
@@ -206,7 +248,7 @@ export class OpenID4VCIClient {
         debug(`Access token error. No succes body`);
         throw Error(
           `Retrieving an access token from ${
-            this._serverMetadata?.token_endpoint
+            this._endpointMetadata?.token_endpoint
           } for issuer ${this.getIssuer()} failed as there was no success response body`
         );
       }
@@ -240,11 +282,11 @@ export class OpenID4VCIClient {
 
     const requestBuilder = CredentialRequestClientBuilderV1_0_09.fromCredentialOffer({
       credentialOffer: this.credentialOffer,
-      metadata: this.serverMetadata,
+      metadata: this.endpointMetadata,
     });
     requestBuilder.withToken(this.accessTokenResponse.access_token);
-    if (this.serverMetadata?.openid4vci_metadata) {
-      const metadata = this.serverMetadata.openid4vci_metadata;
+    if (this.endpointMetadata?.issuerMetadata) {
+      const metadata = this.endpointMetadata.issuerMetadata;
       const types = Array.isArray(credentialType) ? credentialType : [credentialType];
       if (metadata.credentials_supported && Array.isArray(metadata.credentials_supported)) {
         for (const type of types) {
@@ -287,7 +329,7 @@ export class OpenID4VCIClient {
     if (response.errorBody) {
       debug(`Credential request error:\r\n${response.errorBody}`);
       throw Error(
-        `Retrieving a credential from ${this._serverMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${
+        `Retrieving a credential from ${this._endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${
           response.origResponse.status
         }`
       );
@@ -295,7 +337,7 @@ export class OpenID4VCIClient {
       debug(`Credential request error. No success body`);
       throw Error(
         `Retrieving a credential from ${
-          this._serverMetadata?.credential_endpoint
+          this._endpointMetadata?.credential_endpoint
         } for issuer ${this.getIssuer()} failed as there was no success response body`
       );
     }
@@ -303,7 +345,7 @@ export class OpenID4VCIClient {
   }
 
   getCredentialsSupported(restrictToInitiationTypes: boolean, supportedType?: string): CredentialSupported[] {
-    const credentialsSupported = this.serverMetadata?.openid4vci_metadata?.credentials_supported;
+    const credentialsSupported = this.endpointMetadata?.issuerMetadata?.credentials_supported;
     if (!credentialsSupported) {
       return [];
     } else if (!restrictToInitiationTypes) {
@@ -363,10 +405,10 @@ export class OpenID4VCIClient {
     return this._credentialOffer;
   }
 
-  public get serverMetadata(): EndpointMetadata {
+  public get endpointMetadata(): EndpointMetadata {
     this.assertServerMetadata();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this._serverMetadata!;
+    return this._endpointMetadata!;
   }
 
   get kid(): string {
@@ -400,19 +442,19 @@ export class OpenID4VCIClient {
 
   public getIssuer(): string {
     this.assertIssuerData();
-    return this._serverMetadata ? this.serverMetadata.issuer : this.getIssuer();
+    return this._endpointMetadata ? this.endpointMetadata.issuer : this.getIssuer();
   }
 
   public getAccessTokenEndpoint(): string {
     this.assertIssuerData();
-    return this.serverMetadata
-      ? this.serverMetadata.token_endpoint
+    return this.endpointMetadata
+      ? this.endpointMetadata.token_endpoint
       : AccessTokenClient.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
   }
 
   public getCredentialEndpoint(): string {
     this.assertIssuerData();
-    return this.serverMetadata ? this.serverMetadata.credential_endpoint : `${this.getIssuer()}/credential`;
+    return this.endpointMetadata ? this.endpointMetadata.credential_endpoint : `${this.getIssuer()}/credential`;
   }
 
   private assertIssuerData(): void {
@@ -422,7 +464,7 @@ export class OpenID4VCIClient {
   }
 
   private assertServerMetadata(): void {
-    if (!this._serverMetadata) {
+    if (!this._endpointMetadata) {
       throw Error('No server metadata');
     }
   }

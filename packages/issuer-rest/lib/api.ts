@@ -3,6 +3,7 @@ import https from 'https'
 import * as path from 'path'
 
 import {
+  AuthorizationRequest,
   CredentialFormatEnum,
   CredentialRequest,
   CredentialSupported,
@@ -17,11 +18,14 @@ import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import * as dotenv from 'dotenv-flow'
-import express, { Express, Response } from 'express'
+import express, { Express, NextFunction, Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
+
+import { validateRequestBody } from './expressUtils'
 
 const key = fs.readFileSync(process.env.PRIVATE_KEY || path.join(__dirname, './privkey.pem'), 'utf-8')
 const cert = fs.readFileSync(process.env.x509_CERTIFICATE || path.join(__dirname, './chain.pem'), 'utf-8')
+const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90
 
 function buildVCIFromEnvironment() {
   const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
@@ -66,9 +70,8 @@ export class RestAPI {
   public readonly express: Express
   private _vcIssuer: VcIssuer
   //fixme: use this map for now as an internal mechanism for preAuthorizedCode to ids
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   private tokenToId: Map<string, string> = new Map()
+  private authRequestsData: Map<string, AuthorizationRequest> = new Map()
 
   constructor(opts?: { metadata: IssuerMetadata; stateManager: ICredentialOfferStateManager; userPinRequired: boolean }) {
     dotenv.config()
@@ -88,6 +91,7 @@ export class RestAPI {
     this.express.use(bodyParser.json())
     this.express.use(cookieParser(secret))
 
+    this.pushedAuthorizationEndpoint()
     this.registerMetadataEndpoint()
     this.registerTokenRequestEndpoint()
     this.registerCredentialRequestEndpoint()
@@ -130,6 +134,60 @@ export class RestAPI {
           preAuthorizedCode: preAuthorizedCode,
         })
       )
+    })
+  }
+
+  private pushedAuthorizationEndpoint() {
+    const handleHttpStatus400 = async (req: Request, res: Response, next: NextFunction) => {
+      if (!req.body) {
+        return res.status(400).send({ error: 'invalid_request', error_description: 'Request body must be present' })
+      }
+      const required = ['client_id', 'code_challenge_method', 'code_challenge', 'redirect_uri']
+      const conditional = ['authorization_details', 'scope']
+      try {
+        validateRequestBody({ required, conditional, body: req.body })
+      } catch (e: unknown) {
+        return res.status(400).json({
+          error: 'invalid_request',
+          error_description: (e as Error).message,
+        })
+      }
+      return next()
+    }
+
+    this.express.post('/par', handleHttpStatus400, (req: Request, res: Response) => {
+      // FIXME Fake client for testing, it needs to come from a registered client
+      const client = {
+        scope: ['openid', 'test'],
+        redirectUris: ['http://localhost:8080/*', 'https://www.test.com/*', 'https://test.nl', 'http://*/chart', 'http:*'],
+      }
+
+      // For security reasons the redirect_uri from the request needs to be matched against the ones present in the registered client
+      const matched = client.redirectUris.filter((s: string) => new RegExp(s.replace('*', '.*')).test(req.body.redirect_uri))
+      if (!matched.length) {
+        return res.status(400).send({ error: 'invalid_request', error_description: 'redirect_uri is not valid for the given client' })
+      }
+
+      // The scopes from the request need to be matched against the ones present in the registered client
+      if (!req.body.scope.split(',').every((scope: string) => client.scope.includes(scope))) {
+        return res.status(400).send({ error: 'invalid_scope', error_description: 'scope is not valid for the given client' })
+      }
+
+      //TODO Implement authorization_details verification
+
+      // TODO: Both UUID and requestURI need to be configurable for the server
+      const uuid = uuidv4()
+      const requestUri = `urn:ietf:params:oauth:request_uri:${uuid}`
+      // The redirect_uri is created and set in a map, to keep track of the actual request
+      this.authRequestsData.set(requestUri, req.body)
+      // Invalidates the request_uri removing it from the mapping after it is expired, needs to be refactored because
+      // some of the properties will be needed in subsequent steps if the authorization succeeds
+      // TODO in the /token endpoint the code_challenge must be matched against the hashed code_verifier
+      setTimeout(() => {
+        this.authRequestsData.delete(requestUri)
+      }, expiresIn * 1000)
+
+      return res.status(201).json({ request_uri: requestUri, expires_in: expiresIn })
     })
   }
 }

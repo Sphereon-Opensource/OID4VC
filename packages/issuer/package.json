@@ -9,7 +9,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@sphereon/openid4vci-common": "workspace:*",
+    "@sphereon/openid4vci-common": "workspace:../common",
     "@sphereon/ssi-types": "^0.9.0",
     "uuid": "^9.0.0"
   },

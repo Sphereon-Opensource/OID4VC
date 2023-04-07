@@ -1,6 +1,7 @@
 import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 import { ProofOfPossession } from './CredentialIssuance.types';
+import { Oauth2ASWithOID4VCIMetadata } from './OpenID4VCIServerMetadata';
 
 /**
  * Important Note: please be aware that these Common interfaces are based on versions v1_0.11 and v1_0.09
@@ -208,5 +209,5 @@ export interface EndpointMetadata {
   token_endpoint: string;
   credential_endpoint: string;
   authorization_endpoint?: string;
-  openid4vci_metadata?: IssuerMetadata;
+  issuerMetadata?: IssuerMetadata | Oauth2ASWithOID4VCIMetadata;
 }

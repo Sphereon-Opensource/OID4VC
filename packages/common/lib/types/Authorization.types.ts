@@ -227,3 +227,8 @@ export namespace AuthzFlowType {
     return AuthzFlowType.AUTHORIZATION_CODE_FLOW;
   }
 }
+
+export interface PushedAuthorizationResponse {
+  request_uri: string;
+  expires_in: number;
+}
