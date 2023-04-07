@@ -175,6 +175,7 @@ export class RestAPI {
 
       //TODO Implement authorization_details verification
 
+      // TODO: Both UUID and requestURI need to be configurable for the server
       const uuid = uuidv4()
       const requestUri = `urn:ietf:params:oauth:request_uri:${uuid}`
       // The redirect_uri is created and set in a map, to keep track of the actual request
