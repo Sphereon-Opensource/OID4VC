@@ -77,7 +77,7 @@ describe('OID4VCI-Client should', () => {
   async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
     expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
     expect(client.credentialOffer).toBeDefined();
-    expect(client.serverMetadata).toBeDefined();
+    expect(client.endpointMetadata).toBeDefined();
     expect(client.getIssuer()).toEqual('https://issuer.research.identiproof.io');
     expect(client.getCredentialEndpoint()).toEqual('https://issuer.research.identiproof.io/credential');
     expect(client.getAccessTokenEndpoint()).toEqual('https://auth.research.identiproof.io/oauth2/token');

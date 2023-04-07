@@ -1,4 +1,4 @@
-import { AuthzFlowType, CodeChallengeMethod } from '@sphereon/openid4vci-common';
+import { AuthzFlowType, CodeChallengeMethod, Oauth2ASWithOID4VCIMetadata } from '@sphereon/openid4vci-common';
 import nock from 'nock';
 
 import { OpenID4VCIClient } from '../OpenID4VCIClient';
@@ -21,7 +21,7 @@ describe('OpenID4VCIClient', () => {
   });
 
   it('should successfully retrieve the authorization code using PAR', async () => {
-    client.serverMetadata.openid4vci_metadata!.pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`;
+    (client.endpointMetadata.issuerMetadata! as Oauth2ASWithOID4VCIMetadata).pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`;
     const actual = await client.acquirePushedAuthorizationRequestURI({
       clientId: 'test-client',
       codeChallengeMethod: CodeChallengeMethod.SHA256,
@@ -56,7 +56,7 @@ describe('OpenID4VCIClient', () => {
   });
 
   it('should not fail when only authorization_details is present', async () => {
-    client.serverMetadata.openid4vci_metadata!.pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`;
+    (client.endpointMetadata.issuerMetadata! as Oauth2ASWithOID4VCIMetadata).pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`;
     const actual = await client.acquirePushedAuthorizationRequestURI({
       clientId: 'test-client',
       codeChallengeMethod: CodeChallengeMethod.SHA256,
@@ -77,7 +77,7 @@ describe('OpenID4VCIClient', () => {
   });
 
   it('should not fail when only scope is present', async () => {
-    client.serverMetadata.openid4vci_metadata!.pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`;
+    (client.endpointMetadata.issuerMetadata! as Oauth2ASWithOID4VCIMetadata).pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`;
     const actual = await client.acquirePushedAuthorizationRequestURI({
       clientId: 'test-client',
       codeChallengeMethod: CodeChallengeMethod.SHA256,
@@ -89,7 +89,7 @@ describe('OpenID4VCIClient', () => {
   });
 
   it('should not fail when both authorization_details and scope are present', async () => {
-    client.serverMetadata.openid4vci_metadata!.pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`;
+    (client.endpointMetadata.issuerMetadata! as Oauth2ASWithOID4VCIMetadata).pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`;
     const actual = await client.acquirePushedAuthorizationRequestURI({
       clientId: 'test-client',
       codeChallengeMethod: CodeChallengeMethod.SHA256,

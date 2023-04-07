@@ -29,7 +29,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     const metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
     expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential');
     expect(metadata.token_endpoint).toEqual('https://auth.research.identiproof.io/oauth2/token');
-    expect(metadata.openid4vci_metadata).toEqual(IDENTIPROOF_OID4VCI_METADATA);
+    expect(metadata.issuerMetadata).toEqual(IDENTIPROOF_OID4VCI_METADATA);
   });
 
   it('succeed with OID4VCI and separate AS metadata from Initiation', async () => {
@@ -42,7 +42,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     const metadata = await MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(initiation.request));
     expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential');
     expect(metadata.token_endpoint).toEqual('https://auth.research.identiproof.io/oauth2/token');
-    expect(metadata.openid4vci_metadata).toEqual(IDENTIPROOF_OID4VCI_METADATA);
+    expect(metadata.issuerMetadata).toEqual(IDENTIPROOF_OID4VCI_METADATA);
   });
 
   it('Fail without OID4VCI and only AS metadata (no credential endpoint)', async () => {
@@ -129,7 +129,7 @@ describe('Metadataclient with Spruce Issuer should', () => {
     const metadata = await MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL);
     expect(metadata.credential_endpoint).toEqual('https://ngi-oidc4vci-test.spruceid.xyz/credential');
     expect(metadata.token_endpoint).toEqual('https://ngi-oidc4vci-test.spruceid.xyz/token');
-    expect(metadata.openid4vci_metadata).toEqual(SPRUCE_OID4VCI_METADATA);
+    expect(metadata.issuerMetadata).toEqual(SPRUCE_OID4VCI_METADATA);
   });
 
   it('Fail without OID4VCI', async () => {
@@ -155,7 +155,7 @@ describe('Metadataclient with Danubetech should', () => {
     const metadata = await MetadataClient.retrieveAllMetadata(DANUBE_ISSUER_URL);
     expect(metadata.credential_endpoint).toEqual('https://oidc4vc.uniissuer.io/credential');
     expect(metadata.token_endpoint).toEqual('https://oidc4vc.uniissuer.io/token');
-    expect(metadata.openid4vci_metadata).toEqual(DANUBE_OIDC_METADATA);
+    expect(metadata.issuerMetadata).toEqual(DANUBE_OIDC_METADATA);
   });
 
   it('Fail without OID4VCI', async () => {
@@ -182,7 +182,7 @@ describe('Metadataclient with Walt-id should', () => {
     const metadata = await MetadataClient.retrieveAllMetadata(WALT_ISSUER_URL);
     expect(metadata.credential_endpoint).toEqual('https://jff.walt.id/issuer-api/oidc/credential');
     expect(metadata.token_endpoint).toEqual('https://jff.walt.id/issuer-api/oidc/token');
-    expect(metadata.openid4vci_metadata).toEqual(WALT_OID4VCI_METADATA);
+    expect(metadata.issuerMetadata).toEqual(WALT_OID4VCI_METADATA);
   });
 
   it('Fail without OID4VCI', async () => {
