@@ -26,6 +26,7 @@ export interface OAuth2ASMetadata {
   pushed_authorization_request_endpoint?: string; // The URL of the pushed authorization request endpoint at which a client can post an authorization request to exchange for a request_uri value usable at the authorization server
   // Note that the presence of pushed_authorization_request_endpoint is sufficient for a client to determine that it may use the PAR flow. A request_uri value obtained from the PAR endpoint is usable at the authorization endpoint regardless of other authorization server metadata such as request_uri_parameter_supported or require_request_uri_registration
   require_pushed_authorization_requests?: boolean; // Boolean parameter indicating whether Indicates whether the client is required to use PAR to initiate authorization. If omitted, the default value is false.
+  'pre-authorized_grant_anonymous_access_supported': boolean; // OPTIONAL. A JSON Boolean indicating whether the issuer accepts a Token Request with a Pre-Authorized Code but without a client id. The default is false
 
   // OIDC values
   frontchannel_logout_supported?: boolean;

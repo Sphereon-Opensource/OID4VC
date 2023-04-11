@@ -98,7 +98,7 @@ export interface JWTPayload {
 }
 
 export type JWTSignerCallback = (jwt: Jwt, kid?: string) => Promise<string>;
-export type JWTVerifyCallback = (args: { jwt: string; kid?: string }) => Promise<void>;
+export type JWTVerifyCallback = (args: { jwt: string; kid?: string }) => Promise<Jwt>;
 
 export type Request = CredentialRequest;
 

@@ -3,7 +3,7 @@ import https from 'https'
 import * as path from 'path'
 
 import {
-  AuthorizationRequest,
+  AuthorizationRequestV1_0_09,
   CredentialFormatEnum,
   CredentialRequest,
   CredentialSupported,
@@ -71,7 +71,7 @@ export class RestAPI {
   private _vcIssuer: VcIssuer
   //fixme: use this map for now as an internal mechanism for preAuthorizedCode to ids
   private tokenToId: Map<string, string> = new Map()
-  private authRequestsData: Map<string, AuthorizationRequest> = new Map()
+  private authRequestsData: Map<string, AuthorizationRequestV1_0_09> = new Map()
 
   constructor(opts?: { metadata: IssuerMetadata; stateManager: ICredentialOfferStateManager; userPinRequired: boolean }) {
     dotenv.config()
