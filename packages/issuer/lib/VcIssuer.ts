@@ -98,10 +98,9 @@ export class VcIssuer {
       }
 
       const { iss, aud, iat, nonce } = payload
-      // Get client id and check if it is pre-authorized
-      if (iss && iss !== '') {
-        throw new Error(ISS_ERROR)
-      }
+      // I couldn't find a way to get the client_id, neither the grant type at this point, so I will not validate iss since it's optional
+      // iss: OPTIONAL (string). The value of this claim MUST be the client_id of the client making the credential request.
+      // This claim MUST be omitted if the Access Token authorizing the issuance call was obtained from a Pre-Authorized Code Flow through anonymous access to the Token Endpoint.
       if (!aud || aud !== this._issuerMetadata.credential_issuer) {
         throw new Error(AUD_ERROR)
       }

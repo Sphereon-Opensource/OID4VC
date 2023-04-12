@@ -87,7 +87,7 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   };
 
   const jwtHeader: JWTHeaderParameters = {
-    typ: 'JWT',
+    typ: 'openid4vci-proof+jwt',
     alg,
     kid,
   };
