@@ -7,7 +7,6 @@ import {
   CredentialResponse,
   IAT_ERROR,
   ICredentialOfferStateManager,
-  ISS_ERROR,
   ISSUER_CONFIG_ERROR,
   IssuerMetadata,
   Jwt,
@@ -17,9 +16,9 @@ import {
   NONCE_ERROR,
   ProofType,
   TokenErrorResponse,
-  TYP_ERROR,
+  TYP_ERROR, UNKNOWN_CLIENT_ERROR,
 } from '@sphereon/openid4vci-common'
-import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import {ICredential, W3CVerifiableCredential} from '@sphereon/ssi-types'
 
 export class VcIssuer {
   _issuerMetadata: IssuerMetadata
@@ -57,13 +56,17 @@ export class VcIssuer {
    * @param issueCredentialRequest a credential issuance request
    * @param jwtVerifyCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
    * @param issuerCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
+   * @param issuerState the state of the issuer
    */
   public async issueCredentialFromIssueRequest(
     issueCredentialRequest: CredentialRequest,
+    issuerState: string,
     jwtVerifyCallback?: JWTVerifyCallback,
     issuerCallback?: CredentialIssuerCallback
   ): Promise<CredentialResponse> {
-    //TODO: do we want additional validations here?
+    if (!(await this._stateManager.hasState(issuerState))) {
+      throw new Error(UNKNOWN_CLIENT_ERROR)
+    }
     await this.validateJWT(issueCredentialRequest, jwtVerifyCallback)
     if (this.isMetadataSupportCredentialRequestFormat(issueCredentialRequest.format)) {
       return {

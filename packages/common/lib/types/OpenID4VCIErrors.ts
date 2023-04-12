@@ -14,3 +14,4 @@ export const IAT_ERROR = 'iat must be the time at which the proof was issued';
 export const NONCE_ERROR = 'nonce must be c_nonce provided by the credential issuer';
 export const JWT_VERIFY_CONFIG_ERROR = 'JWT verify callback not configured correctly.';
 export const ISSUER_CONFIG_ERROR = 'Issuer not configured correctly.';
+export const UNKNOWN_CLIENT_ERROR = 'The client is not known by the issuer';
