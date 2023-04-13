@@ -5,7 +5,6 @@ import * as path from 'path'
 import {
   AuthorizationRequestV1_0_09,
   CredentialFormatEnum,
-  CredentialRequest,
   CredentialSupported,
   Display,
   ICredentialOfferStateManager,
@@ -108,24 +107,24 @@ export class RestAPI {
   }
 
   private registerMetadataEndpoint() {
-    this.express.get('/metadata', (request, response) => {
+    this.express.get('/metadata', (request: Request, response: Response) => {
       return response.send(this._vcIssuer._issuerMetadata)
     })
   }
   private registerTokenRequestEndpoint() {
-    this.express.post('/token', (request, response) => {
+    this.express.post('/token', (request: Request, response: Response) => {
       return RestAPI.sendErrorResponse(response, 501, 'Not implemented')
     })
   }
   private registerCredentialRequestEndpoint() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    this.express.get('/credential-request', async (request, _response) => {
-      this._vcIssuer.issueCredentialFromIssueRequest(request as unknown as CredentialRequest)
+    this.express.get('/credential-request', async (request: Request, _response: Response) => {
+      if (!request.body) this._vcIssuer.issueCredentialFromIssueRequest(request.body.issueCredentialRequest, request.body.issuerState)
     })
   }
 
   private registerCredentialOfferEndpoint() {
-    this.express.get('/credential-offer/:pre_authorized_code', async (request, response) => {
+    this.express.get('/credential-offer/:pre_authorized_code', async (request: Request, response: Response) => {
       const preAuthorizedCode = request.params.pre_authorized_code
       const id = uuidv4()
       this.tokenToId.set(preAuthorizedCode, id)

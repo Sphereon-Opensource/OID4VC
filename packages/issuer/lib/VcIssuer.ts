@@ -16,9 +16,10 @@ import {
   NONCE_ERROR,
   ProofType,
   TokenErrorResponse,
-  TYP_ERROR, UNKNOWN_CLIENT_ERROR,
+  TYP_ERROR,
+  UNKNOWN_CLIENT_ERROR,
 } from '@sphereon/openid4vci-common'
-import {ICredential, W3CVerifiableCredential} from '@sphereon/ssi-types'
+import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 export class VcIssuer {
   _issuerMetadata: IssuerMetadata
@@ -100,7 +101,7 @@ export class VcIssuer {
         throw new Error(KID_JWK_X5C_ERROR)
       }
 
-      const { iss, aud, iat, nonce } = payload
+      const { aud, iat, nonce } = payload
       // I couldn't find a way to get the client_id, neither the grant type at this point, so I will not validate iss since it's optional
       // iss: OPTIONAL (string). The value of this claim MUST be the client_id of the client making the credential request.
       // This claim MUST be omitted if the Access Token authorizing the issuance call was obtained from a Pre-Authorized Code Flow through anonymous access to the Token Endpoint.

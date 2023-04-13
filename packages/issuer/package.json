@@ -14,8 +14,10 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@sphereon/openid4vci-client": "workspace:../client",
     "@types/jest": "^29.5.0",
-    "@types/uuid": "^9.0.1"
+    "@types/uuid": "^9.0.1",
+    "nock": "^13.2.9"
   },
   "engines": {
     "node": ">=16"
