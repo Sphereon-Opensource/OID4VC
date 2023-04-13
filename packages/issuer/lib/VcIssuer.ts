@@ -14,7 +14,6 @@ import {
   JWTVerifyCallback,
   KID_JWK_X5C_ERROR,
   NONCE_ERROR,
-  ProofType,
   TokenErrorResponse,
   TYP_ERROR,
   UNKNOWN_CLIENT_ERROR,
@@ -41,7 +40,7 @@ export class VcIssuer {
     this._stateManager = args.stateManager
     this._userPinRequired = args && args.userPinRequired ? args.userPinRequired : false
     this._issuerCallback = args?.callback
-    this._verifyCallback = args.verifyCallback
+    this._verifyCallback = args?.verifyCallback
   }
 
   public get credentialOfferStateManager(): ICredentialOfferStateManager {
@@ -79,16 +78,16 @@ export class VcIssuer {
   }
 
   private async validateJWT(issueCredentialRequest: CredentialRequest, jwtVerifyCallback?: JWTVerifyCallback): Promise<void> {
-    if (issueCredentialRequest.type === ProofType.JWT) {
+    if ((!Array.isArray(issueCredentialRequest.format) && issueCredentialRequest.format === 'jwt') || issueCredentialRequest.format === 'jwt_vc') {
       issueCredentialRequest.proof.jwt
 
-      if (!this._verifyCallback || !jwtVerifyCallback) {
+      if (!this._verifyCallback && !jwtVerifyCallback) {
         throw new Error(JWT_VERIFY_CONFIG_ERROR)
       }
 
       const { payload, header }: Jwt = jwtVerifyCallback
         ? await jwtVerifyCallback(issueCredentialRequest.proof)
-        : await this._verifyCallback(issueCredentialRequest.proof)
+        : await this._verifyCallback!(issueCredentialRequest.proof)
 
       const { typ, alg, kid, jwk, x5c } = header
       if (!typ || typ !== 'openid4vci-proof+jwt') {
@@ -97,7 +96,7 @@ export class VcIssuer {
       if (!alg || !(alg in Alg)) {
         throw new Error(ALG_ERROR)
       }
-      if ([kid, jwk, x5c].filter(Boolean).length === 1) {
+      if (!([kid, jwk, x5c].filter((x) => !!x).length === 1)) {
         throw new Error(KID_JWK_X5C_ERROR)
       }
 

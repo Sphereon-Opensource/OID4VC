@@ -22,8 +22,6 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { validateRequestBody } from './expressUtils'
 
-const key = fs.readFileSync(process.env.PRIVATE_KEY || path.join(__dirname, './privkey.pem'), 'utf-8')
-const cert = fs.readFileSync(process.env.x509_CERTIFICATE || path.join(__dirname, './chain.pem'), 'utf-8')
 const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90
 
 function buildVCIFromEnvironment() {
@@ -74,6 +72,8 @@ export class RestAPI {
 
   constructor(opts?: { metadata: IssuerMetadata; stateManager: ICredentialOfferStateManager; userPinRequired: boolean }) {
     dotenv.config()
+    const key = fs.readFileSync(process.env.PRIVATE_KEY || path.join(__dirname, './privkey.pem'), 'utf-8')
+    const cert = fs.readFileSync(process.env.x509_CERTIFICATE || path.join(__dirname, './chain.pem'), 'utf-8')
     // todo: we probably want to pass a dummy issuance callback function here
     this._vcIssuer = opts
       ? (this._vcIssuer = new VcIssuer(opts.metadata, {
@@ -118,7 +118,7 @@ export class RestAPI {
   }
   private registerCredentialRequestEndpoint() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    this.express.get('/credential-request', async (request: Request, _response: Response) => {
+    this.express.get('/credential', async (request: Request, _response: Response) => {
       if (!request.body) this._vcIssuer.issueCredentialFromIssueRequest(request.body.issueCredentialRequest, request.body.issuerState)
     })
   }

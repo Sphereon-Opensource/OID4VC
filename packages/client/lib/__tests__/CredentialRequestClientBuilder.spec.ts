@@ -1,6 +1,6 @@
 import { KeyObject } from 'crypto';
 
-import {Alg, CredentialRequest, IssuerMetadata, Jwt, JWTPayload, ProofOfPossession, Typ} from '@sphereon/openid4vci-common';
+import { Alg, CredentialRequest, IssuerMetadata, Jwt, JWTPayload, ProofOfPossession, Typ } from '@sphereon/openid4vci-common';
 import * as jose from 'jose';
 
 import { CredentialRequestClientBuilderV1_0_09, ProofOfPossessionBuilder } from '..';
@@ -44,8 +44,8 @@ interface KeyPair {
 }
 
 async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; kid?: string }): Promise<Jwt> {
-  const result = await jose.jwtVerify(args.jwt, keypair.publicKey)
-  return { header: result.protectedHeader, payload: (result.payload as unknown) as JWTPayload  }
+  const result = await jose.jwtVerify(args.jwt, keypair.publicKey);
+  return { header: result.protectedHeader, payload: result.payload as unknown as JWTPayload };
 }
 describe('Credential Request Client Builder', () => {
   it('should build correctly provided with correct params', function () {
