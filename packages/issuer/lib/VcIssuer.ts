@@ -14,7 +14,7 @@ import {
   JWTVerifyCallback,
   KID_JWK_X5C_ERROR,
   NONCE_ERROR,
-  TokenErrorResponse,
+  TokenErrorResponse, Typ,
   TYP_ERROR,
   UNKNOWN_CLIENT_ERROR,
 } from '@sphereon/openid4vci-common'
@@ -90,7 +90,7 @@ export class VcIssuer {
         : await this._verifyCallback!(issueCredentialRequest.proof)
 
       const { typ, alg, kid, jwk, x5c } = header
-      if (!typ || typ !== 'openid4vci-proof+jwt') {
+      if (!typ || typ !== Typ["OPENID4VCI-PROOF+JWT"]) {
         throw new Error(TYP_ERROR)
       }
       if (!alg || !(alg in Alg)) {

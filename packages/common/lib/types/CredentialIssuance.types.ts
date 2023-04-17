@@ -78,6 +78,9 @@ export enum Alg {
 
 export enum Typ {
   JWT = 'JWT',
+  // https://www.rfc-editor.org/rfc/rfc8725.pdf#name-use-explicit-typing
+  // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1-2.1.2.1.2.1.1
+  'OPENID4VCI-PROOF+JWT' = 'openid4vci-proof+jwt'
 }
 
 export interface JWTHeader {
