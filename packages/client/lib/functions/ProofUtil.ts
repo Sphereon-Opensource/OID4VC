@@ -1,4 +1,4 @@
-import { BAD_PARAMS, JWS_NOT_VALID, Jwt, JWTPayload, ProofOfPossession, ProofOfPossessionCallbacks, ProofType } from '@sphereon/openid4vci-common';
+import {BAD_PARAMS, JWS_NOT_VALID, Jwt, JWTPayload, ProofOfPossession, ProofOfPossessionCallbacks, ProofType, Typ} from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 import { JWTHeaderParameters } from 'jose';
 
@@ -87,7 +87,7 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   };
 
   const jwtHeader: JWTHeaderParameters = {
-    typ: 'openid4vci-proof+jwt',
+    typ: Typ.JWT,
     alg,
     kid,
   };
