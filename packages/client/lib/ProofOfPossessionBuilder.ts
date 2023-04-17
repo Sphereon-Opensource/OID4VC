@@ -22,7 +22,7 @@ export class ProofOfPossessionBuilder {
   private alg?: string;
   private jti?: string;
   private cNonce?: string;
-  private typ?: string
+  private typ?: string;
 
   private constructor({
     proof,

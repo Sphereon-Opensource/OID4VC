@@ -1,3 +1,6 @@
+import { KeyObject } from 'crypto'
+
+import { CredentialRequestClient, CredentialRequestClientBuilderV1_0_09, ProofOfPossessionBuilder } from '@sphereon/openid4vci-client'
 import {
   Alg,
   CredentialFormatEnum,
@@ -9,53 +12,52 @@ import {
   ProofOfPossession,
   Typ,
 } from '@sphereon/openid4vci-common'
-import {IProofPurpose, IProofType} from '@sphereon/ssi-types'
-
-import {VcIssuer} from '../VcIssuer'
-import {CredentialSupportedBuilderV1_11, VcIssuerBuilder} from '../builder'
-import {MemoryCredentialOfferStateManager} from '../state-manager/MemoryCredentialOfferStateManager'
-import {CredentialRequestClient, CredentialRequestClientBuilderV1_0_09, ProofOfPossessionBuilder} from "@sphereon/openid4vci-client";
-import {KeyObject} from "crypto";
+import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import * as jose from 'jose'
 
-const INITIATION_TEST_URI = 'openid-initiate-issuance://?credential_type=OpenBadgeCredential&issuer=https%3A%2F%2Fjff%2Ewalt%2Eid%2Fissuer-api%2Foidc%2F&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
-const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io';
-const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1';
+import { VcIssuer } from '../VcIssuer'
+import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../builder'
+import { MemoryCredentialOfferStateManager } from '../state-manager/MemoryCredentialOfferStateManager'
 
-let keypair: KeyPair;
+const INITIATION_TEST_URI =
+  'openid-initiate-issuance://?credential_type=OpenBadgeCredential&issuer=https%3A%2F%2Fjff%2Ewalt%2Eid%2Fissuer-api%2Foidc%2F&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false'
+const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
+const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
+
+let keypair: KeyPair
 
 async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promise<string> {
   if (!args.payload.aud) {
-    throw Error('aud required');
+    throw Error('aud required')
   } else if (!kid) {
-    throw Error('kid required');
+    throw Error('kid required')
   }
   return await new jose.SignJWT({ ...args.payload })
-  .setProtectedHeader({ ...args.header })
-  .setIssuedAt(+new Date())
-  .setIssuer(kid)
-  .setAudience(args.payload.aud)
-  .setExpirationTime('2h')
-  .sign(keypair.privateKey);
+    .setProtectedHeader({ ...args.header })
+    .setIssuedAt(+new Date())
+    .setIssuer(kid)
+    .setAudience(args.payload.aud)
+    .setExpirationTime('2h')
+    .sign(keypair.privateKey)
 }
 
-async function verifyCallbackFunction(args: { jwt: string, kid?: string }):Promise<Jwt> {
+async function verifyCallbackFunction(args: { jwt: string; kid?: string }): Promise<Jwt> {
   const result = await jose.jwtVerify(args.jwt, keypair.publicKey)
   return {
     header: result.protectedHeader,
-    payload: result.payload
+    payload: result.payload,
   } as Jwt
 }
 
 interface KeyPair {
-  publicKey: KeyObject;
-  privateKey: KeyObject;
+  publicKey: KeyObject
+  privateKey: KeyObject
 }
 
 beforeAll(async () => {
-  const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
-  keypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject };
-});
+  const { privateKey, publicKey } = await jose.generateKeyPair('ES256')
+  keypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject }
+})
 
 describe('VcIssuer', () => {
   let vcIssuer: VcIssuer
@@ -183,64 +185,59 @@ describe('VcIssuer', () => {
   it('Should pass requesting a credential using the client', async () => {
     //FIXME Use the same Enum to match format. It's actually using CredentialFormat and CredentialFormatEnum
     const credReqClient = CredentialRequestClientBuilderV1_0_09.fromURI({ uri: INITIATION_TEST_URI })
-    .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-    .withFormat('jwt_vc_json')
-    .withCredentialType('credentialType')
-    .withToken('token')
+      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
+      .withFormat('jwt_vc_json')
+      .withCredentialType('credentialType')
+      .withToken('token')
 
     const jwt: Jwt = {
-      header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ["OPENID4VCI-PROOF+JWT"] },
+      header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ['OPENID4VCI-PROOF+JWT'] },
       payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
-    };
+    }
 
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt,
       callbacks: {
-        signCallback: proofOfPossessionCallbackFunction
+        signCallback: proofOfPossessionCallbackFunction,
       },
     })
-    .withClientId('sphereon:wallet')
-    .withKid(kid)
-    .build();
+      .withClientId('sphereon:wallet')
+      .withKid(kid)
+      .build()
 
     const credentialRequestClient = new CredentialRequestClient(credReqClient)
     const credentialRequest = await credentialRequestClient.createCredentialRequest({
       credentialType: ['VerifiableCredential'],
-      format: "jwt_vc_json",
-      proofInput: proof
+      format: 'jwt_vc_json',
+      proofInput: proof,
     })
     expect(credentialRequest).toEqual({
-      "format": "jwt_vc_json",
-      "proof": {
-        "jwt": expect.stringContaining("eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwibm9uY2UiOiJ0WmlnbnNuRmJwIiwianRpIjoidFppZ25zbkZicDIyMyIsImF1ZCI6Imh0dHBzOi8vaXNzdWVyLnJlc2VhcmNoLmlkZW50aXByb29mLmlvIiwiaWF0IjoxNjgxNz"),
-        "proof_type": "jwt"
+      format: 'jwt_vc_json',
+      proof: {
+        jwt: expect.stringContaining(
+          'eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwibm9uY2UiOiJ0WmlnbnNuRmJwIiwianRpIjoidFppZ25zbkZicDIyMyIsImF1ZCI6Imh0dHBzOi8vaXNzdWVyLnJlc2VhcmNoLmlkZW50aXByb29mLmlvIiwiaWF0IjoxNjgxNz'
+        ),
+        proof_type: 'jwt',
       },
-      "type": [
-        "VerifiableCredential"
-      ]
+      type: ['VerifiableCredential'],
     })
 
-    await expect(vcIssuer.issueCredentialFromIssueRequest(credentialRequest, 'existing-client')).resolves.toEqual(
-    {
-      "credential": {
-      "@context": [
-        "https://www.w3.org/2018/credentials/v1"
-      ],
-          "credentialSubject": {},
-      "issuanceDate": expect.any(String),
-          "issuer": "did:key:test",
-          "proof": {
-        "created": expect.any(String),
-            "jwt": "ye.ye.ye",
-            "proofPurpose": "assertionMethod",
-            "type": "JwtProof2020",
-            "verificationMethod": "sdfsdfasdfasdfasdfasdfassdfasdf"
+    await expect(vcIssuer.issueCredentialFromIssueRequest(credentialRequest, 'existing-client')).resolves.toEqual({
+      credential: {
+        '@context': ['https://www.w3.org/2018/credentials/v1'],
+        credentialSubject: {},
+        issuanceDate: expect.any(String),
+        issuer: 'did:key:test',
+        proof: {
+          created: expect.any(String),
+          jwt: 'ye.ye.ye',
+          proofPurpose: 'assertionMethod',
+          type: 'JwtProof2020',
+          verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
+        },
+        type: ['VerifiableCredential'],
       },
-      "type": [
-        "VerifiableCredential"
-      ]
-    },
-      "format": "jwt_vc_json"
+      format: 'jwt_vc_json',
     })
   })
 })
