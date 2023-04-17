@@ -212,7 +212,7 @@ describe('VcIssuer', () => {
     expect(credentialRequest).toEqual({
       "format": "jwt_vc_json",
       "proof": {
-        "jwt": expect.stringContaining("eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEiLCJ0eXAiOiJvcGVuaWQ0dmNpLXByb29mK2p3dCJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwibm9uY2UiOiJ0WmlnbnNuRmJwIiwianRpIjoidFppZ25zbkZicDIyMyIsImF1ZCI6Imh0dHBzOi8vaXNzdWVyLnJlc2VhcmNoLmlkZW50aXByb29mLmlvIiwiaWF0IjoxNjgxNz"),
+        "jwt": expect.stringContaining("eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwibm9uY2UiOiJ0WmlnbnNuRmJwIiwianRpIjoidFppZ25zbkZicDIyMyIsImF1ZCI6Imh0dHBzOi8vaXNzdWVyLnJlc2VhcmNoLmlkZW50aXByb29mLmlvIiwiaWF0IjoxNjgxNz"),
         "proof_type": "jwt"
       },
       "type": [

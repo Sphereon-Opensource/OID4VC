@@ -59,6 +59,7 @@ const partiallyValidateJWS = (jws: string): void => {
 };
 
 export interface JwtProps {
+  typ?: string;
   kid?: string;
   issuer?: string;
   clientId?: string;
