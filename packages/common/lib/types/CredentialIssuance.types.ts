@@ -14,6 +14,9 @@ export interface CredentialRequest {
 export interface CredentialResponse {
   credential: W3CVerifiableCredential;
   format: CredentialFormat | CredentialFormat[];
+  acceptance_token?: string;
+  c_nonce?: string;
+  c_nonce_expires_in?: number;
 }
 
 export interface CredentialOfferRequestWithBaseUrl {

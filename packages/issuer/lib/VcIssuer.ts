@@ -7,12 +7,16 @@ import {
   TokenErrorResponse,
 } from '@sphereon/openid4vci-common'
 import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import {v4} from "uuid";
+import * as process from "process";
 
 export class VcIssuer {
   _issuerMetadata: IssuerMetadata
   _userPinRequired?: boolean
   _issuerCallback?: CredentialIssuerCallback
   private readonly _stateManager: ICredentialOfferStateManager
+  private readonly _cNonce: string[] = []
+  private readonly _cNonceExpiresIn: number = (parseInt(process.env.C_NONCE_EXPIRES_IN as string) * 1000) || 90 * 1000
 
   constructor(
     issuerMetadata: IssuerMetadata,
@@ -43,9 +47,19 @@ export class VcIssuer {
   ): Promise<CredentialResponse> {
     //TODO: do we want additional validations here?
     if (this.isMetadataSupportCredentialRequestFormat(issueCredentialRequest.format)) {
+      const cNonce = v4()
+      this._cNonce.push(cNonce)
+      setTimeout(() => {
+        const index = this._cNonce.indexOf(cNonce)
+        if (index !== -1) {
+          this._cNonce.splice(index, 1)
+        }
+      }, this._cNonceExpiresIn)
       return {
         credential: await this.issueCredential({ credentialRequest: issueCredentialRequest }, issuerCallback),
         format: issueCredentialRequest.format,
+        c_nonce: cNonce,
+        c_nonce_expires_in: this._cNonceExpiresIn
       }
     }
     throw new Error(TokenErrorResponse.invalid_request)
