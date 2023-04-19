@@ -15,3 +15,8 @@ export const NONCE_ERROR = 'nonce must be c_nonce provided by the credential iss
 export const JWT_VERIFY_CONFIG_ERROR = 'JWT verify callback not configured correctly.';
 export const ISSUER_CONFIG_ERROR = 'Issuer not configured correctly.';
 export const UNKNOWN_CLIENT_ERROR = 'The client is not known by the issuer';
+export const ISS_MISSING_IN_NON_PRE_AUTHORIZED_CONTEXT = 'iss missing in non-pre-authorized context';
+
+export const NO_ISS_IN_PRE_AUTHORIZED_CONTEXT = 'iss should be omitted in pre-authorized context';
+
+export const ISS_MUST_BE_CLIENT_ID = 'iss must be the client id';

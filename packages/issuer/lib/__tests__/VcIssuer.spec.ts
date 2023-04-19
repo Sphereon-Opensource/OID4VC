@@ -215,7 +215,7 @@ describe('VcIssuer', () => {
       format: 'jwt_vc_json',
       proof: {
         jwt: expect.stringContaining(
-          'eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwibm9uY2UiOiJ0WmlnbnNuRmJwIiwianRpIjoidFppZ25zbkZicDIyMyIsImF1ZCI6Imh0dHBzOi8vaXNzdWVyLnJlc2VhcmNoLmlkZW50aXByb29mLmlvIiwiaWF0IjoxNjgxNz'
+          'eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEva2V5cy8xIiwibm9uY2UiOiJ0WmlnbnNuRmJwIiwianRpIjoidFppZ25zbkZicDIyMyIsImF1ZCI6Imh0dHBzOi8vaXNzdWVyLnJlc2VhcmNoLmlkZW50aXByb29mLmlvIiwiaWF0IjoxNjgx'
         ),
         proof_type: 'jwt',
       },

@@ -6,13 +6,13 @@ import {
   CredentialRequest,
   CredentialResponse,
   IAT_ERROR,
-  ICredentialOfferStateManager,
+  ICredentialOfferStateManager, ISS_MISSING_IN_NON_PRE_AUTHORIZED_CONTEXT, ISS_MUST_BE_CLIENT_ID,
   ISSUER_CONFIG_ERROR,
   IssuerMetadata,
   Jwt,
   JWT_VERIFY_CONFIG_ERROR,
   JWTVerifyCallback,
-  KID_JWK_X5C_ERROR,
+  KID_JWK_X5C_ERROR, NO_ISS_IN_PRE_AUTHORIZED_CONTEXT,
   NONCE_ERROR,
   TokenErrorResponse,
   Typ,
@@ -55,6 +55,8 @@ export class VcIssuer {
   /**
    * issueCredentialFromIssueRequest
    * @param issueCredentialRequest a credential issuance request
+   * @param preAuthorizedCode the pre-authorized code
+   * @param clientId the id from the client making the request
    * @param jwtVerifyCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
    * @param issuerCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
    * @param issuerState the state of the issuer
@@ -62,6 +64,8 @@ export class VcIssuer {
   public async issueCredentialFromIssueRequest(
     issueCredentialRequest: CredentialRequest,
     issuerState: string,
+    preAuthorizedCode?: string,
+    clientId?: string,
     jwtVerifyCallback?: JWTVerifyCallback,
     issuerCallback?: CredentialIssuerCallback
   ): Promise<CredentialResponse> {
@@ -78,7 +82,7 @@ export class VcIssuer {
     throw new Error(TokenErrorResponse.invalid_request)
   }
 
-  private async validateJWT(issueCredentialRequest: CredentialRequest, jwtVerifyCallback?: JWTVerifyCallback): Promise<void> {
+  private async validateJWT(issueCredentialRequest: CredentialRequest, jwtVerifyCallback?: JWTVerifyCallback, clientId?: string, preAuthorizedCode?: string): Promise<void> {
     if ((!Array.isArray(issueCredentialRequest.format) && issueCredentialRequest.format === 'jwt') || issueCredentialRequest.format === 'jwt_vc') {
       issueCredentialRequest.proof.jwt
 
@@ -102,10 +106,19 @@ export class VcIssuer {
         throw new Error(KID_JWK_X5C_ERROR)
       }
 
-      const { aud, iat, nonce } = payload
-      // I couldn't find a way to get the client_id, neither the grant type at this point, so I will not validate iss since it's optional
+      const { iss, aud, iat, nonce } = payload
       // iss: OPTIONAL (string). The value of this claim MUST be the client_id of the client making the credential request.
       // This claim MUST be omitted if the Access Token authorizing the issuance call was obtained from a Pre-Authorized Code Flow through anonymous access to the Token Endpoint.
+      // TODO We need an introspection endpoint in case the AS and RS are separated
+      if (!iss && !preAuthorizedCode) {
+        throw new Error(ISS_MISSING_IN_NON_PRE_AUTHORIZED_CONTEXT)
+      }
+      if (iss && preAuthorizedCode) {
+        throw new Error(NO_ISS_IN_PRE_AUTHORIZED_CONTEXT)
+      }
+      if (iss && iss !== clientId) {
+        throw new Error(ISS_MUST_BE_CLIENT_ID)
+      }
       if (!aud || aud !== this._issuerMetadata.credential_issuer) {
         throw new Error(AUD_ERROR)
       }
