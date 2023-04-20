@@ -138,7 +138,6 @@ export class VcIssuer {
       const { iss, aud, iat, nonce } = payload
       // iss: OPTIONAL (string). The value of this claim MUST be the client_id of the client making the credential request.
       // This claim MUST be omitted if the Access Token authorizing the issuance call was obtained from a Pre-Authorized Code Flow through anonymous access to the Token Endpoint.
-      // TODO We need an introspection endpoint in case the AS and RS are separated
       if (!iss && grants.authorization_code) {
         throw new Error(NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT)
       }
