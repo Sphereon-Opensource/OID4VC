@@ -18,4 +18,3 @@ export const NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT = 'iss missing in authorizatio
 export const ISS_PRESENT_IN_PRE_AUTHORIZED_CODE_CONTEXT = 'iss should be omitted in pre-authorized-code context';
 export const ISS_MUST_BE_CLIENT_ID = 'iss must be the client id';
 export const GRANTS_MUST_NOT_BE_UNDEFINED = 'Grants must not be undefined';
-export const UNDEFINED_CLIENT_ID = 'Client id must not be undefined';

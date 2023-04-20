@@ -84,13 +84,10 @@ export class VcIssuer {
     throw new Error(TokenErrorResponse.invalid_request)
   }
 
-  private async retrieveGrantsFromClient(issuerState: string): Promise<{ clientId: string; grants: Grant }> {
+  private async retrieveGrantsFromClient(issuerState: string): Promise<{ clientId?: string; grants?: Grant }> {
     const credentialOfferState: CredentialOfferState | undefined = await this._stateManager.getAssertedState(issuerState)
     const clientId = credentialOfferState?.clientId
     const grants = credentialOfferState?.credentialOffer?.grants
-    if (!clientId) {
-      throw new Error(UNDEFINED_CLIENT_ID)
-    }
     if (!grants?.authorization_code?.issuer_state || !grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']) {
       throw new Error(GRANTS_MUST_NOT_BE_UNDEFINED)
     }
@@ -99,8 +96,8 @@ export class VcIssuer {
 
   private async validateJWT(
     issueCredentialRequest: CredentialRequest,
-    grants: Grant,
-    clientId: string,
+    grants?: Grant,
+    clientId?: string,
     jwtVerifyCallback?: JWTVerifyCallback
   ): Promise<void> {
     if ((!Array.isArray(issueCredentialRequest.format) && issueCredentialRequest.format === 'jwt') || issueCredentialRequest.format === 'jwt_vc') {
@@ -129,10 +126,10 @@ export class VcIssuer {
       const { iss, aud, iat, nonce } = payload
       // iss: OPTIONAL (string). The value of this claim MUST be the client_id of the client making the credential request.
       // This claim MUST be omitted if the Access Token authorizing the issuance call was obtained from a Pre-Authorized Code Flow through anonymous access to the Token Endpoint.
-      if (!iss && grants.authorization_code) {
+      if ((!iss && grants?.authorization_code)) {
         throw new Error(NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT)
       }
-      if (iss && grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
+      if (iss && grants && grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
         throw new Error(ISS_PRESENT_IN_PRE_AUTHORIZED_CODE_CONTEXT)
       }
       if (iss && iss !== clientId) {
