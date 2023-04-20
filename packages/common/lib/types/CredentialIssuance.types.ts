@@ -51,19 +51,24 @@ export type DecodeURIAsJsonOpts = {
   arrayTypeProperties?: string[];
 };
 
-export interface JWK {
-  alg?: string;
+export interface BaseJWK {
+  kty?: string;
   crv?: string;
+  x?: string;
+  y?: string;
+  e?: string;
+  n?: string;
+}
+
+export interface JWK extends BaseJWK {
+  alg?: string;
   d?: string;
   dp?: string;
   dq?: string;
-  e?: string;
   ext?: boolean;
   k?: string;
   key_ops?: string[];
   kid?: string;
-  kty?: string;
-  n?: string;
   oth?: Array<{
     d?: string;
     r?: string;
@@ -73,8 +78,6 @@ export interface JWK {
   q?: string;
   qi?: string;
   use?: string;
-  x?: string;
-  y?: string;
   x5c?: string[];
   x5t?: string;
   'x5t#S256'?: string;
@@ -111,7 +114,7 @@ export interface JoseHeaderParameters {
   x5c?: string[]; // CONDITIONAL. JWT header containing a certificate or certificate chain corresponding to the key used to sign the JWT. This element may be used to convey a key attestation. In such a case, the actual key certificate will contain attributes related to the key properties. MUST NOT be present if kid or jwk is present.
   x5u?: string;
   jku?: string;
-  jwk?: Pick<JWK, 'kty' | 'crv' | 'x' | 'y' | 'e' | 'n'>; // CONDITIONAL. JWT header containing the key material the new Credential shall be bound to. MUST NOT be present if kid or x5c is present.
+  jwk?: BaseJWK; // CONDITIONAL. JWT header containing the key material the new Credential shall be bound to. MUST NOT be present if kid or x5c is present.
   typ?: string; //JWT always
   cty?: string;
 }
