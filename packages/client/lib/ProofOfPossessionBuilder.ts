@@ -22,6 +22,7 @@ export class ProofOfPossessionBuilder {
   private alg?: string;
   private jti?: string;
   private cNonce?: string;
+  private typ?: string;
 
   private constructor({
     proof,
@@ -87,6 +88,11 @@ export class ProofOfPossessionBuilder {
     return this;
   }
 
+  withTyp(typ: string): ProofOfPossessionBuilder {
+    this.typ = typ;
+    return this;
+  }
+
   withAccessTokenNonce(cNonce: string): ProofOfPossessionBuilder {
     this.cNonce = cNonce;
     return this;
@@ -113,6 +119,9 @@ export class ProofOfPossessionBuilder {
       if (jwt.header.kid) {
         this.withKid(jwt.header.kid);
       }
+      if (jwt.header.typ) {
+        this.withTyp(jwt.header.typ);
+      }
       this.withAlg(jwt.header.alg);
     }
     if (jwt.payload) {
@@ -131,6 +140,7 @@ export class ProofOfPossessionBuilder {
       return await createProofOfPossession(
         this.callbacks,
         {
+          typ: this.typ,
           kid: this.kid,
           jti: this.jti,
           alg: this.alg,

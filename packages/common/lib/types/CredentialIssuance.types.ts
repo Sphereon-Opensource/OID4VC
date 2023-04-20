@@ -51,13 +51,38 @@ export type DecodeURIAsJsonOpts = {
   arrayTypeProperties?: string[];
 };
 
-export interface JWK {
+export interface BaseJWK {
   kty?: string;
   crv?: string;
   x?: string;
   y?: string;
   e?: string;
   n?: string;
+}
+
+export interface JWK extends BaseJWK {
+  alg?: string;
+  d?: string;
+  dp?: string;
+  dq?: string;
+  ext?: boolean;
+  k?: string;
+  key_ops?: string[];
+  kid?: string;
+  oth?: Array<{
+    d?: string;
+    r?: string;
+    t?: string;
+  }>;
+  p?: string;
+  q?: string;
+  qi?: string;
+  use?: string;
+  x5c?: string[];
+  x5t?: string;
+  'x5t#S256'?: string;
+  x5u?: string;
+  [propName: string]: unknown;
 }
 
 export interface Jwt {
@@ -78,15 +103,38 @@ export enum Alg {
 
 export enum Typ {
   JWT = 'JWT',
+  // https://www.rfc-editor.org/rfc/rfc8725.pdf#name-use-explicit-typing
+  // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1-2.1.2.1.2.1.1
+  'OPENID4VCI-PROOF+JWT' = 'openid4vci-proof+jwt',
 }
 
-export interface JWTHeader {
-  alg: Alg | string; // REQUIRED by the JWT signer
-  typ?: string; //JWT always
+export interface JoseHeaderParameters {
   kid?: string; // CONDITIONAL. JWT header containing the key ID. If the Credential shall be bound to a DID, the kid refers to a DID URL which identifies a particular key in the DID Document that the Credential shall be bound to. MUST NOT be present if jwk or x5c is present.
-  jwk?: JWK; // CONDITIONAL. JWT header containing the key material the new Credential shall be bound to. MUST NOT be present if kid or x5c is present.
+  x5t?: string;
   x5c?: string[]; // CONDITIONAL. JWT header containing a certificate or certificate chain corresponding to the key used to sign the JWT. This element may be used to convey a key attestation. In such a case, the actual key certificate will contain attributes related to the key properties. MUST NOT be present if kid or jwk is present.
+  x5u?: string;
+  jku?: string;
+  jwk?: BaseJWK; // CONDITIONAL. JWT header containing the key material the new Credential shall be bound to. MUST NOT be present if kid or x5c is present.
+  typ?: string; //JWT always
+  cty?: string;
 }
+
+export interface JWSHeaderParameters extends JoseHeaderParameters {
+  alg?: Alg | string; // REQUIRED by the JWT signer
+  b64?: boolean;
+  crit?: string[];
+  [propName: string]: unknown;
+}
+
+export interface CompactJWSHeaderParameters extends JWSHeaderParameters {
+  alg: string;
+}
+
+export interface JWTHeaderParameters extends CompactJWSHeaderParameters {
+  b64?: true;
+}
+
+export type JWTHeader = JWTHeaderParameters;
 
 export interface JWTPayload {
   iss?: string; // REQUIRED (string). The value of this claim MUST be the client_id of the client making the credential request.
@@ -98,7 +146,7 @@ export interface JWTPayload {
 }
 
 export type JWTSignerCallback = (jwt: Jwt, kid?: string) => Promise<string>;
-export type JWTVerifyCallback = (args: { jwt: string; kid?: string }) => Promise<void>;
+export type JWTVerifyCallback = (args: { jwt: string; kid?: string }) => Promise<Jwt>;
 
 export type Request = CredentialRequest;
 
