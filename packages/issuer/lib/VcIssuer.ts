@@ -23,9 +23,8 @@ import {
   TokenErrorResponse,
   Typ,
   TYP_ERROR,
-  UNDEFINED_CLIENT_ID,
 } from '@sphereon/openid4vci-common'
-import {ICredential, W3CVerifiableCredential} from '@sphereon/ssi-types'
+import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 export class VcIssuer {
   _issuerMetadata: IssuerMetadata
@@ -61,11 +60,9 @@ export class VcIssuer {
   /**
    * issueCredentialFromIssueRequest
    * @param issueCredentialRequest a credential issuance request
-   * @param state the state to be passed to the state manager
-   * @param clientId the id from the client making the request
+   * @param issuerState the key to retrieve the credential offer state
    * @param jwtVerifyCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
    * @param issuerCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
-   * @param issuerState the state of the issuer
    */
   public async issueCredentialFromIssueRequest(
     issueCredentialRequest: CredentialRequest,
@@ -126,7 +123,7 @@ export class VcIssuer {
       const { iss, aud, iat, nonce } = payload
       // iss: OPTIONAL (string). The value of this claim MUST be the client_id of the client making the credential request.
       // This claim MUST be omitted if the Access Token authorizing the issuance call was obtained from a Pre-Authorized Code Flow through anonymous access to the Token Endpoint.
-      if ((!iss && grants?.authorization_code)) {
+      if (!iss && grants?.authorization_code) {
         throw new Error(NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT)
       }
       if (iss && grants && grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {

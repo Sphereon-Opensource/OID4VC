@@ -19,5 +19,5 @@ export interface ICredentialOfferStateManager {
 
   clearAllStates(): Promise<void>; // clears all states
 
-  getAssertedState(issuerState: string): Promise<CredentialOfferState | undefined>
+  getAssertedState(issuerState: string): Promise<CredentialOfferState | undefined>;
 }

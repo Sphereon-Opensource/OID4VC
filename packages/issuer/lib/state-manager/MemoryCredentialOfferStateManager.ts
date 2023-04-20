@@ -1,4 +1,4 @@
-import {CredentialOfferState, ICredentialOfferStateManager, UNKNOWN_CLIENT_ERROR} from '@sphereon/openid4vci-common'
+import { CredentialOfferState, ICredentialOfferStateManager, UNKNOWN_CLIENT_ERROR } from '@sphereon/openid4vci-common'
 
 export class MemoryCredentialOfferStateManager implements ICredentialOfferStateManager {
   private readonly credentialOfferStateManager: Map<string, CredentialOfferState>
