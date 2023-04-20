@@ -30,7 +30,10 @@ export class MetadataClient {
    * @param request
    */
   public static async retrieveAllMetadataFromCredentialOfferRequest(request: CredentialOfferPayload): Promise<EndpointMetadata> {
-    return MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(request));
+    if (getIssuerFromCredentialOfferPayload(request)) {
+      return MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(request) as string);
+    }
+    throw new Error("can't retrieve metadata from CredentialOfferRequest. No issuer field is present");
   }
 
   /**

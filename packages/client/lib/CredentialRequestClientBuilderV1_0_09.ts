@@ -36,7 +36,9 @@ export class CredentialRequestClientBuilderV1_0_09 {
     metadata?: EndpointMetadata;
   }): CredentialRequestClientBuilderV1_0_09 {
     const builder = new CredentialRequestClientBuilderV1_0_09();
-    const issuer = getIssuerFromCredentialOfferPayload(request);
+    const issuer = getIssuerFromCredentialOfferPayload(request)
+      ? (getIssuerFromCredentialOfferPayload(request) as string)
+      : (metadata?.issuer as string);
     builder.withCredentialEndpoint(
       metadata?.credential_endpoint ? metadata.credential_endpoint : issuer.endsWith('/') ? `${issuer}credential` : `${issuer}/credential`
     );
