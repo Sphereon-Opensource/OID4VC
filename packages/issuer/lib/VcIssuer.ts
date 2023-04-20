@@ -1,3 +1,5 @@
+import * as process from 'process'
+
 import {
   CredentialIssuerCallback,
   CredentialRequest,
@@ -6,9 +8,8 @@ import {
   IssuerMetadata,
   TokenErrorResponse,
 } from '@sphereon/openid4vci-common'
-import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
-import {v4} from "uuid";
-import * as process from "process";
+import {ICredential, W3CVerifiableCredential} from '@sphereon/ssi-types'
+import {v4} from 'uuid'
 
 export class VcIssuer {
   _issuerMetadata: IssuerMetadata
@@ -16,7 +17,7 @@ export class VcIssuer {
   _issuerCallback?: CredentialIssuerCallback
   private readonly _stateManager: ICredentialOfferStateManager
   private readonly _cNonce: string[] = []
-  private readonly _cNonceExpiresIn: number = (parseInt(process.env.C_NONCE_EXPIRES_IN as string) * 1000) || 90 * 1000
+  private readonly _cNonceExpiresIn: number = parseInt(process.env.C_NONCE_EXPIRES_IN as string) * 1000 || 90 * 1000
 
   constructor(
     issuerMetadata: IssuerMetadata,
@@ -59,7 +60,7 @@ export class VcIssuer {
         credential: await this.issueCredential({ credentialRequest: issueCredentialRequest }, issuerCallback),
         format: issueCredentialRequest.format,
         c_nonce: cNonce,
-        c_nonce_expires_in: this._cNonceExpiresIn
+        c_nonce_expires_in: this._cNonceExpiresIn,
       }
     }
     throw new Error(TokenErrorResponse.invalid_request)
