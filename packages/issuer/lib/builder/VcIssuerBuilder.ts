@@ -4,6 +4,7 @@ import {
   Display,
   ICredentialOfferStateManager,
   IssuerMetadata,
+  JWTVerifyCallback,
   TokenErrorResponse,
 } from '@sphereon/openid4vci-common'
 
@@ -21,6 +22,7 @@ export class VcIssuerBuilder {
   userPinRequired?: boolean
   credentialOfferStateManager?: ICredentialOfferStateManager
   issuerCallback?: CredentialIssuerCallback
+  verifyCallback?: JWTVerifyCallback
 
   public withCredentialIssuer(issuer: string): VcIssuerBuilder {
     this.credentialIssuer = issuer
@@ -93,6 +95,11 @@ export class VcIssuerBuilder {
     return this
   }
 
+  withJWTVerifyCallback(verifyCallback: JWTVerifyCallback): VcIssuerBuilder {
+    this.verifyCallback = verifyCallback
+    return this
+  }
+
   public build(): VcIssuer {
     if (!this.credentialEndpoint || !this.credentialIssuer || !this.credentialsSupported) {
       throw new Error(TokenErrorResponse.invalid_request)
@@ -123,6 +130,7 @@ export class VcIssuerBuilder {
     return new VcIssuer(metadata, {
       userPinRequired: this.userPinRequired,
       callback: this.issuerCallback,
+      verifyCallback: this.verifyCallback,
       stateManager: this.credentialOfferStateManager,
     })
   }

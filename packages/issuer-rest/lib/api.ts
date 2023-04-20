@@ -1,11 +1,6 @@
-import * as fs from 'fs'
-import https from 'https'
-import * as path from 'path'
-
 import {
-  AuthorizationRequest,
+  AuthorizationRequestV1_0_09,
   CredentialFormatEnum,
-  CredentialRequest,
   CredentialSupported,
   Display,
   ICredentialOfferStateManager,
@@ -23,8 +18,6 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { validateRequestBody } from './expressUtils'
 
-const key = fs.readFileSync(process.env.PRIVATE_KEY || path.join(__dirname, './privkey.pem'), 'utf-8')
-const cert = fs.readFileSync(process.env.x509_CERTIFICATE || path.join(__dirname, './chain.pem'), 'utf-8')
 const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90
 
 function buildVCIFromEnvironment() {
@@ -71,7 +64,7 @@ export class RestAPI {
   private _vcIssuer: VcIssuer
   //fixme: use this map for now as an internal mechanism for preAuthorizedCode to ids
   private tokenToId: Map<string, string> = new Map()
-  private authRequestsData: Map<string, AuthorizationRequest> = new Map()
+  private authRequestsData: Map<string, AuthorizationRequestV1_0_09> = new Map()
 
   constructor(opts?: { metadata: IssuerMetadata; stateManager: ICredentialOfferStateManager; userPinRequired: boolean }) {
     dotenv.config()
@@ -83,7 +76,7 @@ export class RestAPI {
         }))
       : buildVCIFromEnvironment()
     this.express = express()
-    const port = process.env.PORT || 3443
+    const port = process.env.PORT || 3000
     const secret = process.env.COOKIE_SIGNING_KEY
 
     this.express.use(cors())
@@ -96,10 +89,7 @@ export class RestAPI {
     this.registerTokenRequestEndpoint()
     this.registerCredentialRequestEndpoint()
     this.registerCredentialOfferEndpoint()
-    const credentials = { key, cert }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const httpsServer = https.createServer(credentials, this.express as any)
-    httpsServer.listen(port as number, '0.0.0.0', () => console.log(`HTTPS server listening on port ${port}`))
+    this.express.listen(port, () => console.log(`HTTPS server listening on port ${port}`))
   }
 
   private static sendErrorResponse(response: Response, statusCode: number, message: string) {
@@ -108,24 +98,25 @@ export class RestAPI {
   }
 
   private registerMetadataEndpoint() {
-    this.express.get('/metadata', (request, response) => {
+    this.express.get('/metadata', (request: Request, response: Response) => {
       return response.send(this._vcIssuer._issuerMetadata)
     })
   }
   private registerTokenRequestEndpoint() {
-    this.express.post('/token', (request, response) => {
+    this.express.post('/token', (request: Request, response: Response) => {
       return RestAPI.sendErrorResponse(response, 501, 'Not implemented')
     })
   }
   private registerCredentialRequestEndpoint() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    this.express.get('/credential-request', async (request, _response) => {
-      this._vcIssuer.issueCredentialFromIssueRequest(request as unknown as CredentialRequest)
+    this.express.get('/credential', async (request: Request, _response: Response) => {
+      if (!request.body)
+        this._vcIssuer.issueCredentialFromIssueRequest(request.body.issueCredentialRequest, request.body.issuerState, request.body.clientId)
     })
   }
 
   private registerCredentialOfferEndpoint() {
-    this.express.get('/credential-offer/:pre_authorized_code', async (request, response) => {
+    this.express.get('/credential-offer/:pre_authorized_code', async (request: Request, response: Response) => {
       const preAuthorizedCode = request.params.pre_authorized_code
       const id = uuidv4()
       this.tokenToId.set(preAuthorizedCode, id)

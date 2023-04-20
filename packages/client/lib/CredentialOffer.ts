@@ -5,9 +5,10 @@ import {
   CredentialOfferRequestWithBaseUrl,
   OpenId4VCIVersion,
 } from '@sphereon/openid4vci-common';
+import { determineSpecVersionFromURI } from '@sphereon/openid4vci-common';
 import Debug from 'debug';
 
-import { convertJsonToURI, convertURIToJsonObject, determineSpecVersionFromURI } from './functions';
+import { convertJsonToURI, convertURIToJsonObject } from './functions';
 
 const debug = Debug('sphereon:openid4vci:initiation');
 

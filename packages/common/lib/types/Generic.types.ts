@@ -43,6 +43,7 @@ export interface IssuerMetadata {
 }
 
 export interface CredentialSupportedBrief {
+  name?: string;
   types: string[]; // REQUIRED. JSON array designating the types a certain credential type supports
   cryptographic_binding_methods_supported?: string[]; // OPTIONAL. Array of case sensitive strings that identify how the Credential is bound to the identifier of the End-User who possesses the Credential
   cryptographic_suites_supported?: string[]; // OPTIONAL. Array of case sensitive strings that identify the cryptographic suites that are supported for the cryptographic_binding_methods_supported
