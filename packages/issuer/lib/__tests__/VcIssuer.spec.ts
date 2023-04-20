@@ -171,6 +171,8 @@ describe('VcIssuer', () => {
         state
       )
     ).resolves.toEqual({
+      c_nonce: expect.any(String),
+      c_nonce_expires_in: 90000,
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         credentialSubject: {},
@@ -230,6 +232,8 @@ describe('VcIssuer', () => {
     })
 
     await expect(vcIssuer.issueCredentialFromIssueRequest(credentialRequest, state)).resolves.toEqual({
+      c_nonce: expect.any(String),
+      c_nonce_expires_in: 90000,
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         credentialSubject: {},
