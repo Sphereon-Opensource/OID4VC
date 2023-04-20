@@ -18,4 +18,6 @@ export interface ICredentialOfferStateManager {
   clearExpiredStates(timestamp?: number): Promise<void>; // clears all expired states compared against timestamp if provided, otherwise current timestamp
 
   clearAllStates(): Promise<void>; // clears all states
+
+  getAssertedState(issuerState: string): Promise<CredentialOfferState | undefined>
 }

@@ -24,9 +24,8 @@ import {
   Typ,
   TYP_ERROR,
   UNDEFINED_CLIENT_ID,
-  UNKNOWN_CLIENT_ERROR,
 } from '@sphereon/openid4vci-common'
-import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import {ICredential, W3CVerifiableCredential} from '@sphereon/ssi-types'
 
 export class VcIssuer {
   _issuerMetadata: IssuerMetadata
@@ -86,7 +85,7 @@ export class VcIssuer {
   }
 
   private async retrieveGrantsFromClient(issuerState: string): Promise<{ clientId: string; grants: Grant }> {
-    const credentialOfferState: CredentialOfferState | undefined = await this.retrieveCredentialOffer(issuerState)
+    const credentialOfferState: CredentialOfferState | undefined = await this._stateManager.getAssertedState(issuerState)
     const clientId = credentialOfferState?.clientId
     const grants = credentialOfferState?.credentialOffer?.grants
     if (!clientId) {
@@ -96,14 +95,6 @@ export class VcIssuer {
       throw new Error(GRANTS_MUST_NOT_BE_UNDEFINED)
     }
     return { clientId, grants }
-  }
-
-  private async retrieveCredentialOffer(issuerState: string): Promise<CredentialOfferState | undefined> {
-    if (await this._stateManager.hasState(issuerState)) {
-      return await this._stateManager.getState(issuerState)
-    } else {
-      throw new Error(UNKNOWN_CLIENT_ERROR)
-    }
   }
 
   private async validateJWT(

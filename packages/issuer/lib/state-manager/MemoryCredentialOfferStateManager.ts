@@ -1,4 +1,4 @@
-import { CredentialOfferState, ICredentialOfferStateManager } from '@sphereon/openid4vci-common'
+import {CredentialOfferState, ICredentialOfferStateManager, UNKNOWN_CLIENT_ERROR} from '@sphereon/openid4vci-common'
 
 export class MemoryCredentialOfferStateManager implements ICredentialOfferStateManager {
   private readonly credentialOfferStateManager: Map<string, CredentialOfferState>
@@ -34,5 +34,13 @@ export class MemoryCredentialOfferStateManager implements ICredentialOfferStateM
 
   async setState(state: string, payload: CredentialOfferState): Promise<void> {
     this.credentialOfferStateManager.set(state, payload)
+  }
+
+  async getAssertedState(issuerState: string): Promise<CredentialOfferState | undefined> {
+    if (await this.hasState(issuerState)) {
+      return await this.getState(issuerState)
+    } else {
+      throw new Error(UNKNOWN_CLIENT_ERROR)
+    }
   }
 }
