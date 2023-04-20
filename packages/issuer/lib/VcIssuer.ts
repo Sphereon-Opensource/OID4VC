@@ -23,7 +23,7 @@ import {
   Typ,
   TYP_ERROR,
 } from '@sphereon/openid4vci-common'
-import {ICredential, W3CVerifiableCredential} from '@sphereon/ssi-types'
+import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 export class VcIssuer {
   _issuerMetadata: IssuerMetadata
