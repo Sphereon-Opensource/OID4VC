@@ -61,6 +61,8 @@ beforeAll(async () => {
 
 describe('VcIssuer', () => {
   let vcIssuer: VcIssuer
+  const state = 'existing-client'
+  const clientId = 'sphereon:wallet'
 
   beforeAll(async () => {
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
@@ -86,6 +88,7 @@ describe('VcIssuer', () => {
       .build()
     const stateManager = new MemoryCredentialOfferStateManager()
     await stateManager.setState('existing-client', {
+      clientId,
       createdOn: +new Date(),
       credentialOffer: {
         credential_issuer: 'did:key:test',
@@ -93,6 +96,10 @@ describe('VcIssuer', () => {
           types: ['VerifiableCredential'],
           '@context': ['https://www.w3.org/2018/credentials/v1'],
           credentialSubject: {},
+        },
+        grants: {
+          authorization_code: { issuer_state: 'test_code' },
+          'urn:ietf:params:oauth:grant-type:pre-authorized_code': { 'pre-authorized_code': 'test_code', user_pin_required: true },
         },
       },
     })
@@ -148,7 +155,7 @@ describe('VcIssuer', () => {
           format: 'jwt_vc_json',
           proof: 'ye.ye.ye',
         } as unknown as CredentialRequest,
-        'test-code'
+        'first interaction'
       )
     ).rejects.toThrow(Error('The client is not known by the issuer'))
   })
@@ -161,7 +168,7 @@ describe('VcIssuer', () => {
           format: 'jwt_vc_json',
           proof: 'ye.ye.ye',
         } as unknown as CredentialRequest,
-        'existing-client'
+        state
       )
     ).resolves.toEqual({
       credential: {
@@ -201,7 +208,7 @@ describe('VcIssuer', () => {
         signCallback: proofOfPossessionCallbackFunction,
       },
     })
-      .withClientId('sphereon:wallet')
+      .withClientId(clientId)
       .withKid(kid)
       .build()
 
@@ -222,7 +229,7 @@ describe('VcIssuer', () => {
       type: ['VerifiableCredential'],
     })
 
-    await expect(vcIssuer.issueCredentialFromIssueRequest(credentialRequest, 'existing-client')).resolves.toEqual({
+    await expect(vcIssuer.issueCredentialFromIssueRequest(credentialRequest, state)).resolves.toEqual({
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         credentialSubject: {},

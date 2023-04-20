@@ -3,20 +3,27 @@ import {
   ALG_ERROR,
   AUD_ERROR,
   CredentialIssuerCallback,
+  CredentialOfferState,
   CredentialRequest,
   CredentialResponse,
+  Grant,
+  GRANTS_MUST_NOT_BE_UNDEFINED,
   IAT_ERROR,
-  ICredentialOfferStateManager, ISS_MISSING_IN_NON_PRE_AUTHORIZED_CONTEXT, ISS_MUST_BE_CLIENT_ID,
+  ICredentialOfferStateManager,
+  ISS_MUST_BE_CLIENT_ID,
+  ISS_PRESENT_IN_PRE_AUTHORIZED_CODE_CONTEXT,
   ISSUER_CONFIG_ERROR,
   IssuerMetadata,
   Jwt,
   JWT_VERIFY_CONFIG_ERROR,
   JWTVerifyCallback,
-  KID_JWK_X5C_ERROR, NO_ISS_IN_PRE_AUTHORIZED_CONTEXT,
+  KID_JWK_X5C_ERROR,
+  NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT,
   NONCE_ERROR,
   TokenErrorResponse,
   Typ,
   TYP_ERROR,
+  UNDEFINED_CLIENT_ID,
   UNKNOWN_CLIENT_ERROR,
 } from '@sphereon/openid4vci-common'
 import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
@@ -55,7 +62,7 @@ export class VcIssuer {
   /**
    * issueCredentialFromIssueRequest
    * @param issueCredentialRequest a credential issuance request
-   * @param preAuthorizedCode the pre-authorized code
+   * @param state the state to be passed to the state manager
    * @param clientId the id from the client making the request
    * @param jwtVerifyCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
    * @param issuerCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
@@ -64,15 +71,11 @@ export class VcIssuer {
   public async issueCredentialFromIssueRequest(
     issueCredentialRequest: CredentialRequest,
     issuerState: string,
-    preAuthorizedCode?: string,
-    clientId?: string,
     jwtVerifyCallback?: JWTVerifyCallback,
     issuerCallback?: CredentialIssuerCallback
   ): Promise<CredentialResponse> {
-    if (!(await this._stateManager.hasState(issuerState))) {
-      throw new Error(UNKNOWN_CLIENT_ERROR)
-    }
-    await this.validateJWT(issueCredentialRequest, jwtVerifyCallback)
+    const { clientId, grants } = await this.retrieveGrantsFromClient(issuerState)
+    await this.validateJWT(issueCredentialRequest, grants, clientId, jwtVerifyCallback)
     if (this.isMetadataSupportCredentialRequestFormat(issueCredentialRequest.format)) {
       return {
         credential: await this.issueCredential({ credentialRequest: issueCredentialRequest }, issuerCallback),
@@ -82,7 +85,33 @@ export class VcIssuer {
     throw new Error(TokenErrorResponse.invalid_request)
   }
 
-  private async validateJWT(issueCredentialRequest: CredentialRequest, jwtVerifyCallback?: JWTVerifyCallback, clientId?: string, preAuthorizedCode?: string): Promise<void> {
+  private async retrieveGrantsFromClient(issuerState: string): Promise<{ clientId: string; grants: Grant }> {
+    const credentialOfferState: CredentialOfferState | undefined = await this.retrieveCredentialOffer(issuerState)
+    const clientId = credentialOfferState?.clientId
+    const grants = credentialOfferState?.credentialOffer?.grants
+    if (!clientId) {
+      throw new Error(UNDEFINED_CLIENT_ID)
+    }
+    if (!grants?.authorization_code?.issuer_state || !grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']) {
+      throw new Error(GRANTS_MUST_NOT_BE_UNDEFINED)
+    }
+    return { clientId, grants }
+  }
+
+  private async retrieveCredentialOffer(issuerState: string): Promise<CredentialOfferState | undefined> {
+    if (await this._stateManager.hasState(issuerState)) {
+      return await this._stateManager.getState(issuerState)
+    } else {
+      throw new Error(UNKNOWN_CLIENT_ERROR)
+    }
+  }
+
+  private async validateJWT(
+    issueCredentialRequest: CredentialRequest,
+    grants: Grant,
+    clientId: string,
+    jwtVerifyCallback?: JWTVerifyCallback
+  ): Promise<void> {
     if ((!Array.isArray(issueCredentialRequest.format) && issueCredentialRequest.format === 'jwt') || issueCredentialRequest.format === 'jwt_vc') {
       issueCredentialRequest.proof.jwt
 
@@ -95,7 +124,7 @@ export class VcIssuer {
         : await this._verifyCallback!(issueCredentialRequest.proof)
 
       const { typ, alg, kid, jwk, x5c } = header
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       if (!typ || typ !== Typ['OPENID4VCI-PROOF+JWT']) {
         throw new Error(TYP_ERROR)
       }
@@ -110,11 +139,11 @@ export class VcIssuer {
       // iss: OPTIONAL (string). The value of this claim MUST be the client_id of the client making the credential request.
       // This claim MUST be omitted if the Access Token authorizing the issuance call was obtained from a Pre-Authorized Code Flow through anonymous access to the Token Endpoint.
       // TODO We need an introspection endpoint in case the AS and RS are separated
-      if (!iss && !preAuthorizedCode) {
-        throw new Error(ISS_MISSING_IN_NON_PRE_AUTHORIZED_CONTEXT)
+      if (!iss && grants.authorization_code) {
+        throw new Error(NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT)
       }
-      if (iss && preAuthorizedCode) {
-        throw new Error(NO_ISS_IN_PRE_AUTHORIZED_CONTEXT)
+      if (iss && grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
+        throw new Error(ISS_PRESENT_IN_PRE_AUTHORIZED_CODE_CONTEXT)
       }
       if (iss && iss !== clientId) {
         throw new Error(ISS_MUST_BE_CLIENT_ID)

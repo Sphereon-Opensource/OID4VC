@@ -1,6 +1,7 @@
 import { CredentialOfferPayloadV1_0_11 } from './v1_0_11.types';
 
 export interface CredentialOfferState {
+  clientId: string;
   credentialOffer: CredentialOfferPayloadV1_0_11;
   createdOn: number;
 }
