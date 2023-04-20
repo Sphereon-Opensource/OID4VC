@@ -120,10 +120,12 @@ describe('VcIssuer builder should', () => {
     expect(vcIssuer).toBeDefined()
     const now = +new Date()
     await vcIssuer.credentialOfferStateManager?.setState('test', {
+      clientId: 'test_client',
       createdOn: now,
       credentialOffer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' },
     })
     await expect(vcIssuer.credentialOfferStateManager?.getState('test')).resolves.toEqual({
+      clientId: 'test_client',
       createdOn: now,
       credentialOffer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' },
     })
