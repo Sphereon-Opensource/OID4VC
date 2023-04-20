@@ -11,7 +11,6 @@ import {
   IAT_ERROR,
   ICredentialOfferStateManager,
   ISS_MUST_BE_CLIENT_ID,
-  ISS_PRESENT_IN_PRE_AUTHORIZED_CODE_CONTEXT,
   ISSUER_CONFIG_ERROR,
   IssuerMetadata,
   Jwt,
@@ -24,7 +23,7 @@ import {
   Typ,
   TYP_ERROR,
 } from '@sphereon/openid4vci-common'
-import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import {ICredential, W3CVerifiableCredential} from '@sphereon/ssi-types'
 
 export class VcIssuer {
   _issuerMetadata: IssuerMetadata
@@ -121,14 +120,24 @@ export class VcIssuer {
       }
 
       const { iss, aud, iat, nonce } = payload
-      // iss: OPTIONAL (string). The value of this claim MUST be the client_id of the client making the credential request.
-      // This claim MUST be omitted if the Access Token authorizing the issuance call was obtained from a Pre-Authorized Code Flow through anonymous access to the Token Endpoint.
+      // https://www.rfc-editor.org/rfc/rfc6749.html#section-3.2.1
+      // A client MAY use the "client_id" request parameter to identify itself
+      // when sending requests to the token endpoint.  In the
+      // "authorization_code" "grant_type" request to the token endpoint, an
+      // unauthenticated client MUST send its "client_id" to prevent itself
+      // from inadvertently accepting a code intended for a client with a
+      // different "client_id".  This protects the client from substitution of
+      // the authentication code.  (It provides no additional security for the
+      // protected resource.)
       if (!iss && grants?.authorization_code) {
         throw new Error(NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT)
       }
-      if (iss && grants && grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
-        throw new Error(ISS_PRESENT_IN_PRE_AUTHORIZED_CODE_CONTEXT)
-      }
+      // iss: OPTIONAL (string). The value of this claim MUST be the client_id of the client making the credential request.
+      // This claim MUST be omitted if the Access Token authorizing the issuance call was obtained from a Pre-Authorized Code Flow through anonymous access to the Token Endpoint.
+      // TODO We need to investigate further what the comment above means, because it's not clear if the client or the user may be authorized anonymously
+      // if (iss && grants && grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
+      //   throw new Error(ISS_PRESENT_IN_PRE_AUTHORIZED_CODE_CONTEXT)
+      // }
       if (iss && iss !== clientId) {
         throw new Error(ISS_MUST_BE_CLIENT_ID)
       }
