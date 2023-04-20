@@ -3,9 +3,11 @@ import { KeyObject } from 'crypto';
 import {
   Alg,
   CredentialRequest,
+  EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
   Jwt,
   ProofOfPossession,
+  ProofType,
   Typ,
   URL_NOT_VALID,
   WellKnownEndpoints,
@@ -13,11 +15,11 @@ import {
 import * as jose from 'jose';
 import nock from 'nock';
 
-import { CredentialRequestClientBuilderV1_0_09, MetadataClient } from '..';
-import { ProofOfPossessionBuilder } from '..';
+import { CredentialRequestClientBuilderV1_0_09, MetadataClient, ProofOfPossessionBuilder } from '..';
 import { CredentialOffer } from '../CredentialOffer';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';
+import { getMockData } from './data/VciDataFixtures';
 
 const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN';
 
@@ -149,7 +151,7 @@ describe('Credential Request Client with Walt.id ', () => {
     const credentialOffer = CredentialOffer.fromURI(WALT_IRR_URI);
 
     const request = credentialOffer.request;
-    const metadata = await MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(request));
+    const metadata = await MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(request) as string);
     expect(metadata.credential_endpoint).toEqual(WALT_OID4VCI_METADATA.credential_endpoint);
     expect(metadata.token_endpoint).toEqual(WALT_OID4VCI_METADATA.token_endpoint);
 
@@ -158,5 +160,102 @@ describe('Credential Request Client with Walt.id ', () => {
       metadata,
     }).build();
     expect(credReqClient.credentialRequestOpts.credentialEndpoint).toBe(WALT_OID4VCI_METADATA.credential_endpoint);
+  });
+});
+
+describe('Credential Request Client with different issuers ', () => {
+  it('should create correct CredentialRequest for Spruce', async () => {
+    const IRR_URI =
+      'openid-initiate-issuance://?issuer=https%3A%2F%2Fngi%2Doidc4vci%2Dtest%2Espruceid%2Exyz&credential_type=OpenBadgeCredential&pre-authorized_code=eyJhbGciOiJFUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOlsiT3BlbkJhZGdlQ3JlZGVudGlhbCJdLCJleHAiOiIyMDIzLTA0LTIwVDA5OjA0OjM2WiIsIm5vbmNlIjoibWFibmVpT0VSZVB3V3BuRFFweEt3UnRsVVRFRlhGUEwifQ.qOZRPN8sTv_knhp7WaWte2-aDULaPZX--2i9unF6QDQNUllqDhvxgIHMDCYHCV8O2_Gj-T2x1J84fDMajE3asg&user_pin_required=false';
+    const credentialOffer = await CredentialRequestClientBuilderV1_0_09.fromURI({
+      uri: IRR_URI,
+      metadata: getMockData('spruce')?.metadata as unknown as EndpointMetadata,
+    })
+      .build()
+      .createCredentialRequest({
+        proofInput: {
+          proof_type: ProofType.JWT,
+          jwt: getMockData('spruce')?.credential.request.proof.jwt as string,
+        },
+        credentialType: 'OpenBadgeCredential',
+        format: 'jwt_vc',
+      });
+    expect(credentialOffer).toEqual(getMockData('spruce')?.credential.request);
+  });
+
+  it('should create correct CredentialRequest for Walt', async () => {
+    const IRR_URI =
+      'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Fdefault%2Foidc%2F&amp;credential_type=OpenBadgeCredential&amp;pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA&amp;user_pin_required=false';
+    const credentialOffer = await CredentialRequestClientBuilderV1_0_09.fromURI({
+      uri: IRR_URI,
+      metadata: getMockData('walt')?.metadata as unknown as EndpointMetadata,
+    })
+      .build()
+      .createCredentialRequest({
+        proofInput: {
+          proof_type: ProofType.JWT,
+          jwt: getMockData('walt')?.credential.request.proof.jwt as string,
+        },
+        credentialType: 'OpenBadgeCredential',
+        format: 'jwt_vc',
+      });
+    expect(credentialOffer).toEqual(getMockData('walt')?.credential.request);
+  });
+
+  it('should create correct CredentialRequest for uniissuer', async () => {
+    const IRR_URI =
+      'https://oidc4vc.uniissuer.io/&credential_type=OpenBadgeCredential&pre-authorized_code=0ApoI8rxVmdQ44RIpuDbFIURIIkOhyek&user_pin_required=false';
+    const credentialOffer = await CredentialRequestClientBuilderV1_0_09.fromURI({
+      uri: IRR_URI,
+      metadata: getMockData('uniissuer')?.metadata as unknown as EndpointMetadata,
+    })
+      .build()
+      .createCredentialRequest({
+        proofInput: {
+          proof_type: ProofType.JWT,
+          jwt: getMockData('uniissuer')?.credential.request.proof.jwt as string,
+        },
+        credentialType: 'OpenBadgeCredential',
+        format: 'jwt_vc',
+      });
+    expect(credentialOffer).toEqual(getMockData('uniissuer')?.credential.request);
+  });
+
+  it('should create correct CredentialRequest for mattr', async () => {
+    const IRR_URI =
+      'openid-initiate-issuance://?issuer=https://launchpad.mattrlabs.com&credential_type=OpenBadgeCredential&pre-authorized_code=g0UCOj6RAN5AwHU6gczm_GzB4_lH6GW39Z0Dl2DOOiO';
+    const credentialOffer = await CredentialRequestClientBuilderV1_0_09.fromURI({
+      uri: IRR_URI,
+      metadata: getMockData('mattr')?.metadata as unknown as EndpointMetadata,
+    })
+      .build()
+      .createCredentialRequest({
+        proofInput: {
+          proof_type: ProofType.JWT,
+          jwt: getMockData('mattr')?.credential.request.proof.jwt as string,
+        },
+        credentialType: 'OpenBadgeCredential',
+        format: 'ldp_vc',
+      });
+    expect(credentialOffer).toEqual(getMockData('mattr')?.credential.request);
+  });
+
+  it('should create correct CredentialRequest for diwala', async () => {
+    const IRR_URI =
+      'openid-initiate-issuance://?issuer=https://oidc4vc.diwala.io&amp;credential_type=OpenBadgeCredential&amp;pre-authorized_code=eyJhbGciOiJIUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOiJPcGVuQmFkZ2VDcmVkZW50aWFsIiwiZXhwIjoxNjgxOTg0NDY3fQ.fEAHKz2nuWfiYHw406iNxr-81pWkNkbi31bWsYSf6Ng';
+    const credentialOffer = await CredentialRequestClientBuilderV1_0_09.fromURI({
+      uri: IRR_URI,
+      metadata: getMockData('diwala')?.metadata as unknown as EndpointMetadata,
+    })
+      .build()
+      .createCredentialRequest({
+        proofInput: {
+          proof_type: ProofType.JWT,
+          jwt: getMockData('diwala')?.credential.request.proof.jwt as string,
+        },
+        credentialType: 'OpenBadgeCredential',
+        format: 'ldp_vc',
+      });
+    expect(credentialOffer).toEqual(getMockData('diwala')?.credential.request);
   });
 });

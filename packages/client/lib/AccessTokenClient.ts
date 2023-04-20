@@ -37,7 +37,9 @@ export class AccessTokenClient {
     const { request } = credentialOffer;
 
     const isPinRequired = this.isPinRequiredValue(request);
-    const issuerOpts = { issuer: getIssuerFromCredentialOfferPayload(request) };
+    const issuerOpts = {
+      issuer: getIssuerFromCredentialOfferPayload(request) ? (getIssuerFromCredentialOfferPayload(request) as string) : (metadata?.issuer as string),
+    };
 
     return await this.acquireAccessTokenUsingRequest({
       accessTokenRequest: await this.createAccessTokenRequest({
