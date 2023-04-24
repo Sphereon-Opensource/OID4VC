@@ -17,7 +17,7 @@ describe('issuerCallback', () => {
       credentialSubject: {},
       issuanceDate: new Date().toISOString(),
     }
-    await expect(getIssuerCallback(credential)()).resolves.toEqual({
+    await expect(getIssuerCallback(credential)({})).resolves.toEqual({
       '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],
       credentialSubject: {},
       issuanceDate: expect.any(String),
