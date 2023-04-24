@@ -12,14 +12,16 @@ export const generateDid = async () => {
   return { didDocument, keyPairs, methodFor }
 }
 
-export const credentialCallback = async (opts: {
-  credentialRequest?: CredentialRequest
-  credential?: ICredential
-}): Promise<W3CVerifiableCredential> => {
-  const documentLoader = securityLoader().build()
-  const keyPair = await Ed25519VerificationKey2020.generate()
-  const suite = new Ed25519Signature2020({ key: keyPair })
-  suite.verificationMethod = (await generateDid()).didDocument.verificationMethod[0].id
-  const credential = opts.credential
-  return await vc.issue({ credential, suite, documentLoader })
+export const getIssuerCallback = (credential: ICredential) => {
+  if (!credential) {
+    throw new Error('A credential needs to be provided')
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return async (_opts: { credentialRequest?: CredentialRequest; credential?: ICredential }): Promise<W3CVerifiableCredential> => {
+    const documentLoader = securityLoader().build()
+    const keyPair = await Ed25519VerificationKey2020.generate()
+    const suite = new Ed25519Signature2020({ key: keyPair })
+    suite.verificationMethod = (await generateDid()).didDocument.verificationMethod[0].id
+    return await vc.issue({ credential, suite, documentLoader })
+  }
 }

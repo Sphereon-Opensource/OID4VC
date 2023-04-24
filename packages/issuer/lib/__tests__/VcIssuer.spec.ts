@@ -12,7 +12,8 @@ import {
   ProofOfPossession,
   Typ,
 } from '@sphereon/openid4vci-common'
-import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
+import { generateDid, getIssuerCallback } from '@sphereon/openid4vci-issuer-callback/dist/IssuerCallback'
+import { ICredential, IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import * as jose from 'jose'
 
 import { VcIssuer } from '../VcIssuer'
@@ -25,6 +26,7 @@ const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
 
 let keypair: KeyPair
+let didKey: string
 
 async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promise<string> {
   if (!args.payload.aud) {
@@ -57,6 +59,7 @@ interface KeyPair {
 beforeAll(async () => {
   const { privateKey, publicKey } = await jose.generateKeyPair('ES256')
   keypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject }
+  didKey = (await generateDid()).didDocument.id
 })
 
 describe('VcIssuer', () => {
@@ -204,6 +207,14 @@ describe('VcIssuer', () => {
       payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
     }
 
+    const credential: ICredential = {
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
+      type: ['VerifiableCredential'],
+      issuer: didKey,
+      credentialSubject: {},
+      issuanceDate: new Date().toISOString(),
+    }
+
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt,
       callbacks: {
@@ -231,20 +242,20 @@ describe('VcIssuer', () => {
       type: ['VerifiableCredential'],
     })
 
-    await expect(vcIssuer.issueCredentialFromIssueRequest(credentialRequest, state)).resolves.toEqual({
+    await expect(vcIssuer.issueCredentialFromIssueRequest(credentialRequest, state, undefined, getIssuerCallback(credential))).resolves.toEqual({
       c_nonce: expect.any(String),
       c_nonce_expires_in: 90000,
       credential: {
-        '@context': ['https://www.w3.org/2018/credentials/v1'],
+        '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],
         credentialSubject: {},
         issuanceDate: expect.any(String),
-        issuer: 'did:key:test',
+        issuer: didKey,
         proof: {
           created: expect.any(String),
-          jwt: 'ye.ye.ye',
           proofPurpose: 'assertionMethod',
-          type: 'JwtProof2020',
-          verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
+          proofValue: expect.any(String),
+          type: 'Ed25519Signature2020',
+          verificationMethod: expect.stringContaining('did:key:'),
         },
         type: ['VerifiableCredential'],
       },

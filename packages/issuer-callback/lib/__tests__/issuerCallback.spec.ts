@@ -1,15 +1,12 @@
-import * as didMethodKey from '@digitalcredentials/did-method-key'
 import { ICredential } from '@sphereon/ssi-types'
 
-import { credentialCallback } from '../IssuerCallback'
+import { generateDid, getIssuerCallback } from '../IssuerCallback'
 
 describe('issuerCallback', () => {
   let didKey: string
 
   beforeAll(async () => {
-    const didKeyDriver = didMethodKey.driver()
-    const { didDocument } = await didKeyDriver.generate()
-    didKey = didDocument.id
+    didKey = (await generateDid()).didDocument.id
   })
 
   it('should issue a VC', async () => {
@@ -20,7 +17,7 @@ describe('issuerCallback', () => {
       credentialSubject: {},
       issuanceDate: new Date().toISOString(),
     }
-    await expect(credentialCallback({ credential })).resolves.toEqual({
+    await expect(getIssuerCallback(credential)()).resolves.toEqual({
       '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],
       credentialSubject: {},
       issuanceDate: expect.any(String),
