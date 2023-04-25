@@ -1,11 +1,13 @@
 import {
   AuthorizationRequestV1_0_09,
+  CNonceState,
   CredentialFormatEnum,
+  CredentialOfferState,
   CredentialSupported,
   Display,
-  ICredentialOfferStateManager,
   IssuerCredentialSubjectDisplay,
   IssuerMetadata,
+  IStateManager,
 } from '@sphereon/openid4vci-common'
 import { createCredentialOfferURI, CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
 import { MemoryCredentialOfferStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager/MemoryCredentialOfferStateManager'
@@ -66,13 +68,19 @@ export class RestAPI {
   private tokenToId: Map<string, string> = new Map()
   private authRequestsData: Map<string, AuthorizationRequestV1_0_09> = new Map()
 
-  constructor(opts?: { metadata: IssuerMetadata; stateManager: ICredentialOfferStateManager; userPinRequired: boolean }) {
+  constructor(opts?: {
+    metadata: IssuerMetadata
+    stateManager: IStateManager<CredentialOfferState>
+    cNonceStateManager: IStateManager<CNonceState>
+    userPinRequired: boolean
+  }) {
     dotenv.config()
     // todo: we probably want to pass a dummy issuance callback function here
     this._vcIssuer = opts
       ? (this._vcIssuer = new VcIssuer(opts.metadata, {
           userPinRequired: opts.userPinRequired,
           stateManager: opts.stateManager ?? new MemoryCredentialOfferStateManager(),
+          cNonceStateManager: opts.cNonceStateManager,
         }))
       : buildVCIFromEnvironment()
     this.express = express()

@@ -117,6 +117,7 @@ describe('VcIssuer', () => {
       })
       .withCredentialsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
+      .withInMemoryCNonceState()
       .withJWTVerifyCallback(verifyCallbackFunction)
       .withIssuerCallback(() =>
         Promise.resolve({

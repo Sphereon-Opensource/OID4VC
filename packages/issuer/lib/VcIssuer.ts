@@ -4,6 +4,7 @@ import {
   Alg,
   ALG_ERROR,
   AUD_ERROR,
+  CNonceState,
   CredentialIssuerCallback,
   CredentialOfferState,
   CredentialRequest,
@@ -11,10 +12,10 @@ import {
   Grant,
   GRANTS_MUST_NOT_BE_UNDEFINED,
   IAT_ERROR,
-  ICredentialOfferStateManager,
   ISS_MUST_BE_CLIENT_ID,
   ISSUER_CONFIG_ERROR,
   IssuerMetadata,
+  IStateManager,
   Jwt,
   JWT_VERIFY_CONFIG_ERROR,
   JWTVerifyCallback,
@@ -33,8 +34,8 @@ export class VcIssuer {
   _userPinRequired?: boolean
   _issuerCallback?: CredentialIssuerCallback
   _verifyCallback?: JWTVerifyCallback
-  private readonly _stateManager: ICredentialOfferStateManager
-  private readonly _cNonces: string[] = []
+  private readonly _stateManager: IStateManager<CredentialOfferState>
+  private readonly _cNonceStateManager: IStateManager<CNonceState>
   // TODO add config option
   private readonly _cNonceExpiresIn: number = parseInt(process.env.C_NONCE_EXPIRES_IN as string) * 1000 || 90 * 1000
 
@@ -42,19 +43,21 @@ export class VcIssuer {
     issuerMetadata: IssuerMetadata,
     args: {
       userPinRequired?: boolean
-      stateManager: ICredentialOfferStateManager
+      stateManager: IStateManager<CredentialOfferState>
+      cNonceStateManager: IStateManager<CNonceState>
       callback?: CredentialIssuerCallback
       verifyCallback?: JWTVerifyCallback
     }
   ) {
     this._issuerMetadata = issuerMetadata
     this._stateManager = args.stateManager
+    this._cNonceStateManager = args.cNonceStateManager
     this._userPinRequired = args && args.userPinRequired ? args.userPinRequired : false
     this._issuerCallback = args?.callback
     this._verifyCallback = args?.verifyCallback
   }
 
-  public get credentialOfferStateManager(): ICredentialOfferStateManager {
+  public get credentialOfferStateManager(): IStateManager<CredentialOfferState> {
     return this._stateManager
   }
 
@@ -82,12 +85,9 @@ export class VcIssuer {
     await this.validateJWT(opts.issueCredentialRequest, grants, clientId, opts.jwtVerifyCallback)
     if (this.isMetadataSupportCredentialRequestFormat(opts.issueCredentialRequest.format)) {
       const cNonce = opts.cNonce ? opts.cNonce : v4()
-      this._cNonces.push(cNonce)
+      await this._cNonceStateManager.setState(cNonce, { cNonce, createdOn: +new Date() })
       setTimeout(() => {
-        const index = this._cNonces.indexOf(cNonce)
-        if (index !== -1) {
-          this._cNonces.splice(index, 1)
-        }
+        this._cNonceStateManager.deleteState(cNonce)
       }, this._cNonceExpiresIn)
       return {
         credential: await this.issueCredential({ credentialRequest: opts.issueCredentialRequest }, opts.issuerCallback),

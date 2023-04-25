@@ -1,7 +1,6 @@
 import { CredentialFormatEnum, CredentialSupported, Display, IssuerCredentialSubjectDisplay, TokenErrorResponse } from '@sphereon/openid4vci-common'
 
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../index'
-import { MemoryCredentialOfferStateManager } from '../state-manager/MemoryCredentialOfferStateManager'
 
 describe('VcIssuer builder should', () => {
   it('generate a VcIssuer', () => {
@@ -34,6 +33,7 @@ describe('VcIssuer builder should', () => {
         locale: 'en-US',
       })
       .withInMemoryCredentialOfferState()
+      .withInMemoryCNonceState()
       .withCredentialsSupported(credentialsSupported)
       .build()
 
@@ -115,7 +115,8 @@ describe('VcIssuer builder should', () => {
         locale: 'en-US',
       })
       .withCredentialsSupported(credentialsSupported)
-      .withCredentialOfferStateManager(new MemoryCredentialOfferStateManager())
+      .withInMemoryCredentialOfferState()
+      .withInMemoryCNonceState()
       .build()
     expect(vcIssuer).toBeDefined()
     const now = +new Date()

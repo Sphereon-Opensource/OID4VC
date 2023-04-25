@@ -6,10 +6,15 @@ export interface CredentialOfferState {
   createdOn: number;
 }
 
-export interface ICredentialOfferStateManager {
-  setState(state: string, payload: CredentialOfferState): Promise<void>;
+export interface CNonceState {
+  cNonce: string;
+  createdOn: number;
+}
 
-  getState(state: string): Promise<CredentialOfferState | undefined>;
+export interface IStateManager<T> {
+  setState(state: string, payload: T): Promise<void>;
+
+  getState(state: string): Promise<T | undefined>;
 
   hasState(state: string): Promise<boolean>;
 
@@ -19,5 +24,5 @@ export interface ICredentialOfferStateManager {
 
   clearAllStates(): Promise<void>; // clears all states
 
-  getAssertedState(issuerState: string): Promise<CredentialOfferState | undefined>;
+  getAssertedState(issuerState: string): Promise<T | undefined>;
 }

@@ -1,14 +1,17 @@
 import {
+  CNonceState,
   CredentialIssuerCallback,
+  CredentialOfferState,
   CredentialSupported,
   Display,
-  ICredentialOfferStateManager,
   IssuerMetadata,
+  IStateManager,
   JWTVerifyCallback,
   TokenErrorResponse,
 } from '@sphereon/openid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
+import { MemoryCNonceStateManager } from '../state-manager/MemoryCNonceStateManager'
 import { MemoryCredentialOfferStateManager } from '../state-manager/MemoryCredentialOfferStateManager'
 
 export class VcIssuerBuilder {
@@ -20,7 +23,8 @@ export class VcIssuerBuilder {
   issuerDisplay?: Display[]
   credentialsSupported?: CredentialSupported[]
   userPinRequired?: boolean
-  credentialOfferStateManager?: ICredentialOfferStateManager
+  credentialOfferStateManager?: IStateManager<CredentialOfferState>
+  cNonceStateManager?: IStateManager<CNonceState>
   issuerCallback?: CredentialIssuerCallback
   verifyCallback?: JWTVerifyCallback
 
@@ -80,13 +84,23 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withCredentialOfferStateManager(iCredentialOfferStateManager: ICredentialOfferStateManager): VcIssuerBuilder {
+  public withCredentialOfferStateManager(iCredentialOfferStateManager: IStateManager<CredentialOfferState>): VcIssuerBuilder {
     this.credentialOfferStateManager = iCredentialOfferStateManager
     return this
   }
 
   public withInMemoryCredentialOfferState(): VcIssuerBuilder {
     this.withCredentialOfferStateManager(new MemoryCredentialOfferStateManager())
+    return this
+  }
+
+  public withCNonceStateManager(iCNonceStateManager: IStateManager<CNonceState>): VcIssuerBuilder {
+    this.cNonceStateManager = iCNonceStateManager
+    return this
+  }
+
+  public withInMemoryCNonceState(): VcIssuerBuilder {
+    this.withCNonceStateManager(new MemoryCNonceStateManager())
     return this
   }
 
@@ -105,6 +119,9 @@ export class VcIssuerBuilder {
       throw new Error(TokenErrorResponse.invalid_request)
     }
     if (!this.credentialOfferStateManager) {
+      throw new Error(TokenErrorResponse.invalid_request)
+    }
+    if (!this.cNonceStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
     if (!this.userPinRequired) {
@@ -132,6 +149,7 @@ export class VcIssuerBuilder {
       callback: this.issuerCallback,
       verifyCallback: this.verifyCallback,
       stateManager: this.credentialOfferStateManager,
+      cNonceStateManager: this.cNonceStateManager,
     })
   }
 }
