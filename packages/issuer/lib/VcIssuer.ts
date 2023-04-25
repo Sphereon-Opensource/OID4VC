@@ -35,6 +35,7 @@ export class VcIssuer {
   _verifyCallback?: JWTVerifyCallback
   private readonly _stateManager: ICredentialOfferStateManager
   private readonly _cNonce: string[] = []
+  // TODO add config option
   private readonly _cNonceExpiresIn: number = parseInt(process.env.C_NONCE_EXPIRES_IN as string) * 1000 || 90 * 1000
 
   constructor(
