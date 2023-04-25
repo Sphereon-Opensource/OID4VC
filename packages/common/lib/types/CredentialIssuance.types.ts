@@ -12,11 +12,11 @@ export interface CredentialRequest {
 }
 
 export interface CredentialResponse {
-  credential: W3CVerifiableCredential;
-  format: CredentialFormat | CredentialFormat[];
-  acceptance_token?: string;
-  c_nonce?: string;
-  c_nonce_expires_in?: number;
+  credential?: W3CVerifiableCredential; // OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
+  format: CredentialFormat | CredentialFormat[]; // REQUIRED. JSON string denoting the format of the issued Credential
+  acceptance_token?: string; // OPTIONAL. A JSON string containing a security token subsequently used to obtain a Credential. MUST be present when credential is not returned
+  c_nonce?: string; // OPTIONAL. JSON string containing a nonce to be used to create a proof of possession of key material when requesting a Credential (see Section 7.2). When received, the Wallet MUST use this nonce value for its subsequent credential requests until the Credential Issuer provides a fresh nonce
+  c_nonce_expires_in?: number; // OPTIONAL. JSON integer denoting the lifetime in seconds of the c_nonce
 }
 
 export interface CredentialOfferRequestWithBaseUrl {
