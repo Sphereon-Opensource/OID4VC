@@ -58,12 +58,21 @@ importers:
       '@digitalcredentials/vc':
         specifier: ^5.0.0
         version: 5.0.0(expo@48.0.11)(react-native@0.71.7)
+      '@sphereon/openid4vci-client':
+        specifier: workspace:../client
+        version: link:../client
       '@sphereon/openid4vci-common':
         specifier: workspace:../common
         version: link:../common
+      '@sphereon/openid4vci-issuer':
+        specifier: workspace:../issuer
+        version: link:../issuer
       '@sphereon/ssi-types':
         specifier: ^0.9.0
         version: 0.9.0
+      jose:
+        specifier: ^4.10.0
+        version: 4.14.1
     devDependencies:
       '@babel/core':
         specifier: ^7.21.4
@@ -188,12 +197,6 @@ importers:
         specifier: ^9.0.0
         version: 9.0.0
     devDependencies:
-      '@sphereon/openid4vci-callback-example':
-        specifier: workspace:../callback-example
-        version: link:../callback-example
-      '@sphereon/openid4vci-client':
-        specifier: workspace:../client
-        version: link:../client
       '@types/jest':
         specifier: ^29.5.0
         version: 29.5.1
@@ -203,12 +206,6 @@ importers:
       '@types/uuid':
         specifier: ^9.0.1
         version: 9.0.1
-      jose:
-        specifier: ^4.10.0
-        version: 4.14.1
-      nock:
-        specifier: ^13.2.9
-        version: 13.3.0
 
   packages/issuer-rest:
     dependencies:
@@ -8211,7 +8208,6 @@ packages:
 
   /jose@4.14.1:
     resolution: {integrity: sha512-SgjXLpP7jhQkUNKL6RpowoR/IF4QKE+WjLDMpNnh2vmhiFs67NftrNpvFtgbwpvRdtueFliahYYWz9E+XZZQlg==}
-    dev: true
 
   /js-sdsl@4.4.0:
     resolution: {integrity: sha512-FfVSdx6pJ41Oa+CF7RDaFmTnCaFhua+SNYQX74riGOpl96x+2jQCqEfQ2bnXu/5DPCqlRuiqyvTJM0Qjz26IVg==}

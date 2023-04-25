@@ -1,7 +1,3 @@
-import { KeyObject } from 'crypto'
-
-import { generateDid, getIssuerCallback, verifyCredential } from '@sphereon/openid4vci-callback-example'
-import { CredentialRequestClient, CredentialRequestClientBuilderV1_0_09, ProofOfPossessionBuilder } from '@sphereon/openid4vci-client'
 import {
   Alg,
   CredentialFormatEnum,
@@ -9,59 +5,14 @@ import {
   CredentialSupported,
   Display,
   IssuerCredentialSubjectDisplay,
-  Jwt,
-  ProofOfPossession,
-  Typ,
 } from '@sphereon/openid4vci-common'
-import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
-import * as jose from 'jose'
+import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 
 import { VcIssuer } from '../VcIssuer'
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../builder'
-import { MemoryCredentialOfferStateManager } from '../state-manager/MemoryCredentialOfferStateManager'
+import { MemoryCredentialOfferStateManager } from '../state-manager'
 
-const INITIATION_TEST_URI =
-  'openid-initiate-issuance://?credential_type=OpenBadgeCredential&issuer=https%3A%2F%2Fjff%2Ewalt%2Eid%2Fissuer-api%2Foidc%2F&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false'
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
-const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
-
-let keypair: KeyPair // Proof of Possession JWT
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let didKey: { didDocument: any; keyPairs: any; methodFor: any } // Json LD VC issuance
-
-async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promise<string> {
-  if (!args.payload.aud) {
-    throw Error('aud required')
-  } else if (!kid) {
-    throw Error('kid required')
-  }
-  return await new jose.SignJWT({ ...args.payload })
-    .setProtectedHeader({ ...args.header })
-    .setIssuedAt(+new Date())
-    .setIssuer(kid)
-    .setAudience(args.payload.aud)
-    .setExpirationTime('2h')
-    .sign(keypair.privateKey)
-}
-
-async function verifyCallbackFunction(args: { jwt: string; kid?: string }): Promise<Jwt> {
-  const result = await jose.jwtVerify(args.jwt, keypair.publicKey)
-  return {
-    header: result.protectedHeader,
-    payload: result.payload,
-  } as Jwt
-}
-
-interface KeyPair {
-  publicKey: KeyObject
-  privateKey: KeyObject
-}
-
-beforeAll(async () => {
-  const { privateKey, publicKey } = await jose.generateKeyPair('ES256')
-  keypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject }
-  didKey = await generateDid()
-})
 
 describe('VcIssuer', () => {
   let vcIssuer: VcIssuer
@@ -118,7 +69,6 @@ describe('VcIssuer', () => {
       .withCredentialsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
       .withInMemoryCNonceState()
-      .withJWTVerifyCallback(verifyCallbackFunction)
       .withIssuerCallback(() =>
         Promise.resolve({
           '@context': ['https://www.w3.org/2018/credentials/v1'],
@@ -194,84 +144,5 @@ describe('VcIssuer', () => {
       },
       format: 'jwt_vc_json',
     })
-  })
-
-  it('Should pass requesting a verifiable credential using the client', async () => {
-    //FIXME Use the same Enum to match format. It's actually using CredentialFormat and CredentialFormatEnum
-    const credReqClient = CredentialRequestClientBuilderV1_0_09.fromURI({ uri: INITIATION_TEST_URI })
-      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc_json')
-      .withCredentialType('credentialType')
-      .withToken('token')
-
-    const jwt: Jwt = {
-      header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ['OPENID4VCI-PROOF+JWT'] },
-      payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
-    }
-
-    const credential: ICredential = {
-      '@context': ['https://www.w3.org/2018/credentials/v1'],
-      type: ['VerifiableCredential'],
-      issuer: didKey.didDocument.id,
-      credentialSubject: {},
-      issuanceDate: new Date().toISOString(),
-    }
-
-    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
-      jwt,
-      callbacks: {
-        signCallback: proofOfPossessionCallbackFunction,
-      },
-    })
-      .withClientId(clientId)
-      .withKid(kid)
-      .build()
-
-    const credentialRequestClient = new CredentialRequestClient(credReqClient)
-    const credentialRequest = await credentialRequestClient.createCredentialRequest({
-      credentialType: ['VerifiableCredential'],
-      format: 'jwt_vc_json',
-      proofInput: proof,
-    })
-    expect(credentialRequest).toEqual({
-      format: 'jwt_vc_json',
-      proof: {
-        jwt: expect.stringContaining(
-          'eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJkaWQ6ZXhhbXBsZTpl'
-        ),
-        proof_type: 'jwt',
-      },
-      type: ['VerifiableCredential'],
-    })
-
-    const credentialResponse = await vcIssuer.issueCredentialFromIssueRequest({
-      issueCredentialRequest: credentialRequest,
-      issuerState: state,
-      issuerCallback: getIssuerCallback(credential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id),
-    })
-
-    expect(credentialResponse).toEqual({
-      c_nonce: expect.any(String),
-      c_nonce_expires_in: 90000,
-      credential: {
-        '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],
-        credentialSubject: {},
-        issuanceDate: expect.any(String),
-        issuer: didKey.didDocument.id,
-        proof: {
-          created: expect.any(String),
-          proofPurpose: 'assertionMethod',
-          proofValue: expect.any(String),
-          type: 'Ed25519Signature2020',
-          verificationMethod: expect.stringContaining('did:key:'),
-        },
-        type: ['VerifiableCredential'],
-      },
-      format: 'jwt_vc_json',
-    })
-
-    await expect(
-      verifyCredential(credentialResponse.credential as W3CVerifiableCredential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)
-    ).resolves.toEqual(expect.objectContaining({ verified: true }))
   })
 })
