@@ -111,7 +111,13 @@ export class RestAPI {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.express.get('/credential', async (request: Request, _response: Response) => {
       if (!request.body)
-        this._vcIssuer.issueCredentialFromIssueRequest(request.body.issueCredentialRequest, request.body.issuerState, request.body.clientId)
+        this._vcIssuer.issueCredentialFromIssueRequest({
+          issueCredentialRequest: request.body.issueCredentialRequest,
+          issuerState: request.body.issuerState,
+          jwtVerifyCallback: request.body.jwtVerifyCallback,
+          issuerCallback: request.body.issuerCallback,
+          cNonce: request.body.cNonce,
+        })
     })
   }
 

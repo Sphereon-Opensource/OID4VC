@@ -1,1 +1,1 @@
-export { getIssuerCallback, generateDid } from './IssuerCallback'
+export { getIssuerCallback, generateDid, verifyCredential } from './IssuerCallback'

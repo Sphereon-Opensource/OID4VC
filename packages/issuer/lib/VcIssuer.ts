@@ -34,7 +34,7 @@ export class VcIssuer {
   _issuerCallback?: CredentialIssuerCallback
   _verifyCallback?: JWTVerifyCallback
   private readonly _stateManager: ICredentialOfferStateManager
-  private readonly _cNonce: string[] = []
+  private readonly _cNonces: string[] = []
   // TODO add config option
   private readonly _cNonceExpiresIn: number = parseInt(process.env.C_NONCE_EXPIRES_IN as string) * 1000 || 90 * 1000
 
@@ -64,31 +64,34 @@ export class VcIssuer {
 
   /**
    * issueCredentialFromIssueRequest
-   * @param issueCredentialRequest a credential issuance request
-   * @param issuerState the key to retrieve the credential offer state
-   * @param jwtVerifyCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
-   * @param issuerCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
+   * @param opts issuerREquestParams
+   *  - issueCredentialsRequest the credential request
+   *  - issuerState the state of the issuer
+   *  - jwtVerifyCallback callback that verifies the Proof of Possession JWT
+   *  - issuerCallback callback to issue a Verifiable Credential
+   *  - cNonce an existing c_nonce
    */
-  public async issueCredentialFromIssueRequest(
-    issueCredentialRequest: CredentialRequest,
-    issuerState: string,
-    jwtVerifyCallback?: JWTVerifyCallback,
+  public async issueCredentialFromIssueRequest(opts: {
+    issueCredentialRequest: CredentialRequest
+    issuerState: string
+    jwtVerifyCallback?: JWTVerifyCallback
     issuerCallback?: CredentialIssuerCallback
-  ): Promise<CredentialResponse> {
-    const { clientId, grants } = await this.retrieveGrantsFromClient(issuerState)
-    await this.validateJWT(issueCredentialRequest, grants, clientId, jwtVerifyCallback)
-    if (this.isMetadataSupportCredentialRequestFormat(issueCredentialRequest.format)) {
-      const cNonce = v4()
-      this._cNonce.push(cNonce)
+    cNonce?: string
+  }): Promise<CredentialResponse> {
+    const { clientId, grants } = await this.retrieveGrantsFromClient(opts.issuerState)
+    await this.validateJWT(opts.issueCredentialRequest, grants, clientId, opts.jwtVerifyCallback)
+    if (this.isMetadataSupportCredentialRequestFormat(opts.issueCredentialRequest.format)) {
+      const cNonce = opts.cNonce ? opts.cNonce : v4()
+      this._cNonces.push(cNonce)
       setTimeout(() => {
-        const index = this._cNonce.indexOf(cNonce)
+        const index = this._cNonces.indexOf(cNonce)
         if (index !== -1) {
-          this._cNonce.splice(index, 1)
+          this._cNonces.splice(index, 1)
         }
       }, this._cNonceExpiresIn)
       return {
-        credential: await this.issueCredential({ credentialRequest: issueCredentialRequest }, issuerCallback),
-        format: issueCredentialRequest.format,
+        credential: await this.issueCredential({ credentialRequest: opts.issueCredentialRequest }, opts.issuerCallback),
+        format: opts.issueCredentialRequest.format,
         c_nonce: cNonce,
         c_nonce_expires_in: this._cNonceExpiresIn,
       }

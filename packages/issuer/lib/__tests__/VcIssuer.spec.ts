@@ -1,7 +1,6 @@
 import { KeyObject } from 'crypto'
 
-import { generateDid, getIssuerCallback } from '@sphereon/openid4vci-callback-example'
-import { verifyCredential } from '@sphereon/openid4vci-callback-example/dist/IssuerCallback'
+import { generateDid, getIssuerCallback, verifyCredential } from '@sphereon/openid4vci-callback-example'
 import { CredentialRequestClient, CredentialRequestClientBuilderV1_0_09, ProofOfPossessionBuilder } from '@sphereon/openid4vci-client'
 import {
   Alg,
@@ -154,27 +153,27 @@ describe('VcIssuer', () => {
 
   it('should fail at the first interaction of the client with the issuer', async () => {
     await expect(
-      vcIssuer.issueCredentialFromIssueRequest(
-        {
+      vcIssuer.issueCredentialFromIssueRequest({
+        issueCredentialRequest: {
           type: ['VerifiableCredential'],
           format: 'jwt_vc_json',
           proof: 'ye.ye.ye',
         } as unknown as CredentialRequest,
-        'first interaction'
-      )
+        issuerState: 'first interaction',
+      })
     ).rejects.toThrow(Error('The client is not known by the issuer'))
   })
 
   it('should succeed if the client already interacted with the issuer', async () => {
     await expect(
-      vcIssuer.issueCredentialFromIssueRequest(
-        {
+      vcIssuer.issueCredentialFromIssueRequest({
+        issueCredentialRequest: {
           type: ['VerifiableCredential'],
           format: 'jwt_vc_json',
           proof: 'ye.ye.ye',
         } as unknown as CredentialRequest,
-        state
-      )
+        issuerState: state,
+      })
     ).resolves.toEqual({
       c_nonce: expect.any(String),
       c_nonce_expires_in: 90000,
@@ -244,12 +243,11 @@ describe('VcIssuer', () => {
       type: ['VerifiableCredential'],
     })
 
-    const credentialResponse = await vcIssuer.issueCredentialFromIssueRequest(
-      credentialRequest,
-      state,
-      undefined,
-      getIssuerCallback(credential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)
-    )
+    const credentialResponse = await vcIssuer.issueCredentialFromIssueRequest({
+      issueCredentialRequest: credentialRequest,
+      issuerState: state,
+      issuerCallback: getIssuerCallback(credential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id),
+    })
 
     expect(credentialResponse).toEqual({
       c_nonce: expect.any(String),
