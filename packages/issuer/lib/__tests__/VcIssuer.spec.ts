@@ -1,6 +1,7 @@
 import { KeyObject } from 'crypto'
 
 import { generateDid, getIssuerCallback } from '@sphereon/openid4vci-callback-example'
+import { verifyCredential } from '@sphereon/openid4vci-callback-example/dist/IssuerCallback'
 import { CredentialRequestClient, CredentialRequestClientBuilderV1_0_09, ProofOfPossessionBuilder } from '@sphereon/openid4vci-client'
 import {
   Alg,
@@ -13,7 +14,7 @@ import {
   ProofOfPossession,
   Typ,
 } from '@sphereon/openid4vci-common'
-import { ICredential, IProofPurpose, IProofType } from '@sphereon/ssi-types'
+import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import * as jose from 'jose'
 
 import { VcIssuer } from '../VcIssuer'
@@ -25,8 +26,9 @@ const INITIATION_TEST_URI =
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
 
-let keypair: KeyPair
-let didKey: string
+let keypair: KeyPair // Proof of Possession JWT
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let didKey: { didDocument: any; keyPairs: any; methodFor: any } // Json LD VC issuance
 
 async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promise<string> {
   if (!args.payload.aud) {
@@ -59,7 +61,7 @@ interface KeyPair {
 beforeAll(async () => {
   const { privateKey, publicKey } = await jose.generateKeyPair('ES256')
   keypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject }
-  didKey = (await generateDid()).didDocument.id
+  didKey = await generateDid()
 })
 
 describe('VcIssuer', () => {
@@ -194,7 +196,7 @@ describe('VcIssuer', () => {
     })
   })
 
-  it('Should pass requesting a credential using the client', async () => {
+  it('Should pass requesting a verifiable credential using the client', async () => {
     //FIXME Use the same Enum to match format. It's actually using CredentialFormat and CredentialFormatEnum
     const credReqClient = CredentialRequestClientBuilderV1_0_09.fromURI({ uri: INITIATION_TEST_URI })
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
@@ -210,7 +212,7 @@ describe('VcIssuer', () => {
     const credential: ICredential = {
       '@context': ['https://www.w3.org/2018/credentials/v1'],
       type: ['VerifiableCredential'],
-      issuer: didKey,
+      issuer: didKey.didDocument.id,
       credentialSubject: {},
       issuanceDate: new Date().toISOString(),
     }
@@ -242,14 +244,21 @@ describe('VcIssuer', () => {
       type: ['VerifiableCredential'],
     })
 
-    await expect(vcIssuer.issueCredentialFromIssueRequest(credentialRequest, state, undefined, getIssuerCallback(credential))).resolves.toEqual({
+    const credentialResponse = await vcIssuer.issueCredentialFromIssueRequest(
+      credentialRequest,
+      state,
+      undefined,
+      getIssuerCallback(credential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)
+    )
+
+    expect(credentialResponse).toEqual({
       c_nonce: expect.any(String),
       c_nonce_expires_in: 90000,
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],
         credentialSubject: {},
         issuanceDate: expect.any(String),
-        issuer: didKey,
+        issuer: didKey.didDocument.id,
         proof: {
           created: expect.any(String),
           proofPurpose: 'assertionMethod',
@@ -261,5 +270,9 @@ describe('VcIssuer', () => {
       },
       format: 'jwt_vc_json',
     })
+
+    await expect(
+      verifyCredential(credentialResponse.credential as W3CVerifiableCredential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)
+    ).resolves.toEqual(expect.objectContaining({ verified: true }))
   })
 })
