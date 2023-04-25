@@ -1,5 +1,6 @@
 import { KeyObject } from 'crypto'
 
+import { generateDid, getIssuerCallback } from '@sphereon/openid4vci-callback-example'
 import { CredentialRequestClient, CredentialRequestClientBuilderV1_0_09, ProofOfPossessionBuilder } from '@sphereon/openid4vci-client'
 import {
   Alg,
@@ -12,7 +13,6 @@ import {
   ProofOfPossession,
   Typ,
 } from '@sphereon/openid4vci-common'
-import { generateDid, getIssuerCallback } from '@sphereon/openid4vci-issuer-callback/dist/IssuerCallback'
 import { ICredential, IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import * as jose from 'jose'
 

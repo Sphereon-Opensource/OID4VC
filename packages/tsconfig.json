@@ -7,7 +7,7 @@
     { "path": "client" },
     { "path": "issuer-rest" },
     {
-      "path": "issuer-callback"
+      "path": "callback-example"
     }
   ]
 }

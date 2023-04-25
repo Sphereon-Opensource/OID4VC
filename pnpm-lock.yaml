@@ -41,6 +41,52 @@ importers:
         specifier: 4.9.5
         version: 4.9.5
 
+  packages/callback-example:
+    dependencies:
+      '@digitalcredentials/did-method-key':
+        specifier: ^2.0.3
+        version: 2.0.3
+      '@digitalcredentials/ed25519-signature-2020':
+        specifier: ^3.0.2
+        version: 3.0.2(expo@48.0.11)(react-native@0.71.7)
+      '@digitalcredentials/ed25519-verification-key-2020':
+        specifier: ^4.0.0
+        version: 4.0.0
+      '@digitalcredentials/security-document-loader':
+        specifier: ^1.0.0
+        version: 1.0.0(react-native@0.71.7)
+      '@digitalcredentials/vc':
+        specifier: ^5.0.0
+        version: 5.0.0(expo@48.0.11)(react-native@0.71.7)
+      '@sphereon/openid4vci-common':
+        specifier: workspace:../common
+        version: link:../common
+      '@sphereon/ssi-types':
+        specifier: ^0.9.0
+        version: 0.9.0
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.21.4
+        version: 7.21.4
+      '@babel/preset-env':
+        specifier: ^7.21.4
+        version: 7.21.4(@babel/core@7.21.4)
+      '@types/jest':
+        specifier: ^29.5.0
+        version: 29.5.1
+      '@types/node':
+        specifier: ^18.15.3
+        version: 18.16.0
+      expo:
+        specifier: ^48.0.11
+        version: 48.0.11(@babel/core@7.21.4)
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-native:
+        specifier: ^0.71.7
+        version: 0.71.7(@babel/core@7.21.4)(@babel/preset-env@7.21.4)(react@18.2.0)
+
   packages/client:
     dependencies:
       '@sphereon/openid4vci-common':
@@ -142,12 +188,12 @@ importers:
         specifier: ^9.0.0
         version: 9.0.0
     devDependencies:
+      '@sphereon/openid4vci-callback-example':
+        specifier: workspace:../callback-example
+        version: link:../callback-example
       '@sphereon/openid4vci-client':
         specifier: workspace:../client
         version: link:../client
-      '@sphereon/openid4vci-issuer-callback':
-        specifier: workspace:../issuer-callback
-        version: link:../issuer-callback
       '@types/jest':
         specifier: ^29.5.0
         version: 29.5.1
@@ -163,52 +209,6 @@ importers:
       nock:
         specifier: ^13.2.9
         version: 13.3.0
-
-  packages/issuer-callback:
-    dependencies:
-      '@digitalcredentials/did-method-key':
-        specifier: ^2.0.3
-        version: 2.0.3
-      '@digitalcredentials/ed25519-signature-2020':
-        specifier: ^3.0.2
-        version: 3.0.2(expo@48.0.11)(react-native@0.71.7)
-      '@digitalcredentials/ed25519-verification-key-2020':
-        specifier: ^4.0.0
-        version: 4.0.0
-      '@digitalcredentials/security-document-loader':
-        specifier: ^1.0.0
-        version: 1.0.0(react-native@0.71.7)
-      '@digitalcredentials/vc':
-        specifier: ^5.0.0
-        version: 5.0.0(expo@48.0.11)(react-native@0.71.7)
-      '@sphereon/openid4vci-common':
-        specifier: workspace:../common
-        version: link:../common
-      '@sphereon/ssi-types':
-        specifier: ^0.9.0
-        version: 0.9.0
-    devDependencies:
-      '@babel/core':
-        specifier: ^7.21.4
-        version: 7.21.4
-      '@babel/preset-env':
-        specifier: ^7.21.4
-        version: 7.21.4(@babel/core@7.21.4)
-      '@types/jest':
-        specifier: ^29.5.0
-        version: 29.5.1
-      '@types/node':
-        specifier: ^18.15.3
-        version: 18.16.0
-      expo:
-        specifier: ^48.0.11
-        version: 48.0.11(@babel/core@7.21.4)
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
-      react-native:
-        specifier: ^0.71.7
-        version: 0.71.7(@babel/core@7.21.4)(@babel/preset-env@7.21.4)(react@18.2.0)
 
   packages/issuer-rest:
     dependencies:
@@ -3016,7 +3016,7 @@ packages:
       '@octokit/request-error': 3.0.3
       '@octokit/types': 9.1.2
       is-plain-object: 5.0.0
-      node-fetch: 2.6.7
+      node-fetch: 2.6.9
       universal-user-agent: 6.0.0
     transitivePeerDependencies:
       - encoding

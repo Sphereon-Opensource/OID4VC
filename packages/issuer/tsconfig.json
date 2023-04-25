@@ -10,7 +10,7 @@
       "path": "../common"
     },
     {
-      "path": "../issuer-callback"
+      "path": "../callback-example"
     }
   ]
 }
