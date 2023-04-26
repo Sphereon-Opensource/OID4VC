@@ -19,3 +19,4 @@ export const ISS_PRESENT_IN_PRE_AUTHORIZED_CODE_CONTEXT = 'iss should be omitted
 export const ISS_MUST_BE_CLIENT_ID = 'iss must be the client id';
 export const GRANTS_MUST_NOT_BE_UNDEFINED = 'Grants must not be undefined';
 export const C_NONCE_MISSING_ERROR = 'c_nonce must be present';
+export const CREDENTIAL_MISSING_ERROR = 'Credential must be present in response';

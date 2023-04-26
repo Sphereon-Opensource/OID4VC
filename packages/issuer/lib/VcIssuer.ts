@@ -5,6 +5,7 @@ import {
   ALG_ERROR,
   AUD_ERROR,
   CNonceState,
+  CREDENTIAL_MISSING_ERROR,
   CredentialIssuerCallback,
   CredentialOfferState,
   CredentialRequest,
@@ -89,8 +90,15 @@ export class VcIssuer {
       setTimeout(() => {
         this.nonceManager.deleteState(cNonce)
       }, this._cNonceExpiresIn)
+      const credential = await this.issueCredential({ credentialRequest: opts.issueCredentialRequest }, opts.issuerCallback)
+      // TODO implement acceptance_token (deferred response)
+      // TODO update verification accordingly
+      if (!credential) {
+        // credential: OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
+        throw new Error(CREDENTIAL_MISSING_ERROR)
+      }
       return {
-        credential: await this.issueCredential({ credentialRequest: opts.issueCredentialRequest }, opts.issuerCallback),
+        credential,
         format: opts.issueCredentialRequest.format,
         c_nonce: cNonce,
         c_nonce_expires_in: this._cNonceExpiresIn,
