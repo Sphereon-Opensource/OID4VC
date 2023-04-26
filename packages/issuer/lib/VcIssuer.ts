@@ -62,6 +62,10 @@ export class VcIssuer {
     return this._stateManager
   }
 
+  public get nonceStateManager(): IStateManager<CNonceState> {
+    return this.nonceManager
+  }
+
   public getIssuerMetadata() {
     return this._issuerMetadata
   }

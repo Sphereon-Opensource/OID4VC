@@ -1,19 +1,25 @@
+import * as process from 'process'
+
 import {
-  AuthorizationRequestV1_0_09,
+  AccessTokenResponse,
+  CNonceState,
   CredentialFormatEnum,
+  CredentialOfferState,
   CredentialSupported,
   Display,
-  ICredentialOfferStateManager,
   IssuerCredentialSubjectDisplay,
   IssuerMetadata,
+  IStateManager,
 } from '@sphereon/openid4vci-common'
 import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
+import { MemoryCNonceStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager'
 import { MemoryCredentialOfferStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager/MemoryCredentialOfferStateManager'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import * as dotenv from 'dotenv-flow'
 import { Express, Request, Response } from 'express'
+import { v4 } from 'uuid'
 
 function buildVCIFromEnvironment() {
   const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
@@ -57,16 +63,26 @@ function buildVCIFromEnvironment() {
 export class IssuerTokenEndpoint {
   public readonly express: Express
   private _vcIssuer: VcIssuer
-  //fixme: use this map for now as an internal mechanism for preAuthorizedCode to ids
-  private tokenToId: Map<string, string> = new Map()
-  private authRequestsData: Map<string, AuthorizationRequestV1_0_09> = new Map()
-  constructor(opts?: { metadata: IssuerMetadata; stateManager: ICredentialOfferStateManager; userPinRequired: boolean; express?: Express }) {
+  private readonly tokenExpiresIn: number
+  private readonly cNonceExpiresIn: number
+  constructor(opts?: {
+    metadata: IssuerMetadata
+    stateManager: IStateManager<CredentialOfferState>
+    nonceManager: IStateManager<CNonceState>
+    userPinRequired: boolean
+    tokenExpiresIn?: number
+    cNonceExpiresIn?: number
+    express?: Express
+  }) {
     dotenv.config()
+    this.tokenExpiresIn = opts?.tokenExpiresIn ? opts.tokenExpiresIn : parseInt(process.env.TOKEN_EXPIRES_IN)
+    this.cNonceExpiresIn = opts?.cNonceExpiresIn ? opts.cNonceExpiresIn : parseInt(process.env.C_NONCE_EXPIRES_IN)
     // todo: we probably want to pass a dummy issuance callback function here
     this._vcIssuer = opts
       ? (this._vcIssuer = new VcIssuer(opts.metadata, {
           userPinRequired: opts.userPinRequired,
           stateManager: opts.stateManager ?? new MemoryCredentialOfferStateManager(),
+          nonceManager: opts.nonceManager ?? new MemoryCNonceStateManager(),
         }))
       : buildVCIFromEnvironment()
     if (!_express) {
@@ -88,6 +104,10 @@ export class IssuerTokenEndpoint {
 
   private registerTokenEndpoint() {
     this._express.post('/token', (request: Request, response: Response) => {
+      response.set({
+        'Cache-Control': 'no-store',
+        Pragma: 'no-cache',
+      })
       if (request.body.grant_type === 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
         if (!request.body['pre-authorized_code']) {
           throw new Error('pre-authorized_code is required')
@@ -99,6 +119,20 @@ export class IssuerTokenEndpoint {
           throw Error('PIN must consist of maximum 8 numeric characters')
         }
       }
+      const cNonce = v4()
+      this._vcIssuer.nonceStateManager.setState(cNonce, { cNonce, createdOn: +new Date() })
+      setTimeout(() => {
+        this._vcIssuer.nonceStateManager.deleteState(cNonce)
+      }, this.cNonceExpiresIn)
+
+      const responseBody: AccessTokenResponse = {
+        access_token: 'eyJhbGciOiJSUzI1NiIsInR5cCI6Ikp..sHQ', // What should be in the JWT?
+        token_type: 'bearer',
+        expires_in: this.tokenExpiresIn,
+        c_nonce: cNonce,
+        c_nonce_expires_in: this.cNonceExpiresIn,
+      }
+      return response.status(200).json(responseBody)
     })
   }
 }
