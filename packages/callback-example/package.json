@@ -1,7 +1,7 @@
 {
-  "name": "@sphereon/openid4vci-issuer",
+  "name": "@sphereon/openid4vci-callback-example",
   "version": "0.5.0-unstable.0",
-  "description": "OpenID 4 Verifiable Credential Issuance issuer rest endpoints",
+  "description": "OpenID 4 Verifiable Credential Issuance issuer callback example",
   "source": "lib/index.ts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,14 +9,25 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@digitalcredentials/did-method-key": "^2.0.3",
+    "@digitalcredentials/ed25519-signature-2020": "^3.0.2",
+    "@digitalcredentials/ed25519-verification-key-2020": "^4.0.0",
+    "@digitalcredentials/security-document-loader": "^1.0.0",
+    "@digitalcredentials/vc": "^5.0.0",
     "@sphereon/openid4vci-common": "workspace:../common",
+    "@sphereon/openid4vci-issuer": "workspace:../issuer",
+    "@sphereon/openid4vci-client": "workspace:../client",
     "@sphereon/ssi-types": "^0.9.0",
-    "uuid": "^9.0.0"
+    "jose": "^4.10.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.21.4",
+    "@babel/preset-env": "^7.21.4",
     "@types/jest": "^29.5.0",
     "@types/node": "^18.15.3",
-    "@types/uuid": "^9.0.1"
+    "expo": "^48.0.11",
+    "react": "^18.2.0",
+    "react-native": "^0.71.7"
   },
   "engines": {
     "node": ">=16"
