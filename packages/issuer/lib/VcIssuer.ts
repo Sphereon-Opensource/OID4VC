@@ -1,7 +1,11 @@
+import * as process from 'process'
+
 import {
   Alg,
   ALG_ERROR,
   AUD_ERROR,
+  CNonceState,
+  CREDENTIAL_MISSING_ERROR,
   CredentialIssuerCallback,
   CredentialOfferState,
   CredentialRequest,
@@ -9,10 +13,10 @@ import {
   Grant,
   GRANTS_MUST_NOT_BE_UNDEFINED,
   IAT_ERROR,
-  ICredentialOfferStateManager,
   ISS_MUST_BE_CLIENT_ID,
   ISSUER_CONFIG_ERROR,
   IssuerMetadata,
+  IStateManager,
   Jwt,
   JWT_VERIFY_CONFIG_ERROR,
   JWTVerifyCallback,
@@ -24,31 +28,37 @@ import {
   TYP_ERROR,
 } from '@sphereon/openid4vci-common'
 import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import { v4 } from 'uuid'
 
 export class VcIssuer {
   _issuerMetadata: IssuerMetadata
   _userPinRequired?: boolean
   _issuerCallback?: CredentialIssuerCallback
   _verifyCallback?: JWTVerifyCallback
-  private readonly _stateManager: ICredentialOfferStateManager
+  private readonly _stateManager: IStateManager<CredentialOfferState>
+  private readonly nonceManager: IStateManager<CNonceState>
+  // TODO add config option
+  private readonly _cNonceExpiresIn: number = parseInt(process.env.C_NONCE_EXPIRES_IN as string) * 1000 || 90 * 1000
 
   constructor(
     issuerMetadata: IssuerMetadata,
     args: {
       userPinRequired?: boolean
-      stateManager: ICredentialOfferStateManager
+      stateManager: IStateManager<CredentialOfferState>
+      nonceManager: IStateManager<CNonceState>
       callback?: CredentialIssuerCallback
       verifyCallback?: JWTVerifyCallback
     }
   ) {
     this._issuerMetadata = issuerMetadata
     this._stateManager = args.stateManager
+    this.nonceManager = args.nonceManager
     this._userPinRequired = args && args.userPinRequired ? args.userPinRequired : false
     this._issuerCallback = args?.callback
     this._verifyCallback = args?.verifyCallback
   }
 
-  public get credentialOfferStateManager(): ICredentialOfferStateManager {
+  public get credentialOfferStateManager(): IStateManager<CredentialOfferState> {
     return this._stateManager
   }
 
@@ -58,23 +68,40 @@ export class VcIssuer {
 
   /**
    * issueCredentialFromIssueRequest
-   * @param issueCredentialRequest a credential issuance request
-   * @param issuerState the key to retrieve the credential offer state
-   * @param jwtVerifyCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
-   * @param issuerCallback OPTIONAL. if provided will use this callback instead what is configured in the VcIssuer
+   * @param opts issuerREquestParams
+   *  - issueCredentialsRequest the credential request
+   *  - issuerState the state of the issuer
+   *  - jwtVerifyCallback callback that verifies the Proof of Possession JWT
+   *  - issuerCallback callback to issue a Verifiable Credential
+   *  - cNonce an existing c_nonce
    */
-  public async issueCredentialFromIssueRequest(
-    issueCredentialRequest: CredentialRequest,
-    issuerState: string,
-    jwtVerifyCallback?: JWTVerifyCallback,
+  public async issueCredentialFromIssueRequest(opts: {
+    issueCredentialRequest: CredentialRequest
+    issuerState: string
+    jwtVerifyCallback?: JWTVerifyCallback
     issuerCallback?: CredentialIssuerCallback
-  ): Promise<CredentialResponse> {
-    const { clientId, grants } = await this.retrieveGrantsFromClient(issuerState)
-    await this.validateJWT(issueCredentialRequest, grants, clientId, jwtVerifyCallback)
-    if (this.isMetadataSupportCredentialRequestFormat(issueCredentialRequest.format)) {
+    cNonce?: string
+  }): Promise<CredentialResponse> {
+    const { clientId, grants } = await this.retrieveGrantsFromClient(opts.issuerState)
+    await this.validateJWT(opts.issueCredentialRequest, grants, clientId, opts.jwtVerifyCallback)
+    if (this.isMetadataSupportCredentialRequestFormat(opts.issueCredentialRequest.format)) {
+      const cNonce = opts.cNonce ? opts.cNonce : v4()
+      await this.nonceManager.setState(cNonce, { cNonce, createdOn: +new Date() })
+      setTimeout(() => {
+        this.nonceManager.deleteState(cNonce)
+      }, this._cNonceExpiresIn)
+      const credential = await this.issueCredential({ credentialRequest: opts.issueCredentialRequest }, opts.issuerCallback)
+      // TODO implement acceptance_token (deferred response)
+      // TODO update verification accordingly
+      if (!credential) {
+        // credential: OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
+        throw new Error(CREDENTIAL_MISSING_ERROR)
+      }
       return {
-        credential: await this.issueCredential({ credentialRequest: issueCredentialRequest }, issuerCallback),
-        format: issueCredentialRequest.format,
+        credential,
+        format: opts.issueCredentialRequest.format,
+        c_nonce: cNonce,
+        c_nonce_expires_in: this._cNonceExpiresIn,
       }
     }
     throw new Error(TokenErrorResponse.invalid_request)

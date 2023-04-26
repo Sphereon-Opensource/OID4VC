@@ -1,11 +1,13 @@
 import {
   AuthorizationRequestV1_0_09,
+  CNonceState,
   CredentialFormatEnum,
+  CredentialOfferState,
   CredentialSupported,
   Display,
-  ICredentialOfferStateManager,
   IssuerCredentialSubjectDisplay,
   IssuerMetadata,
+  IStateManager,
 } from '@sphereon/openid4vci-common'
 import { createCredentialOfferURI, CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
 import { MemoryCredentialOfferStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager/MemoryCredentialOfferStateManager'
@@ -66,13 +68,19 @@ export class RestAPI {
   private tokenToId: Map<string, string> = new Map()
   private authRequestsData: Map<string, AuthorizationRequestV1_0_09> = new Map()
 
-  constructor(opts?: { metadata: IssuerMetadata; stateManager: ICredentialOfferStateManager; userPinRequired: boolean }) {
+  constructor(opts?: {
+    metadata: IssuerMetadata
+    stateManager: IStateManager<CredentialOfferState>
+    nonceManager: IStateManager<CNonceState>
+    userPinRequired: boolean
+  }) {
     dotenv.config()
     // todo: we probably want to pass a dummy issuance callback function here
     this._vcIssuer = opts
       ? (this._vcIssuer = new VcIssuer(opts.metadata, {
           userPinRequired: opts.userPinRequired,
           stateManager: opts.stateManager ?? new MemoryCredentialOfferStateManager(),
+          nonceManager: opts.nonceManager,
         }))
       : buildVCIFromEnvironment()
     this.express = express()
@@ -111,7 +119,13 @@ export class RestAPI {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.express.get('/credential', async (request: Request, _response: Response) => {
       if (!request.body)
-        this._vcIssuer.issueCredentialFromIssueRequest(request.body.issueCredentialRequest, request.body.issuerState, request.body.clientId)
+        this._vcIssuer.issueCredentialFromIssueRequest({
+          issueCredentialRequest: request.body.issueCredentialRequest,
+          issuerState: request.body.issuerState,
+          jwtVerifyCallback: request.body.jwtVerifyCallback,
+          issuerCallback: request.body.issuerCallback,
+          cNonce: request.body.cNonce,
+        })
     })
   }
 

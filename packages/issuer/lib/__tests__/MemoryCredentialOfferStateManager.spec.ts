@@ -1,5 +1,7 @@
-import { CredentialOfferStateBuilder } from '../state-manager/CredentialOfferStateBuilder'
-import { MemoryCredentialOfferStateManager } from '../state-manager/MemoryCredentialOfferStateManager'
+import { UNKNOWN_CLIENT_ERROR } from '@sphereon/openid4vci-common'
+
+import { CredentialOfferStateBuilder } from '../state-manager'
+import { MemoryCredentialOfferStateManager } from '../state-manager'
 
 describe('MemoryIssuerStateManager', () => {
   let memoryIssuerStateManager: MemoryCredentialOfferStateManager
@@ -22,6 +24,7 @@ describe('MemoryIssuerStateManager', () => {
 
   it('should retrieve a state', async () => {
     await expect(memoryIssuerStateManager.getState(String(0))).resolves.toBeDefined()
+    await expect(memoryIssuerStateManager.getAssertedState(String(0))).resolves.toBeDefined()
   })
   it('should check whether a state exists', async () => {
     await expect(memoryIssuerStateManager.hasState(String(1))).resolves.toBeTruthy()
@@ -45,5 +48,8 @@ describe('MemoryIssuerStateManager', () => {
     await expect(memoryIssuerStateManager.getState(String(0))).resolves.toBeUndefined()
     await expect(memoryIssuerStateManager.getState(String(1))).resolves.toBeUndefined()
     await expect(memoryIssuerStateManager.getState(String(2))).resolves.toBeUndefined()
+  })
+  it('should throw exception when state does not exist', async () => {
+    await expect(memoryIssuerStateManager.getAssertedState(String(3))).rejects.toThrowError(Error(UNKNOWN_CLIENT_ERROR))
   })
 })
