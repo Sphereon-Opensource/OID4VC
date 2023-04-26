@@ -262,6 +262,61 @@ importers:
         specifier: ^9.0.1
         version: 9.0.1
 
+  packages/issuer-token-endpoint:
+    dependencies:
+      '@sphereon/openid4vci-common':
+        specifier: workspace:../common
+        version: link:../common
+      '@sphereon/openid4vci-issuer':
+        specifier: workspace:../issuer
+        version: link:../issuer
+      '@sphereon/ssi-types':
+        specifier: ^0.9.0
+        version: 0.9.0
+      body-parser:
+        specifier: ^1.20.2
+        version: 1.20.2
+      cookie-parser:
+        specifier: ^1.4.6
+        version: 1.4.6
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      dotenv-flow:
+        specifier: ^3.2.0
+        version: 3.2.0
+      express:
+        specifier: ^4.18.2
+        version: 4.18.2
+      uuid:
+        specifier: ^9.0.0
+        version: 9.0.0
+    devDependencies:
+      '@types/body-parser':
+        specifier: ^1.19.2
+        version: 1.19.2
+      '@types/cookie-parser':
+        specifier: ^1.4.3
+        version: 1.4.3
+      '@types/cors':
+        specifier: ^2.8.13
+        version: 2.8.13
+      '@types/dotenv-flow':
+        specifier: ^3.2.0
+        version: 3.2.0
+      '@types/express':
+        specifier: ^4.17.17
+        version: 4.17.17
+      '@types/jest':
+        specifier: ^29.5.0
+        version: 29.5.1
+      '@types/node':
+        specifier: ^18.15.3
+        version: 18.16.0
+      '@types/uuid':
+        specifier: ^9.0.1
+        version: 9.0.1
+
 packages:
 
   /@ampproject/remapping@2.2.1:
@@ -2446,7 +2501,7 @@ packages:
     resolution: {integrity: sha512-yUCDCcRNNbI9UUsUB6FYEmDHpo5Tn/f0q5D7vhDP4i6Or8kBj82y7+e31hwfLvK2ykOYlDVs2MxAluH/+QUBOQ==}
     engines: {node: ^14.15.0 || >=16.0.0}
     dependencies:
-      chalk: 4.1.0
+      chalk: 4.1.2
       execa: 5.0.0
       strong-log-transformer: 2.1.0
     dev: true
@@ -5422,7 +5477,7 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       globby: 11.1.0
-      graceful-fs: 4.2.10
+      graceful-fs: 4.2.11
       is-glob: 4.0.3
       is-path-cwd: 2.2.0
       is-path-inside: 3.0.3
@@ -6584,7 +6639,7 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       at-least-node: 1.0.0
-      graceful-fs: 4.2.10
+      graceful-fs: 4.2.11
       jsonfile: 6.1.0
       universalify: 2.0.0
 
@@ -6893,6 +6948,7 @@ packages:
 
   /graceful-fs@4.2.10:
     resolution: {integrity: sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA==}
+    dev: true
 
   /graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
@@ -8580,7 +8636,7 @@ packages:
     resolution: {integrity: sha512-gUD/epcRms75Cw8RT1pUdHugZYM5ce64ucs2GEISABwkRsOQr0q2wm/MV2TKThycIe5e0ytRweW2RZxclogCdQ==}
     engines: {node: '>=8'}
     dependencies:
-      graceful-fs: 4.2.10
+      graceful-fs: 4.2.11
       parse-json: 5.2.0
       strip-bom: 4.0.0
       type-fest: 0.6.0
@@ -9909,7 +9965,7 @@ packages:
       '@yarnpkg/parsers': 3.0.0-rc.42
       '@zkochan/js-yaml': 0.0.6
       axios: 1.3.6
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       cliui: 7.0.4
@@ -12805,7 +12861,7 @@ packages:
   /write-file-atomic@2.4.3:
     resolution: {integrity: sha512-GaETH5wwsX+GcnzhPgKcKjJ6M2Cq3/iZp1WyY/X1CSqrW+jVNM9Y7D8EC2sM4ZG/V8wZlSniJnCKWPmBYAucRQ==}
     dependencies:
-      graceful-fs: 4.2.10
+      graceful-fs: 4.2.11
       imurmurhash: 0.1.4
       signal-exit: 3.0.7
 
