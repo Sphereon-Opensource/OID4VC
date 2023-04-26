@@ -35,7 +35,7 @@ export class VcIssuer {
   _issuerCallback?: CredentialIssuerCallback
   _verifyCallback?: JWTVerifyCallback
   private readonly _stateManager: IStateManager<CredentialOfferState>
-  private readonly _cNonceStateManager: IStateManager<CNonceState>
+  private readonly nonceManager: IStateManager<CNonceState>
   // TODO add config option
   private readonly _cNonceExpiresIn: number = parseInt(process.env.C_NONCE_EXPIRES_IN as string) * 1000 || 90 * 1000
 
@@ -44,14 +44,14 @@ export class VcIssuer {
     args: {
       userPinRequired?: boolean
       stateManager: IStateManager<CredentialOfferState>
-      cNonceStateManager: IStateManager<CNonceState>
+      nonceManager: IStateManager<CNonceState>
       callback?: CredentialIssuerCallback
       verifyCallback?: JWTVerifyCallback
     }
   ) {
     this._issuerMetadata = issuerMetadata
     this._stateManager = args.stateManager
-    this._cNonceStateManager = args.cNonceStateManager
+    this.nonceManager = args.nonceManager
     this._userPinRequired = args && args.userPinRequired ? args.userPinRequired : false
     this._issuerCallback = args?.callback
     this._verifyCallback = args?.verifyCallback
@@ -85,9 +85,9 @@ export class VcIssuer {
     await this.validateJWT(opts.issueCredentialRequest, grants, clientId, opts.jwtVerifyCallback)
     if (this.isMetadataSupportCredentialRequestFormat(opts.issueCredentialRequest.format)) {
       const cNonce = opts.cNonce ? opts.cNonce : v4()
-      await this._cNonceStateManager.setState(cNonce, { cNonce, createdOn: +new Date() })
+      await this.nonceManager.setState(cNonce, { cNonce, createdOn: +new Date() })
       setTimeout(() => {
-        this._cNonceStateManager.deleteState(cNonce)
+        this.nonceManager.deleteState(cNonce)
       }, this._cNonceExpiresIn)
       return {
         credential: await this.issueCredential({ credentialRequest: opts.issueCredentialRequest }, opts.issuerCallback),

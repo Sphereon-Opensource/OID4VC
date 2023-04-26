@@ -71,7 +71,7 @@ export class RestAPI {
   constructor(opts?: {
     metadata: IssuerMetadata
     stateManager: IStateManager<CredentialOfferState>
-    cNonceStateManager: IStateManager<CNonceState>
+    nonceManager: IStateManager<CNonceState>
     userPinRequired: boolean
   }) {
     dotenv.config()
@@ -80,7 +80,7 @@ export class RestAPI {
       ? (this._vcIssuer = new VcIssuer(opts.metadata, {
           userPinRequired: opts.userPinRequired,
           stateManager: opts.stateManager ?? new MemoryCredentialOfferStateManager(),
-          cNonceStateManager: opts.cNonceStateManager,
+          nonceManager: opts.nonceManager,
         }))
       : buildVCIFromEnvironment()
     this.express = express()

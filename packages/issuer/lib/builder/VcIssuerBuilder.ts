@@ -149,7 +149,7 @@ export class VcIssuerBuilder {
       callback: this.issuerCallback,
       verifyCallback: this.verifyCallback,
       stateManager: this.credentialOfferStateManager,
-      cNonceStateManager: this.cNonceStateManager,
+      nonceManager: this.cNonceStateManager,
     })
   }
 }
