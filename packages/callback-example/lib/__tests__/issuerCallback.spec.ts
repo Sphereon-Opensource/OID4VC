@@ -20,7 +20,7 @@ import { generateDid, getIssuerCallback, verifyCredential } from '../IssuerCallb
 
 const INITIATION_TEST_URI =
   'openid-initiate-issuance://?credential_type=OpenBadgeCredential&issuer=https%3A%2F%2Fjff%2Ewalt%2Eid%2Fissuer-api%2Foidc%2F&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false'
-const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
+const IDENTIPROOF_ISSUER_URL = 'https://example.com/credential'
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
 let keypair: KeyPair // Proof of Possession JWT
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
