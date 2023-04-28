@@ -89,7 +89,7 @@ describe('issuerCallback', () => {
     const stateManager = new MemoryCredentialOfferStateManager()
     await stateManager.setState('existing-client', {
       clientId,
-      "pre-authorized_code": preAuthorizedCode,
+      'pre-authorized_code': preAuthorizedCode,
       createdOn: +new Date(),
       credentialOffer: {
         credential_issuer: 'did:key:test',

@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "start": "ts-node lib/api.ts",
+    "start": "ts-node lib/IssuerTokenServer.ts",
     "build": "tsc"
   },
   "dependencies": {

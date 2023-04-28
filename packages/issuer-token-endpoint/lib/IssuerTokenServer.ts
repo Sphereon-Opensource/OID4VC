@@ -30,8 +30,8 @@ export class IssuerTokenServer {
 
     if (!opts?.app) {
       this._app = express()
-      const port = parseInt(this._baseUrl.host.split(':')[1])
-      const httpPort = (port ? port : parseInt(process.env.PORT as string)) ?? 80
+      const port = this._baseUrl.host.split(':')[1] ? parseInt(this._baseUrl.host.split(':')[1]) : undefined
+      const httpPort = (port ? port : process.env.PORT ? parseInt(process.env.PORT as string) : undefined) ?? 80
       const secret = process.env.COOKIE_SIGNING_KEY
 
       this._app.use(cors())
