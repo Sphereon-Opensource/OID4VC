@@ -24,9 +24,9 @@ export class MemoryCNonceStateManager implements IStateManager<CNonceState> {
     return this.cNonceStateManager.delete(state)
   }
 
-  async getAssertedState(issuerState: string): Promise<CNonceState | undefined> {
+  async getAssertedState(issuerState: string): Promise<CNonceState> {
     if (await this.hasState(issuerState)) {
-      return await this.getState(issuerState)
+      return (await this.getState(issuerState)) as CNonceState
     } else {
       throw new Error(C_NONCE_MISSING_ERROR)
     }

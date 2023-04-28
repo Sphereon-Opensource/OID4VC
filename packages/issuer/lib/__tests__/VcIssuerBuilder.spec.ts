@@ -2,6 +2,7 @@ import { CredentialFormatEnum, CredentialSupported, Display, IssuerCredentialSub
 
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../index'
 
+const preAuthorizedCode = 'pre_authorized_test_code'
 describe('VcIssuer builder should', () => {
   it('generate a VcIssuer', () => {
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
@@ -122,11 +123,13 @@ describe('VcIssuer builder should', () => {
     const now = +new Date()
     await vcIssuer.credentialOfferStateManager?.setState('test', {
       clientId: 'test_client',
+      "pre-authorized_code": preAuthorizedCode,
       createdOn: now,
       credentialOffer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' },
     })
     await expect(vcIssuer.credentialOfferStateManager?.getState('test')).resolves.toEqual({
       clientId: 'test_client',
+      "pre-authorized_code": preAuthorizedCode,
       createdOn: now,
       credentialOffer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' },
     })
