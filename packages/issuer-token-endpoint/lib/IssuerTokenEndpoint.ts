@@ -1,5 +1,8 @@
-import { AccessTokenResponse, CNonceState, CredentialOfferState, IStateManager } from '@sphereon/openid4vci-common'
+import { KeyObject } from 'crypto'
+
+import { AccessTokenResponse, Alg, CNonceState, CredentialOfferState, IStateManager, JWTHeader, JWTPayload, Typ } from '@sphereon/openid4vci-common'
 import express, { NextFunction, Request, Response, Router } from 'express'
+import * as jose from 'jose'
 import { v4 } from 'uuid'
 
 const router = express.Router()
@@ -12,6 +15,7 @@ interface ITokenEndpointOpts {
   userPinRequired?: boolean
   stateManager?: IStateManager<CredentialOfferState>
   nonceStateManager?: IStateManager<CNonceState>
+  privateKey: KeyObject
 }
 
 let tokenPath: string
@@ -21,6 +25,7 @@ let tokenExpiresIn: number
 let userPinRequired: boolean
 let stateManager: IStateManager<CredentialOfferState>
 let nonceStateManager: IStateManager<CNonceState>
+let privateKey: KeyObject
 
 export const tokenRequestEndpoint = (opts?: ITokenEndpointOpts): Router => {
   tokenPath = (opts?.tokenPath ? opts.tokenPath : (process.env.TOKEN_PATH as string)) ?? '/token'
@@ -28,6 +33,7 @@ export const tokenRequestEndpoint = (opts?: ITokenEndpointOpts): Router => {
   cNonceExpiresIn = (opts?.cNonceExpiresIn ? opts.cNonceExpiresIn : parseInt(process.env.C_NONCE_EXPIRES_IN as string)) ?? 300000
   tokenExpiresIn = (opts?.tokenExpiresIn ? opts.tokenExpiresIn : parseInt(process.env.TOKEN_EXPIRES_IN as string)) ?? 300000
   userPinRequired = (opts?.userPinRequired ? opts.userPinRequired : !!process.env.USER_PIN_REQUIRED) ?? false
+  privateKey = opts?.privateKey as KeyObject
   if (opts?.stateManager) {
     stateManager = opts.stateManager
   } else {
@@ -58,8 +64,12 @@ const handleTokenRequest = async (request: Request, response: Response) => {
     nonceStateManager.deleteState(cNonce)
   }, cNonceExpiresIn)
 
+  const issuanceTime = new Date()
+  const header: JWTHeader = { typ: Typ.JWT, alg: Alg.ES256 }
+  const payload: JWTPayload = { iat: issuanceTime.getTime(), exp: +new Date(issuanceTime.getTime() + tokenExpiresIn) }
+  const access_token = await new jose.SignJWT({ ...payload }).setProtectedHeader({ ...header }).sign(privateKey)
   const responseBody: AccessTokenResponse = {
-    access_token: 'eyJhbGciOiJSUzI1NiIsInR5cCI6Ikp..sHQ', // What should be in the JWT?
+    access_token,
     token_type: 'bearer',
     expires_in: tokenExpiresIn,
     c_nonce: cNonce,
@@ -71,30 +81,32 @@ const handleTokenRequest = async (request: Request, response: Response) => {
 
 export const handleHTTPStatus400 = (request: Request, response: Response, next: NextFunction) => {
   /*
-  invalid_request:
-
-the Authorization Server does not expect a PIN in the pre-authorized flow but the client provides a PIN
-
-the Authorization Server expects a PIN in the pre-authorized flow but the client does not provide a PIN
-invalid_grant:
-
-the Authorization Server expects a PIN in the pre-authorized flow but the client provides the wrong PIN
-
-the End-User provides the wrong Pre-Authorized Code or the Pre-Authorized Code has expired
-invalid_client:
-
-the client tried to send a Token Request with a Pre-Authorized Code without Client ID but the Authorization Server does not support anonymous access
+    invalid_client:
+    the client tried to send a Token Request with a Pre-Authorized Code without Client ID but the Authorization Server does not support anonymous access
    */
   if (request.body.grant_type === 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     if (!request.body['pre-authorized_code']) {
       return response.status(400).json({ error: 'invalid_request', error_description: 'pre-authorized_code is required' })
     }
+    /*
+    invalid_request:
+    the Authorization Server expects a PIN in the pre-authorized flow but the client does not provide a PIN
+     */
     if (userPinRequired && !request.body.user_pin) {
       return response.status(400).json({ error: 'invalid_request', error_description: 'User pin is required' })
     }
+    /*
+    invalid_request:
+    the Authorization Server does not expect a PIN in the pre-authorized flow but the client provides a PIN
+     */
     if (!userPinRequired && request.body.user_pin) {
       return response.status(400).json({ error: 'invalid_request', error_description: 'User pin is not required' })
     }
+    /*
+    invalid_grant:
+    the Authorization Server expects a PIN in the pre-authorized flow but the client provides the wrong PIN
+    the End-User provides the wrong Pre-Authorized Code or the Pre-Authorized Code has expired
+     */
     if (!/[0-9{,8}]/.test(request.body.user_pin)) {
       return response.status(400).json({ error: 'invalid_grant', error_message: 'PIN must consist of maximum 8 numeric characters' })
     }

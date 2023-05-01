@@ -1,3 +1,4 @@
+import { KeyObject } from 'crypto'
 import process from 'process'
 
 import { CNonceState, CredentialOfferState, IStateManager } from '@sphereon/openid4vci-common'
@@ -23,10 +24,15 @@ export class IssuerTokenServer {
     nonceStateManager?: IStateManager<CNonceState>
     userPinRequired?: boolean
     baseUrl?: string
+    privateKey?: KeyObject
   }) {
     dotenv.config()
-    const { tokenPath, interval, tokenExpiresIn, cNonceExpiresIn, userPinRequired, stateManager, nonceStateManager } = { ...opts }
+    const { tokenPath, interval, tokenExpiresIn, cNonceExpiresIn, userPinRequired, stateManager, nonceStateManager, privateKey } = { ...opts }
     this._baseUrl = new URL((opts?.baseUrl ? opts.baseUrl : process.env.BASE_URL) ?? 'http://localhost')
+
+    if (!privateKey) {
+      throw new Error('Please provide a private key')
+    }
 
     if (!opts?.app) {
       this._app = express()
@@ -45,7 +51,7 @@ export class IssuerTokenServer {
     }
     this._app.use(
       this._baseUrl.pathname,
-      tokenRequestEndpoint({ tokenPath, tokenExpiresIn, interval, cNonceExpiresIn, userPinRequired, stateManager, nonceStateManager })
+      tokenRequestEndpoint({ tokenPath, tokenExpiresIn, interval, cNonceExpiresIn, userPinRequired, stateManager, nonceStateManager, privateKey })
     )
   }
 }
