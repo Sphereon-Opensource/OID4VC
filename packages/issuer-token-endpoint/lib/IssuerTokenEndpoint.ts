@@ -12,7 +12,6 @@ interface ITokenEndpointOpts {
   interval?: number
   cNonceExpiresIn?: number
   tokenExpiresIn?: number
-  userPinRequired?: boolean
   stateManager?: IStateManager<CredentialOfferState>
   nonceStateManager?: IStateManager<CNonceState>
   privateKey: KeyObject
@@ -22,7 +21,6 @@ let tokenPath: string
 let interval: number
 let cNonceExpiresIn: number
 let tokenExpiresIn: number
-let userPinRequired: boolean
 let stateManager: IStateManager<CredentialOfferState>
 let nonceStateManager: IStateManager<CNonceState>
 let privateKey: KeyObject
@@ -32,7 +30,6 @@ export const tokenRequestEndpoint = (opts?: ITokenEndpointOpts): Router => {
   interval = (opts?.interval ? opts.interval : parseInt(process.env.INTERVAL as string)) ?? 300000
   cNonceExpiresIn = (opts?.cNonceExpiresIn ? opts.cNonceExpiresIn : parseInt(process.env.C_NONCE_EXPIRES_IN as string)) ?? 300000
   tokenExpiresIn = (opts?.tokenExpiresIn ? opts.tokenExpiresIn : parseInt(process.env.TOKEN_EXPIRES_IN as string)) ?? 300000
-  userPinRequired = (opts?.userPinRequired ? opts.userPinRequired : !!process.env.USER_PIN_REQUIRED) ?? false
   privateKey = opts?.privateKey as KeyObject
   if (opts?.stateManager) {
     stateManager = opts.stateManager
@@ -53,10 +50,6 @@ const handleTokenRequest = async (request: Request, response: Response) => {
     'Cache-Control': 'no-store',
     Pragma: 'no-cache',
   })
-
-  const assertedState = (await stateManager.getAssertedState(request.body.state)) as CredentialOfferState
-  assertedState!['pre-authorized_code'] = request.body['pre-authorized_code']
-  await stateManager.setState(request.body.state, assertedState)
 
   const cNonce = v4()
   await nonceStateManager.setState(cNonce, { cNonce, createdOn: +new Date() })
@@ -79,11 +72,10 @@ const handleTokenRequest = async (request: Request, response: Response) => {
   return response.status(200).json(responseBody)
 }
 
-export const handleHTTPStatus400 = (request: Request, response: Response, next: NextFunction) => {
-  /*
-    invalid_client:
-    the client tried to send a Token Request with a Pre-Authorized Code without Client ID but the Authorization Server does not support anonymous access
-   */
+export const handleHTTPStatus400 = async (request: Request, response: Response, next: NextFunction) => {
+  const assertedState = (await stateManager.getAssertedState(request.body.state)) as CredentialOfferState
+  await stateManager.setState(request.body.state, assertedState)
+  // TODO invalid_client: the client tried to send a Token Request with a Pre-Authorized Code without Client ID but the Authorization Server does not support anonymous access
   if (request.body.grant_type === 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
     if (!request.body['pre-authorized_code']) {
       return response.status(400).json({ error: 'invalid_request', error_description: 'pre-authorized_code is required' })
@@ -92,14 +84,14 @@ export const handleHTTPStatus400 = (request: Request, response: Response, next: 
     invalid_request:
     the Authorization Server expects a PIN in the pre-authorized flow but the client does not provide a PIN
      */
-    if (userPinRequired && !request.body.user_pin) {
+    if (assertedState.userPinRequired && !request.body.user_pin) {
       return response.status(400).json({ error: 'invalid_request', error_description: 'User pin is required' })
     }
     /*
     invalid_request:
     the Authorization Server does not expect a PIN in the pre-authorized flow but the client provides a PIN
      */
-    if (!userPinRequired && request.body.user_pin) {
+    if (!assertedState.userPinRequired && request.body.user_pin) {
       return response.status(400).json({ error: 'invalid_request', error_description: 'User pin is not required' })
     }
     /*
@@ -109,6 +101,15 @@ export const handleHTTPStatus400 = (request: Request, response: Response, next: 
      */
     if (!/[0-9{,8}]/.test(request.body.user_pin)) {
       return response.status(400).json({ error: 'invalid_grant', error_message: 'PIN must consist of maximum 8 numeric characters' })
+    }
+    const now = +new Date()
+    const expirationTime = assertedState.preAuthorizedCodeCreatedOn + assertedState.preAuthorizedCodeExpiresIn
+    if (
+      request.body.user_pin !== assertedState.pinCode ||
+      request.body['pre-authorized_code'] !== assertedState['pre-authorized_code'] ||
+      now >= expirationTime
+    ) {
+      return response.status(400).json({ error: 'invalid_grant', error_message: 'PIN is invalid or pre-authorized_code is invalid or expired' })
     }
   }
   return next()
