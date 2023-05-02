@@ -7,7 +7,7 @@ export interface CredentialOfferState {
   'pre-authorized_code': string;
   preAuthorizedCodeCreatedOn: number;
   preAuthorizedCodeExpiresIn: number;
-  pinCode: number;
+  userPin: number;
   userPinRequired: boolean;
 }
 

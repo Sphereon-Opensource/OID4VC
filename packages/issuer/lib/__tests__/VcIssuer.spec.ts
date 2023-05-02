@@ -50,7 +50,7 @@ describe('VcIssuer', () => {
       preAuthorizedCodeExpiresIn: 300000,
       userPinRequired: false,
       preAuthorizedCodeCreatedOn: +new Date(),
-      pinCode: 123456,
+      userPin: 123456,
       credentialOffer: {
         credential_issuer: 'did:key:test',
         credential_definition: {
