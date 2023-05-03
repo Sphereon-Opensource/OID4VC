@@ -33,10 +33,10 @@ let nonceStateManager: IStateManager<CNonceState>
 let jwtSignerCallback: JWTSignerCallback
 
 export const tokenRequestEndpoint = (opts?: ITokenEndpointOpts): Router => {
-  tokenPath = (opts?.tokenPath ? opts.tokenPath : (process.env.TOKEN_PATH as string)) ?? '/token'
-  interval = (opts?.interval ? opts.interval : getNumberOrUndefined(process.env.INTERVAL)) ?? 300000
-  cNonceExpiresIn = (opts?.cNonceExpiresIn ? opts.cNonceExpiresIn : getNumberOrUndefined(process.env.C_NONCE_EXPIRES_IN)) ?? 300000
-  tokenExpiresIn = (opts?.tokenExpiresIn ? opts.tokenExpiresIn : getNumberOrUndefined(process.env.TOKEN_EXPIRES_IN)) ?? 300000
+  tokenPath = opts?.tokenPath ?? process.env.TOKEN_PATH ?? '/token'
+  interval = opts?.interval ?? getNumberOrUndefined(process.env.INTERVAL) ?? 300000
+  cNonceExpiresIn = opts?.cNonceExpiresIn ?? getNumberOrUndefined(process.env.C_NONCE_EXPIRES_IN) ?? 300000
+  tokenExpiresIn = opts?.tokenExpiresIn ?? getNumberOrUndefined(process.env.TOKEN_EXPIRES_IN) ?? 300000
   if (opts?.jwtSignerCallback) {
     jwtSignerCallback = opts.jwtSignerCallback
   } else {

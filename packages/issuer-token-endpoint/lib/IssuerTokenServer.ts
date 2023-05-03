@@ -29,12 +29,12 @@ export class IssuerTokenServer {
   }) {
     dotenv.config()
     const { tokenPath, interval, tokenExpiresIn, cNonceExpiresIn, stateManager, nonceStateManager, jwtSignerCallback } = { ...opts }
-    this._baseUrl = new URL((opts?.baseUrl ? opts.baseUrl : process.env.BASE_URL) ?? 'http://localhost')
+    this._baseUrl = new URL(opts?.baseUrl ?? process.env.BASE_URL ?? 'http://localhost')
 
     if (!opts?.app) {
       this._app = express()
-      const port = getNumberOrUndefined(this._baseUrl.host.split(':')[1])
-      const httpPort = (port ? port : getNumberOrUndefined(process.env.PORT)) ?? 3000
+      const httpPort = getNumberOrUndefined(this._baseUrl.host.split(':')[1]) ?? getNumberOrUndefined(process.env.PORT) ?? 3000
+      const host = this._baseUrl.host.split(':')[0]
       const secret = process.env.COOKIE_SIGNING_KEY
 
       this._app.use(cors())
@@ -42,7 +42,7 @@ export class IssuerTokenServer {
       this._app.use(bodyParser.json())
       this._app.use(cookieParser(secret))
 
-      this._app.listen(httpPort, this._baseUrl.host.split(':')[0], () => console.log(`HTTP server listening on port ${httpPort}`))
+      this._app.listen(httpPort, host, () => console.log(`HTTP server listening on port ${httpPort}`))
     } else {
       this._app = opts.app
     }
