@@ -13,6 +13,7 @@ import {
   JWTSignerCallback,
   NONCE_STATE_MANAGER_REQUIRED_ERROR,
   PIN_NOT_MATCH_ERROR,
+  PIN_NOT_MATCHING_ERROR,
   PIN_VALIDATION_ERROR,
   PRE_AUTH_CODE_LITERAL,
   PRE_AUTHORIZED_CODE_REQUIRED_ERROR,
@@ -56,8 +57,8 @@ export const tokenRequestEndpoint = (opts?: ITokenEndpointOpts): Router => {
     tokenPath,
     handleHTTPStatus400({ stateManager: opts.stateManager }),
     handleTokenRequest({
-      jwtSignerCallback: opts.jwtSignerCallback!,
-      nonceStateManager: opts.nonceStateManager!,
+      jwtSignerCallback: opts.jwtSignerCallback,
+      nonceStateManager: opts.nonceStateManager,
       cNonceExpiresIn,
       interval,
       tokenExpiresIn,
@@ -143,13 +144,12 @@ export const handleHTTPStatus400 = (opts: Required<Pick<ITokenEndpointOpts, 'sta
       the Authorization Server expects a PIN in the pre-authorized flow but the client provides the wrong PIN
       the End-User provides the wrong Pre-Authorized Code or the Pre-Authorized Code has expired
        */
-      if (
-        (request.body.user_pin && !/[0-9{,8}]/.test(request.body.user_pin)) ||
-        assertedState.userPin != getNumberOrUndefined(request.body.user_pin)
-      ) {
+      if (request.body.user_pin && !/[0-9{,8}]/.test(request.body.user_pin)) {
         return response.status(400).json({ error: TokenErrorResponse.invalid_grant, error_message: PIN_VALIDATION_ERROR })
       }
-
+      if (assertedState.userPin != getNumberOrUndefined(request.body.user_pin)) {
+        return response.status(400).json({ error: TokenErrorResponse.invalid_grant, error_message: PIN_NOT_MATCHING_ERROR })
+      }
       if (getNumberOrUndefined(request.body.user_pin) !== assertedState.userPin) {
         return response.status(400).json({ error: TokenErrorResponse.invalid_grant, error_message: PIN_NOT_MATCH_ERROR })
       } else if (

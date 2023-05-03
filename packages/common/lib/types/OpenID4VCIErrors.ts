@@ -31,3 +31,4 @@ export const EXPIRED_PRE_AUTHORIZED_CODE = 'pre-authorized_code is expired';
 export const JWT_SIGNER_CALLBACK_REQUIRED_ERROR = 'JWT signer callback function is required';
 export const STATE_MANAGER_REQUIRED_ERROR = 'StateManager instance is required';
 export const NONCE_STATE_MANAGER_REQUIRED_ERROR = 'NonceStateManager instance is required';
+export const PIN_NOT_MATCHING_ERROR = 'PIN does not match';

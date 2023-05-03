@@ -62,7 +62,6 @@ describe('issuerCallback', () => {
   let vcIssuer: VcIssuer
   const state = 'existing-client'
   const clientId = 'sphereon:wallet'
-  const preAuthorizedCode = 'pre_authorized_test_code'
 
   beforeAll(async () => {
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
@@ -89,12 +88,9 @@ describe('issuerCallback', () => {
     const stateManager = new MemoryCredentialOfferStateManager()
     await stateManager.setState('existing-client', {
       clientId,
-      'pre-authorized_code': preAuthorizedCode,
       createdOn: +new Date(),
       userPin: 123456,
-      userPinRequired: true,
       preAuthorizedCodeExpiresIn: 300000,
-      preAuthorizedCodeCreatedOn: +new Date(),
       credentialOffer: {
         credential_issuer: 'did:key:test',
         credential_definition: {

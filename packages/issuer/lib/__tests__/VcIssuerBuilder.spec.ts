@@ -124,17 +124,13 @@ describe('VcIssuer builder should', () => {
       clientId: 'test_client',
       createdOn: preAuthorizedCodeCreatedOn,
       preAuthorizedCodeExpiresIn: 300000,
-      userPinRequired: false,
-      preAuthorizedCodeCreatedOn,
       userPin: 123456,
       credentialOffer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' },
     })
     await expect(vcIssuer.credentialOfferStateManager?.getState('test')).resolves.toEqual({
       clientId: 'test_client',
       userPin: 123456,
-      preAuthorizedCodeCreatedOn,
       preAuthorizedCodeExpiresIn: 300000,
-      userPinRequired: false,
       createdOn: preAuthorizedCodeCreatedOn,
       credentialOffer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' },
     })
