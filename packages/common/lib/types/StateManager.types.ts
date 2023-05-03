@@ -6,7 +6,6 @@ export interface CredentialOfferState {
   createdOn: number;
   preAuthorizedCodeExpiresIn: number;
   userPin: number;
-  userPinRequired: boolean;
 }
 
 export interface CNonceState {

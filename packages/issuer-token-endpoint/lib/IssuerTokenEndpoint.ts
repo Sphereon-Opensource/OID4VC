@@ -102,14 +102,14 @@ export const handleHTTPStatus400 = async (request: Request, response: Response, 
     invalid_request:
     the Authorization Server expects a PIN in the pre-authorized flow but the client does not provide a PIN
      */
-    if (assertedState.userPinRequired && !request.body.user_pin) {
+    if (assertedState.credentialOffer.grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"]?.user_pin_required && !request.body.user_pin) {
       return response.status(400).json({ error: 'invalid_request', error_description: 'User pin is required' })
     }
     /*
     invalid_request:
     the Authorization Server does not expect a PIN in the pre-authorized flow but the client provides a PIN
      */
-    if (!assertedState.userPinRequired && request.body.user_pin) {
+    if (!assertedState.credentialOffer.grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"]?.user_pin_required && request.body.user_pin) {
       return response.status(400).json({ error: 'invalid_request', error_description: 'User pin is not required' })
     }
     /*
