@@ -62,7 +62,6 @@ const state = new MemoryCredentialOfferStateManager()
 state.setState('test_state', {
   userPinRequired: true,
   userPin: 493536,
-  preAuthorizedCodeCreatedOn: +new Date(),
   preAuthorizedCodeExpiresIn: 300000,
   createdOn: +new Date(),
   credentialOffer: {

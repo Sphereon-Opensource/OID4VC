@@ -121,7 +121,7 @@ export const handleHTTPStatus400 = async (request: Request, response: Response, 
       return response.status(400).json({ error: 'invalid_grant', error_message: 'PIN must consist of maximum 8 numeric characters' })
     }
     const now = +new Date()
-    const expirationTime = assertedState.preAuthorizedCodeCreatedOn + assertedState.preAuthorizedCodeExpiresIn
+    const expirationTime = assertedState.createdOn + assertedState.preAuthorizedCodeExpiresIn
     if (
       getNumberOrUndefined(request.body.user_pin) !== assertedState.userPin ||
       request.body['pre-authorized_code'] !==
