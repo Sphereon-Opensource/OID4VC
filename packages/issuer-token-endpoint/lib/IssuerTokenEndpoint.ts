@@ -112,11 +112,11 @@ const isValidGrant = (assertedState: CredentialOfferState, grantType: string): b
   return false
 }
 
-export const handleHTTPStatus400 = (opts: Pick<ITokenEndpointOpts, 'stateManager'>) => {
+export const handleHTTPStatus400 = (opts: Required<Pick<ITokenEndpointOpts, 'stateManager'>>) => {
   return async (request: Request, response: Response, next: NextFunction) => {
     // TODO invalid_client: the client tried to send a Token Request with a Pre-Authorized Code without Client ID but the Authorization Server does not support anonymous access
     const assertedState = (await opts.stateManager.getAssertedState(request.body.state)) as CredentialOfferState
-    await stateManager.setState(request.body.state, assertedState)
+    await opts.stateManager.setState(request.body.state, assertedState)
     if (!isValidGrant(assertedState, request.body.grant_type)) {
       return response.status(400).json({ error: TokenErrorResponse.invalid_grant, error_description: UNSUPPORTED_GRANT_TYPE_ERROR })
     }
