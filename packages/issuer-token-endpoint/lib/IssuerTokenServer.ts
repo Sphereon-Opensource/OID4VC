@@ -1,14 +1,11 @@
-import { KeyObject } from 'crypto'
 import process from 'process'
 
-import { Alg, CNonceState, CredentialOfferState, getNumberOrUndefined, IStateManager, Jwt, JWTSignerCallback } from '@sphereon/openid4vci-common'
-import { MemoryCNonceStateManager, MemoryCredentialOfferStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager'
+import { CNonceState, CredentialOfferState, getNumberOrUndefined, IStateManager, JWTSignerCallback } from '@sphereon/openid4vci-common'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import * as dotenv from 'dotenv-flow'
 import express, { Express } from 'express'
-import * as jose from 'jose'
 
 import { tokenRequestEndpoint } from './IssuerTokenEndpoint'
 
@@ -52,28 +49,3 @@ export class IssuerTokenServer {
     )
   }
 }
-
-const signerCallback = async (jwt: Jwt, kid?: string): Promise<string> => {
-  const privateKey = (await jose.generateKeyPair(Alg.ES256)).privateKey as KeyObject
-  return new jose.SignJWT({ ...jwt.payload }).setProtectedHeader({ ...jwt.header }).sign(privateKey)
-}
-
-const state = new MemoryCredentialOfferStateManager()
-state.setState('test_state', {
-  userPin: 493536,
-  preAuthorizedCodeExpiresIn: 300000,
-  createdOn: +new Date(),
-  credentialOffer: {
-    credential_issuer: 'test_issuer',
-    credential_definition: {
-      '@context': ['test_context'],
-      types: ['VerifiableCredential'],
-      credentialSubject: {},
-    },
-  },
-})
-export default new IssuerTokenServer({
-  stateManager: state,
-  nonceStateManager: new MemoryCNonceStateManager(),
-  jwtSignerCallback: signerCallback,
-})._app
