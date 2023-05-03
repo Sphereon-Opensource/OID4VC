@@ -58,6 +58,10 @@ beforeAll(async () => {
   keypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject }
   didKey = await generateDid()
 }, 30000)
+
+afterAll(async () => {
+  await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
+})
 describe('issuerCallback', () => {
   let vcIssuer: VcIssuer
   const state = 'existing-client'
@@ -134,6 +138,10 @@ describe('issuerCallback', () => {
       )
       .build()
   }, 30000)
+
+  afterAll(async () => {
+    await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
+  })
 
   it('should issue a VC', async () => {
     const credential: ICredential = {

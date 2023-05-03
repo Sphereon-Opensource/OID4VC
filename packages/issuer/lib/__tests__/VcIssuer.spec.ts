@@ -46,8 +46,6 @@ describe('VcIssuer', () => {
       clientId,
       createdOn: +new Date(),
       preAuthorizedCodeExpiresIn: 300000,
-      userPinRequired: false,
-      preAuthorizedCodeCreatedOn: +new Date(),
       userPin: 123456,
       credentialOffer: {
         credential_issuer: 'did:key:test',
@@ -104,6 +102,10 @@ describe('VcIssuer', () => {
         })
       )
       .build()
+  })
+
+  afterAll(async () => {
+    await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 
   it('should fail at the first interaction of the client with the issuer', async () => {
