@@ -60,7 +60,6 @@ const signerCallback = async (jwt: Jwt, kid?: string): Promise<string> => {
 
 const state = new MemoryCredentialOfferStateManager()
 state.setState('test_state', {
-  'pre-authorized_code': 'SplxlOBeZQQYbYS6WxSbIA',
   userPinRequired: true,
   userPin: 493536,
   preAuthorizedCodeCreatedOn: +new Date(),

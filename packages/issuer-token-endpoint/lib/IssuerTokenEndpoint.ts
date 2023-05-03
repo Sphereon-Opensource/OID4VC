@@ -124,7 +124,8 @@ export const handleHTTPStatus400 = async (request: Request, response: Response, 
     const expirationTime = assertedState.preAuthorizedCodeCreatedOn + assertedState.preAuthorizedCodeExpiresIn
     if (
       getNumberOrUndefined(request.body.user_pin) !== assertedState.userPin ||
-      request.body['pre-authorized_code'] !== assertedState['pre-authorized_code'] ||
+      request.body['pre-authorized_code'] !==
+        assertedState.credentialOffer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code'] ||
       now >= expirationTime
     ) {
       return response.status(400).json({ error: 'invalid_grant', error_message: 'PIN is invalid or pre-authorized_code is invalid or expired' })

@@ -4,7 +4,6 @@ export interface CredentialOfferState {
   clientId?: string;
   credentialOffer: CredentialOfferPayloadV1_0_11;
   createdOn: number;
-  'pre-authorized_code': string;
   preAuthorizedCodeCreatedOn: number;
   preAuthorizedCodeExpiresIn: number;
   userPin: number;
