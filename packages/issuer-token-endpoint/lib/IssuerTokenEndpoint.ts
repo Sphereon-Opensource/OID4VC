@@ -88,7 +88,7 @@ const handleTokenRequest = (
     })
 
     const cNonce = v4()
-    await opts.nonceStateManager?.setState(cNonce, { cNonce, createdOn: +new Date() })
+    await opts.nonceStateManager?.setState(cNonce, { cNonce: v4(), createdOn: +new Date() })
     setTimeout(() => {
       opts.nonceStateManager?.deleteState(cNonce)
     }, opts.cNonceExpiresIn as number)
