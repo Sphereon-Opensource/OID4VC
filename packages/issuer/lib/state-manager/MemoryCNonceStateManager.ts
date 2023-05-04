@@ -2,6 +2,7 @@ import { C_NONCE_MISSING_ERROR, CNonceState, IStateManager } from '@sphereon/ope
 
 export class MemoryCNonceStateManager implements IStateManager<CNonceState> {
   private readonly cNonceStateManager: Map<string, CNonceState>
+  private intervalRoutineId?: NodeJS.Timer
 
   constructor() {
     this.cNonceStateManager = new Map()
@@ -42,5 +43,17 @@ export class MemoryCNonceStateManager implements IStateManager<CNonceState> {
 
   async setState(state: string, payload: CNonceState): Promise<void> {
     this.cNonceStateManager.set(state, payload)
+  }
+
+  startCleanupRoutine(timestamp?: number, timeout?: number): void {
+    if (!this.intervalRoutineId) {
+      this.intervalRoutineId = setInterval(() => this.clearExpiredStates(timestamp), timeout ?? 5000)
+    }
+  }
+
+  stopCleanupRouting(): void {
+    if (this.intervalRoutineId) {
+      clearInterval(this.intervalRoutineId)
+    }
   }
 }
