@@ -67,11 +67,13 @@ export const tokenRequestEndpoint = (opts?: ITokenEndpointOpts): Router => {
   return router
 }
 
-const generateAccessToken = async (opts: Required<Pick<ITokenEndpointOpts, 'accessTokenSignerCallback' | 'tokenExpiresIn'>>): Promise<string> => {
+const generateAccessToken = async (
+  opts: Required<Pick<ITokenEndpointOpts, 'accessTokenSignerCallback' | 'tokenExpiresIn'> & { state: string }>
+): Promise<string> => {
   const issuanceTime = new Date()
   const jwt: Jwt = {
     header: { typ: Typ.JWT, alg: Alg.ES256 },
-    payload: { iat: issuanceTime.getTime(), exp: opts.tokenExpiresIn },
+    payload: { iat: issuanceTime.getTime(), exp: opts.tokenExpiresIn, iss: opts.state },
   }
   return await opts.accessTokenSignerCallback(jwt)
 }
@@ -91,7 +93,11 @@ const handleTokenRequest = (
       opts.nonceStateManager?.deleteState(cNonce)
     }, opts.cNonceExpiresIn as number)
 
-    const access_token = await generateAccessToken({ tokenExpiresIn: opts.tokenExpiresIn, accessTokenSignerCallback: opts.accessTokenSignerCallback })
+    const access_token = await generateAccessToken({
+      tokenExpiresIn: opts.tokenExpiresIn,
+      accessTokenSignerCallback: opts.accessTokenSignerCallback,
+      state: request.body.state,
+    })
     const responseBody: AccessTokenResponse = {
       access_token,
       token_type: 'bearer',
