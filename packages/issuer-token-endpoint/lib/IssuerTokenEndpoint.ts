@@ -35,6 +35,7 @@ interface ITokenEndpointOpts {
   interval?: number
   cNonceExpiresIn?: number
   tokenExpiresIn?: number
+  preAuthorizedCodeExpirationDuration?: number
   stateManager?: IStateManager<CredentialOfferState>
   nonceStateManager?: IStateManager<CNonceState>
   accessTokenSignerCallback?: JWTSignerCallback
@@ -44,6 +45,8 @@ interface ITokenEndpointOpts {
 export const tokenRequestEndpoint = (opts?: ITokenEndpointOpts): Router => {
   const tokenPath = opts?.tokenPath ?? process.env.TOKEN_PATH ?? '/token'
   const accessTokenIssuer = opts?.accessTokenIssuer ?? process.env.ACCESS_TOKEN_ISSUER
+  const preAuthorizedCodeExpirationDuration =
+    opts?.preAuthorizedCodeExpirationDuration ?? getNumberOrUndefined(process.env.PRE_AUTHORIZED_CODE_EXPIRATION_DURATION) ?? 300000
   const interval = opts?.interval ?? getNumberOrUndefined(process.env.INTERVAL) ?? 300000
   const cNonceExpiresIn = opts?.cNonceExpiresIn ?? getNumberOrUndefined(process.env.C_NONCE_EXPIRES_IN) ?? 300000
   const tokenExpiresIn = opts?.tokenExpiresIn ?? getNumberOrUndefined(process.env.TOKEN_EXPIRES_IN) ?? 300000
@@ -61,7 +64,7 @@ export const tokenRequestEndpoint = (opts?: ITokenEndpointOpts): Router => {
   }
   router.post(
     tokenPath,
-    handleHTTPStatus400({ stateManager: opts.stateManager }),
+    handleHTTPStatus400({ stateManager: opts.stateManager, preAuthorizedCodeExpirationDuration }),
     handleTokenRequest({
       accessTokenSignerCallback: opts.accessTokenSignerCallback,
       nonceStateManager: opts.nonceStateManager,
@@ -129,7 +132,7 @@ const isValidGrant = (assertedState: CredentialOfferState, grantType: string): b
   return false
 }
 
-export const handleHTTPStatus400 = (opts: Required<Pick<ITokenEndpointOpts, 'stateManager'>>) => {
+export const handleHTTPStatus400 = (opts: Required<Pick<ITokenEndpointOpts, 'preAuthorizedCodeExpirationDuration' | 'stateManager'>>) => {
   return async (request: Request, response: Response, next: NextFunction) => {
     const assertedState = (await opts.stateManager.getAssertedState(request.body.state)) as CredentialOfferState
     if (!isValidGrant(assertedState, request.body.grant_type)) {
@@ -170,7 +173,7 @@ export const handleHTTPStatus400 = (opts: Required<Pick<ITokenEndpointOpts, 'sta
         request.body[PRE_AUTH_CODE_LITERAL] !== assertedState.credentialOffer.grants?.[GrantType.PRE_AUTHORIZED_CODE]?.[PRE_AUTH_CODE_LITERAL]
       ) {
         return response.status(400).json({ error: TokenErrorResponse.invalid_grant, error_message: INVALID_PRE_AUTHORIZED_CODE })
-      } else if (isPreAuthorizedCodeExpired(assertedState)) {
+      } else if (isPreAuthorizedCodeExpired(assertedState, opts.preAuthorizedCodeExpirationDuration)) {
         return response.status(400).json({ error: TokenErrorResponse.invalid_grant, error_message: EXPIRED_PRE_AUTHORIZED_CODE })
       }
     }
@@ -178,8 +181,8 @@ export const handleHTTPStatus400 = (opts: Required<Pick<ITokenEndpointOpts, 'sta
   }
 }
 
-const isPreAuthorizedCodeExpired = (state: CredentialOfferState) => {
+const isPreAuthorizedCodeExpired = (state: CredentialOfferState, expirationDuration: number) => {
   const now = +new Date()
-  const expirationTime = state.createdOn + state.preAuthorizedCodeExpiresIn
+  const expirationTime = state.createdOn + expirationDuration
   return now >= expirationTime
 }

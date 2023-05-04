@@ -34,9 +34,20 @@ export class IssuerTokenServer {
     baseUrl?: string
     accessTokenSignerCallback?: JWTSignerCallback
     accessTokenIssuer?: string
+    preAuthorizedCodeExpirationDuration?: number
   }) {
     dotenv.config()
-    const { tokenPath, interval, tokenExpiresIn, cNonceExpiresIn, stateManager, nonceStateManager, accessTokenSignerCallback, accessTokenIssuer } = {
+    const {
+      tokenPath,
+      interval,
+      tokenExpiresIn,
+      cNonceExpiresIn,
+      stateManager,
+      nonceStateManager,
+      accessTokenSignerCallback,
+      accessTokenIssuer,
+      preAuthorizedCodeExpirationDuration,
+    } = {
       ...opts,
     }
     this._baseUrl = new URL(opts?.baseUrl ?? process.env.BASE_URL ?? 'http://localhost')
@@ -64,6 +75,7 @@ export class IssuerTokenServer {
         nonceStateManager,
         accessTokenSignerCallback,
         accessTokenIssuer,
+        preAuthorizedCodeExpirationDuration,
       })
     )
     this._server = this._app.listen(httpPort, host, () => console.log(`HTTP server listening on port ${httpPort}`))

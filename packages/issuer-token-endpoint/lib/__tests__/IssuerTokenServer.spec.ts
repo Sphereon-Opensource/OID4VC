@@ -22,7 +22,6 @@ describe('IssuerTokenServer', () => {
 
     const credentialOfferState = {
       userPin: 493536,
-      preAuthorizedCodeExpiresIn: 300000,
       createdOn: +new Date(),
       credentialOffer: {
         credential_issuer: 'test_issuer',
@@ -63,6 +62,7 @@ describe('IssuerTokenServer', () => {
       nonceStateManager: new MemoryCNonceStateManager(),
       accessTokenSignerCallback: signerCallback,
       accessTokenIssuer: 'https://www.example.com',
+      preAuthorizedCodeExpirationDuration: 2000,
     })
     app = issuerTokenServer.app
     server = issuerTokenServer.server
@@ -177,6 +177,7 @@ describe('IssuerTokenServer', () => {
     })
   })
   it('should return http code 400 with message pre-authorized code expired', async () => {
+    await new Promise((r) => setTimeout(r, 2000))
     const res = await requests(app)
       .post('/token')
       .send(
