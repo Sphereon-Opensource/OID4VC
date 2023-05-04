@@ -52,7 +52,7 @@ export class IssuerTokenServer {
     }
     this._app.use(
       this._baseUrl.pathname,
-      tokenRequestEndpoint({ tokenPath, tokenExpiresIn, interval, cNonceExpiresIn, stateManager, nonceStateManager, jwtSignerCallback })
+      tokenRequestEndpoint({ tokenPath, tokenExpiresIn, interval, cNonceExpiresIn, stateManager, nonceStateManager, accessTokenSignerCallback: jwtSignerCallback })
     )
     this._server = this._app.listen(httpPort, host, () => console.log(`HTTP server listening on port ${httpPort}`))
   }
