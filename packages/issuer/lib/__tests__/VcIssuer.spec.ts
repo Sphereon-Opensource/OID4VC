@@ -45,7 +45,6 @@ describe('VcIssuer', () => {
     await stateManager.setState('existing-client', {
       clientId,
       createdOn: +new Date(),
-      preAuthorizedCodeExpiresIn: 300000,
       userPin: 123456,
       credentialOffer: {
         credential_issuer: 'did:key:test',

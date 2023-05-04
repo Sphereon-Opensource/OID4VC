@@ -94,7 +94,6 @@ describe('issuerCallback', () => {
       clientId,
       createdOn: +new Date(),
       userPin: 123456,
-      preAuthorizedCodeExpiresIn: 300000,
       credentialOffer: {
         credential_issuer: 'did:key:test',
         credential_definition: {
