@@ -32,3 +32,4 @@ export const JWT_SIGNER_CALLBACK_REQUIRED_ERROR = 'JWT signer callback function 
 export const STATE_MANAGER_REQUIRED_ERROR = 'StateManager instance is required';
 export const NONCE_STATE_MANAGER_REQUIRED_ERROR = 'NonceStateManager instance is required';
 export const PIN_NOT_MATCHING_ERROR = 'PIN does not match';
+export const ACCESS_TOKEN_ISSUER_REQUIRED_ERROR = 'access token issuer is required';

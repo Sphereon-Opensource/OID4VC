@@ -32,10 +32,13 @@ export class IssuerTokenServer {
     stateManager?: IStateManager<CredentialOfferState>
     nonceStateManager?: IStateManager<CNonceState>
     baseUrl?: string
-    jwtSignerCallback?: JWTSignerCallback
+    accessTokenSignerCallback?: JWTSignerCallback
+    accessTokenIssuer?: string
   }) {
     dotenv.config()
-    const { tokenPath, interval, tokenExpiresIn, cNonceExpiresIn, stateManager, nonceStateManager, jwtSignerCallback } = { ...opts }
+    const { tokenPath, interval, tokenExpiresIn, cNonceExpiresIn, stateManager, nonceStateManager, accessTokenSignerCallback, accessTokenIssuer } = {
+      ...opts,
+    }
     this._baseUrl = new URL(opts?.baseUrl ?? process.env.BASE_URL ?? 'http://localhost')
     const httpPort = getNumberOrUndefined(this._baseUrl.host.split(':')[1]) ?? getNumberOrUndefined(process.env.PORT) ?? 3000
     const host = this._baseUrl.host.split(':')[0]
@@ -59,7 +62,8 @@ export class IssuerTokenServer {
         cNonceExpiresIn,
         stateManager,
         nonceStateManager,
-        accessTokenSignerCallback: jwtSignerCallback,
+        accessTokenSignerCallback,
+        accessTokenIssuer,
       })
     )
     this._server = this._app.listen(httpPort, host, () => console.log(`HTTP server listening on port ${httpPort}`))

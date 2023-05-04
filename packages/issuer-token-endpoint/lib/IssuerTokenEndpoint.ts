@@ -1,4 +1,5 @@
 import {
+  ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AccessTokenResponse,
   Alg,
   CNonceState,
@@ -37,10 +38,12 @@ interface ITokenEndpointOpts {
   stateManager?: IStateManager<CredentialOfferState>
   nonceStateManager?: IStateManager<CNonceState>
   accessTokenSignerCallback?: JWTSignerCallback
+  accessTokenIssuer?: string
 }
 
 export const tokenRequestEndpoint = (opts?: ITokenEndpointOpts): Router => {
   const tokenPath = opts?.tokenPath ?? process.env.TOKEN_PATH ?? '/token'
+  const accessTokenIssuer = opts?.accessTokenIssuer ?? process.env.ACCESS_TOKEN_ISSUER
   const interval = opts?.interval ?? getNumberOrUndefined(process.env.INTERVAL) ?? 300000
   const cNonceExpiresIn = opts?.cNonceExpiresIn ?? getNumberOrUndefined(process.env.C_NONCE_EXPIRES_IN) ?? 300000
   const tokenExpiresIn = opts?.tokenExpiresIn ?? getNumberOrUndefined(process.env.TOKEN_EXPIRES_IN) ?? 300000
@@ -53,6 +56,9 @@ export const tokenRequestEndpoint = (opts?: ITokenEndpointOpts): Router => {
   if (!opts?.nonceStateManager) {
     throw new Error(NONCE_STATE_MANAGER_REQUIRED_ERROR)
   }
+  if (!accessTokenIssuer) {
+    throw new Error(ACCESS_TOKEN_ISSUER_REQUIRED_ERROR)
+  }
   router.post(
     tokenPath,
     handleHTTPStatus400({ stateManager: opts.stateManager }),
@@ -62,24 +68,30 @@ export const tokenRequestEndpoint = (opts?: ITokenEndpointOpts): Router => {
       cNonceExpiresIn,
       interval,
       tokenExpiresIn,
+      accessTokenIssuer,
     })
   )
   return router
 }
 
 const generateAccessToken = async (
-  opts: Required<Pick<ITokenEndpointOpts, 'accessTokenSignerCallback' | 'tokenExpiresIn'> & { state: string }>
+  opts: Required<Pick<ITokenEndpointOpts, 'accessTokenSignerCallback' | 'tokenExpiresIn' | 'accessTokenIssuer'> & { state: string }>
 ): Promise<string> => {
   const issuanceTime = new Date()
   const jwt: Jwt = {
     header: { typ: Typ.JWT, alg: Alg.ES256 },
-    payload: { iat: issuanceTime.getTime(), exp: opts.tokenExpiresIn, iss: opts.state },
+    payload: { iat: issuanceTime.getTime(), exp: opts.tokenExpiresIn, iss: opts.accessTokenIssuer, state: opts.state },
   }
   return await opts.accessTokenSignerCallback(jwt)
 }
 
 const handleTokenRequest = (
-  opts: Required<Pick<ITokenEndpointOpts, 'cNonceExpiresIn' | 'interval' | 'accessTokenSignerCallback' | 'nonceStateManager' | 'tokenExpiresIn'>>
+  opts: Required<
+    Pick<
+      ITokenEndpointOpts,
+      'accessTokenIssuer' | 'cNonceExpiresIn' | 'interval' | 'accessTokenSignerCallback' | 'nonceStateManager' | 'tokenExpiresIn'
+    >
+  >
 ) => {
   return async (request: Request, response: Response) => {
     response.set({
@@ -94,6 +106,7 @@ const handleTokenRequest = (
       tokenExpiresIn: opts.tokenExpiresIn,
       accessTokenSignerCallback: opts.accessTokenSignerCallback,
       state: request.body.state,
+      accessTokenIssuer: opts.accessTokenIssuer,
     })
     const responseBody: AccessTokenResponse = {
       access_token,
