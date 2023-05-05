@@ -36,9 +36,9 @@ export class MemoryCredentialOfferStateManager implements IStateManager<Credenti
     this.credentialOfferStateManager.set(state, payload)
   }
 
-  async getAssertedState(issuerState: string): Promise<CredentialOfferState | undefined> {
+  async getAssertedState(issuerState: string): Promise<CredentialOfferState> {
     if (await this.hasState(issuerState)) {
-      return await this.getState(issuerState)
+      return (await this.getState(issuerState)) as CredentialOfferState
     } else {
       throw new Error(UNKNOWN_CLIENT_ERROR)
     }

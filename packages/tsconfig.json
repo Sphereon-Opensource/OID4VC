@@ -8,6 +8,9 @@
     { "path": "issuer-rest" },
     {
       "path": "callback-example"
+    },
+    {
+      "path": "issuer-token-endpoint"
     }
   ]
 }

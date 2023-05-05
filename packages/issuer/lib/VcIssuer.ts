@@ -62,6 +62,10 @@ export class VcIssuer {
     return this._stateManager
   }
 
+  public get nonceStateManager(): IStateManager<CNonceState> {
+    return this.nonceManager
+  }
+
   public getIssuerMetadata() {
     return this._issuerMetadata
   }
@@ -87,9 +91,6 @@ export class VcIssuer {
     if (this.isMetadataSupportCredentialRequestFormat(opts.issueCredentialRequest.format)) {
       const cNonce = opts.cNonce ? opts.cNonce : v4()
       await this.nonceManager.setState(cNonce, { cNonce, createdOn: +new Date() })
-      setTimeout(() => {
-        this.nonceManager.deleteState(cNonce)
-      }, this._cNonceExpiresIn)
       const credential = await this.issueCredential({ credentialRequest: opts.issueCredentialRequest }, opts.issuerCallback)
       // TODO implement acceptance_token (deferred response)
       // TODO update verification accordingly

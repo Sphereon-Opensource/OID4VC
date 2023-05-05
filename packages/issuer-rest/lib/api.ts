@@ -10,6 +10,7 @@ import {
   IStateManager,
 } from '@sphereon/openid4vci-common'
 import { createCredentialOfferURI, CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
+import { MemoryCNonceStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager'
 import { MemoryCredentialOfferStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager/MemoryCredentialOfferStateManager'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
@@ -80,7 +81,7 @@ export class RestAPI {
       ? (this._vcIssuer = new VcIssuer(opts.metadata, {
           userPinRequired: opts.userPinRequired,
           stateManager: opts.stateManager ?? new MemoryCredentialOfferStateManager(),
-          nonceManager: opts.nonceManager,
+          nonceManager: opts.nonceManager ?? new MemoryCNonceStateManager(),
         }))
       : buildVCIFromEnvironment()
     this.express = express()

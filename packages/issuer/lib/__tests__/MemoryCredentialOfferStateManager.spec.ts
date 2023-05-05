@@ -10,7 +10,7 @@ describe('MemoryIssuerStateManager', () => {
     memoryIssuerStateManager = new MemoryCredentialOfferStateManager()
   })
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const day = 86400000
     for (const i of Array.from(Array(3).keys())) {
       const timestamp = +new Date(+new Date() + day * (i - 1))
@@ -18,7 +18,7 @@ describe('MemoryIssuerStateManager', () => {
         .credentialOffer({ credential_offer: { credential_issuer: 'test', credentials: ['test'] } })
         .createdOn(timestamp)
         .build()
-      memoryIssuerStateManager.setState(String(i), issuerState)
+      await memoryIssuerStateManager.setState(String(i), issuerState)
     }
   })
 

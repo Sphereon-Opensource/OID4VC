@@ -45,6 +45,7 @@ describe('VcIssuer', () => {
     await stateManager.setState('existing-client', {
       clientId,
       createdOn: +new Date(),
+      userPin: 123456,
       credentialOffer: {
         credential_issuer: 'did:key:test',
         credential_definition: {
@@ -100,6 +101,10 @@ describe('VcIssuer', () => {
         })
       )
       .build()
+  })
+
+  afterAll(async () => {
+    await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 
   it('should fail at the first interaction of the client with the issuer', async () => {

@@ -119,15 +119,17 @@ describe('VcIssuer builder should', () => {
       .withInMemoryCNonceState()
       .build()
     expect(vcIssuer).toBeDefined()
-    const now = +new Date()
+    const preAuthorizedCodeCreatedOn = +new Date()
     await vcIssuer.credentialOfferStateManager?.setState('test', {
       clientId: 'test_client',
-      createdOn: now,
+      createdOn: preAuthorizedCodeCreatedOn,
+      userPin: 123456,
       credentialOffer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' },
     })
     await expect(vcIssuer.credentialOfferStateManager?.getState('test')).resolves.toEqual({
       clientId: 'test_client',
-      createdOn: now,
+      userPin: 123456,
+      createdOn: preAuthorizedCodeCreatedOn,
       credentialOffer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' },
     })
   })

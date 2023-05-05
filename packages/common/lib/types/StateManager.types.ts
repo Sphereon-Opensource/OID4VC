@@ -4,6 +4,7 @@ export interface CredentialOfferState {
   clientId?: string;
   credentialOffer: CredentialOfferPayloadV1_0_11;
   createdOn: number;
+  userPin: number;
 }
 
 export interface CNonceState {
@@ -24,5 +25,5 @@ export interface IStateManager<T> {
 
   clearAllStates(): Promise<void>; // clears all states
 
-  getAssertedState(issuerState: string): Promise<T | undefined>;
+  getAssertedState(issuerState: string): Promise<T>;
 }
