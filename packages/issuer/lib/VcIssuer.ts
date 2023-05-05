@@ -6,6 +6,7 @@ import {
   AUD_ERROR,
   CNonceState,
   CREDENTIAL_MISSING_ERROR,
+  CredentialFormat,
   CredentialIssuerCallback,
   CredentialOfferState,
   CredentialRequest,
@@ -15,6 +16,7 @@ import {
   IAT_ERROR,
   ISS_MUST_BE_CLIENT_ID,
   ISSUER_CONFIG_ERROR,
+  IssuerCredentialSubject,
   IssuerMetadata,
   IStateManager,
   Jwt,
@@ -91,18 +93,48 @@ export class VcIssuer {
     if (this.isMetadataSupportCredentialRequestFormat(opts.issueCredentialRequest.format)) {
       const cNonce = opts.cNonce ? opts.cNonce : v4()
       await this.nonceManager.setState(cNonce, { cNonce, createdOn: +new Date() })
-      const credential = await this.issueCredential({ credentialRequest: opts.issueCredentialRequest }, opts.issuerCallback)
-      // TODO implement acceptance_token (deferred response)
-      // TODO update verification accordingly
-      if (!credential) {
-        // credential: OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
-        throw new Error(CREDENTIAL_MISSING_ERROR)
-      }
-      return {
-        credential,
-        format: opts.issueCredentialRequest.format,
-        c_nonce: cNonce,
-        c_nonce_expires_in: this._cNonceExpiresIn,
+
+      const compareArrays = (a: unknown[], b: unknown[]): boolean =>
+        a.length === b.length && a.every((element: unknown): boolean => b.includes(element))
+
+      if (opts.issueCredentialRequest.format === CredentialFormat.jwt_vc_json) {
+        const supportedMatchingCredentials = this._issuerMetadata.credentials_supported.find(
+          (a) =>
+            a.format === opts.issueCredentialRequest.format &&
+            compareArrays(
+              a.types,
+              Array.isArray(opts.issueCredentialRequest.type) ? opts.issueCredentialRequest.type : [opts.issueCredentialRequest.type]
+            ) &&
+            compareArrays(
+              Object.keys((opts.issueCredentialRequest.credentialSubject as IssuerCredentialSubject) ?? {}),
+              Object.keys(a.credentialSubject ?? {})
+            )
+        )
+        if (supportedMatchingCredentials) {
+          // TODO issue credential
+          const credential = {
+            '@context': ['https://www.w3.org/2018/credentials/v1'],
+            type: Array.isArray(opts.issueCredentialRequest.type) ? opts.issueCredentialRequest.type : [opts.issueCredentialRequest.type],
+            issuer: this._issuerMetadata.credential_issuer,
+            issuanceDate: new Date().toISOString(),
+            credentialSubject: opts.issueCredentialRequest.credentialSubject as IssuerCredentialSubject,
+          }
+          const vc = await this.issueCredential({ credentialRequest: opts.issueCredentialRequest, credential }, opts.issuerCallback)
+          // TODO implement acceptance_token (deferred response)
+          // TODO update verification accordingly
+          if (!vc) {
+            // credential: OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
+            throw new Error(CREDENTIAL_MISSING_ERROR)
+          }
+          return {
+            credential: vc,
+            format: opts.issueCredentialRequest.format,
+            c_nonce: cNonce,
+            c_nonce_expires_in: this._cNonceExpiresIn,
+          }
+        }
+      } else {
+        throw new Error(`${opts.issueCredentialRequest.format}: credential format not supported`)
       }
     }
     throw new Error(TokenErrorResponse.invalid_request)
@@ -124,7 +156,10 @@ export class VcIssuer {
     clientId?: string,
     jwtVerifyCallback?: JWTVerifyCallback
   ): Promise<void> {
-    if ((!Array.isArray(issueCredentialRequest.format) && issueCredentialRequest.format === 'jwt') || issueCredentialRequest.format === 'jwt_vc') {
+    if (
+      (!Array.isArray(issueCredentialRequest.format) && issueCredentialRequest.format === CredentialFormat.jwt_vc_json) ||
+      issueCredentialRequest.format === CredentialFormat.jwt_vc_json_ld
+    ) {
       issueCredentialRequest.proof.jwt
 
       if (!this._verifyCallback && !jwtVerifyCallback) {

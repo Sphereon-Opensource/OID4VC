@@ -1,7 +1,7 @@
 import {
   AuthorizationRequestV1_0_09,
   CNonceState,
-  CredentialFormatEnum,
+  CredentialFormat,
   CredentialOfferState,
   CredentialSupported,
   Display,
@@ -27,7 +27,7 @@ function buildVCIFromEnvironment() {
   const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
     .withCryptographicSuitesSupported(process.env.cryptographic_suites_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
-    .withFormat(process.env.credential_supported_format as unknown as CredentialFormatEnum)
+    .withFormat(process.env.credential_supported_format as CredentialFormat)
     .withId(process.env.credential_supported_id as string)
     .withTypes([process.env.credential_supported_types_1 as string, process.env.credential_supported_types_2 as string])
     .withCredentialDisplay({

@@ -1,5 +1,5 @@
 import {
-  CredentialFormatEnum,
+  CredentialFormat,
   CredentialSupported,
   Display,
   IssuerCredentialSubject,
@@ -8,7 +8,7 @@ import {
 } from '@sphereon/openid4vci-common'
 
 export class CredentialSupportedBuilderV1_11 {
-  format?: CredentialFormatEnum
+  format?: CredentialFormat
   id?: string
   types?: string[]
   cryptographicBindingMethodsSupported?: ('jwk' | 'cose_key' | 'did' | string)[]
@@ -16,7 +16,7 @@ export class CredentialSupportedBuilderV1_11 {
   display?: Display[]
   credentialSubject?: IssuerCredentialSubject
 
-  withFormat(credentialFormat: CredentialFormatEnum): CredentialSupportedBuilderV1_11 {
+  withFormat(credentialFormat: CredentialFormat): CredentialSupportedBuilderV1_11 {
     this.format = credentialFormat
     return this
   }

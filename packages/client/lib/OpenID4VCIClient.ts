@@ -4,6 +4,7 @@ import {
   AuthorizationRequestV1_0_09,
   AuthzFlowType,
   CodeChallengeMethod,
+  CredentialFormat,
   CredentialOfferPayloadV1_0_09,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
@@ -16,7 +17,6 @@ import {
   ResponseType,
 } from '@sphereon/openid4vci-common';
 import { CredentialSupportedTypeV1_0_08, CredentialSupportedV1_0_08 } from '@sphereon/openid4vci-common/dist/types/v1_0_08.types';
-import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';

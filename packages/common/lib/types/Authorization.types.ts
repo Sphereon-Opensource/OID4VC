@@ -1,6 +1,6 @@
 import { CredentialOfferPayload, CredentialOfferRequestWithBaseUrl } from './CredentialIssuance.types';
 import {
-  CredentialFormatEnum,
+  CredentialFormat,
   EndpointMetadata,
   ErrorResponse,
   IssuerCredentialDefinition,
@@ -94,7 +94,7 @@ export interface CommonAuthorizationDetails {
    * specifically used to identify the Credential type to be issued. This specification defines
    * Credential Format Profiles in Appendix E.
    */
-  format: CredentialFormatEnum;
+  format: CredentialFormat;
   /**
    * If the Credential Issuer metadata contains an authorization_server parameter,
    * the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.

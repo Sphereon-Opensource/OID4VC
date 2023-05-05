@@ -11,7 +11,7 @@ export interface CredentialLogo {
   alt_text?: string;
 }
 
-export enum CredentialFormatEnum {
+export enum CredentialFormat {
   jwt_vc_json = 'jwt_vc_json',
   jwt_vc_json_ld = 'jwt_vc_json_ld',
   ldp_vc = 'ldp_vc',
@@ -49,7 +49,7 @@ export interface CredentialSupportedBrief {
   cryptographic_suites_supported?: string[]; // OPTIONAL. Array of case sensitive strings that identify the cryptographic suites that are supported for the cryptographic_binding_methods_supported
 }
 export type CommonCredentialSupported = CredentialSupportedBrief & {
-  format: CredentialFormatEnum | string; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
+  format: CredentialFormat | string; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
   id?: string; // OPTIONAL. A JSON string identifying the respective object. The value MUST be unique across all credentials_supported entries in the Credential Issuer Metadata
   display?: Display[]; // OPTIONAL. An array of objects, where each object contains the display properties of the supported credential for a certain language
   /**
@@ -68,7 +68,7 @@ export type CredentialSupportedJwtVcJson = CommonCredentialSupported;
 export type CredentialSupported = CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc;
 
 export interface CredentialOfferFormat {
-  format: CredentialFormatEnum;
+  format: CredentialFormat;
   types: string[];
 }
 
@@ -132,13 +132,13 @@ export interface CommonCredentialRequest {
 }
 
 export interface CredentialRequestJwtVcJson extends CommonCredentialRequest {
-  format: CredentialFormatEnum.jwt_vc_json;
+  format: CredentialFormat.jwt_vc_json;
   types: string[];
   credentialSubject?: IssuerCredentialSubject;
 }
 
 export interface CredentialRequestJwtVcJsonLdAndLdpVc extends CommonCredentialRequest {
-  format: CredentialFormatEnum.jwt_vc_json_ld | CredentialFormatEnum.ldp_vc;
+  format: CredentialFormat.jwt_vc_json_ld | CredentialFormat.ldp_vc;
   credential_definition: IssuerCredentialDefinition;
 }
 
@@ -151,7 +151,7 @@ export interface CommonCredentialResponse {
 }
 
 export interface CredentialResponseJwtVcJsonLdAndLdpVc extends CommonCredentialResponse {
-  format: CredentialFormatEnum.jwt_vc_json_ld | CredentialFormatEnum.ldp_vc;
+  format: CredentialFormat.jwt_vc_json_ld | CredentialFormat.ldp_vc;
   credential: IVerifiableCredential;
 }
 

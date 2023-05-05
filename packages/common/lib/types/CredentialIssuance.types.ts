@@ -1,5 +1,6 @@
-import { CredentialFormat, ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
+import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
+import { CredentialFormat } from './Generic.types';
 import { OpenId4VCIVersion } from './OpenID4VCIVersions.types';
 import { CredentialOfferPayloadV1_0_09 } from './v1_0_09.types';
 import { CredentialOfferPayloadV1_0_11 } from './v1_0_11.types';
@@ -9,6 +10,7 @@ export interface CredentialRequest {
   type: string | string[];
   format: CredentialFormat | CredentialFormat[];
   proof: ProofOfPossession;
+  [s: string]: unknown;
 }
 
 export interface CredentialResponse {

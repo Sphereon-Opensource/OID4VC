@@ -1,5 +1,6 @@
 import {
   AccessTokenResponse,
+  CredentialFormat,
   CredentialOfferPayload,
   CredentialOfferPayloadV1_0_09,
   CredentialOfferRequestWithBaseUrl,
@@ -7,7 +8,6 @@ import {
   getIssuerFromCredentialOfferPayload,
   IssuerMetadata,
 } from '@sphereon/openid4vci-common';
-import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialRequestClient } from './CredentialRequestClient';
 import { convertURIToJsonObject } from './functions';
