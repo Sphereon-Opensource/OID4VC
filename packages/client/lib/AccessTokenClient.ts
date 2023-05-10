@@ -15,7 +15,7 @@ import {
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
   TokenErrorResponse,
-} from '@sphereon/openid4vci-common';
+} from '@sphereon/oid4vci-common';
 import { ObjectUtils } from '@sphereon/ssi-types';
 import Debug from 'debug';
 

@@ -1,4 +1,4 @@
-import { CredentialFormatEnum } from '@sphereon/openid4vci-common'
+import { CredentialFormatEnum } from '@sphereon/oid4vci-common'
 
 import { createCredentialOfferURI } from '../index'
 
@@ -20,7 +20,7 @@ describe('CredentialOfferUtils should', () => {
         },
       },
     }
-    expect(createCredentialOfferURI(undefined, { credentialOffer })).toEqual(
+    expect(createCredentialOfferURI(undefined, { credentialOffer, state: 'eyJhbGciOiJSU0Et...FYUaBy' })).toEqual(
       'openid-credential-offer://?credential_offer=credential_issuer=https%3A%2F%2Fcredential-issuer.example.com&credentials=%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D&grants=%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D'
     )
   })

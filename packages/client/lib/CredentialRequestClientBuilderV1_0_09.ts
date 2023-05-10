@@ -6,7 +6,7 @@ import {
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
   IssuerMetadata,
-} from '@sphereon/openid4vci-common';
+} from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialRequestClient } from './CredentialRequestClient';

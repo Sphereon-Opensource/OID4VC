@@ -1,4 +1,4 @@
-import { OpenId4VCIVersion } from '@sphereon/openid4vci-common';
+import { OpenId4VCIVersion } from '@sphereon/oid4vci-common';
 
 import { CredentialOffer } from '../CredentialOffer';
 

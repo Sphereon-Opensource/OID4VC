@@ -1,4 +1,4 @@
-import { CredentialSupportedBrief, IssuerCredentialSubjectDisplay, IssuerMetadataV1_0_08 } from '@sphereon/openid4vci-common';
+import { CredentialSupportedBrief, IssuerCredentialSubjectDisplay, IssuerMetadataV1_0_08 } from '@sphereon/oid4vci-common';
 import { ICredentialStatus, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 export function getMockData(issuerName: string): IssuerMockData | null {

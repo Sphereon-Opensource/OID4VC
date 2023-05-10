@@ -1,4 +1,4 @@
-import { CredentialFormatEnum, CredentialSupported, Display, IssuerCredentialSubjectDisplay, TokenErrorResponse } from '@sphereon/openid4vci-common'
+import { CredentialFormatEnum, CredentialSupported, Display, IssuerCredentialSubjectDisplay, TokenErrorResponse } from '@sphereon/oid4vci-common'
 
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../index'
 
@@ -37,9 +37,9 @@ describe('VcIssuer builder should', () => {
       .withCredentialsSupported(credentialsSupported)
       .build()
 
-    expect(vcIssuer.getIssuerMetadata().authorization_server).toEqual('https://authorization-server')
-    expect(vcIssuer.getIssuerMetadata().display).toBeDefined()
-    expect(vcIssuer.getIssuerMetadata().credentials_supported[0].id).toEqual('UniversityDegree_JWT')
+    expect(vcIssuer.issuerMetadata.authorization_server).toEqual('https://authorization-server')
+    expect(vcIssuer.issuerMetadata.display).toBeDefined()
+    expect(vcIssuer.issuerMetadata.credentials_supported[0].id).toEqual('UniversityDegree_JWT')
   })
 
   it('fail to generate a VcIssuer', () => {
@@ -124,13 +124,13 @@ describe('VcIssuer builder should', () => {
       clientId: 'test_client',
       createdOn: preAuthorizedCodeCreatedOn,
       userPin: 123456,
-      credentialOffer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' },
+      credentialOffer: { credential_offer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' } },
     })
     await expect(vcIssuer.credentialOfferStateManager?.getState('test')).resolves.toEqual({
       clientId: 'test_client',
       userPin: 123456,
       createdOn: preAuthorizedCodeCreatedOn,
-      credentialOffer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' },
+      credentialOffer: { credential_offer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' } },
     })
   })
 })

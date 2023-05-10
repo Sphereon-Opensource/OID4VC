@@ -1,8 +1,8 @@
 import { KeyObject } from 'crypto'
 import * as http from 'http'
 
-import { Alg, Jwt } from '@sphereon/openid4vci-common'
-import { MemoryCNonceStateManager, MemoryCredentialOfferStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager'
+import { Alg, CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11, Jwt } from '@sphereon/oid4vci-common'
+import { MemoryCNonceStateManager, MemoryCredentialOfferStateManager } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { Express } from 'express'
 import * as jose from 'jose'
 import requests from 'supertest'
@@ -20,42 +20,48 @@ describe('IssuerTokenServer', () => {
       return new jose.SignJWT({ ...jwt.payload }).setProtectedHeader({ ...jwt.header }).sign(privateKey)
     }
 
-    const credentialOfferState = {
+    const credentialOfferState1 = {
       userPin: 493536,
       createdOn: +new Date(),
       credentialOffer: {
-        credential_issuer: 'test_issuer',
-        credential_definition: {
-          '@context': ['test_context'],
-          types: ['VerifiableCredential'],
-          credentialSubject: {},
-        },
-        grants: {
-          'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-            user_pin_required: true,
-            'pre-authorized_code': 'SplxlOBeZQQYbYS6WxSbIA',
+        credential_offer: {
+          credential_issuer: 'test_issuer',
+          credential_definition: {
+            '@context': ['test_context'],
+            types: ['VerifiableCredential'],
+            credentialSubject: {},
           },
-        },
+          grants: {
+            'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+              user_pin_required: true,
+              'pre-authorized_code': 'SplxlOBeZQQYbYS6WxSbIA',
+            },
+          },
+        } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
       },
     }
-    const credentialOfferState1 = {
-      ...credentialOfferState,
+    const credentialOfferState2 = {
+      ...credentialOfferState1,
       credentialOffer: {
-        ...credentialOfferState.credentialOffer,
-        grants: {
-          ...credentialOfferState.credentialOffer.grants,
-          'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-            ...credentialOfferState.credentialOffer.grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'],
-            user_pin_required: false,
+        ...credentialOfferState1.credentialOffer,
+        credential_offer: {
+          ...credentialOfferState1.credentialOffer.credential_offer,
+
+          grants: {
+            ...credentialOfferState1.credentialOffer.credential_offer.grants,
+            'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+              ...credentialOfferState1.credentialOffer.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+              user_pin_required: false,
+            },
           },
-        },
+        } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
       },
     }
-    const credentialOfferState2 = { ...credentialOfferState, preAuthorizedCodeExpiresIn: 1 }
+    const credentialOfferState3 = { ...credentialOfferState1, preAuthorizedCodeExpiresIn: 1 }
     const state = new MemoryCredentialOfferStateManager()
-    await state.setState('test_state', credentialOfferState)
-    await state.setState('test_state_1', credentialOfferState1)
-    await state.setState('test_state_2', credentialOfferState2)
+    await state.setState('test_state', credentialOfferState1)
+    await state.setState('test_state_1', credentialOfferState2)
+    await state.setState('test_state_2', credentialOfferState3)
 
     const issuerTokenServer = new IssuerTokenServer({
       stateManager: state,

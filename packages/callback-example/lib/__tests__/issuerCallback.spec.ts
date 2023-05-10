@@ -1,21 +1,22 @@
 import { KeyObject } from 'crypto'
 
-import { CredentialRequestClient, CredentialRequestClientBuilderV1_0_09, ProofOfPossessionBuilder } from '@sphereon/openid4vci-client'
+import { CredentialRequestClient, CredentialRequestClientBuilderV1_0_09, ProofOfPossessionBuilder } from '@sphereon/oid4vci-client'
 import {
   Alg,
   CredentialFormatEnum,
+  CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
   CredentialSupported,
   Display,
   IssuerCredentialSubjectDisplay,
   Jwt,
   ProofOfPossession,
   Typ,
-} from '@sphereon/openid4vci-common'
-import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
-import { MemoryCredentialOfferStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager/MemoryCredentialOfferStateManager'
+} from '@sphereon/oid4vci-common'
+import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import * as jose from 'jose'
 
+import { MemoryCredentialOfferStateManager } from '../../../issuer/lib/state-manager'
 import { generateDid, getIssuerCallback, verifyCredential } from '../IssuerCallback'
 
 const INITIATION_TEST_URI =
@@ -95,16 +96,21 @@ describe('issuerCallback', () => {
       createdOn: +new Date(),
       userPin: 123456,
       credentialOffer: {
-        credential_issuer: 'did:key:test',
-        credential_definition: {
-          types: ['VerifiableCredential'],
-          '@context': ['https://www.w3.org/2018/credentials/v1'],
-          credentialSubject: {},
-        },
-        grants: {
-          authorization_code: { issuer_state: 'test_code' },
-          'urn:ietf:params:oauth:grant-type:pre-authorized_code': { 'pre-authorized_code': 'test_code', user_pin_required: true },
-        },
+        credential_offer: {
+          credential_issuer: 'did:key:test',
+          credential_definition: {
+            types: ['VerifiableCredential'],
+            '@context': ['https://www.w3.org/2018/credentials/v1'],
+            credentialSubject: {},
+          },
+          grants: {
+            authorization_code: { issuer_state: 'test_code' },
+            'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+              'pre-authorized_code': 'test_code',
+              user_pin_required: true,
+            },
+          },
+        } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
       },
     })
     vcIssuer = new VcIssuerBuilder()

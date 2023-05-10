@@ -3,7 +3,7 @@ import { Ed25519Signature2020 } from '@digitalcredentials/ed25519-signature-2020
 import { Ed25519VerificationKey2020 } from '@digitalcredentials/ed25519-verification-key-2020'
 import { securityLoader } from '@digitalcredentials/security-document-loader'
 import vc from '@digitalcredentials/vc'
-import { CredentialRequest } from '@sphereon/openid4vci-common'
+import { CredentialRequest } from '@sphereon/oid4vci-common'
 import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 // Example on how to generate a did:key to issue a verifiable credential

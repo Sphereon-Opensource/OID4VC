@@ -1,5 +1,5 @@
 {
-  "name": "@sphereon/openid4vci-issuer-rest",
+  "name": "@sphereon/oid4vci-issuer-rest",
   "version": "0.5.0-unstable.0",
   "description": "OpenID 4 Verifiable Credential Issuance issuer",
   "source": "lib/index.ts",
@@ -10,8 +10,8 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@sphereon/openid4vci-common": "workspace:../common",
-    "@sphereon/openid4vci-issuer": "workspace:../issuer",
+    "@sphereon/oid4vci-common": "workspace:../common",
+    "@sphereon/oid4vci-issuer": "workspace:../issuer",
     "@sphereon/ssi-types": "^0.9.0",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",

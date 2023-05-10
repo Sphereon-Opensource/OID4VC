@@ -1,4 +1,4 @@
-import { CredentialFormatEnum } from '@sphereon/openid4vci-common';
+import { CredentialFormatEnum } from '@sphereon/oid4vci-common';
 
 import { AuthorizationDetailsBuilder } from '../AuthorizationDetailsBuilder';
 

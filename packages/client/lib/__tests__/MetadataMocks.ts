@@ -1,4 +1,4 @@
-import { CredentialOfferPayloadV1_0_09, CredentialOfferRequestWithBaseUrl, OpenId4VCIVersion } from '@sphereon/openid4vci-common';
+import { CredentialOfferPayloadV1_0_09, CredentialOfferRequestWithBaseUrl, OpenId4VCIVersion } from '@sphereon/oid4vci-common';
 
 export const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io';
 export const IDENTIPROOF_AS_URL = 'https://auth.research.identiproof.io';

@@ -1,11 +1,12 @@
 import {
   Alg,
   CredentialFormatEnum,
+  CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
   CredentialRequest,
   CredentialSupported,
   Display,
   IssuerCredentialSubjectDisplay,
-} from '@sphereon/openid4vci-common'
+} from '@sphereon/oid4vci-common'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 
 import { VcIssuer } from '../VcIssuer'
@@ -47,16 +48,21 @@ describe('VcIssuer', () => {
       createdOn: +new Date(),
       userPin: 123456,
       credentialOffer: {
-        credential_issuer: 'did:key:test',
-        credential_definition: {
-          types: ['VerifiableCredential'],
-          '@context': ['https://www.w3.org/2018/credentials/v1'],
-          credentialSubject: {},
-        },
-        grants: {
-          authorization_code: { issuer_state: 'test_code' },
-          'urn:ietf:params:oauth:grant-type:pre-authorized_code': { 'pre-authorized_code': 'test_code', user_pin_required: true },
-        },
+        credential_offer: {
+          credential_issuer: 'did:key:test',
+          credential_definition: {
+            types: ['VerifiableCredential'],
+            '@context': ['https://www.w3.org/2018/credentials/v1'],
+            credentialSubject: {},
+          },
+          grants: {
+            authorization_code: { issuer_state: 'test_code' },
+            'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+              'pre-authorized_code': 'test_code',
+              user_pin_required: true,
+            },
+          },
+        } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
       },
     })
     vcIssuer = new VcIssuerBuilder()

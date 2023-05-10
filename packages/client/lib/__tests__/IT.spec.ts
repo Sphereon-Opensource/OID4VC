@@ -1,4 +1,4 @@
-import { AccessTokenResponse, Alg, AuthzFlowType, CredentialOfferRequestWithBaseUrl, Jwt, ProofOfPossession, Typ } from '@sphereon/openid4vci-common';
+import { AccessTokenResponse, Alg, AuthzFlowType, CredentialOfferRequestWithBaseUrl, Jwt, ProofOfPossession, Typ } from '@sphereon/oid4vci-common';
 import nock from 'nock';
 
 import { AccessTokenClient, CredentialRequestClientBuilderV1_0_09, OpenID4VCIClient, ProofOfPossessionBuilder } from '..';

@@ -8,7 +8,7 @@ import {
   ProofOfPossessionCallbacks,
   ProofType,
   Typ,
-} from '@sphereon/openid4vci-common';
+} from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
 const debug = Debug('sphereon:openid4vci:token');

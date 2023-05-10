@@ -75,7 +75,7 @@ Release with support for the pre-authorized code flow only!
 
 Release with support for the pre-authorized code flow only!
 
-**WARNING: The package has been renamed to @sphereon/openid4vci-client!**
+**WARNING: The package has been renamed to @sphereon/oid4vci-client!**
 
 - Added:
 

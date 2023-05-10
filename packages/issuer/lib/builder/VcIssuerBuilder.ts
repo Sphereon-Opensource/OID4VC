@@ -8,74 +8,74 @@ import {
   IStateManager,
   JWTVerifyCallback,
   TokenErrorResponse,
-} from '@sphereon/openid4vci-common'
+} from '@sphereon/oid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
-import { MemoryCNonceStateManager } from '../state-manager/MemoryCNonceStateManager'
-import { MemoryCredentialOfferStateManager } from '../state-manager/MemoryCredentialOfferStateManager'
+import { MemoryCNonceStateManager, MemoryCredentialOfferStateManager } from '../state-manager'
+
+import { IssuerMetadataBuilderV1_11 } from './IssuerMetadataBuilderV1_11'
 
 export class VcIssuerBuilder {
-  credentialIssuer?: string
-  authorizationServer?: string
-  credentialEndpoint?: string
-  batchCredentialEndpoint?: string
-  tokenEndpoint?: string
-  issuerDisplay?: Display[]
-  credentialsSupported?: CredentialSupported[]
+  issuerMetadataBuilder?: IssuerMetadataBuilderV1_11
+  issuerMetadata: Partial<IssuerMetadata> = {}
   userPinRequired?: boolean
   credentialOfferStateManager?: IStateManager<CredentialOfferState>
   cNonceStateManager?: IStateManager<CNonceState>
   issuerCallback?: CredentialIssuerCallback
   verifyCallback?: JWTVerifyCallback
 
-  public withCredentialIssuer(issuer: string): VcIssuerBuilder {
-    this.credentialIssuer = issuer
+  public withIssuerMetadata(issuerMetadata: IssuerMetadata) {
+    this.issuerMetadata = issuerMetadata
+  }
+
+  public withIssuerMetadataBuilder(builder: IssuerMetadataBuilderV1_11) {
+    this.issuerMetadataBuilder = builder
     return this
   }
+
+  public withCredentialIssuer(issuer: string): VcIssuerBuilder {
+    this.issuerMetadata.credential_issuer = issuer
+    return this
+  }
+
   public withAuthorizationServer(authorizationServer: string): VcIssuerBuilder {
-    this.authorizationServer = authorizationServer
+    this.issuerMetadata.authorization_server = authorizationServer
     return this
   }
 
   public withCredentialEndpoint(credentialEndpoint: string): VcIssuerBuilder {
-    this.credentialEndpoint = credentialEndpoint
+    this.issuerMetadata.credential_endpoint = credentialEndpoint
     return this
   }
 
   public withBatchCredentialEndpoint(batchCredentialEndpoint: string): VcIssuerBuilder {
-    this.batchCredentialEndpoint = batchCredentialEndpoint
-    return this
+    this.issuerMetadata.batch_credential_endpoint = batchCredentialEndpoint
+    throw Error('Not implemented yet')
+    // return this
   }
 
   public withTokenEndpoint(tokenEndpoint: string): VcIssuerBuilder {
-    this.tokenEndpoint = tokenEndpoint
+    this.issuerMetadata.token_endpoint = tokenEndpoint
     return this
   }
 
   public withIssuerDisplay(issuerDisplay: Display[] | Display): VcIssuerBuilder {
-    this.issuerDisplay = Array.isArray(issuerDisplay) ? issuerDisplay : [issuerDisplay]
+    this.issuerMetadata.display = Array.isArray(issuerDisplay) ? issuerDisplay : [issuerDisplay]
     return this
   }
 
-  public addIssuerDisplay(issuerDisplay: Display[] | Display): VcIssuerBuilder {
-    if (!Array.isArray(issuerDisplay)) this.issuerDisplay = this.issuerDisplay ? [...this.issuerDisplay, issuerDisplay] : [issuerDisplay]
-    else {
-      this.issuerDisplay = this.issuerDisplay ? [...this.issuerDisplay, ...issuerDisplay] : issuerDisplay
-    }
+  public addIssuerDisplay(issuerDisplay: Display): VcIssuerBuilder {
+    this.issuerMetadata.display = [...(this.issuerMetadata.display ?? []), issuerDisplay]
     return this
   }
 
   public withCredentialsSupported(credentialSupported: CredentialSupported | CredentialSupported[]): VcIssuerBuilder {
-    this.credentialsSupported = Array.isArray(credentialSupported) ? credentialSupported : [credentialSupported]
+    this.issuerMetadata.credentials_supported = Array.isArray(credentialSupported) ? credentialSupported : [credentialSupported]
     return this
   }
 
-  public addCredentialsSupported(credentialSupported: CredentialSupported | CredentialSupported[]): VcIssuerBuilder {
-    if (!Array.isArray(credentialSupported))
-      this.credentialsSupported = this.credentialsSupported ? [...this.credentialsSupported, credentialSupported] : [credentialSupported]
-    else {
-      this.credentialsSupported = this.credentialsSupported ? [...this.credentialsSupported, ...credentialSupported] : credentialSupported
-    }
+  public addCredentialsSupported(credentialSupported: CredentialSupported): VcIssuerBuilder {
+    this.issuerMetadata.credentials_supported = [...(this.issuerMetadata.credentials_supported ?? []), credentialSupported]
     return this
   }
 
@@ -115,37 +115,28 @@ export class VcIssuerBuilder {
   }
 
   public build(): VcIssuer {
-    if (!this.credentialEndpoint || !this.credentialIssuer || !this.credentialsSupported) {
-      throw new Error(TokenErrorResponse.invalid_request)
-    }
     if (!this.credentialOfferStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
     if (!this.cNonceStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    if (!this.userPinRequired) {
-      this.userPinRequired = false
+
+    const builder = this.issuerMetadataBuilder?.build()
+    const metadata: Partial<IssuerMetadata> = { ...this.issuerMetadata, ...builder }
+    // Let's make sure these get merged correctly:
+    metadata.credentials_supported = [...(this.issuerMetadata.credentials_supported ?? []), ...(builder?.credentials_supported ?? [])]
+    metadata.display = [...(this.issuerMetadata.display ?? []), ...(builder?.display ?? [])]
+    if (
+      !metadata.credential_endpoint ||
+      !metadata.credential_issuer ||
+      !this.issuerMetadata.credentials_supported ||
+      this.issuerMetadata.credentials_supported.length === 0
+    ) {
+      throw new Error(TokenErrorResponse.invalid_request)
     }
-    const metadata: IssuerMetadata = {
-      credential_endpoint: this.credentialEndpoint,
-      credential_issuer: this.credentialIssuer,
-      credentials_supported: this.credentialsSupported,
-    }
-    if (this.issuerDisplay) {
-      metadata.display = this.issuerDisplay
-    }
-    if (this.batchCredentialEndpoint) {
-      metadata.batch_credential_endpoint = this.batchCredentialEndpoint
-    }
-    if (this.authorizationServer) {
-      metadata.authorization_server = this.authorizationServer
-    }
-    if (this.tokenEndpoint) {
-      metadata.token_endpoint = this.tokenEndpoint
-    }
-    return new VcIssuer(metadata, {
-      userPinRequired: this.userPinRequired,
+    return new VcIssuer(metadata as IssuerMetadata, {
+      userPinRequired: this.userPinRequired ?? false,
       callback: this.issuerCallback,
       verifyCallback: this.verifyCallback,
       stateManager: this.credentialOfferStateManager,

@@ -1,4 +1,4 @@
-import { getIssuerFromCredentialOfferPayload, WellKnownEndpoints } from '@sphereon/openid4vci-common';
+import { getIssuerFromCredentialOfferPayload, WellKnownEndpoints } from '@sphereon/oid4vci-common';
 import nock from 'nock';
 
 import { CredentialOffer } from '../CredentialOffer';

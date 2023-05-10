@@ -5,7 +5,7 @@ import {
   IssuerCredentialSubject,
   IssuerCredentialSubjectDisplay,
   TokenErrorResponse,
-} from '@sphereon/openid4vci-common'
+} from '@sphereon/oid4vci-common'
 
 export class CredentialSupportedBuilderV1_11 {
   format?: CredentialFormatEnum

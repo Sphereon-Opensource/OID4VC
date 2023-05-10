@@ -8,7 +8,7 @@ import {
   Oauth2ASWithOID4VCIMetadata,
   OpenIDResponse,
   WellKnownEndpoints,
-} from '@sphereon/openid4vci-common';
+} from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
 import { getJson } from './functions';

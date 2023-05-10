@@ -2,10 +2,18 @@
   "extends": "./tsconfig-base.json",
   "files": [],
   "references": [
-    { "path": "common" },
-    { "path": "issuer" },
-    { "path": "client" },
-    { "path": "issuer-rest" },
+    {
+      "path": "common"
+    },
+    {
+      "path": "issuer"
+    },
+    {
+      "path": "client"
+    },
+    {
+      "path": "issuer-rest"
+    },
     {
       "path": "callback-example"
     },

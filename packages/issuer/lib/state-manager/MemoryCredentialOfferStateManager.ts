@@ -1,4 +1,4 @@
-import { CredentialOfferState, IStateManager, UNKNOWN_CLIENT_ERROR } from '@sphereon/openid4vci-common'
+import { CredentialOfferState, IStateManager, UNKNOWN_CLIENT_ERROR } from '@sphereon/oid4vci-common'
 
 export class MemoryCredentialOfferStateManager implements IStateManager<CredentialOfferState> {
   private readonly credentialOfferStateManager: Map<string, CredentialOfferState>

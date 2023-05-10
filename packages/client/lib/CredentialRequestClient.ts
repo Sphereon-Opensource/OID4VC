@@ -1,4 +1,4 @@
-import { CredentialRequest, CredentialResponse, OpenIDResponse, ProofOfPossession, URL_NOT_VALID } from '@sphereon/openid4vci-common';
+import { CredentialRequest, CredentialResponse, OpenIDResponse, ProofOfPossession, URL_NOT_VALID } from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 

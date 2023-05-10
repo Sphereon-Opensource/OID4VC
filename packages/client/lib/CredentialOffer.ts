@@ -4,8 +4,8 @@ import {
   CredentialOfferPayloadV1_0_11,
   CredentialOfferRequestWithBaseUrl,
   OpenId4VCIVersion,
-} from '@sphereon/openid4vci-common';
-import { determineSpecVersionFromURI } from '@sphereon/openid4vci-common';
+} from '@sphereon/oid4vci-common';
+import { determineSpecVersionFromURI } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
 import { convertJsonToURI, convertURIToJsonObject } from './functions';

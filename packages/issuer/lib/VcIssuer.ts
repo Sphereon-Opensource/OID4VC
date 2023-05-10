@@ -7,7 +7,9 @@ import {
   CNonceState,
   CREDENTIAL_MISSING_ERROR,
   CredentialIssuerCallback,
+  CredentialOfferPayloadV1_0_11,
   CredentialOfferState,
+  CredentialOfferV1_0_11,
   CredentialRequest,
   CredentialResponse,
   Grant,
@@ -26,19 +28,22 @@ import {
   TokenErrorResponse,
   Typ,
   TYP_ERROR,
-} from '@sphereon/openid4vci-common'
+} from '@sphereon/oid4vci-common'
 import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
+import { createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
+
+const SECOND = 1000
+
 export class VcIssuer {
-  _issuerMetadata: IssuerMetadata
-  _userPinRequired?: boolean
-  _issuerCallback?: CredentialIssuerCallback
-  _verifyCallback?: JWTVerifyCallback
+  private readonly _issuerMetadata: IssuerMetadata
+  private readonly _userPinRequired?: boolean
+  private readonly _issuerCallback?: CredentialIssuerCallback
+  private readonly _verifyCallback?: JWTVerifyCallback
   private readonly _stateManager: IStateManager<CredentialOfferState>
   private readonly nonceManager: IStateManager<CNonceState>
-  // TODO add config option
-  private readonly _cNonceExpiresIn: number = parseInt(process.env.C_NONCE_EXPIRES_IN as string) * 1000 || 90 * 1000
+  private readonly _cNonceExpiresIn: number
 
   constructor(
     issuerMetadata: IssuerMetadata,
@@ -48,14 +53,17 @@ export class VcIssuer {
       nonceManager: IStateManager<CNonceState>
       callback?: CredentialIssuerCallback
       verifyCallback?: JWTVerifyCallback
+      cNonceExpiresIn?: number | undefined // expiration duration in seconds
     }
   ) {
     this._issuerMetadata = issuerMetadata
     this._stateManager = args.stateManager
     this.nonceManager = args.nonceManager
-    this._userPinRequired = args && args.userPinRequired ? args.userPinRequired : false
+    this._userPinRequired = args?.userPinRequired ?? false
     this._issuerCallback = args?.callback
     this._verifyCallback = args?.verifyCallback
+    this._cNonceExpiresIn =
+      ((args?.cNonceExpiresIn ?? (process.env.C_NONCE_EXPIRES_IN ? parseInt(process.env.C_NONCE_EXPIRES_IN) : 90)) as number) * SECOND
   }
 
   public get credentialOfferStateManager(): IStateManager<CredentialOfferState> {
@@ -66,13 +74,48 @@ export class VcIssuer {
     return this.nonceManager
   }
 
-  public getIssuerMetadata() {
+  public get issuerMetadata() {
     return this._issuerMetadata
+  }
+
+  public async createCredentialOfferURI(opts?: {
+    state?: string
+    credentialOffer?: CredentialOfferPayloadV1_0_11
+    credentialOfferUri?: string
+    scheme?: string
+    preAuthorizedCode?: string
+    userPinRequired?: boolean
+  }): Promise<string> {
+    const credentialOffer = createCredentialOfferObject(this._issuerMetadata, {
+      ...opts,
+      userPinRequired: this._userPinRequired ?? opts?.userPinRequired,
+    })
+    const correlationId = credentialOffer.grant.authorization_code
+      ? credentialOffer.grant.authorization_code.issuer_state
+      : credentialOffer.grant['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
+    if (!correlationId) {
+      throw Error(`No grant state or pre-authorized code could be deduced`)
+    }
+    let userPin: number | undefined
+    // todo: Double check this can only happen in pre-auth flow and if so make sure to not do the below when in a state is present (authorized flow)
+    if (opts?.userPinRequired) {
+      userPin = Math.round(9999 * Math.random())
+    }
+    this.credentialOfferStateManager.setState(correlationId, {
+      createdOn: +new Date(),
+      ...(userPin && { userPin }),
+      credentialOffer: {
+        credential_offer: credentialOffer.credential_offer,
+        credential_offer_uri: credentialOffer.credential_offer_uri,
+      } as CredentialOfferV1_0_11,
+    })
+
+    return createCredentialOfferURIFromObject(credentialOffer)
   }
 
   /**
    * issueCredentialFromIssueRequest
-   * @param opts issuerREquestParams
+   * @param opts issuerRequestParams
    *  - issueCredentialsRequest the credential request
    *  - issuerState the state of the issuer
    *  - jwtVerifyCallback callback that verifies the Proof of Possession JWT
@@ -111,7 +154,7 @@ export class VcIssuer {
   private async retrieveGrantsFromClient(issuerState: string): Promise<{ clientId?: string; grants?: Grant }> {
     const credentialOfferState: CredentialOfferState | undefined = await this._stateManager.getAssertedState(issuerState)
     const clientId = credentialOfferState?.clientId
-    const grants = credentialOfferState?.credentialOffer?.grants
+    const grants = credentialOfferState?.credentialOffer?.credential_offer?.grants
     if (!grants?.authorization_code?.issuer_state || !grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']) {
       throw new Error(GRANTS_MUST_NOT_BE_UNDEFINED)
     }
@@ -127,13 +170,14 @@ export class VcIssuer {
     if ((!Array.isArray(issueCredentialRequest.format) && issueCredentialRequest.format === 'jwt') || issueCredentialRequest.format === 'jwt_vc') {
       issueCredentialRequest.proof.jwt
 
-      if (!this._verifyCallback && !jwtVerifyCallback) {
+      if (typeof this._verifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
         throw new Error(JWT_VERIFY_CONFIG_ERROR)
       }
 
       const { payload, header }: Jwt = jwtVerifyCallback
         ? await jwtVerifyCallback(issueCredentialRequest.proof)
-        : await this._verifyCallback!(issueCredentialRequest.proof)
+        : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          await this._verifyCallback!(issueCredentialRequest.proof)
 
       const { typ, alg, kid, jwk, x5c } = header
 
@@ -195,6 +239,7 @@ export class VcIssuer {
     }
     return false
   }
+
   private async issueCredential(
     opts: { credentialRequest?: CredentialRequest; credential?: ICredential },
     issuerCallback?: CredentialIssuerCallback

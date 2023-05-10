@@ -8,10 +8,10 @@ import {
   IssuerCredentialSubjectDisplay,
   IssuerMetadata,
   IStateManager,
-} from '@sphereon/openid4vci-common'
-import { createCredentialOfferURI, CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/openid4vci-issuer'
-import { MemoryCNonceStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager'
-import { MemoryCredentialOfferStateManager } from '@sphereon/openid4vci-issuer/dist/state-manager/MemoryCredentialOfferStateManager'
+} from '@sphereon/oid4vci-common'
+import { createCredentialOfferURI, CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { MemoryCNonceStateManager } from '@sphereon/oid4vci-issuer/dist/state-manager'
+import { MemoryCredentialOfferStateManager } from '@sphereon/oid4vci-issuer/dist/state-manager/MemoryCredentialOfferStateManager'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
@@ -108,7 +108,7 @@ export class RestAPI {
 
   private registerMetadataEndpoint() {
     this.express.get('/metadata', (request: Request, response: Response) => {
-      return response.send(this._vcIssuer._issuerMetadata)
+      return response.send(this._vcIssuer.issuerMetadata)
     })
   }
   private registerTokenRequestEndpoint() {
@@ -136,7 +136,7 @@ export class RestAPI {
       const id = uuidv4()
       this.tokenToId.set(preAuthorizedCode, id)
       return response.send(
-        createCredentialOfferURI(this._vcIssuer._issuerMetadata, {
+        createCredentialOfferURI(this._vcIssuer.issuerMetadata, {
           preAuthorizedCode: preAuthorizedCode,
         })
       )

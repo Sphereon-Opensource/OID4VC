@@ -3,13 +3,13 @@ import { CredentialOfferPayload } from './CredentialIssuance.types';
 import { CredentialOfferFormat, Grant, IssuerCredentialDefinition } from './Generic.types';
 
 export interface CredentialOfferV1_0_11 {
-  credential_offer?: CommonCredentialOfferPayloadV1_0_11;
+  credential_offer?: CredentialOfferPayloadV1_0_11;
   credential_offer_uri?: string;
 }
 
 export interface CommonCredentialOfferPayloadV1_0_11 {
   credential_issuer: string; // REQUIRED. The URL of the Credential Issuer, the Wallet is requested to obtain one or more Credentials from.
-  //fixme: @nklomp, I've made this optional because in the annex E's example, we don't see the credentials property, but we see credential_definition property which I guess does the same thing. I've already asked about this in https://bitbucket.org/openid/connect/issues/1875/differences-between-spec-and-examples-in
+
   /**
    * REQUIRED. A JSON array, where every entry is a JSON object or a JSON string. If the entry is an object,
    * the object contains the data related to a certain credential type the Wallet MAY request.
@@ -19,7 +19,7 @@ export interface CommonCredentialOfferPayloadV1_0_11 {
    * credentials_supported Credential Issuer metadata parameter.
    * When processing, the Wallet MUST resolve this string value to the respective object.
    */
-  credentials?: (CredentialOfferFormat | string)[];
+  credentials: (CredentialOfferFormat | string)[];
   /**
    * OPTIONAL. A JSON object indicating to the Wallet the Grant Types the Credential Issuer's AS is prepared
    * to process for this credential offer. Every grant is represented by a key and an object.

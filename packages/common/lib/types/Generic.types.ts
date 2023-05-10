@@ -9,6 +9,7 @@ import { Oauth2ASWithOID4VCIMetadata } from './OpenID4VCIServerMetadata';
 export interface CredentialLogo {
   url?: string;
   alt_text?: string;
+  [key: string]: unknown;
 }
 
 export enum CredentialFormatEnum {

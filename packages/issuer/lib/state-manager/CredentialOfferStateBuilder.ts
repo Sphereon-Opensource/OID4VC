@@ -1,4 +1,4 @@
-import { CredentialOfferState, CredentialOfferV1_0_11 } from '@sphereon/openid4vci-common'
+import { CredentialOfferState, CredentialOfferV1_0_11 } from '@sphereon/oid4vci-common'
 
 export class CredentialOfferStateBuilder {
   private readonly credentialOfferState: Partial<CredentialOfferState>
@@ -7,7 +7,7 @@ export class CredentialOfferStateBuilder {
   }
 
   credentialOffer(credentialOffer: CredentialOfferV1_0_11): CredentialOfferStateBuilder {
-    ;(this.credentialOfferState.credentialOffer as CredentialOfferV1_0_11) = credentialOffer
+    this.credentialOfferState.credentialOffer = credentialOffer
     return this
   }
 
@@ -17,7 +17,10 @@ export class CredentialOfferStateBuilder {
   }
 
   build(): CredentialOfferState {
-    if (!this.credentialOfferState.credentialOffer || !this.credentialOfferState.createdOn) {
+    if (!this.credentialOfferState.createdOn) {
+      this.credentialOfferState.createdOn = +new Date()
+    }
+    if (!this.credentialOfferState.credentialOffer) {
       throw new Error('Not all properties are present to build an IssuerState object')
     }
     return this.credentialOfferState as CredentialOfferState

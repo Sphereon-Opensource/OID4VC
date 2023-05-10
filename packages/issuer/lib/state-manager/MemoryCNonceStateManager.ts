@@ -1,4 +1,4 @@
-import { C_NONCE_MISSING_ERROR, CNonceState, IStateManager } from '@sphereon/openid4vci-common'
+import { C_NONCE_MISSING_ERROR, CNonceState, IStateManager } from '@sphereon/oid4vci-common'
 
 export class MemoryCNonceStateManager implements IStateManager<CNonceState> {
   private readonly cNonceStateManager: Map<string, CNonceState>

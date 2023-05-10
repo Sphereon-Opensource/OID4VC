@@ -1,4 +1,4 @@
-import { UNKNOWN_CLIENT_ERROR } from '@sphereon/openid4vci-common'
+import { UNKNOWN_CLIENT_ERROR } from '@sphereon/oid4vci-common'
 
 import { CredentialOfferStateBuilder } from '../state-manager'
 import { MemoryCredentialOfferStateManager } from '../state-manager'

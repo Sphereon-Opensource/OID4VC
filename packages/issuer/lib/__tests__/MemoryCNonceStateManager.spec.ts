@@ -1,4 +1,4 @@
-import { C_NONCE_MISSING_ERROR, CNonceState } from '@sphereon/openid4vci-common'
+import { C_NONCE_MISSING_ERROR, CNonceState } from '@sphereon/oid4vci-common'
 import { v4 } from 'uuid'
 
 import { MemoryCNonceStateManager } from '../state-manager'

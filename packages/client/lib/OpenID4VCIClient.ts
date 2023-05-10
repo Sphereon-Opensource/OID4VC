@@ -14,8 +14,8 @@ import {
   ProofOfPossessionCallbacks,
   PushedAuthorizationResponse,
   ResponseType,
-} from '@sphereon/openid4vci-common';
-import { CredentialSupportedTypeV1_0_08, CredentialSupportedV1_0_08 } from '@sphereon/openid4vci-common/dist/types/v1_0_08.types';
+} from '@sphereon/oid4vci-common';
+import { CredentialSupportedTypeV1_0_08, CredentialSupportedV1_0_08 } from '@sphereon/oid4vci-common/dist/types/v1_0_08.types';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 

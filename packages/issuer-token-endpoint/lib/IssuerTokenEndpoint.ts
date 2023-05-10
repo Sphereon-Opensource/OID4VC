@@ -24,7 +24,7 @@ import {
   UNSUPPORTED_GRANT_TYPE_ERROR,
   USER_PIN_NOT_REQUIRED_ERROR,
   USER_PIN_REQUIRED_ERROR,
-} from '@sphereon/openid4vci-common'
+} from '@sphereon/oid4vci-common'
 import express, { NextFunction, Request, Response, Router } from 'express'
 import { v4 } from 'uuid'
 
@@ -125,9 +125,12 @@ const handleTokenRequest = (
 }
 
 const isValidGrant = (assertedState: CredentialOfferState, grantType: string): boolean => {
-  if (assertedState.credentialOffer.grants) {
+  if (assertedState.credentialOffer?.credential_offer?.grants) {
     // TODO implement authorization_code
-    return Object.keys(assertedState.credentialOffer?.grants).includes(GrantType.PRE_AUTHORIZED_CODE) && grantType === GrantType.PRE_AUTHORIZED_CODE
+    return (
+      Object.keys(assertedState.credentialOffer?.credential_offer?.grants).includes(GrantType.PRE_AUTHORIZED_CODE) &&
+      grantType === GrantType.PRE_AUTHORIZED_CODE
+    )
   }
   return false
 }
@@ -146,14 +149,14 @@ export const handleHTTPStatus400 = (opts: Required<Pick<ITokenEndpointOpts, 'pre
       invalid_request:
       the Authorization Server expects a PIN in the pre-authorized flow but the client does not provide a PIN
        */
-      if (assertedState.credentialOffer.grants?.[GrantType.PRE_AUTHORIZED_CODE]?.user_pin_required && !request.body.user_pin) {
+      if (assertedState.credentialOffer.credential_offer?.grants?.[GrantType.PRE_AUTHORIZED_CODE]?.user_pin_required && !request.body.user_pin) {
         return response.status(400).json({ error: TokenErrorResponse.invalid_request, error_description: USER_PIN_REQUIRED_ERROR })
       }
       /*
       invalid_request:
       the Authorization Server does not expect a PIN in the pre-authorized flow but the client provides a PIN
        */
-      if (!assertedState.credentialOffer.grants?.[GrantType.PRE_AUTHORIZED_CODE]?.user_pin_required && request.body.user_pin) {
+      if (!assertedState.credentialOffer.credential_offer?.grants?.[GrantType.PRE_AUTHORIZED_CODE]?.user_pin_required && request.body.user_pin) {
         return response.status(400).json({ error: TokenErrorResponse.invalid_request, error_description: USER_PIN_NOT_REQUIRED_ERROR })
       }
       /*
@@ -170,7 +173,8 @@ export const handleHTTPStatus400 = (opts: Required<Pick<ITokenEndpointOpts, 'pre
       if (getNumberOrUndefined(request.body.user_pin) !== assertedState.userPin) {
         return response.status(400).json({ error: TokenErrorResponse.invalid_grant, error_message: PIN_NOT_MATCH_ERROR })
       } else if (
-        request.body[PRE_AUTH_CODE_LITERAL] !== assertedState.credentialOffer.grants?.[GrantType.PRE_AUTHORIZED_CODE]?.[PRE_AUTH_CODE_LITERAL]
+        request.body[PRE_AUTH_CODE_LITERAL] !==
+        assertedState.credentialOffer?.credential_offer?.grants?.[GrantType.PRE_AUTHORIZED_CODE]?.[PRE_AUTH_CODE_LITERAL]
       ) {
         return response.status(400).json({ error: TokenErrorResponse.invalid_grant, error_message: INVALID_PRE_AUTHORIZED_CODE })
       } else if (isPreAuthorizedCodeExpired(assertedState, opts.preAuthorizedCodeExpirationDuration)) {

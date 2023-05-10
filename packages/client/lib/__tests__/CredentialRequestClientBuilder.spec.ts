@@ -1,6 +1,6 @@
 import { KeyObject } from 'crypto';
 
-import { Alg, CredentialRequest, IssuerMetadata, Jwt, JWTPayload, ProofOfPossession, Typ } from '@sphereon/openid4vci-common';
+import { Alg, CredentialRequest, IssuerMetadata, Jwt, JWTPayload, ProofOfPossession, Typ } from '@sphereon/oid4vci-common';
 import * as jose from 'jose';
 
 import { CredentialRequestClientBuilderV1_0_09, ProofOfPossessionBuilder } from '..';

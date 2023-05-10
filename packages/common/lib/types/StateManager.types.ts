@@ -1,10 +1,10 @@
-import { CredentialOfferPayloadV1_0_11 } from './v1_0_11.types';
+import { CredentialOfferV1_0_11 } from './v1_0_11.types';
 
 export interface CredentialOfferState {
   clientId?: string;
-  credentialOffer: CredentialOfferPayloadV1_0_11;
+  credentialOffer: CredentialOfferV1_0_11;
   createdOn: number;
-  userPin: number;
+  userPin?: number;
 }
 
 export interface CNonceState {

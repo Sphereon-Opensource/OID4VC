@@ -1,4 +1,4 @@
-import { AccessTokenRequest, AccessTokenRequestOpts, AccessTokenResponse, GrantTypes, OpenIDResponse } from '@sphereon/openid4vci-common';
+import { AccessTokenRequest, AccessTokenRequestOpts, AccessTokenResponse, GrantTypes, OpenIDResponse } from '@sphereon/oid4vci-common';
 import nock from 'nock';
 
 import { AccessTokenClient } from '../AccessTokenClient';

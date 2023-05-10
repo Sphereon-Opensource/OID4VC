@@ -1,7 +1,7 @@
 import * as http from 'http'
 import process from 'process'
 
-import { CNonceState, CredentialOfferState, getNumberOrUndefined, IStateManager, JWTSignerCallback } from '@sphereon/openid4vci-common'
+import { CNonceState, CredentialOfferState, getNumberOrUndefined, IStateManager, JWTSignerCallback } from '@sphereon/oid4vci-common'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
