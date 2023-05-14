@@ -9,15 +9,17 @@ export function createCredentialOfferObject(
     credentialOffer?: CredentialOfferPayloadV1_0_11
     credentialOfferUri?: string
     scheme?: string
+    baseUri?: string
     preAuthorizedCode?: string
     userPinRequired?: boolean
   }
-): CredentialOfferV1_0_11 & { scheme: string; grant: Grant } {
+): CredentialOfferV1_0_11 & { scheme: string; grant: Grant; baseUri: string } {
   if (!issuerMetadata && !opts?.credentialOffer && !opts?.credentialOfferUri) {
     throw new Error('You have to provide issuerMetadata or credentialOffer object for creating a deeplink')
   }
-  const scheme = opts?.scheme ? opts.scheme : 'openid-credential-offer'
-  const credential_offer_uri = opts?.credentialOfferUri ? `${scheme}://?credential_offer_uri=${opts?.credentialOfferUri}` : undefined
+  const baseUri = opts?.baseUri ?? ''
+  const scheme = opts?.scheme?.replace('://', '') ?? 'openid-credential-offer'
+  const credential_offer_uri = opts?.credentialOfferUri ? `${scheme}://${baseUri}?credential_offer_uri=${opts?.credentialOfferUri}` : undefined
   let credential_offer: CredentialOfferPayloadV1_0_11
   if (opts?.credentialOffer) {
     credential_offer = opts.credentialOffer
@@ -27,6 +29,7 @@ export function createCredentialOfferObject(
       credentials: issuerMetadata?.credentials_supported,
     } as CredentialOfferPayloadV1_0_11
   }
+  // todo: check payload against issuer metadata
 
   if (!credential_offer.grants) {
     credential_offer.grants = {}
@@ -43,18 +46,23 @@ export function createCredentialOfferObject(
       },
     }
   }
-  return { credential_offer, credential_offer_uri, scheme, grant: credential_offer.grants }
+  return { credential_offer, credential_offer_uri, scheme, baseUri, grant: credential_offer.grants }
 }
 
 export function createCredentialOfferURIFromObject(
-  credentialOffer: CredentialOfferV1_0_11 & { scheme: string; grant: Grant },
-  opts?: { scheme?: string }
+  credentialOffer: CredentialOfferV1_0_11 & { scheme?: string; baseUri?: string; grant?: Grant },
+  opts?: { scheme?: string; baseUri?: string }
 ) {
-  const scheme = opts?.scheme ?? 'openid-credential-offer'
+  const scheme = opts?.scheme?.replace('://', '') ?? credentialOffer?.scheme?.replace('://', '') ?? 'openid-credential-offer'
+  const baseUri = opts?.baseUri ?? credentialOffer?.baseUri ?? ''
   if (credentialOffer.credential_offer_uri) {
-    return `${scheme}://?credential_offer_uri=${credentialOffer.credential_offer_uri}`
+    if (credentialOffer.credential_offer_uri.includes('credential_offer_uri=')) {
+      // discard the scheme. Apparently a URI is set and it already contains the actual uri, so assume that takes priority
+      return credentialOffer.credential_offer_uri
+    }
+    return `${scheme}://${baseUri}?credential_offer_uri=${credentialOffer.credential_offer_uri}`
   }
-  return `${scheme}://?credential_offer=${encodeJsonAsURI(credentialOffer.credential_offer)}`
+  return `${scheme}://${baseUri}?credential_offer=${encodeJsonAsURI(credentialOffer.credential_offer)}`
 }
 
 export function createCredentialOfferURI(

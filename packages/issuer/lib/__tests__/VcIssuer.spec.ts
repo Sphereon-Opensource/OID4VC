@@ -9,7 +9,6 @@ import {
   STATE_MISSING_ERROR,
 } from '@sphereon/oid4vci-common'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
-import { v4 } from 'uuid'
 
 import { VcIssuer } from '../VcIssuer'
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../builder'
@@ -19,8 +18,9 @@ const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
 
 describe('VcIssuer', () => {
   let vcIssuer: VcIssuer
-  const state = 'existing-client'
+  const issuerState = 'previously-created-state'
   const clientId = 'sphereon:wallet'
+  const preAuthorizedCode = 'test_code'
 
   beforeAll(async () => {
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
@@ -45,9 +45,10 @@ describe('VcIssuer', () => {
       } as IssuerCredentialSubjectDisplay)
       .build()
     const stateManager = new MemoryStates<CredentialOfferSession>()
-    await stateManager.set('existing-client', {
-      id: v4(),
+    await stateManager.set('previously-created-state', {
+      issuerState,
       clientId,
+      preAuthorizedCode,
       createdOn: +new Date(),
       userPin: 123456,
       credentialOffer: {
@@ -59,9 +60,9 @@ describe('VcIssuer', () => {
             credentialSubject: {},
           },
           grants: {
-            authorization_code: { issuer_state: 'test_code' },
+            authorization_code: { issuer_state: issuerState },
             'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-              'pre-authorized_code': 'test_code',
+              'pre-authorized_code': preAuthorizedCode,
               user_pin_required: true,
             },
           },
@@ -79,6 +80,7 @@ describe('VcIssuer', () => {
       .withCredentialsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
       .withInMemoryCNonceState()
+      .withInMemoryCredentialOfferURIState()
       .withIssuerCallback(() =>
         Promise.resolve({
           '@context': ['https://www.w3.org/2018/credentials/v1'],
@@ -116,7 +118,43 @@ describe('VcIssuer', () => {
     await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 
-  it('should fail at the first interaction of the client with the issuer', async () => {
+  it('should create credential offer', async () => {
+    await expect(
+      vcIssuer.createCredentialOfferURI({
+        grants: {
+          authorization_code: {
+            issuer_state: issuerState,
+          },
+          'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+            'pre-authorized_code': preAuthorizedCode,
+            user_pin_required: true,
+          },
+        },
+        scheme: 'http',
+        baseUri: 'issuer-example.com',
+      })
+    ).resolves.toEqual(
+      'http://issuer-example.com?credential_offer=grants=%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D&credential_issuer=https%3A%2F%2Fissuer.research.identiproof.io'
+    )
+  })
+
+  it('should create credential offer uri', async () => {
+    await expect(
+      vcIssuer.createCredentialOfferURI({
+        grants: {
+          authorization_code: {
+            issuer_state: issuerState,
+          },
+        },
+        scheme: 'http',
+        baseUri: 'issuer-example.com',
+        credentials: [''],
+        credentialOfferUri: 'https://somehost.com/offer-id',
+      })
+    ).resolves.toEqual('http://issuer-example.com?credential_offer_uri=https://somehost.com/offer-id')
+  })
+
+  it('should fail issuing credential if an invalid state is used', async () => {
     await expect(
       vcIssuer.issueCredentialFromIssueRequest({
         issueCredentialRequest: {
@@ -124,12 +162,12 @@ describe('VcIssuer', () => {
           format: 'jwt_vc_json',
           proof: 'ye.ye.ye',
         } as unknown as CredentialRequest,
-        issuerState: 'first interaction',
+        issuerState: 'invalid state',
       })
     ).rejects.toThrow(Error(STATE_MISSING_ERROR))
   })
 
-  it('should succeed if the client already interacted with the issuer', async () => {
+  it('should issue credential if a valid state is passed in', async () => {
     await expect(
       vcIssuer.issueCredentialFromIssueRequest({
         issueCredentialRequest: {
@@ -137,7 +175,7 @@ describe('VcIssuer', () => {
           format: 'jwt_vc_json',
           proof: 'ye.ye.ye',
         } as unknown as CredentialRequest,
-        issuerState: state,
+        issuerState,
       })
     ).resolves.toEqual({
       c_nonce: expect.any(String),

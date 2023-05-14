@@ -8,6 +8,7 @@ import {
   JWTVerifyCallback,
   MetadataDisplay,
   TokenErrorResponse,
+  URIState,
 } from '@sphereon/oid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
@@ -20,6 +21,7 @@ export class VcIssuerBuilder {
   issuerMetadata: Partial<CredentialIssuerMetadata> = {}
   userPinRequired?: boolean
   credentialOfferStateManager?: IStateManager<CredentialOfferSession>
+  credentialOfferURIManager?: IStateManager<URIState>
   cNonceStateManager?: IStateManager<CNonceState>
   issuerCallback?: CredentialIssuerCallback
   verifyCallback?: JWTVerifyCallback
@@ -84,8 +86,18 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withCredentialOfferStateManager(iCredentialOfferStateManager: IStateManager<CredentialOfferSession>): VcIssuerBuilder {
-    this.credentialOfferStateManager = iCredentialOfferStateManager
+  public withCredentialOfferURIStateManager(credentialOfferURI: IStateManager<URIState>): VcIssuerBuilder {
+    this.credentialOfferURIManager = credentialOfferURI
+    return this
+  }
+
+  public withInMemoryCredentialOfferURIState(): VcIssuerBuilder {
+    this.withCredentialOfferURIStateManager(new MemoryStates<URIState>())
+    return this
+  }
+
+  public withCredentialOfferStateManager(credentialOfferManager: IStateManager<CredentialOfferSession>): VcIssuerBuilder {
+    this.credentialOfferStateManager = credentialOfferManager
     return this
   }
 
@@ -94,8 +106,8 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withCNonceStateManager(iCNonceStateManager: IStateManager<CNonceState>): VcIssuerBuilder {
-    this.cNonceStateManager = iCNonceStateManager
+  public withCNonceStateManager(cNonceManager: IStateManager<CNonceState>): VcIssuerBuilder {
+    this.cNonceStateManager = cNonceManager
     return this
   }
 
@@ -141,6 +153,7 @@ export class VcIssuerBuilder {
       verifyCallback: this.verifyCallback,
       credentialOfferSessions: this.credentialOfferStateManager,
       cNonces: this.cNonceStateManager,
+      uris: this.credentialOfferURIManager,
     })
   }
 }

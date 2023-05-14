@@ -3,11 +3,13 @@ import { CredentialOfferV1_0_11 } from './v1_0_11.types';
 export interface StateType {
   createdOn: number;
 }
+
 export interface CredentialOfferSession extends StateType {
   clientId?: string;
   credentialOffer: CredentialOfferV1_0_11;
   userPin?: number;
-  id: string; // state or pre-authz code depending on flow
+  issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+  preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
 }
 
 export interface CNonceState extends StateType {
@@ -15,8 +17,9 @@ export interface CNonceState extends StateType {
 }
 
 export interface URIState extends StateType {
-  id: string;
-  uri: string;
+  issuerState?: string;
+  preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+  uri: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
 }
 
 export interface IStateManager<T extends StateType> {

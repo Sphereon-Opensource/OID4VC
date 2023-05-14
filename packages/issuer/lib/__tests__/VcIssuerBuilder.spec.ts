@@ -123,7 +123,7 @@ describe('VcIssuer builder should', () => {
     expect(vcIssuer).toBeDefined()
     const preAuthorizedCodeCreatedOn = +new Date()
     await vcIssuer.credentialOfferSessions?.set('test', {
-      id: v4(),
+      issuerState: v4(),
       clientId: 'test_client',
       createdOn: preAuthorizedCodeCreatedOn,
       userPin: 123456,

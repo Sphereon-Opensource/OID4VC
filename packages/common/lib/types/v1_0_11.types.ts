@@ -45,11 +45,10 @@ export interface CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11 extends CommonCredent
   credential_definition: IssuerCredentialDefinition;
 }
 
-export interface CredentialOfferJwtVcJsonV1_0_11 extends CommonCredentialOfferPayloadV1_0_11 {
-  credentials: (CredentialOfferFormat | string)[]; // look at CommonCredentialOfferPayloadV1_0_11.credentials
-}
+export type CredentialOfferJwtVcJsonV1_0_11 = CommonCredentialOfferPayloadV1_0_11;
 
-export type CredentialOfferPayloadV1_0_11 = CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11 | CredentialOfferJwtVcJsonV1_0_11;
+export type CredentialOfferPayloadV1_0_11 = CommonCredentialOfferPayloadV1_0_11 &
+  (CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11 | CredentialOfferJwtVcJsonV1_0_11);
 
 export interface AuthorizationRequestV1_0_11 extends AuthorizationDetailsJwtVcJson, AuthorizationDetailsJwtVcJson {
   issuer_state?: string;

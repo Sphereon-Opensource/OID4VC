@@ -8,6 +8,7 @@ import {
   CREDENTIAL_MISSING_ERROR,
   CredentialIssuerCallback,
   CredentialIssuerMetadata,
+  CredentialOfferFormat,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferSession,
   CredentialOfferV1_0_11,
@@ -18,6 +19,7 @@ import {
   IAT_ERROR,
   ISS_MUST_BE_CLIENT_ID,
   ISSUER_CONFIG_ERROR,
+  IssuerCredentialDefinition,
   IStateManager,
   Jwt,
   JWT_VERIFY_CONFIG_ERROR,
@@ -79,28 +81,59 @@ export class VcIssuer {
   }
 
   public async createCredentialOfferURI(opts: {
-    grant: Grant
-    issuerState?: string
-
-    credentialOffer?: CredentialOfferPayloadV1_0_11
+    grants?: Grant
+    credentials?: (CredentialOfferFormat | string)[]
+    credentialDefinition?: IssuerCredentialDefinition
     credentialOfferUri?: string
     scheme?: string
-    preAuthorizedCode?: string
-    userPinRequired?: boolean
+    baseUri?: string
   }): Promise<string> {
-    const credentialOffer = createCredentialOfferObject(this._issuerMetadata, {
-      ...opts,
-      userPinRequired: this._userPinRequired ?? opts?.userPinRequired,
-    })
-    const id = credentialOffer.grant.authorization_code
-      ? credentialOffer.grant.authorization_code.issuer_state
-      : credentialOffer.grant['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
-    if (!id) {
-      throw Error(`No grant state or pre-authorized code could be deduced`)
+    const { grants, credentials, credentialDefinition } = opts
+    if (!grants?.authorization_code && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
+      throw Error(`No grant issuer state or pre-authorized code could be deduced`)
     }
+    const credentialOffer: CredentialOfferPayloadV1_0_11 = {
+      ...(grants && { grants }),
+      ...(credentials && { credentials }),
+      ...(credentialDefinition && { credential_definition: credentialDefinition }),
+      credential_issuer: this.issuerMetadata.credential_issuer,
+    } as CredentialOfferPayloadV1_0_11
+
+    let issuerState: string | undefined = undefined
+    if (grants?.authorization_code) {
+      issuerState = grants?.authorization_code.issuer_state
+      if (!issuerState) {
+        issuerState = v4()
+        grants.authorization_code.issuer_state = issuerState
+      }
+    }
+
+    let preAuthorizedCode: string | undefined = undefined
+    let userPinRequired: boolean | undefined = undefined
+    if (grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
+      preAuthorizedCode = grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
+      userPinRequired = grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.user_pin_required
+      if (userPinRequired === undefined) {
+        userPinRequired = false
+        grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'].user_pin_required = userPinRequired
+      }
+      if (!preAuthorizedCode) {
+        preAuthorizedCode = v4()
+        grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']['pre-authorized_code'] = preAuthorizedCode
+      }
+    }
+
+    const credentialOfferObject = createCredentialOfferObject(this._issuerMetadata, {
+      ...opts,
+      credentialOffer,
+      userPinRequired,
+      preAuthorizedCode,
+      state: issuerState,
+    })
+
     let userPin: number | undefined
     // todo: Double check this can only happen in pre-auth flow and if so make sure to not do the below when in a state is present (authorized flow)
-    if (opts?.userPinRequired) {
+    if (userPinRequired) {
       userPin = Math.round(9999 * Math.random())
     }
     const createdOn = +new Date()
@@ -108,20 +141,41 @@ export class VcIssuer {
       if (!this.uris) {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
-      this.uris.set(opts.credentialOfferUri, { uri: opts.credentialOfferUri, createdOn, id })
+      this.uris.set(opts.credentialOfferUri, {
+        uri: opts.credentialOfferUri,
+        createdOn,
+        preAuthorizedCode,
+        issuerState,
+      })
     }
 
-    this.credentialOfferSessions.set(id, {
-      id,
-      createdOn,
-      ...(userPin && { userPin }),
-      credentialOffer: {
-        credential_offer: credentialOffer.credential_offer,
-        credential_offer_uri: credentialOffer.credential_offer_uri,
-      } as CredentialOfferV1_0_11,
-    })
+    if (preAuthorizedCode) {
+      this.credentialOfferSessions.set(preAuthorizedCode, {
+        preAuthorizedCode,
+        issuerState,
+        createdOn,
+        ...(userPin && { userPin }),
+        credentialOffer: {
+          credential_offer: credentialOfferObject.credential_offer,
+          credential_offer_uri: credentialOfferObject.credential_offer_uri,
+        } as CredentialOfferV1_0_11,
+      })
+    }
+    // todo: check whether we could have the same value for issuer state and pre auth code if both are supported.
+    if (issuerState) {
+      this.credentialOfferSessions.set(issuerState, {
+        preAuthorizedCode,
+        issuerState,
+        createdOn,
+        ...(userPin && { userPin }),
+        credentialOffer: {
+          credential_offer: credentialOfferObject.credential_offer,
+          credential_offer_uri: credentialOfferObject.credential_offer_uri,
+        } as CredentialOfferV1_0_11,
+      })
+    }
 
-    return createCredentialOfferURIFromObject(credentialOffer)
+    return createCredentialOfferURIFromObject(credentialOfferObject)
   }
 
   /**
@@ -140,6 +194,7 @@ export class VcIssuer {
     issuerCallback?: CredentialIssuerCallback
     cNonce?: string
   }): Promise<CredentialResponse> {
+    // fixme: Why does this only assume a issuer State? Also why would you need to pass in the state on something which comes from the request?
     const { clientId, grants } = await this.retrieveGrantsFromClient(opts.issuerState)
     await this.validateJWT(opts.issueCredentialRequest, grants, clientId, opts.jwtVerifyCallback)
     if (this.isMetadataSupportCredentialRequestFormat(opts.issueCredentialRequest.format)) {
@@ -166,7 +221,7 @@ export class VcIssuer {
     const credentialOfferState: CredentialOfferSession | undefined = await this._credentialOfferSessions.getAsserted(issuerState)
     const clientId = credentialOfferState?.clientId
     const grants = credentialOfferState?.credentialOffer?.credential_offer?.grants
-    if (!grants?.authorization_code?.issuer_state || !grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']) {
+    if (!grants?.authorization_code?.issuer_state && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']) {
       throw new Error(GRANTS_MUST_NOT_BE_UNDEFINED)
     }
     return { clientId, grants }
