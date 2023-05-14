@@ -15,7 +15,6 @@ import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
 import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import * as jose from 'jose'
-import { v4 } from 'uuid'
 
 import { MemoryStates } from '../../../issuer/lib/state-manager'
 import { generateDid, getIssuerCallback, verifyCredential } from '../IssuerCallback'
@@ -66,7 +65,7 @@ afterAll(async () => {
 })
 describe('issuerCallback', () => {
   let vcIssuer: VcIssuer
-  const state = 'existing-client'
+  const state = 'existing-state'
   const clientId = 'sphereon:wallet'
 
   beforeAll(async () => {
@@ -92,8 +91,8 @@ describe('issuerCallback', () => {
       } as IssuerCredentialSubjectDisplay)
       .build()
     const stateManager = new MemoryStates<CredentialOfferSession>()
-    await stateManager.set('existing-client', {
-      id: v4(),
+    await stateManager.set('existing-state', {
+      issuerState: 'existing-state',
       clientId,
       createdOn: +new Date(),
       userPin: 123456,
