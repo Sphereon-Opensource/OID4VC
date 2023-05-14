@@ -3,20 +3,21 @@ import { KeyObject } from 'crypto'
 import { CredentialRequestClient, CredentialRequestClientBuilderV1_0_09, ProofOfPossessionBuilder } from '@sphereon/oid4vci-client'
 import {
   Alg,
-  CredentialFormatEnum,
+  CredentialFormat,
   CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
   CredentialSupported,
-  Display,
   IssuerCredentialSubjectDisplay,
   Jwt,
   ProofOfPossession,
   Typ,
 } from '@sphereon/oid4vci-common'
+import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
 import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import * as jose from 'jose'
+import { v4 } from 'uuid'
 
-import { MemoryCredentialOfferStateManager } from '../../../issuer/lib/state-manager'
+import { MemoryStates } from '../../../issuer/lib/state-manager'
 import { generateDid, getIssuerCallback, verifyCredential } from '../IssuerCallback'
 
 const INITIATION_TEST_URI =
@@ -73,7 +74,7 @@ describe('issuerCallback', () => {
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       //FIXME Here a CredentialFormatEnum is passed in, but later it is matched against a CredentialFormat
-      .withFormat(CredentialFormatEnum.jwt_vc_json)
+      .withFormat(CredentialFormat.jwt_vc_json)
       .withId('UniversityDegree_JWT')
       .withCredentialDisplay({
         name: 'University Credential',
@@ -84,14 +85,15 @@ describe('issuerCallback', () => {
         },
         background_color: '#12107c',
         text_color: '#FFFFFF',
-      } as Display)
+      })
       .withIssuerCredentialSubjectDisplay('given_name', {
         name: 'given name',
         locale: 'en-US',
       } as IssuerCredentialSubjectDisplay)
       .build()
-    const stateManager = new MemoryCredentialOfferStateManager()
-    await stateManager.setState('existing-client', {
+    const stateManager = new MemoryStates<CredentialOfferSession>()
+    await stateManager.set('existing-client', {
+      id: v4(),
       clientId,
       createdOn: +new Date(),
       userPin: 123456,

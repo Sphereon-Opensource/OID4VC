@@ -1,22 +1,22 @@
 import {
-  CredentialFormatEnum,
+  CredentialFormat,
+  CredentialsSupportedDisplay,
   CredentialSupported,
-  Display,
   IssuerCredentialSubject,
   IssuerCredentialSubjectDisplay,
   TokenErrorResponse,
 } from '@sphereon/oid4vci-common'
 
 export class CredentialSupportedBuilderV1_11 {
-  format?: CredentialFormatEnum
+  format?: CredentialFormat
   id?: string
   types?: string[]
   cryptographicBindingMethodsSupported?: ('jwk' | 'cose_key' | 'did' | string)[]
   cryptographicSuitesSupported?: ('jwt_vc' | 'ldp_vc' | string)[]
-  display?: Display[]
+  display?: CredentialsSupportedDisplay[]
   credentialSubject?: IssuerCredentialSubject
 
-  withFormat(credentialFormat: CredentialFormatEnum): CredentialSupportedBuilderV1_11 {
+  withFormat(credentialFormat: CredentialFormat): CredentialSupportedBuilderV1_11 {
     this.format = credentialFormat
     return this
   }
@@ -74,7 +74,7 @@ export class CredentialSupportedBuilderV1_11 {
     return this
   }
 
-  addCredentialDisplay(credentialDisplay: Display | Display[]): CredentialSupportedBuilderV1_11 {
+  addCredentialDisplay(credentialDisplay: CredentialsSupportedDisplay | CredentialsSupportedDisplay[]): CredentialSupportedBuilderV1_11 {
     if (!Array.isArray(credentialDisplay)) {
       this.display = this.display ? [...this.display, credentialDisplay] : [credentialDisplay]
     } else {
@@ -83,7 +83,7 @@ export class CredentialSupportedBuilderV1_11 {
     return this
   }
 
-  withCredentialDisplay(credentialDisplay: Display | Display[]): CredentialSupportedBuilderV1_11 {
+  withCredentialDisplay(credentialDisplay: CredentialsSupportedDisplay | CredentialsSupportedDisplay[]): CredentialSupportedBuilderV1_11 {
     this.display = Array.isArray(credentialDisplay) ? credentialDisplay : [credentialDisplay]
     return this
   }

@@ -1,15 +1,25 @@
 import { KeyObject } from 'crypto'
 import * as http from 'http'
 
-import { Alg, CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11, Jwt } from '@sphereon/oid4vci-common'
-import { MemoryCNonceStateManager, MemoryCredentialOfferStateManager } from '@sphereon/oid4vci-issuer/dist/state-manager'
+import {
+  Alg,
+  CNonceState,
+  CredentialIssuerMetadata,
+  CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+  CredentialOfferSession,
+  Jwt,
+  URIState,
+} from '@sphereon/oid4vci-common'
+import { VcIssuer } from '@sphereon/oid4vci-issuer'
+import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { Express } from 'express'
 import * as jose from 'jose'
 import requests from 'supertest'
+import { v4 } from 'uuid'
 
-import { IssuerTokenServer } from '../IssuerTokenServer'
+import { OID4VCIServer } from '../OID4VCIServer'
 
-describe('IssuerTokenServer', () => {
+describe('OID4VCIServer', () => {
   let app: Express
   let server: http.Server
 
@@ -21,6 +31,7 @@ describe('IssuerTokenServer', () => {
     }
 
     const credentialOfferState1 = {
+      id: v4(),
       userPin: 493536,
       createdOn: +new Date(),
       credentialOffer: {
@@ -42,6 +53,7 @@ describe('IssuerTokenServer', () => {
     }
     const credentialOfferState2 = {
       ...credentialOfferState1,
+      id: v4(),
       credentialOffer: {
         ...credentialOfferState1.credentialOffer,
         credential_offer: {
@@ -57,21 +69,69 @@ describe('IssuerTokenServer', () => {
         } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
       },
     }
-    const credentialOfferState3 = { ...credentialOfferState1, preAuthorizedCodeExpiresIn: 1 }
-    const state = new MemoryCredentialOfferStateManager()
-    await state.setState('test_state', credentialOfferState1)
-    await state.setState('test_state_1', credentialOfferState2)
-    await state.setState('test_state_2', credentialOfferState3)
+    const credentialOfferState3 = { ...credentialOfferState1, preAuthorizedCodeExpiresIn: 1, id: v4() }
+    const state = new MemoryStates<CredentialOfferSession>()
+    await state.set('test_state', credentialOfferState1)
+    await state.set('test_state_1', credentialOfferState2)
+    await state.set('test_state_2', credentialOfferState3)
 
-    const issuerTokenServer = new IssuerTokenServer({
-      stateManager: state,
-      nonceStateManager: new MemoryCNonceStateManager(),
-      accessTokenSignerCallback: signerCallback,
-      accessTokenIssuer: 'https://www.example.com',
-      preAuthorizedCodeExpirationDuration: 2000,
+    const vcIssuer: VcIssuer = new VcIssuer(
+      {
+        authorization_server: 'https://authorization-server',
+        credential_endpoint: 'https://credential-endpoint',
+        credential_issuer: 'https://credential-issuer',
+        display: [{ name: 'example issuer', locale: 'en-US' }],
+        credentials_supported: [
+          {
+            format: 'jwt_vc_json',
+            types: ['VerifiableCredential', 'UniversityDegreeCredential'],
+            credentialSubject: {
+              given_name: {
+                display: [
+                  {
+                    name: 'given name',
+                    locale: 'en-US',
+                  },
+                ],
+              },
+            },
+            cryptographic_suites_supported: ['ES256K'],
+            cryptographic_binding_methods_supported: ['did'],
+            id: 'UniversityDegree_JWT',
+            display: [
+              {
+                name: 'University Credential',
+                locale: 'en-US',
+                logo: {
+                  url: 'https://exampleuniversity.com/public/logo.png',
+                  alt_text: 'a square logo of a university',
+                },
+                background_color: '#12107c',
+                text_color: '#FFFFFF',
+              },
+            ],
+          },
+        ],
+      } as CredentialIssuerMetadata,
+      {
+        cNonceExpiresIn: 300,
+        credentialOfferSessions: state,
+        cNonces: new MemoryStates<CNonceState>(),
+        uris: new MemoryStates<URIState>(),
+      }
+    )
+
+    const vcIssuerServer = new OID4VCIServer({
+      issuer: vcIssuer,
+      tokenEndpointOpts: {
+        accessTokenSignerCallback: signerCallback,
+        accessTokenIssuer: 'https://www.example.com',
+        preAuthorizedCodeExpirationDuration: 2000,
+        tokenExpiresIn: 300000,
+      },
     })
-    app = issuerTokenServer.app
-    server = issuerTokenServer.server
+    app = vcIssuerServer.app
+    server = vcIssuerServer.server
   })
 
   afterAll(async () => {
@@ -90,7 +150,7 @@ describe('IssuerTokenServer', () => {
     expect(res.statusCode).toEqual(200)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
-      access_token: expect.stringContaining('eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE2ODM'),
+      access_token: expect.stringContaining('eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE2ODQ'),
       token_type: 'bearer',
       expires_in: 300000,
       c_nonce: expect.any(String),

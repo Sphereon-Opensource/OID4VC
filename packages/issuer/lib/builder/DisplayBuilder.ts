@@ -1,4 +1,4 @@
-import { CredentialLogo, Display } from '@sphereon/oid4vci-common'
+import { CredentialLogo, MetadataDisplay } from '@sphereon/oid4vci-common'
 
 export class DisplayBuilder {
   name?: string
@@ -49,14 +49,14 @@ export class DisplayBuilder {
     return this
   }
 
-  build(): Display {
+  build(): MetadataDisplay {
     return {
       ...this.additionalProperties,
       ...(this.name && { name: this.name }),
       ...(this.locale && { locale: this.locale }),
       ...(this.logo && { logo: this.logo }),
       ...(this.backgroundColor && { background_color: this.backgroundColor }),
-      ...(this.textColor && { background_color: this.backgroundColor }),
+      ...(this.textColor && { text_color: this.textColor }),
     }
   }
 }

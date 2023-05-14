@@ -1,4 +1,4 @@
-import { CredentialFormatEnum } from '@sphereon/oid4vci-common'
+import { CredentialFormat } from '@sphereon/oid4vci-common'
 
 import { createCredentialOfferURI } from '../index'
 
@@ -10,7 +10,7 @@ describe('CredentialOfferUtils should', () => {
       credential_issuer: 'https://credential-issuer.example.com',
       credentials: [
         {
-          format: CredentialFormatEnum.jwt_vc_json,
+          format: CredentialFormat.jwt_vc_json,
           types: ['VerifiableCredential', 'UniversityDegreeCredential'],
         },
       ],

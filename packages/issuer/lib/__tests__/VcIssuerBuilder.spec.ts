@@ -1,4 +1,5 @@
-import { CredentialFormatEnum, CredentialSupported, Display, IssuerCredentialSubjectDisplay, TokenErrorResponse } from '@sphereon/oid4vci-common'
+import { CredentialFormat, CredentialSupported, IssuerCredentialSubjectDisplay, TokenErrorResponse } from '@sphereon/oid4vci-common'
+import { v4 } from 'uuid'
 
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../index'
 
@@ -7,7 +8,7 @@ describe('VcIssuer builder should', () => {
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
-      .withFormat(CredentialFormatEnum.jwt_vc_json)
+      .withFormat(CredentialFormat.jwt_vc_json)
       .withId('UniversityDegree_JWT')
       .withCredentialDisplay({
         name: 'University Credential',
@@ -18,7 +19,7 @@ describe('VcIssuer builder should', () => {
         },
         background_color: '#12107c',
         text_color: '#FFFFFF',
-      } as Display)
+      })
       .withIssuerCredentialSubjectDisplay('given_name', {
         name: 'given name',
         locale: 'en-US',
@@ -46,7 +47,7 @@ describe('VcIssuer builder should', () => {
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
-      .withFormat(CredentialFormatEnum.jwt_vc_json)
+      .withFormat(CredentialFormat.jwt_vc_json)
       .withId('UniversityDegree_JWT')
       .withCredentialDisplay({
         name: 'University Credential',
@@ -57,7 +58,7 @@ describe('VcIssuer builder should', () => {
         },
         background_color: '#12107c',
         text_color: '#FFFFFF',
-      } as Display)
+      })
       .withIssuerCredentialSubjectDisplay('given_name', {
         name: 'given name',
         locale: 'en-US',
@@ -89,7 +90,7 @@ describe('VcIssuer builder should', () => {
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
-      .withFormat(CredentialFormatEnum.jwt_vc_json)
+      .withFormat(CredentialFormat.jwt_vc_json)
       .withId('UniversityDegree_JWT')
       .withCredentialDisplay({
         name: 'University Credential',
@@ -100,7 +101,7 @@ describe('VcIssuer builder should', () => {
         },
         background_color: '#12107c',
         text_color: '#FFFFFF',
-      } as Display)
+      })
       .withIssuerCredentialSubjectDisplay('given_name', {
         name: 'given name',
         locale: 'en-US',
@@ -118,15 +119,17 @@ describe('VcIssuer builder should', () => {
       .withInMemoryCredentialOfferState()
       .withInMemoryCNonceState()
       .build()
+    console.log(JSON.stringify(vcIssuer.issuerMetadata))
     expect(vcIssuer).toBeDefined()
     const preAuthorizedCodeCreatedOn = +new Date()
-    await vcIssuer.credentialOfferStateManager?.setState('test', {
+    await vcIssuer.credentialOfferSessions?.set('test', {
+      id: v4(),
       clientId: 'test_client',
       createdOn: preAuthorizedCodeCreatedOn,
       userPin: 123456,
       credentialOffer: { credential_offer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' } },
     })
-    await expect(vcIssuer.credentialOfferStateManager?.getState('test')).resolves.toEqual({
+    await expect(vcIssuer.credentialOfferSessions?.get('test')).resolves.toMatchObject({
       clientId: 'test_client',
       userPin: 123456,
       createdOn: preAuthorizedCodeCreatedOn,

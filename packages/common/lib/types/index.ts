@@ -8,4 +8,4 @@ export * from './OAuth2ASMetadata';
 export * from './OpenID4VCIErrors';
 export * from './OpenID4VCIServerMetadata';
 export * from './OpenID4VCIVersions.types';
-export { CredentialOfferState, IStateManager, CNonceState } from '../types/StateManager.types';
+export * from './StateManager.types';

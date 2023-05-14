@@ -1,17 +1,19 @@
 import {
   Alg,
-  CredentialFormatEnum,
+  CredentialFormat,
   CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+  CredentialOfferSession,
   CredentialRequest,
   CredentialSupported,
-  Display,
   IssuerCredentialSubjectDisplay,
+  STATE_MISSING_ERROR,
 } from '@sphereon/oid4vci-common'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
+import { v4 } from 'uuid'
 
 import { VcIssuer } from '../VcIssuer'
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../builder'
-import { MemoryCredentialOfferStateManager } from '../state-manager'
+import { MemoryStates } from '../state-manager'
 
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
 
@@ -25,7 +27,7 @@ describe('VcIssuer', () => {
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       //FIXME Here a CredentialFormatEnum is passed in, but later it is matched against a CredentialFormat
-      .withFormat(CredentialFormatEnum.jwt_vc_json)
+      .withFormat(CredentialFormat.jwt_vc_json)
       .withId('UniversityDegree_JWT')
       .withCredentialDisplay({
         name: 'University Credential',
@@ -36,14 +38,15 @@ describe('VcIssuer', () => {
         },
         background_color: '#12107c',
         text_color: '#FFFFFF',
-      } as Display)
+      })
       .withIssuerCredentialSubjectDisplay('given_name', {
         name: 'given name',
         locale: 'en-US',
       } as IssuerCredentialSubjectDisplay)
       .build()
-    const stateManager = new MemoryCredentialOfferStateManager()
-    await stateManager.setState('existing-client', {
+    const stateManager = new MemoryStates<CredentialOfferSession>()
+    await stateManager.set('existing-client', {
+      id: v4(),
       clientId,
       createdOn: +new Date(),
       userPin: 123456,
@@ -123,7 +126,7 @@ describe('VcIssuer', () => {
         } as unknown as CredentialRequest,
         issuerState: 'first interaction',
       })
-    ).rejects.toThrow(Error('The client is not known by the issuer'))
+    ).rejects.toThrow(Error(STATE_MISSING_ERROR))
   })
 
   it('should succeed if the client already interacted with the issuer', async () => {

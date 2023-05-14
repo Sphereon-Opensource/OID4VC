@@ -1,4 +1,4 @@
-import { CredentialSupported, Display, IssuerMetadata } from '@sphereon/oid4vci-common'
+import { CredentialIssuerMetadata, CredentialSupported, MetadataDisplay } from '@sphereon/oid4vci-common'
 
 import { CredentialSupportedBuilderV1_11 } from './CredentialSupportedBuilderV1_11'
 import { DisplayBuilder } from './DisplayBuilder'
@@ -9,7 +9,7 @@ export class IssuerMetadataBuilderV1_11 {
   supportedBuilders: CredentialSupportedBuilderV1_11[] = []
   supportedCredentials: CredentialSupported[] = []
   displayBuilders: DisplayBuilder[] = []
-  display: Display[] = []
+  display: MetadataDisplay[] = []
   batchCredentialEndpoint?: string
   authorizationServer?: string
   tokenEndpoint?: string
@@ -55,12 +55,12 @@ export class IssuerMetadataBuilderV1_11 {
     return this
   }
 
-  public withIssuerDisplay(issuerDisplay: Display[] | Display): IssuerMetadataBuilderV1_11 {
+  public withIssuerDisplay(issuerDisplay: MetadataDisplay[] | MetadataDisplay): IssuerMetadataBuilderV1_11 {
     this.display = Array.isArray(issuerDisplay) ? issuerDisplay : [issuerDisplay]
     return this
   }
 
-  public addDisplay(display: Display) {
+  public addDisplay(display: MetadataDisplay) {
     this.display.push(display)
   }
 
@@ -74,7 +74,7 @@ export class IssuerMetadataBuilderV1_11 {
     return builder
   }
 
-  public build(): IssuerMetadata {
+  public build(): CredentialIssuerMetadata {
     if (!this.credentialIssuer) {
       throw Error('No credential issuer supplied')
     } else if (!this.credentialEndpoint) {
@@ -87,7 +87,7 @@ export class IssuerMetadataBuilderV1_11 {
       throw Error('No supported credentials supplied')
     }
 
-    const display: Display[] = []
+    const display: MetadataDisplay[] = []
     display.push(...this.display)
     display.push(...this.displayBuilders.map((builder) => builder.build()))
 

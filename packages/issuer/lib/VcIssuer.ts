@@ -7,8 +7,9 @@ import {
   CNonceState,
   CREDENTIAL_MISSING_ERROR,
   CredentialIssuerCallback,
+  CredentialIssuerMetadata,
   CredentialOfferPayloadV1_0_11,
-  CredentialOfferState,
+  CredentialOfferSession,
   CredentialOfferV1_0_11,
   CredentialRequest,
   CredentialResponse,
@@ -17,7 +18,6 @@ import {
   IAT_ERROR,
   ISS_MUST_BE_CLIENT_ID,
   ISSUER_CONFIG_ERROR,
-  IssuerMetadata,
   IStateManager,
   Jwt,
   JWT_VERIFY_CONFIG_ERROR,
@@ -29,36 +29,41 @@ import {
   Typ,
   TYP_ERROR,
 } from '@sphereon/oid4vci-common'
+import { URIState } from '@sphereon/oid4vci-common'
 import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
 import { createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
+import { LookupStateManager } from './state-manager/LookupStateManager'
 
 const SECOND = 1000
 
 export class VcIssuer {
-  private readonly _issuerMetadata: IssuerMetadata
-  private readonly _userPinRequired?: boolean
+  private readonly _issuerMetadata: CredentialIssuerMetadata
+  private readonly _userPinRequired: boolean
   private readonly _issuerCallback?: CredentialIssuerCallback
   private readonly _verifyCallback?: JWTVerifyCallback
-  private readonly _stateManager: IStateManager<CredentialOfferState>
-  private readonly nonceManager: IStateManager<CNonceState>
+  private readonly _credentialOfferSessions: IStateManager<CredentialOfferSession>
+  private readonly _cNonces: IStateManager<CNonceState>
+  private readonly _uris?: IStateManager<URIState>
   private readonly _cNonceExpiresIn: number
 
   constructor(
-    issuerMetadata: IssuerMetadata,
+    issuerMetadata: CredentialIssuerMetadata,
     args: {
       userPinRequired?: boolean
-      stateManager: IStateManager<CredentialOfferState>
-      nonceManager: IStateManager<CNonceState>
+      credentialOfferSessions: IStateManager<CredentialOfferSession>
+      cNonces: IStateManager<CNonceState>
+      uris?: IStateManager<URIState>
       callback?: CredentialIssuerCallback
       verifyCallback?: JWTVerifyCallback
       cNonceExpiresIn?: number | undefined // expiration duration in seconds
     }
   ) {
     this._issuerMetadata = issuerMetadata
-    this._stateManager = args.stateManager
-    this.nonceManager = args.nonceManager
+    this._credentialOfferSessions = args.credentialOfferSessions
+    this._cNonces = args.cNonces
+    this._uris = args.uris
     this._userPinRequired = args?.userPinRequired ?? false
     this._issuerCallback = args?.callback
     this._verifyCallback = args?.verifyCallback
@@ -66,20 +71,17 @@ export class VcIssuer {
       ((args?.cNonceExpiresIn ?? (process.env.C_NONCE_EXPIRES_IN ? parseInt(process.env.C_NONCE_EXPIRES_IN) : 90)) as number) * SECOND
   }
 
-  public get credentialOfferStateManager(): IStateManager<CredentialOfferState> {
-    return this._stateManager
+  public getCredentialOfferSessionById(id: string): Promise<CredentialOfferSession> {
+    if (!this.uris) {
+      throw Error('Cannnot lookup credential offer by id, if URI state manager is not set')
+    }
+    return new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, 'uri').getAsserted(id)
   }
 
-  public get nonceStateManager(): IStateManager<CNonceState> {
-    return this.nonceManager
-  }
+  public async createCredentialOfferURI(opts: {
+    grant: Grant
+    issuerState?: string
 
-  public get issuerMetadata() {
-    return this._issuerMetadata
-  }
-
-  public async createCredentialOfferURI(opts?: {
-    state?: string
     credentialOffer?: CredentialOfferPayloadV1_0_11
     credentialOfferUri?: string
     scheme?: string
@@ -90,10 +92,10 @@ export class VcIssuer {
       ...opts,
       userPinRequired: this._userPinRequired ?? opts?.userPinRequired,
     })
-    const correlationId = credentialOffer.grant.authorization_code
+    const id = credentialOffer.grant.authorization_code
       ? credentialOffer.grant.authorization_code.issuer_state
       : credentialOffer.grant['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
-    if (!correlationId) {
+    if (!id) {
       throw Error(`No grant state or pre-authorized code could be deduced`)
     }
     let userPin: number | undefined
@@ -101,8 +103,17 @@ export class VcIssuer {
     if (opts?.userPinRequired) {
       userPin = Math.round(9999 * Math.random())
     }
-    this.credentialOfferStateManager.setState(correlationId, {
-      createdOn: +new Date(),
+    const createdOn = +new Date()
+    if (opts?.credentialOfferUri) {
+      if (!this.uris) {
+        throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
+      }
+      this.uris.set(opts.credentialOfferUri, { uri: opts.credentialOfferUri, createdOn, id })
+    }
+
+    this.credentialOfferSessions.set(id, {
+      id,
+      createdOn,
       ...(userPin && { userPin }),
       credentialOffer: {
         credential_offer: credentialOffer.credential_offer,
@@ -133,7 +144,7 @@ export class VcIssuer {
     await this.validateJWT(opts.issueCredentialRequest, grants, clientId, opts.jwtVerifyCallback)
     if (this.isMetadataSupportCredentialRequestFormat(opts.issueCredentialRequest.format)) {
       const cNonce = opts.cNonce ? opts.cNonce : v4()
-      await this.nonceManager.setState(cNonce, { cNonce, createdOn: +new Date() })
+      await this._cNonces.set(cNonce, { cNonce, createdOn: +new Date() })
       const credential = await this.issueCredential({ credentialRequest: opts.issueCredentialRequest }, opts.issuerCallback)
       // TODO implement acceptance_token (deferred response)
       // TODO update verification accordingly
@@ -152,7 +163,7 @@ export class VcIssuer {
   }
 
   private async retrieveGrantsFromClient(issuerState: string): Promise<{ clientId?: string; grants?: Grant }> {
-    const credentialOfferState: CredentialOfferState | undefined = await this._stateManager.getAssertedState(issuerState)
+    const credentialOfferState: CredentialOfferSession | undefined = await this._credentialOfferSessions.getAsserted(issuerState)
     const clientId = credentialOfferState?.clientId
     const grants = credentialOfferState?.credentialOffer?.credential_offer?.grants
     if (!grants?.authorization_code?.issuer_state || !grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']) {
@@ -248,5 +259,37 @@ export class VcIssuer {
       throw new Error(ISSUER_CONFIG_ERROR)
     }
     return issuerCallback ? await issuerCallback(opts) : this._issuerCallback(opts)
+  }
+
+  get userPinRequired(): boolean {
+    return this._userPinRequired
+  }
+
+  get issuerCallback(): CredentialIssuerCallback | undefined {
+    return this._issuerCallback
+  }
+
+  get verifyCallback(): JWTVerifyCallback | undefined {
+    return this._verifyCallback
+  }
+
+  get uris(): IStateManager<URIState> | undefined {
+    return this._uris
+  }
+
+  get cNonceExpiresIn(): number {
+    return this._cNonceExpiresIn
+  }
+
+  public get credentialOfferSessions(): IStateManager<CredentialOfferSession> {
+    return this._credentialOfferSessions
+  }
+
+  public get cNonces(): IStateManager<CNonceState> {
+    return this._cNonces
+  }
+
+  public get issuerMetadata() {
+    return this._issuerMetadata
   }
 }

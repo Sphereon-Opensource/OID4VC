@@ -1,11 +1,11 @@
 import {
   AccessTokenResponse,
+  CredentialIssuerMetadata,
   CredentialOfferPayload,
   CredentialOfferPayloadV1_0_09,
   CredentialOfferRequestWithBaseUrl,
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
-  IssuerMetadata,
 } from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 
@@ -63,7 +63,7 @@ export class CredentialRequestClientBuilderV1_0_09 {
     });
   }
 
-  public withCredentialEndpointFromMetadata(metadata: IssuerMetadata): CredentialRequestClientBuilderV1_0_09 {
+  public withCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadata): CredentialRequestClientBuilderV1_0_09 {
     this.credentialEndpoint = metadata.credential_endpoint;
     return this;
   }

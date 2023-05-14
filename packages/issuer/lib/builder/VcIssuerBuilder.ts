@@ -1,30 +1,30 @@
 import {
   CNonceState,
   CredentialIssuerCallback,
-  CredentialOfferState,
+  CredentialIssuerMetadata,
+  CredentialOfferSession,
   CredentialSupported,
-  Display,
-  IssuerMetadata,
   IStateManager,
   JWTVerifyCallback,
+  MetadataDisplay,
   TokenErrorResponse,
 } from '@sphereon/oid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
-import { MemoryCNonceStateManager, MemoryCredentialOfferStateManager } from '../state-manager'
+import { MemoryStates } from '../state-manager'
 
 import { IssuerMetadataBuilderV1_11 } from './IssuerMetadataBuilderV1_11'
 
 export class VcIssuerBuilder {
   issuerMetadataBuilder?: IssuerMetadataBuilderV1_11
-  issuerMetadata: Partial<IssuerMetadata> = {}
+  issuerMetadata: Partial<CredentialIssuerMetadata> = {}
   userPinRequired?: boolean
-  credentialOfferStateManager?: IStateManager<CredentialOfferState>
+  credentialOfferStateManager?: IStateManager<CredentialOfferSession>
   cNonceStateManager?: IStateManager<CNonceState>
   issuerCallback?: CredentialIssuerCallback
   verifyCallback?: JWTVerifyCallback
 
-  public withIssuerMetadata(issuerMetadata: IssuerMetadata) {
+  public withIssuerMetadata(issuerMetadata: CredentialIssuerMetadata) {
     this.issuerMetadata = issuerMetadata
   }
 
@@ -59,12 +59,12 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withIssuerDisplay(issuerDisplay: Display[] | Display): VcIssuerBuilder {
+  public withIssuerDisplay(issuerDisplay: MetadataDisplay[] | MetadataDisplay): VcIssuerBuilder {
     this.issuerMetadata.display = Array.isArray(issuerDisplay) ? issuerDisplay : [issuerDisplay]
     return this
   }
 
-  public addIssuerDisplay(issuerDisplay: Display): VcIssuerBuilder {
+  public addIssuerDisplay(issuerDisplay: MetadataDisplay): VcIssuerBuilder {
     this.issuerMetadata.display = [...(this.issuerMetadata.display ?? []), issuerDisplay]
     return this
   }
@@ -84,13 +84,13 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withCredentialOfferStateManager(iCredentialOfferStateManager: IStateManager<CredentialOfferState>): VcIssuerBuilder {
+  public withCredentialOfferStateManager(iCredentialOfferStateManager: IStateManager<CredentialOfferSession>): VcIssuerBuilder {
     this.credentialOfferStateManager = iCredentialOfferStateManager
     return this
   }
 
   public withInMemoryCredentialOfferState(): VcIssuerBuilder {
-    this.withCredentialOfferStateManager(new MemoryCredentialOfferStateManager())
+    this.withCredentialOfferStateManager(new MemoryStates<CredentialOfferSession>())
     return this
   }
 
@@ -100,7 +100,7 @@ export class VcIssuerBuilder {
   }
 
   public withInMemoryCNonceState(): VcIssuerBuilder {
-    this.withCNonceStateManager(new MemoryCNonceStateManager())
+    this.withCNonceStateManager(new MemoryStates())
     return this
   }
 
@@ -123,7 +123,7 @@ export class VcIssuerBuilder {
     }
 
     const builder = this.issuerMetadataBuilder?.build()
-    const metadata: Partial<IssuerMetadata> = { ...this.issuerMetadata, ...builder }
+    const metadata: Partial<CredentialIssuerMetadata> = { ...this.issuerMetadata, ...builder }
     // Let's make sure these get merged correctly:
     metadata.credentials_supported = [...(this.issuerMetadata.credentials_supported ?? []), ...(builder?.credentials_supported ?? [])]
     metadata.display = [...(this.issuerMetadata.display ?? []), ...(builder?.display ?? [])]
@@ -135,12 +135,12 @@ export class VcIssuerBuilder {
     ) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    return new VcIssuer(metadata as IssuerMetadata, {
+    return new VcIssuer(metadata as CredentialIssuerMetadata, {
       userPinRequired: this.userPinRequired ?? false,
       callback: this.issuerCallback,
       verifyCallback: this.verifyCallback,
-      stateManager: this.credentialOfferStateManager,
-      nonceManager: this.cNonceStateManager,
+      credentialOfferSessions: this.credentialOfferStateManager,
+      cNonces: this.cNonceStateManager,
     })
   }
 }

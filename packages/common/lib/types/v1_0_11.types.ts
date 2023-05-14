@@ -8,7 +8,10 @@ export interface CredentialOfferV1_0_11 {
 }
 
 export interface CommonCredentialOfferPayloadV1_0_11 {
-  credential_issuer: string; // REQUIRED. The URL of the Credential Issuer, the Wallet is requested to obtain one or more Credentials from.
+  /**
+   * REQUIRED. The URL of the Credential Issuer, the Wallet is requested to obtain one or more Credentials from.
+   */
+  credential_issuer: string;
 
   /**
    * REQUIRED. A JSON array, where every entry is a JSON object or a JSON string. If the entry is an object,

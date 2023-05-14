@@ -376,14 +376,12 @@ export class OpenID4VCIClient {
       }
       if (supportedTypeOverlap.length > 0) {
         credentialSupportedOverlap.push({
+          ...supported,
           types: supportedTypeOverlap,
-          format: supported.format,
-          cryptographic_suites_supported: supported.cryptographic_suites_supported,
-          cryptographic_binding_methods_supported: supported.cryptographic_binding_methods_supported,
         });
       }
     }
-    return credentialSupportedOverlap;
+    return credentialSupportedOverlap as CredentialSupported[];
   }
 
   getCredentialMetadata(type: string): CredentialSupported[] {
