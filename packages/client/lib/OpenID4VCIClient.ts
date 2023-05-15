@@ -10,6 +10,7 @@ import {
   CredentialSupported,
   EndpointMetadata,
   IssuerCredentialSubject,
+  OpenId4VCIVersion,
   OpenIDResponse,
   ProofOfPossessionCallbacks,
   PushedAuthorizationResponse,
@@ -83,7 +84,7 @@ export class OpenID4VCIClient {
     retrieveServerMetadata?: boolean;
     clientId?: string;
   }): Promise<OpenID4VCIClient> {
-    const client = new OpenID4VCIClient(CredentialOffer.fromURI(uri), flowType, kid, alg, clientId);
+    const client = new OpenID4VCIClient(await CredentialOffer.fromURI(uri), flowType, kid, alg, clientId);
     // noinspection PointlessBooleanExpressionJS
     if (retrieveServerMetadata !== false) {
       await client.retrieveServerMetadata();
@@ -139,6 +140,7 @@ export class OpenID4VCIClient {
     return convertJsonToURI(queryObj, {
       baseUrl: this._endpointMetadata.authorization_endpoint,
       uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details'],
+      version: this.version(),
     });
   }
 
@@ -401,6 +403,10 @@ export class OpenID4VCIClient {
 
   get credentialOffer(): CredentialOfferRequestWithBaseUrl {
     return this._credentialOffer;
+  }
+
+  public version(): OpenId4VCIVersion {
+    return this.credentialOffer.version;
   }
 
   public get endpointMetadata(): EndpointMetadata {

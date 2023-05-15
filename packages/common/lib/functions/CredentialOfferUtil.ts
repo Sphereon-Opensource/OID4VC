@@ -6,11 +6,13 @@ export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
   if (uri) {
     version = determineSpecVersionFromScheme(uri, version);
 
-    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_09, version, 'pre-authorized_code');
+    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_09, version, 'initiate_issuance');
+    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_09, version, 'initiate_issuance_uri');
+    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_09, version, 'op_state');
+
+    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_11, version, 'credential_offer_uri=');
     version = getVersion(uri, OpenId4VCIVersion.VER_1_0_11, version, 'credential_issuer');
-    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_11, version, 'cryptographic_binding_methods_supported');
-    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_11, version, 'cryptographic_suites_supported');
-    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_11, version, 'credentialSubject');
+    version = getVersion(uri, OpenId4VCIVersion.VER_1_0_11, version, 'grants');
 
     return version;
   }
@@ -22,10 +24,12 @@ export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
 
 export function determineSpecVersionFromScheme(credentialOfferURI: string, openId4VCIVersion: OpenId4VCIVersion) {
   const scheme = getScheme(credentialOfferURI);
-  if (credentialOfferURI.startsWith(DefaultURISchemes.CREDENTIAL_OFFER)) {
+  if (credentialOfferURI.includes(DefaultURISchemes.INITIATE_ISSUANCE)) {
+    return recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_1_0_09, scheme);
+  } else if (credentialOfferURI.includes(DefaultURISchemes.CREDENTIAL_OFFER)) {
     return recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_1_0_11, scheme);
   } else {
-    return recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_1_0_09, scheme);
+    return recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_UNKNOWN, scheme);
   }
 }
 
@@ -51,7 +55,7 @@ function recordVersion(determinedVersion: OpenId4VCIVersion, potentialVersion: O
 }
 
 export function getIssuerFromCredentialOfferPayload(request: CredentialOfferPayload): string | undefined {
-  if (!request || !('issuer' in request) || 'credential_issuer' in request) {
+  if (!request || (!('issuer' in request) && !('credential_issuer' in request))) {
     return undefined;
   }
   return 'issuer' in request ? request.issuer : request['credential_issuer'];

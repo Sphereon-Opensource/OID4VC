@@ -1,4 +1,4 @@
-import { CredentialIssuerMetadata, CredentialOfferPayloadV1_0_11, CredentialOfferV1_0_11, encodeJsonAsURI, Grant } from '@sphereon/oid4vci-common'
+import { CredentialIssuerMetadata, CredentialOfferPayloadV1_0_11, CredentialOfferV1_0_11, Grant } from '@sphereon/oid4vci-common'
 import { v4 as uuidv4 } from 'uuid'
 
 export function createCredentialOfferObject(
@@ -62,7 +62,7 @@ export function createCredentialOfferURIFromObject(
     }
     return `${scheme}://${baseUri}?credential_offer_uri=${credentialOffer.credential_offer_uri}`
   }
-  return `${scheme}://${baseUri}?credential_offer=${encodeJsonAsURI(credentialOffer.credential_offer)}`
+  return `${scheme}://${baseUri}?credential_offer=${encodeURIComponent(JSON.stringify(credentialOffer.credential_offer))}`
 }
 
 export function createCredentialOfferURI(

@@ -1,5 +1,7 @@
+import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   Alg,
+  AuthzFlowType,
   CredentialFormat,
   CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
   CredentialOfferSession,
@@ -119,23 +121,40 @@ describe('VcIssuer', () => {
   })
 
   it('should create credential offer', async () => {
-    await expect(
-      vcIssuer.createCredentialOfferURI({
+    const uri = await vcIssuer.createCredentialOfferURI({
+      grants: {
+        authorization_code: {
+          issuer_state: issuerState,
+        },
+        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+          'pre-authorized_code': preAuthorizedCode,
+          user_pin_required: true,
+        },
+      },
+      scheme: 'http',
+      baseUri: 'issuer-example.com',
+    })
+    expect(uri).toEqual(
+      'http://issuer-example.com?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%7D'
+    )
+
+    const client = await OpenID4VCIClient.fromURI({ uri, flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW })
+    expect(client.credentialOffer).toEqual({
+      baseUrl: 'http://issuer-example.com',
+      request: {
+        credential_issuer: 'https://issuer.research.identiproof.io',
         grants: {
           authorization_code: {
-            issuer_state: issuerState,
+            issuer_state: 'previously-created-state',
           },
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-            'pre-authorized_code': preAuthorizedCode,
+            'pre-authorized_code': 'test_code',
             user_pin_required: true,
           },
         },
-        scheme: 'http',
-        baseUri: 'issuer-example.com',
-      })
-    ).resolves.toEqual(
-      'http://issuer-example.com?credential_offer=grants=%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D&credential_issuer=https%3A%2F%2Fissuer.research.identiproof.io'
-    )
+      },
+      version: 1011,
+    })
   })
 
   it('should create credential offer uri', async () => {

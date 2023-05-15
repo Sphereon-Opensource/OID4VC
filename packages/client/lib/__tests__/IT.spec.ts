@@ -98,7 +98,7 @@ describe('OID4VCI-Client should', () => {
     'succeed with a full flow without the client',
     async () => {
       /* Convert the URI into an object */
-      const credentialOffer: CredentialOfferRequestWithBaseUrl = CredentialOffer.fromURI(INITIATE_QR);
+      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOffer.fromURI(INITIATE_QR);
 
       expect(credentialOffer.baseUrl).toEqual('openid-initiate-issuance://');
       expect(credentialOffer.request).toEqual({

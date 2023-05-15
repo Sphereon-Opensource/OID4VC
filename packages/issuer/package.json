@@ -14,6 +14,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@sphereon/oid4vci-client": "workspace:*",
     "@types/jest": "^29.5.0",
     "@types/node": "^18.15.3",
     "@types/uuid": "^9.0.1"
