@@ -51,7 +51,7 @@ function recordVersion(determinedVersion: OpenId4VCIVersion, potentialVersion: O
 }
 
 export function getIssuerFromCredentialOfferPayload(request: CredentialOfferPayload): string | undefined {
-  if (!request || !('issuer' in request) || 'credential_issuer' in request) {
+  if (!request || !('issuer' in request || 'credential_issuer' in request)) {
     return undefined;
   }
   return 'issuer' in request ? request.issuer : request['credential_issuer'];
