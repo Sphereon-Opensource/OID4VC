@@ -42,7 +42,7 @@ export interface IssuerMockData {
     url: string;
     deeplink: string;
     request: {
-      type: string;
+      type: [string];
       format: 'jwt_vc' | 'ldp_vc' | string;
       proof: {
         proof_type: 'jwt' | string;
@@ -110,7 +110,7 @@ const mockData: VciMockDataStructure = {
       deeplink:
         'openid-initiate-issuance://?issuer=https%3A%2F%2Fngi%2Doidc4vci%2Dtest%2Espruceid%2Exyz&credential_type=OpenBadgeCredential&pre-authorized_code=eyJhbGciOiJFUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOlsiT3BlbkJhZGdlQ3JlZGVudGlhbCJdLCJleHAiOiIyMDIzLTA0LTIwVDA5OjA0OjM2WiIsIm5vbmNlIjoibWFibmVpT0VSZVB3V3BuRFFweEt3UnRsVVRFRlhGUEwifQ.qOZRPN8sTv_knhp7WaWte2-aDULaPZX--2i9unF6QDQNUllqDhvxgIHMDCYHCV8O2_Gj-T2x1J84fDMajE3asg&user_pin_required=false',
       request: {
-        type: 'OpenBadgeCredential',
+        type: ['OpenBadgeCredential'],
         format: 'jwt_vc',
         proof: {
           proof_type: 'jwt',
@@ -356,7 +356,7 @@ const mockData: VciMockDataStructure = {
         'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Fdefault%2Foidc%2F&amp;credential_type=OpenBadgeCredential&amp;pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA&amp;user_pin_required=false',
       url: 'https://jff.walt.id/issuer-api/default/oidc/credential',
       request: {
-        type: 'OpenBadgeCredential',
+        type: ['OpenBadgeCredential'],
         format: 'jwt_vc',
         proof: {
           proof_type: 'jwt',
@@ -474,7 +474,7 @@ const mockData: VciMockDataStructure = {
         'https://oidc4vc.uniissuer.io/&credential_type=OpenBadgeCredential&pre-authorized_code=0ApoI8rxVmdQ44RIpuDbFIURIIkOhyek&user_pin_required=false',
       url: 'https://oidc4vc.uniissuer.io/1.0/credential',
       request: {
-        type: 'OpenBadgeCredential',
+        type: ['OpenBadgeCredential'],
         format: 'jwt_vc',
         proof: {
           proof_type: 'jwt',
@@ -573,7 +573,7 @@ const mockData: VciMockDataStructure = {
         'openid-initiate-issuance://?issuer=https://launchpad.mattrlabs.com&credential_type=OpenBadgeCredential&pre-authorized_code=g0UCOj6RAN5AwHU6gczm_GzB4_lH6GW39Z0Dl2DOOiO',
       url: 'https://launchpad.vii.electron.mattrlabs.io/oidc/v1/auth/credential',
       request: {
-        type: 'OpenBadgeCredential',
+        type: ['OpenBadgeCredential'],
         format: 'ldp_vc',
         proof: {
           proof_type: 'jwt',
@@ -687,7 +687,7 @@ const mockData: VciMockDataStructure = {
         'openid-initiate-issuance://?issuer=https://oidc4vc.diwala.io&amp;credential_type=OpenBadgeCredential&amp;pre-authorized_code=eyJhbGciOiJIUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOiJPcGVuQmFkZ2VDcmVkZW50aWFsIiwiZXhwIjoxNjgxOTg0NDY3fQ.fEAHKz2nuWfiYHw406iNxr-81pWkNkbi31bWsYSf6Ng',
       url: 'https://oidc4vc.diwala.io/credential',
       request: {
-        type: 'OpenBadgeCredential',
+        type: ['OpenBadgeCredential'],
         format: 'ldp_vc',
         proof: {
           proof_type: 'jwt',

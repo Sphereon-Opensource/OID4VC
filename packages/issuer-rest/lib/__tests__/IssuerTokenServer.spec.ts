@@ -4,10 +4,11 @@ import * as http from 'http'
 import {
   Alg,
   CNonceState,
-  CredentialIssuerMetadata,
+  CredentialIssuerMetadataOpts,
   CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
   CredentialOfferSession,
   Jwt,
+  STATE_MISSING_ERROR,
   URIState,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer'
@@ -15,25 +16,27 @@ import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { Express } from 'express'
 import * as jose from 'jose'
 import requests from 'supertest'
-import { v4 } from 'uuid'
 
 import { OID4VCIServer } from '../OID4VCIServer'
 
 describe('OID4VCIServer', () => {
   let app: Express
   let server: http.Server
+  const preAuthorizedCode1 = 'SplxlOBeZQQYbYS6WxSbIA1'
+  const preAuthorizedCode2 = 'SplxlOBeZQQYbYS6WxSbIA2'
+  const preAuthorizedCode3 = 'SplxlOBeZQQYbYS6WxSbIA3'
 
   beforeAll(async () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const signerCallback = async (jwt: Jwt, kid?: string): Promise<string> => {
       const privateKey = (await jose.generateKeyPair(Alg.ES256)).privateKey as KeyObject
-      return new jose.SignJWT({ ...jwt.payload }).setProtectedHeader({ ...jwt.header }).sign(privateKey)
+      return new jose.SignJWT({ ...jwt.payload }).setProtectedHeader({ ...jwt.header, alg: Alg.ES256 }).sign(privateKey)
     }
 
-    const credentialOfferState1 = {
-      id: v4(),
+    const credentialOfferState1: CredentialOfferSession = {
+      preAuthorizedCode: preAuthorizedCode1,
       userPin: 493536,
-      createdOn: +new Date(),
+      createdAt: +new Date(),
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'test_issuer',
@@ -45,40 +48,41 @@ describe('OID4VCIServer', () => {
           grants: {
             'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
               user_pin_required: true,
-              'pre-authorized_code': 'SplxlOBeZQQYbYS6WxSbIA',
+              'pre-authorized_code': preAuthorizedCode1,
             },
           },
         } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
       },
     }
-    const credentialOfferState2 = {
+    const credentialOfferState2: CredentialOfferSession = {
       ...credentialOfferState1,
-      id: v4(),
+      preAuthorizedCode: preAuthorizedCode2,
       credentialOffer: {
         ...credentialOfferState1.credentialOffer,
         credential_offer: {
           ...credentialOfferState1.credentialOffer.credential_offer,
 
           grants: {
-            ...credentialOfferState1.credentialOffer.credential_offer.grants,
+            ...credentialOfferState1.credentialOffer.credential_offer!.grants!,
             'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
               ...credentialOfferState1.credentialOffer.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+              'pre-authorized_code': preAuthorizedCode2,
               user_pin_required: false,
             },
           },
         } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
       },
     }
-    const credentialOfferState3 = { ...credentialOfferState1, preAuthorizedCodeExpiresIn: 1, id: v4() }
-    const state = new MemoryStates<CredentialOfferSession>()
-    await state.set('test_state', credentialOfferState1)
-    await state.set('test_state_1', credentialOfferState2)
-    await state.set('test_state_2', credentialOfferState3)
+    const credentialOfferState3: CredentialOfferSession = { ...credentialOfferState1, preAuthorizedCode: preAuthorizedCode3, createdAt: 0 }
+    const credentialOfferSessions = new MemoryStates<CredentialOfferSession>()
+    await credentialOfferSessions.set(preAuthorizedCode1, credentialOfferState1)
+    await credentialOfferSessions.set(preAuthorizedCode2, credentialOfferState2)
+    await credentialOfferSessions.set(preAuthorizedCode3, credentialOfferState3)
 
     const vcIssuer: VcIssuer = new VcIssuer(
       {
-        authorization_server: 'https://authorization-server',
-        credential_endpoint: 'https://credential-endpoint',
+        // authorization_server: 'https://authorization-server',
+        // credential_endpoint: 'https://credential-endpoint',
         credential_issuer: 'https://credential-issuer',
         display: [{ name: 'example issuer', locale: 'en-US' }],
         credentials_supported: [
@@ -112,10 +116,10 @@ describe('OID4VCIServer', () => {
             ],
           },
         ],
-      } as CredentialIssuerMetadata,
+      } as CredentialIssuerMetadataOpts,
       {
         cNonceExpiresIn: 300,
-        credentialOfferSessions: state,
+        credentialOfferSessions,
         cNonces: new MemoryStates<CNonceState>(),
         uris: new MemoryStates<URIState>(),
       }
@@ -144,9 +148,7 @@ describe('OID4VCIServer', () => {
   it('should return the access token', async () => {
     const res = await requests(app)
       .post('/token')
-      .send(
-        'grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=SplxlOBeZQQYbYS6WxSbIA&user_pin=493536&state=test_state'
-      )
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode1}&user_pin=493536`)
     expect(res.statusCode).toEqual(200)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -162,7 +164,7 @@ describe('OID4VCIServer', () => {
   it('should return http code 400 with message User pin is required', async () => {
     const res = await requests(app)
       .post('/token')
-      .send('grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=SplxlOBeZQQYbYS6WxSbIA&state=test_state')
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode1}`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -171,9 +173,7 @@ describe('OID4VCIServer', () => {
     })
   })
   it('should return http code 400 with message pre-authorized_code is required', async () => {
-    const res = await requests(app)
-      .post('/token')
-      .send('grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&user_pin=493536&state=test_state')
+    const res = await requests(app).post('/token').send('grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&user_pin=493536')
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -182,9 +182,7 @@ describe('OID4VCIServer', () => {
     })
   })
   it('should return http code 400 with message unsupported grant_type', async () => {
-    const res = await requests(app)
-      .post('/token')
-      .send('grant_type=non-existent&pre-authorized_code=SplxlOBeZQQYbYS6WxSbIA&user_pin=493536&state=test_state')
+    const res = await requests(app).post('/token').send(`grant_type=non-existent&pre-authorized_code=${preAuthorizedCode1}&user_pin=493536`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -195,9 +193,7 @@ describe('OID4VCIServer', () => {
   it('should return http code 400 with message PIN does not match', async () => {
     const res = await requests(app)
       .post('/token')
-      .send(
-        'grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=SplxlOBeZQQYbYS6WxSbIA&user_pin=493537&state=test_state'
-      )
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode1}&user_pin=493537`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -208,9 +204,7 @@ describe('OID4VCIServer', () => {
   it('should return http code 400 with message PIN must consist of maximum 8 numeric characters', async () => {
     const res = await requests(app)
       .post('/token')
-      .send(
-        'grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=SplxlOBeZQQYbYS6WxSbIA&user_pin=invalid&state=test_state'
-      )
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode1}&user_pin=invalid`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -221,20 +215,18 @@ describe('OID4VCIServer', () => {
   it('should return http code 400 with message pre-authorized_code is invalid', async () => {
     const res = await requests(app)
       .post('/token')
-      .send('grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=test&user_pin=493536&state=test_state')
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=test&user_pin=493536`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
-      error: 'invalid_grant',
-      error_message: 'pre-authorized_code is invalid',
+      error: 'invalid_request',
+      error_message: STATE_MISSING_ERROR,
     })
   })
   it('should return http code 400 with message User pin is not required', async () => {
     const res = await requests(app)
       .post('/token')
-      .send(
-        'grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=SplxlOBeZQQYbYS6WxSbIA&user_pin=493536&state=test_state_1'
-      )
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode2}&user_pin=493536`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -246,9 +238,7 @@ describe('OID4VCIServer', () => {
     await new Promise((r) => setTimeout(r, 2000))
     const res = await requests(app)
       .post('/token')
-      .send(
-        'grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=SplxlOBeZQQYbYS6WxSbIA&user_pin=493536&state=test_state_2'
-      )
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode3}&user_pin=493536`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({

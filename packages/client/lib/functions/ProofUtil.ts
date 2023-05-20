@@ -1,14 +1,4 @@
-import {
-  BAD_PARAMS,
-  JWS_NOT_VALID,
-  Jwt,
-  JWTHeader,
-  JWTPayload,
-  ProofOfPossession,
-  ProofOfPossessionCallbacks,
-  ProofType,
-  Typ,
-} from '@sphereon/oid4vci-common';
+import { BAD_PARAMS, JWS_NOT_VALID, Jwt, JWTHeader, JWTPayload, ProofOfPossession, ProofOfPossessionCallbacks, Typ } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
 const debug = Debug('sphereon:openid4vci:token');
@@ -42,9 +32,9 @@ export const createProofOfPossession = async (
   const signerArgs = createJWT(jwtProps, existingJwt);
   const jwt = await callbacks.signCallback(signerArgs, signerArgs.header.kid);
   const proof = {
-    proof_type: ProofType.JWT,
+    proof_type: 'jwt',
     jwt,
-  };
+  } as ProofOfPossession;
 
   try {
     partiallyValidateJWS(jwt);
@@ -68,7 +58,7 @@ const partiallyValidateJWS = (jws: string): void => {
 };
 
 export interface JwtProps {
-  typ?: string;
+  typ?: Typ;
   kid?: string;
   issuer?: string;
   clientId?: string;
@@ -97,7 +87,7 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   };
 
   const jwtHeader: JWTHeader = {
-    typ: Typ.JWT,
+    typ: 'jwt',
     alg,
     kid,
   };

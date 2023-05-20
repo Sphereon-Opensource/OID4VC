@@ -2,6 +2,7 @@ import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential 
 
 import { ProofOfPossession } from './CredentialIssuance.types';
 import { Oauth2ASWithOID4VCIMetadata } from './OpenID4VCIServerMetadata';
+import { CredentialRequestV1_0_11 } from './v1_0_11.types';
 
 /**
  * Important Note: please be aware that these Common interfaces are based on versions v1_0.11 and v1_0.09
@@ -13,12 +14,7 @@ export interface CredentialLogo {
   [key: string]: unknown;
 }
 
-export enum CredentialFormat {
-  jwt_vc_json = 'jwt_vc_json',
-  jwt_vc_json_ld = 'jwt_vc_json_ld',
-  ldp_vc = 'ldp_vc',
-  mso_mdoc = 'mso_mdoc',
-}
+export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json_ld' | 'ldp_vc' /*| 'mso_mdoc'*/; // we do not support mdocs at this point
 
 export interface NameAndLocale {
   name?: string; // REQUIRED. String value of a display name for the Credential.
@@ -43,14 +39,25 @@ export type MetadataDisplay = NameAndLocale &
     name?: string; //OPTIONAL. String value of a display name for the Credential Issuer.
   };
 
-export interface CredentialIssuerMetadata {
-  credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
+export interface CredentialIssuerMetadataOpts {
+  credential_endpoint?: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   batch_credential_endpoint?: string; // OPTIONAL. URL of the Credential Issuer's Batch Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components. If omitted, the Credential Issuer does not support the Batch Credential Endpoint.
   credentials_supported: CredentialSupported[]; // REQUIRED. A JSON array containing a list of JSON objects, each of them representing metadata about a separate credential type that the Credential Issuer can issue. The JSON objects in the array MUST conform to the structure of the Section 10.2.3.1.
   credential_issuer: string; // REQUIRED. The Credential Issuer's identifier.
   authorization_server?: string; // OPTIONAL. Identifier of the OAuth 2.0 Authorization Server (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
   token_endpoint?: string;
   display?: MetadataDisplay[]; //  An array of objects, where each object contains display properties of a Credential Issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
+}
+
+// For now we extend the opts above. Only difference is that the credential endpoint is optional in the Opts, as it can come from other sources. The value is however required in the eventual Issuer Metadata
+export interface CredentialIssuerMetadata extends CredentialIssuerMetadataOpts {
+  credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
+  /*batch_credential_endpoint?: string; // OPTIONAL. URL of the Credential Issuer's Batch Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components. If omitted, the Credential Issuer does not support the Batch Credential Endpoint.
+  credentials_supported: CredentialSupported[]; // REQUIRED. A JSON array containing a list of JSON objects, each of them representing metadata about a separate credential type that the Credential Issuer can issue. The JSON objects in the array MUST conform to the structure of the Section 10.2.3.1.
+  credential_issuer: string; // REQUIRED. The Credential Issuer's identifier.
+  authorization_server?: string; // OPTIONAL. Identifier of the OAuth 2.0 Authorization Server (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
+  token_endpoint?: string;
+  display?: MetadataDisplay[]; //  An array of objects, where each object contains display properties of a Credential Issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:*/
 }
 
 export interface CredentialSupportedBrief {
@@ -61,7 +68,7 @@ export interface CredentialSupportedBrief {
 }
 
 export type CommonCredentialSupported = CredentialSupportedBrief & {
-  format: CredentialFormat | string; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
+  format: OID4VCICredentialFormat | string; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
   id?: string; // OPTIONAL. A JSON string identifying the respective object. The value MUST be unique across all credentials_supported entries in the Credential Issuer Metadata
   display?: CredentialsSupportedDisplay[]; // OPTIONAL. An array of objects, where each object contains the display properties of the supported credential for a certain language
   /**
@@ -82,7 +89,7 @@ export interface CredentialSupportedJwtVcJson extends CommonCredentialSupported 
 export type CredentialSupported = CommonCredentialSupported & (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc);
 
 export interface CredentialOfferFormat {
-  format: CredentialFormat;
+  format: OID4VCICredentialFormat | string;
   types: string[];
 }
 
@@ -141,19 +148,21 @@ export interface ErrorResponse extends Response {
   state?: string;
 }
 
+export type UniformCredentialRequest = CredentialRequestV1_0_11;
+
 export interface CommonCredentialRequest {
-  format: string;
+  format: OID4VCICredentialFormat /* | OID4VCICredentialFormat[];*/; // for now it seems only one is supported in the spec
   proof?: ProofOfPossession;
 }
 
 export interface CredentialRequestJwtVcJson extends CommonCredentialRequest {
-  format: CredentialFormat.jwt_vc_json;
+  format: 'jwt_vc_json';
   types: string[];
   credentialSubject?: IssuerCredentialSubject;
 }
 
 export interface CredentialRequestJwtVcJsonLdAndLdpVc extends CommonCredentialRequest {
-  format: CredentialFormat.jwt_vc_json_ld | CredentialFormat.ldp_vc;
+  format: 'jwt_vc_json_ld' | 'ldp_vc';
   credential_definition: IssuerCredentialDefinition;
 }
 
@@ -166,7 +175,7 @@ export interface CommonCredentialResponse {
 }
 
 export interface CredentialResponseJwtVcJsonLdAndLdpVc extends CommonCredentialResponse {
-  format: CredentialFormat.jwt_vc_json_ld | CredentialFormat.ldp_vc;
+  format: 'jwt_vc_json_ld' | 'ldp_vc';
   credential: IVerifiableCredential;
 }
 

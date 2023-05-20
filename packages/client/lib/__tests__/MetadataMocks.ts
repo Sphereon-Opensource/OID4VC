@@ -1,4 +1,4 @@
-import { CredentialOfferPayloadV1_0_09, CredentialOfferRequestWithBaseUrl, OpenId4VCIVersion } from '@sphereon/oid4vci-common';
+import { CredentialOfferPayloadV1_0_08, CredentialOfferRequestWithBaseUrl, OpenId4VCIVersion } from '@sphereon/oid4vci-common';
 
 export const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io';
 export const IDENTIPROOF_AS_URL = 'https://auth.research.identiproof.io';
@@ -11,15 +11,27 @@ export const INITIATION_TEST_URI =
   'openid-initiate-issuance://?credential_type=OpenBadgeCredential&issuer=https%3A%2F%2Fjff%2Ewalt%2Eid%2Fissuer-api%2Foidc%2F&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
 
 export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
+  scheme: 'openid-initiate-issuance',
   baseUrl: 'openid-initiate-issuance://',
-  request: {
+  credential_offer: {
+    credentials: ['OpenBadgeCredential'],
+    credential_issuer: 'https://jff.walt.id/issuer-api/oidc/',
+    grants: {
+      'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+        'pre-authorized_code':
+          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
+        user_pin_required: false,
+      },
+    },
+  },
+  original_credential_offer: {
     credential_type: 'OpenBadgeCredential',
     issuer: 'https://jff.walt.id/issuer-api/oidc/',
     'pre-authorized_code':
       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
     user_pin_required: 'false',
-  } as CredentialOfferPayloadV1_0_09,
-  version: OpenId4VCIVersion.VER_1_0_09,
+  } as CredentialOfferPayloadV1_0_08,
+  version: OpenId4VCIVersion.VER_1_0_08,
 };
 export const IDENTIPROOF_AS_METADATA = {
   issuer: 'https://auth.research.identiproof.io',

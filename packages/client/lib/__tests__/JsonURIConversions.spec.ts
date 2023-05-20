@@ -67,7 +67,7 @@ describe('URI To Json Object', () => {
       )
     ).toEqual({
       issuer: 'https://server.example.com',
-      credential_type: 'https://did.example.org/healthCard',
+      credential_type: ['https://did.example.org/healthCard'],
       op_state: 'eyJhbGciOiJSU0Et...FYUaBy',
     });
   });

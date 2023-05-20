@@ -2,10 +2,12 @@ import { IStateManager, STATE_MISSING_ERROR } from '@sphereon/oid4vci-common'
 import { StateType } from '@sphereon/oid4vci-common/dist/types/StateManager.types'
 
 export class MemoryStates<T extends StateType> implements IStateManager<T> {
+  private readonly expiresInMS: number
   private readonly states: Map<string, T>
-  private intervalRoutineId?: NodeJS.Timer
+  private cleanupIntervalId?: NodeJS.Timer
 
-  constructor() {
+  constructor(opts?: { expiresInSec?: number }) {
+    this.expiresInMS = opts?.expiresInSec !== undefined ? opts?.expiresInSec * 1000 : 180000
     this.states = new Map()
   }
   async clearAll(): Promise<void> {
@@ -14,9 +16,9 @@ export class MemoryStates<T extends StateType> implements IStateManager<T> {
 
   async clearExpired(timestamp?: number): Promise<void> {
     const states = Array.from(this.states.entries())
-    timestamp = timestamp ?? +new Date()
+    const ts = timestamp ?? +new Date()
     for (const [id, state] of states) {
-      if (state.createdOn < timestamp) {
+      if (state.createdAt + this.expiresInMS < ts) {
         this.states.delete(id)
       }
     }
@@ -27,11 +29,14 @@ export class MemoryStates<T extends StateType> implements IStateManager<T> {
   }
 
   async getAsserted(id: string): Promise<T> {
+    let result: T | undefined
     if (await this.has(id)) {
-      return (await this.get(id)) as T
-    } else {
+      result = (await this.get(id)) as T
+    }
+    if (!result) {
       throw new Error(STATE_MISSING_ERROR)
     }
+    return result
   }
 
   async get(id: string): Promise<T | undefined> {
@@ -46,15 +51,15 @@ export class MemoryStates<T extends StateType> implements IStateManager<T> {
     this.states.set(id, stateValue)
   }
 
-  startCleanupRoutine(timestamp?: number, timeout?: number): void {
-    if (!this.intervalRoutineId) {
-      this.intervalRoutineId = setInterval(() => this.clearExpired(timestamp), timeout ?? 5000)
+  async startCleanupRoutine(timeout?: number): Promise<void> {
+    if (!this.cleanupIntervalId) {
+      this.cleanupIntervalId = setInterval(() => this.clearExpired(), timeout ?? 30000)
     }
   }
 
-  stopCleanupRouting(): void {
-    if (this.intervalRoutineId) {
-      clearInterval(this.intervalRoutineId)
+  async stopCleanupRoutine(): Promise<void> {
+    if (this.cleanupIntervalId) {
+      clearInterval(this.cleanupIntervalId)
     }
   }
 }

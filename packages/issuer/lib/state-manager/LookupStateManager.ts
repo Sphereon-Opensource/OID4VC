@@ -4,6 +4,16 @@ import { StateType } from '@sphereon/oid4vci-common/dist/types/StateManager.type
 export class LookupStateManager<K extends StateType, V extends StateType> implements IStateManager<V> {
   constructor(private keyValueMapper: IStateManager<K>, private valueStateManager: IStateManager<V>, private lookup: string) {}
 
+  startCleanupRoutine(timeout?: number | undefined): Promise<void> {
+    this.keyValueMapper.startCleanupRoutine(timeout)
+    return this.valueStateManager.startCleanupRoutine(timeout)
+  }
+
+  stopCleanupRoutine(): Promise<void> {
+    this.keyValueMapper.stopCleanupRoutine()
+    return this.valueStateManager.stopCleanupRoutine()
+  }
+
   async clearAll(): Promise<void> {
     this.keyValueMapper.clearAll()
     this.valueStateManager.clearAll()

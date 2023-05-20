@@ -1,6 +1,6 @@
 import { KeyObject } from 'crypto';
 
-import { Alg, JWS_NOT_VALID, Jwt, NO_JWT_PROVIDED, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession, Typ } from '@sphereon/oid4vci-common';
+import { Alg, JWS_NOT_VALID, Jwt, NO_JWT_PROVIDED, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession } from '@sphereon/oid4vci-common';
 import * as jose from 'jose';
 
 import { ProofOfPossessionBuilder } from '..';
@@ -8,7 +8,7 @@ import { ProofOfPossessionBuilder } from '..';
 import { IDENTIPROOF_ISSUER_URL } from './MetadataMocks';
 
 const jwt: Jwt = {
-  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
+  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'jwt' },
   payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL, iat: Date.now() },
 };
 

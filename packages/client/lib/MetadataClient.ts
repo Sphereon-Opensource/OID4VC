@@ -22,7 +22,7 @@ export class MetadataClient {
    * @param credentialOffer
    */
   public static async retrieveAllMetadataFromCredentialOffer(credentialOffer: CredentialOfferRequestWithBaseUrl): Promise<EndpointMetadata> {
-    return MetadataClient.retrieveAllMetadataFromCredentialOfferRequest(credentialOffer.request);
+    return MetadataClient.retrieveAllMetadataFromCredentialOfferRequest(credentialOffer.credential_offer);
   }
 
   /**

@@ -1,6 +1,7 @@
-import { Encoding, OpenIDResponse } from '@sphereon/oid4vci-common';
 import { fetch } from 'cross-fetch';
 import Debug from 'debug';
+
+import { Encoding, OpenIDResponse } from '../types';
 
 const debug = Debug('sphereon:openid4vci:http');
 

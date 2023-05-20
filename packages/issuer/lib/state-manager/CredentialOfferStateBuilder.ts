@@ -11,14 +11,14 @@ export class CredentialOfferStateBuilder {
     return this
   }
 
-  createdOn(timestamp: number): CredentialOfferStateBuilder {
-    this.credentialOfferState.createdOn = timestamp
+  createdAt(timestamp: number): CredentialOfferStateBuilder {
+    this.credentialOfferState.createdAt = timestamp
     return this
   }
 
   build(): CredentialOfferSession {
-    if (!this.credentialOfferState.createdOn) {
-      this.credentialOfferState.createdOn = +new Date()
+    if (!this.credentialOfferState.createdAt) {
+      this.credentialOfferState.createdAt = +new Date()
     }
     if (!this.credentialOfferState.credentialOffer) {
       throw new Error('Not all properties are present to build an IssuerState object')

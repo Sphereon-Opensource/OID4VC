@@ -7,14 +7,14 @@ describe('MemoryIssuerStateManager', () => {
   let memoryCNonceStateManager: IStateManager<CNonceState>
 
   beforeAll(() => {
-    memoryCNonceStateManager = new MemoryStates<CNonceState>()
+    memoryCNonceStateManager = new MemoryStates<CNonceState>({ expiresInSec: 0 })
   })
 
   beforeEach(async () => {
     const day = 86400000
     for (const i of Array.from(Array(3).keys())) {
       const timestamp = +new Date(+new Date() + day * (i - 1))
-      const cNonce: CNonceState = { cNonce: v4(), createdOn: timestamp }
+      const cNonce: CNonceState = { cNonce: v4(), createdAt: timestamp }
       await memoryCNonceStateManager.set(String(i), cNonce)
     }
   })

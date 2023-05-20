@@ -1,4 +1,13 @@
+import { CredentialFormat } from '@sphereon/ssi-types';
+
+import { ProofOfPossession } from './CredentialIssuance.types';
 import { CredentialsSupportedDisplay, CredentialSupportedBrief, IssuerCredentialSubject, MetadataDisplay, NameAndLocale } from './Generic.types';
+
+export interface CredentialRequestV1_0_08 {
+  type: string;
+  format: CredentialFormat;
+  proof: ProofOfPossession;
+}
 
 export interface IssuerMetadataV1_0_08 {
   issuer?: string;

@@ -1,13 +1,12 @@
 import { CredentialOfferSession, IStateManager, STATE_MISSING_ERROR } from '@sphereon/oid4vci-common'
 
-import { CredentialOfferStateBuilder } from '../state-manager'
-import { MemoryStates } from '../state-manager'
+import { CredentialOfferStateBuilder, MemoryStates } from '../state-manager'
 
 describe('MemoryIssuerStateManager', () => {
   let memoryIssuerStateManager: IStateManager<CredentialOfferSession>
 
   beforeAll(() => {
-    memoryIssuerStateManager = new MemoryStates<CredentialOfferSession>()
+    memoryIssuerStateManager = new MemoryStates<CredentialOfferSession>({ expiresInSec: 1 })
   })
 
   beforeEach(async () => {
@@ -16,7 +15,7 @@ describe('MemoryIssuerStateManager', () => {
       const timestamp = +new Date(+new Date() + day * (i - 1))
       const issuerState = new CredentialOfferStateBuilder()
         .credentialOffer({ credential_offer: { credential_issuer: 'test', credentials: ['test'] } })
-        .createdOn(timestamp)
+        .createdAt(timestamp)
         .build()
       await memoryIssuerStateManager.set(String(i), issuerState)
     }

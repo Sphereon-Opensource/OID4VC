@@ -6,16 +6,14 @@ import {
   AUD_ERROR,
   CNonceState,
   CREDENTIAL_MISSING_ERROR,
-  CredentialIssuerCallback,
-  CredentialIssuerMetadata,
+  CredentialIssuerMetadataOpts,
   CredentialOfferFormat,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferSession,
   CredentialOfferV1_0_11,
-  CredentialRequest,
+  CredentialRequestV1_0_11,
   CredentialResponse,
   Grant,
-  GRANTS_MUST_NOT_BE_UNDEFINED,
   IAT_ERROR,
   ISS_MUST_BE_CLIENT_ID,
   ISSUER_CONFIG_ERROR,
@@ -24,24 +22,23 @@ import {
   Jwt,
   JWT_VERIFY_CONFIG_ERROR,
   JWTVerifyCallback,
-  KID_JWK_X5C_ERROR,
   NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT,
   NONCE_ERROR,
   TokenErrorResponse,
-  Typ,
   TYP_ERROR,
+  URIState,
 } from '@sphereon/oid4vci-common'
-import { URIState } from '@sphereon/oid4vci-common'
 import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
 import { createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
-import { LookupStateManager } from './state-manager/LookupStateManager'
+import { LookupStateManager } from './state-manager'
+import { CredentialIssuerCallback } from './types'
 
 const SECOND = 1000
 
 export class VcIssuer {
-  private readonly _issuerMetadata: CredentialIssuerMetadata
+  private readonly _issuerMetadata: CredentialIssuerMetadataOpts
   private readonly _userPinRequired: boolean
   private readonly _issuerCallback?: CredentialIssuerCallback
   private readonly _verifyCallback?: JWTVerifyCallback
@@ -51,7 +48,7 @@ export class VcIssuer {
   private readonly _cNonceExpiresIn: number
 
   constructor(
-    issuerMetadata: CredentialIssuerMetadata,
+    issuerMetadata: CredentialIssuerMetadataOpts,
     args: {
       userPinRequired?: boolean
       credentialOfferSessions: IStateManager<CredentialOfferSession>
@@ -108,8 +105,8 @@ export class VcIssuer {
       }
     }
 
-    let preAuthorizedCode: string | undefined = undefined
-    let userPinRequired: boolean | undefined = undefined
+    let preAuthorizedCode: string | undefined
+    let userPinRequired: boolean | undefined
     if (grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
       preAuthorizedCode = grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
       userPinRequired = grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.user_pin_required
@@ -128,7 +125,7 @@ export class VcIssuer {
       credentialOffer,
       userPinRequired,
       preAuthorizedCode,
-      state: issuerState,
+      issuerState,
     })
 
     let userPin: number | undefined
@@ -136,14 +133,14 @@ export class VcIssuer {
     if (userPinRequired) {
       userPin = Math.round(9999 * Math.random())
     }
-    const createdOn = +new Date()
+    const createdAt = +new Date()
     if (opts?.credentialOfferUri) {
       if (!this.uris) {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
       this.uris.set(opts.credentialOfferUri, {
         uri: opts.credentialOfferUri,
-        createdOn,
+        createdAt: createdAt,
         preAuthorizedCode,
         issuerState,
       })
@@ -153,7 +150,7 @@ export class VcIssuer {
       this.credentialOfferSessions.set(preAuthorizedCode, {
         preAuthorizedCode,
         issuerState,
-        createdOn,
+        createdAt: createdAt,
         ...(userPin && { userPin }),
         credentialOffer: {
           credential_offer: credentialOfferObject.credential_offer,
@@ -166,7 +163,7 @@ export class VcIssuer {
       this.credentialOfferSessions.set(issuerState, {
         preAuthorizedCode,
         issuerState,
-        createdOn,
+        createdAt: createdAt,
         ...(userPin && { userPin }),
         credentialOffer: {
           credential_offer: credentialOfferObject.credential_offer,
@@ -188,76 +185,118 @@ export class VcIssuer {
    *  - cNonce an existing c_nonce
    */
   public async issueCredentialFromIssueRequest(opts: {
-    issueCredentialRequest: CredentialRequest
-    issuerState: string
+    credentialRequest: CredentialRequestV1_0_11
+    newCNonce?: string
+    cNonceExpiresIn?: number
+    tokenExpiresIn?: number
     jwtVerifyCallback?: JWTVerifyCallback
     issuerCallback?: CredentialIssuerCallback
-    cNonce?: string
+    responseCNonce?: string
   }): Promise<CredentialResponse> {
-    // fixme: Why does this only assume a issuer State? Also why would you need to pass in the state on something which comes from the request?
-    const { clientId, grants } = await this.retrieveGrantsFromClient(opts.issuerState)
-    await this.validateJWT(opts.issueCredentialRequest, grants, clientId, opts.jwtVerifyCallback)
-    if (this.isMetadataSupportCredentialRequestFormat(opts.issueCredentialRequest.format)) {
-      const cNonce = opts.cNonce ? opts.cNonce : v4()
-      await this._cNonces.set(cNonce, { cNonce, createdOn: +new Date() })
-      const credential = await this.issueCredential({ credentialRequest: opts.issueCredentialRequest }, opts.issuerCallback)
-      // TODO implement acceptance_token (deferred response)
-      // TODO update verification accordingly
-      if (!credential) {
-        // credential: OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
-        throw new Error(CREDENTIAL_MISSING_ERROR)
-      }
-      return {
-        credential,
-        format: opts.issueCredentialRequest.format,
-        c_nonce: cNonce,
-        c_nonce_expires_in: this._cNonceExpiresIn,
-      }
+    if (!this.isMetadataSupportCredentialRequestFormat(opts.credentialRequest.format)) {
+      throw new Error(TokenErrorResponse.invalid_request)
     }
-    throw new Error(TokenErrorResponse.invalid_request)
-  }
 
-  private async retrieveGrantsFromClient(issuerState: string): Promise<{ clientId?: string; grants?: Grant }> {
-    const credentialOfferState: CredentialOfferSession | undefined = await this._credentialOfferSessions.getAsserted(issuerState)
-    const clientId = credentialOfferState?.clientId
-    const grants = credentialOfferState?.credentialOffer?.credential_offer?.grants
+    const { preAuthSession, authSession, cNonceState } = await this.validateCredentialRequestProof({
+      ...opts,
+      tokenExpiresIn: opts.tokenExpiresIn ?? 180000,
+    })
+    const cNonce = opts.newCNonce ? opts.newCNonce : v4()
+    await this.cNonces.set(cNonce, {
+      cNonce,
+      createdAt: +new Date(),
+      ...(authSession?.issuerState && { issuerState: authSession.issuerState }),
+      ...(preAuthSession && { preAuthorizedCode: preAuthSession.preAuthorizedCode }),
+    })
+    const credential = await this.issueCredential({ credentialRequest: opts.credentialRequest }, opts.issuerCallback)
+    // TODO implement acceptance_token (deferred response)
+    // TODO update verification accordingly
+    if (!credential) {
+      // credential: OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
+      throw new Error(CREDENTIAL_MISSING_ERROR)
+    }
+    // remove the previous nonce
+    this.cNonces.delete(cNonceState.cNonce)
+    return {
+      credential,
+      format: opts.credentialRequest.format,
+      c_nonce: cNonce,
+      c_nonce_expires_in: this._cNonceExpiresIn,
+    }
+  }
+  /*
+  private async retrieveGrantsAndCredentialOfferSession(id: string): Promise<{
+    clientId?: string;
+    grants?: Grant,
+    session: CredentialOfferSession
+  }> {
+    const session: CredentialOfferSession | undefined = await this._credentialOfferSessions.getAsserted(id)
+    const clientId = session?.clientId
+    const grants = session?.credentialOffer?.credential_offer?.grants
     if (!grants?.authorization_code?.issuer_state && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']) {
       throw new Error(GRANTS_MUST_NOT_BE_UNDEFINED)
     }
-    return { clientId, grants }
-  }
+    return { session, clientId, grants }
+  }*/
 
-  private async validateJWT(
-    issueCredentialRequest: CredentialRequest,
-    grants?: Grant,
-    clientId?: string,
+  private async validateCredentialRequestProof({
+    credentialRequest,
+    clientId,
+    jwtVerifyCallback,
+    tokenExpiresIn,
+  }: {
+    credentialRequest: CredentialRequestV1_0_11
+    tokenExpiresIn: number
+    // grants?: Grant,
+    clientId?: string
     jwtVerifyCallback?: JWTVerifyCallback
-  ): Promise<void> {
-    if ((!Array.isArray(issueCredentialRequest.format) && issueCredentialRequest.format === 'jwt') || issueCredentialRequest.format === 'jwt_vc') {
-      issueCredentialRequest.proof.jwt
-
+  }) {
+    if (credentialRequest.format === 'jwt_vc_json' || credentialRequest.format === 'jwt_vc_json_ld') {
       if (typeof this._verifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
         throw new Error(JWT_VERIFY_CONFIG_ERROR)
       }
+      if (!credentialRequest.proof) {
+        throw Error('Proof of possession is required. No proof value present in credential request')
+      }
 
       const { payload, header }: Jwt = jwtVerifyCallback
-        ? await jwtVerifyCallback(issueCredentialRequest.proof)
+        ? await jwtVerifyCallback(credentialRequest.proof)
         : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          await this._verifyCallback!(issueCredentialRequest.proof)
+          await this._verifyCallback!(credentialRequest.proof)
 
       const { typ, alg, kid, jwk, x5c } = header
 
-      if (!typ || typ !== Typ['OPENID4VCI-PROOF+JWT']) {
+      if (typ !== 'openid4vci-proof+jwt') {
         throw new Error(TYP_ERROR)
-      }
-      if (!alg || !(alg in Alg)) {
+      } else if (!alg || !(alg in Alg)) {
         throw new Error(ALG_ERROR)
-      }
-      if (!([kid, jwk, x5c].filter((x) => !!x).length === 1)) {
-        throw new Error(KID_JWK_X5C_ERROR)
+      } else if (!([kid, jwk, x5c].filter((x) => !!x).length === 1)) {
+        // throw new Error(KID_JWK_X5C_ERROR) // todo: whut. An x5c is very specific to X509 certs only
       }
 
       const { iss, aud, iat, nonce } = payload
+      if (!nonce) {
+        throw Error('No nonce was found in the Proof of Possession')
+      }
+      const cNonceState = await this.cNonces.getAsserted(nonce)
+      const { preAuthorizedCode, createdAt, issuerState } = cNonceState
+
+      const preAuthSession = preAuthorizedCode ? await this.credentialOfferSessions.get(preAuthorizedCode) : undefined
+      const authSession = issuerState ? await this.credentialOfferSessions.get(issuerState) : undefined
+      if (!preAuthSession && !authSession) {
+        throw Error('Either a pre-authorized code or issuer state needs to be present')
+      }
+      if (preAuthSession) {
+        if (!preAuthSession.preAuthorizedCode || preAuthSession.preAuthorizedCode !== preAuthorizedCode) {
+          throw Error('Invalid pre-authorized code')
+        }
+      }
+      if (authSession) {
+        if (!authSession.issuerState || authSession.issuerState !== issuerState) {
+          throw Error('Invalid issuer state')
+        }
+      }
+
       // https://www.rfc-editor.org/rfc/rfc6749.html#section-3.2.1
       // A client MAY use the "client_id" request parameter to identify itself
       // when sending requests to the token endpoint.  In the
@@ -267,7 +306,7 @@ export class VcIssuer {
       // different "client_id".  This protects the client from substitution of
       // the authentication code.  (It provides no additional security for the
       // protected resource.)
-      if (!iss && grants?.authorization_code) {
+      if (!iss && authSession?.credentialOffer.credential_offer?.grants?.authorization_code) {
         throw new Error(NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT)
       }
       // iss: OPTIONAL (string). The value of this claim MUST be the client_id of the client making the credential request.
@@ -284,11 +323,16 @@ export class VcIssuer {
       }
       if (!iat) {
         throw new Error(IAT_ERROR)
+      } else if (iat > createdAt + tokenExpiresIn) {
+        throw new Error(IAT_ERROR)
       }
+      // todo: Add a check of iat against current TS on server with a skew
       if (!nonce) {
         throw new Error(NONCE_ERROR)
       }
+      return { jwt: { header, payload } as Jwt, preAuthSession, authSession, cNonceState }
     }
+    throw Error(`Format ${credentialRequest.format} not supported yet`)
   }
 
   private isMetadataSupportCredentialRequestFormat(requestFormat: string | string[]): boolean {
@@ -307,7 +351,7 @@ export class VcIssuer {
   }
 
   private async issueCredential(
-    opts: { credentialRequest?: CredentialRequest; credential?: ICredential },
+    opts: { credentialRequest?: CredentialRequestV1_0_11; credential?: ICredential },
     issuerCallback?: CredentialIssuerCallback
   ): Promise<W3CVerifiableCredential> {
     if ((!opts.credential && !opts.credentialRequest) || !this._issuerCallback) {

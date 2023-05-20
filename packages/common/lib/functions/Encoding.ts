@@ -104,11 +104,11 @@ function decodeJsonProperties(parts: string[] | string[][]): unknown {
       continue;
     }
     if (Array.isArray(value)) {
-      if (value.length > 1) {
-        json[decodeURIComponent(key)] = value.map((v) => decodeURIComponent(v));
-      } else {
+      // if (value.length > 1) {
+      json[decodeURIComponent(key)] = value.map((v) => decodeURIComponent(v));
+      /*} else {
         json[decodeURIComponent(key)] = decodeURIComponent(value[0]);
-      }
+      }*/
     }
     const isBool = typeof value == 'boolean';
     const isNumber = typeof value == 'number';

@@ -1,6 +1,12 @@
 import { AuthorizationDetailsJwtVcJson, CommonAuthorizationRequest } from './Authorization.types';
-import { CredentialOfferPayload } from './CredentialIssuance.types';
-import { CredentialOfferFormat, Grant, IssuerCredentialDefinition } from './Generic.types';
+import {
+  CommonCredentialRequest,
+  CredentialOfferFormat,
+  CredentialRequestJwtVcJson,
+  CredentialRequestJwtVcJsonLdAndLdpVc,
+  Grant,
+  IssuerCredentialDefinition,
+} from './Generic.types';
 
 export interface CredentialOfferV1_0_11 {
   credential_offer?: CredentialOfferPayloadV1_0_11;
@@ -50,6 +56,8 @@ export type CredentialOfferJwtVcJsonV1_0_11 = CommonCredentialOfferPayloadV1_0_1
 export type CredentialOfferPayloadV1_0_11 = CommonCredentialOfferPayloadV1_0_11 &
   (CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11 | CredentialOfferJwtVcJsonV1_0_11);
 
+export type CredentialRequestV1_0_11 = CommonCredentialRequest & (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc);
+
 export interface AuthorizationRequestV1_0_11 extends AuthorizationDetailsJwtVcJson, AuthorizationDetailsJwtVcJson {
   issuer_state?: string;
 }
@@ -57,9 +65,4 @@ export interface AuthorizationRequestV1_0_11 extends AuthorizationDetailsJwtVcJs
 // todo https://sphereon.atlassian.net/browse/VDX-185
 export function isAuthorizationRequestV1_0_11(request: CommonAuthorizationRequest): boolean {
   return request && 'issuer_state' in request;
-}
-
-// TODO https://sphereon.atlassian.net/browse/VDX-184
-export function isCredentialOfferV1_0_11(request: CredentialOfferPayload | CredentialOfferV1_0_11): boolean {
-  return request && ('credential_offer' in request || 'credential_offer_uri' in request || 'credential_issuer' in request);
 }

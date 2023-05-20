@@ -1,14 +1,14 @@
 import {
-  CredentialFormat,
   CredentialsSupportedDisplay,
   CredentialSupported,
   IssuerCredentialSubject,
   IssuerCredentialSubjectDisplay,
+  OID4VCICredentialFormat,
   TokenErrorResponse,
 } from '@sphereon/oid4vci-common'
 
 export class CredentialSupportedBuilderV1_11 {
-  format?: CredentialFormat
+  format?: OID4VCICredentialFormat
   id?: string
   types?: string[]
   cryptographicBindingMethodsSupported?: ('jwk' | 'cose_key' | 'did' | string)[]
@@ -16,7 +16,7 @@ export class CredentialSupportedBuilderV1_11 {
   display?: CredentialsSupportedDisplay[]
   credentialSubject?: IssuerCredentialSubject
 
-  withFormat(credentialFormat: CredentialFormat): CredentialSupportedBuilderV1_11 {
+  withFormat(credentialFormat: OID4VCICredentialFormat): CredentialSupportedBuilderV1_11 {
     this.format = credentialFormat
     return this
   }

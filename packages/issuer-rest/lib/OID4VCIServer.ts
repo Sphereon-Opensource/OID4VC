@@ -3,12 +3,13 @@ import process from 'process'
 
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
-  AuthorizationRequestV1_0_09,
-  CredentialFormat,
+  AuthorizationRequest,
+  CredentialRequestV1_0_11,
   CredentialSupported,
   getNumberOrUndefined,
   IssuerCredentialSubjectDisplay,
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
+  OID4VCICredentialFormat,
 } from '@sphereon/oid4vci-common'
 import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import bodyParser from 'body-parser'
@@ -17,7 +18,7 @@ import * as dotenv from 'dotenv-flow'
 import express, { Express, NextFunction, Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 
-import { handleHTTPStatus400, handleTokenRequest, ITokenEndpointOpts } from './IssuerTokenEndpoint'
+import { handleTokenRequest, ITokenEndpointOpts, verifyTokenRequest } from './IssuerTokenEndpoint'
 import { sendErrorResponse, validateRequestBody } from './expressUtils'
 
 const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90
@@ -26,7 +27,7 @@ function buildVCIFromEnvironment() {
   const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
     .withCryptographicSuitesSupported(process.env.cryptographic_suites_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
-    .withFormat(process.env.credential_supported_format as unknown as CredentialFormat)
+    .withFormat(process.env.credential_supported_format as unknown as OID4VCICredentialFormat)
     .withId(process.env.credential_supported_id as string)
     .withTypes([process.env.credential_supported_types_1 as string, process.env.credential_supported_types_2 as string])
     .withCredentialDisplay({
@@ -63,11 +64,12 @@ function buildVCIFromEnvironment() {
 }
 
 export class OID4VCIServer {
-  // public readonly express: Express
-  private readonly _vcIssuer: VcIssuer
-  private authRequestsData: Map<string, AuthorizationRequestV1_0_09> = new Map()
+  private readonly _issuer: VcIssuer
+  private authRequestsData: Map<string, AuthorizationRequest> = new Map()
   private readonly _app: Express
   private readonly _baseUrl: URL
+  private readonly cNonceExpiresIn: number
+  private readonly tokenExpiresIn: number
   private readonly _server: http.Server
 
   public get app(): Express {
@@ -80,7 +82,6 @@ export class OID4VCIServer {
 
   constructor(opts?: {
     issuer?: VcIssuer // If not supplied as argument, it will be fully configured from environment variables
-    tokenEndpointDisabled?: boolean // Disable if used in an existing OAuth2/OIDC environment and have the AS handle tokens
     tokenEndpointOpts?: ITokenEndpointOpts
     serverOpts?: {
       app?: Express
@@ -104,24 +105,25 @@ export class OID4VCIServer {
     } else {
       this._app = opts.serverOpts.app
     }
-    this._vcIssuer = opts?.issuer ? opts.issuer : buildVCIFromEnvironment()
-
-    const tokenEndpointDisabled = opts?.tokenEndpointDisabled === true || process.env.TOKEN_ENDPOINT_DISABLED === 'true'
+    this._issuer = opts?.issuer ? opts.issuer : buildVCIFromEnvironment()
 
     this.pushedAuthorizationEndpoint()
     this.metadataEndpoint()
     this.credentialEndpoint()
     this.credentialOffersEndpoint()
-    if (tokenEndpointDisabled) {
-      console.log('Token endpoint disabled by configuration')
-    } else {
+    this.assertAccessTokenHandling()
+    if (!this.isTokenEndpointDisabled(opts?.tokenEndpointOpts)) {
       this.accessTokenEndpoint(opts?.tokenEndpointOpts)
     }
+    this.cNonceExpiresIn = opts?.tokenEndpointOpts?.cNonceExpiresIn || 300
+    this.tokenExpiresIn = opts?.tokenEndpointOpts?.tokenExpiresIn || 300
     this._server = this.app.listen(httpPort, host, () => console.log(`HTTP server listening on port ${httpPort}`))
   }
 
   private accessTokenEndpoint(tokenEndpointOpts?: ITokenEndpointOpts) {
-    const path = tokenEndpointOpts?.tokenPath ?? process.env.TOKEN_PATH ?? '/token'
+    const issuerEndpoint = this.issuer.issuerMetadata.token_endpoint
+    let path: string
+
     const accessTokenIssuer = tokenEndpointOpts?.accessTokenIssuer ?? process.env.ACCESS_TOKEN_ISSUER
 
     const preAuthorizedCodeExpirationDuration =
@@ -135,16 +137,25 @@ export class OID4VCIServer {
     } else if (!accessTokenIssuer) {
       throw new Error(ACCESS_TOKEN_ISSUER_REQUIRED_ERROR)
     }
+    if (!issuerEndpoint) {
+      path = this.extractPath(tokenEndpointOpts?.tokenPath ?? process.env.TOKEN_PATH ?? '/token')
+      // last replace fixes any baseUrl ending with a slash and path starting with a slash
+      this.issuer.issuerMetadata.token_endpoint = `${this._baseUrl.toString()}${path}`.replace('//', '/')
+    } else {
+      this.assertEndpointHasIssuerBaseUrl(issuerEndpoint)
+      path = this.extractPath(issuerEndpoint)
+    }
+
     this.app.post(
       path,
-      handleHTTPStatus400({
-        credentialOfferSessionManager: this.vcIssuer.credentialOfferSessions,
+      verifyTokenRequest({
+        issuer: this.issuer,
         preAuthorizedCodeExpirationDuration,
       }),
       handleTokenRequest({
+        issuer: this.issuer,
         accessTokenSignerCallback: tokenEndpointOpts.accessTokenSignerCallback,
-        nonceManager: this.vcIssuer.cNonces,
-        cNonceExpiresIn: this.vcIssuer.cNonceExpiresIn,
+        cNonceExpiresIn: this.issuer.cNonceExpiresIn,
         interval,
         tokenExpiresIn,
         accessTokenIssuer,
@@ -154,36 +165,47 @@ export class OID4VCIServer {
 
   private metadataEndpoint() {
     this.app.get('/metadata', (request: Request, response: Response) => {
-      return response.send(this.vcIssuer.issuerMetadata)
+      return response.send(this.issuer.issuerMetadata)
     })
   }
 
   private credentialEndpoint() {
+    const endpoint = this.issuer.issuerMetadata.credential_endpoint
+    let path: string
+    if (!endpoint) {
+      path = '/credentials'
+      // last replace fixes any baseUrl ending with a slash and path starting with a slash
+      this.issuer.issuerMetadata.credential_endpoint = `${this._baseUrl}${path}`.replace('//', '/')
+    } else {
+      this.assertEndpointHasIssuerBaseUrl(endpoint)
+      path = this.extractPath(endpoint)
+    }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    this.app.get('/credential', async (request: Request, _response: Response) => {
-      if (!request.body)
-        this.vcIssuer.issueCredentialFromIssueRequest({
-          issueCredentialRequest: request.body.issueCredentialRequest,
-          issuerState: request.body.issuerState,
-          jwtVerifyCallback: request.body.jwtVerifyCallback,
-          issuerCallback: request.body.issuerCallback,
-          cNonce: request.body.cNonce,
-        })
+    this.app.post(path, async (request: Request, _response: Response) => {
+      const credentialRequest = request.body as CredentialRequestV1_0_11
+      this.issuer.issueCredentialFromIssueRequest({
+        credentialRequest: credentialRequest,
+        tokenExpiresIn: this.tokenExpiresIn,
+        cNonceExpiresIn: this.cNonceExpiresIn,
+        //WTF
+        jwtVerifyCallback: request.body.jwtVerifyCallback,
+        issuerCallback: request.body.issuerCallback,
+      })
     })
   }
 
   private credentialOffersEndpoint() {
-    this.app.get('/credential-offers/:id', async (request: Request, response: Response) => {
+    this.app.get('/credentials/offers/:id', async (request: Request, response: Response) => {
       const { id } = request.params
       try {
-        const credOfferSession = await this.vcIssuer.credentialOfferSessions.get(id)
-        if (!credOfferSession || !credOfferSession.credentialOffer) {
+        const session = await this.issuer.credentialOfferSessions.get(id)
+        if (!session || !session.credentialOffer) {
           return sendErrorResponse(response, 404, {
             error: 'invalid_request',
             error_description: `Credential offer ${id} not found`,
           })
         }
-        return response.send(JSON.stringify(credOfferSession.credentialOffer.credential_offer))
+        return response.send(JSON.stringify(session.credentialOffer.credential_offer))
       } catch (e) {
         return sendErrorResponse(
           response,
@@ -258,7 +280,44 @@ export class OID4VCIServer {
     })
   }
 
-  get vcIssuer(): VcIssuer {
-    return this._vcIssuer
+  get issuer(): VcIssuer {
+    return this._issuer
+  }
+
+  private isTokenEndpointDisabled(tokenEndpointOpts?: ITokenEndpointOpts) {
+    return tokenEndpointOpts?.tokenEndpointDisabled === true || process.env.TOKEN_ENDPOINT_DISABLED === 'true'
+  }
+
+  private assertAccessTokenHandling(tokenEndpointOpts?: ITokenEndpointOpts) {
+    const authServer = this.issuer.issuerMetadata.authorization_server
+    if (this.isTokenEndpointDisabled(tokenEndpointOpts)) {
+      if (!authServer) {
+        throw Error(
+          `No Authorization Server (AS) is defined in the issuer metadata and the token endpoint is disabled. An AS or token endpoints needs to be present`
+        )
+      }
+      console.log('Token endpoint disabled by configuration')
+    } else {
+      if (authServer) {
+        throw Error(
+          `A Authorization Server (AS) was already enabled in the issuer metadata (${authServer}. Cannot both have an AS and enable the token endpoint at the same time `
+        )
+      }
+    }
+  }
+
+  private extractPath(endpoint: string) {
+    if (endpoint.startsWith('/')) {
+      return endpoint
+    }
+    this.assertEndpointHasIssuerBaseUrl(endpoint)
+    const path = endpoint.replace(this._baseUrl.toString(), '')
+    return path.startsWith('/') ? path : `/${path}`
+  }
+
+  private assertEndpointHasIssuerBaseUrl(endpoint: string) {
+    if (!endpoint.startsWith(this._baseUrl.toString())) {
+      throw Error(`endpoint '${endpoint}' does not have base url '${this._baseUrl}'`)
+    }
   }
 }

@@ -1,11 +1,11 @@
-import { CredentialFormat } from '@sphereon/oid4vci-common';
+import { OID4VCICredentialFormat } from '@sphereon/oid4vci-common';
 
 import { AuthorizationDetailsBuilder } from '../AuthorizationDetailsBuilder';
 
 describe('AuthorizationDetailsBuilder test', () => {
   it('should create AuthorizationDetails object from arrays', () => {
     const actual = new AuthorizationDetailsBuilder()
-      .withFormats('jwt_vc' as CredentialFormat)
+      .withFormats('jwt_vc' as OID4VCICredentialFormat)
       .withLocations(['test1', 'test2'])
       .withType('openid_credential')
       .buildJwtVcJson();
@@ -17,7 +17,7 @@ describe('AuthorizationDetailsBuilder test', () => {
   });
   it('should create AuthorizationDetails object from single objects', () => {
     const actual = new AuthorizationDetailsBuilder()
-      .withFormats('jwt_vc' as CredentialFormat)
+      .withFormats('jwt_vc' as OID4VCICredentialFormat)
       .withLocations(['test1'])
       .withType('openid_credential')
       .buildJwtVcJson();
@@ -29,7 +29,7 @@ describe('AuthorizationDetailsBuilder test', () => {
   });
   it('should create AuthorizationDetails object if locations is missing', () => {
     const actual = new AuthorizationDetailsBuilder()
-      .withFormats('jwt_vc' as CredentialFormat)
+      .withFormats('jwt_vc' as OID4VCICredentialFormat)
       .withType('openid_credential')
       .buildJwtVcJson();
     expect(actual).toEqual({
@@ -40,7 +40,7 @@ describe('AuthorizationDetailsBuilder test', () => {
   it('should fail if type is missing', () => {
     expect(() => {
       new AuthorizationDetailsBuilder()
-        .withFormats('jwt_vc' as CredentialFormat)
+        .withFormats('jwt_vc' as OID4VCICredentialFormat)
         .withLocations(['test1'])
         .buildJwtVcJson();
     }).toThrow(Error('Type and format are required properties'));
@@ -52,7 +52,7 @@ describe('AuthorizationDetailsBuilder test', () => {
   });
   it('should be able to add random field to the object', () => {
     const actual = new AuthorizationDetailsBuilder()
-      .withFormats('jwt_vc' as CredentialFormat)
+      .withFormats('jwt_vc' as OID4VCICredentialFormat)
       .withType('openid_credential')
       .buildJwtVcJson();
     actual['random'] = 'test';

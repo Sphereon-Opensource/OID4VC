@@ -1,19 +1,26 @@
-import { CredentialIssuerMetadata, CredentialOfferPayloadV1_0_11, CredentialOfferV1_0_11, Grant } from '@sphereon/oid4vci-common'
+import {
+  CredentialIssuerMetadata,
+  CredentialIssuerMetadataOpts,
+  CredentialOfferPayloadV1_0_11,
+  CredentialOfferSession,
+  CredentialOfferV1_0_11,
+  Grant,
+} from '@sphereon/oid4vci-common'
 import { v4 as uuidv4 } from 'uuid'
 
 export function createCredentialOfferObject(
-  issuerMetadata?: CredentialIssuerMetadata,
+  issuerMetadata?: CredentialIssuerMetadataOpts,
   // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
   opts?: {
-    state?: string
     credentialOffer?: CredentialOfferPayloadV1_0_11
     credentialOfferUri?: string
     scheme?: string
     baseUri?: string
+    issuerState?: string
     preAuthorizedCode?: string
     userPinRequired?: boolean
   }
-): CredentialOfferV1_0_11 & { scheme: string; grant: Grant; baseUri: string } {
+): CredentialOfferV1_0_11 & { scheme: string; grants: Grant; baseUri: string } {
   if (!issuerMetadata && !opts?.credentialOffer && !opts?.credentialOfferUri) {
     throw new Error('You have to provide issuerMetadata or credentialOffer object for creating a deeplink')
   }
@@ -42,11 +49,11 @@ export function createCredentialOfferObject(
   } else if (!credential_offer.grants?.authorization_code?.issuer_state) {
     credential_offer.grants = {
       authorization_code: {
-        issuer_state: opts?.state ?? uuidv4(),
+        issuer_state: opts?.issuerState ?? uuidv4(),
       },
     }
   }
-  return { credential_offer, credential_offer_uri, scheme, baseUri, grant: credential_offer.grants }
+  return { credential_offer, credential_offer_uri, scheme, baseUri, grants: credential_offer.grants }
 }
 
 export function createCredentialOfferURIFromObject(
@@ -79,4 +86,10 @@ export function createCredentialOfferURI(
 ): string {
   const credentialOffer = createCredentialOfferObject(issuerMetadata, opts)
   return createCredentialOfferURIFromObject(credentialOffer, opts)
+}
+
+export const isPreAuthorizedCodeExpired = (state: CredentialOfferSession, expirationDuration: number) => {
+  const now = +new Date()
+  const expirationTime = state.createdAt + expirationDuration
+  return now >= expirationTime
 }

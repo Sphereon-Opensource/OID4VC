@@ -2,19 +2,18 @@ import {
   AccessTokenRequest,
   AccessTokenRequestOpts,
   AccessTokenResponse,
+  assertedUniformCredentialOffer,
   AuthorizationServerOpts,
-  CredentialOfferPayload,
-  CredentialOfferPayloadV1_0_09,
-  CredentialOfferPayloadV1_0_11,
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
   GrantTypes,
-  isCredentialOfferV1_0_09,
-  isCredentialOfferV1_0_11,
+  isPreAuthCode,
   IssuerOpts,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
   TokenErrorResponse,
+  toUniformCredentialOfferRequest,
+  UniformCredentialOfferPayload,
 } from '@sphereon/oid4vci-common';
 import { ObjectUtils } from '@sphereon/ssi-types';
 import Debug from 'debug';
@@ -22,23 +21,16 @@ import Debug from 'debug';
 import { MetadataClient } from './MetadataClient';
 import { convertJsonToURI, formPost } from './functions';
 
-const debug = Debug('sphereon:openid4vci:token');
+const debug = Debug('sphereon:oid4vci:token');
 
 export class AccessTokenClient {
-  public async acquireAccessToken({
-    credentialOffer,
-    asOpts,
-    pin,
-    codeVerifier,
-    code,
-    redirectUri,
-    metadata,
-  }: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
-    const { request } = credentialOffer;
+  public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
+    const { asOpts, pin, codeVerifier, code, redirectUri, metadata } = opts;
 
-    const isPinRequired = this.isPinRequiredValue(request);
+    const credentialOffer = await assertedUniformCredentialOffer(opts.credentialOffer);
+    const isPinRequired = this.isPinRequiredValue(credentialOffer.credential_offer);
     const issuerOpts = {
-      issuer: getIssuerFromCredentialOfferPayload(request) ? (getIssuerFromCredentialOfferPayload(request) as string) : (metadata?.issuer as string),
+      issuer: getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) ?? (metadata?.issuer as string),
     };
 
     return await this.acquireAccessTokenUsingRequest({
@@ -83,33 +75,29 @@ export class AccessTokenClient {
     return this.sendAuthCode(requestTokenURL, accessTokenRequest);
   }
 
-  public async createAccessTokenRequest({
-    credentialOffer,
-    asOpts,
-    pin,
-    codeVerifier,
-    code,
-    redirectUri,
-  }: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
-    const credentialOfferRequest = credentialOffer.request;
+  public async createAccessTokenRequest(opts: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
+    const { asOpts, pin, codeVerifier, code, redirectUri } = opts;
+    const credentialOfferRequest = await toUniformCredentialOfferRequest(opts.credentialOffer);
     const request: Partial<AccessTokenRequest> = {};
     if (asOpts?.clientId) {
       request.client_id = asOpts.clientId;
     }
 
-    this.assertNumericPin(this.isPinRequiredValue(credentialOfferRequest), pin);
+    this.assertNumericPin(this.isPinRequiredValue(credentialOfferRequest.credential_offer), pin);
     request.user_pin = pin;
 
-    if (credentialOfferRequest[PRE_AUTH_CODE_LITERAL as keyof CredentialOfferPayload]) {
+    const isPreAuth = isPreAuthCode(credentialOfferRequest);
+    if (isPreAuth) {
       if (codeVerifier) {
         throw new Error('Cannot pass a code_verifier when flow type is pre-authorized');
       }
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
-      //todo: handle this for v11
-      request[PRE_AUTH_CODE_LITERAL] = (credentialOfferRequest as CredentialOfferPayloadV1_0_09)[PRE_AUTH_CODE_LITERAL];
+      // we actually know it is there because of the isPreAuthCode call
+      request[PRE_AUTH_CODE_LITERAL] =
+        credentialOfferRequest?.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.[PRE_AUTH_CODE_LITERAL];
     }
-    if ('op_state' in credentialOfferRequest || 'issuer_state' in credentialOfferRequest) {
-      this.throwNotSupportedFlow();
+    if (credentialOfferRequest.credential_offer.grants?.authorization_code?.issuer_state) {
+      this.throwNotSupportedFlow(); // not supported yet
       request.grant_type = GrantTypes.AUTHORIZATION_CODE;
     }
     if (codeVerifier) {
@@ -118,9 +106,8 @@ export class AccessTokenClient {
       request.redirect_uri = redirectUri;
       request.grant_type = GrantTypes.AUTHORIZATION_CODE;
     }
-    //todo: handle this for v11
-    if (request.grant_type === GrantTypes.AUTHORIZATION_CODE && (credentialOfferRequest as CredentialOfferPayloadV1_0_09)[PRE_AUTH_CODE_LITERAL]) {
-      throw Error('A pre_authorized_code flow cannot have an op_state in the initiation request');
+    if (request.grant_type === GrantTypes.AUTHORIZATION_CODE && isPreAuth) {
+      throw Error('A pre_authorized_code flow cannot have an issuer state in the credential offer');
     }
 
     return request as AccessTokenRequest;
@@ -138,26 +125,14 @@ export class AccessTokenClient {
     }
   }
 
-  private isPinRequiredValue(requestPayload: CredentialOfferPayload): boolean {
+  private isPinRequiredValue(requestPayload: UniformCredentialOfferPayload): boolean {
     let isPinRequired = false;
     if (!requestPayload) {
       throw new Error(TokenErrorResponse.invalid_request);
     }
     const issuer = getIssuerFromCredentialOfferPayload(requestPayload);
-    if (isCredentialOfferV1_0_09(requestPayload)) {
-      requestPayload = requestPayload as CredentialOfferPayloadV1_0_09;
-      if (typeof requestPayload.user_pin_required === 'string') {
-        isPinRequired = requestPayload.user_pin_required.toLowerCase() === 'true';
-      } else if (typeof requestPayload.user_pin_required === 'boolean') {
-        isPinRequired = requestPayload.user_pin_required;
-      }
-    } else if (isCredentialOfferV1_0_11(requestPayload)) {
-      requestPayload = requestPayload as CredentialOfferPayloadV1_0_11;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      if ('grants' in requestPayload && 'urn:ietf:params:oauth:grant-type:pre-authorized_code' in requestPayload.grants!) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        isPinRequired = requestPayload!.grants!['urn:ietf:params:oauth:grant-type:pre-authorized_code']!.user_pin_required;
-      }
+    if (requestPayload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
+      isPinRequired = requestPayload.grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.user_pin_required ?? false;
     }
     debug(`Pin required for issuer ${issuer}: ${isPinRequired}`);
     return isPinRequired;
@@ -255,12 +230,12 @@ export class AccessTokenClient {
 
   private static creatTokenURLFromURL(url: string, allowInsecureEndpoints?: boolean, tokenEndpoint?: string): string {
     if (allowInsecureEndpoints !== true && url.startsWith('http://')) {
-      throw Error(`Unprotected token endpoints are not allowed ${url}`);
+      throw Error(`Unprotected token endpoints are not allowed ${url}. Adjust settings if you really need this (dev/test settings only!!)`);
     }
     const hostname = url.replace(/https?:\/\//, '').replace(/\/$/, '');
     const endpoint = tokenEndpoint ? (tokenEndpoint.startsWith('/') ? tokenEndpoint : tokenEndpoint.substring(1)) : '/token';
-    // We always require https
-    return `https://${hostname}${endpoint}`;
+    const scheme = url.split('://')[0];
+    return `${scheme ? scheme + '://' : 'https://'}${hostname}${endpoint}`;
   }
 
   private throwNotSupportedFlow(): void {

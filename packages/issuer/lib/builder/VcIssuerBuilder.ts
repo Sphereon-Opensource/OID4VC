@@ -1,6 +1,5 @@
 import {
   CNonceState,
-  CredentialIssuerCallback,
   CredentialIssuerMetadata,
   CredentialOfferSession,
   CredentialSupported,
@@ -13,6 +12,7 @@ import {
 
 import { VcIssuer } from '../VcIssuer'
 import { MemoryStates } from '../state-manager'
+import { CredentialIssuerCallback } from '../types'
 
 import { IssuerMetadataBuilderV1_11 } from './IssuerMetadataBuilderV1_11'
 

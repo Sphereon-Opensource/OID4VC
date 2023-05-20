@@ -1,7 +1,7 @@
 import { CredentialOfferV1_0_11 } from './v1_0_11.types';
 
 export interface StateType {
-  createdOn: number;
+  createdAt: number;
 }
 
 export interface CredentialOfferSession extends StateType {
@@ -14,10 +14,12 @@ export interface CredentialOfferSession extends StateType {
 
 export interface CNonceState extends StateType {
   cNonce: string;
+  issuerState?: string;
+  preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
 }
 
 export interface URIState extends StateType {
-  issuerState?: string;
+  issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   uri: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
 }
@@ -36,4 +38,8 @@ export interface IStateManager<T extends StateType> {
   clearAll(): Promise<void>; // clears all states
 
   getAsserted(id: string): Promise<T>;
+
+  startCleanupRoutine(timeout?: number): Promise<void>;
+
+  stopCleanupRoutine(): Promise<void>;
 }

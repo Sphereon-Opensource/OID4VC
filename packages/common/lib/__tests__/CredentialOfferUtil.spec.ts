@@ -4,7 +4,7 @@ import { OpenId4VCIVersion } from '../types';
 export const UNIT_TEST_TIMEOUT = 30000;
 
 describe('CredentialOfferUtil should', () => {
-  const INITIATE_QR_V9 =
+  const INITIATE_QR_V8 =
     'openid-initiate-issuance://?' +
     'issuer=https%3A%2F%2Fissuer.research.identiproof.io&' +
     'credential_type=OpenBadgeCredentialUrl&' +
@@ -20,9 +20,9 @@ describe('CredentialOfferUtil should', () => {
     'credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D';
 
   it(
-    'get version 9 with sample URL',
+    'get version 8 with sample URL',
     async () => {
-      expect(determineSpecVersionFromURI(INITIATE_QR_V9)).toEqual(OpenId4VCIVersion.VER_1_0_09);
+      expect(determineSpecVersionFromURI(INITIATE_QR_V8)).toEqual(OpenId4VCIVersion.VER_1_0_08);
     },
     UNIT_TEST_TIMEOUT
   );
@@ -39,7 +39,7 @@ describe('CredentialOfferUtil should', () => {
     'get exception for mixed attributes in URL',
     async () => {
       expect(() => determineSpecVersionFromURI(INITIATE_QR_DATA_MIXED_V9)).toThrow(
-        Error("Invalid param. Some keys have been used from version: 1009 version while 'credential_issuer' is used from version: 1011")
+        Error("Invalid param. Some keys have been used from version: 1008 version while 'credential_issuer' is used from version: 1011")
       );
     },
     UNIT_TEST_TIMEOUT
@@ -48,7 +48,7 @@ describe('CredentialOfferUtil should', () => {
   it(
     'get version 11 as default value',
     async () => {
-      expect(determineSpecVersionFromURI('')).toEqual(OpenId4VCIVersion.VER_1_0_11);
+      expect(determineSpecVersionFromURI('test://uri')).toEqual(OpenId4VCIVersion.VER_1_0_11);
     },
     UNIT_TEST_TIMEOUT
   );
