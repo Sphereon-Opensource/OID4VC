@@ -13,6 +13,10 @@ describe('AccessTokenClient should', () => {
     nock.cleanAll();
   });
 
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
   it(
     'get Access Token for with pre-authorized code without resulting in errors',
     async () => {

@@ -80,7 +80,9 @@ export class CredentialRequestClient {
   }): Promise<UniformCredentialRequest> {
     const { proofInput } = opts;
     const formatSelection = opts.format ?? this.credentialRequestOpts.format;
-    const format: OID4VCICredentialFormat = (formatSelection === 'jwt_vc' ? 'jwt_vc_json_ld' : formatSelection) as OID4VCICredentialFormat;
+    const format: OID4VCICredentialFormat = (
+      formatSelection === 'jwt_vc' || formatSelection === 'jwt' ? 'jwt_vc_json_ld' : formatSelection
+    ) as OID4VCICredentialFormat;
     if (!format) {
       throw Error(`Format of credential to be issued is missing`);
     } else if (format !== 'jwt_vc_json_ld' && format !== 'jwt_vc_json' && format !== 'ldp_vc') {

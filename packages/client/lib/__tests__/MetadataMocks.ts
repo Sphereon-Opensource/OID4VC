@@ -25,7 +25,7 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
     },
   },
   original_credential_offer: {
-    credential_type: 'OpenBadgeCredential',
+    credential_type: ['OpenBadgeCredential'],
     issuer: 'https://jff.walt.id/issuer-api/oidc/',
     'pre-authorized_code':
       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',

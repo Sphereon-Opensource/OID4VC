@@ -224,7 +224,7 @@ xdescribe('issuerCallback', () => {
 
     const credentialResponse = await vcIssuer.issueCredentialFromIssueRequest({
       credentialRequest: credentialRequest,
-      issuerState: state,
+      responseCNonce: state,
       issuerCallback: getIssuerCallback(credential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id),
     })
 

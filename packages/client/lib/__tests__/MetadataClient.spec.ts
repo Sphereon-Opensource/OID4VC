@@ -21,6 +21,11 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
   beforeAll(() => {
     nock.cleanAll();
   });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
   it('succeed with OID4VCI and separate AS metadata', async () => {
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
 

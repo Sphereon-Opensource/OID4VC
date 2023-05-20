@@ -42,8 +42,8 @@ export interface IssuerMockData {
     url: string;
     deeplink: string;
     request: {
-      type: [string];
-      format: 'jwt_vc' | 'ldp_vc' | string;
+      types: [string];
+      format: 'jwt_vc' | 'ldp_vc' | 'jwt_vc_json_ld' | string;
       proof: {
         proof_type: 'jwt' | string;
         jwt: string;
@@ -110,8 +110,8 @@ const mockData: VciMockDataStructure = {
       deeplink:
         'openid-initiate-issuance://?issuer=https%3A%2F%2Fngi%2Doidc4vci%2Dtest%2Espruceid%2Exyz&credential_type=OpenBadgeCredential&pre-authorized_code=eyJhbGciOiJFUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOlsiT3BlbkJhZGdlQ3JlZGVudGlhbCJdLCJleHAiOiIyMDIzLTA0LTIwVDA5OjA0OjM2WiIsIm5vbmNlIjoibWFibmVpT0VSZVB3V3BuRFFweEt3UnRsVVRFRlhGUEwifQ.qOZRPN8sTv_knhp7WaWte2-aDULaPZX--2i9unF6QDQNUllqDhvxgIHMDCYHCV8O2_Gj-T2x1J84fDMajE3asg&user_pin_required=false',
       request: {
-        type: ['OpenBadgeCredential'],
-        format: 'jwt_vc',
+        types: ['OpenBadgeCredential'],
+        format: 'jwt_vc_json_ld',
         proof: {
           proof_type: 'jwt',
           jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6andrOmV5SmhiR2NpT2lKRlV6STFOa3NpTENKMWMyVWlPaUp6YVdjaUxDSnJkSGtpT2lKRlF5SXNJbU55ZGlJNkluTmxZM0F5TlRack1TSXNJbmdpT2lKclpuVmpTa0V0VEhKck9VWjBPRmx5TFVkMlQzSmpia3N3YjNkc2RqUlhNblUwU3pJeFNHZHZTVlIzSWl3aWVTSTZJalozY0ZCUE1rOUNRVXBTU0ZFMVRXdEtXVlJaV0dsQlJFUXdOMU5OTlV0amVXcDNYMkUzVUUxWmVGa2lmUSMwIn0.eyJhdWQiOiJodHRwczovL25naS1vaWRjNHZjaS10ZXN0LnNwcnVjZWlkLnh5eiIsImlhdCI6MTY4MTkxMTA2MC45NDIsImV4cCI6MTY4MTkxMTcyMC45NDIsImlzcyI6InNwaGVyZW9uOnNzaS13YWxsZXQiLCJqdGkiOiJhNjA4MzMxZi02ZmE0LTQ0ZjAtYWNkZWY5NmFjMjdmNmQ3MCJ9.NwF3_41gwnlIdd_6Uk9CczeQHzIQt6UcvTT5Cxv72j9S1vNwiY9annA2kLsjsTiR5-WMBdUhJCO7wYCtZ15mxw',
@@ -356,8 +356,8 @@ const mockData: VciMockDataStructure = {
         'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Fdefault%2Foidc%2F&amp;credential_type=OpenBadgeCredential&amp;pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA&amp;user_pin_required=false',
       url: 'https://jff.walt.id/issuer-api/default/oidc/credential',
       request: {
-        type: ['OpenBadgeCredential'],
-        format: 'jwt_vc',
+        types: ['OpenBadgeCredential'],
+        format: 'jwt_vc_json_ld',
         proof: {
           proof_type: 'jwt',
           jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6andrOmV5SmhiR2NpT2lKRlV6STFOa3NpTENKMWMyVWlPaUp6YVdjaUxDSnJkSGtpT2lKRlF5SXNJbU55ZGlJNkluTmxZM0F5TlRack1TSXNJbmdpT2lKclpuVmpTa0V0VEhKck9VWjBPRmx5TFVkMlQzSmpia3N3YjNkc2RqUlhNblUwU3pJeFNHZHZTVlIzSWl3aWVTSTZJalozY0ZCUE1rOUNRVXBTU0ZFMVRXdEtXVlJaV0dsQlJFUXdOMU5OTlV0amVXcDNYMkUzVUUxWmVGa2lmUSMwIn0.eyJhdWQiOiJodHRwczovL2pmZi53YWx0LmlkL2lzc3Vlci1hcGkvZGVmYXVsdC9vaWRjLyIsImlhdCI6MTY4MTkxMTk0Mi4yMzgsImV4cCI6MTY4MTkxMjYwMi4yMzgsIm5vbmNlIjoiZjA2YTMxMDUtYTJlZC00NGZjLTk1NGItNGEyNTk3MDM0OTNiIiwiaXNzIjoic3BoZXJlb246c3NpLXdhbGxldCIsImp0aSI6IjA1OWM3ODA5LTlmOGYtNGE3ZS1hZDI4YTNhMTNhMGIzNmViIn0.RfiWyybxpe3nkx3b0yIsqDHQtvB1WwhDW4t0X-kijy2dsSfv2cYhSEmAzs1shg7OV4EW8fSzt_Te79xiVl6jCw',
@@ -366,7 +366,7 @@ const mockData: VciMockDataStructure = {
       response: {
         credential:
           'eyJraWQiOiJkaWQ6andrOmV5SnJkSGtpT2lKUFMxQWlMQ0oxYzJVaU9pSnphV2NpTENKamNuWWlPaUpGWkRJMU5URTVJaXdpYTJsa0lqb2lOMlEyWTJKbU1qUTRPV0l6TkRJM05tSXhOekl4T1RBMU5EbGtNak01TVRnaUxDSjRJam9pUm01RlZWVmhkV1J0T1RsT016QmlPREJxY3poV2REUkJiazk0ZGxKM1dIUm5VbU5MY1ROblFrbDFPQ0lzSW1Gc1p5STZJa1ZrUkZOQkluMCMwIiwidHlwIjoiSldUIiwiYWxnIjoiRWREU0EifQ.eyJpc3MiOiJkaWQ6andrOmV5SnJkSGtpT2lKUFMxQWlMQ0oxYzJVaU9pSnphV2NpTENKamNuWWlPaUpGWkRJMU5URTVJaXdpYTJsa0lqb2lOMlEyWTJKbU1qUTRPV0l6TkRJM05tSXhOekl4T1RBMU5EbGtNak01TVRnaUxDSjRJam9pUm01RlZWVmhkV1J0T1RsT016QmlPREJxY3poV2REUkJiazk0ZGxKM1dIUm5VbU5MY1ROblFrbDFPQ0lzSW1Gc1p5STZJa1ZrUkZOQkluMCIsInN1YiI6ImRpZDpqd2s6ZXlKaGJHY2lPaUpGVXpJMU5rc2lMQ0oxYzJVaU9pSnphV2NpTENKcmRIa2lPaUpGUXlJc0ltTnlkaUk2SW5ObFkzQXlOVFpyTVNJc0luZ2lPaUpyWm5WalNrRXRUSEpyT1VaME9GbHlMVWQyVDNKamJrc3diM2RzZGpSWE1uVTBTekl4U0dkdlNWUjNJaXdpZVNJNklqWjNjRkJQTWs5Q1FVcFNTRkUxVFd0S1dWUlpXR2xCUkVRd04xTk5OVXRqZVdwM1gyRTNVRTFaZUZraWZRIiwibmJmIjoxNjgxOTExOTk5LCJpYXQiOjE2ODE5MTE5OTksInZjIjp7InR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJPcGVuQmFkZ2VDcmVkZW50aWFsIl0sIkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9wdXJsLmltc2dsb2JhbC5vcmcvc3BlYy9vYi92M3AwL2NvbnRleHQuanNvbiJdLCJpZCI6InVybjp1dWlkOmM0YTA4MDYzLTc4ZTUtNDdkNS04NGY5LTg2YTFmNjNiYzNkYSIsImlzc3VlciI6eyJpZCI6ImRpZDpqd2s6ZXlKcmRIa2lPaUpQUzFBaUxDSjFjMlVpT2lKemFXY2lMQ0pqY25ZaU9pSkZaREkxTlRFNUlpd2lhMmxrSWpvaU4yUTJZMkptTWpRNE9XSXpOREkzTm1JeE56SXhPVEExTkRsa01qTTVNVGdpTENKNElqb2lSbTVGVlZWaGRXUnRPVGxPTXpCaU9EQnFjemhXZERSQmJrOTRkbEozV0hSblVtTkxjVE5uUWtsMU9DSXNJbUZzWnlJNklrVmtSRk5CSW4wIiwiaW1hZ2UiOnsiaWQiOiJodHRwczovL3czYy1jY2cuZ2l0aHViLmlvL3ZjLWVkL3BsdWdmZXN0LTItMjAyMi9pbWFnZXMvSkZGLVZDLUVEVS1QTFVHRkVTVDItYmFkZ2UtaW1hZ2UucG5nIiwidHlwZSI6IkltYWdlIn0sIm5hbWUiOiJKb2JzIGZvciB0aGUgRnV0dXJlIChKRkYpIiwidHlwZSI6IlByb2ZpbGUiLCJ1cmwiOiJodHRwczovL3czYy1jY2cuZ2l0aHViLmlvL3ZjLWVkL3BsdWdmZXN0LTItMjAyMi9pbWFnZXMvSkZGLVZDLUVEVS1QTFVHRkVTVDItYmFkZ2UtaW1hZ2UucG5nIn0sImlzc3VhbmNlRGF0ZSI6IjIwMjMtMDQtMTlUMTM6NDY6MzlaIiwiaXNzdWVkIjoiMjAyMy0wNC0xOVQxMzo0NjozOVoiLCJ2YWxpZEZyb20iOiIyMDIzLTA0LTE5VDEzOjQ2OjM5WiIsImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmp3azpleUpoYkdjaU9pSkZVekkxTmtzaUxDSjFjMlVpT2lKemFXY2lMQ0pyZEhraU9pSkZReUlzSW1OeWRpSTZJbk5sWTNBeU5UWnJNU0lzSW5naU9pSnJablZqU2tFdFRISnJPVVowT0ZseUxVZDJUM0pqYmtzd2IzZHNkalJYTW5VMFN6SXhTR2R2U1ZSM0lpd2llU0k2SWpaM2NGQlBNazlDUVVwU1NGRTFUV3RLV1ZSWldHbEJSRVF3TjFOTk5VdGplV3AzWDJFM1VFMVplRmtpZlEiLCJhY2hpZXZlbWVudCI6eyJjcml0ZXJpYSI6eyJuYXJyYXRpdmUiOiJUaGUgY29ob3J0IG9mIHRoZSBKRkYgUGx1Z2Zlc3QgMiBpbiBBdWd1c3QtTm92ZW1iZXIgb2YgMjAyMiBjb2xsYWJvcmF0ZWQgdG8gcHVzaCBpbnRlcm9wZXJhYmlsaXR5IG9mIFZDcyBpbiBlZHVjYXRpb24gZm9yd2FyZC4iLCJ0eXBlIjoiQ3JpdGVyaWEifSwiZGVzY3JpcHRpb24iOiJUaGlzIHdhbGxldCBjYW4gZGlzcGxheSB0aGlzIE9wZW4gQmFkZ2UgMy4wIiwiaWQiOiIwIiwiaW1hZ2UiOnsiaWQiOiJodHRwczovL3czYy1jY2cuZ2l0aHViLmlvL3ZjLWVkL3BsdWdmZXN0LTItMjAyMi9pbWFnZXMvSkZGLVZDLUVEVS1QTFVHRkVTVDItYmFkZ2UtaW1hZ2UucG5nIiwidHlwZSI6IkltYWdlIn0sIm5hbWUiOiJPdXIgV2FsbGV0IFBhc3NlZCBKRkYgUGx1Z2Zlc3QgIzIgMjAyMiIsInR5cGUiOiJBY2hpZXZlbWVudCJ9LCJ0eXBlIjoiQWNoaWV2ZW1lbnRTdWJqZWN0In0sIm5hbWUiOiJBY2hpZXZlbWVudCBDcmVkZW50aWFsIn0sImp0aSI6InVybjp1dWlkOmM0YTA4MDYzLTc4ZTUtNDdkNS04NGY5LTg2YTFmNjNiYzNkYSJ9.AM-lAUjCjcuQgy1QhQXctd3YrUoC2UdXvOwDHcHsi_UuHX0nt__QrYlfcwUutc9gSsz-U9SZ1e6iAGarTNVbDQ',
-        format: 'jwt_vc',
+        format: 'jwt_vc_json_ld',
       },
     },
   },
@@ -474,7 +474,7 @@ const mockData: VciMockDataStructure = {
         'https://oidc4vc.uniissuer.io/&credential_type=OpenBadgeCredential&pre-authorized_code=0ApoI8rxVmdQ44RIpuDbFIURIIkOhyek&user_pin_required=false',
       url: 'https://oidc4vc.uniissuer.io/1.0/credential',
       request: {
-        type: ['OpenBadgeCredential'],
+        types: ['OpenBadgeCredential'],
         format: 'jwt_vc',
         proof: {
           proof_type: 'jwt',
@@ -573,7 +573,7 @@ const mockData: VciMockDataStructure = {
         'openid-initiate-issuance://?issuer=https://launchpad.mattrlabs.com&credential_type=OpenBadgeCredential&pre-authorized_code=g0UCOj6RAN5AwHU6gczm_GzB4_lH6GW39Z0Dl2DOOiO',
       url: 'https://launchpad.vii.electron.mattrlabs.io/oidc/v1/auth/credential',
       request: {
-        type: ['OpenBadgeCredential'],
+        types: ['OpenBadgeCredential'],
         format: 'ldp_vc',
         proof: {
           proof_type: 'jwt',
@@ -687,7 +687,7 @@ const mockData: VciMockDataStructure = {
         'openid-initiate-issuance://?issuer=https://oidc4vc.diwala.io&amp;credential_type=OpenBadgeCredential&amp;pre-authorized_code=eyJhbGciOiJIUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOiJPcGVuQmFkZ2VDcmVkZW50aWFsIiwiZXhwIjoxNjgxOTg0NDY3fQ.fEAHKz2nuWfiYHw406iNxr-81pWkNkbi31bWsYSf6Ng',
       url: 'https://oidc4vc.diwala.io/credential',
       request: {
-        type: ['OpenBadgeCredential'],
+        types: ['OpenBadgeCredential'],
         format: 'ldp_vc',
         proof: {
           proof_type: 'jwt',

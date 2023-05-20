@@ -21,6 +21,12 @@ describe('OID4VCI-Client should', () => {
   async function proofOfPossessionCallbackFunction(_args: Jwt, _kid?: string): Promise<string> {
     return 'ey.val.ue';
   }
+  beforeEach(() => {
+    nock.cleanAll();
+  });
+  afterEach(() => {
+    nock.cleanAll();
+  });
 
   // Access token mocks
   const mockedAccessTokenResponse: AccessTokenResponse = {
@@ -89,6 +95,7 @@ describe('OID4VCI-Client should', () => {
 
     const credentialResponse = await client.acquireCredentials({
       credentialTypes: 'OpenBadgeCredential',
+      format: 'jwt_vc_json_ld',
       proofCallbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },

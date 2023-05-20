@@ -23,6 +23,7 @@ describe('VcIssuer', () => {
   const preAuthorizedCode = 'test_code'
 
   beforeAll(async () => {
+    jest.clearAllMocks()
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
@@ -115,7 +116,8 @@ describe('VcIssuer', () => {
   })
 
   afterAll(async () => {
-    await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
+    jest.clearAllMocks()
+    // await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 
   it('should create credential offer', async () => {

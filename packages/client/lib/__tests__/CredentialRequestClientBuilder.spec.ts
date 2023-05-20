@@ -81,9 +81,9 @@ describe('Credential Request Client Builder', () => {
     await proofOfPossessionVerifierCallbackFunction({ ...proof, kid });
     const credentialRequest: UniformCredentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof });
     expect(credentialRequest.proof?.jwt).toContain(partialJWT);
-    expect('type' in credentialRequest).toBe(true);
-    if ('type' in credentialRequest) {
-      expect(credentialRequest.type).toBe('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential');
+    expect('types' in credentialRequest).toBe(true);
+    if ('types' in credentialRequest) {
+      expect(credentialRequest.types).toStrictEqual(['https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential']);
     }
   });
 
