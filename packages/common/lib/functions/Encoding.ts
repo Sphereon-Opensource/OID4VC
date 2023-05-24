@@ -32,7 +32,7 @@ export function convertJsonToURI(
   }
 
   let components: string;
-  if (opts?.version && opts.version < OpenId4VCIVersion.VER_1_0_11) {
+  if ((opts?.version && opts.version < OpenId4VCIVersion.VER_1_0_11) || !(opts?.encodeAsSingleJson ?? true)) {
     for (const [key, value] of Object.entries(json)) {
       if (!value) {
         continue;
