@@ -23,7 +23,7 @@ export const validateRequestBody = ({
 }
 
 export const sendErrorResponse = (response: Response, statusCode: number, message: any, error?: any) => {
-  console.log(`${message} ${error}`)
+  console.log(`${JSON.stringify(message)} ${error}`)
   response.statusCode = statusCode
   response.status(statusCode).send(message)
 }

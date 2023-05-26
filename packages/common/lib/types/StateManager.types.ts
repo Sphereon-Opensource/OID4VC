@@ -7,7 +7,7 @@ export interface StateType {
 export interface CredentialOfferSession extends StateType {
   clientId?: string;
   credentialOffer: CredentialOfferV1_0_11;
-  userPin?: number;
+  userPin?: string;
   issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
 }

@@ -79,9 +79,11 @@ export function isCredentialOfferVersion(offer: CredentialOfferPayload | Credent
   }
   const version = determineSpecVersionFromOffer(offer);
   if (version.valueOf() < min.valueOf()) {
-    throw Error(`Credential offer version (${version.valueOf()}) is lower than minimum required version (${min.valueOf()})`);
+    console.log(`Credential offer version (${version.valueOf()}) is lower than minimum required version (${min.valueOf()})`);
+    return false;
   } else if (max && version.valueOf() > max.valueOf()) {
-    throw Error(`Credential offer version (${version.valueOf()}) is higher than maximum required version (${max.valueOf()})`);
+    console.log(`Credential offer version (${version.valueOf()}) is higher than maximum required version (${max.valueOf()})`);
+    return false;
   }
   return true;
 }
@@ -182,7 +184,7 @@ export async function assertedUniformCredentialOffer(
   if (!credentialOffer.credential_offer) {
     throw Error(`No credential_offer present`);
   }
-  credentialOffer.credential_offer = await toUniformCredentialOfferPayload(credentialOffer.credential_offer);
+  credentialOffer.credential_offer = await toUniformCredentialOfferPayload(credentialOffer.credential_offer, { version: credentialOffer.version });
   return credentialOffer as AssertedUniformCredentialOffer;
 }
 
@@ -203,6 +205,7 @@ export function toUniformCredentialOfferPayload(
     version?: OpenId4VCIVersion;
   }
 ): UniformCredentialOfferPayload {
+  // todo: create test to check idempotence once a payload is already been made uniform.
   const version = opts?.version ?? determineSpecVersionFromOffer(offer);
   if (version >= OpenId4VCIVersion.VER_1_0_11) {
     const orig = offer as UniformCredentialOfferPayload;
@@ -210,11 +213,12 @@ export function toUniformCredentialOfferPayload(
       ...orig,
     };
   }
-  const grants: Grant = {};
+  const grants: Grant = 'grants' in offer ? (offer.grants as Grant) : {};
   let offerPayloadAsV8V9 = offer as CredentialOfferPayloadV1_0_08 | CredentialOfferPayloadV1_0_09;
   if (isCredentialOfferVersion(offer, OpenId4VCIVersion.VER_1_0_08, OpenId4VCIVersion.VER_1_0_09)) {
     if (offerPayloadAsV8V9.op_state) {
       grants.authorization_code = {
+        ...grants.authorization_code,
         issuer_state: offerPayloadAsV8V9.op_state,
       };
     }
@@ -231,11 +235,12 @@ export function toUniformCredentialOfferPayload(
       };
     }
   }
+  const issuer = getIssuerFromCredentialOfferPayload(offer);
   if (version === OpenId4VCIVersion.VER_1_0_09) {
     offerPayloadAsV8V9 = offer as CredentialOfferPayloadV1_0_09;
     return {
       // credential_definition: getCredentialsSupported(never, offerPayloadAsV8V9.credentials).map(sup => {credentialSubject: sup.credentialSubject})[0],
-      credential_issuer: offerPayloadAsV8V9.issuer,
+      credential_issuer: issuer ?? offerPayloadAsV8V9.issuer,
       credentials: offerPayloadAsV8V9.credentials,
       grants,
     };
@@ -243,7 +248,7 @@ export function toUniformCredentialOfferPayload(
   if (version === OpenId4VCIVersion.VER_1_0_08) {
     offerPayloadAsV8V9 = offer as CredentialOfferPayloadV1_0_08;
     return {
-      credential_issuer: offerPayloadAsV8V9.issuer,
+      credential_issuer: issuer ?? offerPayloadAsV8V9.issuer,
       credentials: Array.isArray(offerPayloadAsV8V9.credential_type) ? offerPayloadAsV8V9.credential_type : [offerPayloadAsV8V9.credential_type],
       grants,
     } as UniformCredentialOfferPayload;

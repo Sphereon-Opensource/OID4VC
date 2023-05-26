@@ -73,7 +73,7 @@ xdescribe('issuerCallback', () => {
       //FIXME Here a CredentialFormatEnum is passed in, but later it is matched against a CredentialFormat
       .withFormat('jwt_vc_json')
       .withId('UniversityDegree_JWT')
-      .withCredentialDisplay({
+      .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
         logo: {
@@ -83,7 +83,7 @@ xdescribe('issuerCallback', () => {
         background_color: '#12107c',
         text_color: '#FFFFFF',
       })
-      .withIssuerCredentialSubjectDisplay('given_name', {
+      .addCredentialSubjectPropertyDisplay('given_name', {
         name: 'given name',
         locale: 'en-US',
       } as IssuerCredentialSubjectDisplay)
@@ -93,7 +93,7 @@ xdescribe('issuerCallback', () => {
       issuerState: 'existing-state',
       clientId,
       createdAt: +new Date(),
-      userPin: 123456,
+      userPin: '123456',
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'did:key:test',

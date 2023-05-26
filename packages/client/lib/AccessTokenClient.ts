@@ -29,8 +29,12 @@ export class AccessTokenClient {
 
     const credentialOffer = await assertedUniformCredentialOffer(opts.credentialOffer);
     const isPinRequired = this.isPinRequiredValue(credentialOffer.credential_offer);
+    const issuer = getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) ?? (metadata?.issuer as string);
+    if (!issuer) {
+      throw Error('Issuer required at this point');
+    }
     const issuerOpts = {
-      issuer: getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) ?? (metadata?.issuer as string),
+      issuer,
     };
 
     return await this.acquireAccessTokenUsingRequest({
@@ -96,7 +100,7 @@ export class AccessTokenClient {
       request[PRE_AUTH_CODE_LITERAL] =
         credentialOfferRequest?.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.[PRE_AUTH_CODE_LITERAL];
     }
-    if (credentialOfferRequest.credential_offer.grants?.authorization_code?.issuer_state) {
+    if (!isPreAuth && credentialOfferRequest.credential_offer.grants?.authorization_code?.issuer_state) {
       this.throwNotSupportedFlow(); // not supported yet
       request.grant_type = GrantTypes.AUTHORIZATION_CODE;
     }
@@ -215,7 +219,7 @@ export class AccessTokenClient {
     } else if (metadata?.token_endpoint) {
       url = metadata.token_endpoint;
     } else {
-      if (!issuerOpts) {
+      if (!issuerOpts?.issuer) {
         throw Error('Either authorization server options, a token endpoint or issuer options are required at this point');
       }
       url = this.creatTokenURLFromURL(issuerOpts.issuer, asOpts?.allowInsecureEndpoints, issuerOpts.tokenEndpoint);

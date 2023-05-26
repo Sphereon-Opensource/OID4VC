@@ -74,7 +74,7 @@ export class CredentialSupportedBuilderV1_11 {
     return this
   }
 
-  addCredentialDisplay(credentialDisplay: CredentialsSupportedDisplay | CredentialsSupportedDisplay[]): CredentialSupportedBuilderV1_11 {
+  addCredentialSupportedDisplay(credentialDisplay: CredentialsSupportedDisplay | CredentialsSupportedDisplay[]): CredentialSupportedBuilderV1_11 {
     if (!Array.isArray(credentialDisplay)) {
       this.display = this.display ? [...this.display, credentialDisplay] : [credentialDisplay]
     } else {
@@ -83,12 +83,17 @@ export class CredentialSupportedBuilderV1_11 {
     return this
   }
 
-  withCredentialDisplay(credentialDisplay: CredentialsSupportedDisplay | CredentialsSupportedDisplay[]): CredentialSupportedBuilderV1_11 {
+  withCredentialSupportedDisplay(credentialDisplay: CredentialsSupportedDisplay | CredentialsSupportedDisplay[]): CredentialSupportedBuilderV1_11 {
     this.display = Array.isArray(credentialDisplay) ? credentialDisplay : [credentialDisplay]
     return this
   }
 
-  withIssuerCredentialSubjectDisplay(
+  withCredentialSubjectDisplay(credentialSubject: IssuerCredentialSubject) {
+    this.credentialSubject = credentialSubject
+    return this
+  }
+
+  addCredentialSubjectPropertyDisplay(
     subjectProperty: string,
     issuerCredentialSubjectDisplay: IssuerCredentialSubjectDisplay
   ): CredentialSupportedBuilderV1_11 {

@@ -21,6 +21,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@sphereon/oid4vci-client": "workspace:*",
     "@types/body-parser": "^1.19.2",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.13",

@@ -32,7 +32,10 @@ export function convertJsonToURI(
   }
 
   let components: string;
-  if (opts?.version && opts.version < OpenId4VCIVersion.VER_1_0_11) {
+  if (opts?.version && opts.version > OpenId4VCIVersion.VER_1_0_08) {
+    // v11 changed from encoding every param to a encoded json object with a credential_offer param key
+    components = encodeAndStripWhitespace(JSON.stringify(json));
+  } else {
     for (const [key, value] of Object.entries(json)) {
       if (!value) {
         continue;
@@ -60,9 +63,6 @@ export function convertJsonToURI(
       results.push(encoded);
     }
     components = results.join('&');
-  } else {
-    // v11 changed from encoding every param to a encoded json object with a credential_offer param key
-    components = encodeAndStripWhitespace(JSON.stringify(json));
   }
   if (opts?.baseUrl) {
     if (opts.baseUrl.endsWith('=')) {

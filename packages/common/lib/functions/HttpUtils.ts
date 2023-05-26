@@ -76,7 +76,7 @@ const openIdFetch = async <T>(
   const isJSONResponse = accept === 'application/json' || origResponse.headers.get('Content-Type') === 'application/json';
   const success = origResponse && origResponse.status >= 200 && origResponse.status < 400;
   const responseText = await origResponse.text();
-  const responseBody = isJSONResponse ? JSON.parse(responseText) : responseText;
+  const responseBody = isJSONResponse && responseText.includes('{') ? JSON.parse(responseText) : responseText;
 
   debug(`${success ? 'success' : 'error'} status: ${origResponse.status}, body:\r\n${JSON.stringify(responseBody)}`);
   if (!success && opts?.exceptionOnHttpErrorStatus) {

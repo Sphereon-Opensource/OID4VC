@@ -24,19 +24,38 @@ export function createCredentialOfferObject(
   if (!issuerMetadata && !opts?.credentialOffer && !opts?.credentialOfferUri) {
     throw new Error('You have to provide issuerMetadata or credentialOffer object for creating a deeplink')
   }
-  const baseUri = opts?.baseUri ?? ''
   const scheme = opts?.scheme?.replace('://', '') ?? 'openid-credential-offer'
+  let baseUri: string
+  if (opts?.baseUri) {
+    baseUri = opts.baseUri
+  } else if (scheme.startsWith('http')) {
+    if (issuerMetadata?.credential_issuer) {
+      baseUri = issuerMetadata?.credential_issuer
+      if (!baseUri.startsWith(`${scheme}://`)) {
+        throw Error(`schem ${scheme} is different from base uri ${baseUri}`)
+      }
+      baseUri = baseUri.replace(`${scheme}://`, '')
+    } else {
+      throw Error(`A '${scheme}' scheme requires a URI to be present as baseUri`)
+    }
+  } else {
+    baseUri = ''
+  }
+
   const credential_offer_uri = opts?.credentialOfferUri ? `${scheme}://${baseUri}?credential_offer_uri=${opts?.credentialOfferUri}` : undefined
   let credential_offer: CredentialOfferPayloadV1_0_11
   if (opts?.credentialOffer) {
-    credential_offer = opts.credentialOffer
+    credential_offer = {
+      ...opts.credentialOffer,
+      credentials: opts.credentialOffer?.credentials ?? issuerMetadata?.credentials_supported,
+    }
   } else {
     credential_offer = {
       credential_issuer: issuerMetadata?.credential_issuer,
       credentials: issuerMetadata?.credentials_supported,
     } as CredentialOfferPayloadV1_0_11
   }
-  // todo: check payload against issuer metadata
+  // todo: check payload against issuer metadata. Especially strings in the credentials array: When processing, the Wallet MUST resolve this string value to the respective object.
 
   if (!credential_offer.grants) {
     credential_offer.grants = {}

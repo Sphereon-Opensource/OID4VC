@@ -10,7 +10,7 @@ describe('VcIssuer builder should', () => {
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
       .withId('UniversityDegree_JWT')
-      .withCredentialDisplay({
+      .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
         logo: {
@@ -20,7 +20,7 @@ describe('VcIssuer builder should', () => {
         background_color: '#12107c',
         text_color: '#FFFFFF',
       })
-      .withIssuerCredentialSubjectDisplay('given_name', {
+      .addCredentialSubjectPropertyDisplay('given_name', {
         name: 'given name',
         locale: 'en-US',
       } as IssuerCredentialSubjectDisplay)
@@ -49,7 +49,7 @@ describe('VcIssuer builder should', () => {
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
       .withId('UniversityDegree_JWT')
-      .withCredentialDisplay({
+      .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
         logo: {
@@ -59,7 +59,7 @@ describe('VcIssuer builder should', () => {
         background_color: '#12107c',
         text_color: '#FFFFFF',
       })
-      .withIssuerCredentialSubjectDisplay('given_name', {
+      .addCredentialSubjectPropertyDisplay('given_name', {
         name: 'given name',
         locale: 'en-US',
       } as IssuerCredentialSubjectDisplay)
@@ -92,7 +92,7 @@ describe('VcIssuer builder should', () => {
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
       .withId('UniversityDegree_JWT')
-      .withCredentialDisplay({
+      .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
         logo: {
@@ -102,7 +102,7 @@ describe('VcIssuer builder should', () => {
         background_color: '#12107c',
         text_color: '#FFFFFF',
       })
-      .withIssuerCredentialSubjectDisplay('given_name', {
+      .addCredentialSubjectPropertyDisplay('given_name', {
         name: 'given name',
         locale: 'en-US',
       } as IssuerCredentialSubjectDisplay)
@@ -126,12 +126,12 @@ describe('VcIssuer builder should', () => {
       issuerState: v4(),
       clientId: 'test_client',
       createdAt: preAuthorizedCodecreatedAt,
-      userPin: 123456,
+      userPin: '123456',
       credentialOffer: { credential_offer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' } },
     })
     await expect(vcIssuer.credentialOfferSessions?.get('test')).resolves.toMatchObject({
       clientId: 'test_client',
-      userPin: 123456,
+      userPin: '123456',
       createdAt: preAuthorizedCodecreatedAt,
       credentialOffer: { credential_offer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' } },
     })

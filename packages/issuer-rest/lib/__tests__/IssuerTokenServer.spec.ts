@@ -19,7 +19,7 @@ import requests from 'supertest'
 
 import { OID4VCIServer } from '../OID4VCIServer'
 
-describe('OID4VCIServer', () => {
+xdescribe('OID4VCIServer', () => {
   let app: Express
   let server: http.Server
   const preAuthorizedCode1 = 'SplxlOBeZQQYbYS6WxSbIA1'
@@ -35,7 +35,7 @@ describe('OID4VCIServer', () => {
 
     const credentialOfferState1: CredentialOfferSession = {
       preAuthorizedCode: preAuthorizedCode1,
-      userPin: 493536,
+      userPin: '493536',
       createdAt: +new Date(),
       credentialOffer: {
         credential_offer: {

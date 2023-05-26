@@ -82,8 +82,8 @@ export class VcIssuer {
     credentials?: (CredentialOfferFormat | string)[]
     credentialDefinition?: IssuerCredentialDefinition
     credentialOfferUri?: string
-    scheme?: string
     baseUri?: string
+    scheme?: string
   }): Promise<string> {
     const { grants, credentials, credentialDefinition } = opts
     if (!grants?.authorization_code && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
@@ -128,10 +128,10 @@ export class VcIssuer {
       issuerState,
     })
 
-    let userPin: number | undefined
+    let userPin: string | undefined
     // todo: Double check this can only happen in pre-auth flow and if so make sure to not do the below when in a state is present (authorized flow)
     if (userPinRequired) {
-      userPin = Math.round(9999 * Math.random())
+      userPin = ('' + Math.round(9999 * Math.random())).padStart(4, '0')
     }
     const createdAt = +new Date()
     if (opts?.credentialOfferUri) {
@@ -224,6 +224,7 @@ export class VcIssuer {
       c_nonce_expires_in: this._cNonceExpiresIn,
     }
   }
+
   /*
   private async retrieveGrantsAndCredentialOfferSession(id: string): Promise<{
     clientId?: string;

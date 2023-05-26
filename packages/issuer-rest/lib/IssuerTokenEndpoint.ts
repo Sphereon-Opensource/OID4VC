@@ -3,13 +3,11 @@ import {
   Alg,
   CredentialOfferSession,
   EXPIRED_PRE_AUTHORIZED_CODE,
-  getNumberOrUndefined,
   GrantType,
   INVALID_PRE_AUTHORIZED_CODE,
   Jwt,
   JWTSignerCallback,
   PIN_NOT_MATCH_ERROR,
-  PIN_NOT_MATCHING_ERROR,
   PIN_VALIDATION_ERROR,
   PRE_AUTH_CODE_LITERAL,
   PRE_AUTHORIZED_CODE_REQUIRED_ERROR,
@@ -183,13 +181,7 @@ export const verifyTokenRequest = ({
           error_message: PIN_VALIDATION_ERROR,
         })
       }
-      if (credentialOfferSession.userPin != getNumberOrUndefined(request.body.user_pin)) {
-        return sendErrorResponse(response, 400, {
-          error: TokenErrorResponse.invalid_grant,
-          error_message: PIN_NOT_MATCHING_ERROR,
-        })
-      }
-      if (getNumberOrUndefined(request.body.user_pin) !== credentialOfferSession.userPin) {
+      if (request.body.user_pin !== credentialOfferSession.userPin) {
         return sendErrorResponse(response, 400, {
           error: TokenErrorResponse.invalid_grant,
           error_message: PIN_NOT_MATCH_ERROR,

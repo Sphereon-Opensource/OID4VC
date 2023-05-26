@@ -30,7 +30,7 @@ function buildVCIFromEnvironment() {
     .withFormat(process.env.credential_supported_format as unknown as OID4VCICredentialFormat)
     .withId(process.env.credential_supported_id as string)
     .withTypes([process.env.credential_supported_types_1 as string, process.env.credential_supported_types_2 as string])
-    .withCredentialDisplay({
+    .withCredentialSupportedDisplay({
       name: process.env.credential_display_name as string,
       locale: process.env.credential_display_locale as string,
       logo: {
@@ -40,7 +40,7 @@ function buildVCIFromEnvironment() {
       background_color: process.env.credential_display_background_color as string,
       text_color: process.env.credential_display_text_color as string,
     })
-    .withIssuerCredentialSubjectDisplay(
+    .addCredentialSubjectPropertyDisplay(
       process.env.credential_subject_display_key1 as string,
       {
         name: process.env.credential_subject_display_key1_name as string,
@@ -124,7 +124,7 @@ export class OID4VCIServer {
     const issuerEndpoint = this.issuer.issuerMetadata.token_endpoint
     let path: string
 
-    const accessTokenIssuer = tokenEndpointOpts?.accessTokenIssuer ?? process.env.ACCESS_TOKEN_ISSUER
+    const accessTokenIssuer = tokenEndpointOpts?.accessTokenIssuer ?? process.env.ACCESS_TOKEN_ISSUER ?? this.issuer.issuerMetadata.credential_issuer
 
     const preAuthorizedCodeExpirationDuration =
       tokenEndpointOpts?.preAuthorizedCodeExpirationDuration ?? getNumberOrUndefined(process.env.PRE_AUTHORIZED_CODE_EXPIRATION_DURATION) ?? 300000
@@ -132,22 +132,30 @@ export class OID4VCIServer {
     const tokenExpiresIn = tokenEndpointOpts?.tokenExpiresIn ?? 300
 
     // todo: this means we cannot sign JWTs or issue access tokens when configured from env vars!
-    if (!tokenEndpointOpts?.accessTokenSignerCallback) {
+    if (tokenEndpointOpts?.accessTokenSignerCallback === undefined) {
       throw new Error(JWT_SIGNER_CALLBACK_REQUIRED_ERROR)
     } else if (!accessTokenIssuer) {
       throw new Error(ACCESS_TOKEN_ISSUER_REQUIRED_ERROR)
     }
+    let url: URL
+    let baseUrl = this._baseUrl?.toString()
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length)
+    }
     if (!issuerEndpoint) {
-      path = this.extractPath(tokenEndpointOpts?.tokenPath ?? process.env.TOKEN_PATH ?? '/token')
-      // last replace fixes any baseUrl ending with a slash and path starting with a slash
-      this.issuer.issuerMetadata.token_endpoint = `${this._baseUrl.toString()}${path}`.replace('//', '/')
+      path = this.extractPath(tokenEndpointOpts?.tokenPath ?? process.env.TOKEN_PATH ?? '/token', true)
+      // let's fix any baseUrl ending with a slash as path will always start with a slash
+
+      url = new URL(`${baseUrl}${path}`)
+      this.issuer.issuerMetadata.token_endpoint = url.toString()
     } else {
       this.assertEndpointHasIssuerBaseUrl(issuerEndpoint)
       path = this.extractPath(issuerEndpoint)
+      url = new URL(`${baseUrl}${path}`)
     }
 
     this.app.post(
-      path,
+      url.pathname,
       verifyTokenRequest({
         issuer: this.issuer,
         preAuthorizedCodeExpirationDuration,
@@ -164,7 +172,12 @@ export class OID4VCIServer {
   }
 
   private metadataEndpoint() {
-    this.app.get('/metadata', (request: Request, response: Response) => {
+    let basePath = this.extractPath(this._baseUrl.toString())
+    if (basePath.endsWith('/')) {
+      basePath = basePath.substring(0, basePath.length)
+    }
+    const path = basePath + '/.well-known/openid-credential-issuer'
+    this.app.get(path, (request: Request, response: Response) => {
       return response.send(this.issuer.issuerMetadata)
     })
   }
@@ -284,6 +297,10 @@ export class OID4VCIServer {
     return this._issuer
   }
 
+  public stop() {
+    this.server.close()
+  }
+
   private isTokenEndpointDisabled(tokenEndpointOpts?: ITokenEndpointOpts) {
     return tokenEndpointOpts?.tokenEndpointDisabled === true || process.env.TOKEN_ENDPOINT_DISABLED === 'true'
   }
@@ -300,18 +317,23 @@ export class OID4VCIServer {
     } else {
       if (authServer) {
         throw Error(
-          `A Authorization Server (AS) was already enabled in the issuer metadata (${authServer}. Cannot both have an AS and enable the token endpoint at the same time `
+          `A Authorization Server (AS) was already enabled in the issuer metadata (${authServer}). Cannot both have an AS and enable the token endpoint at the same time `
         )
       }
     }
   }
 
-  private extractPath(endpoint: string) {
+  private extractPath(endpoint: string, skipBaseUrlCheck?: boolean) {
     if (endpoint.startsWith('/')) {
       return endpoint
     }
-    this.assertEndpointHasIssuerBaseUrl(endpoint)
-    const path = endpoint.replace(this._baseUrl.toString(), '')
+    if (skipBaseUrlCheck !== true) {
+      this.assertEndpointHasIssuerBaseUrl(endpoint)
+    }
+    let path = endpoint
+    if (endpoint.toLowerCase().includes('://')) {
+      path = new URL(endpoint).pathname
+    }
     return path.startsWith('/') ? path : `/${path}`
   }
 

@@ -197,6 +197,7 @@ export class OpenID4VCIClient {
     }
     return authorizationDetails;
   }
+
   private handleLocations(authorizationDetails: AuthDetails) {
     if (authorizationDetails && (this.endpointMetadata.issuerMetadata?.authorization_server || this.endpointMetadata.authorization_endpoint)) {
       if (authorizationDetails.locations) {
@@ -212,19 +213,14 @@ export class OpenID4VCIClient {
     return authorizationDetails;
   }
 
-  public async acquireAccessToken({
-    pin,
-    clientId,
-    codeVerifier,
-    code,
-    redirectUri,
-  }: {
+  public async acquireAccessToken(opts?: {
     pin?: string;
     clientId?: string;
     codeVerifier?: string;
     code?: string;
     redirectUri?: string;
   }): Promise<AccessTokenResponse> {
+    const { pin, clientId, codeVerifier, code, redirectUri } = opts ?? {};
     this.assertIssuerData();
     if (clientId) {
       this._clientId = clientId;
@@ -239,7 +235,7 @@ export class OpenID4VCIClient {
         codeVerifier,
         code,
         redirectUri,
-        asOpts: { clientId: this.clientId },
+        asOpts: { clientId },
       });
 
       if (response.errorBody) {
