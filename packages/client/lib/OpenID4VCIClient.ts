@@ -63,6 +63,9 @@ export class OpenID4VCIClient {
     alg?: Alg | string,
     clientId?: string
   ) {
+    if (!credentialOffer.supportedFlows.includes(flowType)) {
+      throw Error(`Flows ${flowType} is not supported by issuer ${credentialOffer.credential_offer_uri}`);
+    }
     this._flowType = flowType;
     this._credentialOffer = credentialOffer;
     this._kid = kid;
@@ -322,7 +325,7 @@ export class OpenID4VCIClient {
       .withAlg(this.alg)
       .withKid(this.kid);
 
-    if (this._clientId) {
+    if (this.clientId) {
       proofBuilder.withClientId(this.clientId);
     }
     if (jti) {
@@ -413,6 +416,10 @@ export class OpenID4VCIClient {
     return this._flowType;
   }
 
+  issuerSupportedFlowTypes(): AuthzFlowType[] {
+    return this.credentialOffer.supportedFlows;
+  }
+
   get credentialOffer(): CredentialOfferRequestWithBaseUrl {
     return this._credentialOffer;
   }
@@ -443,10 +450,10 @@ export class OpenID4VCIClient {
     return this._alg;
   }
 
-  get clientId(): string {
-    if (!this._clientId) {
+  get clientId(): string | undefined {
+    /*if (!this._clientId) {
       throw Error('No client id present');
-    }
+    }*/
     return this._clientId;
   }
 

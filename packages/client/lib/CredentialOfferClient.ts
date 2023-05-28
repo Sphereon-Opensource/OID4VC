@@ -12,7 +12,7 @@ import Debug from 'debug';
 
 import { convertJsonToURI, convertURIToJsonObject } from './functions';
 
-const debug = Debug('sphereon:openid4vci:initiation');
+const debug = Debug('sphereon:oid4vci:offer');
 
 export class CredentialOfferClient {
   public static async fromURI(uri: string, opts?: { resolve?: boolean }): Promise<CredentialOfferRequestWithBaseUrl> {

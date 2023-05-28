@@ -13,7 +13,7 @@ import Debug from 'debug';
 
 import { getJson } from './functions';
 
-const debug = Debug('sphereon:openid4vci:metadata');
+const debug = Debug('sphereon:oid4vci:metadata');
 
 export class MetadataClient {
   /**

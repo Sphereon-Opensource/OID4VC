@@ -196,6 +196,7 @@ describe('VcIssuer', () => {
         },
       },
       scheme: 'http',
+      supportedFlows: [AuthzFlowType.AUTHORIZATION_CODE_FLOW, AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW],
       version: 1011,
     })
     expect(client.getIssuer()).toEqual(ISSUER_URL)

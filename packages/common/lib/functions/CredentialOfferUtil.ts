@@ -1,5 +1,6 @@
 import {
   AssertedUniformCredentialOffer,
+  AuthzFlowType,
   CredentialOffer,
   CredentialOfferPayload,
   CredentialOfferPayloadV1_0_08,
@@ -154,10 +155,13 @@ export async function toUniformCredentialOfferRequest(
   if (!originalCredentialOffer) {
     throw Error('No credential offer available');
   }
+  const payload = toUniformCredentialOfferPayload(originalCredentialOffer, opts);
+  const supportedFlows = determineFlowType(payload, version);
   return {
-    credential_offer: toUniformCredentialOfferPayload(originalCredentialOffer, opts),
+    credential_offer: payload,
     original_credential_offer: originalCredentialOffer,
     ...(credentialOfferURI && { credential_offer_uri: credentialOfferURI }),
+    supportedFlows,
     version,
   };
 }
@@ -254,6 +258,30 @@ export function toUniformCredentialOfferPayload(
     } as UniformCredentialOfferPayload;
   }
   throw Error(`Could not create uniform payload for version ${version}`);
+}
+
+export function determineFlowType(
+  suppliedOffer: AssertedUniformCredentialOffer | UniformCredentialOfferPayload,
+  version: OpenId4VCIVersion
+): AuthzFlowType[] {
+  let payload: UniformCredentialOfferPayload;
+  if ('credential_offer' in suppliedOffer && suppliedOffer['credential_offer']) {
+    payload = suppliedOffer.credential_offer;
+  } else {
+    payload = suppliedOffer as UniformCredentialOfferPayload;
+  }
+  const supportedFlows: AuthzFlowType[] = [];
+  if (payload.grants?.authorization_code) {
+    supportedFlows.push(AuthzFlowType.AUTHORIZATION_CODE_FLOW);
+  }
+  if (payload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']) {
+    supportedFlows.push(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
+  }
+  if (supportedFlows.length === 0 && version < OpenId4VCIVersion.VER_1_0_09) {
+    // auth flow without op_state was possible in v08. The only way to know is that the detections would result in finding nothing.
+    supportedFlows.push(AuthzFlowType.AUTHORIZATION_CODE_FLOW);
+  }
+  return supportedFlows;
 }
 
 function getVersionFromURIParam(credentialOfferURI: string, currentVersion: OpenId4VCIVersion, matchingVersion: OpenId4VCIVersion, param: string) {

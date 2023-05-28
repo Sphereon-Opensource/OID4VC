@@ -15,7 +15,7 @@ import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { isValidURL, post } from './functions';
 
-const debug = Debug('sphereon:openid4vci:credential');
+const debug = Debug('sphereon:oid4vci:credential');
 
 export interface CredentialRequestOpts {
   credentialEndpoint: string;

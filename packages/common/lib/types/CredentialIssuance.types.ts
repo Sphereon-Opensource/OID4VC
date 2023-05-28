@@ -1,5 +1,6 @@
 import { W3CVerifiableCredential } from '@sphereon/ssi-types';
 
+import { AuthzFlowType } from './Authorization.types';
 import { OID4VCICredentialFormat } from './Generic.types';
 import { OpenId4VCIVersion } from './OpenID4VCIVersions.types';
 import { CredentialOfferPayloadV1_0_08 } from './v1_0_08.types';
@@ -17,8 +18,6 @@ export interface CredentialResponse {
 export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOfferRequest {
   scheme: string;
   baseUrl: string;
-  /*  request: CredentialOfferPayload;
-  version: OpenId4VCIVersion;*/
 }
 
 export type CredentialOffer = CredentialOfferV1_0_09 | CredentialOfferV1_0_11;
@@ -37,6 +36,7 @@ export interface UniformCredentialOffer {
 export interface UniformCredentialOfferRequest extends AssertedUniformCredentialOffer {
   original_credential_offer: CredentialOfferPayload;
   version: OpenId4VCIVersion;
+  supportedFlows: AuthzFlowType[];
 }
 
 export type UniformCredentialOfferPayload = CredentialOfferPayloadV1_0_11;

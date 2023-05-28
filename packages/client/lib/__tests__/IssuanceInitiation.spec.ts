@@ -1,3 +1,5 @@
+import { AuthzFlowType } from '@sphereon/oid4vci-common';
+
 import { CredentialOfferClient } from '../CredentialOfferClient';
 
 import { INITIATION_TEST, INITIATION_TEST_HTTPS_URI, INITIATION_TEST_URI } from './MetadataMocks';
@@ -21,6 +23,7 @@ describe('Issuance Initiation', () => {
         op_state: 'eyJhbGciOiJSU0Et...FYUaBy',
       },
       scheme: 'https',
+      supportedFlows: [AuthzFlowType.AUTHORIZATION_CODE_FLOW],
       version: 1008,
     });
   });
