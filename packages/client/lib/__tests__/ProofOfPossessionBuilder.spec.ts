@@ -1,6 +1,6 @@
 import { KeyObject } from 'crypto';
 
-import { Alg, JWS_NOT_VALID, Jwt, NO_JWT_PROVIDED, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession } from '@sphereon/oid4vci-common';
+import { Alg, JWS_NOT_VALID, Jwt, NO_JWT_PROVIDED, OpenId4VCIVersion, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession } from '@sphereon/oid4vci-common';
 import * as jose from 'jose';
 
 import { ProofOfPossessionBuilder } from '..';
@@ -44,7 +44,7 @@ beforeAll(async () => {
 describe('ProofOfPossession Builder ', () => {
   it('should fail without supplied proof or callbacks', async function () {
     await expect(
-      ProofOfPossessionBuilder.fromProof(undefined as never)
+      ProofOfPossessionBuilder.fromProof(undefined as never, OpenId4VCIVersion.VER_1_0_11)
         .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)
@@ -54,7 +54,7 @@ describe('ProofOfPossession Builder ', () => {
 
   it('should fail wit undefined jwt supplied', async function () {
     await expect(() =>
-      ProofOfPossessionBuilder.fromJwt({ jwt, callbacks: { signCallback: proofOfPossessionCallbackFunction } })
+      ProofOfPossessionBuilder.fromJwt({ jwt, callbacks: { signCallback: proofOfPossessionCallbackFunction }, version: OpenId4VCIVersion.VER_1_0_08 })
         .withJwt(undefined as never)
         .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
@@ -69,6 +69,7 @@ describe('ProofOfPossession Builder ', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
+      version: OpenId4VCIVersion.VER_1_0_08,
     })
       .withIssuer(IDENTIPROOF_ISSUER_URL)
       .withKid(kid)
@@ -84,7 +85,7 @@ describe('ProofOfPossession Builder ', () => {
     }
 
     await expect(
-      ProofOfPossessionBuilder.fromJwt({ jwt, callbacks: { signCallback: proofOfPossessionCallbackFunction } })
+      ProofOfPossessionBuilder.fromJwt({ jwt, callbacks: { signCallback: proofOfPossessionCallbackFunction }, version: OpenId4VCIVersion.VER_1_0_08 })
         .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)
@@ -99,7 +100,7 @@ describe('ProofOfPossession Builder ', () => {
     }
 
     await expect(
-      ProofOfPossessionBuilder.fromJwt({ jwt, callbacks: { signCallback: proofOfPossessionCallbackFunction } })
+      ProofOfPossessionBuilder.fromJwt({ jwt, callbacks: { signCallback: proofOfPossessionCallbackFunction }, version: OpenId4VCIVersion.VER_1_0_08 })
         .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)

@@ -103,5 +103,5 @@ export const isValidURL = (url: string): boolean => {
       '(\\#[-a-z\\d_]*)?$', // validate fragment locator
     'i'
   );
-  return !!urlPattern.test(url);
+  return urlPattern.test(url);
 };

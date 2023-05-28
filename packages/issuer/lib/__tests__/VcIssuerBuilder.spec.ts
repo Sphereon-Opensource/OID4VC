@@ -20,6 +20,7 @@ describe('VcIssuer builder should', () => {
         background_color: '#12107c',
         text_color: '#FFFFFF',
       })
+      .withTypes('VerifiableCredential')
       .addCredentialSubjectPropertyDisplay('given_name', {
         name: 'given name',
         locale: 'en-US',
@@ -48,6 +49,7 @@ describe('VcIssuer builder should', () => {
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
+      .withTypes('VerifiableCredential')
       .withId('UniversityDegree_JWT')
       .withCredentialSupportedDisplay({
         name: 'University Credential',
@@ -91,6 +93,7 @@ describe('VcIssuer builder should', () => {
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
+      .withTypes('VerifiableCredential')
       .withId('UniversityDegree_JWT')
       .withCredentialSupportedDisplay({
         name: 'University Credential',

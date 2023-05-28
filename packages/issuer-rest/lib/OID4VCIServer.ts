@@ -92,8 +92,7 @@ export class OID4VCIServer {
     dotenv.config()
 
     this._baseUrl = new URL(opts?.serverOpts?.baseUrl ?? process.env.BASE_URL ?? 'http://localhost')
-    // fixme: this is way too naive (fails for instance for base urls with a path)
-    const httpPort = getNumberOrUndefined(this._baseUrl.host.split(':')[1]) ?? getNumberOrUndefined(process.env.PORT) ?? 3000
+    const httpPort = getNumberOrUndefined(this._baseUrl.port) ?? getNumberOrUndefined(process.env.PORT) ?? 3000
     const host = this._baseUrl.host.split(':')[0]
 
     if (!opts?.serverOpts?.app) {
@@ -140,7 +139,7 @@ export class OID4VCIServer {
     let url: URL
     let baseUrl = this._baseUrl?.toString()
     if (baseUrl.endsWith('/')) {
-      baseUrl = baseUrl.substring(0, baseUrl.length)
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1)
     }
     if (!issuerEndpoint) {
       path = this.extractPath(tokenEndpointOpts?.tokenPath ?? process.env.TOKEN_PATH ?? '/token', true)
@@ -174,7 +173,7 @@ export class OID4VCIServer {
   private metadataEndpoint() {
     let basePath = this.extractPath(this._baseUrl.toString())
     if (basePath.endsWith('/')) {
-      basePath = basePath.substring(0, basePath.length)
+      basePath = basePath.substring(0, basePath.length - 1)
     }
     const path = basePath + '/.well-known/openid-credential-issuer'
     this.app.get(path, (request: Request, response: Response) => {
@@ -186,24 +185,24 @@ export class OID4VCIServer {
     const endpoint = this.issuer.issuerMetadata.credential_endpoint
     let path: string
     if (!endpoint) {
-      path = '/credentials'
-      // last replace fixes any baseUrl ending with a slash and path starting with a slash
-      this.issuer.issuerMetadata.credential_endpoint = `${this._baseUrl}${path}`.replace('//', '/')
+      path = this._baseUrl.toString().endsWith('/') ? 'credentials' : '/credentials'
+      this.issuer.issuerMetadata.credential_endpoint = `${this._baseUrl}${path}`
     } else {
       this.assertEndpointHasIssuerBaseUrl(endpoint)
       path = this.extractPath(endpoint)
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    this.app.post(path, async (request: Request, _response: Response) => {
-      const credentialRequest = request.body as CredentialRequestV1_0_11
-      this.issuer.issueCredentialFromIssueRequest({
-        credentialRequest: credentialRequest,
-        tokenExpiresIn: this.tokenExpiresIn,
-        cNonceExpiresIn: this.cNonceExpiresIn,
-        //WTF
-        jwtVerifyCallback: request.body.jwtVerifyCallback,
-        issuerCallback: request.body.issuerCallback,
-      })
+    this.app.post(path, async (request: Request, response: Response) => {
+      try {
+        const credentialRequest = request.body as CredentialRequestV1_0_11
+        const credential = await this.issuer.issueCredentialFromIssueRequest({
+          credentialRequest: credentialRequest,
+          tokenExpiresIn: this.tokenExpiresIn,
+          cNonceExpiresIn: this.cNonceExpiresIn,
+        })
+        return response.send(credential)
+      } catch (e) {
+        return sendErrorResponse(response, 500, e)
+      }
     })
   }
 

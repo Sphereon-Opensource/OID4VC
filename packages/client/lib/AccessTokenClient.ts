@@ -233,7 +233,7 @@ export class AccessTokenClient {
   }
 
   private static creatTokenURLFromURL(url: string, allowInsecureEndpoints?: boolean, tokenEndpoint?: string): string {
-    if (allowInsecureEndpoints !== true && url.startsWith('http://')) {
+    if (allowInsecureEndpoints !== true && url.startsWith('http:')) {
       throw Error(`Unprotected token endpoints are not allowed ${url}. Adjust settings if you really need this (dev/test settings only!!)`);
     }
     const hostname = url.replace(/https?:\/\//, '').replace(/\/$/, '');

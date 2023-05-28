@@ -111,6 +111,12 @@ export class CredentialSupportedBuilderV1_11 {
     const credentialSupported: Partial<CredentialSupported> = {
       format: this.format,
     }
+    if (!this.types) {
+      throw new Error('types are required')
+    } else {
+      credentialSupported.types = this.types
+    }
+
     if (this.credentialSubject) {
       credentialSupported.credentialSubject = this.credentialSubject
     }

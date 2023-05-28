@@ -25,16 +25,22 @@ export class MemoryStates<T extends StateType> implements IStateManager<T> {
   }
 
   async delete(id: string): Promise<boolean> {
+    if (!id) {
+      throw Error('No id supplied')
+    }
     return this.states.delete(id)
   }
 
   async getAsserted(id: string): Promise<T> {
+    if (!id) {
+      throw Error('No id supplied')
+    }
     let result: T | undefined
     if (await this.has(id)) {
       result = (await this.get(id)) as T
     }
     if (!result) {
-      throw new Error(STATE_MISSING_ERROR)
+      throw new Error(STATE_MISSING_ERROR + ` (${id})`)
     }
     return result
   }
@@ -44,10 +50,16 @@ export class MemoryStates<T extends StateType> implements IStateManager<T> {
   }
 
   async has(id: string): Promise<boolean> {
+    if (!id) {
+      throw Error('No id supplied')
+    }
     return this.states.has(id)
   }
 
   async set(id: string, stateValue: T): Promise<void> {
+    if (!id) {
+      throw Error('No id supplied')
+    }
     this.states.set(id, stateValue)
   }
 

@@ -5,6 +5,7 @@ import {
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
   Jwt,
+  OpenId4VCIVersion,
   ProofOfPossession,
   URL_NOT_VALID,
   WellKnownEndpoints,
@@ -82,13 +83,14 @@ describe('Credential Request Client ', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
+      version: OpenId4VCIVersion.VER_1_0_08,
     })
       // .withEndpointMetadata(metadata)
       .withClientId('sphereon:wallet')
       .withKid(kid)
       .build();
     expect(credReqClient.getCredentialEndpoint()).toEqual(basePath + '/credential');
-    const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof });
+    const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, version: OpenId4VCIVersion.VER_1_0_08 });
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy();
     const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
     expect(result?.errorBody?.error).toBe('unsupported_format');
@@ -113,12 +115,17 @@ describe('Credential Request Client ', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
+      version: OpenId4VCIVersion.VER_1_0_08,
     })
       // .withEndpointMetadata(metadata)
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build();
-    const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, format: 'jwt' });
+    const credentialRequest = await credReqClient.createCredentialRequest({
+      proofInput: proof,
+      format: 'jwt',
+      version: OpenId4VCIVersion.VER_1_0_08,
+    });
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy();
     expect(credentialRequest.format).toEqual('jwt_vc_json_ld');
     const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
@@ -136,6 +143,7 @@ describe('Credential Request Client ', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
+      version: OpenId4VCIVersion.VER_1_0_08,
     })
       // .withEndpointMetadata(metadata)
       .withKid(kid)
@@ -187,6 +195,7 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialTypes: ['OpenBadgeCredential'],
         format: 'jwt_vc_json_ld',
+        version: OpenId4VCIVersion.VER_1_0_08,
       });
     expect(credentialRequest).toEqual(getMockData('spruce')?.credential.request);
   });
@@ -208,6 +217,7 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialTypes: ['OpenBadgeCredential'],
         format: 'jwt_vc',
+        version: OpenId4VCIVersion.VER_1_0_08,
       });
     expect(credentialOffer).toEqual(getMockData('walt')?.credential.request);
   });
@@ -230,6 +240,7 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialTypes: ['OpenBadgeCredential'],
         format: 'jwt_vc',
+        version: OpenId4VCIVersion.VER_1_0_08,
       });
     expect(credentialOffer).toEqual(getMockData('uniissuer')?.credential.request);
   });
@@ -251,6 +262,7 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialTypes: ['OpenBadgeCredential'],
         format: 'ldp_vc',
+        version: OpenId4VCIVersion.VER_1_0_08,
       });
     expect(credentialOffer).toEqual(getMockData('mattr')?.credential.request);
   });
@@ -272,6 +284,7 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialTypes: ['OpenBadgeCredential'],
         format: 'ldp_vc',
+        version: OpenId4VCIVersion.VER_1_0_08,
       });
     expect(credentialOffer).toEqual(getMockData('diwala')?.credential.request);
   });

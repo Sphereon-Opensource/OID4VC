@@ -32,7 +32,7 @@ export const createProofOfPossession = async (
   const signerArgs = createJWT(jwtProps, existingJwt);
   const jwt = await callbacks.signCallback(signerArgs, signerArgs.header.kid);
   const proof = {
-    proof_type: 'jwt',
+    proof_type: signerArgs.header.typ ?? 'jwt',
     jwt,
   } as ProofOfPossession;
 
@@ -87,7 +87,7 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   };
 
   const jwtHeader: JWTHeader = {
-    typ: 'jwt',
+    typ: jwtProps?.typ ?? existingJwt?.header.typ ?? 'jwt',
     alg,
     kid,
   };

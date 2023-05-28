@@ -47,6 +47,6 @@ describe('MemoryIssuerStateManager', () => {
     await expect(memoryCNonceStateManager.get(String(2))).resolves.toBeUndefined()
   })
   it('should throw exception when state does not exist', async () => {
-    await expect(memoryCNonceStateManager.getAsserted(String(3))).rejects.toThrowError(Error(STATE_MISSING_ERROR))
+    await expect(memoryCNonceStateManager.getAsserted(String(3))).rejects.toThrowError(Error(STATE_MISSING_ERROR + ' (3)'))
   })
 })

@@ -23,7 +23,7 @@ export interface CredentialRequestOpts {
   format?: CredentialFormat | OID4VCICredentialFormat;
   proof: ProofOfPossession;
   token: string;
-  version?: OpenId4VCIVersion;
+  version: OpenId4VCIVersion;
 }
 
 export class CredentialRequestClient {
@@ -48,7 +48,7 @@ export class CredentialRequestClient {
   }): Promise<OpenIDResponse<CredentialResponse>> {
     const { credentialTypes, proofInput, format } = opts;
 
-    const request = await this.createCredentialRequest({ proofInput, credentialTypes, format });
+    const request = await this.createCredentialRequest({ proofInput, credentialTypes, format, version: this.version() });
     return await this.acquireCredentialsUsingRequest(request);
   }
 
@@ -77,6 +77,7 @@ export class CredentialRequestClient {
     proofInput: ProofOfPossessionBuilder | ProofOfPossession;
     credentialTypes?: string | string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
+    version: OpenId4VCIVersion;
   }): Promise<UniformCredentialRequest> {
     const { proofInput } = opts;
     const formatSelection = opts.format ?? this.credentialRequestOpts.format;
@@ -100,7 +101,9 @@ export class CredentialRequestClient {
     }
 
     const proof =
-      'proof_type' in proofInput ? await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession).build() : await proofInput.build();
+      'proof_type' in proofInput
+        ? await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession, opts.version).build()
+        : await proofInput.build();
     return {
       types,
       format,
@@ -108,7 +111,10 @@ export class CredentialRequestClient {
     } as UniformCredentialRequest;
   }
 
+  private version(): OpenId4VCIVersion {
+    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_11;
+  }
   private isV11OrHigher(): boolean {
-    return !this.credentialRequestOpts.version || this.credentialRequestOpts.version >= OpenId4VCIVersion.VER_1_0_11;
+    return this.version() >= OpenId4VCIVersion.VER_1_0_11;
   }
 }

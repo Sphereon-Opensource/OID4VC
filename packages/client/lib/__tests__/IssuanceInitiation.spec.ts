@@ -30,12 +30,12 @@ describe('Issuance Initiation', () => {
   });
 
   it('Should return Issuance Initiation URI from request', async () => {
-    expect(await CredentialOfferClient.toURI(INITIATION_TEST)).toEqual(INITIATION_TEST_URI);
+    expect(CredentialOfferClient.toURI(INITIATION_TEST)).toEqual(INITIATION_TEST_URI);
   });
 
   it('Should return URI from Issuance Initiation Request', async () => {
     const issuanceInitiationClient = await CredentialOfferClient.fromURI(INITIATION_TEST_HTTPS_URI);
-    expect(await CredentialOfferClient.toURI(issuanceInitiationClient)).toEqual(INITIATION_TEST_HTTPS_URI);
+    expect(CredentialOfferClient.toURI(issuanceInitiationClient)).toEqual(INITIATION_TEST_HTTPS_URI);
   });
 
   it('Should throw error on invalid URI', async () => {

@@ -5,6 +5,7 @@ import {
   CredentialOfferSession,
   CredentialOfferV1_0_11,
   Grant,
+  PIN_VALIDATION_ERROR,
 } from '@sphereon/oid4vci-common'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -111,4 +112,10 @@ export const isPreAuthorizedCodeExpired = (state: CredentialOfferSession, expira
   const now = +new Date()
   const expirationTime = state.createdAt + expirationDuration
   return now >= expirationTime
+}
+
+export const assertValidPinNumber = (pin?: string) => {
+  if (pin && !/[0-9{,8}]/.test(pin)) {
+    throw Error(PIN_VALIDATION_ERROR)
+  }
 }

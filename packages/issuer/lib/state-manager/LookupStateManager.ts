@@ -1,3 +1,5 @@
+// noinspection ES6MissingAwait
+
 import { IStateManager } from '@sphereon/oid4vci-common'
 import { StateType } from '@sphereon/oid4vci-common/dist/types/StateManager.types'
 

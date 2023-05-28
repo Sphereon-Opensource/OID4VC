@@ -1,6 +1,14 @@
 import { KeyObject } from 'crypto';
 
-import { Alg, CredentialIssuerMetadata, Jwt, JWTPayload, ProofOfPossession, UniformCredentialRequest } from '@sphereon/oid4vci-common';
+import {
+  Alg,
+  CredentialIssuerMetadata,
+  Jwt,
+  JWTPayload,
+  OpenId4VCIVersion,
+  ProofOfPossession,
+  UniformCredentialRequest,
+} from '@sphereon/oid4vci-common';
 import * as jose from 'jose';
 
 import { CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '..';
@@ -74,12 +82,16 @@ describe('Credential Request Client Builder', () => {
         signCallback: proofOfPossessionCallbackFunction,
         verifyCallback: proofOfPossessionVerifierCallbackFunction,
       },
+      version: OpenId4VCIVersion.VER_1_0_08,
     })
       .withClientId('sphereon:wallet')
       .withKid(kid)
       .build();
     await proofOfPossessionVerifierCallbackFunction({ ...proof, kid });
-    const credentialRequest: UniformCredentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof });
+    const credentialRequest: UniformCredentialRequest = await credReqClient.createCredentialRequest({
+      proofInput: proof,
+      version: OpenId4VCIVersion.VER_1_0_08,
+    });
     expect(credentialRequest.proof?.jwt).toContain(partialJWT);
     expect('types' in credentialRequest).toBe(true);
     if ('types' in credentialRequest) {

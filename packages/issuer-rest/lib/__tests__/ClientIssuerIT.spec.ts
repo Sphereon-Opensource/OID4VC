@@ -1,7 +1,9 @@
 import { KeyObject } from 'crypto'
 
+import * as didKeyDriver from '@digitalcredentials/did-method-key'
 import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
+  AccessTokenResponse,
   Alg,
   AuthzFlowType,
   CredentialOfferSession,
@@ -20,9 +22,27 @@ import { OID4VCIServer } from '../OID4VCIServer'
 
 const ISSUER_URL = 'http://localhost:3456/test'
 
+let subjectKeypair: KeyPair // Proof of Possession JWT
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let subjectDIDKey: { didDocument: any; keyPairs: any; methodFor: any } // Json LD VC issuance
+
+export const generateDid = async () => {
+  const didKD = didKeyDriver.driver()
+  const { didDocument, keyPairs, methodFor } = await didKD.generate()
+  return { didDocument, keyPairs, methodFor }
+}
+
+interface KeyPair {
+  publicKey: KeyObject
+  privateKey: KeyObject
+}
+
+jest.setTimeout(15000)
+
 describe('VcIssuer', () => {
   let vcIssuer: VcIssuer
   let server: OID4VCIServer
+  let accessToken: AccessTokenResponse
   const issuerState = 'previously-created-state'
   // const clientId = 'sphereon:wallet'
   const preAuthorizedCode = 'test_code'
@@ -35,8 +55,12 @@ describe('VcIssuer', () => {
   beforeAll(async () => {
     jest.clearAllMocks()
 
+    const { privateKey, publicKey } = await jose.generateKeyPair('ES256')
+    subjectKeypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject }
+    subjectDIDKey = await generateDid()
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const signerCallback = async (jwt: Jwt, kid?: string): Promise<string> => {
+    const accessTokenSignerCallback = async (jwt: Jwt, kid?: string): Promise<string> => {
       const privateKey = (await jose.generateKeyPair(Alg.ES256)).privateKey as KeyObject
       return new jose.SignJWT({ ...jwt.payload }).setProtectedHeader({ ...jwt.header, alg: Alg.ES256 }).sign(privateKey)
     }
@@ -44,7 +68,7 @@ describe('VcIssuer', () => {
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
-      //FIXME Here a CredentialFormatEnum is passed in, but later it is matched against a CredentialFormat
+      .withTypes('VerifiableCredential')
       .withFormat('jwt_vc_json')
       .withId('UniversityDegree_JWT')
       .withCredentialSupportedDisplay({
@@ -92,26 +116,18 @@ describe('VcIssuer', () => {
           },
         })
       )
-      .withJWTVerifyCallback(() =>
-        Promise.resolve({
-          header: {
-            typ: 'openid4vci-proof+jwt',
-            alg: Alg.ES256K,
-            kid: 'test-kid',
-          },
-          payload: {
-            aud: 'https://credential-issuer',
-            iat: +new Date(),
-            nonce: 'test-nonce',
-          },
-        })
-      )
+      .withJWTVerifyCallback((args: { jwt: string; _kid?: string }) => {
+        return Promise.resolve({
+          header: jose.decodeProtectedHeader(args.jwt),
+          payload: jose.decodeJwt(args.jwt),
+        } as Jwt)
+      })
       .build()
 
     server = new OID4VCIServer({
       issuer: vcIssuer,
       serverOpts: { baseUrl: 'http://localhost:3456/test', port: 3456 },
-      tokenEndpointOpts: { accessTokenSignerCallback: signerCallback, tokenPath: 'test/token/path' },
+      tokenEndpointOpts: { accessTokenSignerCallback, tokenPath: 'test/token/path' },
     })
   })
 
@@ -145,7 +161,12 @@ describe('VcIssuer', () => {
   })
 
   it('should create client from credential offer URI', async () => {
-    client = await OpenID4VCIClient.fromURI({ uri, flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW })
+    client = await OpenID4VCIClient.fromURI({
+      uri,
+      flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
+      kid: subjectDIDKey.didDocument.authentication[0],
+      alg: 'ES256',
+    })
     expect(client.credentialOffer).toEqual({
       baseUrl: 'http://localhost:3456/test',
       credential_offer: {
@@ -212,6 +233,7 @@ describe('VcIssuer', () => {
             ],
             format: 'jwt_vc_json',
             id: 'UniversityDegree_JWT',
+            types: ['VerifiableCredential'],
           },
         ],
         display: [
@@ -237,6 +259,40 @@ describe('VcIssuer', () => {
   })
 
   it('should acquire access token', async () => {
-    await expect(client.acquireAccessToken({ pin: credOfferSession.userPin })).resolves.toBeDefined()
+    accessToken = await client.acquireAccessToken({ pin: credOfferSession.userPin })
+    expect(accessToken).toBeDefined()
+  })
+  it('should issue credential', async () => {
+    async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promise<string> {
+      return await new jose.SignJWT({ ...args.payload })
+        .setProtectedHeader({ ...args.header })
+        .setIssuedAt(+new Date())
+        .setIssuer(kid!)
+        .setAudience(args.payload.aud!)
+        .setExpirationTime('2h')
+        .sign(subjectKeypair.privateKey)
+    }
+
+    const credentialResponse = await client.acquireCredentials({
+      credentialTypes: ['VerifiableCredential'],
+      format: 'jwt_vc_json',
+      proofCallbacks: { signCallback: proofOfPossessionCallbackFunction },
+    })
+    expect(credentialResponse).toMatchObject({
+      c_nonce_expires_in: 90000,
+      credential: {
+        '@context': ['https://www.w3.org/2018/credentials/v1'],
+        credentialSubject: {},
+        issuer: 'did:key:test',
+        proof: {
+          jwt: 'ye.ye.ye',
+          proofPurpose: 'assertionMethod',
+          type: 'JwtProof2020',
+          verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
+        },
+        type: ['VerifiableCredential'],
+      },
+      format: 'jwt_vc_json',
+    })
   })
 })

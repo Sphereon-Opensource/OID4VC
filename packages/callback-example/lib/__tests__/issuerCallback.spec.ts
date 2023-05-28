@@ -7,6 +7,7 @@ import {
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
   Jwt,
+  OpenId4VCIVersion,
   ProofOfPossession,
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
@@ -200,6 +201,7 @@ xdescribe('issuerCallback', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
+      version: OpenId4VCIVersion.VER_1_0_08,
     })
       .withClientId(clientId)
       .withKid(kid)
@@ -210,6 +212,7 @@ xdescribe('issuerCallback', () => {
       credentialTypes: ['VerifiableCredential'],
       format: 'jwt_vc_json',
       proofInput: proof,
+      version: OpenId4VCIVersion.VER_1_0_08,
     })
     expect(credentialRequest).toEqual({
       format: 'jwt_vc_json',

@@ -27,8 +27,8 @@ describe('VcIssuer', () => {
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
-      //FIXME Here a CredentialFormatEnum is passed in, but later it is matched against a CredentialFormat
       .withFormat('jwt_vc_json')
+      .withTypes('VerifiableCredential')
       .withId('UniversityDegree_JWT')
       .withCredentialSupportedDisplay({
         name: 'University Credential',
@@ -135,7 +135,7 @@ describe('VcIssuer', () => {
       baseUri: 'issuer-example.com',
     })
     expect(uri).toEqual(
-      'http://issuer-example.com?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22credentialSubject%22%3A%7B%22given_name%22%3A%7B%22name%22%3A%22given%20name%22%2C%22locale%22%3A%22en-US%22%7D%7D%2C%22cryptographic_suites_supported%22%3A%5B%22ES256K%22%5D%2C%22cryptographic_binding_methods_supported%22%3A%5B%22did%22%5D%2C%22id%22%3A%22UniversityDegree_JWT%22%2C%22display%22%3A%5B%7B%22name%22%3A%22University%20Credential%22%2C%22locale%22%3A%22en-US%22%2C%22logo%22%3A%7B%22url%22%3A%22https%3A%2F%2Fexampleuniversity.com%2Fpublic%2Flogo.png%22%2C%22alt_text%22%3A%22a%20square%20logo%20of%20a%20university%22%7D%2C%22background_color%22%3A%22%2312107c%22%2C%22text_color%22%3A%22%23FFFFFF%22%7D%5D%7D%5D%7D'
+      'http://issuer-example.com?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%5D%2C%22credentialSubject%22%3A%7B%22given_name%22%3A%7B%22name%22%3A%22given%20name%22%2C%22locale%22%3A%22en-US%22%7D%7D%2C%22cryptographic_suites_supported%22%3A%5B%22ES256K%22%5D%2C%22cryptographic_binding_methods_supported%22%3A%5B%22did%22%5D%2C%22id%22%3A%22UniversityDegree_JWT%22%2C%22display%22%3A%5B%7B%22name%22%3A%22University%20Credential%22%2C%22locale%22%3A%22en-US%22%2C%22logo%22%3A%7B%22url%22%3A%22https%3A%2F%2Fexampleuniversity.com%2Fpublic%2Flogo.png%22%2C%22alt_text%22%3A%22a%20square%20logo%20of%20a%20university%22%7D%2C%22background_color%22%3A%22%2312107c%22%2C%22text_color%22%3A%22%23FFFFFF%22%7D%5D%7D%5D%7D'
     )
 
     const client = await OpenID4VCIClient.fromURI({ uri, flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW })
@@ -167,6 +167,7 @@ describe('VcIssuer', () => {
             ],
             format: 'jwt_vc_json',
             id: 'UniversityDegree_JWT',
+            types: ['VerifiableCredential'],
           },
         ],
         grants: {
@@ -205,6 +206,7 @@ describe('VcIssuer', () => {
             ],
             format: 'jwt_vc_json',
             id: 'UniversityDegree_JWT',
+            types: ['VerifiableCredential'],
           },
         ],
         grants: {
@@ -252,7 +254,7 @@ describe('VcIssuer', () => {
         },
         // issuerState: 'invalid state',
       })
-    ).rejects.toThrow(Error(STATE_MISSING_ERROR))
+    ).rejects.toThrow(Error(STATE_MISSING_ERROR + ' (test-nonce)'))
   })
 
   // Of course this doesn't work. The state is part of the proof to begin with

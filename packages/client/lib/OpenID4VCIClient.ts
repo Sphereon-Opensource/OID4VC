@@ -293,6 +293,9 @@ export class OpenID4VCIClient {
         for (const type of types) {
           let typeSupported = false;
           for (const credentialSupported of metadata.credentials_supported) {
+            if (!credentialSupported.types || credentialSupported.types.length === 0) {
+              throw Error('types is required in the credentials supported');
+            }
             if (credentialSupported.types.indexOf(type) != -1) {
               typeSupported = true;
             }
@@ -313,12 +316,15 @@ export class OpenID4VCIClient {
     const proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse({
       accessTokenResponse: this.accessTokenResponse,
       callbacks: proofCallbacks,
+      version: this.version(),
     })
       .withIssuer(this.getIssuer())
       .withAlg(this.alg)
-      .withClientId(this.clientId)
       .withKid(this.kid);
 
+    if (this._clientId) {
+      proofBuilder.withClientId(this.clientId);
+    }
     if (jti) {
       proofBuilder.withJti(jti);
     }

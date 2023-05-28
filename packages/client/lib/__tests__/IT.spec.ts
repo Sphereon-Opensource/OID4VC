@@ -1,4 +1,12 @@
-import { AccessTokenResponse, Alg, AuthzFlowType, CredentialOfferRequestWithBaseUrl, Jwt, ProofOfPossession } from '@sphereon/oid4vci-common';
+import {
+  AccessTokenResponse,
+  Alg,
+  AuthzFlowType,
+  CredentialOfferRequestWithBaseUrl,
+  Jwt,
+  OpenId4VCIVersion,
+  ProofOfPossession,
+} from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
@@ -148,6 +156,7 @@ describe('OID4VCI-Client should', () => {
         callbacks: {
           signCallback: proofOfPossessionCallbackFunction,
         },
+        version: OpenId4VCIVersion.VER_1_0_11,
       })
         .withEndpointMetadata({
           issuer: 'https://issuer.research.identiproof.io',

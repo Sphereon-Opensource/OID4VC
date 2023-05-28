@@ -97,7 +97,7 @@ export function convertURIToJsonObject(uri: string, opts?: DecodeURIAsJsonOpts):
 }
 
 function decodeJsonProperties(parts: string[] | string[][]): unknown {
-  const json: { [s: string]: any } | ArrayLike<any> = {};
+  const json: { [s: string]: unknown } | ArrayLike<unknown> = {};
   for (const key in parts) {
     const value = parts[key];
     if (!value) {

@@ -4,6 +4,7 @@ import {
   EndpointMetadata,
   Jwt,
   NO_JWT_PROVIDED,
+  OpenId4VCIVersion,
   PROOF_CANT_BE_CONSTRUCTED,
   ProofOfPossession,
   ProofOfPossessionCallbacks,
@@ -15,6 +16,8 @@ import { createProofOfPossession } from './functions';
 export class ProofOfPossessionBuilder {
   private readonly proof?: ProofOfPossession;
   private readonly callbacks?: ProofOfPossessionCallbacks;
+
+  private version: OpenId4VCIVersion;
 
   private kid?: string;
   private clientId?: string;
@@ -30,11 +33,13 @@ export class ProofOfPossessionBuilder {
     callbacks,
     jwt,
     accessTokenResponse,
+    version,
   }: {
     proof?: ProofOfPossession;
     callbacks?: ProofOfPossessionCallbacks;
     accessTokenResponse?: AccessTokenResponse;
     jwt?: Jwt;
+    version: OpenId4VCIVersion;
   }) {
     this.proof = proof;
     this.callbacks = callbacks;
@@ -44,24 +49,35 @@ export class ProofOfPossessionBuilder {
     if (accessTokenResponse) {
       this.withAccessTokenResponse(accessTokenResponse);
     }
+    this.version = version;
   }
 
-  static fromJwt({ jwt, callbacks }: { jwt: Jwt; callbacks: ProofOfPossessionCallbacks }): ProofOfPossessionBuilder {
-    return new ProofOfPossessionBuilder({ callbacks, jwt });
+  static fromJwt({
+    jwt,
+    callbacks,
+    version,
+  }: {
+    jwt: Jwt;
+    callbacks: ProofOfPossessionCallbacks;
+    version: OpenId4VCIVersion;
+  }): ProofOfPossessionBuilder {
+    return new ProofOfPossessionBuilder({ callbacks, jwt, version });
   }
 
   static fromAccessTokenResponse({
     accessTokenResponse,
     callbacks,
+    version,
   }: {
     accessTokenResponse: AccessTokenResponse;
     callbacks: ProofOfPossessionCallbacks;
+    version: OpenId4VCIVersion;
   }): ProofOfPossessionBuilder {
-    return new ProofOfPossessionBuilder({ callbacks, accessTokenResponse });
+    return new ProofOfPossessionBuilder({ callbacks, accessTokenResponse, version });
   }
 
-  static fromProof(proof: ProofOfPossession): ProofOfPossessionBuilder {
-    return new ProofOfPossessionBuilder({ proof });
+  static fromProof(proof: ProofOfPossession, version: OpenId4VCIVersion): ProofOfPossessionBuilder {
+    return new ProofOfPossessionBuilder({ proof, version });
   }
 
   withClientId(clientId: string): ProofOfPossessionBuilder {
@@ -116,15 +132,23 @@ export class ProofOfPossessionBuilder {
       throw new Error(NO_JWT_PROVIDED);
     }
     this.jwt = jwt;
-    if (jwt.header) {
-      if (jwt.header.kid) {
-        this.withKid(jwt.header.kid);
-      }
-      if (jwt.header.typ) {
-        this.withTyp(jwt.header.typ as Typ);
-      }
-      this.withAlg(jwt.header.alg);
+    if (!jwt.header) {
+      throw Error(`No JWT header present`);
+    } else if (!jwt.payload) {
+      throw Error(`No JWT payload present`);
     }
+
+    if (jwt.header.kid) {
+      this.withKid(jwt.header.kid);
+    }
+    if (jwt.header.typ) {
+      this.withTyp(jwt.header.typ as Typ);
+    }
+    if (this.version >= OpenId4VCIVersion.VER_1_0_11) {
+      this.withTyp('openid4vci-proof+jwt');
+    }
+    this.withAlg(jwt.header.alg);
+
     if (jwt.payload) {
       if (jwt.payload.iss) this.withClientId(jwt.payload.iss);
       if (jwt.payload.aud) this.withIssuer(jwt.payload.aud);
@@ -141,7 +165,7 @@ export class ProofOfPossessionBuilder {
       return await createProofOfPossession(
         this.callbacks,
         {
-          typ: this.typ,
+          typ: this.typ ?? (this.version < OpenId4VCIVersion.VER_1_0_11 ? 'jwt' : 'openid4vci-proof+jwt'),
           kid: this.kid,
           jti: this.jti,
           alg: this.alg,

@@ -49,6 +49,6 @@ describe('MemoryIssuerStateManager', () => {
     await expect(memoryIssuerStateManager.get(String(2))).resolves.toBeUndefined()
   })
   it('should throw exception when state does not exist', async () => {
-    await expect(memoryIssuerStateManager.getAsserted(String(3))).rejects.toThrowError(Error(STATE_MISSING_ERROR))
+    await expect(memoryIssuerStateManager.getAsserted(String(3))).rejects.toThrowError(Error(STATE_MISSING_ERROR + ' (3)'))
   })
 })

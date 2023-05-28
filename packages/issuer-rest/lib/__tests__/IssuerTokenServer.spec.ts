@@ -19,7 +19,7 @@ import requests from 'supertest'
 
 import { OID4VCIServer } from '../OID4VCIServer'
 
-xdescribe('OID4VCIServer', () => {
+describe('OID4VCIServer', () => {
   let app: Express
   let server: http.Server
   const preAuthorizedCode1 = 'SplxlOBeZQQYbYS6WxSbIA1'
@@ -152,7 +152,7 @@ xdescribe('OID4VCIServer', () => {
     expect(res.statusCode).toEqual(200)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
-      access_token: expect.stringContaining('eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE2ODQ'),
+      access_token: expect.stringContaining('eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE2OD'),
       token_type: 'bearer',
       expires_in: 300000,
       c_nonce: expect.any(String),
@@ -198,7 +198,7 @@ xdescribe('OID4VCIServer', () => {
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
       error: 'invalid_grant',
-      error_message: 'PIN does not match',
+      error_message: 'PIN is invalid',
     })
   })
   it('should return http code 400 with message PIN must consist of maximum 8 numeric characters', async () => {
@@ -220,7 +220,7 @@ xdescribe('OID4VCIServer', () => {
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
       error: 'invalid_request',
-      error_message: STATE_MISSING_ERROR,
+      error_message: STATE_MISSING_ERROR + ' (test)',
     })
   })
   it('should return http code 400 with message User pin is not required', async () => {
