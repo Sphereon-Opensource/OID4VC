@@ -36,7 +36,7 @@ export function getSupportedCredentials(opts?: {
     credentialsSupported = (issuerMetadata as CredentialIssuerMetadata).credentials_supported;
   }
 
-  if (credentialsSupported === undefined) {
+  if (credentialsSupported === undefined || credentialsSupported.length === 0) {
     return [];
   } else if (!credentialTypes || credentialTypes.length === 0) {
     return credentialsSupported;
@@ -49,18 +49,29 @@ export function getSupportedCredentials(opts?: {
   const credentialSupportedOverlap: CredentialSupported[] = [];
   for (const offerType of initiationTypes) {
     if (typeof offerType === 'string') {
-      const supported = credentialsSupported.find((sup) => sup.id === offerType);
+      const supported = credentialsSupported.find((sup) => sup.id === offerType || sup.types.includes(offerType));
       if (supported) {
         credentialSupportedOverlap.push(supported);
       }
     } else {
-      const supported = credentialsSupported.find((sup) => sup.types == offerType.types && sup.format === offerType.format);
+      const supported = credentialsSupported.find((sup) => arrayEqualsIgnoreOrder(sup.types, offerType.types) && sup.format === offerType.format);
       if (supported) {
         credentialSupportedOverlap.push(supported);
       }
     }
   }
   return credentialSupportedOverlap;
+}
+
+function arrayEqualsIgnoreOrder(a: string[], b: string[]) {
+  if (a.length !== b.length) return false;
+  const uniqueValues = new Set([...a, ...b]);
+  for (const v of uniqueValues) {
+    const aCount = a.filter((e) => e === v).length;
+    const bCount = b.filter((e) => e === v).length;
+    if (aCount !== bCount) return false;
+  }
+  return true;
 }
 
 export function credentialsSupportedV8ToV11(supportedV8: CredentialSupportedTypeV1_0_08): CredentialSupported[] {
