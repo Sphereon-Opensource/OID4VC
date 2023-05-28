@@ -18,6 +18,9 @@ export interface CredentialResponse {
 export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOfferRequest {
   scheme: string;
   baseUrl: string;
+  userPinRequired: boolean;
+  issuerState?: string;
+  preAuthorizedCode?: string;
 }
 
 export type CredentialOffer = CredentialOfferV1_0_09 | CredentialOfferV1_0_11;

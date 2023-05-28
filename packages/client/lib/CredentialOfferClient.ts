@@ -48,10 +48,17 @@ export class CredentialOfferClient {
       version,
     });
 
+    const grants = request.credential_offer?.grants;
+
     return {
       scheme,
       baseUrl,
       ...request,
+      ...(grants?.authorization_code?.issuer_state && { issuerState: grants.authorization_code.issuer_state }),
+      ...(grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code'] && {
+        preAuthorizedCode: grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']['pre-authorized_code'],
+      }),
+      userPinRequired: request.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.user_pin_required ?? false,
     };
   }
 

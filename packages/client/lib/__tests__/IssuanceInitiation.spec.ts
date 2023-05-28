@@ -1,5 +1,3 @@
-import { AuthzFlowType } from '@sphereon/oid4vci-common';
-
 import { CredentialOfferClient } from '../CredentialOfferClient';
 
 import { INITIATION_TEST, INITIATION_TEST_HTTPS_URI, INITIATION_TEST_URI } from './MetadataMocks';
@@ -17,13 +15,15 @@ describe('Issuance Initiation', () => {
           },
         },
       },
+      issuerState: 'eyJhbGciOiJSU0Et...FYUaBy',
       original_credential_offer: {
         credential_type: ['https://did.example.org/healthCard', 'https://did.example.org/driverLicense'],
         issuer: 'https://server.example.com',
         op_state: 'eyJhbGciOiJSU0Et...FYUaBy',
       },
       scheme: 'https',
-      supportedFlows: [AuthzFlowType.AUTHORIZATION_CODE_FLOW],
+      supportedFlows: ['Authorization Code Flow'],
+      userPinRequired: false,
       version: 1008,
     });
   });

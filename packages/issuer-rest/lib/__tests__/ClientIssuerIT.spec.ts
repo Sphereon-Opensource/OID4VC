@@ -182,6 +182,7 @@ describe('VcIssuer', () => {
           },
         },
       },
+      issuerState: 'previously-created-state',
       original_credential_offer: {
         credential_issuer: 'http://localhost:3456/test',
         credentials: ['UniversityDegree_JWT'],
@@ -195,8 +196,10 @@ describe('VcIssuer', () => {
           },
         },
       },
+      preAuthorizedCode: 'test_code',
       scheme: 'http',
-      supportedFlows: [AuthzFlowType.AUTHORIZATION_CODE_FLOW, AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW],
+      supportedFlows: ['Authorization Code Flow', 'Pre-Authorized Code Flow'],
+      userPinRequired: true,
       version: 1011,
     })
     expect(client.getIssuer()).toEqual(ISSUER_URL)
