@@ -9,7 +9,6 @@ import {
   CredentialResponse,
   CredentialSupported,
   EndpointMetadata,
-  IssuerCredentialSubject,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   OpenIDResponse,
@@ -17,7 +16,8 @@ import {
   PushedAuthorizationResponse,
   ResponseType,
 } from '@sphereon/oid4vci-common';
-import { CredentialSupportedTypeV1_0_08, CredentialSupportedV1_0_08 } from '@sphereon/oid4vci-common/dist/types/v1_0_08.types';
+import { getSupportedCredentials } from '@sphereon/oid4vci-common/dist/functions/IssuerMetadataUtils';
+import { CredentialSupportedTypeV1_0_08 } from '@sphereon/oid4vci-common/dist/types/v1_0_08.types';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
@@ -167,9 +167,15 @@ export class OpenID4VCIClient {
     // Authorization servers supporting PAR SHOULD include the URL of their pushed authorization request endpoint in their authorization server metadata document
     // Note that the presence of pushed_authorization_request_endpoint is sufficient for a client to determine that it may use the PAR flow.
     // What happens if it doesn't ???
-    if (!this._endpointMetadata?.issuerMetadata || !('pushed_authorization_request_endpoint' in this._endpointMetadata.issuerMetadata)) {
+    // let parEndpoint: string
+    if (
+      !this._endpointMetadata?.issuerMetadata ||
+      !('pushed_authorization_request_endpoint' in this._endpointMetadata.issuerMetadata) ||
+      typeof this._endpointMetadata.issuerMetadata.pushed_authorization_request_endpoint !== 'string'
+    ) {
       throw Error('Server metadata does not contain pushed authorization request endpoint');
     }
+    const parEndpoint: string = this._endpointMetadata.issuerMetadata.pushed_authorization_request_endpoint;
 
     // add 'openid' scope if not present
     if (scope && !scope.includes('openid')) {
@@ -186,8 +192,7 @@ export class OpenID4VCIClient {
       redirect_uri: redirectUri,
       scope: scope,
     };
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return await formPost(this._endpointMetadata.issuerMetadata.pushed_authorization_request_endpoint!, JSON.stringify(queryObj));
+    return await formPost(parEndpoint, JSON.stringify(queryObj));
   }
 
   public handleAuthorizationDetails(authorizationDetails?: AuthDetails | AuthDetails[]): AuthDetails | AuthDetails[] | undefined {
@@ -355,17 +360,35 @@ export class OpenID4VCIClient {
   }
 
   getCredentialsSupported(restrictToInitiationTypes: boolean, supportedType?: string): CredentialSupported[] {
-    //FIXME: delegate to getCredentialsSupported from IssuerMetadataUtils
+    return getSupportedCredentials({
+      issuerMetadata: this.endpointMetadata.issuerMetadata,
+      version: this.version(),
+      supportedType,
+      credentialTypes: restrictToInitiationTypes ? this.getCredentialTypes() : undefined,
+    });
+    /*//FIXME: delegate to getCredentialsSupported from IssuerMetadataUtils
+    let credentialsSupported = this.endpointMetadata?.issuerMetadata?.credentials_supported
 
-    const credentialsSupported = this.endpointMetadata?.issuerMetadata?.credentials_supported;
-    if (!credentialsSupported) {
-      return [];
-    } else if (!restrictToInitiationTypes) {
-      return credentialsSupported;
+    if (this.version() === OpenId4VCIVersion.VER_1_0_08 || typeof credentialsSupported === 'object') {
+      const issuerMetadata = this.endpointMetadata.issuerMetadata as IssuerMetadataV1_0_08
+      const v8CredentialsSupported = issuerMetadata.credentials_supported
+      credentialsSupported = []
+      credentialsSupported = Object.entries(v8CredentialsSupported).map((key, value) => )
+
     }
-    /**
+
+
+    if (!credentialsSupported) {
+      return []
+    } else if (!restrictToInitiationTypes) {
+      return credentialsSupported
+    }
+
+
+
+    /!**
      * the following (not array part is a legacy code from version 1_0-08 which jff implementors used)
-     */
+     *!/
     if (!Array.isArray(credentialsSupported)) {
       const credentialsSupportedV8: CredentialSupportedV1_0_08 = credentialsSupported as CredentialSupportedV1_0_08;
       const initiationTypes = supportedType ? [supportedType] : this.getCredentialTypes();
@@ -378,22 +401,22 @@ export class OpenID4VCIClient {
       // todo: fix this later. we're returning CredentialSupportedV1_0_08 as a list of CredentialSupported (for v09 onward)
       return supported as unknown as CredentialSupported[];
     }
-    const initiationTypes = supportedType ? [supportedType] : this.getCredentialTypes();
-    const credentialSupportedOverlap: CredentialSupported[] = [];
+    const initiationTypes = supportedType ? [supportedType] : this.getCredentialTypes()
+    const credentialSupportedOverlap: CredentialSupported[] = []
     for (const supported of credentialsSupported) {
-      const supportedTypeOverlap: string[] = [];
+      const supportedTypeOverlap: string[] = []
       for (const type of supported.types) {
-        initiationTypes.includes(type);
-        supportedTypeOverlap.push(type);
+        initiationTypes.includes(type)
+        supportedTypeOverlap.push(type)
       }
       if (supportedTypeOverlap.length > 0) {
         credentialSupportedOverlap.push({
           ...supported,
-          types: supportedTypeOverlap,
-        });
+          types: supportedTypeOverlap
+        })
       }
     }
-    return credentialSupportedOverlap as CredentialSupported[];
+    return credentialSupportedOverlap as CredentialSupported[]*/
   }
 
   getCredentialMetadata(type: string): CredentialSupported[] {

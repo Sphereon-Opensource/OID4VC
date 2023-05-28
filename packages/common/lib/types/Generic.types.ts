@@ -2,6 +2,7 @@ import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential 
 
 import { ProofOfPossession } from './CredentialIssuance.types';
 import { Oauth2ASWithOID4VCIMetadata } from './OpenID4VCIServerMetadata';
+import { IssuerMetadataV1_0_08 } from './v1_0_08.types';
 import { CredentialRequestV1_0_11 } from './v1_0_11.types';
 
 /**
@@ -99,12 +100,14 @@ export interface IssuerCredentialDefinition {
   credentialSubject: IssuerCredentialSubject;
 }
 
+/*
 export interface CredentialOfferCredentialDefinition {
   '@context': ICredentialContextType[];
   types: string[];
   credentialSubject?: IssuerCredentialSubject;
   order?: string[]; // An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
 }
+*/
 
 export enum GrantType {
   AUTHORIZATION_CODE = 'authorization_code',
@@ -112,6 +115,7 @@ export enum GrantType {
   PASSWORD = 'password',
 }
 
+/*
 export interface CommonAccessTokenRequest {
   client_id?: string;
   code?: string;
@@ -122,6 +126,7 @@ export interface CommonAccessTokenRequest {
   scope?: string;
   user_pin?: string;
 }
+*/
 
 export enum TokenErrorResponse {
   invalid_request = 'invalid_request',
@@ -130,6 +135,7 @@ export enum TokenErrorResponse {
   invalid_scope = 'invalid_scope',
 }
 
+/*
 export interface CommonAccessTokenResponse {
   access_token: string;
   scope?: string;
@@ -140,6 +146,7 @@ export interface CommonAccessTokenResponse {
   authorization_pending?: boolean;
   interval?: number; // in seconds
 }
+*/
 
 export interface ErrorResponse extends Response {
   error: string;
@@ -179,6 +186,9 @@ export interface CredentialResponseJwtVcJsonLdAndLdpVc extends CommonCredentialR
   credential: IVerifiableCredential;
 }
 
+export interface CredentialResponseJwtVcJson {
+  credential: string;
+}
 // export type CredentialSubjectDisplay = NameAndLocale[];
 
 export type IssuerCredentialSubjectDisplay = CredentialSubjectDisplay & { [key: string]: CredentialSubjectDisplay };
@@ -191,10 +201,6 @@ export interface CredentialSubjectDisplay {
 
 export interface IssuerCredentialSubject {
   [key: string]: IssuerCredentialSubjectDisplay;
-}
-
-export interface CredentialResponseJwtVcJson {
-  credential: string;
 }
 
 export interface Grant {
@@ -235,5 +241,5 @@ export interface EndpointMetadata {
   token_endpoint: string;
   credential_endpoint: string;
   authorization_endpoint?: string;
-  issuerMetadata?: CredentialIssuerMetadata | Oauth2ASWithOID4VCIMetadata;
+  issuerMetadata?: CredentialIssuerMetadata | Oauth2ASWithOID4VCIMetadata | IssuerMetadataV1_0_08;
 }
