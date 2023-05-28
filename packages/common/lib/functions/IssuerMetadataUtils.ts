@@ -21,7 +21,7 @@ export function getSupportedCredentials(opts?: {
   }
   const { version, credentialTypes, supportedType } = opts ?? { version: OpenId4VCIVersion.VER_1_0_11 };
   if (version === OpenId4VCIVersion.VER_1_0_08 || !Array.isArray(issuerMetadata.credentials_supported)) {
-    credentialsSupported = credentialsSupportedV8ToV11((issuerMetadata.credentials_supported as IssuerMetadataV1_0_08).credentials_supported);
+    credentialsSupported = credentialsSupportedV8ToV11((issuerMetadata as IssuerMetadataV1_0_08).credentials_supported);
     /*    const credentialsSupportedV8: CredentialSupportedV1_0_08 = credentialsSupported as CredentialSupportedV1_0_08
         // const initiationTypes = credentialTypes.map(type => typeof type === 'string' ? [type] : type.types)
         const supported: IssuerCredentialSubject = {}
@@ -36,7 +36,7 @@ export function getSupportedCredentials(opts?: {
     credentialsSupported = (issuerMetadata as CredentialIssuerMetadata).credentials_supported;
   }
 
-  if (!credentialsSupported) {
+  if (credentialsSupported === undefined) {
     return [];
   } else if (!credentialTypes || credentialTypes.length === 0) {
     return credentialsSupported;
