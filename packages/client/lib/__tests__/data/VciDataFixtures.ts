@@ -357,7 +357,7 @@ const mockData: VciMockDataStructure = {
       url: 'https://jff.walt.id/issuer-api/default/oidc/credential',
       request: {
         types: ['OpenBadgeCredential'],
-        format: 'jwt_vc_json_ld',
+        format: 'jwt_vc_json',
         proof: {
           proof_type: 'jwt',
           jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6andrOmV5SmhiR2NpT2lKRlV6STFOa3NpTENKMWMyVWlPaUp6YVdjaUxDSnJkSGtpT2lKRlF5SXNJbU55ZGlJNkluTmxZM0F5TlRack1TSXNJbmdpT2lKclpuVmpTa0V0VEhKck9VWjBPRmx5TFVkMlQzSmpia3N3YjNkc2RqUlhNblUwU3pJeFNHZHZTVlIzSWl3aWVTSTZJalozY0ZCUE1rOUNRVXBTU0ZFMVRXdEtXVlJaV0dsQlJFUXdOMU5OTlV0amVXcDNYMkUzVUUxWmVGa2lmUSMwIn0.eyJhdWQiOiJodHRwczovL2pmZi53YWx0LmlkL2lzc3Vlci1hcGkvZGVmYXVsdC9vaWRjLyIsImlhdCI6MTY4MTkxMTk0Mi4yMzgsImV4cCI6MTY4MTkxMjYwMi4yMzgsIm5vbmNlIjoiZjA2YTMxMDUtYTJlZC00NGZjLTk1NGItNGEyNTk3MDM0OTNiIiwiaXNzIjoic3BoZXJlb246c3NpLXdhbGxldCIsImp0aSI6IjA1OWM3ODA5LTlmOGYtNGE3ZS1hZDI4YTNhMTNhMGIzNmViIn0.RfiWyybxpe3nkx3b0yIsqDHQtvB1WwhDW4t0X-kijy2dsSfv2cYhSEmAzs1shg7OV4EW8fSzt_Te79xiVl6jCw',
@@ -574,7 +574,7 @@ const mockData: VciMockDataStructure = {
       url: 'https://launchpad.vii.electron.mattrlabs.io/oidc/v1/auth/credential',
       request: {
         types: ['OpenBadgeCredential'],
-        format: 'ldp_vc',
+        format: 'jwt_vc_json_ld',
         proof: {
           proof_type: 'jwt',
           jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3AxM3N6QUFMVFN0cDV1OGtMcnl5YW5vYWtrVWtFUGZXazdvOHY3dms0RW1KI3o2TWtwMTNzekFBTFRTdHA1dThrTHJ5eWFub2Fra1VrRVBmV2s3bzh2N3ZrNEVtSiJ9.eyJhdWQiOiJodHRwczovL2xhdW5jaHBhZC5tYXR0cmxhYnMuY29tIiwiaWF0IjoxNjgxOTE0NDgyLjUxOSwiZXhwIjoxNjgxOTE1MTQyLjUxOSwiaXNzIjoic3BoZXJlb246c3NpLXdhbGxldCIsImp0aSI6ImI5NDY1ZGE5LTY4OGYtNDdjNi04MjUwNDA0ZGNiOWI5Y2E5In0.uQ8ewOfIjy_1p_Gk6PjeEWccBJnjOca1pwbTWiCAFMQX9wlIsfeUdGtXUoHjH5_PQtpwytodx7WU456_CT9iBQ',
@@ -688,7 +688,7 @@ const mockData: VciMockDataStructure = {
       url: 'https://oidc4vc.diwala.io/credential',
       request: {
         types: ['OpenBadgeCredential'],
-        format: 'ldp_vc',
+        format: 'jwt_vc_json_ld',
         proof: {
           proof_type: 'jwt',
           jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3AxM3N6QUFMVFN0cDV1OGtMcnl5YW5vYWtrVWtFUGZXazdvOHY3dms0RW1KI3o2TWtwMTNzekFBTFRTdHA1dThrTHJ5eWFub2Fra1VrRVBmV2s3bzh2N3ZrNEVtSiJ9.eyJhdWQiOiJodHRwczovL29pZGM0dmMuZGl3YWxhLmlvIiwiaWF0IjoxNjgxOTE1MDk1LjIwMiwiZXhwIjoxNjgxOTE1NzU1LjIwMiwiaXNzIjoic3BoZXJlb246c3NpLXdhbGxldCIsImp0aSI6IjYxN2MwM2EzLTM3MTUtNGJlMy1hYjkxNzM4MTlmYzYxNTYzIn0.KA-cHjecaYp9FSaWHkz5cqtNyhBIVT_0I7cJnpHn03T4UWFvdhjhn8Hpe-BU247enFyWOWJ6v3NQZyZgle7xBA',

@@ -55,10 +55,20 @@ export class CredentialRequestClient {
   public async acquireCredentialsUsingRequest(uniformRequest: UniformCredentialRequest): Promise<OpenIDResponse<CredentialResponse>> {
     let request: CredentialRequestV1_0_08 | UniformCredentialRequest = uniformRequest;
     if (!this.isV11OrHigher()) {
+      let format: string = uniformRequest.format;
+      if (format === 'jwt_vc_json') {
+        format = 'jwt_vc';
+      } else if (format === 'jwt_vc_json_ld') {
+        format = 'ldp_vc';
+      }
+
       request = {
-        format: uniformRequest.format,
+        format,
         proof: uniformRequest.proof,
-        type: 'types' in uniformRequest ? uniformRequest.types[0] : uniformRequest.credential_definition.types[0],
+        type:
+          'types' in uniformRequest
+            ? uniformRequest.types.filter((t) => t !== 'VerifiableCredential')[0]
+            : uniformRequest.credential_definition.types[0],
       } as CredentialRequestV1_0_08;
     }
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint;
@@ -81,9 +91,16 @@ export class CredentialRequestClient {
   }): Promise<UniformCredentialRequest> {
     const { proofInput } = opts;
     const formatSelection = opts.format ?? this.credentialRequestOpts.format;
-    const format: OID4VCICredentialFormat = (
-      formatSelection === 'jwt_vc' || formatSelection === 'jwt' ? 'jwt_vc_json_ld' : formatSelection
-    ) as OID4VCICredentialFormat;
+
+    let format: OID4VCICredentialFormat = formatSelection as OID4VCICredentialFormat;
+    if (opts.version < OpenId4VCIVersion.VER_1_0_11) {
+      if (formatSelection === 'jwt_vc' || formatSelection === 'jwt') {
+        format = 'jwt_vc_json';
+      } else if (formatSelection === 'ldp_vc' || formatSelection === 'ldp') {
+        format = 'jwt_vc_json_ld';
+      }
+    }
+
     if (!format) {
       throw Error(`Format of credential to be issued is missing`);
     } else if (format !== 'jwt_vc_json_ld' && format !== 'jwt_vc_json' && format !== 'ldp_vc') {

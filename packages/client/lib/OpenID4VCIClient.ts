@@ -293,7 +293,7 @@ export class OpenID4VCIClient {
       credentialOffer: this.credentialOffer,
       metadata: this.endpointMetadata,
     });
-    requestBuilder.withToken(this.accessTokenResponse.access_token);
+    requestBuilder.withTokenFromResponse(this.accessTokenResponse);
     if (this.endpointMetadata?.issuerMetadata) {
       const metadata = this.endpointMetadata.issuerMetadata;
       const types = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];

@@ -127,7 +127,7 @@ describe('Credential Request Client ', () => {
       version: OpenId4VCIVersion.VER_1_0_08,
     });
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy();
-    expect(credentialRequest.format).toEqual('jwt_vc_json_ld');
+    expect(credentialRequest.format).toEqual('jwt_vc_json');
     const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
     expect(result?.successBody?.credential).toEqual(mockedVC);
   });
