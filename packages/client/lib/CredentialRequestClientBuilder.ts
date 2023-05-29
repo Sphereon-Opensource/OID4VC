@@ -24,7 +24,7 @@ export class CredentialRequestClientBuilder {
 
   public static async fromURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): Promise<CredentialRequestClientBuilder> {
     const offer = await CredentialOfferClient.fromURI(uri);
-    return CredentialRequestClientBuilder.fromCredentialOfferRequest({ request: offer, ...offer, metadata });
+    return CredentialRequestClientBuilder.fromCredentialOfferRequest({ request: offer, ...offer, metadata, version: offer.version });
   }
 
   public static fromCredentialOfferRequest(opts: {
@@ -35,7 +35,7 @@ export class CredentialRequestClientBuilder {
     metadata?: EndpointMetadata;
   }): CredentialRequestClientBuilder {
     const { request, metadata } = opts;
-    const version = opts.version ?? determineSpecVersionFromOffer(request);
+    const version = opts.version ?? request.version ?? determineSpecVersionFromOffer(request);
     const builder = new CredentialRequestClientBuilder();
     const issuer = getIssuerFromCredentialOfferPayload(request.credential_offer) ?? (metadata?.issuer as string);
     builder.withVersion(version);
@@ -62,6 +62,7 @@ export class CredentialRequestClientBuilder {
     return CredentialRequestClientBuilder.fromCredentialOfferRequest({
       request: credentialOffer,
       metadata,
+      version: credentialOffer.version,
     });
   }
 
