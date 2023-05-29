@@ -35,7 +35,7 @@ export class CredentialRequestClientBuilder {
     metadata?: EndpointMetadata;
   }): CredentialRequestClientBuilder {
     const { request, metadata } = opts;
-    const version = opts.version ?? request.version ?? determineSpecVersionFromOffer(request);
+    const version = opts.version ?? request.version ?? determineSpecVersionFromOffer(request.original_credential_offer);
     const builder = new CredentialRequestClientBuilder();
     const issuer = getIssuerFromCredentialOfferPayload(request.credential_offer) ?? (metadata?.issuer as string);
     builder.withVersion(version);
