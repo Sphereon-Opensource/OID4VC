@@ -71,6 +71,7 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   const aud = getJwtProperty('aud', true, jwtProps?.issuer, existingJwt?.payload?.aud);
   const iss = getJwtProperty('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss);
   const jti = getJwtProperty('jti', false, jwtProps?.jti, existingJwt?.payload?.jti);
+  const typ = getJwtProperty('typ', true, jwtProps?.typ, existingJwt?.header?.typ, 'jwt');
   const nonce = getJwtProperty('nonce', false, jwtProps?.nonce, existingJwt?.payload?.nonce); // Officially this is required, but some implementations don't have it
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const alg = getJwtProperty('alg', false, jwtProps?.alg, existingJwt?.header?.alg, 'ES256')!;
@@ -87,7 +88,7 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   };
 
   const jwtHeader: JWTHeader = {
-    typ: jwtProps?.typ ?? existingJwt?.header.typ ?? 'jwt',
+    typ,
     alg,
     kid,
   };
