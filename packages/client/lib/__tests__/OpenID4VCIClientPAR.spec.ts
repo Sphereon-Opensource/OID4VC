@@ -1,4 +1,4 @@
-import { AuthzFlowType, CodeChallengeMethod, Oauth2ASWithOID4VCIMetadata } from '@sphereon/openid4vci-common';
+import { AuthzFlowType, CodeChallengeMethod, Oauth2ASWithOID4VCIMetadata } from '@sphereon/oid4vci-common';
 import nock from 'nock';
 
 import { OpenID4VCIClient } from '../OpenID4VCIClient';

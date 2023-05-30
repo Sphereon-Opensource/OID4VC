@@ -1,17 +1,17 @@
 {
-  "name": "@sphereon/openid4vci-issuer-rest",
-  "version": "0.5.0-unstable.0",
-  "description": "OpenID 4 Verifiable Credential Issuance issuer",
+  "name": "@sphereon/oid4vci-issuer-server",
+  "version": "0.5.0",
+  "description": "OpenID 4 Verifiable Credential Issuance Server",
   "source": "lib/index.ts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "start": "ts-node lib/api.ts",
+    "start": "ts-node lib/OID4VCIServer.ts",
     "build": "tsc"
   },
   "dependencies": {
-    "@sphereon/openid4vci-common": "workspace:../common",
-    "@sphereon/openid4vci-issuer": "workspace:../issuer",
+    "@sphereon/oid4vci-common": "workspace:*",
+    "@sphereon/oid4vci-issuer": "workspace:*",
     "@sphereon/ssi-types": "^0.9.0",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
@@ -28,7 +28,11 @@
     "@types/express": "^4.17.17",
     "@types/jest": "^29.5.0",
     "@types/node": "^18.15.3",
-    "@types/uuid": "^9.0.1"
+    "@types/uuid": "^9.0.1",
+    "jest": "^29.5.0",
+    "jose": "^4.10.0",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.0"
   },
   "engines": {
     "node": ">=16"

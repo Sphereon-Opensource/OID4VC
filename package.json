@@ -1,6 +1,6 @@
 {
-  "name": "openid4vci-workspace",
-  "version": "0.5.0-unstable.0",
+  "name": "@sphereon/oid4vci-workspace",
+  "version": "0.5.0",
   "description": "OpenID for Verifiable Credential Issuance workspace",
   "author": "Sphereon",
   "license": "Apache-2.0",

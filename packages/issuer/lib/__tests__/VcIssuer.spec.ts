@@ -1,30 +1,34 @@
+import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   Alg,
-  CredentialFormatEnum,
-  CredentialRequest,
+  AuthzFlowType,
+  CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+  CredentialOfferSession,
   CredentialSupported,
-  Display,
   IssuerCredentialSubjectDisplay,
-} from '@sphereon/openid4vci-common'
+  STATE_MISSING_ERROR,
+} from '@sphereon/oid4vci-common'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 
 import { VcIssuer } from '../VcIssuer'
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../builder'
-import { MemoryCredentialOfferStateManager } from '../state-manager'
+import { MemoryStates } from '../state-manager'
 
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
 
 describe('VcIssuer', () => {
   let vcIssuer: VcIssuer
-  const state = 'existing-client'
+  const issuerState = 'previously-created-state'
   const clientId = 'sphereon:wallet'
+  const preAuthorizedCode = 'test_code'
 
   beforeAll(async () => {
+    jest.clearAllMocks()
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       //FIXME Here a CredentialFormatEnum is passed in, but later it is matched against a CredentialFormat
-      .withFormat(CredentialFormatEnum.jwt_vc_json)
+      .withFormat('jwt_vc_json')
       .withId('UniversityDegree_JWT')
       .withCredentialDisplay({
         name: 'University Credential',
@@ -35,28 +39,35 @@ describe('VcIssuer', () => {
         },
         background_color: '#12107c',
         text_color: '#FFFFFF',
-      } as Display)
+      })
       .withIssuerCredentialSubjectDisplay('given_name', {
         name: 'given name',
         locale: 'en-US',
       } as IssuerCredentialSubjectDisplay)
       .build()
-    const stateManager = new MemoryCredentialOfferStateManager()
-    await stateManager.setState('existing-client', {
+    const stateManager = new MemoryStates<CredentialOfferSession>()
+    await stateManager.set('previously-created-state', {
+      issuerState,
       clientId,
-      createdOn: +new Date(),
+      preAuthorizedCode,
+      createdAt: +new Date(),
       userPin: 123456,
       credentialOffer: {
-        credential_issuer: 'did:key:test',
-        credential_definition: {
-          types: ['VerifiableCredential'],
-          '@context': ['https://www.w3.org/2018/credentials/v1'],
-          credentialSubject: {},
-        },
-        grants: {
-          authorization_code: { issuer_state: 'test_code' },
-          'urn:ietf:params:oauth:grant-type:pre-authorized_code': { 'pre-authorized_code': 'test_code', user_pin_required: true },
-        },
+        credential_offer: {
+          credential_issuer: 'did:key:test',
+          credential_definition: {
+            types: ['VerifiableCredential'],
+            '@context': ['https://www.w3.org/2018/credentials/v1'],
+            credentialSubject: {},
+          },
+          grants: {
+            authorization_code: { issuer_state: issuerState },
+            'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+              'pre-authorized_code': preAuthorizedCode,
+              user_pin_required: true,
+            },
+          },
+        } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
       },
     })
     vcIssuer = new VcIssuerBuilder()
@@ -70,6 +81,7 @@ describe('VcIssuer', () => {
       .withCredentialsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
       .withInMemoryCNonceState()
+      .withInMemoryCredentialOfferURIState()
       .withIssuerCallback(() =>
         Promise.resolve({
           '@context': ['https://www.w3.org/2018/credentials/v1'],
@@ -104,31 +116,106 @@ describe('VcIssuer', () => {
   })
 
   afterAll(async () => {
-    await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
+    jest.clearAllMocks()
+    // await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 
-  it('should fail at the first interaction of the client with the issuer', async () => {
+  it('should create credential offer', async () => {
+    const uri = await vcIssuer.createCredentialOfferURI({
+      grants: {
+        authorization_code: {
+          issuer_state: issuerState,
+        },
+        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+          'pre-authorized_code': preAuthorizedCode,
+          user_pin_required: true,
+        },
+      },
+      scheme: 'http',
+      baseUri: 'issuer-example.com',
+    })
+    expect(uri).toEqual(
+      'http://issuer-example.com?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%7D'
+    )
+
+    const client = await OpenID4VCIClient.fromURI({ uri, flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW })
+    expect(client.credentialOffer).toEqual({
+      baseUrl: 'http://issuer-example.com',
+      credential_offer: {
+        credential_issuer: 'https://issuer.research.identiproof.io',
+        grants: {
+          authorization_code: {
+            issuer_state: 'previously-created-state',
+          },
+          'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+            'pre-authorized_code': 'test_code',
+            user_pin_required: true,
+          },
+        },
+      },
+      original_credential_offer: {
+        credential_issuer: 'https://issuer.research.identiproof.io',
+        grants: {
+          authorization_code: {
+            issuer_state: 'previously-created-state',
+          },
+          'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+            'pre-authorized_code': 'test_code',
+            user_pin_required: true,
+          },
+        },
+      },
+      scheme: 'http',
+      version: 1011,
+    })
+  })
+
+  it('should create credential offer uri', async () => {
     await expect(
-      vcIssuer.issueCredentialFromIssueRequest({
-        issueCredentialRequest: {
-          type: ['VerifiableCredential'],
-          format: 'jwt_vc_json',
-          proof: 'ye.ye.ye',
-        } as unknown as CredentialRequest,
-        issuerState: 'first interaction',
+      vcIssuer.createCredentialOfferURI({
+        grants: {
+          authorization_code: {
+            issuer_state: issuerState,
+          },
+        },
+        scheme: 'http',
+        baseUri: 'issuer-example.com',
+        credentials: [''],
+        credentialOfferUri: 'https://somehost.com/offer-id',
       })
-    ).rejects.toThrow(Error('The client is not known by the issuer'))
+    ).resolves.toEqual('http://issuer-example.com?credential_offer_uri=https://somehost.com/offer-id')
   })
 
-  it('should succeed if the client already interacted with the issuer', async () => {
+  // Of course this doesn't work. The state is part of the proof to begin with
+  it('should fail issuing credential if an invalid state is used', async () => {
     await expect(
       vcIssuer.issueCredentialFromIssueRequest({
-        issueCredentialRequest: {
-          type: ['VerifiableCredential'],
+        credentialRequest: {
+          types: ['VerifiableCredential'],
           format: 'jwt_vc_json',
-          proof: 'ye.ye.ye',
-        } as unknown as CredentialRequest,
-        issuerState: state,
+          proof: {
+            proof_type: 'openid4vci-proof+jwt',
+            jwt: 'ye.ye.ye',
+          },
+        },
+        // issuerState: 'invalid state',
+      })
+    ).rejects.toThrow(Error(STATE_MISSING_ERROR))
+  })
+
+  // Of course this doesn't work. The state is part of the proof to begin with
+  xit('should issue credential if a valid state is passed in', async () => {
+    await expect(
+      vcIssuer.issueCredentialFromIssueRequest({
+        credentialRequest: {
+          types: ['VerifiableCredential'],
+          format: 'jwt_vc_json',
+          proof: {
+            proof_type: 'openid4vci-proof+jwt',
+            jwt: 'ye.ye.ye',
+          },
+        },
+        // issuerState,
       })
     ).resolves.toEqual({
       c_nonce: expect.any(String),

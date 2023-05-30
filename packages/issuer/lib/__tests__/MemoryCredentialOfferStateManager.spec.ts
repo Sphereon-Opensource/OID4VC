@@ -1,13 +1,12 @@
-import { UNKNOWN_CLIENT_ERROR } from '@sphereon/openid4vci-common'
+import { CredentialOfferSession, IStateManager, STATE_MISSING_ERROR } from '@sphereon/oid4vci-common'
 
-import { CredentialOfferStateBuilder } from '../state-manager'
-import { MemoryCredentialOfferStateManager } from '../state-manager'
+import { CredentialOfferStateBuilder, MemoryStates } from '../state-manager'
 
 describe('MemoryIssuerStateManager', () => {
-  let memoryIssuerStateManager: MemoryCredentialOfferStateManager
+  let memoryIssuerStateManager: IStateManager<CredentialOfferSession>
 
   beforeAll(() => {
-    memoryIssuerStateManager = new MemoryCredentialOfferStateManager()
+    memoryIssuerStateManager = new MemoryStates<CredentialOfferSession>({ expiresInSec: 1 })
   })
 
   beforeEach(async () => {
@@ -16,40 +15,40 @@ describe('MemoryIssuerStateManager', () => {
       const timestamp = +new Date(+new Date() + day * (i - 1))
       const issuerState = new CredentialOfferStateBuilder()
         .credentialOffer({ credential_offer: { credential_issuer: 'test', credentials: ['test'] } })
-        .createdOn(timestamp)
+        .createdAt(timestamp)
         .build()
-      await memoryIssuerStateManager.setState(String(i), issuerState)
+      await memoryIssuerStateManager.set(String(i), issuerState)
     }
   })
 
   it('should retrieve a state', async () => {
-    await expect(memoryIssuerStateManager.getState(String(0))).resolves.toBeDefined()
-    await expect(memoryIssuerStateManager.getAssertedState(String(0))).resolves.toBeDefined()
+    await expect(memoryIssuerStateManager.get(String(0))).resolves.toBeDefined()
+    await expect(memoryIssuerStateManager.getAsserted(String(0))).resolves.toBeDefined()
   })
   it('should check whether a state exists', async () => {
-    await expect(memoryIssuerStateManager.hasState(String(1))).resolves.toBeTruthy()
+    await expect(memoryIssuerStateManager.has(String(1))).resolves.toBeTruthy()
   })
   it('should delete a state', async () => {
-    await expect(memoryIssuerStateManager.deleteState(String(1))).resolves.toBeTruthy()
-    await expect(memoryIssuerStateManager.getState(String(0))).resolves.toBeDefined()
-    await expect(memoryIssuerStateManager.getState(String(1))).resolves.toBeUndefined()
-    await expect(memoryIssuerStateManager.getState(String(2))).resolves.toBeDefined()
+    await expect(memoryIssuerStateManager.delete(String(1))).resolves.toBeTruthy()
+    await expect(memoryIssuerStateManager.get(String(0))).resolves.toBeDefined()
+    await expect(memoryIssuerStateManager.get(String(1))).resolves.toBeUndefined()
+    await expect(memoryIssuerStateManager.get(String(2))).resolves.toBeDefined()
   })
   it('should delete all expired states', async () => {
-    await memoryIssuerStateManager.clearExpiredStates(+new Date() + 10000)
+    await memoryIssuerStateManager.clearExpired(+new Date() + 10000)
     // yesterday should be expired
-    await expect(memoryIssuerStateManager.getState(String(0))).resolves.toBeUndefined()
+    await expect(memoryIssuerStateManager.get(String(0))).resolves.toBeUndefined()
     // today should be expired because the method parameter is a few milliseconds ahead
-    await expect(memoryIssuerStateManager.getState(String(1))).resolves.toBeUndefined()
-    await expect(memoryIssuerStateManager.getState(String(2))).resolves.toBeDefined()
+    await expect(memoryIssuerStateManager.get(String(1))).resolves.toBeUndefined()
+    await expect(memoryIssuerStateManager.get(String(2))).resolves.toBeDefined()
   })
   it('should delete all states', async () => {
-    await memoryIssuerStateManager.clearAllStates()
-    await expect(memoryIssuerStateManager.getState(String(0))).resolves.toBeUndefined()
-    await expect(memoryIssuerStateManager.getState(String(1))).resolves.toBeUndefined()
-    await expect(memoryIssuerStateManager.getState(String(2))).resolves.toBeUndefined()
+    await memoryIssuerStateManager.clearAll()
+    await expect(memoryIssuerStateManager.get(String(0))).resolves.toBeUndefined()
+    await expect(memoryIssuerStateManager.get(String(1))).resolves.toBeUndefined()
+    await expect(memoryIssuerStateManager.get(String(2))).resolves.toBeUndefined()
   })
   it('should throw exception when state does not exist', async () => {
-    await expect(memoryIssuerStateManager.getAssertedState(String(3))).rejects.toThrowError(Error(UNKNOWN_CLIENT_ERROR))
+    await expect(memoryIssuerStateManager.getAsserted(String(3))).rejects.toThrowError(Error(STATE_MISSING_ERROR))
   })
 })

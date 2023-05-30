@@ -1,10 +1,10 @@
-import { CredentialOfferPayload, CredentialOfferRequestWithBaseUrl } from './CredentialIssuance.types';
+import { CredentialOfferPayload, UniformCredentialOffer } from './CredentialIssuance.types';
 import {
-  CredentialFormatEnum,
   EndpointMetadata,
   ErrorResponse,
   IssuerCredentialDefinition,
   IssuerCredentialSubject,
+  OID4VCICredentialFormat,
   PRE_AUTH_CODE_LITERAL,
 } from './Generic.types';
 
@@ -94,7 +94,7 @@ export interface CommonAuthorizationDetails {
    * specifically used to identify the Credential type to be issued. This specification defines
    * Credential Format Profiles in Appendix E.
    */
-  format: CredentialFormatEnum;
+  format: OID4VCICredentialFormat;
   /**
    * If the Credential Issuer metadata contains an authorization_server parameter,
    * the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.
@@ -160,7 +160,7 @@ export interface IssuerOpts {
 }
 
 export interface AccessTokenRequestOpts {
-  credentialOffer: CredentialOfferRequestWithBaseUrl;
+  credentialOffer: UniformCredentialOffer;
   asOpts?: AuthorizationServerOpts;
   metadata?: EndpointMetadata;
   codeVerifier?: string; // only required for authorization flow

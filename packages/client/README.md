@@ -5,7 +5,7 @@
   <br>
 </h1>
 
-[![CI](https://github.com/Sphereon-Opensource/openid4vci-client/actions/workflows/main.yml/badge.svg)](https://github.com/Sphereon-Opensource/openid4vci-client/actions/workflows/main.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/openid4vci-client/branch/develop/graph/badge.svg)](https://codecov.io/gh/Sphereon-Opensource/openid4vci-client) [![NPM Version](https://img.shields.io/npm/v/@sphereon/openid4vci-client.svg)](https://npm.im/@sphereon/openid4vci-client)
+[![CI](https://github.com/Sphereon-Opensource/openid4vci-client/actions/workflows/main.yml/badge.svg)](https://github.com/Sphereon-Opensource/openid4vci-client/actions/workflows/main.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/openid4vci-client/branch/develop/graph/badge.svg)](https://codecov.io/gh/Sphereon-Opensource/openid4vci-client) [![NPM Version](https://img.shields.io/npm/v/@sphereon/oid4vci-client.svg)](https://npm.im/@sphereon/oid4vci-client)
 
 _IMPORTANT this package is in an early development stage and currently only supports the pre-authorized code flow of
 OpenID4VCI!_
@@ -52,7 +52,7 @@ This initiates the client using a URI obtained from the Issuer using a link (URL
 already fetching the Server Metadata
 
 ```typescript
-import { OpenID4VCIClient } from '@sphereon/openid4vci-client';
+import { OpenID4VCIClient } from '@sphereon/oid4vci-client';
 
 // The client is initiated from a URI. This URI is provided by the Issuer, typically as a URL or QR code.
 const client = await OpenID4VCIClient.fromURI({
@@ -77,7 +77,7 @@ The code above already retrieved the metadata, so it will not be fetched again. 
 the `retrieveServerMetadata` option, you can use this method to fetch it from the Issuer:
 
 ```typescript
-import { OpenID4VCIClient } from '@sphereon/openid4vci-client';
+import { OpenID4VCIClient } from '@sphereon/oid4vci-client';
 
 const metadata = await client.retrieveServerMetadata();
 ```
@@ -157,7 +157,7 @@ as a link or a QR code. You can call the `CredentialOffer.fromURI(uri)` method t
 containing the baseUrl and a `uri` JSON object
 
 ```typescript
-import { CredentialOffer } from '@sphereon/openid4vci-client';
+import { CredentialOffer } from '@sphereon/oid4vci-client';
 
 const initiationURI =
   'https://issuer.example.com?issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy';
@@ -193,7 +193,7 @@ OpenID4VCI well-known location is not found, the OIDC/OAuth2 well-known location
 Example:
 
 ```typescript
-import { MetadataClient } from '@sphereon/openid4vci-client';
+import { MetadataClient } from '@sphereon/oid4vci-client';
 
 const metadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(initiationRequestWithUrl);
 
@@ -235,7 +235,7 @@ The library allows to pass in a different value for the AS token endpoint as wel
 if you know the AS upfront. If no AS is provided the issuer value from the Issuance Initiation Request will be used.
 
 ```typescript
-import { AccessTokenClient, AuthorizationServerOpts } from '@sphereon/openid4vci-client';
+import { AccessTokenClient, AuthorizationServerOpts } from '@sphereon/oid4vci-client';
 
 const clientId = 'abcd'; // This can be a random value or a clientId assigned by the Authorization Server (depends on the environment)
 const pin = 1234; // A pincode which is shown out of band typically. Only use when the pin-code is required from the Issuance Initiation object.
@@ -279,7 +279,7 @@ export type JWTVerifyCallback = (args: { jwt: string; kid: string }) => Promise<
 This is an example of the signature callback function created using the `jose` library.
 
 ```typescript
-import { Jwt } from '@sphereon/openid4vci-client';
+import { Jwt } from '@sphereon/oid4vci-client';
 
 const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
 
@@ -338,10 +338,10 @@ export interface Jwt {
 }
 ```
 
-The arguments requested by `jose` and `@sphereon/openid4vci-client`
+The arguments requested by `jose` and `@sphereon/oid4vci-client`
 
 ```typescript
-import { Jwt, ProofOfPossessionCallbacks } from '@sphereon/openid4vci-client';
+import { Jwt, ProofOfPossessionCallbacks } from '@sphereon/oid4vci-client';
 
 const callbacks: ProofOfPossessionCallbacks = {
   signCallback,
@@ -357,7 +357,7 @@ Normally you would use the Proof of Possession builder using the server metadata
 the callbacks. There is however the possibility to use a JWT directly, which will be explained in the next section.
 
 ```typescript
-import { ProofOfPossessionBuilder } from '@sphereon/openid4vci-client';
+import { ProofOfPossessionBuilder } from '@sphereon/oid4vci-client';
 
 const proofInput: ProofOfPossession = await ProofOfPossessionBuilder.fromAccessTokenResponse({
   accessTokenResponse,
@@ -381,7 +381,7 @@ have to use the `c_nonce` value from the Access Token response as `nonce` value!
 the `jti` property.
 
 ```typescript
-import { Jwt, ProofOfPossessionBuilder, ProofOfPossessionCallbacks } from '@sphereon/openid4vci-client';
+import { Jwt, ProofOfPossessionBuilder, ProofOfPossessionCallbacks } from '@sphereon/oid4vci-client';
 
 const callbacks: ProofOfPossessionCallbacks = {
   signCallback,
@@ -413,7 +413,7 @@ Now it is time to request the actual Credential(s) from the Issuer. The example 
 the keypair created earlier.
 
 ```typescript
-import { CredentialRequestClientBuilder, CredentialResponse, ProofOfPossessionArgs } from '@sphereon/openid4vci-client';
+import { CredentialRequestClientBuilder, CredentialResponse, ProofOfPossessionArgs } from '@sphereon/oid4vci-client';
 
 const credentialRequestClient = CredentialRequestClientBuilder.fromCredentialOfferRequest(initiationRequestWithUrl, metadata).build();
 
@@ -438,7 +438,7 @@ Several utility functions are available
 Converts a Json object or string into an URI:
 
 ```typescript
-import { convertJsonToURI } from '@sphereon/openid4vci-client';
+import { convertJsonToURI } from '@sphereon/oid4vci-client';
 
 const encodedURI = convertJsonToURI(
   {
@@ -461,7 +461,7 @@ Converts a URI into a Json object with URL decoded properties. Allows to provide
 be converted into an array.
 
 ```typescript
-import { convertURIToJsonObject } from '@sphereon/openid4vci-client';
+import { convertURIToJsonObject } from '@sphereon/oid4vci-client';
 
 const decodedJson = convertURIToJsonObject(
   'issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy',

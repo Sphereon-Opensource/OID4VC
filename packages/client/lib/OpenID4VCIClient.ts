@@ -4,29 +4,31 @@ import {
   AuthorizationRequestV1_0_09,
   AuthzFlowType,
   CodeChallengeMethod,
-  CredentialOfferPayloadV1_0_09,
+  CredentialOfferPayloadV1_0_08,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
   CredentialSupported,
   EndpointMetadata,
   IssuerCredentialSubject,
+  OID4VCICredentialFormat,
+  OpenId4VCIVersion,
   OpenIDResponse,
   ProofOfPossessionCallbacks,
   PushedAuthorizationResponse,
   ResponseType,
-} from '@sphereon/openid4vci-common';
-import { CredentialSupportedTypeV1_0_08, CredentialSupportedV1_0_08 } from '@sphereon/openid4vci-common/dist/types/v1_0_08.types';
+} from '@sphereon/oid4vci-common';
+import { CredentialSupportedTypeV1_0_08, CredentialSupportedV1_0_08 } from '@sphereon/oid4vci-common/dist/types/v1_0_08.types';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';
-import { CredentialOffer } from './CredentialOffer';
-import { CredentialRequestClientBuilderV1_0_09 } from './CredentialRequestClientBuilderV1_0_09';
+import { CredentialOfferClient } from './CredentialOfferClient';
+import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { convertJsonToURI, formPost } from './functions';
 
-const debug = Debug('sphereon:openid4vci:flow');
+const debug = Debug('sphereon:oid4vci');
 
 interface AuthDetails {
   type: 'openid_credential' | string;
@@ -75,17 +77,19 @@ export class OpenID4VCIClient {
     alg,
     retrieveServerMetadata,
     clientId,
+    resolveOfferUri,
   }: {
     uri: string;
     flowType: AuthzFlowType;
     kid?: string;
     alg?: Alg | string;
     retrieveServerMetadata?: boolean;
+    resolveOfferUri?: boolean;
     clientId?: string;
   }): Promise<OpenID4VCIClient> {
-    const client = new OpenID4VCIClient(CredentialOffer.fromURI(uri), flowType, kid, alg, clientId);
-    // noinspection PointlessBooleanExpressionJS
-    if (retrieveServerMetadata !== false) {
+    const client = new OpenID4VCIClient(await CredentialOfferClient.fromURI(uri, { resolve: resolveOfferUri }), flowType, kid, alg, clientId);
+
+    if (retrieveServerMetadata === undefined || retrieveServerMetadata) {
       await client.retrieveServerMetadata();
     }
     return client;
@@ -94,9 +98,9 @@ export class OpenID4VCIClient {
   public async retrieveServerMetadata(): Promise<EndpointMetadata> {
     this.assertIssuerData();
     if (!this._endpointMetadata) {
-      this._endpointMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this._credentialOffer);
+      this._endpointMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this.credentialOffer);
     }
-    return this._endpointMetadata;
+    return this.endpointMetadata;
   }
 
   public createAuthorizationRequestUrl({
@@ -139,6 +143,7 @@ export class OpenID4VCIClient {
     return convertJsonToURI(queryObj, {
       baseUrl: this._endpointMetadata.authorization_endpoint,
       uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details'],
+      version: this.version(),
     });
   }
 
@@ -229,7 +234,7 @@ export class OpenID4VCIClient {
 
       const response = await accessTokenClient.acquireAccessToken({
         credentialOffer: this.credentialOffer,
-        metadata: this._endpointMetadata,
+        metadata: this.endpointMetadata,
         pin,
         codeVerifier,
         code,
@@ -245,7 +250,7 @@ export class OpenID4VCIClient {
           }`
         );
       } else if (!response.successBody) {
-        debug(`Access token error. No succes body`);
+        debug(`Access token error. No success body`);
         throw Error(
           `Retrieving an access token from ${
             this._endpointMetadata?.token_endpoint
@@ -255,20 +260,20 @@ export class OpenID4VCIClient {
       this._accessTokenResponse = response.successBody;
     }
 
-    return this._accessTokenResponse;
+    return this.accessTokenResponse;
   }
 
   public async acquireCredentials({
-    credentialType,
+    credentialTypes,
     proofCallbacks,
     format,
     kid,
     alg,
     jti,
   }: {
-    credentialType: string | string[];
+    credentialTypes: string | string[];
     proofCallbacks: ProofOfPossessionCallbacks;
-    format?: CredentialFormat | CredentialFormat[];
+    format?: CredentialFormat | OID4VCICredentialFormat;
     kid?: string;
     alg?: Alg | string;
     jti?: string;
@@ -280,14 +285,14 @@ export class OpenID4VCIClient {
       this._kid = kid;
     }
 
-    const requestBuilder = CredentialRequestClientBuilderV1_0_09.fromCredentialOffer({
+    const requestBuilder = CredentialRequestClientBuilder.fromCredentialOffer({
       credentialOffer: this.credentialOffer,
       metadata: this.endpointMetadata,
     });
     requestBuilder.withToken(this.accessTokenResponse.access_token);
     if (this.endpointMetadata?.issuerMetadata) {
       const metadata = this.endpointMetadata.issuerMetadata;
-      const types = Array.isArray(credentialType) ? credentialType : [credentialType];
+      const types = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
       if (metadata.credentials_supported && Array.isArray(metadata.credentials_supported)) {
         for (const type of types) {
           let typeSupported = false;
@@ -297,13 +302,13 @@ export class OpenID4VCIClient {
             }
           }
           if (!typeSupported) {
-            throw Error(`Not all credential types ${JSON.stringify(credentialType)} are supported by issuer ${this.getIssuer()}`);
+            throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
           }
         }
       } else if (metadata.credentials_supported && !Array.isArray(metadata.credentials_supported)) {
         const credentialsSupported = metadata.credentials_supported as CredentialSupportedTypeV1_0_08;
         if (types.some((type) => !metadata.credentials_supported || !credentialsSupported[type])) {
-          throw Error(`Not all credential types ${JSON.stringify(credentialType)} are supported by issuer ${this.getIssuer()}`);
+          throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
         }
       }
       // todo: Format check? We might end up with some disjoint type / format combinations supported by the server
@@ -323,7 +328,7 @@ export class OpenID4VCIClient {
     }
     const response = await credentialRequestClient.acquireCredentialsUsingProof({
       proofInput: proofBuilder,
-      credentialType,
+      credentialTypes: credentialTypes,
       format,
     });
     if (response.errorBody) {
@@ -345,6 +350,8 @@ export class OpenID4VCIClient {
   }
 
   getCredentialsSupported(restrictToInitiationTypes: boolean, supportedType?: string): CredentialSupported[] {
+    //FIXME: delegate to getCredentialsSupported from IssuerMetadataUtils
+
     const credentialsSupported = this.endpointMetadata?.issuerMetadata?.credentials_supported;
     if (!credentialsSupported) {
       return [];
@@ -376,14 +383,12 @@ export class OpenID4VCIClient {
       }
       if (supportedTypeOverlap.length > 0) {
         credentialSupportedOverlap.push({
+          ...supported,
           types: supportedTypeOverlap,
-          format: supported.format,
-          cryptographic_suites_supported: supported.cryptographic_suites_supported,
-          cryptographic_binding_methods_supported: supported.cryptographic_binding_methods_supported,
         });
       }
     }
-    return credentialSupportedOverlap;
+    return credentialSupportedOverlap as CredentialSupported[];
   }
 
   getCredentialMetadata(type: string): CredentialSupported[] {
@@ -392,9 +397,14 @@ export class OpenID4VCIClient {
 
   // todo https://sphereon.atlassian.net/browse/VDX-184
   getCredentialTypes(): string[] {
-    return typeof (this.credentialOffer.request as CredentialOfferPayloadV1_0_09).credential_type === 'string'
-      ? [(this.credentialOffer.request as CredentialOfferPayloadV1_0_09).credential_type as string]
-      : ((this.credentialOffer.request as CredentialOfferPayloadV1_0_09).credential_type as string[]);
+    if (this.credentialOffer.version < OpenId4VCIVersion.VER_1_0_11) {
+      return typeof (this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type === 'string'
+        ? [(this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type as string]
+        : ((this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type as string[]);
+    } else {
+      // FIXME: this for sure isn't correct. It would also include VerifiableCredential. The whole call to this getCredentialsTypes should be changed to begin with
+      return this.credentialOffer.credential_offer.credentials.flatMap((c) => (typeof c === 'string' ? c : c.types));
+    }
   }
 
   get flowType(): AuthzFlowType {
@@ -403,6 +413,10 @@ export class OpenID4VCIClient {
 
   get credentialOffer(): CredentialOfferRequestWithBaseUrl {
     return this._credentialOffer;
+  }
+
+  public version(): OpenId4VCIVersion {
+    return this.credentialOffer.version;
   }
 
   public get endpointMetadata(): EndpointMetadata {

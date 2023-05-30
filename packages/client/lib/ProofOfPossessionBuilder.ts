@@ -7,7 +7,8 @@ import {
   PROOF_CANT_BE_CONSTRUCTED,
   ProofOfPossession,
   ProofOfPossessionCallbacks,
-} from '@sphereon/openid4vci-common';
+  Typ,
+} from '@sphereon/oid4vci-common';
 
 import { createProofOfPossession } from './functions';
 
@@ -22,7 +23,7 @@ export class ProofOfPossessionBuilder {
   private alg?: string;
   private jti?: string;
   private cNonce?: string;
-  private typ?: string;
+  private typ?: Typ;
 
   private constructor({
     proof,
@@ -88,7 +89,7 @@ export class ProofOfPossessionBuilder {
     return this;
   }
 
-  withTyp(typ: string): ProofOfPossessionBuilder {
+  withTyp(typ: Typ): ProofOfPossessionBuilder {
     this.typ = typ;
     return this;
   }
@@ -120,7 +121,7 @@ export class ProofOfPossessionBuilder {
         this.withKid(jwt.header.kid);
       }
       if (jwt.header.typ) {
-        this.withTyp(jwt.header.typ);
+        this.withTyp(jwt.header.typ as Typ);
       }
       this.withAlg(jwt.header.alg);
     }

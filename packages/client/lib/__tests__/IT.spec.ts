@@ -1,8 +1,10 @@
-import { AccessTokenResponse, Alg, AuthzFlowType, CredentialOfferRequestWithBaseUrl, Jwt, ProofOfPossession, Typ } from '@sphereon/openid4vci-common';
+import { AccessTokenResponse, Alg, AuthzFlowType, CredentialOfferRequestWithBaseUrl, Jwt, ProofOfPossession } from '@sphereon/oid4vci-common';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import nock from 'nock';
 
-import { AccessTokenClient, CredentialRequestClientBuilderV1_0_09, OpenID4VCIClient, ProofOfPossessionBuilder } from '..';
-import { CredentialOffer } from '../CredentialOffer';
+import { AccessTokenClient, CredentialRequestClientBuilder, OpenID4VCIClient, ProofOfPossessionBuilder } from '..';
+import { CredentialOfferClient } from '../CredentialOfferClient';
 
 import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
 
@@ -10,7 +12,7 @@ export const UNIT_TEST_TIMEOUT = 30000;
 
 const ISSUER_URL = 'https://issuer.research.identiproof.io';
 const jwt = {
-  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: Typ.JWT },
+  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'jwt' },
   payload: { iss: 'test-clientId', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: ISSUER_URL },
 };
 
@@ -19,6 +21,12 @@ describe('OID4VCI-Client should', () => {
   async function proofOfPossessionCallbackFunction(_args: Jwt, _kid?: string): Promise<string> {
     return 'ey.val.ue';
   }
+  beforeEach(() => {
+    nock.cleanAll();
+  });
+  afterEach(() => {
+    nock.cleanAll();
+  });
 
   // Access token mocks
   const mockedAccessTokenResponse: AccessTokenResponse = {
@@ -86,7 +94,8 @@ describe('OID4VCI-Client should', () => {
     expect(accessToken).toEqual(mockedAccessTokenResponse);
 
     const credentialResponse = await client.acquireCredentials({
-      credentialType: 'OpenBadgeCredential',
+      credentialTypes: 'OpenBadgeCredential',
+      format: 'jwt_vc_json_ld',
       proofCallbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
@@ -98,11 +107,11 @@ describe('OID4VCI-Client should', () => {
     'succeed with a full flow without the client',
     async () => {
       /* Convert the URI into an object */
-      const credentialOffer: CredentialOfferRequestWithBaseUrl = CredentialOffer.fromURI(INITIATE_QR);
+      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR);
 
       expect(credentialOffer.baseUrl).toEqual('openid-initiate-issuance://');
-      expect(credentialOffer.request).toEqual({
-        credential_type: 'OpenBadgeCredentialUrl',
+      expect(credentialOffer.original_credential_offer).toEqual({
+        credential_type: ['OpenBadgeCredentialUrl'],
         issuer: ISSUER_URL,
         'pre-authorized_code':
           '4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp',
@@ -124,7 +133,7 @@ describe('OID4VCI-Client should', () => {
           format: 'jwt-vc',
           credential: mockedVC,
         });
-      const credReqClient = CredentialRequestClientBuilderV1_0_09.fromCredentialOffer({ credentialOffer: credentialOffer })
+      const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: credentialOffer })
         .withFormat('jwt_vc')
 
         .withTokenFromResponse(accessTokenResponse.successBody!)

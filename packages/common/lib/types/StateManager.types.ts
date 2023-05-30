@@ -1,29 +1,45 @@
-import { CredentialOfferPayloadV1_0_11 } from './v1_0_11.types';
+import { CredentialOfferV1_0_11 } from './v1_0_11.types';
 
-export interface CredentialOfferState {
+export interface StateType {
+  createdAt: number;
+}
+
+export interface CredentialOfferSession extends StateType {
   clientId?: string;
-  credentialOffer: CredentialOfferPayloadV1_0_11;
-  createdOn: number;
-  userPin: number;
+  credentialOffer: CredentialOfferV1_0_11;
+  userPin?: number;
+  issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+  preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
 }
 
-export interface CNonceState {
+export interface CNonceState extends StateType {
   cNonce: string;
-  createdOn: number;
+  issuerState?: string;
+  preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
 }
 
-export interface IStateManager<T> {
-  setState(state: string, payload: T): Promise<void>;
+export interface URIState extends StateType {
+  issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+  preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+  uri: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+}
 
-  getState(state: string): Promise<T | undefined>;
+export interface IStateManager<T extends StateType> {
+  set(id: string, stateValue: T): Promise<void>;
 
-  hasState(state: string): Promise<boolean>;
+  get(id: string): Promise<T | undefined>;
 
-  deleteState(state: string): Promise<boolean>;
+  has(id: string): Promise<boolean>;
 
-  clearExpiredStates(timestamp?: number): Promise<void>; // clears all expired states compared against timestamp if provided, otherwise current timestamp
+  delete(id: string): Promise<boolean>;
 
-  clearAllStates(): Promise<void>; // clears all states
+  clearExpired(timestamp?: number): Promise<void>; // clears all expired states compared against timestamp if provided, otherwise current timestamp
 
-  getAssertedState(issuerState: string): Promise<T>;
+  clearAll(): Promise<void>; // clears all states
+
+  getAsserted(id: string): Promise<T>;
+
+  startCleanupRoutine(timeout?: number): Promise<void>;
+
+  stopCleanupRoutine(): Promise<void>;
 }
