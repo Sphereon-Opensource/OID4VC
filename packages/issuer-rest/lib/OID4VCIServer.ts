@@ -67,6 +67,20 @@ function buildVCIFromEnvironment() {
     .build()
 }
 
+interface IOID4VCIServerOpts {
+  tokenEndpointOpts?: ITokenEndpointOpts
+  credentialOfferOpts?: {
+    createOfferEndpointDisabled?: boolean // Disable the REST endpoint for creating offers. You can directly call the Issuer to create the offer object
+    //todo: Add authn/z, as this endpoint would be called by an integration instead of wallets
+  }
+  serverOpts?: {
+    app?: Express
+    port?: number
+    baseUrl?: string
+    host?: string
+  }
+}
+
 export class OID4VCIServer {
   private readonly _issuer: VcIssuer
   private authRequestsData: Map<string, AuthorizationRequest> = new Map()
@@ -84,24 +98,14 @@ export class OID4VCIServer {
     return this._server
   }
 
-  constructor(opts?: {
-    issuer?: VcIssuer // If not supplied as argument, it will be fully configured from environment variables
-    tokenEndpointOpts?: ITokenEndpointOpts
-    credentialOfferOpts?: {
-      createOfferEndpointDisabled?: boolean // Disable the REST endpoint for creating offers. You can directly call the Issuer to create the offer object
-      //todo: Add authn/z, as this endpoint would be called by an integration instead of wallets
-    }
-    serverOpts?: {
-      app?: Express
-      port?: number
-      baseUrl?: string
-    }
-  }) {
+  constructor(
+    opts?: IOID4VCIServerOpts & { issuer?: VcIssuer } /*If not supplied as argument, it will be fully configured from environment variables*/
+  ) {
     dotenv.config()
 
     this._baseUrl = new URL(opts?.serverOpts?.baseUrl ?? process.env.BASE_URL ?? 'http://localhost')
     const httpPort = getNumberOrUndefined(this._baseUrl.port) ?? getNumberOrUndefined(process.env.PORT) ?? 3000
-    const host = this._baseUrl.host.split(':')[0]
+    const host = opts?.serverOpts?.host ?? this._baseUrl.host.split(':')[0]
 
     if (!opts?.serverOpts?.app) {
       this._app = express()
