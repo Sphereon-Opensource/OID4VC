@@ -8,6 +8,7 @@ import {
   CredentialOfferPayloadV1_0_11,
   DefaultURISchemes,
   Grant,
+  GrantType,
   OpenId4VCIVersion,
   OpenIDResponse,
   UniformCredentialOffer,
@@ -264,12 +265,7 @@ export function determineFlowType(
   suppliedOffer: AssertedUniformCredentialOffer | UniformCredentialOfferPayload,
   version: OpenId4VCIVersion
 ): AuthzFlowType[] {
-  let payload: UniformCredentialOfferPayload;
-  if ('credential_offer' in suppliedOffer && suppliedOffer['credential_offer']) {
-    payload = suppliedOffer.credential_offer;
-  } else {
-    payload = suppliedOffer as UniformCredentialOfferPayload;
-  }
+  const payload: UniformCredentialOfferPayload = getCredentialOfferPayload(suppliedOffer);
   const supportedFlows: AuthzFlowType[] = [];
   if (payload.grants?.authorization_code) {
     supportedFlows.push(AuthzFlowType.AUTHORIZATION_CODE_FLOW);
@@ -282,6 +278,46 @@ export function determineFlowType(
     supportedFlows.push(AuthzFlowType.AUTHORIZATION_CODE_FLOW);
   }
   return supportedFlows;
+}
+
+export function getCredentialOfferPayload(offer: AssertedUniformCredentialOffer | UniformCredentialOfferPayload): UniformCredentialOfferPayload {
+  let payload: UniformCredentialOfferPayload;
+  if ('credential_offer' in offer && offer['credential_offer']) {
+    payload = offer.credential_offer;
+  } else {
+    payload = offer as UniformCredentialOfferPayload;
+  }
+  return payload;
+}
+
+export function determineGrantTypes(
+  offer:
+    | AssertedUniformCredentialOffer
+    | UniformCredentialOfferPayload
+    | ({
+        grants: Grant;
+      } & Record<never, never>)
+): GrantType[] {
+  let grants: Grant | undefined;
+  if ('grants' in offer && offer.grants) {
+    grants = offer.grants;
+  } else {
+    grants = getCredentialOfferPayload(offer as AssertedUniformCredentialOffer | UniformCredentialOfferPayload).grants;
+  }
+
+  const types: GrantType[] = [];
+  if (grants) {
+    if (grants.authorization_code) {
+      types.push(GrantType.AUTHORIZATION_CODE);
+    }
+    if (
+      grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'] &&
+      grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']['pre-authorized_code']
+    ) {
+      types.push(GrantType.PRE_AUTHORIZED_CODE);
+    }
+  }
+  return types;
 }
 
 function getVersionFromURIParam(credentialOfferURI: string, currentVersion: OpenId4VCIVersion, matchingVersion: OpenId4VCIVersion, param: string) {

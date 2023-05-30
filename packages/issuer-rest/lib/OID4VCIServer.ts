@@ -4,14 +4,18 @@ import process from 'process'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AuthorizationRequest,
+  CredentialOfferV1_0_11,
   CredentialRequestV1_0_11,
   CredentialSupported,
+  determineGrantTypes,
   getNumberOrUndefined,
+  Grant,
   IssuerCredentialSubjectDisplay,
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
   OID4VCICredentialFormat,
 } from '@sphereon/oid4vci-common'
 import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { CredentialFormat } from '@sphereon/ssi-types'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import * as dotenv from 'dotenv-flow'
@@ -83,6 +87,10 @@ export class OID4VCIServer {
   constructor(opts?: {
     issuer?: VcIssuer // If not supplied as argument, it will be fully configured from environment variables
     tokenEndpointOpts?: ITokenEndpointOpts
+    credentialOfferOpts?: {
+      createOfferEndpointDisabled?: boolean // Disable the REST endpoint for creating offers. You can directly call the Issuer to create the offer object
+      //todo: Add authn/z, as this endpoint would be called by an integration instead of wallets
+    }
     serverOpts?: {
       app?: Express
       port?: number
@@ -107,9 +115,12 @@ export class OID4VCIServer {
     this._issuer = opts?.issuer ? opts.issuer : buildVCIFromEnvironment()
 
     this.pushedAuthorizationEndpoint()
-    this.metadataEndpoint()
-    this.credentialEndpoint()
-    this.credentialOffersEndpoint()
+    this.getMetadataEndpoint()
+    if (!(opts?.credentialOfferOpts?.createOfferEndpointDisabled === true || process.env.CREDENTIAL_OFFER_ENDPOINT_DISABLED === 'true')) {
+      this.createCredentialOfferEndpoint()
+    }
+    this.getCredentialOfferEndpoint()
+    this.getCredentialEndpoint()
     this.assertAccessTokenHandling()
     if (!this.isTokenEndpointDisabled(opts?.tokenEndpointOpts)) {
       this.accessTokenEndpoint(opts?.tokenEndpointOpts)
@@ -170,7 +181,7 @@ export class OID4VCIServer {
     )
   }
 
-  private metadataEndpoint() {
+  private getMetadataEndpoint() {
     let basePath = this.extractPath(this._baseUrl.toString())
     if (basePath.endsWith('/')) {
       basePath = basePath.substring(0, basePath.length - 1)
@@ -181,7 +192,7 @@ export class OID4VCIServer {
     })
   }
 
-  private credentialEndpoint() {
+  private getCredentialEndpoint() {
     const endpoint = this.issuer.issuerMetadata.credential_endpoint
     let path: string
     if (!endpoint) {
@@ -206,8 +217,38 @@ export class OID4VCIServer {
     })
   }
 
-  private credentialOffersEndpoint() {
-    this.app.get('/credentials/offers/:id', async (request: Request, response: Response) => {
+  // fixme authz and enable/disable
+  private createCredentialOfferEndpoint() {
+    this.app.post('/credential-offers', async (request: Request<CredentialOfferV1_0_11>, response: Response) => {
+      const grantTypes = determineGrantTypes(request.body)
+      if (grantTypes.length === 0) {
+        return sendErrorResponse(response, 400, 'No grant type supplied')
+      }
+      const grants = request.body.grants as Grant
+      const credentials = request.body.credentials as (string | CredentialFormat)[]
+      if (!credentials || credentials.length === 0) {
+        return sendErrorResponse(response, 400, 'No credentials supplied')
+      }
+
+      try {
+        const uri = await this.issuer.createCredentialOfferURI({ grants, credentials })
+        return response.send(JSON.stringify({ uri }))
+      } catch (e) {
+        return sendErrorResponse(
+          response,
+          500,
+          {
+            error: 'invalid_request',
+            error_description: (e as Error).message,
+          },
+          e
+        )
+      }
+    })
+  }
+
+  private getCredentialOfferEndpoint() {
+    this.app.get('/credential-offers/:id', async (request: Request, response: Response) => {
       const { id } = request.params
       try {
         const session = await this.issuer.credentialOfferSessions.get(id)
