@@ -251,7 +251,7 @@ export class VcIssuer {
     clientId?: string
     jwtVerifyCallback?: JWTVerifyCallback
   }) {
-    if (credentialRequest.format === 'jwt_vc_json' || credentialRequest.format === 'jwt_vc_json_ld') {
+    if (credentialRequest.format === 'jwt_vc_json' || credentialRequest.format === 'jwt_vc_json-ld') {
       if (typeof this._verifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
         throw new Error(JWT_VERIFY_CONFIG_ERROR)
       }

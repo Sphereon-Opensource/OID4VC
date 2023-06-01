@@ -14,7 +14,7 @@ export interface CredentialLogo {
   [key: string]: unknown;
 }
 
-export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json_ld' | 'ldp_vc' /*| 'mso_mdoc'*/; // we do not support mdocs at this point
+export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' /*| 'mso_mdoc'*/; // we do not support mdocs at this point
 
 export interface NameAndLocale {
   name?: string; // REQUIRED. String value of a display name for the Credential.
@@ -162,7 +162,7 @@ export interface CredentialRequestJwtVcJson extends CommonCredentialRequest {
 }
 
 export interface CredentialRequestJwtVcJsonLdAndLdpVc extends CommonCredentialRequest {
-  format: 'jwt_vc_json_ld' | 'ldp_vc';
+  format: 'jwt_vc_json-ld' | 'ldp_vc';
   credential_definition: IssuerCredentialDefinition;
 }
 
@@ -175,7 +175,7 @@ export interface CommonCredentialResponse {
 }
 
 export interface CredentialResponseJwtVcJsonLdAndLdpVc extends CommonCredentialResponse {
-  format: 'jwt_vc_json_ld' | 'ldp_vc';
+  format: 'jwt_vc_json-ld' | 'ldp_vc';
   credential: IVerifiableCredential;
 }
 
