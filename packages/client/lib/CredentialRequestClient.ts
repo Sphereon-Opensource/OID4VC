@@ -58,7 +58,7 @@ export class CredentialRequestClient {
       let format: string = uniformRequest.format;
       if (format === 'jwt_vc_json') {
         format = 'jwt_vc';
-      } else if (format === 'jwt_vc_json_ld') {
+      } else if (format === 'jwt_vc_json-ld') {
         format = 'ldp_vc';
       }
 
@@ -97,13 +97,13 @@ export class CredentialRequestClient {
       if (formatSelection === 'jwt_vc' || formatSelection === 'jwt') {
         format = 'jwt_vc_json';
       } else if (formatSelection === 'ldp_vc' || formatSelection === 'ldp') {
-        format = 'jwt_vc_json_ld';
+        format = 'jwt_vc_json-ld';
       }
     }
 
     if (!format) {
       throw Error(`Format of credential to be issued is missing`);
-    } else if (format !== 'jwt_vc_json_ld' && format !== 'jwt_vc_json' && format !== 'ldp_vc') {
+    } else if (format !== 'jwt_vc_json-ld' && format !== 'jwt_vc_json' && format !== 'ldp_vc') {
       throw Error(`Invalid format of credential to be issued: ${format}`);
     }
     const typesSelection =
