@@ -151,7 +151,7 @@ describe('Credential Request Client ', () => {
       .build();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json_ld', types: ['random'], proof })).rejects.toThrow(
+    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json-ld', types: ['random'], proof })).rejects.toThrow(
       Error(URL_NOT_VALID)
     );
   });
@@ -194,7 +194,7 @@ describe('Credential Request Client with different issuers ', () => {
           jwt: getMockData('spruce')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
-        format: 'jwt_vc_json_ld',
+        format: 'jwt_vc_json-ld',
         version: OpenId4VCIVersion.VER_1_0_08,
       });
     expect(credentialRequest).toEqual(getMockData('spruce')?.credential.request);
