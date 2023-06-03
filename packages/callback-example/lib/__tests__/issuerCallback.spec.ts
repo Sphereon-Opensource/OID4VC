@@ -125,7 +125,7 @@ xdescribe('issuerCallback', () => {
       .withCredentialOfferStateManager(stateManager)
       .withInMemoryCNonceState()
       .withJWTVerifyCallback(verifyCallbackFunction)
-      .withIssuerCallback(() =>
+      .withCredentialSignerCallback(() =>
         Promise.resolve({
           '@context': ['https://www.w3.org/2018/credentials/v1'],
           type: ['VerifiableCredential'],
@@ -225,10 +225,11 @@ xdescribe('issuerCallback', () => {
       type: ['VerifiableCredential'],
     })
 
-    const credentialResponse = await vcIssuer.issueCredentialFromIssueRequest({
+    const credentialResponse = await vcIssuer.issueCredential({
       credentialRequest: credentialRequest,
+      credential,
       responseCNonce: state,
-      issuerCallback: getIssuerCallback(credential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id),
+      credentialSignerCallback: getIssuerCallback(credential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id),
     })
 
     expect(credentialResponse).toEqual({

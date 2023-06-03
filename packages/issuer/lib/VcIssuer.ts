@@ -22,8 +22,12 @@ import {
   JWT_VERIFY_CONFIG_ERROR,
   JWTVerifyCallback,
   NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT,
+  OID4VCICredentialFormat,
+  OpenId4VCIVersion,
   TokenErrorResponse,
+  toUniformCredentialOfferRequest,
   TYP_ERROR,
+  UniformCredentialRequest,
   URIState,
 } from '@sphereon/oid4vci-common'
 import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
@@ -31,15 +35,17 @@ import { v4 } from 'uuid'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
 import { LookupStateManager } from './state-manager'
-import { CredentialIssuerCallback } from './types'
+import { CredentialDataSupplier, CredentialSignerCallback } from './types'
 
 const SECOND = 1000
 
 export class VcIssuer {
   private readonly _issuerMetadata: CredentialIssuerMetadataOpts
   private readonly _userPinRequired: boolean
-  private readonly _issuerCallback?: CredentialIssuerCallback
-  private readonly _verifyCallback?: JWTVerifyCallback
+  private readonly _defaultCredentialOfferBaseUri?: string
+  private readonly _credentialSignerCallback?: CredentialSignerCallback
+  private readonly _jwtVerifyCallback?: JWTVerifyCallback
+  private readonly _credentialDataSupplier?: CredentialDataSupplier
   private readonly _credentialOfferSessions: IStateManager<CredentialOfferSession>
   private readonly _cNonces: IStateManager<CNonceState>
   private readonly _uris?: IStateManager<URIState>
@@ -49,23 +55,28 @@ export class VcIssuer {
     issuerMetadata: CredentialIssuerMetadataOpts,
     args: {
       userPinRequired?: boolean
+      baseUri?: string
       credentialOfferSessions: IStateManager<CredentialOfferSession>
+      defaultCredentialOfferBaseUri?: string
       cNonces: IStateManager<CNonceState>
       uris?: IStateManager<URIState>
-      callback?: CredentialIssuerCallback
-      verifyCallback?: JWTVerifyCallback
+      credentialSignerCallback?: CredentialSignerCallback
+      jwtVerifyCallback?: JWTVerifyCallback
+      credentialDataSupplier?: CredentialDataSupplier
       cNonceExpiresIn?: number | undefined // expiration duration in seconds
     }
   ) {
     this._issuerMetadata = issuerMetadata
+    this._defaultCredentialOfferBaseUri = args.defaultCredentialOfferBaseUri
     this._credentialOfferSessions = args.credentialOfferSessions
     this._cNonces = args.cNonces
     this._uris = args.uris
     this._userPinRequired = args?.userPinRequired ?? false
-    this._issuerCallback = args?.callback
-    this._verifyCallback = args?.verifyCallback
+    this._credentialSignerCallback = args?.credentialSignerCallback
+    this._jwtVerifyCallback = args?.jwtVerifyCallback
+    this._credentialDataSupplier = args?.credentialDataSupplier
     this._cNonceExpiresIn =
-      ((args?.cNonceExpiresIn ?? (process.env.C_NONCE_EXPIRES_IN ? parseInt(process.env.C_NONCE_EXPIRES_IN) : 90)) as number) * SECOND
+      ((args?.cNonceExpiresIn ?? (process.env.C_NONCE_EXPIRES_IN ? parseInt(process.env.C_NONCE_EXPIRES_IN) : 300)) as number) * SECOND
   }
 
   public getCredentialOfferSessionById(id: string): Promise<CredentialOfferSession> {
@@ -89,7 +100,7 @@ export class VcIssuer {
     if (!grants?.authorization_code && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
       throw Error(`No grant issuer state or pre-authorized code could be deduced`)
     }
-    const credentialOffer: CredentialOfferPayloadV1_0_11 = {
+    const credentialOfferPayload: CredentialOfferPayloadV1_0_11 = {
       ...(grants && { grants }),
       ...(credentials && { credentials }),
       ...(credentialDefinition && { credential_definition: credentialDefinition }),
@@ -120,9 +131,11 @@ export class VcIssuer {
       }
     }
 
+    const baseUri = opts?.baseUri ?? this.defaultCredentialOfferBaseUri
     const credentialOfferObject = createCredentialOfferObject(this._issuerMetadata, {
       ...opts,
-      credentialOffer,
+      credentialOffer: credentialOfferPayload,
+      baseUri,
       userPinRequired,
       preAuthorizedCode,
       issuerState,
@@ -149,16 +162,24 @@ export class VcIssuer {
       })
     }
 
+    const credentialOffer = await toUniformCredentialOfferRequest(
+      {
+        credential_offer: credentialOfferObject.credential_offer,
+        credential_offer_uri: credentialOfferObject.credential_offer_uri,
+      } as CredentialOfferV1_0_11,
+      {
+        version: OpenId4VCIVersion.VER_1_0_11,
+        resolve: false, // We are creating the object, so do not resolve
+      }
+    )
+
     if (preAuthorizedCode) {
       this.credentialOfferSessions.set(preAuthorizedCode, {
         preAuthorizedCode,
         issuerState,
-        createdAt: createdAt,
+        createdAt,
         ...(userPin && { userPin }),
-        credentialOffer: {
-          credential_offer: credentialOfferObject.credential_offer,
-          credential_offer_uri: credentialOfferObject.credential_offer_uri,
-        } as CredentialOfferV1_0_11,
+        credentialOffer,
       })
     }
     // todo: check whether we could have the same value for issuer state and pre auth code if both are supported.
@@ -166,16 +187,13 @@ export class VcIssuer {
       this.credentialOfferSessions.set(issuerState, {
         preAuthorizedCode,
         issuerState,
-        createdAt: createdAt,
+        createdAt,
         ...(userPin && { userPin }),
-        credentialOffer: {
-          credential_offer: credentialOfferObject.credential_offer,
-          credential_offer_uri: credentialOfferObject.credential_offer_uri,
-        } as CredentialOfferV1_0_11,
+        credentialOffer,
       })
     }
 
-    return createCredentialOfferURIFromObject(credentialOfferObject)
+    return createCredentialOfferURIFromObject(credentialOffer, { ...opts, baseUri })
   }
 
   /**
@@ -187,13 +205,15 @@ export class VcIssuer {
    *  - issuerCallback callback to issue a Verifiable Credential
    *  - cNonce an existing c_nonce
    */
-  public async issueCredentialFromIssueRequest(opts: {
+  public async issueCredential(opts: {
     credentialRequest: CredentialRequestV1_0_11
+    credential?: ICredential
+    credentialDataSupplier?: CredentialDataSupplier
     newCNonce?: string
     cNonceExpiresIn?: number
     tokenExpiresIn?: number
     jwtVerifyCallback?: JWTVerifyCallback
-    issuerCallback?: CredentialIssuerCallback
+    credentialSignerCallback?: CredentialSignerCallback
     responseCNonce?: string
   }): Promise<CredentialResponse> {
     if (!this.isMetadataSupportCredentialRequestFormat(opts.credentialRequest.format)) {
@@ -204,26 +224,65 @@ export class VcIssuer {
       ...opts,
       tokenExpiresIn: opts.tokenExpiresIn ?? 180000,
     })
-    const cNonce = opts.newCNonce ? opts.newCNonce : v4()
-    await this.cNonces.set(cNonce, {
-      cNonce,
+    const newcNonce = opts.newCNonce ? opts.newCNonce : v4()
+    const newcNonceState = {
+      cNonce: newcNonce,
       createdAt: +new Date(),
       ...(authSession?.issuerState && { issuerState: authSession.issuerState }),
       ...(preAuthSession && { preAuthorizedCode: preAuthSession.preAuthorizedCode }),
-    })
-    const credential = await this.issueCredential({ credentialRequest: opts.credentialRequest }, opts.issuerCallback)
+    }
+    await this.cNonces.set(newcNonce, newcNonceState)
+    if (!opts.credential && this._credentialDataSupplier === undefined && opts.credentialDataSupplier === undefined) {
+      throw Error(`Either a credential needs to be supplied or a credentialDataSupplier`)
+    }
+    let credential: ICredential | undefined
+    let format: OID4VCICredentialFormat = opts.credentialRequest.format
+    let signerCallback: CredentialSignerCallback | undefined = opts.credentialSignerCallback
+    if (opts.credential) {
+      credential = opts.credential
+    } else {
+      const credentialDataSupplier: CredentialDataSupplier | undefined =
+        typeof opts.credentialDataSupplier === 'function' ? opts.credentialDataSupplier : this._credentialDataSupplier
+      if (typeof credentialDataSupplier !== 'function') {
+        throw Error('Data supplier is mandatory if no credential is supplied')
+      }
+      const credentialOffer = preAuthSession ? preAuthSession.credentialOffer : authSession?.credentialOffer
+      if (!credentialOffer) {
+        throw Error('Credential Offer missing')
+      }
+      const result = await credentialDataSupplier({ ...cNonceState, credentialRequest: opts.credentialRequest, credentialOffer /*todo: clientId: */ })
+      credential = result.credential
+      if (result.format) {
+        format = result.format
+      }
+      if (typeof result.callback === 'function') {
+        signerCallback = result.callback
+      }
+    }
+    if (!credential) {
+      throw Error('A credential needs to be supplied at this point')
+    }
+
+    const verifiableCredential = await this.issueCredentialImpl(
+      {
+        credentialRequest: opts.credentialRequest,
+        format,
+        credential,
+      },
+      signerCallback
+    )
     // TODO implement acceptance_token (deferred response)
     // TODO update verification accordingly
-    if (!credential) {
+    if (!verifiableCredential) {
       // credential: OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
       throw new Error(CREDENTIAL_MISSING_ERROR)
     }
     // remove the previous nonce
     this.cNonces.delete(cNonceState.cNonce)
     return {
-      credential,
+      credential: verifiableCredential,
       format: opts.credentialRequest.format,
-      c_nonce: cNonce,
+      c_nonce: newcNonce,
       c_nonce_expires_in: this._cNonceExpiresIn,
     }
   }
@@ -249,7 +308,7 @@ export class VcIssuer {
     jwtVerifyCallback,
     tokenExpiresIn,
   }: {
-    credentialRequest: CredentialRequestV1_0_11
+    credentialRequest: UniformCredentialRequest
     tokenExpiresIn: number
     // grants?: Grant,
     clientId?: string
@@ -257,7 +316,7 @@ export class VcIssuer {
   }) {
     if (credentialRequest.format !== 'jwt_vc_json' && credentialRequest.format !== 'jwt_vc_json_ld') {
       throw Error(`Format ${credentialRequest.format} not supported yet`)
-    } else if (typeof this._verifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
+    } else if (typeof this._jwtVerifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
       throw new Error(JWT_VERIFY_CONFIG_ERROR)
     } else if (!credentialRequest.proof) {
       throw Error('Proof of possession is required. No proof value present in credential request')
@@ -266,7 +325,7 @@ export class VcIssuer {
     const { payload, header }: Jwt = jwtVerifyCallback
       ? await jwtVerifyCallback(credentialRequest.proof)
       : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        await this._verifyCallback!(credentialRequest.proof)
+        await this._jwtVerifyCallback!(credentialRequest.proof)
 
     const { typ, alg, kid, jwk, x5c } = header
 
@@ -351,26 +410,30 @@ export class VcIssuer {
     return false
   }
 
-  private async issueCredential(
-    opts: { credentialRequest?: CredentialRequestV1_0_11; credential?: ICredential },
-    issuerCallback?: CredentialIssuerCallback
+  private async issueCredentialImpl(
+    opts: { credentialRequest: UniformCredentialRequest; credential: ICredential; format?: OID4VCICredentialFormat },
+    issuerCallback?: CredentialSignerCallback
   ): Promise<W3CVerifiableCredential> {
-    if ((!opts.credential && !opts.credentialRequest) || !this._issuerCallback) {
+    if ((!opts.credential && !opts.credentialRequest) || !this._credentialSignerCallback) {
       throw new Error(ISSUER_CONFIG_ERROR)
     }
-    return issuerCallback ? await issuerCallback(opts) : this._issuerCallback(opts)
+    return issuerCallback ? await issuerCallback(opts) : this._credentialSignerCallback(opts)
   }
 
   get userPinRequired(): boolean {
     return this._userPinRequired
   }
 
-  get issuerCallback(): CredentialIssuerCallback | undefined {
-    return this._issuerCallback
+  get credentialSignerCallback(): CredentialSignerCallback | undefined {
+    return this._credentialSignerCallback
   }
 
-  get verifyCallback(): JWTVerifyCallback | undefined {
-    return this._verifyCallback
+  get jwtVerifyCallback(): JWTVerifyCallback | undefined {
+    return this._jwtVerifyCallback
+  }
+
+  get credentialDataSupplier(): CredentialDataSupplier | undefined {
+    return this._credentialDataSupplier
   }
 
   get uris(): IStateManager<URIState> | undefined {
@@ -389,6 +452,9 @@ export class VcIssuer {
     return this._cNonces
   }
 
+  get defaultCredentialOfferBaseUri(): string | undefined {
+    return this._defaultCredentialOfferBaseUri
+  }
   public get issuerMetadata() {
     return this._issuerMetadata
   }

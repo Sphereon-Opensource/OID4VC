@@ -146,8 +146,8 @@ export async function toUniformCredentialOfferRequest(
   let originalCredentialOffer = offer.credential_offer;
   let credentialOfferURI: string | undefined;
   if ('credential_offer_uri' in offer && offer?.credential_offer_uri !== undefined) {
+    credentialOfferURI = offer.credential_offer_uri;
     if (opts?.resolve || opts?.resolve === undefined) {
-      credentialOfferURI = offer.credential_offer_uri;
       originalCredentialOffer = (await resolveCredentialOfferURI(credentialOfferURI)) as CredentialOfferPayloadV1_0_11;
     } else if (!originalCredentialOffer) {
       throw Error(`Credential offer uri (${credentialOfferURI}) found, but resolution was explicitly disabled and credential_offer was supplied`);

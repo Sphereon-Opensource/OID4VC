@@ -88,9 +88,18 @@ describe('VcIssuer', () => {
       .build()
     const stateManager = new MemoryStates<CredentialOfferSession>()
 
+    const credential = {
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
+      type: ['VerifiableCredential'],
+      issuer: 'did:key:test',
+      issuanceDate: new Date().toISOString(),
+      credentialSubject: {},
+    }
+
     vcIssuer = new VcIssuerBuilder()
       // .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
+      .withDefaultCredentialOfferBaseUri('http://localhost:3456/test')
       .withCredentialIssuer(ISSUER_URL)
       .withIssuerDisplay({
         name: 'example issuer',
@@ -100,13 +109,15 @@ describe('VcIssuer', () => {
       .withCredentialOfferStateManager(stateManager)
       .withInMemoryCNonceState()
       .withInMemoryCredentialOfferURIState()
-      .withIssuerCallback(() =>
+      .withCredentialDataSupplier(() =>
         Promise.resolve({
-          '@context': ['https://www.w3.org/2018/credentials/v1'],
-          type: ['VerifiableCredential'],
-          issuer: 'did:key:test',
-          issuanceDate: new Date().toISOString(),
-          credentialSubject: {},
+          format: 'ldp_vc',
+          credential,
+        })
+      )
+      .withCredentialSignerCallback(() =>
+        Promise.resolve({
+          ...credential,
           proof: {
             type: IProofType.JwtProof2020,
             jwt: 'ye.ye.ye',
@@ -283,7 +294,7 @@ describe('VcIssuer', () => {
       proofCallbacks: { signCallback: proofOfPossessionCallbackFunction },
     })
     expect(credentialResponse).toMatchObject({
-      c_nonce_expires_in: 90000,
+      c_nonce_expires_in: 300000,
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         credentialSubject: {},

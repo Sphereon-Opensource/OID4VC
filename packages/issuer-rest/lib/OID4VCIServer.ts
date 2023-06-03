@@ -104,7 +104,7 @@ export class OID4VCIServer {
     dotenv.config()
 
     this._baseUrl = new URL(opts?.serverOpts?.baseUrl ?? process.env.BASE_URL ?? 'http://localhost')
-    const httpPort = getNumberOrUndefined(this._baseUrl.port) ?? getNumberOrUndefined(process.env.PORT) ?? 3000
+    const httpPort = opts?.serverOpts?.port ?? getNumberOrUndefined(this._baseUrl.port) ?? getNumberOrUndefined(process.env.PORT) ?? 3000
     const host = opts?.serverOpts?.host ?? this._baseUrl.host.split(':')[0]
 
     if (!opts?.serverOpts?.app) {
@@ -129,8 +129,8 @@ export class OID4VCIServer {
     if (!this.isTokenEndpointDisabled(opts?.tokenEndpointOpts)) {
       this.accessTokenEndpoint(opts?.tokenEndpointOpts)
     }
-    this.cNonceExpiresIn = opts?.tokenEndpointOpts?.cNonceExpiresIn || 300
-    this.tokenExpiresIn = opts?.tokenEndpointOpts?.tokenExpiresIn || 300
+    this.cNonceExpiresIn = opts?.tokenEndpointOpts?.cNonceExpiresIn ?? 300000
+    this.tokenExpiresIn = opts?.tokenEndpointOpts?.tokenExpiresIn ?? 300000
     this._server = this.app.listen(httpPort, host, () => console.log(`HTTP server listening on port ${httpPort}`))
   }
 
@@ -209,14 +209,22 @@ export class OID4VCIServer {
     this.app.post(path, async (request: Request, response: Response) => {
       try {
         const credentialRequest = request.body as CredentialRequestV1_0_11
-        const credential = await this.issuer.issueCredentialFromIssueRequest({
+        const credential = await this.issuer.issueCredential({
           credentialRequest: credentialRequest,
           tokenExpiresIn: this.tokenExpiresIn,
           cNonceExpiresIn: this.cNonceExpiresIn,
         })
         return response.send(credential)
       } catch (e) {
-        return sendErrorResponse(response, 500, e)
+        return sendErrorResponse(
+          response,
+          500,
+          {
+            error: 'invalid_request',
+            error_description: (e as Error).message,
+          },
+          e
+        )
       }
     })
   }

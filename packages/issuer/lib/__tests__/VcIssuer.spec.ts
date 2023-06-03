@@ -82,7 +82,7 @@ describe('VcIssuer', () => {
       .withCredentialOfferStateManager(stateManager)
       .withInMemoryCNonceState()
       .withInMemoryCredentialOfferURIState()
-      .withIssuerCallback(() =>
+      .withCredentialSignerCallback(() =>
         Promise.resolve({
           '@context': ['https://www.w3.org/2018/credentials/v1'],
           type: ['VerifiableCredential'],
@@ -247,7 +247,7 @@ describe('VcIssuer', () => {
   // Of course this doesn't work. The state is part of the proof to begin with
   it('should fail issuing credential if an invalid state is used', async () => {
     await expect(
-      vcIssuer.issueCredentialFromIssueRequest({
+      vcIssuer.issueCredential({
         credentialRequest: {
           types: ['VerifiableCredential'],
           format: 'jwt_vc_json',
@@ -264,7 +264,7 @@ describe('VcIssuer', () => {
   // Of course this doesn't work. The state is part of the proof to begin with
   xit('should issue credential if a valid state is passed in', async () => {
     await expect(
-      vcIssuer.issueCredentialFromIssueRequest({
+      vcIssuer.issueCredential({
         credentialRequest: {
           types: ['VerifiableCredential'],
           format: 'jwt_vc_json',
