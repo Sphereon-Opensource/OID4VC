@@ -21,18 +21,10 @@ export function getSupportedCredentials(opts?: {
     return [];
   }
   const { version, credentialTypes, supportedType } = opts ?? { version: OpenId4VCIVersion.VER_1_0_11 };
-  if (version === OpenId4VCIVersion.VER_1_0_08 || !Array.isArray(issuerMetadata.credentials_supported)) {
+
+  const usesTransformedCredentialsSupported = version === OpenId4VCIVersion.VER_1_0_08 || !Array.isArray(issuerMetadata.credentials_supported);
+  if (usesTransformedCredentialsSupported) {
     credentialsSupported = credentialsSupportedV8ToV11((issuerMetadata as IssuerMetadataV1_0_08).credentials_supported);
-    /*    const credentialsSupportedV8: CredentialSupportedV1_0_08 = credentialsSupported as CredentialSupportedV1_0_08
-        // const initiationTypes = credentialTypes.map(type => typeof type === 'string' ? [type] : type.types)
-        const supported: IssuerCredentialSubject = {}
-        for (const [key, value] of Object.entries(credentialsSupportedV8)) {
-          if (initiationTypes.find((type) => (typeof type === 'string' ? type === key : type.types.includes(key)))) {
-            supported[key] = value
-          }
-        }
-        // todo: fix this later. we're returning CredentialSupportedV1_0_08 as a list of CredentialSupported (for v09 onward)
-        return supported as unknown as CredentialSupported[]*/
   } else {
     credentialsSupported = (issuerMetadata as CredentialIssuerMetadata).credentials_supported;
   }
@@ -50,29 +42,24 @@ export function getSupportedCredentials(opts?: {
   const credentialSupportedOverlap: CredentialSupported[] = [];
   for (const offerType of initiationTypes) {
     if (typeof offerType === 'string') {
-      const supported = credentialsSupported.find((sup) => sup.id === offerType || sup.types.includes(offerType));
-      if (supported) {
-        credentialSupportedOverlap.push(supported);
-      }
-    } else {
-      const supported = credentialsSupported.find((sup) => arrayEqualsIgnoreOrder(sup.types, offerType.types) && sup.format === offerType.format);
+      const supported = credentialsSupported.find((sup) => {
+        // Match id to offerType
+        if (sup.id === offerType) return true;
+
+        // If the credential was transformed and the v8 variant supported multiple formats for the id, we
+        // check if there is an id with the format
+        // see credentialsSupportedV8ToV11
+        if (usesTransformedCredentialsSupported && sup.id === `${offerType}-${sup.format}`) return true;
+
+        return false;
+      });
       if (supported) {
         credentialSupportedOverlap.push(supported);
       }
     }
   }
-  return credentialSupportedOverlap;
-}
 
-function arrayEqualsIgnoreOrder(a: string[], b: string[]) {
-  if (a.length !== b.length) return false;
-  const uniqueValues = new Set([...a, ...b]);
-  for (const v of uniqueValues) {
-    const aCount = a.filter((e) => e === v).length;
-    const bCount = b.filter((e) => e === v).length;
-    if (aCount !== bCount) return false;
-  }
-  return true;
+  return credentialSupportedOverlap;
 }
 
 export function credentialsSupportedV8ToV11(supportedV8: CredentialSupportedTypeV1_0_08): CredentialSupported[] {
@@ -84,18 +71,28 @@ export function credentialsSupportedV8ToV11(supportedV8: CredentialSupportedType
 }
 
 export function credentialSupportedV8ToV11(key: string, supportedV8: CredentialSupportedV1_0_08): CredentialSupported[] {
-  return Object.entries(supportedV8.formats).map((entry) => {
+  const v8FormatEntries = Object.entries(supportedV8.formats);
+
+  return v8FormatEntries.map((entry) => {
     const format = entry[0];
     const credentialSupportBrief = entry[1];
     if (typeof format !== 'string') {
       throw Error(`Unknown format received ${JSON.stringify(format)}`);
     }
     let credentialSupport: Partial<CredentialSupported> = {};
+
+    // v8 format included the credential type / id as the key of the object and it could contain multiple supported formats
+    // v11 format has an array where each entry only supports one format, and can only have an `id` property. We include the
+    // key from the v8 object as the id for the v11 object, but to prevent collisions (as multiple formats can be supported under
+    // one key), we append the format to the key IF there's more than one format supported under the key.
+    const id = v8FormatEntries.length > 1 ? `${key}-${format}` : key;
+
     credentialSupport = {
       format,
       display: supportedV8.display,
       ...credentialSupportBrief,
       credentialSubject: supportedV8.claims,
+      id,
     };
     return credentialSupport as CredentialSupported;
   });

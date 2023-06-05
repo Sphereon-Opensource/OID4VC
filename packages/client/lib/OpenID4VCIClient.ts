@@ -4,10 +4,12 @@ import {
   AuthorizationRequestV1_0_09,
   AuthzFlowType,
   CodeChallengeMethod,
+  CredentialOfferFormat,
   CredentialOfferPayloadV1_0_08,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
   CredentialSupported,
+  CredentialSupportedTypeV1_0_08,
   EndpointMetadata,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
@@ -17,7 +19,6 @@ import {
   ResponseType,
 } from '@sphereon/oid4vci-common';
 import { getSupportedCredentials } from '@sphereon/oid4vci-common/dist/functions/IssuerMetadataUtils';
-import { CredentialSupportedTypeV1_0_08 } from '@sphereon/oid4vci-common/dist/types/v1_0_08.types';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
@@ -359,12 +360,42 @@ export class OpenID4VCIClient {
     return response.successBody;
   }
 
+  /**
+   * Retrieve a supported credential by it's id. This is a convenience method that takes into account difference between the
+   * different versions of the oid4vci specification.
+   *
+   * NOTE: for v1_0-08, a single credential id in the issuer metadata could have multiple formats. When retrieving the
+   * supported credentials (using {@link getCredentialsSupported}), for v1_0-08, the format is appended to the id if
+   * there are multiple formats supported for that credential id. E.g. if the issuer metadata for v1_0-08 contains an
+   * entry with key `OpenBadgeCredential` and the supported formats are `jwt_vc-jsonld` and `ldp_vc`, then the id
+   * in the credentials supported will be `OpenBadgeCredential-jwt_vc-jsonld` and `OpenBadgeCredential-ldp_vc`, even though
+   * the offered credential is simply `OpenBadgeCredential`. This method takes this into account.
+   */
+  getCredentialsSupportedById(credentialSupportedId: string, format?: CredentialFormat): CredentialSupported[] {
+    return this.getCredentialMetadata(credentialSupportedId).filter((credentialSupported) => credentialSupported.format === format);
+  }
+
+  /**
+   * Return a normalized version of the credentials supported by the issuer. Can optionally filter based on the credentials
+   * that were offered, or the type of credentials that are supported.
+   *
+   *
+   * NOTE: for v1_0-08, a single credential id in the issuer metadata could have multiple formats. When retrieving the
+   * supported credentials, for v1_0-08, the format is appended to the id if there are multiple formats supported for
+   * that credential id. E.g. if the issuer metadata for v1_0-08 contains an entry with key `OpenBadgeCredential` and
+   * the supported formats are `jwt_vc-jsonld` and `ldp_vc`, then the id in the credentials supported will be
+   * `OpenBadgeCredential-jwt_vc-jsonld` and `OpenBadgeCredential-ldp_vc`, even though the offered credential is simply
+   * `OpenBadgeCredential`. You can use {@link getCredentialsSupportedById} to get the correct supported credential.
+   *
+   * NOTE: this method only returns the credentials supported by the issuer metadata. It does not take into account the
+   * credentials offered. Use {@link getOfferedCredentialsWithMetadata} to get both the inline and referenced offered credentials.
+   */
   getCredentialsSupported(restrictToInitiationTypes: boolean, supportedType?: string): CredentialSupported[] {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.issuerMetadata,
       version: this.version(),
       supportedType,
-      credentialTypes: restrictToInitiationTypes ? this.getCredentialTypes() : undefined,
+      credentialTypes: restrictToInitiationTypes ? this.getOfferedCredentials().filter((c): c is string => typeof c === 'string') : undefined,
     });
     /*//FIXME: delegate to getCredentialsSupported from IssuerMetadataUtils
     let credentialsSupported = this.endpointMetadata?.issuerMetadata?.credentials_supported
@@ -424,15 +455,43 @@ export class OpenID4VCIClient {
   }
 
   // todo https://sphereon.atlassian.net/browse/VDX-184
-  getCredentialTypes(): string[] {
+  /**
+   * Returns all entries from the credential offer. This includes both 'id' entries that reference a supported credential in the issuer metadata,
+   * as well as inline credential offers that do not reference a supported credential in the issuer metadata.
+   */
+  getOfferedCredentials(): Array<string | CredentialOfferFormat> {
     if (this.credentialOffer.version < OpenId4VCIVersion.VER_1_0_11) {
-      return typeof (this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type === 'string'
-        ? [(this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type as string]
-        : ((this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type as string[]);
+      const credentialOffer = this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08;
+
+      return typeof credentialOffer.credential_type === 'string' ? [credentialOffer.credential_type] : credentialOffer.credential_type;
     } else {
-      // FIXME: this for sure isn't correct. It would also include VerifiableCredential. The whole call to this getCredentialsTypes should be changed to begin with
-      return this.credentialOffer.credential_offer.credentials.flatMap((c) => (typeof c === 'string' ? c : c.types));
+      return this.credentialOffer.credential_offer.credentials;
     }
+  }
+
+  /**
+   * Returns all entries from the credential offer with the associated metadata resolved. For inline entries, the offered credential object
+   * is included directly. For 'id' entries, the associated `credentials_supported` object is resolved from the issuer metadata.
+   *
+   * NOTE: for v1_0-08, a single credential id in the issuer metadata could have multiple formats. This means that the returned value
+   * from this method could contain multiple entries for a single credential id, but with different formats. This is detectable as the
+   * id will be the `<credentialId>-<format>`.
+   */
+  getOfferedCredentialsWithMetadata(): Array<CredentialSupported | CredentialOfferFormat> {
+    const offeredCredentials: Array<CredentialSupported | CredentialOfferFormat> = [];
+
+    for (const offeredCredential of this.getOfferedCredentials()) {
+      // If the offeredCredential is a string, it references a supported credential in the issuer metadata
+      if (typeof offeredCredential === 'string') {
+        offeredCredentials.push(...this.getCredentialsSupportedById(offeredCredential));
+      }
+      // Otherwise it's an inline credential offer that does not reference a supported credential in the issuer metadata
+      else {
+        offeredCredentials.push(offeredCredential);
+      }
+    }
+
+    return offeredCredentials;
   }
 
   get flowType(): AuthzFlowType {
