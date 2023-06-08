@@ -252,7 +252,7 @@ describe('VcIssuer', () => {
           types: ['VerifiableCredential'],
           format: 'jwt_vc_json',
           proof: {
-            proof_type: 'openid4vci-proof+jwt',
+            proof_type: 'jwt',
             jwt: 'ye.ye.ye',
           },
         },
@@ -269,7 +269,7 @@ describe('VcIssuer', () => {
           types: ['VerifiableCredential'],
           format: 'jwt_vc_json',
           proof: {
-            proof_type: 'openid4vci-proof+jwt',
+            proof_type: 'jwt',
             jwt: 'ye.ye.ye',
           },
         },

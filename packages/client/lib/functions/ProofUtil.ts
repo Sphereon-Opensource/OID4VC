@@ -29,10 +29,11 @@ export const createProofOfPossession = async (
     debug(`no jwt signer callback or arguments supplied!`);
     throw new Error(BAD_PARAMS);
   }
+
   const signerArgs = createJWT(jwtProps, existingJwt);
   const jwt = await callbacks.signCallback(signerArgs, signerArgs.header.kid);
   const proof = {
-    proof_type: signerArgs.header.typ ?? 'jwt',
+    proof_type: 'jwt',
     jwt,
   } as ProofOfPossession;
 

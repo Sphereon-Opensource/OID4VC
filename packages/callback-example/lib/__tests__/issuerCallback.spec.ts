@@ -3,6 +3,7 @@ import { KeyObject } from 'crypto'
 import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '@sphereon/oid4vci-client'
 import {
   Alg,
+  CNonceState,
   CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
@@ -12,6 +13,7 @@ import {
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
 import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import * as jose from 'jose'
 
@@ -62,7 +64,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
 })
-xdescribe('issuerCallback', () => {
+describe('issuerCallback', () => {
   let vcIssuer: VcIssuer
   const state = 'existing-state'
   const clientId = 'sphereon:wallet'
@@ -71,8 +73,8 @@ xdescribe('issuerCallback', () => {
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
-      //FIXME Here a CredentialFormatEnum is passed in, but later it is matched against a CredentialFormat
       .withFormat('jwt_vc_json')
+      .withTypes('VerifiableCredential')
       .withId('UniversityDegree_JWT')
       .withCredentialSupportedDisplay({
         name: 'University Credential',
@@ -113,6 +115,9 @@ xdescribe('issuerCallback', () => {
         } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
       },
     })
+
+    const nonces = new MemoryStates<CNonceState>()
+    nonces.set('test_value', { cNonce: 'test_value', createdAt: +new Date(), issuerState: 'existing-state' })
     vcIssuer = new VcIssuerBuilder()
       .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
@@ -123,15 +128,24 @@ xdescribe('issuerCallback', () => {
       })
       .withCredentialsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
-      .withInMemoryCNonceState()
+      .withCNonceStateManager(nonces)
       .withJWTVerifyCallback(verifyCallbackFunction)
-      .withCredentialSignerCallback(() =>
+      .withCredentialDataSupplier(
+        () =>
+          Promise.resolve({
+            credential: {
+              '@context': ['https://www.w3.org/2018/credentials/v1'],
+              type: ['VerifiableCredential'],
+              issuer: 'did:key:test',
+              issuanceDate: new Date().toISOString(),
+              credentialSubject: {},
+            },
+            format: 'ldp_vc',
+          }) as Promise<CredentialDataSupplierResult>
+      )
+      .withCredentialSignerCallback((opts) =>
         Promise.resolve({
-          '@context': ['https://www.w3.org/2018/credentials/v1'],
-          type: ['VerifiableCredential'],
-          issuer: 'did:key:test',
-          issuanceDate: new Date().toISOString(),
-          credentialSubject: {},
+          ...opts.credential,
           proof: {
             type: IProofType.JwtProof2020,
             jwt: 'ye.ye.ye',
@@ -148,7 +162,7 @@ xdescribe('issuerCallback', () => {
     await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 
-  it('should issue a VC', async () => {
+  it('should add a proof to a credential', async () => {
     const credential: ICredential = {
       '@context': ['https://www.w3.org/2018/credentials/v1'],
       type: ['VerifiableCredential'],
@@ -176,7 +190,6 @@ xdescribe('issuerCallback', () => {
     )
   })
   it('Should pass requesting a verifiable credential using the client', async () => {
-    //FIXME Use the same Enum to match format. It's actually using CredentialFormat and CredentialFormatEnum
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc_json')
@@ -185,7 +198,7 @@ xdescribe('issuerCallback', () => {
 
     const jwt: Jwt = {
       header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'openid4vci-proof+jwt' },
-      payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
+      payload: { iss: 'sphereon:wallet', nonce: 'test_value', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
     }
 
     const credential: ICredential = {
@@ -201,7 +214,7 @@ xdescribe('issuerCallback', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_08,
+      version: OpenId4VCIVersion.VER_1_0_11,
     })
       .withClientId(clientId)
       .withKid(kid)
@@ -212,17 +225,15 @@ xdescribe('issuerCallback', () => {
       credentialTypes: ['VerifiableCredential'],
       format: 'jwt_vc_json',
       proofInput: proof,
-      version: OpenId4VCIVersion.VER_1_0_08,
+      version: OpenId4VCIVersion.VER_1_0_11,
     })
     expect(credentialRequest).toEqual({
       format: 'jwt_vc_json',
       proof: {
-        jwt: expect.stringContaining(
-          'eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMS9rZXlzLzEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJkaWQ6ZXhhbXBsZTpl'
-        ),
+        jwt: expect.stringContaining('eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFj'),
         proof_type: 'jwt',
       },
-      type: ['VerifiableCredential'],
+      types: ['VerifiableCredential'],
     })
 
     const credentialResponse = await vcIssuer.issueCredential({
@@ -234,7 +245,7 @@ xdescribe('issuerCallback', () => {
 
     expect(credentialResponse).toEqual({
       c_nonce: expect.any(String),
-      c_nonce_expires_in: 90000,
+      c_nonce_expires_in: 300000,
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],
         credentialSubject: {},
