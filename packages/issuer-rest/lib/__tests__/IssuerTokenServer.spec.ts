@@ -198,7 +198,7 @@ describe('OID4VCIServer', () => {
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
       error: 'invalid_grant',
-      error_message: 'PIN is invalid',
+      error_description: 'PIN is invalid',
     })
   })
   it('should return http code 400 with message PIN must consist of maximum 8 numeric characters', async () => {
@@ -209,10 +209,10 @@ describe('OID4VCIServer', () => {
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
       error: 'invalid_grant',
-      error_message: 'PIN must consist of maximum 8 numeric characters',
+      error_description: 'PIN must consist of maximum 8 numeric characters',
     })
   })
-  it('should return http code 400 with message pre-authorized_code is invalid', async () => {
+  it('should return http code 400 with message pre-authorized_code not found', async () => {
     const res = await requests(app)
       .post('/token')
       .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=test&user_pin=493536`)
@@ -220,7 +220,7 @@ describe('OID4VCIServer', () => {
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
       error: 'invalid_request',
-      error_message: STATE_MISSING_ERROR + ' (test)',
+      error_description: STATE_MISSING_ERROR + ' (test)',
     })
   })
   it('should return http code 400 with message User pin is not required', async () => {
@@ -243,7 +243,7 @@ describe('OID4VCIServer', () => {
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
       error: 'invalid_grant',
-      error_message: 'pre-authorized_code is expired',
+      error_description: 'pre-authorized_code is expired',
     })
   })
 })

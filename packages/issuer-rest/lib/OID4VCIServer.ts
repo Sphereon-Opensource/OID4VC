@@ -14,7 +14,7 @@ import {
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
   OID4VCICredentialFormat,
 } from '@sphereon/oid4vci-common'
-import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { CredentialSupportedBuilderV1_11, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { CredentialFormat } from '@sphereon/ssi-types'
 import bodyParser from 'body-parser'
 import cors from 'cors'
@@ -22,7 +22,7 @@ import * as dotenv from 'dotenv-flow'
 import express, { Express, NextFunction, Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 
-import { handleTokenRequest, ITokenEndpointOpts, verifyTokenRequest } from './IssuerTokenEndpoint'
+import { handleTokenRequest, verifyTokenRequest } from './IssuerTokenEndpoint'
 import { sendErrorResponse, validateRequestBody } from './expressUtils'
 
 const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90

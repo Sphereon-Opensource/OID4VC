@@ -8,7 +8,7 @@ import {
   CredentialOfferPayloadV1_0_11,
   DefaultURISchemes,
   Grant,
-  GrantType,
+  GrantTypes,
   OpenId4VCIVersion,
   OpenIDResponse,
   UniformCredentialOffer,
@@ -297,7 +297,7 @@ export function determineGrantTypes(
     | ({
         grants: Grant;
       } & Record<never, never>)
-): GrantType[] {
+): GrantTypes[] {
   let grants: Grant | undefined;
   if ('grants' in offer && offer.grants) {
     grants = offer.grants;
@@ -305,16 +305,16 @@ export function determineGrantTypes(
     grants = getCredentialOfferPayload(offer as AssertedUniformCredentialOffer | UniformCredentialOfferPayload).grants;
   }
 
-  const types: GrantType[] = [];
+  const types: GrantTypes[] = [];
   if (grants) {
     if (grants.authorization_code) {
-      types.push(GrantType.AUTHORIZATION_CODE);
+      types.push(GrantTypes.AUTHORIZATION_CODE);
     }
     if (
       grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'] &&
       grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']['pre-authorized_code']
     ) {
-      types.push(GrantType.PRE_AUTHORIZED_CODE);
+      types.push(GrantTypes.PRE_AUTHORIZED_CODE);
     }
   }
   return types;

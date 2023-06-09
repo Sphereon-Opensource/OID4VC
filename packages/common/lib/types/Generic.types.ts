@@ -109,11 +109,7 @@ export interface CredentialOfferCredentialDefinition {
 }
 */
 
-export enum GrantType {
-  AUTHORIZATION_CODE = 'authorization_code',
-  PRE_AUTHORIZED_CODE = 'urn:ietf:params:oauth:grant-type:pre-authorized_code',
-  PASSWORD = 'password',
-}
+// export type GrantType = GrantTypes;
 
 /*
 export interface CommonAccessTokenRequest {
@@ -127,13 +123,6 @@ export interface CommonAccessTokenRequest {
   user_pin?: string;
 }
 */
-
-export enum TokenErrorResponse {
-  invalid_request = 'invalid_request',
-  invalid_grant = 'invalid_grant',
-  invalid_client = 'invalid_client', // this code has been added only in v1_0-11, but I've added this to the common interface. @nklomp is this ok?
-  invalid_scope = 'invalid_scope',
-}
 
 /*
 export interface CommonAccessTokenResponse {
