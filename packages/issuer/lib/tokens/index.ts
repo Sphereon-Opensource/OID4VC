@@ -1,6 +1,8 @@
 import {
   AccessTokenRequest,
+  AccessTokenResponse,
   Alg,
+  CNonceState,
   CredentialOfferSession,
   EXPIRED_PRE_AUTHORIZED_CODE,
   GrantTypes,
@@ -18,6 +20,7 @@ import {
   USER_PIN_NOT_REQUIRED_ERROR,
   USER_PIN_REQUIRED_ERROR,
 } from '@sphereon/oid4vci-common'
+import { v4 } from 'uuid'
 
 import { isPreAuthorizedCodeExpired } from '../functions'
 
@@ -116,4 +119,42 @@ export const assertValidAccessTokenRequest = async (
   ) {
     throw new TokenError(400, TokenErrorResponse.invalid_grant, INVALID_PRE_AUTHORIZED_CODE)
   }
+}
+
+export const createAccessTokenResponse = async (
+  request: AccessTokenRequest,
+  opts: {
+    cNonces: IStateManager<CNonceState>
+    cNonce?: string
+    cNonceExpiresIn?: number
+    tokenExpiresIn: number
+    // preAuthorizedCodeExpirationDuration?: number
+    accessTokenSignerCallback: JWTSignerCallback
+    accessTokenIssuer: string
+    interval?: number
+  }
+) => {
+  const { cNonces, cNonceExpiresIn, tokenExpiresIn, accessTokenIssuer, accessTokenSignerCallback, interval } = opts
+  // Pre-auth flow
+  const preAuthorizedCode = request[PRE_AUTH_CODE_LITERAL] as string
+
+  const cNonce = opts.cNonce ?? v4()
+  await cNonces.set(cNonce, { cNonce, createdAt: +new Date(), preAuthorizedCode })
+
+  const access_token = await generateAccessToken({
+    tokenExpiresIn,
+    accessTokenSignerCallback,
+    preAuthorizedCode,
+    accessTokenIssuer,
+  })
+  const response: AccessTokenResponse = {
+    access_token,
+    token_type: 'bearer',
+    expires_in: tokenExpiresIn,
+    c_nonce: cNonce,
+    c_nonce_expires_in: cNonceExpiresIn,
+    authorization_pending: false,
+    interval,
+  }
+  return response
 }

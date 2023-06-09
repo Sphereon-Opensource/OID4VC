@@ -1,12 +1,5 @@
-import {
-  AccessTokenResponse,
-  GrantTypes,
-  PRE_AUTH_CODE_LITERAL,
-  PRE_AUTHORIZED_CODE_REQUIRED_ERROR,
-  TokenError,
-  TokenErrorResponse,
-} from '@sphereon/oid4vci-common'
-import { assertValidAccessTokenRequest, generateAccessToken, ITokenEndpointOpts, VcIssuer } from '@sphereon/oid4vci-issuer'
+import { GrantTypes, PRE_AUTHORIZED_CODE_REQUIRED_ERROR, TokenError, TokenErrorResponse } from '@sphereon/oid4vci-common'
+import { assertValidAccessTokenRequest, createAccessTokenResponse, ITokenEndpointOpts, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { NextFunction, Request, Response } from 'express'
 import { v4 } from 'uuid'
 
@@ -45,28 +38,27 @@ export const handleTokenRequest = ({
       })
     }
 
-    // Pre-auth flow
-    const preAuthorizedCode = request.body[PRE_AUTH_CODE_LITERAL] as string
-
-    const cNonce = v4()
-    await issuer.cNonces.set(cNonce, { cNonce, createdAt: +new Date(), preAuthorizedCode })
-
-    const access_token = await generateAccessToken({
-      tokenExpiresIn,
-      accessTokenSignerCallback,
-      preAuthorizedCode,
-      accessTokenIssuer,
-    })
-    const responseBody: AccessTokenResponse = {
-      access_token,
-      token_type: 'bearer',
-      expires_in: tokenExpiresIn,
-      c_nonce: cNonce,
-      c_nonce_expires_in: cNonceExpiresIn,
-      authorization_pending: false,
-      interval,
+    try {
+      const responseBody = await createAccessTokenResponse(request.body, {
+        accessTokenIssuer,
+        cNonces: issuer.cNonces,
+        cNonce: v4(),
+        accessTokenSignerCallback,
+        cNonceExpiresIn,
+        interval,
+        tokenExpiresIn,
+      })
+      return response.status(200).json(responseBody)
+    } catch (error) {
+      return sendErrorResponse(
+        response,
+        400,
+        {
+          error: TokenErrorResponse.invalid_request,
+        },
+        error
+      )
     }
-    return response.status(200).json(responseBody)
   }
 }
 
