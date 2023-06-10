@@ -135,7 +135,7 @@ describe('OID4VCIServer', () => {
       },
     })
     app = vcIssuerServer.app
-    server = vcIssuerServer.server
+    server = vcIssuerServer.server!
   })
 
   afterAll(async () => {

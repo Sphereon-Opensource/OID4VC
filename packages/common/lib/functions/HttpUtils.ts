@@ -67,7 +67,7 @@ const openIdFetch = async <T>(
     body,
   };
 
-  debug(`START fetching url: ${url}`);
+  console.log(`START fetching url: ${url}`);
   if (body) {
     debug(`Body:\r\n${JSON.stringify(body)}`);
   }
@@ -78,7 +78,7 @@ const openIdFetch = async <T>(
   const responseText = await origResponse.text();
   const responseBody = isJSONResponse && responseText.includes('{') ? JSON.parse(responseText) : responseText;
 
-  debug(`${success ? 'success' : 'error'} status: ${origResponse.status}, body:\r\n${JSON.stringify(responseBody)}`);
+  console.log(`${success ? 'success' : 'error'} status: ${origResponse.status}, body:\r\n${JSON.stringify(responseBody)}`);
   if (!success && opts?.exceptionOnHttpErrorStatus) {
     const error = JSON.stringify(responseBody);
     throw new Error(error === '{}' ? '{"error": "not found"}' : error);
@@ -104,4 +104,65 @@ export const isValidURL = (url: string): boolean => {
     'i'
   );
   return urlPattern.test(url);
+};
+
+export const trimBoth = (value: string, trim: string): string => {
+  return trimEnd(trimStart(value, trim), trim);
+};
+
+export const trimEnd = (value: string, trim: string): string => {
+  return value.endsWith(trim) ? value.substring(0, value.length - trim.length) : value;
+};
+
+export const trimStart = (value: string, trim: string): string => {
+  return value.startsWith(trim) ? value.substring(trim.length) : value;
+};
+
+export const adjustUrl = <T extends string | URL>(
+  urlOrPath: T,
+  opts?: {
+    stripSlashEnd?: boolean;
+    stripSlashStart?: boolean;
+    prepend?: string;
+    append?: string;
+  }
+): T => {
+  let url = typeof urlOrPath === 'object' ? urlOrPath.toString() : (urlOrPath as string);
+  if (opts?.append) {
+    url = trimEnd(url, '/') + '/' + trimStart(opts.append, '/');
+  }
+  if (opts?.prepend) {
+    if (opts.prepend.includes('://')) {
+      // includes domain/hostname
+      if (!url.startsWith(opts.prepend)) {
+        url = trimEnd(opts.prepend, '/') + '/' + trimStart(url, '/');
+      }
+    } else {
+      // path only for prepend
+      let host = '';
+      let path = url;
+      if (url.includes('://')) {
+        // includes domain/hostname
+        host = new URL(url).host;
+        path = new URL(url).pathname;
+      }
+      if (!path.startsWith(opts.prepend)) {
+        if (host && host !== '') {
+          url = trimEnd(host, '/');
+        }
+        url += trimEnd(url, '/') + '/' + trimBoth(opts.prepend, '/') + '/' + trimStart(path, '/');
+      }
+    }
+  }
+  if (opts?.stripSlashStart) {
+    url = trimStart(url, '/');
+  }
+  if (opts?.stripSlashEnd) {
+    url = trimEnd(url, '/');
+  }
+
+  if (typeof urlOrPath === 'string') {
+    return url as T;
+  }
+  return new URL(url) as T;
 };

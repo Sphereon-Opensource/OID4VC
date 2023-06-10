@@ -13,7 +13,9 @@ import {
   IssuerCredentialSubjectDisplay,
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
   OID4VCICredentialFormat,
+  TokenErrorResponse,
 } from '@sphereon/oid4vci-common'
+import { adjustUrl, trimBoth, trimEnd, trimStart } from '@sphereon/oid4vci-common/dist/functions/HttpUtils'
 import { CredentialSupportedBuilderV1_11, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { CredentialFormat } from '@sphereon/ssi-types'
 import bodyParser from 'body-parser'
@@ -67,12 +69,16 @@ function buildVCIFromEnvironment() {
     .build()
 }
 
+interface ICreateCredentialOfferOpts {
+  createOfferPath?: string
+  getOfferPath?: string
+  createOfferEndpointDisabled?: boolean // Disable the REST endpoint for creating offers. You can directly call the Issuer to create the offer object
+  //todo: Add authn/z, as this endpoint would be called by an integration instead of wallets
+}
+
 interface IOID4VCIServerOpts {
   tokenEndpointOpts?: ITokenEndpointOpts
-  credentialOfferOpts?: {
-    createOfferEndpointDisabled?: boolean // Disable the REST endpoint for creating offers. You can directly call the Issuer to create the offer object
-    //todo: Add authn/z, as this endpoint would be called by an integration instead of wallets
-  }
+  credentialOfferOpts?: ICreateCredentialOfferOpts
   serverOpts?: {
     app?: Express
     port?: number
@@ -88,14 +94,19 @@ export class OID4VCIServer {
   private readonly _baseUrl: URL
   private readonly cNonceExpiresIn: number
   private readonly tokenExpiresIn: number
-  private readonly _server: http.Server
+  private readonly _server?: http.Server
+  private readonly _router: express.Router
 
   public get app(): Express {
     return this._app
   }
 
-  public get server(): http.Server {
+  public get server(): http.Server | undefined {
     return this._server
+  }
+
+  public get router(): express.Router {
+    return this._router
   }
 
   constructor(
@@ -116,14 +127,15 @@ export class OID4VCIServer {
     } else {
       this._app = opts.serverOpts.app
     }
+    this._router = express.Router()
     this._issuer = opts?.issuer ? opts.issuer : buildVCIFromEnvironment()
 
     this.pushedAuthorizationEndpoint()
     this.getMetadataEndpoint()
     if (!(opts?.credentialOfferOpts?.createOfferEndpointDisabled === true || process.env.CREDENTIAL_OFFER_ENDPOINT_DISABLED === 'true')) {
-      this.createCredentialOfferEndpoint()
+      this.createCredentialOfferEndpoint(opts?.credentialOfferOpts)
     }
-    this.getCredentialOfferEndpoint()
+    this.getCredentialOfferEndpoint(opts?.credentialOfferOpts)
     this.getCredentialEndpoint()
     this.assertAccessTokenHandling()
     if (!this.isTokenEndpointDisabled(opts?.tokenEndpointOpts)) {
@@ -131,12 +143,21 @@ export class OID4VCIServer {
     }
     this.cNonceExpiresIn = opts?.tokenEndpointOpts?.cNonceExpiresIn ?? 300000
     this.tokenExpiresIn = opts?.tokenEndpointOpts?.tokenExpiresIn ?? 300000
-    this._server = this.app.listen(httpPort, host, () => console.log(`HTTP server listening on port ${httpPort}`))
+    this._app.use(this.getBasePath(), this._router)
+    if (!opts?.serverOpts?.app) {
+      this._server = this.app.listen(httpPort, host, () => console.log(`HTTP server listening on port ${httpPort}`))
+    }
   }
 
   private accessTokenEndpoint(tokenEndpointOpts?: ITokenEndpointOpts) {
-    const issuerEndpoint = this.issuer.issuerMetadata.token_endpoint
-    let path: string
+    const tokenEndpoint = this.issuer.issuerMetadata.token_endpoint
+    const externalAS = !!tokenEndpoint
+    if (externalAS) {
+      console.log(`External Authorization Server ${tokenEndpoint} is being used. Not enabling issuer token endpoint`)
+      return
+      // path = this.determinePath(tokenEndpoint, { skipBaseUrlCheck: true })
+      // url = new URL(`${baseUrl}${path}`)
+    }
 
     const accessTokenIssuer = tokenEndpointOpts?.accessTokenIssuer ?? process.env.ACCESS_TOKEN_ISSUER ?? this.issuer.issuerMetadata.credential_issuer
 
@@ -151,25 +172,20 @@ export class OID4VCIServer {
     } else if (!accessTokenIssuer) {
       throw new Error(ACCESS_TOKEN_ISSUER_REQUIRED_ERROR)
     }
-    let url: URL
-    let baseUrl = this._baseUrl?.toString()
-    if (baseUrl.endsWith('/')) {
-      baseUrl = baseUrl.substring(0, baseUrl.length - 1)
-    }
-    if (!issuerEndpoint) {
-      path = this.extractPath(tokenEndpointOpts?.tokenPath ?? process.env.TOKEN_PATH ?? '/token', true)
-      // let's fix any baseUrl ending with a slash as path will always start with a slash
 
-      url = new URL(`${baseUrl}${path}`)
-      this.issuer.issuerMetadata.token_endpoint = url.toString()
-    } else {
-      this.assertEndpointHasIssuerBaseUrl(issuerEndpoint)
-      path = this.extractPath(issuerEndpoint)
-      url = new URL(`${baseUrl}${path}`)
-    }
+    const baseUrl = this.getBaseUrl()
 
-    this.app.post(
-      url.pathname,
+    // issuer is also AS
+    const path = this.determinePath(tokenEndpointOpts?.tokenPath ?? process.env.TOKEN_PATH ?? '/token', {
+      skipBaseUrlCheck: false,
+      stripBasePath: true,
+    })
+    // let's fix any baseUrl ending with a slash as path will always start with a slash and we already removed it at the end of the base url
+
+    const url = new URL(`${baseUrl}${path}`)
+    this.issuer.issuerMetadata.token_endpoint = url.toString()
+    this.router.post(
+      this.determinePath(url.pathname, { stripBasePath: true }),
       verifyTokenRequest({
         issuer: this.issuer,
         preAuthorizedCodeExpirationDuration,
@@ -186,12 +202,8 @@ export class OID4VCIServer {
   }
 
   private getMetadataEndpoint() {
-    let basePath = this.extractPath(this._baseUrl.toString())
-    if (basePath.endsWith('/')) {
-      basePath = basePath.substring(0, basePath.length - 1)
-    }
-    const path = basePath + '/.well-known/openid-credential-issuer'
-    this.app.get(path, (request: Request, response: Response) => {
+    const path = `/.well-known/openid-credential-issuer`
+    this.router.get(path, (request: Request, response: Response) => {
       return response.send(this.issuer.issuerMetadata)
     })
   }
@@ -200,13 +212,12 @@ export class OID4VCIServer {
     const endpoint = this.issuer.issuerMetadata.credential_endpoint
     let path: string
     if (!endpoint) {
-      path = this._baseUrl.toString().endsWith('/') ? 'credentials' : '/credentials'
-      this.issuer.issuerMetadata.credential_endpoint = `${this._baseUrl}${path}`
+      path = `/credentials`
+      this.issuer.issuerMetadata.credential_endpoint = `${this.getBaseUrl()}${path}`
     } else {
-      this.assertEndpointHasIssuerBaseUrl(endpoint)
-      path = this.extractPath(endpoint)
+      path = this.determinePath(endpoint, { stripBasePath: true, skipBaseUrlCheck: false })
     }
-    this.app.post(path, async (request: Request, response: Response) => {
+    this.router.post(this.determinePath(path, { stripBasePath: true }), async (request: Request, response: Response) => {
       try {
         const credentialRequest = request.body as CredentialRequestV1_0_11
         const credential = await this.issuer.issueCredential({
@@ -230,19 +241,20 @@ export class OID4VCIServer {
   }
 
   // fixme authz and enable/disable
-  private createCredentialOfferEndpoint() {
-    this.app.post('/credential-offers', async (request: Request<CredentialOfferV1_0_11>, response: Response) => {
-      const grantTypes = determineGrantTypes(request.body)
-      if (grantTypes.length === 0) {
-        return sendErrorResponse(response, 400, 'No grant type supplied')
-      }
-      const grants = request.body.grants as Grant
-      const credentials = request.body.credentials as (string | CredentialFormat)[]
-      if (!credentials || credentials.length === 0) {
-        return sendErrorResponse(response, 400, 'No credentials supplied')
-      }
-
+  private createCredentialOfferEndpoint(opts?: ICreateCredentialOfferOpts) {
+    const path = this.determinePath(opts?.createOfferPath ?? '/webapp/credential-offers', { stripBasePath: true })
+    this.router.post(path, async (request: Request<CredentialOfferV1_0_11>, response: Response) => {
       try {
+        const grantTypes = determineGrantTypes(request.body)
+        if (grantTypes.length === 0) {
+          return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_grant, error_description: 'No grant type supplied' })
+        }
+        const grants = request.body.grants as Grant
+        const credentials = request.body.credentials as (string | CredentialFormat)[]
+        if (!credentials || credentials.length === 0) {
+          return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'No credentials supplied' })
+        }
+
         const uri = await this.issuer.createCredentialOfferURI({ grants, credentials })
         return response.send(JSON.stringify({ uri }))
       } catch (e) {
@@ -250,7 +262,7 @@ export class OID4VCIServer {
           response,
           500,
           {
-            error: 'invalid_request',
+            error: TokenErrorResponse.invalid_request,
             error_description: (e as Error).message,
           },
           e
@@ -259,10 +271,11 @@ export class OID4VCIServer {
     })
   }
 
-  private getCredentialOfferEndpoint() {
-    this.app.get('/credential-offers/:id', async (request: Request, response: Response) => {
-      const { id } = request.params
+  private getCredentialOfferEndpoint(opts?: ICreateCredentialOfferOpts) {
+    const path = this.determinePath(opts?.getOfferPath ?? '/webapp/credential-offers/:id', { stripBasePath: true })
+    this.app.get(path, async (request: Request, response: Response) => {
       try {
+        const { id } = request.params
         const session = await this.issuer.credentialOfferSessions.get(id)
         if (!session || !session.credentialOffer) {
           return sendErrorResponse(response, 404, {
@@ -303,7 +316,7 @@ export class OID4VCIServer {
       return next()
     }
 
-    this.app.post('/par', handleHttpStatus400, (req: Request, res: Response) => {
+    this.router.post('/par', handleHttpStatus400, (req: Request, res: Response) => {
       // FIXME Fake client for testing, it needs to come from a registered client
       const client = {
         scope: ['openid', 'test'],
@@ -350,6 +363,9 @@ export class OID4VCIServer {
   }
 
   public stop() {
+    if (!this.server) {
+      throw Error('Cannot stop server is the REST API is only a router of an existing express app')
+    }
     this.server.close()
   }
 
@@ -375,23 +391,52 @@ export class OID4VCIServer {
     }
   }
 
-  private extractPath(endpoint: string, skipBaseUrlCheck?: boolean) {
-    if (endpoint.startsWith('/')) {
-      return endpoint
+  public getBaseUrl() {
+    if (!this._baseUrl) {
+      throw Error(`Not base URL provided`)
     }
-    if (skipBaseUrlCheck !== true) {
+    return trimEnd(this._baseUrl.toString(), '/')
+  }
+
+  public getBasePath() {
+    const basePath = new URL(this.getBaseUrl()).pathname
+    if (basePath === '' || basePath === '/') {
+      return ''
+    }
+    return `/${trimBoth(basePath, '/')}`
+  }
+
+  private determinePath(endpoint: string, opts?: { skipBaseUrlCheck?: boolean; prependUrl?: string; stripBasePath?: boolean }) {
+    let path = endpoint
+    if (opts?.prependUrl) {
+      path = adjustUrl(path, { prepend: opts.prependUrl })
+    }
+    if (opts?.skipBaseUrlCheck !== true) {
       this.assertEndpointHasIssuerBaseUrl(endpoint)
     }
-    let path = endpoint
-    if (endpoint.toLowerCase().includes('://')) {
+    if (endpoint.includes('://')) {
       path = new URL(endpoint).pathname
     }
-    return path.startsWith('/') ? path : `/${path}`
+    path = `/${trimBoth(path, '/')}`
+    if (opts?.stripBasePath && path.startsWith(this.getBasePath())) {
+      path = trimStart(path, this.getBasePath())
+      path = `/${trimBoth(path, '/')}`
+    }
+    return path
+  }
+
+  private validateEndpointHasIssuerBaseUrl(endpoint: string): boolean {
+    if (!endpoint) {
+      return false
+    } else if (!endpoint.includes('://')) {
+      return true //absolute or relative path, not containing a hostname
+    }
+    return endpoint.startsWith(this.getBaseUrl())
   }
 
   private assertEndpointHasIssuerBaseUrl(endpoint: string) {
-    if (!endpoint.startsWith(this._baseUrl.toString())) {
-      throw Error(`endpoint '${endpoint}' does not have base url '${this._baseUrl}'`)
+    if (!this.validateEndpointHasIssuerBaseUrl(endpoint)) {
+      throw Error(`endpoint '${endpoint}' does not have base url '${this.getBaseUrl()}'`)
     }
   }
 }

@@ -257,9 +257,9 @@ describe('VcIssuer', () => {
             name: 'example issuer',
           },
         ],
-        token_endpoint: 'http://localhost:3456/test/test/token/path',
+        token_endpoint: 'http://localhost:3456/test/token/path',
       },
-      token_endpoint: 'http://localhost:3456/test/test/token/path',
+      token_endpoint: 'http://localhost:3456/test/token/path',
     })
   })
   it('should get state on server side', async () => {
