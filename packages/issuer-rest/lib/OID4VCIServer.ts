@@ -114,9 +114,11 @@ export class OID4VCIServer {
   ) {
     dotenv.config()
 
-    this._baseUrl = new URL(opts?.serverOpts?.baseUrl ?? process.env.BASE_URL ?? 'http://localhost')
-    const httpPort = opts?.serverOpts?.port ?? getNumberOrUndefined(this._baseUrl.port) ?? getNumberOrUndefined(process.env.PORT) ?? 3000
-    const host = opts?.serverOpts?.host ?? this._baseUrl.host.split(':')[0]
+    this._baseUrl = new URL(
+      opts?.serverOpts?.baseUrl ?? process.env.BASE_URL ?? opts?.issuer?.issuerMetadata?.credential_issuer ?? 'http://localhost'
+    )
+    const httpPort = opts?.serverOpts?.port ?? getNumberOrUndefined(process.env.PORT) ?? getNumberOrUndefined(this._baseUrl.port) ?? 3000
+    const host = opts?.serverOpts?.host ?? process.env.HOST ?? this._baseUrl.host.split(':')[0]
 
     if (!opts?.serverOpts?.app) {
       this._app = express()

@@ -304,7 +304,6 @@ export class VcIssuer {
 
   private async validateCredentialRequestProof({
     credentialRequest,
-    clientId,
     jwtVerifyCallback,
     tokenExpiresIn,
   }: {

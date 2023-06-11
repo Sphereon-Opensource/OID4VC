@@ -127,6 +127,9 @@ describe('OID4VCIServer', () => {
 
     const vcIssuerServer = new OID4VCIServer({
       issuer: vcIssuer,
+      serverOpts: {
+        host: '127.0.0.1',
+      },
       tokenEndpointOpts: {
         accessTokenSignerCallback: signerCallback,
         accessTokenIssuer: 'https://www.example.com',

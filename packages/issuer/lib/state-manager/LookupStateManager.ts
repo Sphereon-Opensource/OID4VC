@@ -58,6 +58,7 @@ export class LookupStateManager<K extends StateType, V extends StateType> implem
     return this.valueId(id).then((value) => (value ? this.valueStateManager.has(value) : false))
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async set(id: string, stateValue: V): Promise<void> {
     throw Error(`Please use the set method that accepts both and id, value and object`)
   }

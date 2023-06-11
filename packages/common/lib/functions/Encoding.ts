@@ -14,9 +14,9 @@ import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, OpenId4VCIVersion
 export function convertJsonToURI(
   json:
     | {
-        [s: string]: any;
+        [s: string]: never;
       }
-    | ArrayLike<any>
+    | ArrayLike<never>
     | string
     | object,
   opts?: EncodeJsonAsURIOpts
