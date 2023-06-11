@@ -69,14 +69,14 @@ function buildVCIFromEnvironment() {
     .build()
 }
 
-interface ICreateCredentialOfferOpts {
+export interface ICreateCredentialOfferOpts {
   createOfferPath?: string
   getOfferPath?: string
   createOfferEndpointDisabled?: boolean // Disable the REST endpoint for creating offers. You can directly call the Issuer to create the offer object
   //todo: Add authn/z, as this endpoint would be called by an integration instead of wallets
 }
 
-interface IOID4VCIServerOpts {
+export interface IOID4VCIServerOpts {
   tokenEndpointOpts?: ITokenEndpointOpts
   credentialOfferOpts?: ICreateCredentialOfferOpts
   serverOpts?: {
