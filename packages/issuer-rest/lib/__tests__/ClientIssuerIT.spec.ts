@@ -138,7 +138,7 @@ describe('VcIssuer', () => {
     server = new OID4VCIServer({
       issuer: vcIssuer,
       serverOpts: { baseUrl: 'http://localhost:3456/test', port: 3456 },
-      tokenEndpointOpts: { accessTokenSignerCallback, tokenPath: 'test/token/path' },
+      tokenEndpointOpts: { accessTokenSignerCallback, tokenPath: '/test/token' },
     })
   })
 
@@ -257,9 +257,8 @@ describe('VcIssuer', () => {
             name: 'example issuer',
           },
         ],
-        token_endpoint: 'http://localhost:3456/test/token/path',
       },
-      token_endpoint: 'http://localhost:3456/test/token/path',
+      token_endpoint: 'http://localhost:3456/test/token',
     })
   })
   it('should get state on server side', async () => {
