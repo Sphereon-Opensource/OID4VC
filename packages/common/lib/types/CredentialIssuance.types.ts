@@ -1,38 +1,51 @@
-import { CredentialFormat, ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
+import { W3CVerifiableCredential } from '@sphereon/ssi-types';
 
+import { AuthzFlowType } from './Authorization.types';
+import { OID4VCICredentialFormat } from './Generic.types';
 import { OpenId4VCIVersion } from './OpenID4VCIVersions.types';
-import { CredentialOfferPayloadV1_0_09 } from './v1_0_09.types';
-import { CredentialOfferPayloadV1_0_11 } from './v1_0_11.types';
-
-export interface CredentialRequest {
-  //TODO: handling list is out of scope for now
-  type: string | string[];
-  format: CredentialFormat | CredentialFormat[];
-  proof: ProofOfPossession;
-}
+import { CredentialOfferPayloadV1_0_08 } from './v1_0_08.types';
+import { CredentialOfferPayloadV1_0_09, CredentialOfferV1_0_09 } from './v1_0_09.types';
+import { CredentialOfferPayloadV1_0_11, CredentialOfferV1_0_11 } from './v1_0_11.types';
 
 export interface CredentialResponse {
   credential?: W3CVerifiableCredential; // OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
-  format: CredentialFormat | CredentialFormat[]; // REQUIRED. JSON string denoting the format of the issued Credential
+  format: OID4VCICredentialFormat /* | OID4VCICredentialFormat[]*/; // REQUIRED. JSON string denoting the format of the issued Credential
   acceptance_token?: string; // OPTIONAL. A JSON string containing a security token subsequently used to obtain a Credential. MUST be present when credential is not returned
   c_nonce?: string; // OPTIONAL. JSON string containing a nonce to be used to create a proof of possession of key material when requesting a Credential (see Section 7.2). When received, the Wallet MUST use this nonce value for its subsequent credential requests until the Credential Issuer provides a fresh nonce
   c_nonce_expires_in?: number; // OPTIONAL. JSON integer denoting the lifetime in seconds of the c_nonce
 }
 
-export interface CredentialOfferRequestWithBaseUrl {
+export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOfferRequest {
+  scheme: string;
   baseUrl: string;
-  request: CredentialOfferPayloadV1_0_09 | CredentialOfferPayloadV1_0_11;
+  userPinRequired: boolean;
+  issuerState?: string;
+  preAuthorizedCode?: string;
+}
+
+export type CredentialOffer = CredentialOfferV1_0_09 | CredentialOfferV1_0_11;
+
+export type CredentialOfferPayload = CredentialOfferPayloadV1_0_08 | CredentialOfferPayloadV1_0_09 | CredentialOfferPayloadV1_0_11;
+
+export interface AssertedUniformCredentialOffer extends UniformCredentialOffer {
+  credential_offer: UniformCredentialOfferPayload;
+}
+
+export interface UniformCredentialOffer {
+  credential_offer?: UniformCredentialOfferPayload;
+  credential_offer_uri?: string;
+}
+
+export interface UniformCredentialOfferRequest extends AssertedUniformCredentialOffer {
+  original_credential_offer: CredentialOfferPayload;
   version: OpenId4VCIVersion;
+  supportedFlows: AuthzFlowType[];
 }
 
-export type CredentialOfferPayload = CredentialOfferPayloadV1_0_09 | CredentialOfferPayloadV1_0_11;
-
-export enum ProofType {
-  JWT = 'jwt',
-}
+export type UniformCredentialOfferPayload = CredentialOfferPayloadV1_0_11;
 
 export interface ProofOfPossession {
-  proof_type: ProofType;
+  proof_type: 'jwt';
   jwt: string;
 
   [x: string]: unknown;
@@ -47,6 +60,8 @@ export type EncodeJsonAsURIOpts = {
   uriTypeProperties?: string[];
   arrayTypeProperties?: string[];
   baseUrl?: string;
+  param?: string;
+  version?: OpenId4VCIVersion;
 };
 
 export type DecodeURIAsJsonOpts = {
@@ -104,12 +119,11 @@ export enum Alg {
   ES256K = 'ES256K',
 }
 
-export enum Typ {
-  JWT = 'JWT',
+export type Typ =
+  | 'jwt'
   // https://www.rfc-editor.org/rfc/rfc8725.pdf#name-use-explicit-typing
   // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1-2.1.2.1.2.1.1
-  'OPENID4VCI-PROOF+JWT' = 'openid4vci-proof+jwt',
-}
+  | 'openid4vci-proof+jwt';
 
 export interface JoseHeaderParameters {
   kid?: string; // CONDITIONAL. JWT header containing the key ID. If the Credential shall be bound to a DID, the kid refers to a DID URL which identifies a particular key in the DID Document that the Credential shall be bound to. MUST NOT be present if jwk or x5c is present.
@@ -151,10 +165,3 @@ export interface JWTPayload {
 
 export type JWTSignerCallback = (jwt: Jwt, kid?: string) => Promise<string>;
 export type JWTVerifyCallback = (args: { jwt: string; kid?: string }) => Promise<Jwt>;
-
-export type Request = CredentialRequest;
-
-export type CredentialIssuerCallback = (opts: {
-  credentialRequest?: CredentialRequest;
-  credential?: ICredential;
-}) => Promise<W3CVerifiableCredential>;

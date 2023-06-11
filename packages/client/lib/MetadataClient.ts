@@ -1,19 +1,19 @@
 import {
+  CredentialIssuerMetadata,
   CredentialOfferPayload,
   CredentialOfferRequestWithBaseUrl,
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
-  IssuerMetadata,
   OAuth2ASMetadata,
   Oauth2ASWithOID4VCIMetadata,
   OpenIDResponse,
   WellKnownEndpoints,
-} from '@sphereon/openid4vci-common';
+} from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
 import { getJson } from './functions';
 
-const debug = Debug('sphereon:openid4vci:metadata');
+const debug = Debug('sphereon:oid4vci:metadata');
 
 export class MetadataClient {
   /**
@@ -22,7 +22,7 @@ export class MetadataClient {
    * @param credentialOffer
    */
   public static async retrieveAllMetadataFromCredentialOffer(credentialOffer: CredentialOfferRequestWithBaseUrl): Promise<EndpointMetadata> {
-    return MetadataClient.retrieveAllMetadataFromCredentialOfferRequest(credentialOffer.request);
+    return MetadataClient.retrieveAllMetadataFromCredentialOfferRequest(credentialOffer.credential_offer);
   }
 
   /**
@@ -118,7 +118,7 @@ export class MetadataClient {
    *
    * @param issuerHost The issuer hostname
    */
-  public static async retrieveOpenID4VCIServerMetadata(issuerHost: string): Promise<OpenIDResponse<IssuerMetadata> | undefined> {
+  public static async retrieveOpenID4VCIServerMetadata(issuerHost: string): Promise<OpenIDResponse<CredentialIssuerMetadata> | undefined> {
     // Since the server metadata endpoint is optional we are not going to throw an error.
     return MetadataClient.retrieveWellknown(issuerHost, WellKnownEndpoints.OPENID4VCI_ISSUER, { errorOnNotFound: false });
   }

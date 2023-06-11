@@ -1,6 +1,6 @@
 {
-  "name": "@sphereon/openid4vci-client",
-  "version": "0.5.0-unstable.0",
+  "name": "@sphereon/oid4vci-client",
+  "version": "0.5.0",
   "description": "OpenID for Verifiable Credential Issuance (OpenID4VCI) client",
   "source": "lib/index.ts",
   "main": "dist/index.js",
@@ -15,7 +15,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@sphereon/openid4vci-common": "workspace:*",
+    "@sphereon/oid4vci-common": "workspace:*",
     "@sphereon/ssi-types": "^0.9.0",
     "cross-fetch": "^3.1.5",
     "debug": "^4.3.4",

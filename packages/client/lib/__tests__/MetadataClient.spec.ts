@@ -1,7 +1,7 @@
-import { getIssuerFromCredentialOfferPayload, WellKnownEndpoints } from '@sphereon/openid4vci-common';
+import { getIssuerFromCredentialOfferPayload, WellKnownEndpoints } from '@sphereon/oid4vci-common';
 import nock from 'nock';
 
-import { CredentialOffer } from '../CredentialOffer';
+import { CredentialOfferClient } from '../CredentialOfferClient';
 import { MetadataClient } from '../MetadataClient';
 
 import {
@@ -21,6 +21,11 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
   beforeAll(() => {
     nock.cleanAll();
   });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
   it('succeed with OID4VCI and separate AS metadata', async () => {
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
 
@@ -38,8 +43,8 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
 
     const INITIATE_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
-    const initiation = CredentialOffer.fromURI(INITIATE_URI);
-    const metadata = await MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(initiation.request) as string);
+    const initiation = await CredentialOfferClient.fromURI(INITIATE_URI);
+    const metadata = await MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(initiation.credential_offer) as string);
     expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential');
     expect(metadata.token_endpoint).toEqual('https://auth.research.identiproof.io/oauth2/token');
     expect(metadata.issuerMetadata).toEqual(IDENTIPROOF_OID4VCI_METADATA);

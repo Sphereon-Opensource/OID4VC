@@ -1,14 +1,4 @@
-import {
-  BAD_PARAMS,
-  JWS_NOT_VALID,
-  Jwt,
-  JWTHeader,
-  JWTPayload,
-  ProofOfPossession,
-  ProofOfPossessionCallbacks,
-  ProofType,
-  Typ,
-} from '@sphereon/openid4vci-common';
+import { BAD_PARAMS, JWS_NOT_VALID, Jwt, JWTHeader, JWTPayload, ProofOfPossession, ProofOfPossessionCallbacks, Typ } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
 const debug = Debug('sphereon:openid4vci:token');
@@ -39,12 +29,13 @@ export const createProofOfPossession = async (
     debug(`no jwt signer callback or arguments supplied!`);
     throw new Error(BAD_PARAMS);
   }
+
   const signerArgs = createJWT(jwtProps, existingJwt);
   const jwt = await callbacks.signCallback(signerArgs, signerArgs.header.kid);
   const proof = {
-    proof_type: ProofType.JWT,
+    proof_type: 'jwt',
     jwt,
-  };
+  } as ProofOfPossession;
 
   try {
     partiallyValidateJWS(jwt);
@@ -68,7 +59,7 @@ const partiallyValidateJWS = (jws: string): void => {
 };
 
 export interface JwtProps {
-  typ?: string;
+  typ?: Typ;
   kid?: string;
   issuer?: string;
   clientId?: string;
@@ -81,6 +72,7 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   const aud = getJwtProperty('aud', true, jwtProps?.issuer, existingJwt?.payload?.aud);
   const iss = getJwtProperty('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss);
   const jti = getJwtProperty('jti', false, jwtProps?.jti, existingJwt?.payload?.jti);
+  const typ = getJwtProperty('typ', true, jwtProps?.typ, existingJwt?.header?.typ, 'jwt');
   const nonce = getJwtProperty('nonce', false, jwtProps?.nonce, existingJwt?.payload?.nonce); // Officially this is required, but some implementations don't have it
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const alg = getJwtProperty('alg', false, jwtProps?.alg, existingJwt?.header?.alg, 'ES256')!;
@@ -97,7 +89,7 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   };
 
   const jwtHeader: JWTHeader = {
-    typ: Typ.JWT,
+    typ,
     alg,
     kid,
   };

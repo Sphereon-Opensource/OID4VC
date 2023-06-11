@@ -1,4 +1,4 @@
-import { CredentialOfferPayloadV1_0_09, CredentialOfferRequestWithBaseUrl, OpenId4VCIVersion } from '@sphereon/openid4vci-common';
+import { AuthzFlowType, CredentialOfferRequestWithBaseUrl } from '@sphereon/oid4vci-common';
 
 export const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io';
 export const IDENTIPROOF_AS_URL = 'https://auth.research.identiproof.io';
@@ -12,14 +12,30 @@ export const INITIATION_TEST_URI =
 
 export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
   baseUrl: 'openid-initiate-issuance://',
-  request: {
-    credential_type: 'OpenBadgeCredential',
+  credential_offer: {
+    credential_issuer: 'https://jff.walt.id/issuer-api/oidc/',
+    credentials: ['OpenBadgeCredential'],
+    grants: {
+      'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+        'pre-authorized_code':
+          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
+        user_pin_required: false,
+      },
+    },
+  },
+  original_credential_offer: {
+    credential_type: ['OpenBadgeCredential'],
     issuer: 'https://jff.walt.id/issuer-api/oidc/',
     'pre-authorized_code':
       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
     user_pin_required: 'false',
-  } as CredentialOfferPayloadV1_0_09,
-  version: OpenId4VCIVersion.VER_1_0_09,
+  },
+  preAuthorizedCode:
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
+  scheme: 'openid-initiate-issuance',
+  supportedFlows: [AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW],
+  userPinRequired: false,
+  version: 1008,
 };
 export const IDENTIPROOF_AS_METADATA = {
   issuer: 'https://auth.research.identiproof.io',

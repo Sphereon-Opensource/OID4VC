@@ -1,22 +1,22 @@
 import {
-  CredentialFormatEnum,
+  CredentialsSupportedDisplay,
   CredentialSupported,
-  Display,
   IssuerCredentialSubject,
   IssuerCredentialSubjectDisplay,
+  OID4VCICredentialFormat,
   TokenErrorResponse,
-} from '@sphereon/openid4vci-common'
+} from '@sphereon/oid4vci-common'
 
 export class CredentialSupportedBuilderV1_11 {
-  format?: CredentialFormatEnum
+  format?: OID4VCICredentialFormat
   id?: string
   types?: string[]
   cryptographicBindingMethodsSupported?: ('jwk' | 'cose_key' | 'did' | string)[]
   cryptographicSuitesSupported?: ('jwt_vc' | 'ldp_vc' | string)[]
-  display?: Display[]
+  display?: CredentialsSupportedDisplay[]
   credentialSubject?: IssuerCredentialSubject
 
-  withFormat(credentialFormat: CredentialFormatEnum): CredentialSupportedBuilderV1_11 {
+  withFormat(credentialFormat: OID4VCICredentialFormat): CredentialSupportedBuilderV1_11 {
     this.format = credentialFormat
     return this
   }
@@ -74,7 +74,7 @@ export class CredentialSupportedBuilderV1_11 {
     return this
   }
 
-  addCredentialDisplay(credentialDisplay: Display | Display[]): CredentialSupportedBuilderV1_11 {
+  addCredentialSupportedDisplay(credentialDisplay: CredentialsSupportedDisplay | CredentialsSupportedDisplay[]): CredentialSupportedBuilderV1_11 {
     if (!Array.isArray(credentialDisplay)) {
       this.display = this.display ? [...this.display, credentialDisplay] : [credentialDisplay]
     } else {
@@ -83,12 +83,17 @@ export class CredentialSupportedBuilderV1_11 {
     return this
   }
 
-  withCredentialDisplay(credentialDisplay: Display | Display[]): CredentialSupportedBuilderV1_11 {
+  withCredentialSupportedDisplay(credentialDisplay: CredentialsSupportedDisplay | CredentialsSupportedDisplay[]): CredentialSupportedBuilderV1_11 {
     this.display = Array.isArray(credentialDisplay) ? credentialDisplay : [credentialDisplay]
     return this
   }
 
-  withIssuerCredentialSubjectDisplay(
+  withCredentialSubjectDisplay(credentialSubject: IssuerCredentialSubject) {
+    this.credentialSubject = credentialSubject
+    return this
+  }
+
+  addCredentialSubjectPropertyDisplay(
     subjectProperty: string,
     issuerCredentialSubjectDisplay: IssuerCredentialSubjectDisplay
   ): CredentialSupportedBuilderV1_11 {
@@ -106,6 +111,12 @@ export class CredentialSupportedBuilderV1_11 {
     const credentialSupported: Partial<CredentialSupported> = {
       format: this.format,
     }
+    if (!this.types) {
+      throw new Error('types are required')
+    } else {
+      credentialSupported.types = this.types
+    }
+
     if (this.credentialSubject) {
       credentialSupported.credentialSubject = this.credentialSubject
     }

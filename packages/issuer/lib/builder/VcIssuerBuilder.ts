@@ -1,155 +1,181 @@
 import {
   CNonceState,
-  CredentialIssuerCallback,
-  CredentialOfferState,
+  CredentialIssuerMetadata,
+  CredentialOfferSession,
   CredentialSupported,
-  Display,
-  IssuerMetadata,
   IStateManager,
   JWTVerifyCallback,
+  MetadataDisplay,
   TokenErrorResponse,
-} from '@sphereon/openid4vci-common'
+  URIState,
+} from '@sphereon/oid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
-import { MemoryCNonceStateManager } from '../state-manager/MemoryCNonceStateManager'
-import { MemoryCredentialOfferStateManager } from '../state-manager/MemoryCredentialOfferStateManager'
+import { MemoryStates } from '../state-manager'
+import { CredentialDataSupplier, CredentialSignerCallback } from '../types'
+
+import { IssuerMetadataBuilderV1_11 } from './IssuerMetadataBuilderV1_11'
 
 export class VcIssuerBuilder {
-  credentialIssuer?: string
-  authorizationServer?: string
-  credentialEndpoint?: string
-  batchCredentialEndpoint?: string
-  tokenEndpoint?: string
-  issuerDisplay?: Display[]
-  credentialsSupported?: CredentialSupported[]
+  issuerMetadataBuilder?: IssuerMetadataBuilderV1_11
+  issuerMetadata: Partial<CredentialIssuerMetadata> = {}
+  defaultCredentialOfferBaseUri?: string
   userPinRequired?: boolean
-  credentialOfferStateManager?: IStateManager<CredentialOfferState>
+  cNonceExpiresIn?: number
+  credentialOfferStateManager?: IStateManager<CredentialOfferSession>
+  credentialOfferURIManager?: IStateManager<URIState>
   cNonceStateManager?: IStateManager<CNonceState>
-  issuerCallback?: CredentialIssuerCallback
-  verifyCallback?: JWTVerifyCallback
+  credentialSignerCallback?: CredentialSignerCallback
+  jwtVerifyCallback?: JWTVerifyCallback
+  credentialDataSupplier?: CredentialDataSupplier
 
-  public withCredentialIssuer(issuer: string): VcIssuerBuilder {
-    this.credentialIssuer = issuer
-    return this
-  }
-  public withAuthorizationServer(authorizationServer: string): VcIssuerBuilder {
-    this.authorizationServer = authorizationServer
+  public withIssuerMetadata(issuerMetadata: CredentialIssuerMetadata) {
+    this.issuerMetadata = issuerMetadata
     return this
   }
 
-  public withCredentialEndpoint(credentialEndpoint: string): VcIssuerBuilder {
-    this.credentialEndpoint = credentialEndpoint
+  public withIssuerMetadataBuilder(builder: IssuerMetadataBuilderV1_11) {
+    this.issuerMetadataBuilder = builder
     return this
   }
 
-  public withBatchCredentialEndpoint(batchCredentialEndpoint: string): VcIssuerBuilder {
-    this.batchCredentialEndpoint = batchCredentialEndpoint
+  public withDefaultCredentialOfferBaseUri(baseUri: string) {
+    this.defaultCredentialOfferBaseUri = baseUri
     return this
   }
 
-  public withTokenEndpoint(tokenEndpoint: string): VcIssuerBuilder {
-    this.tokenEndpoint = tokenEndpoint
+  public withCredentialIssuer(issuer: string): this {
+    this.issuerMetadata.credential_issuer = issuer
     return this
   }
 
-  public withIssuerDisplay(issuerDisplay: Display[] | Display): VcIssuerBuilder {
-    this.issuerDisplay = Array.isArray(issuerDisplay) ? issuerDisplay : [issuerDisplay]
+  public withAuthorizationServer(authorizationServer: string): this {
+    this.issuerMetadata.authorization_server = authorizationServer
     return this
   }
 
-  public addIssuerDisplay(issuerDisplay: Display[] | Display): VcIssuerBuilder {
-    if (!Array.isArray(issuerDisplay)) this.issuerDisplay = this.issuerDisplay ? [...this.issuerDisplay, issuerDisplay] : [issuerDisplay]
-    else {
-      this.issuerDisplay = this.issuerDisplay ? [...this.issuerDisplay, ...issuerDisplay] : issuerDisplay
-    }
+  public withCredentialEndpoint(credentialEndpoint: string): this {
+    this.issuerMetadata.credential_endpoint = credentialEndpoint
     return this
   }
 
-  public withCredentialsSupported(credentialSupported: CredentialSupported | CredentialSupported[]): VcIssuerBuilder {
-    this.credentialsSupported = Array.isArray(credentialSupported) ? credentialSupported : [credentialSupported]
+  public withBatchCredentialEndpoint(batchCredentialEndpoint: string): this {
+    this.issuerMetadata.batch_credential_endpoint = batchCredentialEndpoint
+    throw Error('Not implemented yet')
+    // return this
+  }
+
+  public withTokenEndpoint(tokenEndpoint: string): this {
+    this.issuerMetadata.token_endpoint = tokenEndpoint
     return this
   }
 
-  public addCredentialsSupported(credentialSupported: CredentialSupported | CredentialSupported[]): VcIssuerBuilder {
-    if (!Array.isArray(credentialSupported))
-      this.credentialsSupported = this.credentialsSupported ? [...this.credentialsSupported, credentialSupported] : [credentialSupported]
-    else {
-      this.credentialsSupported = this.credentialsSupported ? [...this.credentialsSupported, ...credentialSupported] : credentialSupported
-    }
+  public withIssuerDisplay(issuerDisplay: MetadataDisplay[] | MetadataDisplay): this {
+    this.issuerMetadata.display = Array.isArray(issuerDisplay) ? issuerDisplay : [issuerDisplay]
     return this
   }
 
-  public withUserPinRequired(userPinRequired: boolean): VcIssuerBuilder {
+  public addIssuerDisplay(issuerDisplay: MetadataDisplay): this {
+    this.issuerMetadata.display = [...(this.issuerMetadata.display ?? []), issuerDisplay]
+    return this
+  }
+
+  public withCredentialsSupported(credentialSupported: CredentialSupported | CredentialSupported[]): this {
+    this.issuerMetadata.credentials_supported = Array.isArray(credentialSupported) ? credentialSupported : [credentialSupported]
+    return this
+  }
+
+  public addCredentialsSupported(credentialSupported: CredentialSupported): this {
+    this.issuerMetadata.credentials_supported = [...(this.issuerMetadata.credentials_supported ?? []), credentialSupported]
+    return this
+  }
+
+  public withUserPinRequired(userPinRequired: boolean): this {
     this.userPinRequired = userPinRequired
     return this
   }
 
-  public withCredentialOfferStateManager(iCredentialOfferStateManager: IStateManager<CredentialOfferState>): VcIssuerBuilder {
-    this.credentialOfferStateManager = iCredentialOfferStateManager
+  public withCredentialOfferURIStateManager(credentialOfferURIManager: IStateManager<URIState>): this {
+    this.credentialOfferURIManager = credentialOfferURIManager
     return this
   }
 
-  public withInMemoryCredentialOfferState(): VcIssuerBuilder {
-    this.withCredentialOfferStateManager(new MemoryCredentialOfferStateManager())
+  public withInMemoryCredentialOfferURIState(): this {
+    this.withCredentialOfferURIStateManager(new MemoryStates<URIState>())
     return this
   }
 
-  public withCNonceStateManager(iCNonceStateManager: IStateManager<CNonceState>): VcIssuerBuilder {
-    this.cNonceStateManager = iCNonceStateManager
+  public withCredentialOfferStateManager(credentialOfferManager: IStateManager<CredentialOfferSession>): this {
+    this.credentialOfferStateManager = credentialOfferManager
     return this
   }
 
-  public withInMemoryCNonceState(): VcIssuerBuilder {
-    this.withCNonceStateManager(new MemoryCNonceStateManager())
+  public withInMemoryCredentialOfferState(): this {
+    this.withCredentialOfferStateManager(new MemoryStates<CredentialOfferSession>())
     return this
   }
 
-  withIssuerCallback(cb: CredentialIssuerCallback): VcIssuerBuilder {
-    this.issuerCallback = cb
+  public withCNonceStateManager(cNonceManager: IStateManager<CNonceState>): this {
+    this.cNonceStateManager = cNonceManager
     return this
   }
 
-  withJWTVerifyCallback(verifyCallback: JWTVerifyCallback): VcIssuerBuilder {
-    this.verifyCallback = verifyCallback
+  public withInMemoryCNonceState(): this {
+    this.withCNonceStateManager(new MemoryStates())
+    return this
+  }
+
+  public withCNonceExpiresIn(cNonceExpiresIn: number): this {
+    this.cNonceExpiresIn = cNonceExpiresIn
+    return this
+  }
+
+  public withCredentialSignerCallback(cb: CredentialSignerCallback): this {
+    this.credentialSignerCallback = cb
+    return this
+  }
+
+  public withJWTVerifyCallback(verifyCallback: JWTVerifyCallback): this {
+    this.jwtVerifyCallback = verifyCallback
+    return this
+  }
+
+  public withCredentialDataSupplier(credentialDataSupplier: CredentialDataSupplier): this {
+    this.credentialDataSupplier = credentialDataSupplier
     return this
   }
 
   public build(): VcIssuer {
-    if (!this.credentialEndpoint || !this.credentialIssuer || !this.credentialsSupported) {
-      throw new Error(TokenErrorResponse.invalid_request)
-    }
     if (!this.credentialOfferStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
     if (!this.cNonceStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    if (!this.userPinRequired) {
-      this.userPinRequired = false
+
+    const builder = this.issuerMetadataBuilder?.build()
+    const metadata: Partial<CredentialIssuerMetadata> = { ...this.issuerMetadata, ...builder }
+    // Let's make sure these get merged correctly:
+    metadata.credentials_supported = [...(this.issuerMetadata.credentials_supported ?? []), ...(builder?.credentials_supported ?? [])]
+    metadata.display = [...(this.issuerMetadata.display ?? []), ...(builder?.display ?? [])]
+    if (
+      !metadata.credential_endpoint ||
+      !metadata.credential_issuer ||
+      !this.issuerMetadata.credentials_supported ||
+      this.issuerMetadata.credentials_supported.length === 0
+    ) {
+      throw new Error(TokenErrorResponse.invalid_request)
     }
-    const metadata: IssuerMetadata = {
-      credential_endpoint: this.credentialEndpoint,
-      credential_issuer: this.credentialIssuer,
-      credentials_supported: this.credentialsSupported,
-    }
-    if (this.issuerDisplay) {
-      metadata.display = this.issuerDisplay
-    }
-    if (this.batchCredentialEndpoint) {
-      metadata.batch_credential_endpoint = this.batchCredentialEndpoint
-    }
-    if (this.authorizationServer) {
-      metadata.authorization_server = this.authorizationServer
-    }
-    if (this.tokenEndpoint) {
-      metadata.token_endpoint = this.tokenEndpoint
-    }
-    return new VcIssuer(metadata, {
-      userPinRequired: this.userPinRequired,
-      callback: this.issuerCallback,
-      verifyCallback: this.verifyCallback,
-      stateManager: this.credentialOfferStateManager,
-      nonceManager: this.cNonceStateManager,
+    return new VcIssuer(metadata as CredentialIssuerMetadata, {
+      userPinRequired: this.userPinRequired ?? false,
+      defaultCredentialOfferBaseUri: this.defaultCredentialOfferBaseUri,
+      credentialSignerCallback: this.credentialSignerCallback,
+      jwtVerifyCallback: this.jwtVerifyCallback,
+      credentialDataSupplier: this.credentialDataSupplier,
+      credentialOfferSessions: this.credentialOfferStateManager,
+      cNonces: this.cNonceStateManager,
+      cNonceExpiresIn: this.cNonceExpiresIn,
+      uris: this.credentialOfferURIManager,
     })
   }
 }

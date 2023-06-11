@@ -1,4 +1,4 @@
-import { CredentialFormatEnum } from '@sphereon/openid4vci-common'
+import { CredentialOfferPayloadV1_0_11 } from '@sphereon/oid4vci-common'
 
 import { createCredentialOfferURI } from '../index'
 
@@ -10,7 +10,7 @@ describe('CredentialOfferUtils should', () => {
       credential_issuer: 'https://credential-issuer.example.com',
       credentials: [
         {
-          format: CredentialFormatEnum.jwt_vc_json,
+          format: 'jwt_vc_json',
           types: ['VerifiableCredential', 'UniversityDegreeCredential'],
         },
       ],
@@ -19,9 +19,9 @@ describe('CredentialOfferUtils should', () => {
           issuer_state: 'eyJhbGciOiJSU0Et...FYUaBy',
         },
       },
-    }
-    expect(createCredentialOfferURI(undefined, { credentialOffer })).toEqual(
-      'openid-credential-offer://?credential_offer=credential_issuer=https%3A%2F%2Fcredential-issuer.example.com&credentials=%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D&grants=%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D'
+    } as CredentialOfferPayloadV1_0_11
+    expect(createCredentialOfferURI(undefined, { credentialOffer, state: 'eyJhbGciOiJSU0Et...FYUaBy' })).toEqual(
+      'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fcredential-issuer.example.com%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D%7D'
     )
   })
 })

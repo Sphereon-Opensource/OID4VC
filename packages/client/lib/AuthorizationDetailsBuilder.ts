@@ -1,4 +1,4 @@
-import { AuthorizationDetailsJwtVcJson, CredentialFormatEnum } from '@sphereon/openid4vci-common';
+import { AuthorizationDetailsJwtVcJson, OID4VCICredentialFormat } from '@sphereon/oid4vci-common';
 
 //todo: refactor this builder to be able to create ldp details as well
 export class AuthorizationDetailsBuilder {
@@ -13,7 +13,7 @@ export class AuthorizationDetailsBuilder {
     return this;
   }
 
-  withFormats(format: CredentialFormatEnum): AuthorizationDetailsBuilder {
+  withFormats(format: OID4VCICredentialFormat): AuthorizationDetailsBuilder {
     this.authorizationDetails.format = format;
     return this;
   }
