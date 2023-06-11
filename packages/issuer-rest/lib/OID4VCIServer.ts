@@ -185,7 +185,7 @@ export class OID4VCIServer {
     // let's fix any baseUrl ending with a slash as path will always start with a slash and we already removed it at the end of the base url
 
     const url = new URL(`${baseUrl}${path}`)
-    this.issuer.issuerMetadata.token_endpoint = url.toString()
+    // this.issuer.issuerMetadata.token_endpoint = url.toString()
     this.router.post(
       this.determinePath(url.pathname, { stripBasePath: true }),
       verifyTokenRequest({
