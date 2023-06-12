@@ -8,7 +8,7 @@ import { CredentialRequestV1_0_11 } from './v1_0_11.types';
 /**
  * Important Note: please be aware that these Common interfaces are based on versions v1_0.11 and v1_0.09
  */
-export interface CredentialLogo {
+export interface ImageInfo {
   url?: string;
   alt_text?: string;
 
@@ -24,7 +24,7 @@ export interface NameAndLocale {
 }
 
 export interface LogoAndColor {
-  logo?: CredentialLogo; // OPTIONAL. A JSON object with information about the logo of the Credential with a following non-exhaustive list of parameters that MAY be included:
+  logo?: ImageInfo; // OPTIONAL. A JSON object with information about the logo of the Credential with a following non-exhaustive list of parameters that MAY be included:
   description?: string; // OPTIONAL. String value of a description of the Credential.
   background_color?: string; //OPTIONAL. String value of a background color of the Credential represented as numerical color values defined in CSS Color Module Level 37 [CSS-Color].
   text_color?: string; // OPTIONAL. String value of a text color of the Credential represented as numerical color values defined in CSS Color Module Level 37 [CSS-Color].
@@ -33,6 +33,7 @@ export interface LogoAndColor {
 export type CredentialsSupportedDisplay = NameAndLocale &
   LogoAndColor & {
     name: string; // REQUIRED. String value of a display name for the Credential.
+    background_image?: ImageInfo; //OPTIONAL, NON-SPEC compliant!. URL of a background image useful for card views of credentials. Expected to an image that fills the full card-view of a wallet
   };
 
 export type MetadataDisplay = NameAndLocale &

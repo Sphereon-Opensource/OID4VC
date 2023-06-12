@@ -1,11 +1,11 @@
-import { CredentialLogo, MetadataDisplay } from '@sphereon/oid4vci-common'
+import { ImageInfo, MetadataDisplay } from '@sphereon/oid4vci-common'
 
 export class DisplayBuilder {
   name?: string
   locale?: string
   additionalProperties: Record<string, unknown> = {}
 
-  logo?: CredentialLogo
+  logo?: ImageInfo
   backgroundColor?: string
   textColor?: string
 
@@ -19,7 +19,7 @@ export class DisplayBuilder {
     return this
   }
 
-  withLogo(logo: CredentialLogo) {
+  withLogo(logo: ImageInfo) {
     if (logo) {
       if (!logo.url) {
         throw Error(`logo without url will not work`)
