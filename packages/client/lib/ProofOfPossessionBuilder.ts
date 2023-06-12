@@ -16,8 +16,7 @@ import { createProofOfPossession } from './functions';
 export class ProofOfPossessionBuilder {
   private readonly proof?: ProofOfPossession;
   private readonly callbacks?: ProofOfPossessionCallbacks;
-
-  private version: OpenId4VCIVersion;
+  private readonly version: OpenId4VCIVersion;
 
   private kid?: string;
   private clientId?: string;
@@ -43,13 +42,15 @@ export class ProofOfPossessionBuilder {
   }) {
     this.proof = proof;
     this.callbacks = callbacks;
+    this.version = version;
     if (jwt) {
       this.withJwt(jwt);
+    } else {
+      this.withTyp(version < OpenId4VCIVersion.VER_1_0_11 ? 'jwt' : 'openid4vci-proof+jwt');
     }
     if (accessTokenResponse) {
       this.withAccessTokenResponse(accessTokenResponse);
     }
-    this.version = version;
   }
 
   static fromJwt({
@@ -80,54 +81,63 @@ export class ProofOfPossessionBuilder {
     return new ProofOfPossessionBuilder({ proof, version });
   }
 
-  withClientId(clientId: string): ProofOfPossessionBuilder {
+  withClientId(clientId: string): this {
     this.clientId = clientId;
     return this;
   }
 
-  withKid(kid: string): ProofOfPossessionBuilder {
+  withKid(kid: string): this {
     this.kid = kid;
     return this;
   }
 
-  withIssuer(issuer: string): ProofOfPossessionBuilder {
+  withIssuer(issuer: string): this {
     this.issuer = issuer;
     return this;
   }
 
-  withAlg(alg: Alg | string): ProofOfPossessionBuilder {
+  withAlg(alg: Alg | string): this {
     this.alg = alg;
     return this;
   }
 
-  withJti(jti: string): ProofOfPossessionBuilder {
+  withJti(jti: string): this {
     this.jti = jti;
     return this;
   }
 
-  withTyp(typ: Typ): ProofOfPossessionBuilder {
+  withTyp(typ: Typ): this {
+    if (this.version >= OpenId4VCIVersion.VER_1_0_11) {
+      if (!!typ && typ !== 'openid4vci-proof+jwt') {
+        throw Error('typ must be openid4vci-proof+jwt for version 1.0.11 and up');
+      }
+    } else {
+      if (!!typ && typ !== 'jwt') {
+        throw Error('typ must be jwt for version 1.0.10 and below');
+      }
+    }
     this.typ = typ;
     return this;
   }
 
-  withAccessTokenNonce(cNonce: string): ProofOfPossessionBuilder {
+  withAccessTokenNonce(cNonce: string): this {
     this.cNonce = cNonce;
     return this;
   }
 
-  withAccessTokenResponse(accessToken: AccessTokenResponse): ProofOfPossessionBuilder {
+  withAccessTokenResponse(accessToken: AccessTokenResponse): this {
     if (accessToken.c_nonce) {
       this.withAccessTokenNonce(accessToken.c_nonce);
     }
     return this;
   }
 
-  withEndpointMetadata(endpointMetadata: EndpointMetadata): ProofOfPossessionBuilder {
+  withEndpointMetadata(endpointMetadata: EndpointMetadata): this {
     this.withIssuer(endpointMetadata.issuer);
     return this;
   }
 
-  withJwt(jwt: Jwt): ProofOfPossessionBuilder {
+  withJwt(jwt: Jwt): this {
     if (!jwt) {
       throw new Error(NO_JWT_PROVIDED);
     }
