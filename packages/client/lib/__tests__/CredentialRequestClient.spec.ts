@@ -75,8 +75,6 @@ describe('Credential Request Client ', () => {
 
     const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: INITIATION_TEST })
       .withCredentialEndpoint(basePath + '/credential')
-      .withFormat('ldp_vc')
-      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt,
@@ -90,7 +88,13 @@ describe('Credential Request Client ', () => {
       .withKid(kid)
       .build();
     expect(credReqClient.getCredentialEndpoint()).toEqual(basePath + '/credential');
-    const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, version: OpenId4VCIVersion.VER_1_0_08 });
+    const credentialRequest = await credReqClient.createCredentialRequestFromCredentialSupported({
+      proofInput: proof,
+      credentialSupported: {
+        id: 'https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential',
+        format: 'ldp_vc',
+      },
+    });
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy();
     const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
     expect(result?.errorBody?.error).toBe('unsupported_format');
@@ -107,8 +111,6 @@ describe('Credential Request Client ', () => {
       });
     const credReqClient = CredentialRequestClientBuilder.fromCredentialOfferRequest({ request: INITIATION_TEST })
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt,
@@ -121,13 +123,16 @@ describe('Credential Request Client ', () => {
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build();
-    const credentialRequest = await credReqClient.createCredentialRequest({
+    const credentialRequest = await credReqClient.createCredentialRequestFromCredentialSupported({
       proofInput: proof,
-      format: 'jwt',
-      version: OpenId4VCIVersion.VER_1_0_08,
+      credentialSupported: {
+        format: 'jwt_vc_json',
+        id: 'OpenBadgeCredential',
+      },
     });
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy();
-    expect(credentialRequest.format).toEqual('jwt_vc_json');
+    // Transformed to v8
+    expect(credentialRequest.format).toEqual('jwt_vc');
     const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
     expect(result?.successBody?.credential).toEqual(mockedVC);
   });
@@ -135,8 +140,6 @@ describe('Credential Request Client ', () => {
   it('should fail with invalid url', async () => {
     const credReqClient = CredentialRequestClientBuilder.fromCredentialOfferRequest({ request: INITIATION_TEST })
       .withCredentialEndpoint('httpsf://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt,
@@ -149,11 +152,14 @@ describe('Credential Request Client ', () => {
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json-ld', types: ['random'], proof })).rejects.toThrow(
-      Error(URL_NOT_VALID)
-    );
+
+    await expect(
+      credReqClient.acquireCredentialsUsingRequest({
+        format: 'jwt_vc_json-ld',
+        type: 'Something',
+        proof,
+      })
+    ).rejects.toThrow(Error(URL_NOT_VALID));
   });
 });
 
@@ -188,14 +194,15 @@ describe('Credential Request Client with different issuers ', () => {
       })
     )
       .build()
-      .createCredentialRequest({
+      .createCredentialRequestFromCredentialSupported({
         proofInput: {
           proof_type: 'jwt',
           jwt: getMockData('spruce')?.credential.request.proof.jwt as string,
         },
-        credentialTypes: ['OpenBadgeCredential'],
-        format: 'jwt_vc_json-ld',
-        version: OpenId4VCIVersion.VER_1_0_08,
+        credentialSupported: {
+          id: 'OpenBadgeCredential',
+          format: 'jwt_vc_json-ld',
+        },
       });
     expect(credentialRequest).toEqual(getMockData('spruce')?.credential.request);
   });
@@ -203,89 +210,100 @@ describe('Credential Request Client with different issuers ', () => {
   it('should create correct CredentialRequest for Walt', async () => {
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Fdefault%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA&user_pin_required=false';
-    const credentialOffer = await (
+    const credentialRequest = await (
       await CredentialRequestClientBuilder.fromURI({
         uri: IRR_URI,
         metadata: getMockData('walt')?.metadata as unknown as EndpointMetadata,
       })
     )
       .build()
-      .createCredentialRequest({
+      .createCredentialRequestFromCredentialSupported({
         proofInput: {
           proof_type: 'jwt',
           jwt: getMockData('walt')?.credential.request.proof.jwt as string,
         },
-        credentialTypes: ['OpenBadgeCredential'],
-        format: 'jwt_vc',
-        version: OpenId4VCIVersion.VER_1_0_08,
+        credentialSupported: {
+          id: 'OpenBadgeCredential',
+          format: 'jwt_vc',
+        },
       });
-    expect(credentialOffer).toEqual(getMockData('walt')?.credential.request);
+    expect(credentialRequest).toEqual(getMockData('walt')?.credential.request);
   });
 
   // Missing the issuer required property
   xit('should create correct CredentialRequest for uniissuer', async () => {
     const IRR_URI =
       'https://oidc4vc.uniissuer.io/?credential_type=OpenBadgeCredential&pre-authorized_code=0ApoI8rxVmdQ44RIpuDbFIURIIkOhyek&user_pin_required=false';
-    const credentialOffer = await (
+    const credentialRequest = await (
       await CredentialRequestClientBuilder.fromURI({
         uri: IRR_URI,
         metadata: getMockData('uniissuer')?.metadata as unknown as EndpointMetadata,
       })
     )
       .build()
-      .createCredentialRequest({
+      .createCredentialRequestFromCredentialSupported({
         proofInput: {
           proof_type: 'jwt',
           jwt: getMockData('uniissuer')?.credential.request.proof.jwt as string,
         },
-        credentialTypes: ['OpenBadgeCredential'],
-        format: 'jwt_vc',
-        version: OpenId4VCIVersion.VER_1_0_08,
+        credentialSupported: {
+          id: 'OpenBadgeCredential',
+          // This should be transformed into jwt_vc
+          format: 'jwt_vc_json',
+        },
       });
-    expect(credentialOffer).toEqual(getMockData('uniissuer')?.credential.request);
+    expect(credentialRequest).toEqual(getMockData('uniissuer')?.credential.request);
   });
 
   it('should create correct CredentialRequest for mattr', async () => {
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https://launchpad.mattrlabs.com&credential_type=OpenBadgeCredential&pre-authorized_code=g0UCOj6RAN5AwHU6gczm_GzB4_lH6GW39Z0Dl2DOOiO';
-    const credentialOffer = await (
+    const credentialRequest = await (
       await CredentialRequestClientBuilder.fromURI({
         uri: IRR_URI,
         metadata: getMockData('mattr')?.metadata as unknown as EndpointMetadata,
       })
     )
       .build()
-      .createCredentialRequest({
+      .createCredentialRequestFromCredentialSupported({
         proofInput: {
           proof_type: 'jwt',
           jwt: getMockData('mattr')?.credential.request.proof.jwt as string,
         },
-        credentialTypes: ['OpenBadgeCredential'],
-        format: 'ldp_vc',
-        version: OpenId4VCIVersion.VER_1_0_08,
+        credentialSupported: {
+          id: 'OpenBadgeCredential',
+          format: 'ldp_vc',
+        },
       });
-    expect(credentialOffer).toEqual(getMockData('mattr')?.credential.request);
+    expect(credentialRequest).toEqual(getMockData('mattr')?.credential.request);
   });
 
   it('should create correct CredentialRequest for diwala', async () => {
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https://oidc4vc.diwala.io&credential_type=OpenBadgeCredential&pre-authorized_code=eyJhbGciOiJIUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOiJPcGVuQmFkZ2VDcmVkZW50aWFsIiwiZXhwIjoxNjgxOTg0NDY3fQ.fEAHKz2nuWfiYHw406iNxr-81pWkNkbi31bWsYSf6Ng';
-    const credentialOffer = await (
+    const client = (
       await CredentialRequestClientBuilder.fromURI({
         uri: IRR_URI,
         metadata: getMockData('diwala')?.metadata as unknown as EndpointMetadata,
       })
-    )
-      .build()
-      .createCredentialRequest({
-        proofInput: {
-          proof_type: 'jwt',
-          jwt: getMockData('diwala')?.credential.request.proof.jwt as string,
-        },
-        credentialTypes: ['OpenBadgeCredential'],
+    ).build();
+
+    // FIXME: the expected request type here includes `types`, but that was not
+    // present in v8, and v9 uses the `credential_definition` property instead.
+    // Is this from an in-between version of the spec? Need more input
+    const credentialRequest = await client.createCredentialRequest({
+      proofInput: {
+        proof_type: 'jwt',
+        jwt: getMockData('diwala')?.credential.request.proof.jwt as string,
+      },
+      requestInput: {
         format: 'ldp_vc',
-        version: OpenId4VCIVersion.VER_1_0_08,
-      });
-    expect(credentialOffer).toEqual(getMockData('diwala')?.credential.request);
+        credential_definition: {
+          types: ['OpenBadgeCredential'],
+          '@context': [],
+        },
+      },
+    });
+    expect(credentialRequest).toEqual(getMockData('diwala')?.credential.request);
   });
 });

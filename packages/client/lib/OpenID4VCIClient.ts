@@ -9,9 +9,7 @@ import {
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
   CredentialSupported,
-  CredentialSupportedTypeV1_0_08,
   EndpointMetadata,
-  OID4VCICredentialFormat,
   OpenId4VCIVersion,
   OpenIDResponse,
   ProofOfPossessionCallbacks,
@@ -24,6 +22,7 @@ import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';
 import { CredentialOfferClient } from './CredentialOfferClient';
+import { RequestFromCredentialSupported, RequestFromInlineCredentialOffer, RequestFromRequestInput } from './CredentialRequestClient';
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
@@ -268,21 +267,16 @@ export class OpenID4VCIClient {
     return this.accessTokenResponse;
   }
 
-  public async acquireCredentials({
-    credentialTypes,
-    proofCallbacks,
-    format,
-    kid,
-    alg,
-    jti,
-  }: {
-    credentialTypes: string | string[];
-    proofCallbacks: ProofOfPossessionCallbacks;
-    format?: CredentialFormat | OID4VCICredentialFormat;
-    kid?: string;
-    alg?: Alg | string;
-    jti?: string;
-  }): Promise<CredentialResponse> {
+  public async acquireCredentials(
+    opts: {
+      proofCallbacks: ProofOfPossessionCallbacks;
+      kid?: string;
+      alg?: Alg | string;
+      jti?: string;
+    } & (RequestFromCredentialSupported | RequestFromInlineCredentialOffer | RequestFromRequestInput)
+  ): Promise<CredentialResponse> {
+    const { proofCallbacks, kid, alg, jti, ...requestOptions } = opts;
+
     if (alg) {
       this._alg = alg;
     }
@@ -295,32 +289,27 @@ export class OpenID4VCIClient {
       metadata: this.endpointMetadata,
     });
     requestBuilder.withTokenFromResponse(this.accessTokenResponse);
-    if (this.endpointMetadata?.issuerMetadata) {
-      const metadata = this.endpointMetadata.issuerMetadata;
-      const types = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
-      if (metadata.credentials_supported && Array.isArray(metadata.credentials_supported)) {
-        for (const type of types) {
-          let typeSupported = false;
-          for (const credentialSupported of metadata.credentials_supported) {
-            if (!credentialSupported.types || credentialSupported.types.length === 0) {
-              throw Error('types is required in the credentials supported');
-            }
-            if (credentialSupported.types.indexOf(type) != -1) {
-              typeSupported = true;
-            }
-          }
-          if (!typeSupported) {
-            throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
-          }
-        }
-      } else if (metadata.credentials_supported && !Array.isArray(metadata.credentials_supported)) {
-        const credentialsSupported = metadata.credentials_supported as CredentialSupportedTypeV1_0_08;
-        if (types.some((type) => !metadata.credentials_supported || !credentialsSupported[type])) {
-          throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
-        }
+
+    // Inline credential offers are only supported from v1_0-11
+    if ('inlineCredentialOffer' in requestOptions) {
+      if (this.version() < OpenId4VCIVersion.VER_1_0_11) {
+        throw new Error('Inline credential offers are not supported for versions prior to v1_0-11');
       }
-      // todo: Format check? We might end up with some disjoint type / format combinations supported by the server
+      // TODO: we should do a deep equality check on the inlineCredentialOffer against the inline offers from the credential offer?
+      //
+    } else if ('credentialSupported' in requestOptions && this.endpointMetadata?.issuerMetadata) {
+      // The credentialSupported MUST have an `id` property, because the offer refers to it.
+      if (!requestOptions.credentialSupported.id) {
+        throw new Error('id is required in the credential supported for versions prior to v1_0-11');
+      }
+
+      // Check if format is supported by issuer, and included in offer
+      const credentialsSupported = this.getCredentialsSupported(true, requestOptions.credentialSupported.id);
+      if (credentialsSupported.length === 0) {
+        throw new Error(`Credential ${requestOptions.credentialSupported.id} not supported by issuer ${this.getIssuer()} or has not been offered`);
+      }
     }
+
     const credentialRequestClient = requestBuilder.build();
     const proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse({
       accessTokenResponse: this.accessTokenResponse,
@@ -338,9 +327,8 @@ export class OpenID4VCIClient {
       proofBuilder.withJti(jti);
     }
     const response = await credentialRequestClient.acquireCredentialsUsingProof({
+      ...requestOptions,
       proofInput: proofBuilder,
-      credentialTypes: credentialTypes,
-      format,
     });
     if (response.errorBody) {
       debug(`Credential request error:\r\n${response.errorBody}`);
@@ -361,21 +349,6 @@ export class OpenID4VCIClient {
   }
 
   /**
-   * Retrieve a supported credential by it's id. This is a convenience method that takes into account difference between the
-   * different versions of the oid4vci specification.
-   *
-   * NOTE: for v1_0-08, a single credential id in the issuer metadata could have multiple formats. When retrieving the
-   * supported credentials (using {@link getCredentialsSupported}), for v1_0-08, the format is appended to the id if
-   * there are multiple formats supported for that credential id. E.g. if the issuer metadata for v1_0-08 contains an
-   * entry with key `OpenBadgeCredential` and the supported formats are `jwt_vc-jsonld` and `ldp_vc`, then the id
-   * in the credentials supported will be `OpenBadgeCredential-jwt_vc-jsonld` and `OpenBadgeCredential-ldp_vc`, even though
-   * the offered credential is simply `OpenBadgeCredential`. This method takes this into account.
-   */
-  getCredentialsSupportedById(credentialSupportedId: string, format?: CredentialFormat): CredentialSupported[] {
-    return this.getCredentialMetadata(credentialSupportedId).filter((credentialSupported) => credentialSupported.format === format);
-  }
-
-  /**
    * Return a normalized version of the credentials supported by the issuer. Can optionally filter based on the credentials
    * that were offered, or the type of credentials that are supported.
    *
@@ -385,73 +358,28 @@ export class OpenID4VCIClient {
    * that credential id. E.g. if the issuer metadata for v1_0-08 contains an entry with key `OpenBadgeCredential` and
    * the supported formats are `jwt_vc-jsonld` and `ldp_vc`, then the id in the credentials supported will be
    * `OpenBadgeCredential-jwt_vc-jsonld` and `OpenBadgeCredential-ldp_vc`, even though the offered credential is simply
-   * `OpenBadgeCredential`. You can use {@link getCredentialsSupportedById} to get the correct supported credential.
+   * `OpenBadgeCredential`.
    *
-   * NOTE: this method only returns the credentials supported by the issuer metadata. It does not take into account the
+   * NOTE: this method only returns the credentials supported by the issuer metadata. It does not take into account the inline
    * credentials offered. Use {@link getOfferedCredentialsWithMetadata} to get both the inline and referenced offered credentials.
    */
-  getCredentialsSupported(restrictToInitiationTypes: boolean, supportedType?: string): CredentialSupported[] {
-    return getSupportedCredentials({
+  getCredentialsSupported(restrictToOfferIds: boolean, credentialSupportedId?: string): CredentialSupported[] {
+    const offeredIds = this.getOfferedCredentials().filter((c): c is string => typeof c === 'string');
+
+    const credentialSupportedIds = restrictToOfferIds ? offeredIds : undefined;
+
+    const credentialsSupported = getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.issuerMetadata,
       version: this.version(),
-      supportedType,
-      credentialTypes: restrictToInitiationTypes ? this.getOfferedCredentials().filter((c): c is string => typeof c === 'string') : undefined,
+      credentialSupportedIds,
     });
-    /*//FIXME: delegate to getCredentialsSupported from IssuerMetadataUtils
-    let credentialsSupported = this.endpointMetadata?.issuerMetadata?.credentials_supported
 
-    if (this.version() === OpenId4VCIVersion.VER_1_0_08 || typeof credentialsSupported === 'object') {
-      const issuerMetadata = this.endpointMetadata.issuerMetadata as IssuerMetadataV1_0_08
-      const v8CredentialsSupported = issuerMetadata.credentials_supported
-      credentialsSupported = []
-      credentialsSupported = Object.entries(v8CredentialsSupported).map((key, value) => )
-
-    }
-
-
-    if (!credentialsSupported) {
-      return []
-    } else if (!restrictToInitiationTypes) {
-      return credentialsSupported
-    }
-
-
-
-    /!**
-     * the following (not array part is a legacy code from version 1_0-08 which jff implementors used)
-     *!/
-    if (!Array.isArray(credentialsSupported)) {
-      const credentialsSupportedV8: CredentialSupportedV1_0_08 = credentialsSupported as CredentialSupportedV1_0_08;
-      const initiationTypes = supportedType ? [supportedType] : this.getCredentialTypes();
-      const supported: IssuerCredentialSubject = {};
-      for (const [key, value] of Object.entries(credentialsSupportedV8)) {
-        if (initiationTypes.includes(key)) {
-          supported[key] = value;
-        }
-      }
-      // todo: fix this later. we're returning CredentialSupportedV1_0_08 as a list of CredentialSupported (for v09 onward)
-      return supported as unknown as CredentialSupported[];
-    }
-    const initiationTypes = supportedType ? [supportedType] : this.getCredentialTypes()
-    const credentialSupportedOverlap: CredentialSupported[] = []
-    for (const supported of credentialsSupported) {
-      const supportedTypeOverlap: string[] = []
-      for (const type of supported.types) {
-        initiationTypes.includes(type)
-        supportedTypeOverlap.push(type)
-      }
-      if (supportedTypeOverlap.length > 0) {
-        credentialSupportedOverlap.push({
-          ...supported,
-          types: supportedTypeOverlap
-        })
-      }
-    }
-    return credentialSupportedOverlap as CredentialSupported[]*/
-  }
-
-  getCredentialMetadata(type: string): CredentialSupported[] {
-    return this.getCredentialsSupported(false, type);
+    return credentialSupportedId
+      ? credentialsSupported.filter(
+          (credentialSupported) =>
+            credentialSupported.id === credentialSupportedId || credentialSupported.id === `${credentialSupportedId}-${credentialSupported.format}`
+        )
+      : credentialsSupported;
   }
 
   // todo https://sphereon.atlassian.net/browse/VDX-184
@@ -483,10 +411,33 @@ export class OpenID4VCIClient {
     for (const offeredCredential of this.getOfferedCredentials()) {
       // If the offeredCredential is a string, it references a supported credential in the issuer metadata
       if (typeof offeredCredential === 'string') {
-        offeredCredentials.push(...this.getCredentialsSupportedById(offeredCredential));
+        const credentialsSupported = this.getCredentialsSupported(false, offeredCredential);
+
+        // Make sure the issuer metadata includes the offered credential.
+        if (credentialsSupported.length === 0) {
+          throw new Error(`Offered credential '${offeredCredential}' is not present in the credentials_supported of the issuer metadata`);
+        }
+
+        offeredCredentials.push(...credentialsSupported);
       }
       // Otherwise it's an inline credential offer that does not reference a supported credential in the issuer metadata
       else {
+        // TODO: we could transform the inline offer to the `CredentialSupported` format, but we'll only be able to populate
+        // the `format`, `types` and `@context` fields. It's not really clear how to determine the supported did methods,
+        // signature suites, etc.. for these inline credentials.
+        // We should also add a property to indicate to the user that this is an inline credential offer.
+        //  if (offeredCredential.format === 'jwt_vc_json') {
+        //    const supported = {
+        //      format: offeredCredential.format,
+        //      types: offeredCredential.types,
+        //    } satisfies CredentialSupportedJwtVcJson;
+        //  } else if (offeredCredential.format === 'jwt_vc_json-ld' || offeredCredential.format === 'ldp_vc') {
+        //    const supported = {
+        //      format: offeredCredential.format,
+        //      '@context': offeredCredential.credential_definition['@context'],
+        //      types: offeredCredential.credential_definition.types,
+        //    } satisfies CredentialSupported;
+        //  }
         offeredCredentials.push(offeredCredential);
       }
     }

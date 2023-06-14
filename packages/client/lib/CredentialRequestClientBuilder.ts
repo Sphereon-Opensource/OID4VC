@@ -1,24 +1,19 @@
 import {
   AccessTokenResponse,
   CredentialIssuerMetadata,
-  CredentialOfferPayloadV1_0_08,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
-  OID4VCICredentialFormat,
   OpenId4VCIVersion,
   UniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common';
-import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialOfferClient } from './CredentialOfferClient';
 import { CredentialRequestClient } from './CredentialRequestClient';
 
 export class CredentialRequestClientBuilder {
   credentialEndpoint?: string;
-  credentialTypes: string[] = [];
-  format?: CredentialFormat | OID4VCICredentialFormat;
   token?: string;
   version?: OpenId4VCIVersion;
 
@@ -40,14 +35,6 @@ export class CredentialRequestClientBuilder {
     const issuer = getIssuerFromCredentialOfferPayload(request.credential_offer) ?? (metadata?.issuer as string);
     builder.withVersion(version);
     builder.withCredentialEndpoint(metadata?.credential_endpoint ?? (issuer.endsWith('/') ? `${issuer}credential` : `${issuer}/credential`));
-
-    if (version <= OpenId4VCIVersion.VER_1_0_08) {
-      //todo: This basically sets all types available during initiation. Probably the user only wants a subset. So do we want to do this?
-      builder.withCredentialType((request.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type);
-    } else {
-      // todo: look whether this is correct
-      builder.withCredentialType(request.credential_offer.credentials.flatMap((c) => (typeof c === 'string' ? c : c.types)));
-    }
 
     return builder;
   }
@@ -73,16 +60,6 @@ export class CredentialRequestClientBuilder {
 
   public withCredentialEndpoint(credentialEndpoint: string): CredentialRequestClientBuilder {
     this.credentialEndpoint = credentialEndpoint;
-    return this;
-  }
-
-  public withCredentialType(credentialTypes: string | string[]): CredentialRequestClientBuilder {
-    this.credentialTypes = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
-    return this;
-  }
-
-  public withFormat(format: CredentialFormat | OID4VCICredentialFormat): CredentialRequestClientBuilder {
-    this.format = format;
     return this;
   }
 

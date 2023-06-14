@@ -1,6 +1,5 @@
 import {
   CredentialIssuerMetadata,
-  CredentialOfferFormat,
   CredentialSupported,
   CredentialSupportedTypeV1_0_08,
   CredentialSupportedV1_0_08,
@@ -12,15 +11,14 @@ import {
 export function getSupportedCredentials(opts?: {
   issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08;
   version: OpenId4VCIVersion;
-  credentialTypes?: (CredentialOfferFormat | string)[];
-  supportedType?: CredentialOfferFormat | string;
+  credentialSupportedIds?: string[];
 }): CredentialSupported[] {
   const { issuerMetadata } = opts ?? {};
   let credentialsSupported: CredentialSupported[];
   if (!issuerMetadata) {
     return [];
   }
-  const { version, credentialTypes, supportedType } = opts ?? { version: OpenId4VCIVersion.VER_1_0_11 };
+  const { version, credentialSupportedIds } = opts ?? { version: OpenId4VCIVersion.VER_1_0_11 };
 
   const usesTransformedCredentialsSupported = version === OpenId4VCIVersion.VER_1_0_08 || !Array.isArray(issuerMetadata.credentials_supported);
   if (usesTransformedCredentialsSupported) {
@@ -31,25 +29,21 @@ export function getSupportedCredentials(opts?: {
 
   if (credentialsSupported === undefined || credentialsSupported.length === 0) {
     return [];
-  } else if (!credentialTypes || credentialTypes.length === 0) {
+  } else if (!credentialSupportedIds || credentialSupportedIds.length === 0) {
     return credentialsSupported;
   }
-  /**
-   * the following (not array part is a legacy code from version 1_0-08 which JFF plugfest 2 implementors used)
-   */
-  const initiationTypes = supportedType ? [supportedType] : credentialTypes;
 
   const credentialSupportedOverlap: CredentialSupported[] = [];
-  for (const offerType of initiationTypes) {
-    if (typeof offerType === 'string') {
+  for (const credentialSupportedId of credentialSupportedIds) {
+    if (typeof credentialSupportedId === 'string') {
       const supported = credentialsSupported.find((sup) => {
         // Match id to offerType
-        if (sup.id === offerType) return true;
+        if (sup.id === credentialSupportedId) return true;
 
         // If the credential was transformed and the v8 variant supported multiple formats for the id, we
         // check if there is an id with the format
         // see credentialsSupportedV8ToV11
-        if (usesTransformedCredentialsSupported && sup.id === `${offerType}-${sup.format}`) return true;
+        if (usesTransformedCredentialsSupported && sup.id === `${credentialSupportedId}-${sup.format}`) return true;
 
         return false;
       });

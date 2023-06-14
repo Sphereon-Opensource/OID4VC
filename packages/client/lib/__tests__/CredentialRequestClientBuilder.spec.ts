@@ -1,14 +1,6 @@
 import { KeyObject } from 'crypto';
 
-import {
-  Alg,
-  CredentialIssuerMetadata,
-  Jwt,
-  JWTPayload,
-  OpenId4VCIVersion,
-  ProofOfPossession,
-  UniformCredentialRequest,
-} from '@sphereon/oid4vci-common';
+import { Alg, CredentialIssuerMetadata, Jwt, JWTPayload, OpenId4VCIVersion, ProofOfPossession } from '@sphereon/oid4vci-common';
 import * as jose from 'jose';
 
 import { CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '..';
@@ -60,21 +52,15 @@ describe('Credential Request Client Builder', () => {
   it('should build correctly provided with correct params', async function () {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .withCredentialType('credentialType')
       .withToken('token')
       .build();
     expect(credReqClient.credentialRequestOpts.credentialEndpoint).toBe('https://oidc4vci.demo.spruceid.com/credential');
-    expect(credReqClient.credentialRequestOpts.format).toBe('jwt_vc');
-    expect(credReqClient.credentialRequestOpts.credentialTypes).toStrictEqual(['credentialType']);
     expect(credReqClient.credentialRequestOpts.token).toBe('token');
   });
 
   it('should build credential request correctly', async () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt,
@@ -88,10 +74,14 @@ describe('Credential Request Client Builder', () => {
       .withKid(kid)
       .build();
     await proofOfPossessionVerifierCallbackFunction({ ...proof, kid });
-    const credentialRequest: UniformCredentialRequest = await credReqClient.createCredentialRequest({
+    const credentialRequest = await credReqClient.createCredentialRequestFromCredentialSupported({
       proofInput: proof,
-      version: OpenId4VCIVersion.VER_1_0_08,
+      credentialSupported: {
+        id: 'https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential',
+        format: 'jwt_vc_json',
+      },
     });
+    // FIXME: the initiation uri is draft 8, but the request is draft 9. I think this test is incorrect?
     expect(credentialRequest.proof?.jwt).toContain(partialJWT);
     expect('types' in credentialRequest).toBe(true);
     if ('types' in credentialRequest) {
@@ -105,15 +95,12 @@ describe('Credential Request Client Builder', () => {
         uri: INITIATION_TEST_URI,
         metadata: WALT_OID4VCI_METADATA,
       })
-    )
-      .withFormat('jwt_vc')
-      .build();
+    ).build();
     expect(credReqClient.credentialRequestOpts.credentialEndpoint).toBe(`${WALT_ISSUER_URL}/credential`);
   });
 
   it('should build correctly with endpoint from metadata', async () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
-      .withFormat('jwt_vc')
       .withCredentialEndpointFromMetadata(IDENTIPROOF_OID4VCI_METADATA as unknown as CredentialIssuerMetadata)
       .build();
     expect(credReqClient.credentialRequestOpts.credentialEndpoint).toBe(`${IDENTIPROOF_ISSUER_URL}/credential`);

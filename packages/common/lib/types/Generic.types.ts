@@ -90,15 +90,29 @@ export interface CredentialSupportedJwtVcJson extends CommonCredentialSupported 
 
 export type CredentialSupported = CommonCredentialSupported & (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc);
 
-export interface CredentialOfferFormat {
+export interface CommonCredentialOfferFormat {
   format: OID4VCICredentialFormat | string;
-  types: string[];
 }
+
+export interface CredentialOfferFormatJwtVcJson extends CommonCredentialOfferFormat {
+  format: 'jwt_vc_json';
+  types: string[]; // REQUIRED. JSON array as defined in Appendix E.1.1.2. This claim contains the type values the Wallet shall request in the subsequent Credential Request.
+}
+
+export interface CredentialOfferFormatJwtVcJsonLdAndLdpVc extends CommonCredentialOfferFormat {
+  format: 'jwt_vc_json-ld' | 'ldp_vc';
+  credential_definition: {
+    '@context': ICredentialContextType[]; // REQUIRED.
+    types: string[]; // REQUIRED. JSON array as defined in Appendix E.1.3.2. This claim contains the type values the Wallet shall request in the subsequent Credential Request.
+  };
+}
+
+export type CredentialOfferFormat = CommonCredentialOfferFormat & (CredentialOfferFormatJwtVcJson | CredentialOfferFormatJwtVcJsonLdAndLdpVc);
 
 export interface IssuerCredentialDefinition {
   '@context': ICredentialContextType[];
   types: string[];
-  credentialSubject: IssuerCredentialSubject;
+  credentialSubject?: IssuerCredentialSubject;
 }
 
 /*

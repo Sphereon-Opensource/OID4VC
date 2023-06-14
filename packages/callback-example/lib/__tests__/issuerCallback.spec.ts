@@ -192,8 +192,6 @@ describe('issuerCallback', () => {
   it('Should pass requesting a verifiable credential using the client', async () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc_json')
-      .withCredentialType('credentialType')
       .withToken('token')
 
     const jwt: Jwt = {
@@ -221,19 +219,26 @@ describe('issuerCallback', () => {
       .build()
 
     const credentialRequestClient = new CredentialRequestClient(credReqClient)
+
+    // FIXME: The initiation is v8, but the test expects a v9 credential request.
+    // it will now fail because of a check if we don't change the version.
+    // the QR should be changed, or the output check should be changed
+    credentialRequestClient.credentialRequestOpts.version = OpenId4VCIVersion.VER_1_0_09
+
     const credentialRequest = await credentialRequestClient.createCredentialRequest({
-      credentialTypes: ['VerifiableCredential'],
-      format: 'jwt_vc_json',
+      requestInput: {
+        types: ['VerifiableCredential'],
+        format: 'jwt_vc_json',
+      },
       proofInput: proof,
-      version: OpenId4VCIVersion.VER_1_0_11,
     })
     expect(credentialRequest).toEqual({
       format: 'jwt_vc_json',
+      types: ['VerifiableCredential'],
       proof: {
         jwt: expect.stringContaining('eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFj'),
         proof_type: 'jwt',
       },
-      types: ['VerifiableCredential'],
     })
 
     const credentialResponse = await vcIssuer.issueCredential({

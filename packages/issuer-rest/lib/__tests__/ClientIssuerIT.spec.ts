@@ -288,8 +288,10 @@ describe('VcIssuer', () => {
     }
 
     const credentialResponse = await client.acquireCredentials({
-      credentialTypes: ['VerifiableCredential'],
-      format: 'jwt_vc_json',
+      requestInput: {
+        format: 'jwt_vc_json',
+        types: ['VerifiableCredential'],
+      },
       proofCallbacks: { signCallback: proofOfPossessionCallbackFunction },
     })
     expect(credentialResponse).toMatchObject({
