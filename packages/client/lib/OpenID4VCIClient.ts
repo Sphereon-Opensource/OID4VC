@@ -10,6 +10,8 @@ import {
   CredentialResponse,
   CredentialSupported,
   EndpointMetadata,
+  OfferedCredentialsWithMetadata,
+  OfferedCredentialType,
   OpenId4VCIVersion,
   OpenIDResponse,
   ProofOfPossessionCallbacks,
@@ -405,8 +407,8 @@ export class OpenID4VCIClient {
    * from this method could contain multiple entries for a single credential id, but with different formats. This is detectable as the
    * id will be the `<credentialId>-<format>`.
    */
-  getOfferedCredentialsWithMetadata(): Array<CredentialSupported | CredentialOfferFormat> {
-    const offeredCredentials: Array<CredentialSupported | CredentialOfferFormat> = [];
+  getOfferedCredentialsWithMetadata(): Array<OfferedCredentialsWithMetadata> {
+    const offeredCredentials: Array<OfferedCredentialsWithMetadata> = [];
 
     for (const offeredCredential of this.getOfferedCredentials()) {
       // If the offeredCredential is a string, it references a supported credential in the issuer metadata
@@ -418,7 +420,11 @@ export class OpenID4VCIClient {
           throw new Error(`Offered credential '${offeredCredential}' is not present in the credentials_supported of the issuer metadata`);
         }
 
-        offeredCredentials.push(...credentialsSupported);
+        offeredCredentials.push(
+          ...credentialsSupported.map((credentialSupported) => {
+            return { credentialSupported, type: OfferedCredentialType.CredentialSupported } as const;
+          })
+        );
       }
       // Otherwise it's an inline credential offer that does not reference a supported credential in the issuer metadata
       else {
@@ -438,7 +444,7 @@ export class OpenID4VCIClient {
         //      types: offeredCredential.credential_definition.types,
         //    } satisfies CredentialSupported;
         //  }
-        offeredCredentials.push(offeredCredential);
+        offeredCredentials.push({ inlineCredentialOffer: offeredCredential, type: OfferedCredentialType.InlineCredentialOffer } as const);
       }
     }
 

@@ -109,6 +109,20 @@ export interface CredentialOfferFormatJwtVcJsonLdAndLdpVc extends CommonCredenti
 
 export type CredentialOfferFormat = CommonCredentialOfferFormat & (CredentialOfferFormatJwtVcJson | CredentialOfferFormatJwtVcJsonLdAndLdpVc);
 
+/**
+ * The type of a credential offer entry. For each item in `credentials` array, the type MUST be one of the following:
+ *  - CredentialSupported, when the value is a string and points to a credential from the `credentials_supported` array.
+ *  - InlineCredentialOffer, when the value is a JSON object that represents an inline credential offer.
+ */
+export enum OfferedCredentialType {
+  CredentialSupported = 'CredentialSupported',
+  InlineCredentialOffer = 'InlineCredentialOffer',
+}
+
+export type OfferedCredentialsWithMetadata =
+  | { credentialSupported: CredentialSupported; type: OfferedCredentialType.CredentialSupported }
+  | { inlineCredentialOffer: CredentialOfferFormat; type: OfferedCredentialType.InlineCredentialOffer };
+
 export interface IssuerCredentialDefinition {
   '@context': ICredentialContextType[];
   types: string[];
