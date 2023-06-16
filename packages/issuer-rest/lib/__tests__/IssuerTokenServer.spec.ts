@@ -7,6 +7,7 @@ import {
   CredentialIssuerMetadataOpts,
   CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
   CredentialOfferSession,
+  IssueStatus,
   Jwt,
   STATE_MISSING_ERROR,
   URIState,
@@ -37,6 +38,8 @@ describe('OID4VCIServer', () => {
       preAuthorizedCode: preAuthorizedCode1,
       userPin: '493536',
       createdAt: +new Date(),
+      lastUpdatedAt: +new Date(),
+      status: IssueStatus.OFFER_CREATED,
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'test_issuer',
