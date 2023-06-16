@@ -4,7 +4,6 @@ import process from 'process'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AuthorizationRequest,
-  AuthStatusResponse,
   CredentialOfferV1_0_11,
   CredentialRequestV1_0_11,
   CredentialSupported,
@@ -12,6 +11,7 @@ import {
   getNumberOrUndefined,
   Grant,
   IssuerCredentialSubjectDisplay,
+  IssueStatusResponse,
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
   OID4VCICredentialFormat,
   TokenErrorResponse,
@@ -300,7 +300,7 @@ export class OID4VCIServer {
           })
         }
 
-        const authStatusBody: AuthStatusResponse = {
+        const authStatusBody: IssueStatusResponse = {
           createdAt: session.createdAt,
           lastUpdatedAt: session.lastUpdatedAt,
           status: session.status,
