@@ -93,7 +93,12 @@ export interface CredentialOfferFormat {
 /**
  * Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
  */
-export type CredentialDataSupplierInput = string | string[] | object | object[] | Partial<ICredential> | Partial<ICredential>[];
+export type CredentialDataSupplierInput = Record<string, string & number & object> &
+  Record<string, string & number & object>[] &
+  object &
+  object[] &
+  Partial<ICredential> &
+  Partial<ICredential>[];
 
 export type CreateCredentialOfferURIResult = {
   uri: string;
