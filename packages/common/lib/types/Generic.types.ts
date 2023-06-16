@@ -1,4 +1,4 @@
-import { ICredential, ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
+import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 import { ProofOfPossession } from './CredentialIssuance.types';
 import { Oauth2ASWithOID4VCIMetadata } from './OpenID4VCIServerMetadata';
@@ -93,12 +93,7 @@ export interface CredentialOfferFormat {
 /**
  * Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
  */
-export type CredentialDataSupplierInput = Record<string, string & number & object> &
-  Record<string, string & number & object>[] &
-  object &
-  object[] &
-  Partial<ICredential> &
-  Partial<ICredential>[];
+export type CredentialDataSupplierInput = any;
 
 export type CreateCredentialOfferURIResult = {
   uri: string;
