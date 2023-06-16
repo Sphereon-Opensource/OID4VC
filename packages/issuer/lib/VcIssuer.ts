@@ -97,7 +97,7 @@ export class VcIssuer {
     baseUri?: string
     scheme?: string
     pinLength?: number
-  }): Promise<string> {
+  }): Promise<{ uri: string; session: CredentialOfferSession }> {
     let preAuthorizedCode: string | undefined = undefined
     let issuerState: string | undefined = undefined
 
@@ -196,7 +196,7 @@ export class VcIssuer {
     if (issuerState) {
       this.credentialOfferSessions.set(issuerState, session)
     }
-    return createCredentialOfferURIFromObject(credentialOffer, { ...opts, baseUri })
+    return { session, uri: createCredentialOfferURIFromObject(credentialOffer, { ...opts, baseUri }) }
   }
 
   /**

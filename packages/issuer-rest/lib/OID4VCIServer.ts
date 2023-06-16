@@ -269,9 +269,7 @@ export class OID4VCIServer {
         if (!credentials || credentials.length === 0) {
           return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'No credentials supplied' })
         }
-        const credentialDataSupplierInput = request.body.credentialDataSupplierInput
-
-        const uri = await this.issuer.createCredentialOfferURI({ grants, credentials, credentialDataSupplierInput })
+        const uri = await this.issuer.createCredentialOfferURI({ ...request.body, grants, credentials })
         return response.send(JSON.stringify({ uri }))
       } catch (e) {
         return sendErrorResponse(

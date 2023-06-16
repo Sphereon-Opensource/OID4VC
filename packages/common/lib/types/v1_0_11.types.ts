@@ -15,6 +15,9 @@ export interface CredentialOfferV1_0_11 {
 }
 
 export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_11 {
+  baseUri?: string;
+  scheme?: string;
+  pinLength?: number;
   credentialDataSupplierInput?: CredentialDataSupplierInput;
 }
 
