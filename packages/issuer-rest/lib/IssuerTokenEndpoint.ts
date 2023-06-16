@@ -40,6 +40,7 @@ export const handleTokenRequest = ({
 
     try {
       const responseBody = await createAccessTokenResponse(request.body, {
+        credentialOfferSessions: issuer.credentialOfferSessions,
         accessTokenIssuer,
         cNonces: issuer.cNonces,
         cNonce: v4(),

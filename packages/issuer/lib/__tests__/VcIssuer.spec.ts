@@ -6,6 +6,7 @@ import {
   CredentialOfferSession,
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
+  IssueStatus,
   STATE_MISSING_ERROR,
 } from '@sphereon/oid4vci-common'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
@@ -51,6 +52,8 @@ describe('VcIssuer', () => {
       clientId,
       preAuthorizedCode,
       createdAt: +new Date(),
+      lastUpdatedAt: +new Date(),
+      status: IssueStatus.OFFER_CREATED,
       userPin: '123456',
       credentialOffer: {
         credential_offer: {

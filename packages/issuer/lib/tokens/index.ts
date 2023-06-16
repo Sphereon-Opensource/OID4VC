@@ -7,6 +7,7 @@ import {
   EXPIRED_PRE_AUTHORIZED_CODE,
   GrantTypes,
   INVALID_PRE_AUTHORIZED_CODE,
+  IssueStatus,
   IStateManager,
   Jwt,
   JWTSignerCallback,
@@ -85,6 +86,9 @@ export const assertValidAccessTokenRequest = async (
   }
 
   const credentialOfferSession = await credentialOfferSessions.getAsserted(request[PRE_AUTH_CODE_LITERAL])
+  credentialOfferSession.status = IssueStatus.ACCESS_TOKEN_REQUESTED
+  credentialOfferSession.lastUpdatedAt = +new Date()
+  credentialOfferSessions.set(request[PRE_AUTH_CODE_LITERAL], credentialOfferSession)
   if (!isValidGrant(credentialOfferSession, request.grant_type)) {
     throw new TokenError(400, TokenErrorResponse.invalid_grant, UNSUPPORTED_GRANT_TYPE_ERROR)
   }
@@ -119,11 +123,13 @@ export const assertValidAccessTokenRequest = async (
   ) {
     throw new TokenError(400, TokenErrorResponse.invalid_grant, INVALID_PRE_AUTHORIZED_CODE)
   }
+  return { preAuthSession: credentialOfferSession }
 }
 
 export const createAccessTokenResponse = async (
   request: AccessTokenRequest,
   opts: {
+    credentialOfferSessions: IStateManager<CredentialOfferSession>
     cNonces: IStateManager<CNonceState>
     cNonce?: string
     cNonceExpiresIn?: number
@@ -134,7 +140,7 @@ export const createAccessTokenResponse = async (
     interval?: number
   }
 ) => {
-  const { cNonces, cNonceExpiresIn, tokenExpiresIn, accessTokenIssuer, accessTokenSignerCallback, interval } = opts
+  const { credentialOfferSessions, cNonces, cNonceExpiresIn, tokenExpiresIn, accessTokenIssuer, accessTokenSignerCallback, interval } = opts
   // Pre-auth flow
   const preAuthorizedCode = request[PRE_AUTH_CODE_LITERAL] as string
 
@@ -156,5 +162,9 @@ export const createAccessTokenResponse = async (
     authorization_pending: false,
     interval,
   }
+  const credentialOfferSession = await credentialOfferSessions.getAsserted(preAuthorizedCode)
+  credentialOfferSession.status = IssueStatus.ACCESS_TOKEN_CREATED
+  credentialOfferSession.lastUpdatedAt = +new Date()
+  credentialOfferSessions.set(preAuthorizedCode, credentialOfferSession)
   return response
 }

@@ -76,9 +76,18 @@ export interface ICreateCredentialOfferOpts {
   //todo: Add authn/z, as this endpoint would be called by an integration instead of wallets
 }
 
+export interface IGetIssueStatusOpts {
+  getStatusPath?: string
+  getStatusEndpointDisabled?: boolean // Disable the REST endpoint for getting the issue status
+  //todo: Add authn/z, as this endpoint would be called by an integration instead of wallets
+  // issuerState?: string
+  // preAuthorizedCode?: string
+}
+
 export interface IOID4VCIServerOpts {
   tokenEndpointOpts?: ITokenEndpointOpts
   credentialOfferOpts?: ICreateCredentialOfferOpts
+  getStatusOpts?: IGetIssueStatusOpts
   serverOpts?: {
     app?: Express
     port?: number
@@ -143,6 +152,9 @@ export class OID4VCIServer {
     if (!this.isTokenEndpointDisabled(opts?.tokenEndpointOpts)) {
       this.accessTokenEndpoint(opts?.tokenEndpointOpts)
     }
+    if (!this.isStatusEndpointDisabled(opts?.getStatusOpts)) {
+      this.getIssueStatusEndpoint(opts?.getStatusOpts)
+    }
     this.cNonceExpiresIn = opts?.tokenEndpointOpts?.cNonceExpiresIn ?? 300000
     this.tokenExpiresIn = opts?.tokenEndpointOpts?.tokenExpiresIn ?? 300000
     this._app.use(this.getBasePath(), this._router)
@@ -182,7 +194,7 @@ export class OID4VCIServer {
       skipBaseUrlCheck: false,
       stripBasePath: true,
     })
-    // let's fix any baseUrl ending with a slash as path will always start with a slash and we already removed it at the end of the base url
+    // let's fix any baseUrl ending with a slash as path will always start with a slash, and we already removed it at the end of the base url
 
     const url = new URL(`${baseUrl}${path}`)
     // this.issuer.issuerMetadata.token_endpoint = url.toString()
@@ -265,6 +277,42 @@ export class OID4VCIServer {
           500,
           {
             error: TokenErrorResponse.invalid_request,
+            error_description: (e as Error).message,
+          },
+          e
+        )
+      }
+    })
+  }
+
+  // fixme authz and enable/disable
+  private getIssueStatusEndpoint(opts?: IGetIssueStatusOpts) {
+    const path = this.determinePath(opts?.getStatusPath ?? '/webapp/credential-offer-status', { stripBasePath: true })
+    this.app.post(path, async (request: Request, response: Response) => {
+      try {
+        const { id } = request.body
+        const session = await this.issuer.credentialOfferSessions.get(id)
+        if (!session || !session.credentialOffer) {
+          return sendErrorResponse(response, 404, {
+            error: 'invalid_request',
+            error_description: `Credential offer ${id} not found`,
+          })
+        }
+
+        return response.send(
+          JSON.stringify({
+            createdAt: session.createdAt,
+            lastUpdatedAt: session.lastUpdatedAt,
+            status: session.status,
+            ...(session.clientId && { clientId: session.clientId }),
+          })
+        )
+      } catch (e) {
+        return sendErrorResponse(
+          response,
+          500,
+          {
+            error: 'invalid_request',
             error_description: (e as Error).message,
           },
           e
@@ -373,6 +421,10 @@ export class OID4VCIServer {
 
   private isTokenEndpointDisabled(tokenEndpointOpts?: ITokenEndpointOpts) {
     return tokenEndpointOpts?.tokenEndpointDisabled === true || process.env.TOKEN_ENDPOINT_DISABLED === 'true'
+  }
+
+  private isStatusEndpointDisabled(statusEndpointOpts?: IGetIssueStatusOpts) {
+    return statusEndpointOpts?.getStatusEndpointDisabled === true || process.env.STATUS_ENDPOINT_DISABLED === 'true'
   }
 
   private assertAccessTokenHandling(tokenEndpointOpts?: ITokenEndpointOpts) {
