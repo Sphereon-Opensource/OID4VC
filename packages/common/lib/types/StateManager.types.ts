@@ -1,4 +1,5 @@
 import { AssertedUniformCredentialOffer } from './CredentialIssuance.types';
+import { CredentialDataSupplierInput } from './Generic.types';
 
 export interface StateType {
   createdAt: number;
@@ -7,6 +8,7 @@ export interface StateType {
 export interface CredentialOfferSession extends StateType {
   clientId?: string;
   credentialOffer: AssertedUniformCredentialOffer;
+  credentialDataSupplierInput?: CredentialDataSupplierInput; // Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
   userPin?: string;
   status: IssueStatus;
   error?: string;

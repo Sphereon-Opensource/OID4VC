@@ -1,6 +1,7 @@
 import { AuthorizationDetailsJwtVcJson, CommonAuthorizationRequest } from './Authorization.types';
 import {
   CommonCredentialRequest,
+  CredentialDataSupplierInput,
   CredentialOfferFormat,
   CredentialRequestJwtVcJson,
   CredentialRequestJwtVcJsonLdAndLdpVc,
@@ -11,6 +12,10 @@ import {
 export interface CredentialOfferV1_0_11 {
   credential_offer?: CredentialOfferPayloadV1_0_11;
   credential_offer_uri?: string;
+}
+
+export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_11 {
+  credentialDataSupplierInput?: CredentialDataSupplierInput;
 }
 
 export interface CommonCredentialOfferPayloadV1_0_11 {

@@ -4,7 +4,7 @@ import process from 'process'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AuthorizationRequest,
-  CredentialOfferV1_0_11,
+  CredentialOfferRESTRequest,
   CredentialRequestV1_0_11,
   CredentialSupported,
   determineGrantTypes,
@@ -258,7 +258,7 @@ export class OID4VCIServer {
   // fixme authz and enable/disable
   private createCredentialOfferEndpoint(opts?: ICreateCredentialOfferOpts) {
     const path = this.determinePath(opts?.createOfferPath ?? '/webapp/credential-offers', { stripBasePath: true })
-    this.router.post(path, async (request: Request<CredentialOfferV1_0_11>, response: Response) => {
+    this.router.post(path, async (request: Request<CredentialOfferRESTRequest>, response: Response) => {
       try {
         const grantTypes = determineGrantTypes(request.body)
         if (grantTypes.length === 0) {
@@ -269,8 +269,9 @@ export class OID4VCIServer {
         if (!credentials || credentials.length === 0) {
           return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'No credentials supplied' })
         }
+        const credentialDataSupplierInput = request.body.credentialDataSupplierInput
 
-        const uri = await this.issuer.createCredentialOfferURI({ grants, credentials })
+        const uri = await this.issuer.createCredentialOfferURI({ grants, credentials, credentialDataSupplierInput })
         return response.send(JSON.stringify({ uri }))
       } catch (e) {
         return sendErrorResponse(

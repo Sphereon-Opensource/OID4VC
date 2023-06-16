@@ -1,4 +1,4 @@
-import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
+import { ICredential, ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 import { ProofOfPossession } from './CredentialIssuance.types';
 import { Oauth2ASWithOID4VCIMetadata } from './OpenID4VCIServerMetadata';
@@ -54,12 +54,6 @@ export interface CredentialIssuerMetadataOpts {
 // For now we extend the opts above. Only difference is that the credential endpoint is optional in the Opts, as it can come from other sources. The value is however required in the eventual Issuer Metadata
 export interface CredentialIssuerMetadata extends CredentialIssuerMetadataOpts {
   credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
-  /*batch_credential_endpoint?: string; // OPTIONAL. URL of the Credential Issuer's Batch Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components. If omitted, the Credential Issuer does not support the Batch Credential Endpoint.
-  credentials_supported: CredentialSupported[]; // REQUIRED. A JSON array containing a list of JSON objects, each of them representing metadata about a separate credential type that the Credential Issuer can issue. The JSON objects in the array MUST conform to the structure of the Section 10.2.3.1.
-  credential_issuer: string; // REQUIRED. The Credential Issuer's identifier.
-  authorization_server?: string; // OPTIONAL. Identifier of the OAuth 2.0 Authorization Server (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
-  token_endpoint?: string;
-  display?: MetadataDisplay[]; //  An array of objects, where each object contains display properties of a Credential Issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:*/
 }
 
 export interface CredentialSupportedBrief {
@@ -95,49 +89,15 @@ export interface CredentialOfferFormat {
   types: string[];
 }
 
+/**
+ * Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
+ */
+export type CredentialDataSupplierInput = string | string[] | object | object[] | Partial<ICredential> | Partial<ICredential>[];
 export interface IssuerCredentialDefinition {
   '@context': ICredentialContextType[];
   types: string[];
   credentialSubject: IssuerCredentialSubject;
 }
-
-/*
-export interface CredentialOfferCredentialDefinition {
-  '@context': ICredentialContextType[];
-  types: string[];
-  credentialSubject?: IssuerCredentialSubject;
-  order?: string[]; // An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
-}
-*/
-
-// export type GrantType = GrantTypes;
-
-/*
-export interface CommonAccessTokenRequest {
-  client_id?: string;
-  code?: string;
-  code_verifier?: string;
-  grant_type: GrantType;
-  'pre-authorized_code'?: string;
-  redirect_uri?: string;
-  scope?: string;
-  user_pin?: string;
-}
-*/
-
-/*
-export interface CommonAccessTokenResponse {
-  access_token: string;
-  scope?: string;
-  token_type?: string;
-  expires_in?: number; // in seconds
-  c_nonce?: string;
-  c_nonce_expires_in?: number; // in seconds
-  authorization_pending?: boolean;
-  interval?: number; // in seconds
-}
-*/
-
 export interface ErrorResponse extends Response {
   error: string;
   error_description?: string;

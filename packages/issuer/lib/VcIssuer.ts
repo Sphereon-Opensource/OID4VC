@@ -6,6 +6,7 @@ import {
   AUD_ERROR,
   CNonceState,
   CREDENTIAL_MISSING_ERROR,
+  CredentialDataSupplierInput,
   CredentialIssuerMetadataOpts,
   CredentialOfferFormat,
   CredentialOfferPayloadV1_0_11,
@@ -92,6 +93,7 @@ export class VcIssuer {
     credentials?: (CredentialOfferFormat | string)[]
     credentialDefinition?: IssuerCredentialDefinition
     credentialOfferUri?: string
+    credentialDataSupplierInput?: CredentialDataSupplierInput // Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
     baseUri?: string
     scheme?: string
     pinLength?: number
@@ -176,13 +178,14 @@ export class VcIssuer {
     )
 
     const status = IssueStatus.OFFER_CREATED
-    const session = {
+    const session: CredentialOfferSession = {
       preAuthorizedCode,
       issuerState,
       createdAt,
       lastUpdatedAt,
       status,
       ...(userPin && { userPin }),
+      ...(opts.credentialDataSupplierInput && { credentialDataSupplierInput: opts.credentialDataSupplierInput }),
       credentialOffer,
     }
 
@@ -209,6 +212,7 @@ export class VcIssuer {
     credentialRequest: CredentialRequestV1_0_11
     credential?: ICredential
     credentialDataSupplier?: CredentialDataSupplier
+    credentialDataSupplierInput?: CredentialDataSupplierInput
     newCNonce?: string
     cNonceExpiresIn?: number
     tokenExpiresIn?: number
@@ -252,21 +256,27 @@ export class VcIssuer {
         if (typeof credentialDataSupplier !== 'function') {
           throw Error('Data supplier is mandatory if no credential is supplied')
         }
-        const credentialOffer = preAuthorizedCode && preAuthSession ? preAuthSession.credentialOffer : authSession?.credentialOffer
+        const session = preAuthorizedCode && preAuthSession ? preAuthSession : authSession
+        if (!session) {
+          throw Error('Either a preAuth or Auth session is required, none found')
+        }
+        const credentialOffer = session.credentialOffer
         if (!credentialOffer) {
           throw Error('Credential Offer missing')
         }
+        const credentialDataSupplierInput = opts.credentialDataSupplierInput ?? session.credentialDataSupplierInput
         const result = await credentialDataSupplier({
           ...cNonceState,
           credentialRequest: opts.credentialRequest,
           credentialOffer /*todo: clientId: */,
+          ...(credentialDataSupplierInput && { credentialDataSupplierInput }),
         })
         credential = result.credential
         if (result.format) {
           format = result.format
         }
-        if (typeof result.callback === 'function') {
-          signerCallback = result.callback
+        if (typeof result.signCallback === 'function') {
+          signerCallback = result.signCallback
         }
       }
       if (!credential) {
@@ -292,12 +302,12 @@ export class VcIssuer {
 
       if (preAuthorizedCode && preAuthSession) {
         preAuthSession.lastUpdatedAt = +new Date()
-        preAuthSession.status = IssueStatus.CREDENTIAL_REQUEST_RECEIVED
+        preAuthSession.status = IssueStatus.CREDENTIAL_ISSUED
         this._credentialOfferSessions.set(preAuthorizedCode, preAuthSession)
       } else if (issuerState && authSession) {
         // If both were set we used the pre auth flow above as well, hence the else if
         authSession.lastUpdatedAt = +new Date()
-        authSession.status = IssueStatus.CREDENTIAL_REQUEST_RECEIVED
+        authSession.status = IssueStatus.CREDENTIAL_ISSUED
         this._credentialOfferSessions.set(issuerState, authSession)
       }
 
