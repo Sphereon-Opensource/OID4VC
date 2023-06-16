@@ -2,6 +2,7 @@ import { ICredential, ICredentialContextType, IVerifiableCredential, W3CVerifiab
 
 import { ProofOfPossession } from './CredentialIssuance.types';
 import { Oauth2ASWithOID4VCIMetadata } from './OpenID4VCIServerMetadata';
+import { CredentialOfferSession } from './StateManager.types';
 import { IssuerMetadataV1_0_08 } from './v1_0_08.types';
 import { CredentialRequestV1_0_11 } from './v1_0_11.types';
 
@@ -93,11 +94,21 @@ export interface CredentialOfferFormat {
  * Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
  */
 export type CredentialDataSupplierInput = string | string[] | object | object[] | Partial<ICredential> | Partial<ICredential>[];
+
+export type CreateCredentialOfferURIResult = {
+  uri: string;
+  session: CredentialOfferSession;
+  userPin?: string;
+  userPinLength?: number;
+  userPinRequired: boolean;
+};
+
 export interface IssuerCredentialDefinition {
   '@context': ICredentialContextType[];
   types: string[];
   credentialSubject: IssuerCredentialSubject;
 }
+
 export interface ErrorResponse extends Response {
   error: string;
   error_description?: string;
@@ -139,6 +150,7 @@ export interface CredentialResponseJwtVcJsonLdAndLdpVc extends CommonCredentialR
 export interface CredentialResponseJwtVcJson {
   credential: string;
 }
+
 // export type CredentialSubjectDisplay = NameAndLocale[];
 
 export type IssuerCredentialSubjectDisplay = CredentialSubjectDisplay & { [key: string]: CredentialSubjectDisplay };

@@ -5,6 +5,7 @@ import {
   ALG_ERROR,
   AUD_ERROR,
   CNonceState,
+  CreateCredentialOfferURIResult,
   CREDENTIAL_MISSING_ERROR,
   CredentialDataSupplierInput,
   CredentialIssuerMetadataOpts,
@@ -97,7 +98,7 @@ export class VcIssuer {
     baseUri?: string
     scheme?: string
     pinLength?: number
-  }): Promise<{ uri: string; session: CredentialOfferSession }> {
+  }): Promise<CreateCredentialOfferURIResult> {
     let preAuthorizedCode: string | undefined = undefined
     let issuerState: string | undefined = undefined
 
@@ -196,7 +197,12 @@ export class VcIssuer {
     if (issuerState) {
       this.credentialOfferSessions.set(issuerState, session)
     }
-    return { session, uri: createCredentialOfferURIFromObject(credentialOffer, { ...opts, baseUri }) }
+    return {
+      session,
+      uri: createCredentialOfferURIFromObject(credentialOffer, { ...opts, baseUri }),
+      userPinRequired: userPinRequired ?? false,
+      ...(userPin !== undefined && { userPin, pinLength: userPin?.length ?? 0 }),
+    }
   }
 
   /**
