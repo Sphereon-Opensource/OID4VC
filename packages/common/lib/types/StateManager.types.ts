@@ -37,6 +37,14 @@ export interface URIState extends StateType {
   uri: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
 }
 
+export interface AuthStatusResponse {
+  createdAt: number;
+  lastUpdatedAt: number;
+  status: IssueStatus;
+  error?: string;
+  clientId?: string;
+}
+
 export interface IStateManager<T extends StateType> {
   set(id: string, stateValue: T): Promise<void>;
 

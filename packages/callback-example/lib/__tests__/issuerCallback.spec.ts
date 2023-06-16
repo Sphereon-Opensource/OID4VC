@@ -14,11 +14,11 @@ import {
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
 import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { MemoryStates } from '@sphereon/oid4vci-issuer'
 import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import * as jose from 'jose'
 
-import { MemoryStates } from '../../../issuer/lib/state-manager'
 import { generateDid, getIssuerCallback, verifyCredential } from '../IssuerCallback'
 
 const INITIATION_TEST_URI =

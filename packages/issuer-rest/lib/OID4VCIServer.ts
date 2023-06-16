@@ -4,6 +4,7 @@ import process from 'process'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AuthorizationRequest,
+  AuthStatusResponse,
   CredentialOfferV1_0_11,
   CredentialRequestV1_0_11,
   CredentialSupported,
@@ -299,14 +300,14 @@ export class OID4VCIServer {
           })
         }
 
-        return response.send(
-          JSON.stringify({
-            createdAt: session.createdAt,
-            lastUpdatedAt: session.lastUpdatedAt,
-            status: session.status,
-            ...(session.clientId && { clientId: session.clientId }),
-          })
-        )
+        const authStatusBody: AuthStatusResponse = {
+          createdAt: session.createdAt,
+          lastUpdatedAt: session.lastUpdatedAt,
+          status: session.status,
+          ...(session.error && { error: session.error }),
+          ...(session.clientId && { clientId: session.clientId }),
+        }
+        return response.send(JSON.stringify(authStatusBody))
       } catch (e) {
         return sendErrorResponse(
           response,
