@@ -396,7 +396,6 @@ export class VcIssuer {
       const { typ, alg, kid, jwk, x5c } = header
 
       if (typ !== 'openid4vci-proof+jwt') {
-        console.log(typ)
         throw new Error(TYP_ERROR)
       } else if (!alg || !(alg in Alg)) {
         throw new Error(ALG_ERROR)
