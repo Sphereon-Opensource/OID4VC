@@ -7,6 +7,7 @@ import {
   CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
+  IssueStatus,
   Jwt,
   OpenId4VCIVersion,
   ProofOfPossession,
@@ -96,6 +97,8 @@ describe('issuerCallback', () => {
       issuerState: 'existing-state',
       clientId,
       createdAt: +new Date(),
+      lastUpdatedAt: +new Date(),
+      status: IssueStatus.OFFER_CREATED,
       userPin: '123456',
       credentialOffer: {
         credential_offer: {
