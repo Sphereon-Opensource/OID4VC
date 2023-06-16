@@ -70,6 +70,13 @@ function buildVCIFromEnvironment() {
     .build()
 }
 
+export type ICreateCredentialOfferURIResponse = {
+  uri: string
+  userPin?: string
+  userPinLength?: number
+  userPinRequired: boolean
+}
+
 export interface ICreateCredentialOfferOpts {
   createOfferPath?: string
   getOfferPath?: string
@@ -258,7 +265,7 @@ export class OID4VCIServer {
   // fixme authz and enable/disable
   private createCredentialOfferEndpoint(opts?: ICreateCredentialOfferOpts) {
     const path = this.determinePath(opts?.createOfferPath ?? '/webapp/credential-offers', { stripBasePath: true })
-    this.router.post(path, async (request: Request<CredentialOfferRESTRequest>, response: Response) => {
+    this.router.post(path, async (request: Request<CredentialOfferRESTRequest>, response: Response<ICreateCredentialOfferURIResponse>) => {
       try {
         const grantTypes = determineGrantTypes(request.body)
         if (grantTypes.length === 0) {
@@ -269,8 +276,13 @@ export class OID4VCIServer {
         if (!credentials || credentials.length === 0) {
           return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'No credentials supplied' })
         }
-        const uri = await this.issuer.createCredentialOfferURI({ ...request.body, grants, credentials })
-        return response.send(JSON.stringify({ uri }))
+        const result = await this.issuer.createCredentialOfferURI({ ...request.body, grants, credentials })
+        // const session = result.session
+        const resultResponse: ICreateCredentialOfferURIResponse = result
+        if ('session' in resultResponse) {
+          delete resultResponse.session
+        }
+        return response.send(resultResponse)
       } catch (e) {
         return sendErrorResponse(
           response,
