@@ -300,7 +300,7 @@ export class OID4VCIServer {
   // fixme authz and enable/disable
   private getIssueStatusEndpoint(opts?: IGetIssueStatusOpts) {
     const path = this.determinePath(opts?.getStatusPath ?? '/webapp/credential-offer-status', { stripBasePath: true })
-    this.app.post(path, async (request: Request, response: Response) => {
+    this.router.post(path, async (request: Request, response: Response) => {
       try {
         const { id } = request.body
         const session = await this.issuer.credentialOfferSessions.get(id)
@@ -335,7 +335,7 @@ export class OID4VCIServer {
 
   private getCredentialOfferEndpoint(opts?: ICreateCredentialOfferOpts) {
     const path = this.determinePath(opts?.getOfferPath ?? '/webapp/credential-offers/:id', { stripBasePath: true })
-    this.app.get(path, async (request: Request, response: Response) => {
+    this.router.get(path, async (request: Request, response: Response) => {
       try {
         const { id } = request.params
         const session = await this.issuer.credentialOfferSessions.get(id)
