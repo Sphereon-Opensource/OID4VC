@@ -22,7 +22,7 @@ export const handleTokenRequest = ({
   issuer,
   interval,
 }: Required<Pick<ITokenEndpointOpts, 'accessTokenIssuer' | 'cNonceExpiresIn' | 'interval' | 'accessTokenSignerCallback' | 'tokenExpiresIn'>> & {
-  issuer: VcIssuer
+  issuer: VcIssuer<unknown>
 }) => {
   return async (request: Request, response: Response) => {
     response.set({
@@ -66,7 +66,7 @@ export const handleTokenRequest = ({
 export const verifyTokenRequest = ({
   preAuthorizedCodeExpirationDuration,
   issuer,
-}: Required<Pick<ITokenEndpointOpts, 'preAuthorizedCodeExpirationDuration'> & { issuer: VcIssuer }>) => {
+}: Required<Pick<ITokenEndpointOpts, 'preAuthorizedCodeExpirationDuration'> & { issuer: VcIssuer<unknown> }>) => {
   return async (request: Request, response: Response, next: NextFunction) => {
     try {
       await assertValidAccessTokenRequest(request.body, {

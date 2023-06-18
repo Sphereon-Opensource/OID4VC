@@ -14,6 +14,7 @@ import {
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
+import { DIDDocument } from 'did-resolver'
 import { Express } from 'express'
 import * as jose from 'jose'
 import requests from 'supertest'
@@ -82,7 +83,7 @@ describe('OID4VCIServer', () => {
     await credentialOfferSessions.set(preAuthorizedCode2, credentialOfferState2)
     await credentialOfferSessions.set(preAuthorizedCode3, credentialOfferState3)
 
-    const vcIssuer: VcIssuer = new VcIssuer(
+    const vcIssuer: VcIssuer<DIDDocument> = new VcIssuer<DIDDocument>(
       {
         // authorization_server: 'https://authorization-server',
         // credential_endpoint: 'https://credential-endpoint',

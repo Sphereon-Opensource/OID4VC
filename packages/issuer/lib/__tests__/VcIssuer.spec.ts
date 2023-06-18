@@ -10,6 +10,7 @@ import {
   STATE_MISSING_ERROR,
 } from '@sphereon/oid4vci-common'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
+import { DIDDocument } from 'did-resolver'
 
 import { VcIssuer } from '../VcIssuer'
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../builder'
@@ -18,7 +19,7 @@ import { MemoryStates } from '../state-manager'
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
 
 describe('VcIssuer', () => {
-  let vcIssuer: VcIssuer
+  let vcIssuer: VcIssuer<DIDDocument>
   const issuerState = 'previously-created-state'
   const clientId = 'sphereon:wallet'
   const preAuthorizedCode = 'test_code'
@@ -73,7 +74,7 @@ describe('VcIssuer', () => {
         } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
       },
     })
-    vcIssuer = new VcIssuerBuilder()
+    vcIssuer = new VcIssuerBuilder<DIDDocument>()
       .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
@@ -103,15 +104,24 @@ describe('VcIssuer', () => {
       )
       .withJWTVerifyCallback(() =>
         Promise.resolve({
-          header: {
-            typ: 'openid4vci-proof+jwt',
-            alg: Alg.ES256K,
-            kid: 'test-kid',
+          did: 'did:example:1234',
+          kid: 'did:example:1234#auth',
+          alg: 'ES256k',
+          didDocument: {
+            '@context': 'https://www.w3.org/ns/did/v1',
+            id: 'did:example:1234',
           },
-          payload: {
-            aud: 'https://credential-issuer',
-            iat: +new Date(),
-            nonce: 'test-nonce',
+          jwt: {
+            header: {
+              typ: 'openid4vci-proof+jwt',
+              alg: Alg.ES256K,
+              kid: 'test-kid',
+            },
+            payload: {
+              aud: 'https://credential-issuer',
+              iat: +new Date(),
+              nonce: 'test-nonce',
+            },
           },
         })
       )

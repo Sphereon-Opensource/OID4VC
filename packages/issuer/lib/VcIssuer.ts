@@ -15,15 +15,18 @@ import {
   CredentialOfferV1_0_11,
   CredentialRequestV1_0_11,
   CredentialResponse,
+  DID_NO_DIDDOC_ERROR,
   Grant,
   IAT_ERROR,
   ISSUER_CONFIG_ERROR,
   IssuerCredentialDefinition,
   IssueStatus,
   IStateManager,
-  Jwt,
   JWT_VERIFY_CONFIG_ERROR,
   JWTVerifyCallback,
+  JwtVerifyResult,
+  KID_DID_NO_DID_ERROR,
+  KID_JWK_X5C_ERROR,
   NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
@@ -42,12 +45,12 @@ import { CredentialDataSupplier, CredentialSignerCallback } from './types'
 
 const SECOND = 1000
 
-export class VcIssuer {
+export class VcIssuer<DIDDoc> {
   private readonly _issuerMetadata: CredentialIssuerMetadataOpts
   private readonly _userPinRequired: boolean
   private readonly _defaultCredentialOfferBaseUri?: string
   private readonly _credentialSignerCallback?: CredentialSignerCallback
-  private readonly _jwtVerifyCallback?: JWTVerifyCallback
+  private readonly _jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
   private readonly _credentialDataSupplier?: CredentialDataSupplier
   private readonly _credentialOfferSessions: IStateManager<CredentialOfferSession>
   private readonly _cNonces: IStateManager<CNonceState>
@@ -64,7 +67,7 @@ export class VcIssuer {
       cNonces: IStateManager<CNonceState>
       uris?: IStateManager<URIState>
       credentialSignerCallback?: CredentialSignerCallback
-      jwtVerifyCallback?: JWTVerifyCallback
+      jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
       credentialDataSupplier?: CredentialDataSupplier
       cNonceExpiresIn?: number | undefined // expiration duration in seconds
     }
@@ -214,7 +217,7 @@ export class VcIssuer {
    *  - issuerCallback callback to issue a Verifiable Credential
    *  - cNonce an existing c_nonce
    */
-  public async issueCredential(opts: {
+  public async issueCredential<DIDDoc>(opts: {
     credentialRequest: CredentialRequestV1_0_11
     credential?: ICredential
     credentialDataSupplier?: CredentialDataSupplier
@@ -222,7 +225,7 @@ export class VcIssuer {
     newCNonce?: string
     cNonceExpiresIn?: number
     tokenExpiresIn?: number
-    jwtVerifyCallback?: JWTVerifyCallback
+    jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
     credentialSignerCallback?: CredentialSignerCallback
     responseCNonce?: string
   }): Promise<CredentialResponse> {
@@ -239,7 +242,8 @@ export class VcIssuer {
       preAuthorizedCode = validated.preAuthorizedCode
       issuerState = validated.issuerState
 
-      const { preAuthSession, authSession, cNonceState } = validated
+      const { preAuthSession, authSession, cNonceState, jwtVerifyResult } = validated
+      const did = jwtVerifyResult.did
       const newcNonce = opts.newCNonce ? opts.newCNonce : v4()
       const newcNonceState = {
         cNonce: newcNonce,
@@ -288,12 +292,17 @@ export class VcIssuer {
       if (!credential) {
         throw Error('A credential needs to be supplied at this point')
       }
+      if (did) {
+        const subjects = Array.isArray(credential.credentialSubject) ? credential.credentialSubject : [credential.credentialSubject]
+        subjects.filter((subject) => !!subject.id).forEach((subject) => (subject.id = did))
+      }
 
       const verifiableCredential = await this.issueCredentialImpl(
         {
           credentialRequest: opts.credentialRequest,
           format,
           credential,
+          jwtVerifyResult,
         },
         signerCallback
       )
@@ -373,7 +382,7 @@ export class VcIssuer {
       return { session, clientId, grants }
     }*/
 
-  private async validateCredentialRequestProof({
+  private async validateCredentialRequestProof<DIDDoc>({
     credentialRequest,
     jwtVerifyCallback,
     tokenExpiresIn,
@@ -382,7 +391,7 @@ export class VcIssuer {
     tokenExpiresIn: number
     // grants?: Grant,
     clientId?: string
-    jwtVerifyCallback?: JWTVerifyCallback
+    jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
   }) {
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
@@ -395,11 +404,13 @@ export class VcIssuer {
         throw Error('Proof of possession is required. No proof value present in credential request')
       }
 
-      const { payload, header }: Jwt = jwtVerifyCallback
+      const jwtVerifyResult = jwtVerifyCallback
         ? await jwtVerifyCallback(credentialRequest.proof)
         : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           await this._jwtVerifyCallback!(credentialRequest.proof)
 
+      const { didDocument, did, jwt } = jwtVerifyResult
+      const { header, payload } = jwt
       const { iss, aud, iat, nonce } = payload
       if (!nonce) {
         throw Error('No nonce was found in the Proof of Possession')
@@ -408,15 +419,26 @@ export class VcIssuer {
       preAuthorizedCode = cNonceState.preAuthorizedCode
       issuerState = cNonceState.issuerState
       const createdAt = cNonceState.createdAt
-
-      const { typ, alg, kid, jwk, x5c } = header
+      // The verify callback should set the correct values, but let's look at the JWT ourselves to to be sure
+      const alg = jwtVerifyResult.alg ?? header.alg
+      const kid = jwtVerifyResult.kid ?? header.kid
+      const jwk = jwtVerifyResult.jwk ?? header.jwk
+      const x5c = jwtVerifyResult.x5c ?? header.x5c
+      const typ = header.typ
 
       if (typ !== 'openid4vci-proof+jwt') {
-        throw new Error(TYP_ERROR)
+        throw Error(TYP_ERROR)
       } else if (!alg || !(alg in Alg)) {
-        throw new Error(ALG_ERROR)
+        throw Error(ALG_ERROR)
       } else if (!([kid, jwk, x5c].filter((x) => !!x).length === 1)) {
-        // throw new Error(KID_JWK_X5C_ERROR) // todo: whut. An x5c is very specific to X509 certs only
+        // only 1 is allowed, but need to look into whether jwk and x5c are allowed together
+        throw Error(KID_JWK_X5C_ERROR)
+      } else if (kid && !did) {
+        // Make sure the callback function extracts the DID from the kid
+        throw Error(KID_DID_NO_DID_ERROR)
+      } else if (did && !didDocument) {
+        // Make sure the callback function does DID resolution when a did is present
+        throw Error(DID_NO_DIDDOC_ERROR)
       }
 
       const preAuthSession = preAuthorizedCode ? await this.credentialOfferSessions.get(preAuthorizedCode) : undefined
@@ -471,7 +493,7 @@ export class VcIssuer {
       }
       // todo: Add a check of iat against current TS on server with a skew
 
-      return { jwt: { header, payload } as Jwt, preAuthorizedCode, preAuthSession, issuerState, authSession, cNonceState }
+      return { jwtVerifyResult, preAuthorizedCode, preAuthSession, issuerState, authSession, cNonceState }
     } catch (error: unknown) {
       await this.updateErrorStatus({ preAuthorizedCode, issuerState, error })
       throw error
@@ -494,7 +516,12 @@ export class VcIssuer {
   }
 
   private async issueCredentialImpl(
-    opts: { credentialRequest: UniformCredentialRequest; credential: ICredential; format?: OID4VCICredentialFormat },
+    opts: {
+      credentialRequest: UniformCredentialRequest
+      credential: ICredential
+      jwtVerifyResult: JwtVerifyResult<any>
+      format?: OID4VCICredentialFormat
+    },
     issuerCallback?: CredentialSignerCallback
   ): Promise<W3CVerifiableCredential> {
     if ((!opts.credential && !opts.credentialRequest) || !this._credentialSignerCallback) {
@@ -511,7 +538,7 @@ export class VcIssuer {
     return this._credentialSignerCallback
   }
 
-  get jwtVerifyCallback(): JWTVerifyCallback | undefined {
+  get jwtVerifyCallback(): JWTVerifyCallback<DIDDoc> | undefined {
     return this._jwtVerifyCallback
   }
 

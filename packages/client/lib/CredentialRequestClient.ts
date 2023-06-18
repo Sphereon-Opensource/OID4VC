@@ -41,8 +41,8 @@ export class CredentialRequestClient {
     this._credentialRequestOpts = { ...builder };
   }
 
-  public async acquireCredentialsUsingProof(opts: {
-    proofInput: ProofOfPossessionBuilder | ProofOfPossession;
+  public async acquireCredentialsUsingProof<DIDDoc>(opts: {
+    proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
     credentialTypes?: string | string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
   }): Promise<OpenIDResponse<CredentialResponse>> {
@@ -83,8 +83,8 @@ export class CredentialRequestClient {
     return response;
   }
 
-  public async createCredentialRequest(opts: {
-    proofInput: ProofOfPossessionBuilder | ProofOfPossession;
+  public async createCredentialRequest<DIDDoc>(opts: {
+    proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
     credentialTypes?: string | string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
     version: OpenId4VCIVersion;

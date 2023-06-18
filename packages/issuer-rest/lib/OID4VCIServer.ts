@@ -55,7 +55,7 @@ function buildVCIFromEnvironment() {
       } as IssuerCredentialSubjectDisplay // fixme: This is wrong (remove the cast and see it has no matches)
     )
     .build()
-  return new VcIssuerBuilder()
+  return new VcIssuerBuilder<never>()
     .withUserPinRequired(process.env.user_pin_required as unknown as boolean)
     .withAuthorizationServer(process.env.authorization_server as string)
     .withCredentialEndpoint(process.env.credential_endpoint as string)
@@ -105,7 +105,7 @@ export interface IOID4VCIServerOpts {
 }
 
 export class OID4VCIServer {
-  private readonly _issuer: VcIssuer
+  private readonly _issuer: VcIssuer<unknown>
   private authRequestsData: Map<string, AuthorizationRequest> = new Map()
   private readonly _app: Express
   private readonly _baseUrl: URL
@@ -127,7 +127,7 @@ export class OID4VCIServer {
   }
 
   constructor(
-    opts?: IOID4VCIServerOpts & { issuer?: VcIssuer } /*If not supplied as argument, it will be fully configured from environment variables*/
+    opts?: IOID4VCIServerOpts & { issuer?: VcIssuer<unknown> } /*If not supplied as argument, it will be fully configured from environment variables*/
   ) {
     dotenv.config()
 
@@ -420,7 +420,7 @@ export class OID4VCIServer {
     })
   }
 
-  get issuer(): VcIssuer {
+  get issuer(): VcIssuer<unknown> {
     return this._issuer
   }
 

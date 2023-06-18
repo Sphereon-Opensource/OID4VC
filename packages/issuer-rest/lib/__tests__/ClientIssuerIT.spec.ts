@@ -10,12 +10,15 @@ import {
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
   Jwt,
+  JWTHeader,
+  JWTPayload,
   OpenId4VCIVersion,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
+import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
 
 import { OID4VCIServer } from '../OID4VCIServer'
@@ -40,7 +43,7 @@ interface KeyPair {
 jest.setTimeout(15000)
 
 describe('VcIssuer', () => {
-  let vcIssuer: VcIssuer
+  let vcIssuer: VcIssuer<DIDDocument>
   let server: OID4VCIServer
   let accessToken: AccessTokenResponse
   const issuerState = 'previously-created-state'
@@ -96,7 +99,7 @@ describe('VcIssuer', () => {
       credentialSubject: {},
     }
 
-    vcIssuer = new VcIssuerBuilder()
+    vcIssuer = new VcIssuerBuilder<DIDDocument>()
       // .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
       .withDefaultCredentialOfferBaseUri('http://localhost:3456/test')
@@ -127,12 +130,29 @@ describe('VcIssuer', () => {
           },
         })
       )
-      .withJWTVerifyCallback((args: { jwt: string; _kid?: string }) => {
+      .withJWTVerifyCallback((args: { jwt: string; kid?: string }) => {
+        const header = jose.decodeProtectedHeader(args.jwt)
+        const payload = jose.decodeJwt(args.jwt)
+
+        const kid = header.kid ?? args.kid
+        const did = kid!.split('#')[0]
+        const didDocument: DIDDocument = {
+          '@context': 'https://www.w3.org/ns/did/v1',
+          id: did,
+        }
+        const alg = header.alg ?? 'ES256k'
         return Promise.resolve({
-          header: jose.decodeProtectedHeader(args.jwt),
-          payload: jose.decodeJwt(args.jwt),
-        } as Jwt)
+          alg,
+          kid,
+          did,
+          didDocument,
+          jwt: {
+            header: header as JWTHeader,
+            payload: payload as JWTPayload,
+          },
+        })
       })
+
       .build()
 
     server = new OID4VCIServer({

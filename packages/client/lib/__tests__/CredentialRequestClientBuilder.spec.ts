@@ -4,7 +4,7 @@ import {
   Alg,
   CredentialIssuerMetadata,
   Jwt,
-  JWTPayload,
+  JwtVerifyResult,
   OpenId4VCIVersion,
   ProofOfPossession,
   UniformCredentialRequest,
@@ -51,9 +51,19 @@ interface KeyPair {
   privateKey: KeyObject;
 }
 
-async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; kid?: string }): Promise<Jwt> {
+async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; kid?: string }): Promise<JwtVerifyResult<unknown>> {
   const result = await jose.jwtVerify(args.jwt, keypair.publicKey);
-  return { header: result.protectedHeader, payload: result.payload as unknown as JWTPayload };
+  const kid = result.protectedHeader.kid ?? args.kid;
+  const did = kid!.split('#')[0];
+  const didDocument = {};
+  const alg = result.protectedHeader.alg;
+  return {
+    alg,
+    did,
+    kid,
+    didDocument,
+    jwt: { header: result.protectedHeader, payload: result.payload },
+  };
 }
 
 describe('Credential Request Client Builder', () => {

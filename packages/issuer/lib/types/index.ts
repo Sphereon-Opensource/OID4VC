@@ -2,6 +2,7 @@ import {
   AssertedUniformCredentialOffer,
   CNonceState,
   CredentialDataSupplierInput,
+  JwtVerifyResult,
   OID4VCICredentialFormat,
   UniformCredentialRequest,
 } from '@sphereon/oid4vci-common'
@@ -11,6 +12,11 @@ export type CredentialSignerCallback = (opts: {
   credentialRequest: UniformCredentialRequest
   credential: ICredential
   format?: OID4VCICredentialFormat
+  /**
+   * We use any since we don't want to expose the DID Document TS type to too many interfaces.
+   * An implementation that wants to look into the DIDDoc would have to do a cast in the signer callback implementation
+   */
+  jwtVerifyResult: JwtVerifyResult<unknown>
 }) => Promise<W3CVerifiableCredential>
 
 export interface CredentialDataSupplierArgs extends CNonceState {

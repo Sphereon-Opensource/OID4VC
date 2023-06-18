@@ -16,7 +16,7 @@ import { CredentialDataSupplier, CredentialSignerCallback } from '../types'
 
 import { IssuerMetadataBuilderV1_11 } from './IssuerMetadataBuilderV1_11'
 
-export class VcIssuerBuilder {
+export class VcIssuerBuilder<DIDDoc> {
   issuerMetadataBuilder?: IssuerMetadataBuilderV1_11
   issuerMetadata: Partial<CredentialIssuerMetadata> = {}
   defaultCredentialOfferBaseUri?: string
@@ -26,7 +26,7 @@ export class VcIssuerBuilder {
   credentialOfferURIManager?: IStateManager<URIState>
   cNonceStateManager?: IStateManager<CNonceState>
   credentialSignerCallback?: CredentialSignerCallback
-  jwtVerifyCallback?: JWTVerifyCallback
+  jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
   credentialDataSupplier?: CredentialDataSupplier
 
   public withIssuerMetadata(issuerMetadata: CredentialIssuerMetadata) {
@@ -135,7 +135,7 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withJWTVerifyCallback(verifyCallback: JWTVerifyCallback): this {
+  public withJWTVerifyCallback(verifyCallback: JWTVerifyCallback<DIDDoc>): this {
     this.jwtVerifyCallback = verifyCallback
     return this
   }
@@ -145,7 +145,7 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public build(): VcIssuer {
+  public build(): VcIssuer<DIDDoc> {
     if (!this.credentialOfferStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
     }

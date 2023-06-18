@@ -13,9 +13,9 @@ import {
 
 import { createProofOfPossession } from './functions';
 
-export class ProofOfPossessionBuilder {
+export class ProofOfPossessionBuilder<DIDDoc> {
   private readonly proof?: ProofOfPossession;
-  private readonly callbacks?: ProofOfPossessionCallbacks;
+  private readonly callbacks?: ProofOfPossessionCallbacks<DIDDoc>;
   private readonly version: OpenId4VCIVersion;
 
   private kid?: string;
@@ -35,7 +35,7 @@ export class ProofOfPossessionBuilder {
     version,
   }: {
     proof?: ProofOfPossession;
-    callbacks?: ProofOfPossessionCallbacks;
+    callbacks?: ProofOfPossessionCallbacks<DIDDoc>;
     accessTokenResponse?: AccessTokenResponse;
     jwt?: Jwt;
     version: OpenId4VCIVersion;
@@ -53,31 +53,31 @@ export class ProofOfPossessionBuilder {
     }
   }
 
-  static fromJwt({
+  static fromJwt<DIDDoc>({
     jwt,
     callbacks,
     version,
   }: {
     jwt: Jwt;
-    callbacks: ProofOfPossessionCallbacks;
+    callbacks: ProofOfPossessionCallbacks<DIDDoc>;
     version: OpenId4VCIVersion;
-  }): ProofOfPossessionBuilder {
+  }): ProofOfPossessionBuilder<DIDDoc> {
     return new ProofOfPossessionBuilder({ callbacks, jwt, version });
   }
 
-  static fromAccessTokenResponse({
+  static fromAccessTokenResponse<DIDDoc>({
     accessTokenResponse,
     callbacks,
     version,
   }: {
     accessTokenResponse: AccessTokenResponse;
-    callbacks: ProofOfPossessionCallbacks;
+    callbacks: ProofOfPossessionCallbacks<DIDDoc>;
     version: OpenId4VCIVersion;
-  }): ProofOfPossessionBuilder {
+  }): ProofOfPossessionBuilder<DIDDoc> {
     return new ProofOfPossessionBuilder({ callbacks, accessTokenResponse, version });
   }
 
-  static fromProof(proof: ProofOfPossession, version: OpenId4VCIVersion): ProofOfPossessionBuilder {
+  static fromProof<DIDDoc>(proof: ProofOfPossession, version: OpenId4VCIVersion): ProofOfPossessionBuilder<DIDDoc> {
     return new ProofOfPossessionBuilder({ proof, version });
   }
 
@@ -158,6 +158,11 @@ export class ProofOfPossessionBuilder {
       this.withTyp('openid4vci-proof+jwt');
     }
     this.withAlg(jwt.header.alg);
+
+    if (Array.isArray(jwt.payload.aud)) {
+      // Rather do this than take the first value, as it might be very hard to figure out why something is failing
+      throw Error('We cannot handle multiple aud values currently');
+    }
 
     if (jwt.payload) {
       if (jwt.payload.iss) this.withClientId(jwt.payload.iss);
