@@ -293,8 +293,14 @@ export class VcIssuer<DIDDoc> {
         throw Error('A credential needs to be supplied at this point')
       }
       if (did) {
-        const subjects = Array.isArray(credential.credentialSubject) ? credential.credentialSubject : [credential.credentialSubject]
-        subjects.filter((subject) => !!subject.id).forEach((subject) => (subject.id = did))
+        const credentialSubjects = Array.isArray(credential.credentialSubject) ? credential.credentialSubject : [credential.credentialSubject]
+        credentialSubjects.map((subject) => {
+          if (!subject.id) {
+            subject.id = did
+          }
+          return subject
+        })
+        credential.credentialSubject = Array.isArray(credential.credentialSubject) ? credentialSubjects : credentialSubjects[0]
       }
 
       const verifiableCredential = await this.issueCredentialImpl(

@@ -13,10 +13,10 @@ export type CredentialSignerCallback = (opts: {
   credential: ICredential
   format?: OID4VCICredentialFormat
   /**
-   * We use any since we don't want to expose the DID Document TS type to too many interfaces.
+   * We use object since we don't want to expose the DID Document TS type to too many interfaces.
    * An implementation that wants to look into the DIDDoc would have to do a cast in the signer callback implementation
    */
-  jwtVerifyResult: JwtVerifyResult<unknown>
+  jwtVerifyResult: JwtVerifyResult<object>
 }) => Promise<W3CVerifiableCredential>
 
 export interface CredentialDataSupplierArgs extends CNonceState {

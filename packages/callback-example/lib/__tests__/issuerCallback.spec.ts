@@ -26,7 +26,7 @@ import { generateDid, getIssuerCallback, verifyCredential } from '../IssuerCallb
 const INITIATION_TEST_URI =
   'openid-initiate-issuance://?credential_type=OpenBadgeCredential&issuer=https%3A%2F%2Fjff%2Ewalt%2Eid%2Fissuer-api%2Foidc%2F&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false'
 const IDENTIPROOF_ISSUER_URL = 'https://example.com/credential'
-const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
+const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21#keys-1'
 let keypair: KeyPair // Proof of Possession JWT
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let didKey: { didDocument: any; keyPairs: any; methodFor: any } // Json LD VC issuance
@@ -215,7 +215,7 @@ describe('issuerCallback', () => {
       .withToken('token')
 
     const jwt: Jwt = {
-      header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'openid4vci-proof+jwt' },
+      header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#keys-1', typ: 'openid4vci-proof+jwt' },
       payload: { iss: 'sphereon:wallet', nonce: 'test_value', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
     }
 
@@ -266,7 +266,9 @@ describe('issuerCallback', () => {
       c_nonce_expires_in: 300000,
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],
-        credentialSubject: {},
+        credentialSubject: {
+          id: 'did:example:ebfeb1f712ebc6f1c276e12ec21',
+        },
         issuanceDate: expect.any(String),
         issuer: didKey.didDocument.id,
         proof: {
