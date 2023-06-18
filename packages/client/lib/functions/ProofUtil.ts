@@ -20,8 +20,8 @@ const debug = Debug('sphereon:openid4vci:token');
  * @param existingJwt
  *  - Optional, clientId of the party requesting the credential
  */
-export const createProofOfPossession = async (
-  callbacks: ProofOfPossessionCallbacks,
+export const createProofOfPossession = async <DIDDoc>(
+  callbacks: ProofOfPossessionCallbacks<DIDDoc>,
   jwtProps?: JwtProps,
   existingJwt?: Jwt
 ): Promise<ProofOfPossession> => {
@@ -69,14 +69,14 @@ export interface JwtProps {
 }
 
 const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
-  const aud = getJwtProperty('aud', true, jwtProps?.issuer, existingJwt?.payload?.aud);
-  const iss = getJwtProperty('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss);
-  const jti = getJwtProperty('jti', false, jwtProps?.jti, existingJwt?.payload?.jti);
-  const typ = getJwtProperty('typ', true, jwtProps?.typ, existingJwt?.header?.typ, 'jwt');
-  const nonce = getJwtProperty('nonce', false, jwtProps?.nonce, existingJwt?.payload?.nonce); // Officially this is required, but some implementations don't have it
+  const aud = getJwtProperty<string | string[]>('aud', true, jwtProps?.issuer, existingJwt?.payload?.aud);
+  const iss = getJwtProperty<string>('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss);
+  const jti = getJwtProperty<string>('jti', false, jwtProps?.jti, existingJwt?.payload?.jti);
+  const typ = getJwtProperty<string>('typ', true, jwtProps?.typ, existingJwt?.header?.typ, 'jwt');
+  const nonce = getJwtProperty<string>('nonce', false, jwtProps?.nonce, existingJwt?.payload?.nonce); // Officially this is required, but some implementations don't have it
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const alg = getJwtProperty('alg', false, jwtProps?.alg, existingJwt?.header?.alg, 'ES256')!;
-  const kid = getJwtProperty('kid', true, jwtProps?.kid, existingJwt?.header?.kid);
+  const alg = getJwtProperty<string>('alg', false, jwtProps?.alg, existingJwt?.header?.alg, 'ES256')!;
+  const kid = getJwtProperty<string>('kid', true, jwtProps?.kid, existingJwt?.header?.kid);
   const jwt: Partial<Jwt> = existingJwt ? existingJwt : {};
   const now = +new Date();
   const jwtPayload: Partial<JWTPayload> = {
@@ -99,17 +99,11 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   };
 };
 
-const getJwtProperty = (
-  propertyName: string,
-  required: boolean,
-  option?: string,
-  jwtProperty?: string,
-  defaultValue?: string
-): string | undefined => {
+const getJwtProperty = <T>(propertyName: string, required: boolean, option?: string, jwtProperty?: T, defaultValue?: T): T | undefined => {
   if (option && jwtProperty && option !== jwtProperty) {
     throw Error(`Cannot have a property '${propertyName}' with value '${option}' and different JWT value '${jwtProperty}' at the same time`);
   }
-  let result = jwtProperty ? jwtProperty : option;
+  let result = (jwtProperty ? jwtProperty : option) as T | undefined;
   if (!result) {
     if (required) {
       throw Error(`No ${propertyName} property provided either in a JWT or as option`);

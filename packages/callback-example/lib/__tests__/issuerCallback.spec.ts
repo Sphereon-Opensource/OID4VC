@@ -7,17 +7,20 @@ import {
   CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
+  IssueStatus,
   Jwt,
+  JwtVerifyResult,
   OpenId4VCIVersion,
   ProofOfPossession,
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
 import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { MemoryStates } from '@sphereon/oid4vci-issuer'
 import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
 
-import { MemoryStates } from '../../../issuer/lib/state-manager'
 import { generateDid, getIssuerCallback, verifyCredential } from '../IssuerCallback'
 
 const INITIATION_TEST_URI =
@@ -42,12 +45,25 @@ async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promi
     .sign(keypair.privateKey)
 }
 
-async function verifyCallbackFunction(args: { jwt: string; kid?: string }): Promise<Jwt> {
+async function verifyCallbackFunction(args: { jwt: string; kid?: string }): Promise<JwtVerifyResult<DIDDocument>> {
   const result = await jose.jwtVerify(args.jwt, keypair.publicKey)
+  const kid = result.protectedHeader.kid ?? args.kid
+  const did = kid!.split('#')[0]
+  const didDocument: DIDDocument = {
+    '@context': 'https://www.w3.org/ns/did/v1',
+    id: did,
+  }
+  const alg = result.protectedHeader.alg
   return {
-    header: result.protectedHeader,
-    payload: result.payload,
-  } as Jwt
+    alg,
+    kid,
+    did,
+    didDocument,
+    jwt: {
+      header: result.protectedHeader,
+      payload: result.payload,
+    },
+  }
 }
 
 interface KeyPair {
@@ -65,7 +81,7 @@ afterAll(async () => {
   await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
 })
 describe('issuerCallback', () => {
-  let vcIssuer: VcIssuer
+  let vcIssuer: VcIssuer<DIDDocument>
   const state = 'existing-state'
   const clientId = 'sphereon:wallet'
 
@@ -96,6 +112,8 @@ describe('issuerCallback', () => {
       issuerState: 'existing-state',
       clientId,
       createdAt: +new Date(),
+      lastUpdatedAt: +new Date(),
+      status: IssueStatus.OFFER_CREATED,
       userPin: '123456',
       credentialOffer: {
         credential_offer: {
@@ -118,7 +136,7 @@ describe('issuerCallback', () => {
 
     const nonces = new MemoryStates<CNonceState>()
     nonces.set('test_value', { cNonce: 'test_value', createdAt: +new Date(), issuerState: 'existing-state' })
-    vcIssuer = new VcIssuerBuilder()
+    vcIssuer = new VcIssuerBuilder<DIDDocument>()
       .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)

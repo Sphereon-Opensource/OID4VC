@@ -1,4 +1,4 @@
-import { CredentialSupported, IssuerCredentialSubjectDisplay, TokenErrorResponse } from '@sphereon/oid4vci-common'
+import { CredentialSupported, IssuerCredentialSubjectDisplay, IssueStatus, TokenErrorResponse } from '@sphereon/oid4vci-common'
 import { v4 } from 'uuid'
 
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../index'
@@ -127,6 +127,8 @@ describe('VcIssuer builder should', () => {
     const preAuthorizedCodecreatedAt = +new Date()
     await vcIssuer.credentialOfferSessions?.set('test', {
       issuerState: v4(),
+      lastUpdatedAt: preAuthorizedCodecreatedAt,
+      status: IssueStatus.OFFER_CREATED,
       clientId: 'test_client',
       createdAt: preAuthorizedCodecreatedAt,
       userPin: '123456',
@@ -135,6 +137,8 @@ describe('VcIssuer builder should', () => {
     await expect(vcIssuer.credentialOfferSessions?.get('test')).resolves.toMatchObject({
       clientId: 'test_client',
       userPin: '123456',
+      status: IssueStatus.OFFER_CREATED,
+      lastUpdatedAt: preAuthorizedCodecreatedAt,
       createdAt: preAuthorizedCodecreatedAt,
       credentialOffer: { credential_offer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' } },
     })

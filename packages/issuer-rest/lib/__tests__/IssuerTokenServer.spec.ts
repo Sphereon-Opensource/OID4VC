@@ -7,12 +7,14 @@ import {
   CredentialIssuerMetadataOpts,
   CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
   CredentialOfferSession,
+  IssueStatus,
   Jwt,
   STATE_MISSING_ERROR,
   URIState,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
+import { DIDDocument } from 'did-resolver'
 import { Express } from 'express'
 import * as jose from 'jose'
 import requests from 'supertest'
@@ -37,6 +39,8 @@ describe('OID4VCIServer', () => {
       preAuthorizedCode: preAuthorizedCode1,
       userPin: '493536',
       createdAt: +new Date(),
+      lastUpdatedAt: +new Date(),
+      status: IssueStatus.OFFER_CREATED,
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'test_issuer',
@@ -79,7 +83,7 @@ describe('OID4VCIServer', () => {
     await credentialOfferSessions.set(preAuthorizedCode2, credentialOfferState2)
     await credentialOfferSessions.set(preAuthorizedCode3, credentialOfferState3)
 
-    const vcIssuer: VcIssuer = new VcIssuer(
+    const vcIssuer: VcIssuer<DIDDocument> = new VcIssuer<DIDDocument>(
       {
         // authorization_server: 'https://authorization-server',
         // credential_endpoint: 'https://credential-endpoint',

@@ -10,12 +10,15 @@ import {
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
   Jwt,
+  JWTHeader,
+  JWTPayload,
   OpenId4VCIVersion,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
+import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
 
 import { OID4VCIServer } from '../OID4VCIServer'
@@ -40,7 +43,7 @@ interface KeyPair {
 jest.setTimeout(15000)
 
 describe('VcIssuer', () => {
-  let vcIssuer: VcIssuer
+  let vcIssuer: VcIssuer<DIDDocument>
   let server: OID4VCIServer
   let accessToken: AccessTokenResponse
   const issuerState = 'previously-created-state'
@@ -96,7 +99,7 @@ describe('VcIssuer', () => {
       credentialSubject: {},
     }
 
-    vcIssuer = new VcIssuerBuilder()
+    vcIssuer = new VcIssuerBuilder<DIDDocument>()
       // .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
       .withDefaultCredentialOfferBaseUri('http://localhost:3456/test')
@@ -127,12 +130,29 @@ describe('VcIssuer', () => {
           },
         })
       )
-      .withJWTVerifyCallback((args: { jwt: string; _kid?: string }) => {
+      .withJWTVerifyCallback((args: { jwt: string; kid?: string }) => {
+        const header = jose.decodeProtectedHeader(args.jwt)
+        const payload = jose.decodeJwt(args.jwt)
+
+        const kid = header.kid ?? args.kid
+        const did = kid!.split('#')[0]
+        const didDocument: DIDDocument = {
+          '@context': 'https://www.w3.org/ns/did/v1',
+          id: did,
+        }
+        const alg = header.alg ?? 'ES256k'
         return Promise.resolve({
-          header: jose.decodeProtectedHeader(args.jwt),
-          payload: jose.decodeJwt(args.jwt),
-        } as Jwt)
+          alg,
+          kid,
+          did,
+          didDocument,
+          jwt: {
+            header: header as JWTHeader,
+            payload: payload as JWTPayload,
+          },
+        })
       })
+
       .build()
 
     server = new OID4VCIServer({
@@ -153,19 +173,21 @@ describe('VcIssuer', () => {
   let client: OpenID4VCIClient
   it('should create credential offer', async () => {
     expect(server.issuer).toBeDefined()
-    uri = await vcIssuer.createCredentialOfferURI({
-      grants: {
-        authorization_code: {
-          issuer_state: issuerState,
+    uri = await vcIssuer
+      .createCredentialOfferURI({
+        grants: {
+          authorization_code: {
+            issuer_state: issuerState,
+          },
+          'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+            'pre-authorized_code': preAuthorizedCode,
+            user_pin_required: true,
+          },
         },
-        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-          'pre-authorized_code': preAuthorizedCode,
-          user_pin_required: true,
-        },
-      },
-      credentials: ['UniversityDegree_JWT'],
-      scheme: 'http',
-    })
+        credentials: ['UniversityDegree_JWT'],
+        scheme: 'http',
+      })
+      .then((response) => response.uri)
     expect(uri).toEqual(
       'http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D%2C%22credentials%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%7D'
     )

@@ -2,13 +2,14 @@ import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential 
 
 import { ProofOfPossession } from './CredentialIssuance.types';
 import { Oauth2ASWithOID4VCIMetadata } from './OpenID4VCIServerMetadata';
+import { CredentialOfferSession } from './StateManager.types';
 import { IssuerMetadataV1_0_08 } from './v1_0_08.types';
 import { CredentialRequestV1_0_11 } from './v1_0_11.types';
 
 /**
  * Important Note: please be aware that these Common interfaces are based on versions v1_0.11 and v1_0.09
  */
-export interface CredentialLogo {
+export interface ImageInfo {
   url?: string;
   alt_text?: string;
 
@@ -24,7 +25,7 @@ export interface NameAndLocale {
 }
 
 export interface LogoAndColor {
-  logo?: CredentialLogo; // OPTIONAL. A JSON object with information about the logo of the Credential with a following non-exhaustive list of parameters that MAY be included:
+  logo?: ImageInfo; // OPTIONAL. A JSON object with information about the logo of the Credential with a following non-exhaustive list of parameters that MAY be included:
   description?: string; // OPTIONAL. String value of a description of the Credential.
   background_color?: string; //OPTIONAL. String value of a background color of the Credential represented as numerical color values defined in CSS Color Module Level 37 [CSS-Color].
   text_color?: string; // OPTIONAL. String value of a text color of the Credential represented as numerical color values defined in CSS Color Module Level 37 [CSS-Color].
@@ -33,6 +34,7 @@ export interface LogoAndColor {
 export type CredentialsSupportedDisplay = NameAndLocale &
   LogoAndColor & {
     name: string; // REQUIRED. String value of a display name for the Credential.
+    background_image?: ImageInfo; //OPTIONAL, NON-SPEC compliant!. URL of a background image useful for card views of credentials. Expected to an image that fills the full card-view of a wallet
   };
 
 export type MetadataDisplay = NameAndLocale &
@@ -53,12 +55,6 @@ export interface CredentialIssuerMetadataOpts {
 // For now we extend the opts above. Only difference is that the credential endpoint is optional in the Opts, as it can come from other sources. The value is however required in the eventual Issuer Metadata
 export interface CredentialIssuerMetadata extends CredentialIssuerMetadataOpts {
   credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
-  /*batch_credential_endpoint?: string; // OPTIONAL. URL of the Credential Issuer's Batch Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components. If omitted, the Credential Issuer does not support the Batch Credential Endpoint.
-  credentials_supported: CredentialSupported[]; // REQUIRED. A JSON array containing a list of JSON objects, each of them representing metadata about a separate credential type that the Credential Issuer can issue. The JSON objects in the array MUST conform to the structure of the Section 10.2.3.1.
-  credential_issuer: string; // REQUIRED. The Credential Issuer's identifier.
-  authorization_server?: string; // OPTIONAL. Identifier of the OAuth 2.0 Authorization Server (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
-  token_endpoint?: string;
-  display?: MetadataDisplay[]; //  An array of objects, where each object contains display properties of a Credential Issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:*/
 }
 
 export interface CredentialSupportedBrief {
@@ -94,48 +90,24 @@ export interface CredentialOfferFormat {
   types: string[];
 }
 
+/**
+ * Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
+ */
+export type CredentialDataSupplierInput = any;
+
+export type CreateCredentialOfferURIResult = {
+  uri: string;
+  session: CredentialOfferSession;
+  userPin?: string;
+  userPinLength?: number;
+  userPinRequired: boolean;
+};
+
 export interface IssuerCredentialDefinition {
   '@context': ICredentialContextType[];
   types: string[];
   credentialSubject: IssuerCredentialSubject;
 }
-
-/*
-export interface CredentialOfferCredentialDefinition {
-  '@context': ICredentialContextType[];
-  types: string[];
-  credentialSubject?: IssuerCredentialSubject;
-  order?: string[]; // An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
-}
-*/
-
-// export type GrantType = GrantTypes;
-
-/*
-export interface CommonAccessTokenRequest {
-  client_id?: string;
-  code?: string;
-  code_verifier?: string;
-  grant_type: GrantType;
-  'pre-authorized_code'?: string;
-  redirect_uri?: string;
-  scope?: string;
-  user_pin?: string;
-}
-*/
-
-/*
-export interface CommonAccessTokenResponse {
-  access_token: string;
-  scope?: string;
-  token_type?: string;
-  expires_in?: number; // in seconds
-  c_nonce?: string;
-  c_nonce_expires_in?: number; // in seconds
-  authorization_pending?: boolean;
-  interval?: number; // in seconds
-}
-*/
 
 export interface ErrorResponse extends Response {
   error: string;
@@ -178,6 +150,7 @@ export interface CredentialResponseJwtVcJsonLdAndLdpVc extends CommonCredentialR
 export interface CredentialResponseJwtVcJson {
   credential: string;
 }
+
 // export type CredentialSubjectDisplay = NameAndLocale[];
 
 export type IssuerCredentialSubjectDisplay = CredentialSubjectDisplay & { [key: string]: CredentialSubjectDisplay };

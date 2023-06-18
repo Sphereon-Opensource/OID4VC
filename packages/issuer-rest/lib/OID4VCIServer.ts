@@ -4,13 +4,14 @@ import process from 'process'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AuthorizationRequest,
-  CredentialOfferV1_0_11,
+  CredentialOfferRESTRequest,
   CredentialRequestV1_0_11,
   CredentialSupported,
   determineGrantTypes,
   getNumberOrUndefined,
   Grant,
   IssuerCredentialSubjectDisplay,
+  IssueStatusResponse,
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
   OID4VCICredentialFormat,
   TokenErrorResponse,
@@ -54,7 +55,7 @@ function buildVCIFromEnvironment() {
       } as IssuerCredentialSubjectDisplay // fixme: This is wrong (remove the cast and see it has no matches)
     )
     .build()
-  return new VcIssuerBuilder()
+  return new VcIssuerBuilder<never>()
     .withUserPinRequired(process.env.user_pin_required as unknown as boolean)
     .withAuthorizationServer(process.env.authorization_server as string)
     .withCredentialEndpoint(process.env.credential_endpoint as string)
@@ -69,6 +70,13 @@ function buildVCIFromEnvironment() {
     .build()
 }
 
+export type ICreateCredentialOfferURIResponse = {
+  uri: string
+  userPin?: string
+  userPinLength?: number
+  userPinRequired: boolean
+}
+
 export interface ICreateCredentialOfferOpts {
   createOfferPath?: string
   getOfferPath?: string
@@ -76,9 +84,18 @@ export interface ICreateCredentialOfferOpts {
   //todo: Add authn/z, as this endpoint would be called by an integration instead of wallets
 }
 
+export interface IGetIssueStatusOpts {
+  getStatusPath?: string
+  getStatusEndpointDisabled?: boolean // Disable the REST endpoint for getting the issue status
+  //todo: Add authn/z, as this endpoint would be called by an integration instead of wallets
+  // issuerState?: string
+  // preAuthorizedCode?: string
+}
+
 export interface IOID4VCIServerOpts {
   tokenEndpointOpts?: ITokenEndpointOpts
   credentialOfferOpts?: ICreateCredentialOfferOpts
+  getStatusOpts?: IGetIssueStatusOpts
   serverOpts?: {
     app?: Express
     port?: number
@@ -88,7 +105,7 @@ export interface IOID4VCIServerOpts {
 }
 
 export class OID4VCIServer {
-  private readonly _issuer: VcIssuer
+  private readonly _issuer: VcIssuer<unknown>
   private authRequestsData: Map<string, AuthorizationRequest> = new Map()
   private readonly _app: Express
   private readonly _baseUrl: URL
@@ -110,7 +127,7 @@ export class OID4VCIServer {
   }
 
   constructor(
-    opts?: IOID4VCIServerOpts & { issuer?: VcIssuer } /*If not supplied as argument, it will be fully configured from environment variables*/
+    opts?: IOID4VCIServerOpts & { issuer?: VcIssuer<unknown> } /*If not supplied as argument, it will be fully configured from environment variables*/
   ) {
     dotenv.config()
 
@@ -142,6 +159,9 @@ export class OID4VCIServer {
     this.assertAccessTokenHandling()
     if (!this.isTokenEndpointDisabled(opts?.tokenEndpointOpts)) {
       this.accessTokenEndpoint(opts?.tokenEndpointOpts)
+    }
+    if (!this.isStatusEndpointDisabled(opts?.getStatusOpts)) {
+      this.getIssueStatusEndpoint(opts?.getStatusOpts)
     }
     this.cNonceExpiresIn = opts?.tokenEndpointOpts?.cNonceExpiresIn ?? 300000
     this.tokenExpiresIn = opts?.tokenEndpointOpts?.tokenExpiresIn ?? 300000
@@ -182,7 +202,7 @@ export class OID4VCIServer {
       skipBaseUrlCheck: false,
       stripBasePath: true,
     })
-    // let's fix any baseUrl ending with a slash as path will always start with a slash and we already removed it at the end of the base url
+    // let's fix any baseUrl ending with a slash as path will always start with a slash, and we already removed it at the end of the base url
 
     const url = new URL(`${baseUrl}${path}`)
     // this.issuer.issuerMetadata.token_endpoint = url.toString()
@@ -245,7 +265,7 @@ export class OID4VCIServer {
   // fixme authz and enable/disable
   private createCredentialOfferEndpoint(opts?: ICreateCredentialOfferOpts) {
     const path = this.determinePath(opts?.createOfferPath ?? '/webapp/credential-offers', { stripBasePath: true })
-    this.router.post(path, async (request: Request<CredentialOfferV1_0_11>, response: Response) => {
+    this.router.post(path, async (request: Request<CredentialOfferRESTRequest>, response: Response<ICreateCredentialOfferURIResponse>) => {
       try {
         const grantTypes = determineGrantTypes(request.body)
         if (grantTypes.length === 0) {
@@ -256,9 +276,13 @@ export class OID4VCIServer {
         if (!credentials || credentials.length === 0) {
           return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'No credentials supplied' })
         }
-
-        const uri = await this.issuer.createCredentialOfferURI({ grants, credentials })
-        return response.send(JSON.stringify({ uri }))
+        const result = await this.issuer.createCredentialOfferURI({ ...request.body, grants, credentials })
+        // const session = result.session
+        const resultResponse: ICreateCredentialOfferURIResponse = result
+        if ('session' in resultResponse) {
+          delete resultResponse.session
+        }
+        return response.send(resultResponse)
       } catch (e) {
         return sendErrorResponse(
           response,
@@ -273,9 +297,45 @@ export class OID4VCIServer {
     })
   }
 
+  // fixme authz and enable/disable
+  private getIssueStatusEndpoint(opts?: IGetIssueStatusOpts) {
+    const path = this.determinePath(opts?.getStatusPath ?? '/webapp/credential-offer-status', { stripBasePath: true })
+    this.router.post(path, async (request: Request, response: Response) => {
+      try {
+        const { id } = request.body
+        const session = await this.issuer.credentialOfferSessions.get(id)
+        if (!session || !session.credentialOffer) {
+          return sendErrorResponse(response, 404, {
+            error: 'invalid_request',
+            error_description: `Credential offer ${id} not found`,
+          })
+        }
+
+        const authStatusBody: IssueStatusResponse = {
+          createdAt: session.createdAt,
+          lastUpdatedAt: session.lastUpdatedAt,
+          status: session.status,
+          ...(session.error && { error: session.error }),
+          ...(session.clientId && { clientId: session.clientId }),
+        }
+        return response.send(JSON.stringify(authStatusBody))
+      } catch (e) {
+        return sendErrorResponse(
+          response,
+          500,
+          {
+            error: 'invalid_request',
+            error_description: (e as Error).message,
+          },
+          e
+        )
+      }
+    })
+  }
+
   private getCredentialOfferEndpoint(opts?: ICreateCredentialOfferOpts) {
     const path = this.determinePath(opts?.getOfferPath ?? '/webapp/credential-offers/:id', { stripBasePath: true })
-    this.app.get(path, async (request: Request, response: Response) => {
+    this.router.get(path, async (request: Request, response: Response) => {
       try {
         const { id } = request.params
         const session = await this.issuer.credentialOfferSessions.get(id)
@@ -360,7 +420,7 @@ export class OID4VCIServer {
     })
   }
 
-  get issuer(): VcIssuer {
+  get issuer(): VcIssuer<unknown> {
     return this._issuer
   }
 
@@ -373,6 +433,10 @@ export class OID4VCIServer {
 
   private isTokenEndpointDisabled(tokenEndpointOpts?: ITokenEndpointOpts) {
     return tokenEndpointOpts?.tokenEndpointDisabled === true || process.env.TOKEN_ENDPOINT_DISABLED === 'true'
+  }
+
+  private isStatusEndpointDisabled(statusEndpointOpts?: IGetIssueStatusOpts) {
+    return statusEndpointOpts?.getStatusEndpointDisabled === true || process.env.STATUS_ENDPOINT_DISABLED === 'true'
   }
 
   private assertAccessTokenHandling(tokenEndpointOpts?: ITokenEndpointOpts) {

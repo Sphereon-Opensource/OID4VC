@@ -108,9 +108,9 @@ export interface Jwt {
   payload: JWTPayload;
 }
 
-export interface ProofOfPossessionCallbacks {
+export interface ProofOfPossessionCallbacks<DIDDoc> {
   signCallback: JWTSignerCallback;
-  verifyCallback?: JWTVerifyCallback;
+  verifyCallback?: JWTVerifyCallback<DIDDoc>;
 }
 
 export enum Alg {
@@ -155,7 +155,7 @@ export type JWTHeader = JWTHeaderParameters;
 
 export interface JWTPayload {
   iss?: string; // REQUIRED (string). The value of this claim MUST be the client_id of the client making the credential request.
-  aud?: string; // REQUIRED (string). The value of this claim MUST be the issuer URL of credential issuer.
+  aud?: string | string[]; // REQUIRED (string). The value of this claim MUST be the issuer URL of credential issuer.
   iat?: number; // REQUIRED (number). The value of this claim MUST be the time at which the proof was issued using the syntax defined in [RFC7519].
   nonce?: string; // REQUIRED (string). The value type of this claim MUST be a string, where the value is a c_nonce provided by the credential issuer. //TODO: Marked as required not present in NGI flow
   jti?: string; // A new nonce chosen by the wallet. Used to prevent replay
@@ -164,4 +164,13 @@ export interface JWTPayload {
 }
 
 export type JWTSignerCallback = (jwt: Jwt, kid?: string) => Promise<string>;
-export type JWTVerifyCallback = (args: { jwt: string; kid?: string }) => Promise<Jwt>;
+export type JWTVerifyCallback<DIDDoc> = (args: { jwt: string; kid?: string }) => Promise<JwtVerifyResult<DIDDoc>>;
+export interface JwtVerifyResult<DIDDoc> {
+  jwt: Jwt;
+  kid?: string;
+  alg: string;
+  did?: string;
+  didDocument?: DIDDoc;
+  x5c?: string;
+  jwk?: BaseJWK;
+}

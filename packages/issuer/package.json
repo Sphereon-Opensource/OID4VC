@@ -10,11 +10,12 @@
   },
   "dependencies": {
     "@sphereon/oid4vci-common": "workspace:*",
-    "@sphereon/ssi-types": "^0.9.0",
+    "@sphereon/ssi-types": "^0.11.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@sphereon/oid4vci-client": "workspace:*",
+    "did-resolver": "^4.1.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^18.15.3",
     "@types/uuid": "^9.0.1"

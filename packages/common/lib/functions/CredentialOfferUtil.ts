@@ -1,3 +1,5 @@
+import Debug from 'debug';
+
 import {
   AssertedUniformCredentialOffer,
   AuthzFlowType,
@@ -17,6 +19,8 @@ import {
 } from '../types';
 
 import { getJson } from './HttpUtils';
+
+const debug = Debug('sphereon:oid4vci:offer');
 
 export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
   let version: OpenId4VCIVersion = OpenId4VCIVersion.VER_UNKNOWN;
@@ -81,10 +85,10 @@ export function isCredentialOfferVersion(offer: CredentialOfferPayload | Credent
   }
   const version = determineSpecVersionFromOffer(offer);
   if (version.valueOf() < min.valueOf()) {
-    console.log(`Credential offer version (${version.valueOf()}) is lower than minimum required version (${min.valueOf()})`);
+    debug(`Credential offer version (${version.valueOf()}) is lower than minimum required version (${min.valueOf()})`);
     return false;
   } else if (max && version.valueOf() > max.valueOf()) {
-    console.log(`Credential offer version (${version.valueOf()}) is higher than maximum required version (${max.valueOf()})`);
+    debug(`Credential offer version (${version.valueOf()}) is higher than maximum required version (${max.valueOf()})`);
     return false;
   }
   return true;

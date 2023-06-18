@@ -67,7 +67,7 @@ const openIdFetch = async <T>(
     body,
   };
 
-  console.log(`START fetching url: ${url}`);
+  debug(`START fetching url: ${url}`);
   if (body) {
     debug(`Body:\r\n${JSON.stringify(body)}`);
   }
@@ -78,7 +78,7 @@ const openIdFetch = async <T>(
   const responseText = await origResponse.text();
   const responseBody = isJSONResponse && responseText.includes('{') ? JSON.parse(responseText) : responseText;
 
-  console.log(`${success ? 'success' : 'error'} status: ${origResponse.status}, body:\r\n${JSON.stringify(responseBody)}`);
+  debug(`${success ? 'success' : 'error'} status: ${origResponse.status}, body:\r\n${JSON.stringify(responseBody)}`);
   if (!success && opts?.exceptionOnHttpErrorStatus) {
     const error = JSON.stringify(responseBody);
     throw new Error(error === '{}' ? '{"error": "not found"}' : error);
