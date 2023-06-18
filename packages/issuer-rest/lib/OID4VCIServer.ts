@@ -30,7 +30,7 @@ import { sendErrorResponse, validateRequestBody } from './expressUtils'
 
 const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90
 
-function buildVCIFromEnvironment() {
+function buildVCIFromEnvironment<DIDDoc extends object>() {
   const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
     .withCryptographicSuitesSupported(process.env.cryptographic_suites_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
@@ -55,7 +55,7 @@ function buildVCIFromEnvironment() {
       } as IssuerCredentialSubjectDisplay // fixme: This is wrong (remove the cast and see it has no matches)
     )
     .build()
-  return new VcIssuerBuilder<never>()
+  return new VcIssuerBuilder<DIDDoc>()
     .withUserPinRequired(process.env.user_pin_required as unknown as boolean)
     .withAuthorizationServer(process.env.authorization_server as string)
     .withCredentialEndpoint(process.env.credential_endpoint as string)
@@ -104,8 +104,8 @@ export interface IOID4VCIServerOpts {
   }
 }
 
-export class OID4VCIServer {
-  private readonly _issuer: VcIssuer<unknown>
+export class OID4VCIServer<DIDDoc extends object> {
+  private readonly _issuer: VcIssuer<DIDDoc>
   private authRequestsData: Map<string, AuthorizationRequest> = new Map()
   private readonly _app: Express
   private readonly _baseUrl: URL
@@ -127,7 +127,7 @@ export class OID4VCIServer {
   }
 
   constructor(
-    opts?: IOID4VCIServerOpts & { issuer?: VcIssuer<unknown> } /*If not supplied as argument, it will be fully configured from environment variables*/
+    opts?: IOID4VCIServerOpts & { issuer?: VcIssuer<DIDDoc> } /*If not supplied as argument, it will be fully configured from environment variables*/
   ) {
     dotenv.config()
 
@@ -420,7 +420,7 @@ export class OID4VCIServer {
     })
   }
 
-  get issuer(): VcIssuer<unknown> {
+  get issuer(): VcIssuer<DIDDoc> {
     return this._issuer
   }
 

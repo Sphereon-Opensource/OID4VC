@@ -14,7 +14,7 @@ import { sendErrorResponse } from './expressUtils'
  * @param issuer
  * @param interval
  */
-export const handleTokenRequest = ({
+export const handleTokenRequest = <T extends object>({
   tokenExpiresIn,
   accessTokenSignerCallback,
   accessTokenIssuer,
@@ -22,7 +22,7 @@ export const handleTokenRequest = ({
   issuer,
   interval,
 }: Required<Pick<ITokenEndpointOpts, 'accessTokenIssuer' | 'cNonceExpiresIn' | 'interval' | 'accessTokenSignerCallback' | 'tokenExpiresIn'>> & {
-  issuer: VcIssuer<unknown>
+  issuer: VcIssuer<T>
 }) => {
   return async (request: Request, response: Response) => {
     response.set({
@@ -63,10 +63,10 @@ export const handleTokenRequest = ({
   }
 }
 
-export const verifyTokenRequest = ({
+export const verifyTokenRequest = <T extends object>({
   preAuthorizedCodeExpirationDuration,
   issuer,
-}: Required<Pick<ITokenEndpointOpts, 'preAuthorizedCodeExpirationDuration'> & { issuer: VcIssuer<unknown> }>) => {
+}: Required<Pick<ITokenEndpointOpts, 'preAuthorizedCodeExpirationDuration'> & { issuer: VcIssuer<T> }>) => {
   return async (request: Request, response: Response, next: NextFunction) => {
     try {
       await assertValidAccessTokenRequest(request.body, {

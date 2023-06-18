@@ -45,11 +45,11 @@ import { CredentialDataSupplier, CredentialSignerCallback } from './types'
 
 const SECOND = 1000
 
-export class VcIssuer<DIDDoc> {
+export class VcIssuer<DIDDoc extends object> {
   private readonly _issuerMetadata: CredentialIssuerMetadataOpts
   private readonly _userPinRequired: boolean
   private readonly _defaultCredentialOfferBaseUri?: string
-  private readonly _credentialSignerCallback?: CredentialSignerCallback
+  private readonly _credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
   private readonly _jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
   private readonly _credentialDataSupplier?: CredentialDataSupplier
   private readonly _credentialOfferSessions: IStateManager<CredentialOfferSession>
@@ -66,7 +66,7 @@ export class VcIssuer<DIDDoc> {
       defaultCredentialOfferBaseUri?: string
       cNonces: IStateManager<CNonceState>
       uris?: IStateManager<URIState>
-      credentialSignerCallback?: CredentialSignerCallback
+      credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
       jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
       credentialDataSupplier?: CredentialDataSupplier
       cNonceExpiresIn?: number | undefined // expiration duration in seconds
@@ -217,7 +217,7 @@ export class VcIssuer<DIDDoc> {
    *  - issuerCallback callback to issue a Verifiable Credential
    *  - cNonce an existing c_nonce
    */
-  public async issueCredential<DIDDoc>(opts: {
+  public async issueCredential(opts: {
     credentialRequest: CredentialRequestV1_0_11
     credential?: ICredential
     credentialDataSupplier?: CredentialDataSupplier
@@ -226,7 +226,7 @@ export class VcIssuer<DIDDoc> {
     cNonceExpiresIn?: number
     tokenExpiresIn?: number
     jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
-    credentialSignerCallback?: CredentialSignerCallback
+    credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
     responseCNonce?: string
   }): Promise<CredentialResponse> {
     let preAuthorizedCode: string | undefined
@@ -257,7 +257,7 @@ export class VcIssuer<DIDDoc> {
       }
       let credential: ICredential | undefined
       let format: OID4VCICredentialFormat = opts.credentialRequest.format
-      let signerCallback: CredentialSignerCallback | undefined = opts.credentialSignerCallback
+      let signerCallback: CredentialSignerCallback<DIDDoc> | undefined = opts.credentialSignerCallback
       if (opts.credential) {
         credential = opts.credential
       } else {
@@ -388,7 +388,7 @@ export class VcIssuer<DIDDoc> {
       return { session, clientId, grants }
     }*/
 
-  private async validateCredentialRequestProof<DIDDoc>({
+  private async validateCredentialRequestProof({
     credentialRequest,
     jwtVerifyCallback,
     tokenExpiresIn,
@@ -525,10 +525,10 @@ export class VcIssuer<DIDDoc> {
     opts: {
       credentialRequest: UniformCredentialRequest
       credential: ICredential
-      jwtVerifyResult: JwtVerifyResult<any>
+      jwtVerifyResult: JwtVerifyResult<DIDDoc>
       format?: OID4VCICredentialFormat
     },
-    issuerCallback?: CredentialSignerCallback
+    issuerCallback?: CredentialSignerCallback<DIDDoc>
   ): Promise<W3CVerifiableCredential> {
     if ((!opts.credential && !opts.credentialRequest) || !this._credentialSignerCallback) {
       throw new Error(ISSUER_CONFIG_ERROR)
@@ -540,7 +540,7 @@ export class VcIssuer<DIDDoc> {
     return this._userPinRequired
   }
 
-  get credentialSignerCallback(): CredentialSignerCallback | undefined {
+  get credentialSignerCallback(): CredentialSignerCallback<DIDDoc> | undefined {
     return this._credentialSignerCallback
   }
 

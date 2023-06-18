@@ -44,7 +44,7 @@ jest.setTimeout(15000)
 
 describe('VcIssuer', () => {
   let vcIssuer: VcIssuer<DIDDocument>
-  let server: OID4VCIServer
+  let server: OID4VCIServer<DIDDocument>
   let accessToken: AccessTokenResponse
   const issuerState = 'previously-created-state'
   // const clientId = 'sphereon:wallet'
