@@ -276,7 +276,7 @@ export class OpenID4VCIClient {
     jti,
   }: {
     credentialTypes: string | string[];
-    proofCallbacks: ProofOfPossessionCallbacks<never>;
+    proofCallbacks: ProofOfPossessionCallbacks<any>;
     format?: CredentialFormat | OID4VCICredentialFormat;
     kid?: string;
     alg?: Alg | string;
