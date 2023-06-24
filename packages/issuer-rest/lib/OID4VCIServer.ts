@@ -277,9 +277,10 @@ export class OID4VCIServer<DIDDoc extends object> {
           return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'No credentials supplied' })
         }
         const result = await this.issuer.createCredentialOfferURI({ ...request.body, grants, credentials })
-        // const session = result.session
         const resultResponse: ICreateCredentialOfferURIResponse = result
         if ('session' in resultResponse) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           delete resultResponse.session
         }
         return response.send(resultResponse)
