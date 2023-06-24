@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-issuer-server",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "OpenID 4 Verifiable Credential Issuance Server",
   "source": "lib/index.ts",
   "main": "dist/index.js",
@@ -21,9 +21,8 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@sphereon/oid4vci-client": "workspace:*",
-    "did-resolver": "^4.1.0",
     "@digitalcredentials/did-method-key": "^2.0.3",
+    "@sphereon/oid4vci-client": "workspace:*",
     "@types/body-parser": "^1.19.2",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.13",
@@ -32,6 +31,7 @@
     "@types/jest": "^29.5.0",
     "@types/node": "^18.15.3",
     "@types/uuid": "^9.0.1",
+    "did-resolver": "^4.1.0",
     "jest": "^29.5.0",
     "jose": "^4.10.0",
     "supertest": "^6.3.3",
