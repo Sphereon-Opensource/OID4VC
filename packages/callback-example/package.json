@@ -1,0 +1,59 @@
+{
+  "name": "@sphereon/oid4vci-callback-example",
+  "version": "0.5.0",
+  "description": "OpenID 4 Verifiable Credential Issuance issuer callback example",
+  "source": "lib/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@digitalcredentials/did-method-key": "^2.0.3",
+    "@digitalcredentials/ed25519-signature-2020": "^3.0.2",
+    "@digitalcredentials/ed25519-verification-key-2020": "^4.0.0",
+    "@digitalcredentials/security-document-loader": "^1.0.0",
+    "@digitalcredentials/vc": "^5.0.0",
+    "@sphereon/oid4vci-client": "workspace:*",
+    "@sphereon/oid4vci-common": "workspace:*",
+    "@sphereon/oid4vci-issuer": "workspace:*",
+    "@sphereon/ssi-types": "^0.11.0",
+    "jose": "^4.10.0"
+  },
+  "devDependencies": {
+    "did-resolver": "^4.1.0",
+    "@babel/core": "^7.21.4",
+    "@babel/preset-env": "^7.21.4",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^18.15.3",
+    "expo": "^48.0.11",
+    "react": "^18.2.0",
+    "react-native": "^0.71.7",
+    "uuid": "^9.0.0",
+    "@types/uuid": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "files": [
+    "lib/**/*",
+    "dist/**/*"
+  ],
+  "keywords": [
+    "Sphereon",
+    "Verifiable Credentials",
+    "OpenID",
+    "OpenID for Verifiable Credential Issuance",
+    "OAuth2",
+    "SSI",
+    "OpenID4VCI",
+    "OIDC4VCI",
+    "OID4VCI"
+  ],
+  "author": "Sphereon",
+  "license": "Apache-2.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}

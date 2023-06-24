@@ -1,0 +1,92 @@
+name: Build, Test and Publish
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+      - 'develop'
+      - 'feature/**'
+      - 'feat/**'
+
+jobs:
+  build-test-publish:
+    env:
+      NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+      NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      GH_USER: ${{secrets.GH_USER}}
+      GH_EMAIL: ${{secrets.GH_EMAIL}}
+      VC_HTTP_API_AUTH_TOKEN: ${{secrets.VC_HTTP_API_AUTH_TOKEN}}
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:10.10
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test123
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.1.0
+#      - name: Get yarn cache directory path
+#        id: yarn-cache-dir-path
+#        run: echo "::set-output name=dir::$(yarn cache dir)"
+#      - uses: actions/cache@v2
+#        id: yarn-cache
+#        with:
+#          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+#          key: ${{ runner.os }}-yarn-2-${{ hashFiles('**/package.json') }}
+
+      - run: pnpm install
+      - run: pnpm build
+      - name: run integration tests
+        env:
+          INCLUDE_POSTGRES_TESTS: true
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test123
+          POSTGRES_PORT: 5432
+          SPHEREON_SSI_MSAL_TENANT_ID: ${{ secrets.SPHEREON_SSI_MSAL_TENANT_ID }}
+          SPHEREON_SSI_MSAL_CLIENT_ID: ${{ secrets.SPHEREON_SSI_MSAL_CLIENT_ID }}
+          SPHEREON_SSI_MSAL_CLIENT_SECRET: ${{ secrets.SPHEREON_SSI_MSAL_CLIENT_SECRET }}
+          SPHEREON_SSI_MSAL_USERNAME: ${{ secrets.SPHEREON_SSI_MSAL_USERNAME }}
+          SPHEREON_SSI_MSAL_PASSWORD: ${{ secrets.SPHEREON_SSI_MSAL_PASSWORD }}
+        run: pnpm test:ci
+
+      - name: setup git coordinates
+        run: |
+          git remote set-url origin https://Sphereon-Opensource:$GH_TOKEN@github.com/Sphereon-Opensource/ssi-sdk.git
+          git config user.name $GH_USER
+          git config user.email $GH_EMAIL
+
+      - name: setup npm registry
+        run: |
+          echo "@sphereon:registry=https://registry.npmjs.org/" > .npmrc
+          echo "registry=https://registry.npmjs.org/" >> .npmrc
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> .npmrc
+#          npm whoami
+
+      - name: diff
+        run: git diff
+
+      - name: publish @latest when on main
+        if: github.ref == 'refs/heads/main'
+        run: pnpm publish:latest
+
+      - name: publish @next when on develop
+        if: github.ref == 'refs/heads/develop'
+        run: pnpm publish:next
+
+      - name: publish @unstable when on unstable branch
+        if: startsWith(github.ref, 'refs/heads/feat')
+        run: pnpm publish:unstable

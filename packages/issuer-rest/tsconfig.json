@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig-base.json",
+  "compilerOptions": {
+    "rootDir": "./lib",
+    "outDir": "./dist",
+    "declarationDir": "./dist",
+    "esModuleInterop": true
+  },
+  "references": [
+    {
+      "path": "../common"
+    },
+    {
+      "path": "../issuer"
+    }
+  ]
+}

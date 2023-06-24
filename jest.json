@@ -1,0 +1,43 @@
+{
+  "preset": "ts-jest",
+  "moduleFileExtensions": [
+    "ts",
+    "tsx",
+    "js",
+    "jsx"
+  ],
+  "collectCoverage": true,
+  "collectCoverageFrom": [
+    "packages/**/src/**/*.ts",
+    "packages/**/lib/**/*.ts",
+    "!**/examples/**",
+    "!packages/cli/**",
+    "!**/types/**",
+    "!**/dist/**",
+    "!**/coverage/**",
+    "!**/node_modules/**/__tests__/**",
+    "!**/node_modules/**/*.test.ts",
+    "!**/node_modules/**",
+    "!**/packages/**/index.ts"
+  ],
+  "coverageReporters": [
+    "text",
+    "lcov",
+    "json"
+  ],
+  "coverageDirectory": "./coverage",
+  "transform": {
+    "\\.jsx?$": "babel-jest",
+    "\\.tsx?$": ["ts-jest", {
+      "tsconfig": "./packages/tsconfig-base.json"
+    }
+    ]
+  },
+  "testMatch": [
+    "**/__tests__/**/*.spec.*",
+    "**/tests/**/*.spec.*"
+  ],
+  "testEnvironment": "node",
+  "automock": false,
+  "verbose": true
+}
