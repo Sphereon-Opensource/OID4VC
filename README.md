@@ -35,7 +35,7 @@ The OpenID4VCI client is typically used in wallet type of applications, where th
 ## OpenID for VCI Issuer
 
 The OpenID4VCI issuer is used in issuer type applications, where an organization is issuing the credential(s). More info can be found in the issuer [README](./packages/issuer/README.md). 
-Please not that the Issuer is a library. It has some examples how to run it with REST endpoints. If you however are looking for a full solution we suggest our [SSI SDK](https://github.com/Sphereon-Opensource/ssi=sdk) or the [demo](https://github.com/Sphereon-Opensource/OID4VCI-demo)
+Please not that the Issuer is a library. It has some examples how to run it with REST endpoints. If you however are looking for a full solution we suggest our [SSI SDK](https://github.com/Sphereon-Opensource/ssi-sdk) or the [demo](https://github.com/Sphereon-Opensource/OID4VC-demo)
 
 
 # Flows
