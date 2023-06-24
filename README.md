@@ -5,7 +5,7 @@
   <br>
 </h1>
 
-[![CI](https://github.com/Sphereon-Opensource/OpenID4VCI/actions/workflows/build-test-on-pr.yml/badge.svg)](https://github.com/Sphereon-Opensource/OpenID4VCI/actions/workflows/build-test-on-pr.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/OpenID4VCI/branch/develop/graph/badge.svg)](https://codecov.io/gh/Sphereon-Opensource/OpenID4VCI) [![NPM Version](https://img.shields.io/npm/v/@sphereon/oid4vci.svg)](https://npm.im/@sphereon/oid4vci)
+[![CI](https://github.com/Sphereon-Opensource/OID4VCI/actions/workflows/build-test-on-pr.yml/badge.svg)](https://github.com/Sphereon-Opensource/OID4VCI/actions/workflows/build-test-on-pr.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/OID4VCI/branch/develop/graph/badge.svg)](https://codecov.io/gh/Sphereon-Opensource/OID4VCI) [![NPM Version](https://img.shields.io/npm/v/@sphereon/oid4vci-client.svg)](https://npm.im/@sphereon/oid4vci-client)
 
 _IMPORTANT the packages are in an early development stage and currently only supports the pre-authorized code flow of
 OpenID4VCI! Work is underway for the Authorized Flows as well, but not fully supported yet_
@@ -28,13 +28,14 @@ Next to the client and issuer, there is also a common package, which has all the
 # Packages
 There are 2 main packages in this mono-repository
 
-## OpenID4VCI Client
+## OpenID for VCI Client
 
 The OpenID4VCI client is typically used in wallet type of applications, where the user is receiving the credential(s). More info can be found in the client [README](./packages/client/README.md)
 
-## OpenID4VCI Issuer
+## OpenID for VCI Issuer
 
-The OpenID4VCI issuer is used in issuer type applications, where an organization is issuiing the credential(s). More info can be found in the client [README](./packages/issuer/README.md). This package is currently undergoing development, and not ready to be used yet!
+The OpenID4VCI issuer is used in issuer type applications, where an organization is issuing the credential(s). More info can be found in the issuer [README](./packages/issuer/README.md). 
+Please not that the Issuer is a library. It has some examples how to run it with REST endpoints. If you however are looking for a full solution we suggest our [SSI SDK](https://github.com/Sphereon-Opensource/ssi=sdk) or the [demo](https://github.com/Sphereon-Opensource/OID4VCI-demo)
 
 
 # Flows
