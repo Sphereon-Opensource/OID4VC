@@ -65,7 +65,7 @@ jobs:
 
       - name: setup git coordinates
         run: |
-          git remote set-url origin https://Sphereon-Opensource:$GH_TOKEN@github.com/Sphereon-Opensource/ssi-sdk.git
+          git remote set-url origin https://Sphereon-Opensource:$GH_TOKEN@github.com/Sphereon-Opensource/OID4VCI.git
           git config user.name $GH_USER
           git config user.email $GH_EMAIL
 
