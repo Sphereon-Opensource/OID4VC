@@ -50,14 +50,14 @@ export function getSupportedCredentials(opts?: {
   const credentialSupportedOverlap: CredentialSupported[] = [];
   for (const offerType of initiationTypes) {
     if (typeof offerType === 'string') {
-      const supported = credentialsSupported.find((sup) => sup.id === offerType || sup.types.includes(offerType));
+      const supported = credentialsSupported.filter((sup) => sup.id === offerType || sup.types.includes(offerType));
       if (supported) {
-        credentialSupportedOverlap.push(supported);
+        credentialSupportedOverlap.push(...supported);
       }
     } else {
-      const supported = credentialsSupported.find((sup) => arrayEqualsIgnoreOrder(sup.types, offerType.types) && sup.format === offerType.format);
+      const supported = credentialsSupported.filter((sup) => arrayEqualsIgnoreOrder(sup.types, offerType.types) && sup.format === offerType.format);
       if (supported) {
-        credentialSupportedOverlap.push(supported);
+        credentialSupportedOverlap.push(...supported);
       }
     }
   }
