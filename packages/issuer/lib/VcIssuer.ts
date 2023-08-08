@@ -162,7 +162,7 @@ export class VcIssuer<DIDDoc extends object> {
       if (!this.uris) {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
-      this.uris.set(opts.credentialOfferUri, {
+      await this.uris.set(opts.credentialOfferUri, {
         uri: opts.credentialOfferUri,
         createdAt: createdAt,
         preAuthorizedCode,
@@ -194,11 +194,11 @@ export class VcIssuer<DIDDoc extends object> {
     }
 
     if (preAuthorizedCode) {
-      this.credentialOfferSessions.set(preAuthorizedCode, session)
+      await this.credentialOfferSessions.set(preAuthorizedCode, session)
     }
     // todo: check whether we could have the same value for issuer state and pre auth code if both are supported.
     if (issuerState) {
-      this.credentialOfferSessions.set(issuerState, session)
+      await this.credentialOfferSessions.set(issuerState, session)
     }
     return {
       session,
@@ -458,7 +458,7 @@ export class VcIssuer<DIDDoc extends object> {
         }
         preAuthSession.lastUpdatedAt = +new Date()
         preAuthSession.status = IssueStatus.CREDENTIAL_REQUEST_RECEIVED
-        this._credentialOfferSessions.set(preAuthorizedCode, preAuthSession)
+        await this._credentialOfferSessions.set(preAuthorizedCode, preAuthSession)
       }
       if (authSession) {
         if (!authSession.issuerState || authSession.issuerState !== issuerState) {

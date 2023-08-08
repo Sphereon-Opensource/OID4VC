@@ -93,6 +93,7 @@ export class OID4VCIServer<DIDDoc extends object> {
   private authRequestsData: Map<string, AuthorizationRequest> = new Map()
   private readonly _app: Express
   private readonly _baseUrl: URL
+  private readonly _expressSupport: ExpressSupport
   // private readonly _server?: http.Server
   private readonly _router: express.Router
 
@@ -101,7 +102,7 @@ export class OID4VCIServer<DIDDoc extends object> {
     opts: IOID4VCIServerOpts & { issuer?: VcIssuer<DIDDoc> } /*If not supplied as argument, it will be fully configured from environment variables*/,
   ) {
     this._baseUrl = new URL(opts?.baseUrl ?? process.env.BASE_URL ?? opts?.issuer?.issuerMetadata?.credential_issuer ?? 'http://localhost')
-
+    this._expressSupport = expressSupport
     this._app = expressSupport.express
     this._router = express.Router()
     this._issuer = opts?.issuer ? opts.issuer : buildVCIFromEnvironment()
@@ -139,11 +140,11 @@ export class OID4VCIServer<DIDDoc extends object> {
     return this._issuer
   }
 
-  public stop() {
-    if (!this._app) {
+  public async stop() {
+    if (!this._expressSupport) {
       throw Error('Cannot stop server is the REST API is only a router of an existing express app')
     }
-    console.log('STOP is Not supported yet')
+    await this._expressSupport.stop()
   }
 
   private isTokenEndpointDisabled(tokenEndpointOpts?: ITokenEndpointOpts) {

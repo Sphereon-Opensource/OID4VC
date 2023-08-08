@@ -17,7 +17,7 @@ import {
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
-import { ExpressBuilder } from '@sphereon/ssi-express-support'
+import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
@@ -25,6 +25,8 @@ import * as jose from 'jose'
 import { OID4VCIServer } from '../OID4VCIServer'
 
 const ISSUER_URL = 'http://localhost:3456/test'
+
+let expressSupport: ExpressSupport
 
 let subjectKeypair: KeyPair // Proof of Possession JWT
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -155,7 +157,7 @@ describe('VcIssuer', () => {
       })
 
       .build()
-    const expressSupport = ExpressBuilder.fromServerOpts({
+    expressSupport = ExpressBuilder.fromServerOpts({
       port: 3456,
       hostname: 'localhost',
     }).build({ startListening: false })
@@ -173,7 +175,7 @@ describe('VcIssuer', () => {
 
   afterAll(async () => {
     jest.clearAllMocks()
-    server.stop()
+    await server.stop()
     // await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 

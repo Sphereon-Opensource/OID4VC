@@ -13,7 +13,7 @@ import {
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
-import { ExpressBuilder } from '@sphereon/ssi-express-support'
+import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { DIDDocument } from 'did-resolver'
 import { Express } from 'express'
 import * as jose from 'jose'
@@ -23,6 +23,7 @@ import { OID4VCIServer } from '../OID4VCIServer'
 
 describe('OID4VCIServer', () => {
   let app: Express
+  let expressSupport: ExpressSupport
   // let server: http.Server
   const preAuthorizedCode1 = 'SplxlOBeZQQYbYS6WxSbIA1'
   const preAuthorizedCode2 = 'SplxlOBeZQQYbYS6WxSbIA2'
@@ -129,11 +130,11 @@ describe('OID4VCIServer', () => {
       },
     )
 
-    const expressSupport = ExpressBuilder.fromServerOpts({
+    expressSupport = ExpressBuilder.fromServerOpts({
       startListening: false,
       port: 5000,
       hostname: '0.0.0.0',
-    }).build({startListening: false})
+    }).build({ startListening: false })
     const vcIssuerServer = new OID4VCIServer(expressSupport, {
       issuer: vcIssuer,
       baseUrl: 'http://localhost:5000',
@@ -151,9 +152,9 @@ describe('OID4VCIServer', () => {
   })
 
   afterAll(async () => {
-    /* await server.close(() => {
-      console.log('Stopping Express server')
-    })*/
+    if (expressSupport) {
+      await expressSupport.stop()
+    }
     await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 
