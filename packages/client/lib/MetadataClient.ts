@@ -52,7 +52,7 @@ export class MetadataClient {
       token_endpoint = issuerMetadata.token_endpoint;
       if (!token_endpoint && issuerMetadata.authorization_server) {
         debug(
-          `Issuer ${issuer} OID4VCI metadata has separate authorization_server ${issuerMetadata.authorization_server} that contains the token endpoint`
+          `Issuer ${issuer} OID4VCI metadata has separate authorization_server ${issuerMetadata.authorization_server} that contains the token endpoint`,
         );
         // Crossword uses this to separate the AS metadata. We fail when not found, since we now have no way of getting the token endpoint
         const response: OpenIDResponse<OAuth2ASMetadata> = await this.retrieveWellknown(
@@ -60,7 +60,7 @@ export class MetadataClient {
           WellKnownEndpoints.OAUTH_AS,
           {
             errorOnNotFound: true,
-          }
+          },
         );
         token_endpoint = response.successBody?.token_endpoint;
       }
@@ -71,7 +71,7 @@ export class MetadataClient {
         WellKnownEndpoints.OPENID_CONFIGURATION,
         {
           errorOnNotFound: false,
-        }
+        },
       );
       let asConfig = response.successBody;
       if (asConfig) {
@@ -133,7 +133,7 @@ export class MetadataClient {
   public static async retrieveWellknown<T>(
     host: string,
     endpointType: WellKnownEndpoints,
-    opts?: { errorOnNotFound?: boolean }
+    opts?: { errorOnNotFound?: boolean },
   ): Promise<OpenIDResponse<T>> {
     const result: OpenIDResponse<T> = await getJson(`${host.endsWith('/') ? host.slice(0, -1) : host}${endpointType}`, {
       exceptionOnHttpErrorStatus: opts?.errorOnNotFound,

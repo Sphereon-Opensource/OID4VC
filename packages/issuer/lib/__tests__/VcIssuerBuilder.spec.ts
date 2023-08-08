@@ -75,7 +75,7 @@ describe('VcIssuer builder should', () => {
           locale: 'en-US',
         })
         .withCredentialsSupported(credentialsSupported)
-        .build()
+        .build(),
     ).toThrowError(TokenErrorResponse.invalid_request)
   })
 
@@ -85,7 +85,7 @@ describe('VcIssuer builder should', () => {
         .withCryptographicSuitesSupported('ES256K')
         .withCryptographicBindingMethod('did')
         .withId('UniversityDegree_JWT')
-        .build()
+        .build(),
     ).toThrowError(TokenErrorResponse.invalid_request)
   })
   it('should successfully attach an instance of the ICredentialOfferStateManager to the VcIssuer instance', async () => {

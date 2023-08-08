@@ -19,7 +19,7 @@ export function convertJsonToURI(
     | ArrayLike<never>
     | string
     | object,
-  opts?: EncodeJsonAsURIOpts
+  opts?: EncodeJsonAsURIOpts,
 ): string {
   if (typeof json === 'string') {
     return convertJsonToURI(JSON.parse(json), opts);

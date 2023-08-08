@@ -45,7 +45,7 @@ describe('AccessTokenClient should', () => {
 
       expect(accessTokenResponse.successBody).toEqual(body);
     },
-    UNIT_TEST_TIMEOUT
+    UNIT_TEST_TIMEOUT,
   );
 
   it(
@@ -76,7 +76,7 @@ describe('AccessTokenClient should', () => {
 
       expect(accessTokenResponse.successBody).toEqual(body);
     },
-    UNIT_TEST_TIMEOUT
+    UNIT_TEST_TIMEOUT,
   );
 
   it(
@@ -96,10 +96,10 @@ describe('AccessTokenClient should', () => {
         accessTokenClient.acquireAccessTokenUsingRequest({
           accessTokenRequest,
           asOpts: { as: MOCK_URL },
-        })
+        }),
       ).rejects.toThrow('Pre-authorization must be proven by presenting the pre-authorized code. Code must be present.');
     },
-    UNIT_TEST_TIMEOUT
+    UNIT_TEST_TIMEOUT,
   );
 
   it(
@@ -119,10 +119,10 @@ describe('AccessTokenClient should', () => {
           accessTokenRequest,
           isPinRequired: true,
           asOpts: { as: MOCK_URL },
-        })
+        }),
       ).rejects.toThrow('A valid pin consisting of maximal 8 numeric characters must be present.');
     },
-    UNIT_TEST_TIMEOUT
+    UNIT_TEST_TIMEOUT,
   );
 
   it(
@@ -144,10 +144,10 @@ describe('AccessTokenClient should', () => {
           accessTokenRequest,
           isPinRequired: true,
           asOpts: { as: MOCK_URL },
-        })
+        }),
       ).rejects.toThrow(Error('A valid pin consisting of maximal 8 numeric characters must be present.'));
     },
-    UNIT_TEST_TIMEOUT
+    UNIT_TEST_TIMEOUT,
   );
 
   it(
@@ -179,7 +179,7 @@ describe('AccessTokenClient should', () => {
       });
       expect(response.successBody).toEqual(body);
     },
-    UNIT_TEST_TIMEOUT
+    UNIT_TEST_TIMEOUT,
   );
 
   it('get error for using a pin when not requested', async () => {
@@ -191,7 +191,7 @@ describe('AccessTokenClient should', () => {
       accessTokenClient.acquireAccessToken({
         credentialOffer: INITIATION_TEST,
         pin: '1234',
-      })
+      }),
     ).rejects.toThrow(Error('Cannot set a pin, when the pin is not required.'));
   });
 
@@ -209,7 +209,7 @@ describe('AccessTokenClient should', () => {
     };
 
     await expect(() => accessTokenClient.acquireAccessToken(requestOpts)).rejects.toThrow(
-      Error('Cannot pass a code_verifier when flow type is pre-authorized')
+      Error('Cannot pass a code_verifier when flow type is pre-authorized'),
     );
   });
 
@@ -219,7 +219,7 @@ describe('AccessTokenClient should', () => {
         asOpts: undefined,
         issuerOpts: undefined,
         metadata: undefined,
-      })
+      }),
     ).toThrow(Error('Cannot determine token URL if no issuer, metadata and no Authorization Server values are present'));
   });
 });

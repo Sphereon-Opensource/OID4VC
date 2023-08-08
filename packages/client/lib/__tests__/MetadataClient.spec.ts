@@ -64,7 +64,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the token endpoint for https://issuer.research.identiproof.io'
+      'Could not deduce the token endpoint for https://issuer.research.identiproof.io',
     );
   });
 
@@ -85,7 +85,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(meta));
 
     await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the token endpoint for https://issuer.research.identiproof.io'
+      'Could not deduce the token endpoint for https://issuer.research.identiproof.io',
     );
   });
 
@@ -96,7 +96,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
 
     await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the credential endpoint for https://issuer.research.identiproof.io'
+      'Could not deduce the credential endpoint for https://issuer.research.identiproof.io',
     );
   });
 
@@ -144,7 +144,7 @@ describe('Metadataclient with Spruce Issuer should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     await expect(() => MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the token endpoint for https://ngi-oidc4vci-test.spruceid.xyz'
+      'Could not deduce the token endpoint for https://ngi-oidc4vci-test.spruceid.xyz',
     );
   });
 });
@@ -170,7 +170,7 @@ describe('Metadataclient with Danubetech should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     await expect(() => MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the token endpoint for https://ngi-oidc4vci-test.spruceid.xyz'
+      'Could not deduce the token endpoint for https://ngi-oidc4vci-test.spruceid.xyz',
     );
   });
 });
@@ -197,7 +197,7 @@ describe('Metadataclient with Walt-id should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     await expect(() => MetadataClient.retrieveAllMetadata(WALT_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the token endpoint for https://jff.walt.id/issuer-api/oidc'
+      'Could not deduce the token endpoint for https://jff.walt.id/issuer-api/oidc',
     );
   });
 });

@@ -188,7 +188,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
           clientId: this.clientId,
           nonce: this.cNonce,
         },
-        this.jwt
+        this.jwt,
       );
     }
     throw new Error(PROOF_CANT_BE_CONSTRUCTED);

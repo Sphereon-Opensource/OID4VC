@@ -61,7 +61,7 @@ export class OpenID4VCIClient {
     flowType: AuthzFlowType,
     kid?: string,
     alg?: Alg | string,
-    clientId?: string
+    clientId?: string,
   ) {
     if (!credentialOffer.supportedFlows.includes(flowType)) {
       throw Error(`Flows ${flowType} is not supported by issuer ${credentialOffer.credential_offer_uri}`);
@@ -251,14 +251,13 @@ export class OpenID4VCIClient {
         throw Error(
           `Retrieving an access token from ${this._endpointMetadata?.token_endpoint} for issuer ${this.getIssuer()} failed with status: ${
             response.origResponse.status
-          }`
+          }`,
         );
       } else if (!response.successBody) {
         debug(`Access token error. No success body`);
         throw Error(
-          `Retrieving an access token from ${
-            this._endpointMetadata?.token_endpoint
-          } for issuer ${this.getIssuer()} failed as there was no success response body`
+          `Retrieving an access token from ${this._endpointMetadata
+            ?.token_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`,
         );
       }
       this._accessTokenResponse = response.successBody;
@@ -346,14 +345,13 @@ export class OpenID4VCIClient {
       throw Error(
         `Retrieving a credential from ${this._endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${
           response.origResponse.status
-        }`
+        }`,
       );
     } else if (!response.successBody) {
       debug(`Credential request error. No success body`);
       throw Error(
-        `Retrieving a credential from ${
-          this._endpointMetadata?.credential_endpoint
-        } for issuer ${this.getIssuer()} failed as there was no success response body`
+        `Retrieving a credential from ${this._endpointMetadata
+          ?.credential_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`,
       );
     }
     return response.successBody;

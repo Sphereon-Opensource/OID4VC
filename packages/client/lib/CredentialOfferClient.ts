@@ -66,7 +66,7 @@ export class CredentialOfferClient {
     requestWithBaseUrl: CredentialOfferRequestWithBaseUrl,
     opts?: {
       version?: OpenId4VCIVersion;
-    }
+    },
   ): string {
     debug(`Credential Offer Request with base URL: ${JSON.stringify(requestWithBaseUrl)}`);
     const version = opts?.version ?? requestWithBaseUrl.version;

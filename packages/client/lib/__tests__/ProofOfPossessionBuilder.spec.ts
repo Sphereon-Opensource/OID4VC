@@ -48,7 +48,7 @@ describe('ProofOfPossession Builder ', () => {
         .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)
-        .build()
+        .build(),
     ).rejects.toThrow(Error(PROOF_CANT_BE_CONSTRUCTED));
   });
 
@@ -59,7 +59,7 @@ describe('ProofOfPossession Builder ', () => {
         .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)
-        .build()
+        .build(),
     ).toThrow(Error(NO_JWT_PROVIDED));
   });
 
@@ -89,7 +89,7 @@ describe('ProofOfPossession Builder ', () => {
         .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)
-        .build()
+        .build(),
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
 
@@ -104,7 +104,7 @@ describe('ProofOfPossession Builder ', () => {
         .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)
-        .build()
+        .build(),
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
 });

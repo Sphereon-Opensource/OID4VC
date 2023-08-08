@@ -449,7 +449,7 @@ const encodedURI = convertJsonToURI(
   {
     arrayTypeProperties: ['credential_type'],
     urlTypeProperties: ['issuer', 'credential_type'],
-  }
+  },
 );
 console.log(encodedURI);
 // issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy
@@ -468,7 +468,7 @@ const decodedJson = convertURIToJsonObject(
   {
     arrayTypeProperties: ['credential_type'],
     requiredProperties: ['issuer', 'credential_type'],
-  }
+  },
 );
 console.log(decodedJson);
 // {

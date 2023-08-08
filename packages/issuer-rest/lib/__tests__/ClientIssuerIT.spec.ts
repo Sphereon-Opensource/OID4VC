@@ -17,6 +17,7 @@ import {
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
+import { ExpressBuilder } from '@sphereon/ssi-express-support'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
@@ -116,7 +117,7 @@ describe('VcIssuer', () => {
         Promise.resolve({
           format: 'ldp_vc',
           credential,
-        })
+        }),
       )
       .withCredentialSignerCallback(() =>
         Promise.resolve({
@@ -128,7 +129,7 @@ describe('VcIssuer', () => {
             proofPurpose: IProofPurpose.assertionMethod,
             verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
           },
-        })
+        }),
       )
       .withJWTVerifyCallback((args: { jwt: string; kid?: string }) => {
         const header = jose.decodeProtectedHeader(args.jwt)
@@ -154,12 +155,20 @@ describe('VcIssuer', () => {
       })
 
       .build()
+    const expressSupport = ExpressBuilder.fromServerOpts({
+      port: 3456,
+      hostname: 'localhost',
+    }).build({ startListening: false })
 
-    server = new OID4VCIServer({
+    server = new OID4VCIServer(expressSupport, {
       issuer: vcIssuer,
-      serverOpts: { baseUrl: 'http://localhost:3456/test', port: 3456 },
-      tokenEndpointOpts: { accessTokenSignerCallback, tokenPath: '/test/token' },
+      baseUrl: 'http://localhost:3456/test',
+      endpointOpts: {
+        // serverOpts: { baseUrl: 'http://localhost:3456/test', port: 3456 },
+        tokenEndpointOpts: { accessTokenSignerCallback, tokenPath: '/test/token' },
+      },
     })
+    expressSupport.start()
   })
 
   afterAll(async () => {
@@ -189,7 +198,7 @@ describe('VcIssuer', () => {
       })
       .then((response) => response.uri)
     expect(uri).toEqual(
-      'http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D%2C%22credentials%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%7D'
+      'http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D%2C%22credentials%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%7D',
     )
   })
 

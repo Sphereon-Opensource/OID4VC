@@ -168,6 +168,6 @@ describe('OID4VCI-Client should', () => {
       const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof });
       expect(credResponse.successBody?.credential).toEqual(mockedVC);
     },
-    UNIT_TEST_TIMEOUT
+    UNIT_TEST_TIMEOUT,
   );
 });

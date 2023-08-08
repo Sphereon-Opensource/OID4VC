@@ -70,7 +70,7 @@ export class VcIssuer<DIDDoc extends object> {
       jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
       credentialDataSupplier?: CredentialDataSupplier
       cNonceExpiresIn?: number | undefined // expiration duration in seconds
-    }
+    },
   ) {
     this._issuerMetadata = issuerMetadata
     this._defaultCredentialOfferBaseUri = args.defaultCredentialOfferBaseUri
@@ -178,7 +178,7 @@ export class VcIssuer<DIDDoc extends object> {
       {
         version: OpenId4VCIVersion.VER_1_0_11,
         resolve: false, // We are creating the object, so do not resolve
-      }
+      },
     )
 
     const status = IssueStatus.OFFER_CREATED
@@ -310,7 +310,7 @@ export class VcIssuer<DIDDoc extends object> {
           credential,
           jwtVerifyResult,
         },
-        signerCallback
+        signerCallback,
       )
       // TODO implement acceptance_token (deferred response)
       // TODO update verification accordingly
@@ -528,7 +528,7 @@ export class VcIssuer<DIDDoc extends object> {
       jwtVerifyResult: JwtVerifyResult<DIDDoc>
       format?: OID4VCICredentialFormat
     },
-    issuerCallback?: CredentialSignerCallback<DIDDoc>
+    issuerCallback?: CredentialSignerCallback<DIDDoc>,
   ): Promise<W3CVerifiableCredential> {
     if ((!opts.credential && !opts.credentialRequest) || !this._credentialSignerCallback) {
       throw new Error(ISSUER_CONFIG_ERROR)

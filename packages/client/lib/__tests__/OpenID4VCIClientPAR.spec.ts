@@ -40,7 +40,7 @@ describe('OpenID4VCIClient', () => {
         codeChallenge: 'mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs',
         scope: 'openid TestCredential',
         redirectUri: 'http://localhost:8881/cb',
-      })
+      }),
     ).rejects.toThrow(Error('Server metadata does not contain pushed authorization request endpoint'));
   });
 
@@ -51,7 +51,7 @@ describe('OpenID4VCIClient', () => {
         codeChallengeMethod: CodeChallengeMethod.SHA256,
         codeChallenge: 'mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs',
         redirectUri: 'http://localhost:8881/cb',
-      })
+      }),
     ).rejects.toThrow(Error('Please provide a scope or authorization_details'));
   });
 

@@ -152,7 +152,7 @@ describe('Credential Request Client ', () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json-ld', types: ['random'], proof })).rejects.toThrow(
-      Error(URL_NOT_VALID)
+      Error(URL_NOT_VALID),
     );
   });
 });
