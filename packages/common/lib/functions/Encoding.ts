@@ -1,5 +1,3 @@
-// import * as u8a from 'uint8arrays'
-
 import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, OpenId4VCIVersion, SearchValue } from '../types';
 
 /**
