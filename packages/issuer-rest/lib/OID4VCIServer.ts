@@ -77,15 +77,14 @@ export interface IGetIssueStatusEndpointOpts extends ISingleEndpointOpts {
 }
 
 export interface IOID4VCIServerOpts extends HasEndpointOpts {
-  endpointOpts: {
+  endpointOpts?: {
     tokenEndpointOpts?: ITokenEndpointOpts
     createCredentialOfferOpts?: ICreateCredentialOfferEndpointOpts
     getCredentialOfferOpts?: IGetCredentialOfferEndpointOpts
     getStatusOpts?: IGetIssueStatusEndpointOpts
     parOpts?: ISingleEndpointOpts
   }
-  baseUrl: string
-  // serverOpts?: IExpressServerOpts & {baseUrl: string}
+  baseUrl?: string
 }
 
 export class OID4VCIServer<DIDDoc extends object> {
@@ -115,10 +114,10 @@ export class OID4VCIServer<DIDDoc extends object> {
     getCredentialOfferEndpoint(this.router, this.issuer, opts?.getCredentialOfferOpts)
     getCredentialEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.tokenEndpointOpts, baseUrl: this.baseUrl })
     this.assertAccessTokenHandling()
-    if (!this.isTokenEndpointDisabled(opts?.endpointOpts.tokenEndpointOpts)) {
+    if (!this.isTokenEndpointDisabled(opts?.endpointOpts?.tokenEndpointOpts)) {
       accessTokenEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.tokenEndpointOpts, baseUrl: this.baseUrl })
     }
-    if (this.isStatusEndpointEnabled(opts?.endpointOpts.getStatusOpts)) {
+    if (this.isStatusEndpointEnabled(opts?.endpointOpts?.getStatusOpts)) {
       getIssueStatusEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.getStatusOpts, baseUrl: this.baseUrl })
     }
     this._app.use(getBasePath(this.baseUrl), this._router)
