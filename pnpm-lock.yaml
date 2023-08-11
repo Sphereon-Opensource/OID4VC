@@ -75,8 +75,8 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-types':
-        specifier: 0.14.2-next.30
-        version: 0.14.2-next.30
+        specifier: ^0.15.1
+        version: 0.15.1
       jose:
         specifier: ^4.10.0
         version: 4.14.4
@@ -118,8 +118,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.14.2-next.30
-        version: 0.14.2-next.30
+        specifier: ^0.15.1
+        version: 0.15.1
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8
@@ -200,8 +200,8 @@ importers:
   packages/common:
     dependencies:
       '@sphereon/ssi-types':
-        specifier: 0.14.2-next.30
-        version: 0.14.2-next.30
+        specifier: ^0.15.1
+        version: 0.15.1
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8
@@ -222,8 +222,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.14.2-next.30
-        version: 0.14.2-next.30
+        specifier: ^0.15.1
+        version: 0.15.1
       uuid:
         specifier: ^9.0.0
         version: 9.0.0
@@ -253,11 +253,11 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-express-support':
-        specifier: 0.14.2-next.30
-        version: 0.14.2-next.30
+        specifier: ^0.15.1
+        version: 0.15.1
       '@sphereon/ssi-types':
-        specifier: 0.14.2-next.30
-        version: 0.14.2-next.30
+        specifier: ^0.15.1
+        version: 0.15.1
       body-parser:
         specifier: ^1.20.2
         version: 1.20.2
@@ -3206,8 +3206,8 @@ packages:
     dependencies:
       '@sinonjs/commons': 3.0.0
 
-  /@sphereon/ssi-express-support@0.14.2-next.30:
-    resolution: {integrity: sha512-/FMTyRl0mAAaXwTBsgUWWJMsBviA6PQUdee8RCRnKXLb/NE2MUAioMwhNUWff89wGyFAzQa4Ut2Jhyix1uX/yA==}
+  /@sphereon/ssi-express-support@0.15.1:
+    resolution: {integrity: sha512-jmPnucQO4je5o7b57RTL30alryckKjwYKkGEvN/J26nTd467/M5nZWv1rf7eo1O7LdCdnRT7ihR9bg5vkP3UOw==}
     peerDependencies:
       '@noble/hashes': ^1.3.1
       passport-azure-ad: ^4.3.5
@@ -3235,8 +3235,8 @@ packages:
       - supports-color
     dev: false
 
-  /@sphereon/ssi-types@0.14.2-next.30:
-    resolution: {integrity: sha512-LX3m4YKX3QxUdPWai79fu9WJ7nnyCvau/PGbQPMD3ZkbHJemLBZP4mBvUNxtq18kM9JErlqGzitMkB5b3rRIeA==}
+  /@sphereon/ssi-types@0.15.1:
+    resolution: {integrity: sha512-NFpgcVHIU8YQ2OkCHpw9YVa5bIDBcfSbp0kvwC0iZa0du1tr3148fV2Xm4ilcLeRNvUKL5BbDEdHl1WuQkmoyw==}
     dependencies:
       jwt-decode: 3.1.2
     dev: false
