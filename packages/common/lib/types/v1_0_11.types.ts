@@ -3,8 +3,8 @@ import {
   CommonCredentialRequest,
   CredentialDataSupplierInput,
   CredentialOfferFormat,
-  CredentialRequestJwtVcJson,
-  CredentialRequestJwtVcJsonLdAndLdpVc,
+  CredentialRequestJwtVc,
+  CredentialRequestLdpVc,
   Grant,
   IssuerCredentialDefinition,
 } from './Generic.types';
@@ -64,7 +64,7 @@ export type CredentialOfferJwtVcJsonV1_0_11 = CommonCredentialOfferPayloadV1_0_1
 export type CredentialOfferPayloadV1_0_11 = CommonCredentialOfferPayloadV1_0_11 &
   (CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11 | CredentialOfferJwtVcJsonV1_0_11);
 
-export type CredentialRequestV1_0_11 = CommonCredentialRequest & (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc);
+export type CredentialRequestV1_0_11 = CommonCredentialRequest & (CredentialRequestJwtVc | CredentialRequestLdpVc);
 
 export interface AuthorizationRequestV1_0_11 extends AuthorizationDetailsJwtVcJson, AuthorizationDetailsJwtVcJson {
   issuer_state?: string;

@@ -123,13 +123,13 @@ export interface CommonCredentialRequest {
   proof?: ProofOfPossession;
 }
 
-export interface CredentialRequestJwtVcJson extends CommonCredentialRequest {
+export interface CredentialRequestJwtVc extends CommonCredentialRequest {
   format: 'jwt_vc_json' | 'jwt_vc_json-ld';
   types: string[];
   credentialSubject?: IssuerCredentialSubject;
 }
 
-export interface CredentialRequestJwtVcJsonLdAndLdpVc extends CommonCredentialRequest {
+export interface CredentialRequestLdpVc extends CommonCredentialRequest {
   format: 'ldp_vc';
   credential_definition: IssuerCredentialDefinition;
 }
