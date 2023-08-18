@@ -61,8 +61,7 @@ export interface CredentialOfferLdpVcV1_0_11 extends CommonCredentialOfferPayloa
 
 export type CredentialOfferJwtVcV1_0_11 = CommonCredentialOfferPayloadV1_0_11;
 
-export type CredentialOfferPayloadV1_0_11 = CommonCredentialOfferPayloadV1_0_11 &
-  (CredentialOfferLdpVcV1_0_11 | CredentialOfferJwtVcV1_0_11);
+export type CredentialOfferPayloadV1_0_11 = CommonCredentialOfferPayloadV1_0_11 & (CredentialOfferLdpVcV1_0_11 | CredentialOfferJwtVcV1_0_11);
 
 export type CredentialRequestV1_0_11 = CommonCredentialRequest & (CredentialRequestJwtVc | CredentialRequestLdpVc);
 
