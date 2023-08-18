@@ -124,13 +124,13 @@ export interface CommonCredentialRequest {
 }
 
 export interface CredentialRequestJwtVcJson extends CommonCredentialRequest {
-  format: 'jwt_vc_json';
+  format: 'jwt_vc_json' | 'jwt_vc_json-ld';
   types: string[];
   credentialSubject?: IssuerCredentialSubject;
 }
 
 export interface CredentialRequestJwtVcJsonLdAndLdpVc extends CommonCredentialRequest {
-  format: 'jwt_vc_json-ld' | 'ldp_vc';
+  format: 'ldp_vc';
   credential_definition: IssuerCredentialDefinition;
 }
 
@@ -142,12 +142,13 @@ export interface CommonCredentialResponse {
   c_nonce_expires_in?: string;
 }
 
-export interface CredentialResponseJwtVcJsonLdAndLdpVc extends CommonCredentialResponse {
-  format: 'jwt_vc_json-ld' | 'ldp_vc';
+export interface CredentialResponseLdpVc extends CommonCredentialResponse {
+  format: 'ldp_vc';
   credential: IVerifiableCredential;
 }
 
-export interface CredentialResponseJwtVcJson {
+export interface CredentialResponseJwtVc {
+  format: 'jwt_vc_json' | 'jwt_vc_json-ld';
   credential: string;
 }
 
