@@ -48,7 +48,7 @@ export interface CommonCredentialOfferPayloadV1_0_11 {
   grants?: Grant;
 }
 
-export interface CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11 extends CommonCredentialOfferPayloadV1_0_11 {
+export interface CredentialOfferLdpVcV1_0_11 extends CommonCredentialOfferPayloadV1_0_11 {
   /**
    * REQUIRED. JSON object containing (and isolating) the detailed description of the credential type.
    * This object MUST be processed using full JSON-LD processing. It consists of the following sub-claims:
@@ -59,10 +59,10 @@ export interface CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11 extends CommonCredent
   credential_definition: IssuerCredentialDefinition;
 }
 
-export type CredentialOfferJwtVcJsonV1_0_11 = CommonCredentialOfferPayloadV1_0_11;
+export type CredentialOfferJwtVcV1_0_11 = CommonCredentialOfferPayloadV1_0_11;
 
 export type CredentialOfferPayloadV1_0_11 = CommonCredentialOfferPayloadV1_0_11 &
-  (CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11 | CredentialOfferJwtVcJsonV1_0_11);
+  (CredentialOfferLdpVcV1_0_11 | CredentialOfferJwtVcV1_0_11);
 
 export type CredentialRequestV1_0_11 = CommonCredentialRequest & (CredentialRequestJwtVc | CredentialRequestLdpVc);
 

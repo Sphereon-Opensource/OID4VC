@@ -4,7 +4,7 @@ import {
   Alg,
   CNonceState,
   CredentialIssuerMetadataOpts,
-  CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+  CredentialOfferLdpVcV1_0_11,
   CredentialOfferSession,
   IssueStatus,
   Jwt,
@@ -56,7 +56,7 @@ describe('OID4VCIServer', () => {
               'pre-authorized_code': preAuthorizedCode1,
             },
           },
-        } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+        } as CredentialOfferLdpVcV1_0_11,
       },
     }
     const credentialOfferState2: CredentialOfferSession = {
@@ -75,7 +75,7 @@ describe('OID4VCIServer', () => {
               user_pin_required: false,
             },
           },
-        } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+        } as CredentialOfferLdpVcV1_0_11,
       },
     }
     const credentialOfferState3: CredentialOfferSession = { ...credentialOfferState1, preAuthorizedCode: preAuthorizedCode3, createdAt: 0 }
