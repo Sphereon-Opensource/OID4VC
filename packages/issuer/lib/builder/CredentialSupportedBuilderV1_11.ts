@@ -95,7 +95,7 @@ export class CredentialSupportedBuilderV1_11 {
 
   addCredentialSubjectPropertyDisplay(
     subjectProperty: string,
-    issuerCredentialSubjectDisplay: IssuerCredentialSubjectDisplay
+    issuerCredentialSubjectDisplay: IssuerCredentialSubjectDisplay,
   ): CredentialSupportedBuilderV1_11 {
     if (!this.credentialSubject) {
       this.credentialSubject = {}

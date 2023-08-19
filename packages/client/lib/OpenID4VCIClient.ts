@@ -9,6 +9,7 @@ import {
   CredentialResponse,
   CredentialSupported,
   EndpointMetadata,
+  EndpointMetadataResult,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   OpenIDResponse,
@@ -53,7 +54,7 @@ export class OpenID4VCIClient {
   private _clientId?: string;
   private _kid: string | undefined;
   private _alg: Alg | string | undefined;
-  private _endpointMetadata: EndpointMetadata | undefined;
+  private _endpointMetadata: EndpointMetadataResult | undefined;
   private _accessTokenResponse: AccessTokenResponse | undefined;
 
   private constructor(
@@ -61,7 +62,7 @@ export class OpenID4VCIClient {
     flowType: AuthzFlowType,
     kid?: string,
     alg?: Alg | string,
-    clientId?: string
+    clientId?: string,
   ) {
     if (!credentialOffer.supportedFlows.includes(flowType)) {
       throw Error(`Flows ${flowType} is not supported by issuer ${credentialOffer.credential_offer_uri}`);
@@ -119,9 +120,14 @@ export class OpenID4VCIClient {
     if (!scope && !authorizationDetails) {
       throw Error('Please provide a scope or authorization_details');
     }
-    // todo: handling this because of the support for v1_0-08
-    if (this._endpointMetadata && this._endpointMetadata.issuerMetadata && 'authorization_endpoint' in this._endpointMetadata.issuerMetadata) {
-      this._endpointMetadata.authorization_endpoint = this._endpointMetadata.issuerMetadata.authorization_endpoint as string;
+    // todo: Probably can go with current logic in MetadataClient who will always set the authorization_endpoint when found
+    //  handling this because of the support for v1_0-08
+    if (
+      this._endpointMetadata &&
+      this._endpointMetadata.credentialIssuerMetadata &&
+      'authorization_endpoint' in this._endpointMetadata.credentialIssuerMetadata
+    ) {
+      this._endpointMetadata.authorization_endpoint = this._endpointMetadata.credentialIssuerMetadata.authorization_endpoint as string;
     }
     if (!this._endpointMetadata?.authorization_endpoint) {
       throw Error('Server metadata does not contain authorization endpoint');
@@ -169,13 +175,13 @@ export class OpenID4VCIClient {
     // What happens if it doesn't ???
     // let parEndpoint: string
     if (
-      !this._endpointMetadata?.issuerMetadata ||
-      !('pushed_authorization_request_endpoint' in this._endpointMetadata.issuerMetadata) ||
-      typeof this._endpointMetadata.issuerMetadata.pushed_authorization_request_endpoint !== 'string'
+      !this._endpointMetadata?.credentialIssuerMetadata ||
+      !('pushed_authorization_request_endpoint' in this._endpointMetadata.credentialIssuerMetadata) ||
+      typeof this._endpointMetadata.credentialIssuerMetadata.pushed_authorization_request_endpoint !== 'string'
     ) {
       throw Error('Server metadata does not contain pushed authorization request endpoint');
     }
-    const parEndpoint: string = this._endpointMetadata.issuerMetadata.pushed_authorization_request_endpoint;
+    const parEndpoint: string = this._endpointMetadata.credentialIssuerMetadata.pushed_authorization_request_endpoint;
 
     // add 'openid' scope if not present
     if (scope && !scope.includes('openid')) {
@@ -207,7 +213,10 @@ export class OpenID4VCIClient {
   }
 
   private handleLocations(authorizationDetails: AuthDetails) {
-    if (authorizationDetails && (this.endpointMetadata.issuerMetadata?.authorization_server || this.endpointMetadata.authorization_endpoint)) {
+    if (
+      authorizationDetails &&
+      (this.endpointMetadata.credentialIssuerMetadata?.authorization_server || this.endpointMetadata.authorization_endpoint)
+    ) {
       if (authorizationDetails.locations) {
         if (Array.isArray(authorizationDetails.locations)) {
           (authorizationDetails.locations as string[]).push(this.endpointMetadata.issuer);
@@ -251,14 +260,13 @@ export class OpenID4VCIClient {
         throw Error(
           `Retrieving an access token from ${this._endpointMetadata?.token_endpoint} for issuer ${this.getIssuer()} failed with status: ${
             response.origResponse.status
-          }`
+          }`,
         );
       } else if (!response.successBody) {
         debug(`Access token error. No success body`);
         throw Error(
-          `Retrieving an access token from ${
-            this._endpointMetadata?.token_endpoint
-          } for issuer ${this.getIssuer()} failed as there was no success response body`
+          `Retrieving an access token from ${this._endpointMetadata
+            ?.token_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`,
         );
       }
       this._accessTokenResponse = response.successBody;
@@ -294,8 +302,8 @@ export class OpenID4VCIClient {
       metadata: this.endpointMetadata,
     });
     requestBuilder.withTokenFromResponse(this.accessTokenResponse);
-    if (this.endpointMetadata?.issuerMetadata) {
-      const metadata = this.endpointMetadata.issuerMetadata;
+    if (this.endpointMetadata?.credentialIssuerMetadata) {
+      const metadata = this.endpointMetadata.credentialIssuerMetadata;
       const types = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
       if (metadata.credentials_supported && Array.isArray(metadata.credentials_supported)) {
         for (const type of types) {
@@ -346,14 +354,13 @@ export class OpenID4VCIClient {
       throw Error(
         `Retrieving a credential from ${this._endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${
           response.origResponse.status
-        }`
+        }`,
       );
     } else if (!response.successBody) {
       debug(`Credential request error. No success body`);
       throw Error(
-        `Retrieving a credential from ${
-          this._endpointMetadata?.credential_endpoint
-        } for issuer ${this.getIssuer()} failed as there was no success response body`
+        `Retrieving a credential from ${this._endpointMetadata
+          ?.credential_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`,
       );
     }
     return response.successBody;
@@ -361,7 +368,7 @@ export class OpenID4VCIClient {
 
   getCredentialsSupported(restrictToInitiationTypes: boolean, supportedType?: string): CredentialSupported[] {
     return getSupportedCredentials({
-      issuerMetadata: this.endpointMetadata.issuerMetadata,
+      issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),
       supportedType,
       credentialTypes: restrictToInitiationTypes ? this.getCredentialTypes() : undefined,
@@ -451,7 +458,7 @@ export class OpenID4VCIClient {
     return this.credentialOffer.version;
   }
 
-  public get endpointMetadata(): EndpointMetadata {
+  public get endpointMetadata(): EndpointMetadataResult {
     this.assertServerMetadata();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this._endpointMetadata!;

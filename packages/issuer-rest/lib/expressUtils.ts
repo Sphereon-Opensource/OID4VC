@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { Request } from 'express'
 
 export const validateRequestBody = ({
   required,
@@ -20,10 +20,4 @@ export const validateRequestBody = ({
   if (message) {
     throw new Error(message)
   }
-}
-
-export const sendErrorResponse = (response: Response, statusCode: number, message: any, error?: any) => {
-  console.log(`${JSON.stringify(message)} ${error}`)
-  response.statusCode = statusCode
-  response.status(statusCode).send(message)
 }

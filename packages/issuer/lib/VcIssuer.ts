@@ -70,7 +70,7 @@ export class VcIssuer<DIDDoc extends object> {
       jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
       credentialDataSupplier?: CredentialDataSupplier
       cNonceExpiresIn?: number | undefined // expiration duration in seconds
-    }
+    },
   ) {
     this._issuerMetadata = issuerMetadata
     this._defaultCredentialOfferBaseUri = args.defaultCredentialOfferBaseUri
@@ -162,7 +162,7 @@ export class VcIssuer<DIDDoc extends object> {
       if (!this.uris) {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
-      this.uris.set(opts.credentialOfferUri, {
+      await this.uris.set(opts.credentialOfferUri, {
         uri: opts.credentialOfferUri,
         createdAt: createdAt,
         preAuthorizedCode,
@@ -178,7 +178,7 @@ export class VcIssuer<DIDDoc extends object> {
       {
         version: OpenId4VCIVersion.VER_1_0_11,
         resolve: false, // We are creating the object, so do not resolve
-      }
+      },
     )
 
     const status = IssueStatus.OFFER_CREATED
@@ -194,11 +194,11 @@ export class VcIssuer<DIDDoc extends object> {
     }
 
     if (preAuthorizedCode) {
-      this.credentialOfferSessions.set(preAuthorizedCode, session)
+      await this.credentialOfferSessions.set(preAuthorizedCode, session)
     }
     // todo: check whether we could have the same value for issuer state and pre auth code if both are supported.
     if (issuerState) {
-      this.credentialOfferSessions.set(issuerState, session)
+      await this.credentialOfferSessions.set(issuerState, session)
     }
     return {
       session,
@@ -310,7 +310,7 @@ export class VcIssuer<DIDDoc extends object> {
           credential,
           jwtVerifyResult,
         },
-        signerCallback
+        signerCallback,
       )
       // TODO implement acceptance_token (deferred response)
       // TODO update verification accordingly
@@ -458,7 +458,7 @@ export class VcIssuer<DIDDoc extends object> {
         }
         preAuthSession.lastUpdatedAt = +new Date()
         preAuthSession.status = IssueStatus.CREDENTIAL_REQUEST_RECEIVED
-        this._credentialOfferSessions.set(preAuthorizedCode, preAuthSession)
+        await this._credentialOfferSessions.set(preAuthorizedCode, preAuthSession)
       }
       if (authSession) {
         if (!authSession.issuerState || authSession.issuerState !== issuerState) {
@@ -528,7 +528,7 @@ export class VcIssuer<DIDDoc extends object> {
       jwtVerifyResult: JwtVerifyResult<DIDDoc>
       format?: OID4VCICredentialFormat
     },
-    issuerCallback?: CredentialSignerCallback<DIDDoc>
+    issuerCallback?: CredentialSignerCallback<DIDDoc>,
   ): Promise<W3CVerifiableCredential> {
     if ((!opts.credential && !opts.credentialRequest) || !this._credentialSignerCallback) {
       throw new Error(ISSUER_CONFIG_ERROR)

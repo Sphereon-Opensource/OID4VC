@@ -1,11 +1,10 @@
 import { KeyObject } from 'crypto'
-import * as http from 'http'
 
 import {
   Alg,
   CNonceState,
   CredentialIssuerMetadataOpts,
-  CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+  CredentialOfferLdpVcV1_0_11,
   CredentialOfferSession,
   IssueStatus,
   Jwt,
@@ -14,6 +13,7 @@ import {
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
+import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { DIDDocument } from 'did-resolver'
 import { Express } from 'express'
 import * as jose from 'jose'
@@ -23,7 +23,8 @@ import { OID4VCIServer } from '../OID4VCIServer'
 
 describe('OID4VCIServer', () => {
   let app: Express
-  let server: http.Server
+  let expressSupport: ExpressSupport
+  // let server: http.Server
   const preAuthorizedCode1 = 'SplxlOBeZQQYbYS6WxSbIA1'
   const preAuthorizedCode2 = 'SplxlOBeZQQYbYS6WxSbIA2'
   const preAuthorizedCode3 = 'SplxlOBeZQQYbYS6WxSbIA3'
@@ -55,7 +56,7 @@ describe('OID4VCIServer', () => {
               'pre-authorized_code': preAuthorizedCode1,
             },
           },
-        } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+        } as CredentialOfferLdpVcV1_0_11,
       },
     }
     const credentialOfferState2: CredentialOfferSession = {
@@ -74,7 +75,7 @@ describe('OID4VCIServer', () => {
               user_pin_required: false,
             },
           },
-        } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+        } as CredentialOfferLdpVcV1_0_11,
       },
     }
     const credentialOfferState3: CredentialOfferSession = { ...credentialOfferState1, preAuthorizedCode: preAuthorizedCode3, createdAt: 0 }
@@ -126,29 +127,34 @@ describe('OID4VCIServer', () => {
         credentialOfferSessions,
         cNonces: new MemoryStates<CNonceState>(),
         uris: new MemoryStates<URIState>(),
-      }
+      },
     )
 
-    const vcIssuerServer = new OID4VCIServer({
+    expressSupport = ExpressBuilder.fromServerOpts({
+      startListening: false,
+      port: 5000,
+      hostname: '0.0.0.0',
+    }).build({ startListening: false })
+    const vcIssuerServer = new OID4VCIServer(expressSupport, {
       issuer: vcIssuer,
-      serverOpts: {
-        host: '127.0.0.1',
-      },
-      tokenEndpointOpts: {
-        accessTokenSignerCallback: signerCallback,
-        accessTokenIssuer: 'https://www.example.com',
-        preAuthorizedCodeExpirationDuration: 2000,
-        tokenExpiresIn: 300000,
+      baseUrl: 'http://localhost:5000',
+      endpointOpts: {
+        tokenEndpointOpts: {
+          accessTokenSignerCallback: signerCallback,
+          accessTokenIssuer: 'https://www.example.com',
+          preAuthorizedCodeExpirationDuration: 2000,
+          tokenExpiresIn: 300000,
+        },
       },
     })
+    expressSupport.start()
     app = vcIssuerServer.app
-    server = vcIssuerServer.server!
   })
 
   afterAll(async () => {
-    await server.close(() => {
-      console.log('Stopping Express server')
-    })
+    if (expressSupport) {
+      await expressSupport.stop()
+    }
     await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 
@@ -159,7 +165,7 @@ describe('OID4VCIServer', () => {
     expect(res.statusCode).toEqual(200)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
-      access_token: expect.stringContaining('eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE2OD'),
+      access_token: expect.stringContaining('eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE2O'),
       token_type: 'bearer',
       expires_in: 300000,
       c_nonce: expect.any(String),

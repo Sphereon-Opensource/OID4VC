@@ -40,7 +40,7 @@ export const generateAccessToken = async (
   opts: Required<Pick<ITokenEndpointOpts, 'accessTokenSignerCallback' | 'tokenExpiresIn' | 'accessTokenIssuer'>> & {
     preAuthorizedCode?: string
     alg?: Alg
-  }
+  },
 ): Promise<string> => {
   const { accessTokenIssuer, alg, accessTokenSignerCallback, tokenExpiresIn, preAuthorizedCode } = opts
   const iat = new Date().getTime()
@@ -72,7 +72,7 @@ export const assertValidAccessTokenRequest = async (
   opts: {
     credentialOfferSessions: IStateManager<CredentialOfferSession>
     expirationDuration: number
-  }
+  },
 ) => {
   const { credentialOfferSessions, expirationDuration } = opts
   // Only pre-auth supported for now
@@ -138,7 +138,7 @@ export const createAccessTokenResponse = async (
     accessTokenSignerCallback: JWTSignerCallback
     accessTokenIssuer: string
     interval?: number
-  }
+  },
 ) => {
   const { credentialOfferSessions, cNonces, cNonceExpiresIn, tokenExpiresIn, accessTokenIssuer, accessTokenSignerCallback, interval } = opts
   // Pre-auth flow

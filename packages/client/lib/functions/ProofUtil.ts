@@ -23,7 +23,7 @@ const debug = Debug('sphereon:openid4vci:token');
 export const createProofOfPossession = async <DIDDoc>(
   callbacks: ProofOfPossessionCallbacks<DIDDoc>,
   jwtProps?: JwtProps,
-  existingJwt?: Jwt
+  existingJwt?: Jwt,
 ): Promise<ProofOfPossession> => {
   if (!callbacks.signCallback) {
     debug(`no jwt signer callback or arguments supplied!`);

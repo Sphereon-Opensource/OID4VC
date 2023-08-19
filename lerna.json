@@ -14,6 +14,5 @@
       "gitRemote": "origin",
       "message": "chore(release): %s"
     }
-  },
-  "useWorkspaces": true
+  }
 }

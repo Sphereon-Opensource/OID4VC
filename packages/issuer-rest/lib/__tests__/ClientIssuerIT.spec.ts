@@ -17,6 +17,7 @@ import {
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
+import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
@@ -24,6 +25,8 @@ import * as jose from 'jose'
 import { OID4VCIServer } from '../OID4VCIServer'
 
 const ISSUER_URL = 'http://localhost:3456/test'
+
+let expressSupport: ExpressSupport
 
 let subjectKeypair: KeyPair // Proof of Possession JWT
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -116,7 +119,7 @@ describe('VcIssuer', () => {
         Promise.resolve({
           format: 'ldp_vc',
           credential,
-        })
+        }),
       )
       .withCredentialSignerCallback(() =>
         Promise.resolve({
@@ -128,7 +131,7 @@ describe('VcIssuer', () => {
             proofPurpose: IProofPurpose.assertionMethod,
             verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
           },
-        })
+        }),
       )
       .withJWTVerifyCallback((args: { jwt: string; kid?: string }) => {
         const header = jose.decodeProtectedHeader(args.jwt)
@@ -154,17 +157,25 @@ describe('VcIssuer', () => {
       })
 
       .build()
+    expressSupport = ExpressBuilder.fromServerOpts({
+      port: 3456,
+      hostname: 'localhost',
+    }).build({ startListening: false })
 
-    server = new OID4VCIServer({
+    server = new OID4VCIServer(expressSupport, {
       issuer: vcIssuer,
-      serverOpts: { baseUrl: 'http://localhost:3456/test', port: 3456 },
-      tokenEndpointOpts: { accessTokenSignerCallback, tokenPath: '/test/token' },
+      baseUrl: 'http://localhost:3456/test',
+      endpointOpts: {
+        // serverOpts: { baseUrl: 'http://localhost:3456/test', port: 3456 },
+        tokenEndpointOpts: { accessTokenSignerCallback, tokenPath: '/test/token' },
+      },
     })
+    expressSupport.start()
   })
 
   afterAll(async () => {
     jest.clearAllMocks()
-    server.stop()
+    await server.stop()
     // await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 
@@ -189,7 +200,7 @@ describe('VcIssuer', () => {
       })
       .then((response) => response.uri)
     expect(uri).toEqual(
-      'http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D%2C%22credentials%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%7D'
+      'http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D%2C%22credentials%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%7D',
     )
   })
 
@@ -241,46 +252,54 @@ describe('VcIssuer', () => {
 
   it('should retrieve server metadata', async () => {
     await expect(client.retrieveServerMetadata()).resolves.toEqual({
-      credential_endpoint: 'http://localhost:3456/test/credential-endpoint',
-      issuer: 'http://localhost:3456/test',
-      issuerMetadata: {
-        credential_endpoint: 'http://localhost:3456/test/credential-endpoint',
-        credential_issuer: 'http://localhost:3456/test',
-        credentials_supported: [
+      "authorizationServerType": "OID4VCI",
+      "authorization_server": "http://localhost:3456/test",
+      "credentialIssuerMetadata": {
+        "credential_endpoint": "http://localhost:3456/test/credential-endpoint",
+        "credential_issuer": "http://localhost:3456/test",
+        "credentials_supported": [
           {
-            credentialSubject: {
-              given_name: {
-                locale: 'en-US',
-                name: 'given name',
-              },
+            "credentialSubject": {
+              "given_name": {
+                "locale": "en-US",
+                "name": "given name"
+              }
             },
-            cryptographic_binding_methods_supported: ['did'],
-            cryptographic_suites_supported: ['ES256K'],
-            display: [
-              {
-                background_color: '#12107c',
-                locale: 'en-US',
-                logo: {
-                  alt_text: 'a square logo of a university',
-                  url: 'https://exampleuniversity.com/public/logo.png',
-                },
-                name: 'University Credential',
-                text_color: '#FFFFFF',
-              },
+            "cryptographic_binding_methods_supported": [
+              "did"
             ],
-            format: 'jwt_vc_json',
-            id: 'UniversityDegree_JWT',
-            types: ['VerifiableCredential'],
-          },
+            "cryptographic_suites_supported": [
+              "ES256K"
+            ],
+            "display": [
+              {
+                "background_color": "#12107c",
+                "locale": "en-US",
+                "logo": {
+                  "alt_text": "a square logo of a university",
+                  "url": "https://exampleuniversity.com/public/logo.png"
+                },
+                "name": "University Credential",
+                "text_color": "#FFFFFF"
+              }
+            ],
+            "format": "jwt_vc_json",
+            "id": "UniversityDegree_JWT",
+            "types": [
+              "VerifiableCredential"
+            ]
+          }
         ],
-        display: [
+        "display": [
           {
-            locale: 'en-US',
-            name: 'example issuer',
-          },
-        ],
+            "locale": "en-US",
+            "name": "example issuer"
+          }
+        ]
       },
-      token_endpoint: 'http://localhost:3456/test/token',
+      "credential_endpoint": "http://localhost:3456/test/credential-endpoint",
+      "issuer": "http://localhost:3456/test",
+      "token_endpoint": "http://localhost:3456/test/token"
     })
   })
   it('should get state on server side', async () => {

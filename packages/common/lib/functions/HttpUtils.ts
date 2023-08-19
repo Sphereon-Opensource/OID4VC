@@ -7,7 +7,13 @@ const debug = Debug('sphereon:openid4vci:http');
 
 export const getJson = async <T>(
   URL: string,
-  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: Record<string, string>; exceptionOnHttpErrorStatus?: boolean }
+  opts?: {
+    bearerToken?: string;
+    contentType?: string;
+    accept?: string;
+    customHeaders?: Record<string, string>;
+    exceptionOnHttpErrorStatus?: boolean;
+  },
 ): Promise<OpenIDResponse<T>> => {
   return await openIdFetch(URL, undefined, { method: 'GET', ...opts });
 };
@@ -15,7 +21,13 @@ export const getJson = async <T>(
 export const formPost = async <T>(
   url: string,
   body: BodyInit,
-  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: Record<string, string>; exceptionOnHttpErrorStatus?: boolean }
+  opts?: {
+    bearerToken?: string;
+    contentType?: string;
+    accept?: string;
+    customHeaders?: Record<string, string>;
+    exceptionOnHttpErrorStatus?: boolean;
+  },
 ): Promise<OpenIDResponse<T>> => {
   return await post(url, body, opts?.contentType ? { ...opts } : { contentType: Encoding.FORM_URL_ENCODED, ...opts });
 };
@@ -23,7 +35,13 @@ export const formPost = async <T>(
 export const post = async <T>(
   url: string,
   body?: BodyInit,
-  opts?: { bearerToken?: string; contentType?: string; accept?: string; customHeaders?: Record<string, string>; exceptionOnHttpErrorStatus?: boolean }
+  opts?: {
+    bearerToken?: string;
+    contentType?: string;
+    accept?: string;
+    customHeaders?: Record<string, string>;
+    exceptionOnHttpErrorStatus?: boolean;
+  },
 ): Promise<OpenIDResponse<T>> => {
   return await openIdFetch(url, body, { method: 'POST', ...opts });
 };
@@ -38,7 +56,7 @@ const openIdFetch = async <T>(
     accept?: string;
     customHeaders?: Record<string, string>;
     exceptionOnHttpErrorStatus?: boolean;
-  }
+  },
 ): Promise<OpenIDResponse<T>> => {
   const headers: Record<string, string> = opts?.customHeaders ?? {};
   if (opts?.bearerToken) {
@@ -50,7 +68,7 @@ const openIdFetch = async <T>(
   if (headers['Content-Type']) {
     if (opts?.contentType && opts.contentType !== headers['Content-Type']) {
       throw Error(
-        `Mismatch in content-types from custom headers (${headers['Content-Type']}) and supplied content type option (${opts.contentType})`
+        `Mismatch in content-types from custom headers (${headers['Content-Type']}) and supplied content type option (${opts.contentType})`,
       );
     }
   } else {
@@ -101,7 +119,7 @@ export const isValidURL = (url: string): boolean => {
       '(\\:\\d+)?(\\/[-a-z\\d%_.~+:]*)*' + // validate port and path
       '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
       '(\\#[-a-z\\d_]*)?$', // validate fragment locator
-    'i'
+    'i',
   );
   return urlPattern.test(url);
 };
@@ -125,7 +143,7 @@ export const adjustUrl = <T extends string | URL>(
     stripSlashStart?: boolean;
     prepend?: string;
     append?: string;
-  }
+  },
 ): T => {
   let url = typeof urlOrPath === 'object' ? urlOrPath.toString() : (urlOrPath as string);
   if (opts?.append) {

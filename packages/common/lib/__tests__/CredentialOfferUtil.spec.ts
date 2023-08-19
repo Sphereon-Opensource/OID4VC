@@ -24,7 +24,7 @@ describe('CredentialOfferUtil should', () => {
     async () => {
       expect(determineSpecVersionFromURI(INITIATE_QR_V8)).toEqual(OpenId4VCIVersion.VER_1_0_08);
     },
-    UNIT_TEST_TIMEOUT
+    UNIT_TEST_TIMEOUT,
   );
 
   it(
@@ -32,17 +32,17 @@ describe('CredentialOfferUtil should', () => {
     async () => {
       expect(determineSpecVersionFromURI(CREDENTIAL_OFFER_QR_V11)).toEqual(OpenId4VCIVersion.VER_1_0_11);
     },
-    UNIT_TEST_TIMEOUT
+    UNIT_TEST_TIMEOUT,
   );
 
   it(
     'get exception for mixed attributes in URL',
     async () => {
       expect(() => determineSpecVersionFromURI(INITIATE_QR_DATA_MIXED_V9)).toThrow(
-        Error("Invalid param. Some keys have been used from version: 1008 version while 'credential_issuer' is used from version: 1011")
+        Error("Invalid param. Some keys have been used from version: 1008 version while 'credential_issuer' is used from version: 1011"),
       );
     },
-    UNIT_TEST_TIMEOUT
+    UNIT_TEST_TIMEOUT,
   );
 
   it(
@@ -50,6 +50,6 @@ describe('CredentialOfferUtil should', () => {
     async () => {
       expect(determineSpecVersionFromURI('test://uri')).toEqual(OpenId4VCIVersion.VER_1_0_11);
     },
-    UNIT_TEST_TIMEOUT
+    UNIT_TEST_TIMEOUT,
   );
 });

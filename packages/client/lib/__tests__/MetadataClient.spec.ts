@@ -30,16 +30,18 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
 
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
+    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404);
 
     const metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
     expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential');
     expect(metadata.token_endpoint).toEqual('https://auth.research.identiproof.io/oauth2/token');
-    expect(metadata.issuerMetadata).toEqual(IDENTIPROOF_OID4VCI_METADATA);
+    expect(metadata.credentialIssuerMetadata).toMatchObject(IDENTIPROOF_OID4VCI_METADATA);
   });
 
   it('succeed with OID4VCI and separate AS metadata from Initiation', async () => {
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
+    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404);
 
     const INITIATE_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
@@ -47,7 +49,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     const metadata = await MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(initiation.credential_offer) as string);
     expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential');
     expect(metadata.token_endpoint).toEqual('https://auth.research.identiproof.io/oauth2/token');
-    expect(metadata.issuerMetadata).toEqual(IDENTIPROOF_OID4VCI_METADATA);
+    expect(metadata.credentialIssuerMetadata).toEqual(IDENTIPROOF_OID4VCI_METADATA);
   });
 
   it('Fail without OID4VCI and only AS metadata (no credential endpoint)', async () => {
@@ -64,18 +66,20 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the token endpoint for https://issuer.research.identiproof.io'
+      'Could not deduce the token_endpoint for https://issuer.research.identiproof.io',
     );
   });
 
   it('Fail with OID4VCI and no AS metadata', async () => {
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
-    nock(IDENTIPROOF_ISSUER_URL)
+    nock(IDENTIPROOF_AS_URL)
       .get(WellKnownEndpoints.OPENID_CONFIGURATION)
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, JSON.stringify({}));
-    await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL)).rejects.toThrowError('{"error": "not found"}');
+    await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL)).rejects.toThrowError(
+      'Issuer https://issuer.research.identiproof.io provided a separate authorization server https://auth.research.identiproof.io, but that server did not provide metadata',
+    );
   });
 
   it('Fail if there is no token endpoint with errors enabled', async () => {
@@ -83,9 +87,10 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     const meta = JSON.parse(JSON.stringify(IDENTIPROOF_AS_METADATA));
     delete meta.token_endpoint;
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(meta));
+    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404);
 
     await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the token endpoint for https://issuer.research.identiproof.io'
+      'Authorization Sever https://auth.research.identiproof.io did not provide a token_endpoint',
     );
   });
 
@@ -94,15 +99,17 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     delete meta.credential_endpoint;
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(meta));
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
+    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404);
 
     await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the credential endpoint for https://issuer.research.identiproof.io'
+      'Could not deduce the credential endpoint for https://issuer.research.identiproof.io',
     );
   });
 
   it('Succeed with default value if there is no credential endpoint with errors disabled', async () => {
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
+    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404);
 
     const metadata = await MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL);
     expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential');
@@ -130,11 +137,13 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
 describe('Metadataclient with Spruce Issuer should', () => {
   it('succeed with OID4VCI and separate AS metadata', async () => {
     nock(SPRUCE_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(SPRUCE_OID4VCI_METADATA));
+    nock(SPRUCE_ISSUER_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404);
+    nock(SPRUCE_ISSUER_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404);
 
     const metadata = await MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL);
     expect(metadata.credential_endpoint).toEqual('https://ngi-oidc4vci-test.spruceid.xyz/credential');
     expect(metadata.token_endpoint).toEqual('https://ngi-oidc4vci-test.spruceid.xyz/token');
-    expect(metadata.issuerMetadata).toEqual(SPRUCE_OID4VCI_METADATA);
+    expect(metadata.credentialIssuerMetadata).toEqual(SPRUCE_OID4VCI_METADATA);
   });
 
   it('Fail without OID4VCI', async () => {
@@ -144,7 +153,7 @@ describe('Metadataclient with Spruce Issuer should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     await expect(() => MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the token endpoint for https://ngi-oidc4vci-test.spruceid.xyz'
+      'Could not deduce the token_endpoint for https://ngi-oidc4vci-test.spruceid.xyz',
     );
   });
 });
@@ -160,7 +169,7 @@ describe('Metadataclient with Danubetech should', () => {
     const metadata = await MetadataClient.retrieveAllMetadata(DANUBE_ISSUER_URL);
     expect(metadata.credential_endpoint).toEqual('https://oidc4vc.uniissuer.io/credential');
     expect(metadata.token_endpoint).toEqual('https://oidc4vc.uniissuer.io/token');
-    expect(metadata.issuerMetadata).toEqual(DANUBE_OIDC_METADATA);
+    expect(metadata.credentialIssuerMetadata).toEqual(DANUBE_OIDC_METADATA);
   });
 
   it('Fail without OID4VCI', async () => {
@@ -170,7 +179,7 @@ describe('Metadataclient with Danubetech should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     await expect(() => MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the token endpoint for https://ngi-oidc4vci-test.spruceid.xyz'
+      'Could not deduce the token_endpoint for https://ngi-oidc4vci-test.spruceid.xyz',
     );
   });
 });
@@ -187,7 +196,7 @@ describe('Metadataclient with Walt-id should', () => {
     const metadata = await MetadataClient.retrieveAllMetadata(WALT_ISSUER_URL);
     expect(metadata.credential_endpoint).toEqual('https://jff.walt.id/issuer-api/oidc/credential');
     expect(metadata.token_endpoint).toEqual('https://jff.walt.id/issuer-api/oidc/token');
-    expect(metadata.issuerMetadata).toEqual(WALT_OID4VCI_METADATA);
+    expect(metadata.credentialIssuerMetadata).toEqual(WALT_OID4VCI_METADATA);
   });
 
   it('Fail without OID4VCI', async () => {
@@ -197,7 +206,7 @@ describe('Metadataclient with Walt-id should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }));
 
     await expect(() => MetadataClient.retrieveAllMetadata(WALT_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the token endpoint for https://jff.walt.id/issuer-api/oidc'
+      'Could not deduce the token_endpoint for https://jff.walt.id/issuer-api/oidc',
     );
   });
 });

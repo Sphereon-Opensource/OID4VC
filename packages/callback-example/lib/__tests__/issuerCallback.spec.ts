@@ -4,7 +4,7 @@ import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossess
 import {
   Alg,
   CNonceState,
-  CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+  CredentialOfferLdpVcV1_0_11,
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
@@ -130,7 +130,7 @@ describe('issuerCallback', () => {
               user_pin_required: true,
             },
           },
-        } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+        } as CredentialOfferLdpVcV1_0_11,
       },
     })
 
@@ -159,7 +159,7 @@ describe('issuerCallback', () => {
               credentialSubject: {},
             },
             format: 'ldp_vc',
-          }) as Promise<CredentialDataSupplierResult>
+          }) as Promise<CredentialDataSupplierResult>,
       )
       .withCredentialSignerCallback((opts) =>
         Promise.resolve({
@@ -171,7 +171,7 @@ describe('issuerCallback', () => {
             proofPurpose: IProofPurpose.assertionMethod,
             verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
           },
-        })
+        }),
       )
       .build()
   }, 30000)
@@ -204,7 +204,7 @@ describe('issuerCallback', () => {
       type: ['VerifiableCredential'],
     })
     await expect(verifyCredential(vc, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)).resolves.toEqual(
-      expect.objectContaining({ verified: true })
+      expect.objectContaining({ verified: true }),
     )
   })
   it('Should pass requesting a verifiable credential using the client', async () => {
@@ -284,7 +284,7 @@ describe('issuerCallback', () => {
     })
 
     await expect(
-      verifyCredential(credentialResponse.credential as W3CVerifiableCredential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)
+      verifyCredential(credentialResponse.credential as W3CVerifiableCredential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id),
     ).resolves.toEqual(expect.objectContaining({ verified: true }))
   })
 })

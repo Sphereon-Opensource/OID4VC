@@ -21,7 +21,7 @@ export function createCredentialOfferObject(
     issuerState?: string
     preAuthorizedCode?: string
     userPinRequired?: boolean
-  }
+  },
 ): CredentialOfferV1_0_11 & { scheme: string; grants: Grant; baseUri: string } {
   if (!issuerMetadata && !opts?.credentialOffer && !opts?.credentialOfferUri) {
     throw new Error('You have to provide issuerMetadata or credentialOffer object for creating a deeplink')
@@ -79,7 +79,7 @@ export function createCredentialOfferObject(
 
 export function createCredentialOfferURIFromObject(
   credentialOffer: (CredentialOfferV1_0_11 | UniformCredentialOffer) & { scheme?: string; baseUri?: string; grant?: Grant },
-  opts?: { scheme?: string; baseUri?: string }
+  opts?: { scheme?: string; baseUri?: string },
 ) {
   const scheme = opts?.scheme?.replace('://', '') ?? credentialOffer?.scheme?.replace('://', '') ?? 'openid-credential-offer'
   let baseUri = opts?.baseUri ?? credentialOffer?.baseUri ?? ''
@@ -109,7 +109,7 @@ export function createCredentialOfferURI(
     scheme?: string
     preAuthorizedCode?: string
     userPinRequired?: boolean
-  }
+  },
 ): string {
   const credentialOffer = createCredentialOfferObject(issuerMetadata, opts)
   return createCredentialOfferURIFromObject(credentialOffer, opts)

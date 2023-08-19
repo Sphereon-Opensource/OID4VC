@@ -144,7 +144,7 @@ export async function toUniformCredentialOfferRequest(
   opts?: {
     resolve?: boolean;
     version?: OpenId4VCIVersion;
-  }
+  },
 ): Promise<UniformCredentialOfferRequest> {
   const version = opts?.version ?? determineSpecVersionFromOffer(offer);
   let originalCredentialOffer = offer.credential_offer;
@@ -180,7 +180,7 @@ export async function assertedUniformCredentialOffer(
   origCredentialOffer: UniformCredentialOffer,
   opts?: {
     resolve?: boolean;
-  }
+  },
 ): Promise<AssertedUniformCredentialOffer> {
   const credentialOffer = JSON.parse(JSON.stringify(origCredentialOffer));
   if (credentialOffer.credential_offer_uri && !credentialOffer.credential_offer) {
@@ -212,7 +212,7 @@ export function toUniformCredentialOfferPayload(
   offer: CredentialOfferPayload,
   opts?: {
     version?: OpenId4VCIVersion;
-  }
+  },
 ): UniformCredentialOfferPayload {
   // todo: create test to check idempotence once a payload is already been made uniform.
   const version = opts?.version ?? determineSpecVersionFromOffer(offer);
@@ -267,7 +267,7 @@ export function toUniformCredentialOfferPayload(
 
 export function determineFlowType(
   suppliedOffer: AssertedUniformCredentialOffer | UniformCredentialOfferPayload,
-  version: OpenId4VCIVersion
+  version: OpenId4VCIVersion,
 ): AuthzFlowType[] {
   const payload: UniformCredentialOfferPayload = getCredentialOfferPayload(suppliedOffer);
   const supportedFlows: AuthzFlowType[] = [];
@@ -300,7 +300,7 @@ export function determineGrantTypes(
     | UniformCredentialOfferPayload
     | ({
         grants: Grant;
-      } & Record<never, never>)
+      } & Record<never, never>),
 ): GrantTypes[] {
   let grants: Grant | undefined;
   if ('grants' in offer && offer.grants) {
@@ -337,6 +337,6 @@ function recordVersion(currentVersion: OpenId4VCIVersion, matchingVersion: OpenI
   }
 
   throw new Error(
-    `Invalid param. Some keys have been used from version: ${currentVersion} version while '${key}' is used from version: ${matchingVersion}`
+    `Invalid param. Some keys have been used from version: ${currentVersion} version while '${key}' is used from version: ${matchingVersion}`,
   );
 }

@@ -7,7 +7,7 @@ describe('Authorization Flow Type determination', () => {
       AuthzFlowType.valueOf({
         issuer: 'test',
         credential_type: 'test',
-      } as CredentialOfferPayload)
+      } as CredentialOfferPayload),
     ).toEqual(AuthzFlowType.AUTHORIZATION_CODE_FLOW);
   });
   it('should return authorization code flow type with a credential_type array', () => {
@@ -15,7 +15,7 @@ describe('Authorization Flow Type determination', () => {
       AuthzFlowType.valueOf({
         issuer: 'test',
         credential_type: ['test', 'test1'],
-      } as CredentialOfferPayload)
+      } as CredentialOfferPayload),
     ).toEqual(AuthzFlowType.AUTHORIZATION_CODE_FLOW);
   });
   it('should return pre-authorized code flow with a single credential_type', () => {
@@ -24,7 +24,7 @@ describe('Authorization Flow Type determination', () => {
         issuer: 'test',
         credential_type: 'test',
         'pre-authorized_code': 'test',
-      } as CredentialOfferPayload)
+      } as CredentialOfferPayload),
     ).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
   });
   it('should return pre-authorized code flow with a credential_type array', () => {
@@ -33,7 +33,7 @@ describe('Authorization Flow Type determination', () => {
         issuer: 'test',
         credential_type: ['test', 'test1'],
         'pre-authorized_code': 'test',
-      } as CredentialOfferPayload)
+      } as CredentialOfferPayload),
     ).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
   });
 });

@@ -1,4 +1,7 @@
-export interface OAuth2ASMetadata {
+import { CredentialIssuerMetadata } from './Generic.types';
+import { IssuerMetadataV1_0_08 } from './v1_0_08.types';
+
+export interface AuthorizationServerMetadata {
   issuer: string;
   authorization_endpoint?: string;
   token_endpoint?: string;
@@ -44,6 +47,32 @@ export interface OAuth2ASMetadata {
   claims_supported?: string[];
   claims_parameter_supported?: boolean;
 
+  // VCI values. In case an AS provides a credential_endpoint itself
+  credential_endpoint?: string;
+
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   [x: string]: any; //We use any, so you can access properties if you know the structure
+}
+
+export enum WellKnownEndpoints {
+  OPENID_CONFIGURATION = '/.well-known/openid-configuration',
+  OAUTH_AS = '/.well-known/oauth-authorization-server',
+  OPENID4VCI_ISSUER = '/.well-known/openid-credential-issuer',
+}
+
+export type AuthorizationServerType = 'OIDC' | 'OAuth 2.0' | 'OID4VCI'; // OID4VCI means the Issuer hosts a token endpoint itself
+
+export interface EndpointMetadata {
+  issuer: string;
+  token_endpoint: string;
+  credential_endpoint: string;
+  authorization_server?: string;
+  authorization_endpoint?: string; // Can be undefined in pre-auth flow
+}
+export interface EndpointMetadataResult extends EndpointMetadata {
+  // The EndpointMetadata are snake-case so they can easily be used in payloads/JSON.
+  // The values below should not end up in requests/responses directly, so they are using our normal CamelCase convention
+  authorizationServerType: AuthorizationServerType;
+  authorizationServerMetadata?: AuthorizationServerMetadata;
+  credentialIssuerMetadata?: Partial<AuthorizationServerMetadata> & (CredentialIssuerMetadata | IssuerMetadataV1_0_08);
 }
