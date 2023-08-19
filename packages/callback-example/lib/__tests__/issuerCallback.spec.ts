@@ -4,7 +4,7 @@ import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossess
 import {
   Alg,
   CNonceState,
-  CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+  CredentialOfferLdpVcV1_0_11,
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
@@ -130,7 +130,7 @@ describe('issuerCallback', () => {
               user_pin_required: true,
             },
           },
-        } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+        } as CredentialOfferLdpVcV1_0_11,
       },
     })
 

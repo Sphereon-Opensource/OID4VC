@@ -2,7 +2,7 @@ import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   Alg,
   AuthzFlowType,
-  CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+  CredentialOfferLdpVcV1_0_11,
   CredentialOfferSession,
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
@@ -71,7 +71,7 @@ describe('VcIssuer', () => {
               user_pin_required: true,
             },
           },
-        } as CredentialOfferJwtVcJsonLdAndLdpVcV1_0_11,
+        } as CredentialOfferLdpVcV1_0_11,
       },
     })
     vcIssuer = new VcIssuerBuilder<DIDDocument>()

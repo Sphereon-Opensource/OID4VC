@@ -1,9 +1,8 @@
 import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 import { ProofOfPossession } from './CredentialIssuance.types';
-import { Oauth2ASWithOID4VCIMetadata } from './OpenID4VCIServerMetadata';
+import { AuthorizationServerMetadata } from './ServerMetadata';
 import { CredentialOfferSession } from './StateManager.types';
-import { IssuerMetadataV1_0_08 } from './v1_0_08.types';
 import { CredentialRequestV1_0_11 } from './v1_0_11.types';
 
 /**
@@ -53,7 +52,7 @@ export interface CredentialIssuerMetadataOpts {
 }
 
 // For now we extend the opts above. Only difference is that the credential endpoint is optional in the Opts, as it can come from other sources. The value is however required in the eventual Issuer Metadata
-export interface CredentialIssuerMetadata extends CredentialIssuerMetadataOpts {
+export interface CredentialIssuerMetadata extends CredentialIssuerMetadataOpts, Partial<AuthorizationServerMetadata> {
   credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
 }
 
@@ -123,13 +122,13 @@ export interface CommonCredentialRequest {
   proof?: ProofOfPossession;
 }
 
-export interface CredentialRequestJwtVcJson extends CommonCredentialRequest {
+export interface CredentialRequestJwtVc extends CommonCredentialRequest {
   format: 'jwt_vc_json' | 'jwt_vc_json-ld';
   types: string[];
   credentialSubject?: IssuerCredentialSubject;
 }
 
-export interface CredentialRequestJwtVcJsonLdAndLdpVc extends CommonCredentialRequest {
+export interface CredentialRequestLdpVc extends CommonCredentialRequest {
   format: 'ldp_vc';
   credential_definition: IssuerCredentialDefinition;
 }
@@ -192,17 +191,3 @@ export interface GrantUrnIetf {
 }
 
 export const PRE_AUTH_CODE_LITERAL = 'pre-authorized_code';
-
-export enum WellKnownEndpoints {
-  OPENID_CONFIGURATION = '/.well-known/openid-configuration',
-  OAUTH_AS = '/.well-known/oauth-authorization-server',
-  OPENID4VCI_ISSUER = '/.well-known/openid-credential-issuer',
-}
-
-export interface EndpointMetadata {
-  issuer: string;
-  token_endpoint: string;
-  credential_endpoint: string;
-  authorization_endpoint?: string;
-  issuerMetadata?: CredentialIssuerMetadata | Oauth2ASWithOID4VCIMetadata | IssuerMetadataV1_0_08;
-}

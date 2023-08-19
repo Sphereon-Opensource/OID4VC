@@ -5,8 +5,8 @@ import {
   CredentialOfferRequestWithBaseUrl,
   Jwt,
   OpenId4VCIVersion,
-  ProofOfPossession,
-} from '@sphereon/oid4vci-common';
+  ProofOfPossession, WellKnownEndpoints
+} from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
@@ -55,6 +55,7 @@ describe('OID4VCI-Client should', () => {
   function succeedWithAFullFlowWithClientSetup() {
     nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
     nock(IDENTIPROOF_AS_URL).get('/.well-known/oauth-authorization-server').reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
+    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
     nock(IDENTIPROOF_AS_URL)
       .post(/oauth2\/token.*/)
       .reply(200, JSON.stringify(mockedAccessTokenResponse));

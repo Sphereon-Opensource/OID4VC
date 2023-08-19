@@ -1,4 +1,11 @@
-import { AccessTokenRequest, AccessTokenRequestOpts, AccessTokenResponse, GrantTypes, OpenIDResponse } from '@sphereon/oid4vci-common';
+import {
+  AccessTokenRequest,
+  AccessTokenRequestOpts,
+  AccessTokenResponse,
+  GrantTypes,
+  OpenIDResponse,
+  WellKnownEndpoints
+} from '@sphereon/oid4vci-common'
 import nock from 'nock';
 
 import { AccessTokenClient } from '../AccessTokenClient';
@@ -11,6 +18,8 @@ const MOCK_URL = 'https://sphereonjunit20221013.com/';
 describe('AccessTokenClient should', () => {
   beforeEach(() => {
     nock.cleanAll();
+    nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {});
+    nock(MOCK_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
   });
 
   afterEach(() => {
