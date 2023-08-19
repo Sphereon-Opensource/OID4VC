@@ -1,12 +1,6 @@
 import { CredentialOfferPayload, UniformCredentialOffer } from './CredentialIssuance.types';
-import {
-  EndpointMetadata,
-  ErrorResponse,
-  IssuerCredentialDefinition,
-  IssuerCredentialSubject,
-  OID4VCICredentialFormat,
-  PRE_AUTH_CODE_LITERAL,
-} from './Generic.types';
+import { ErrorResponse, IssuerCredentialDefinition, IssuerCredentialSubject, OID4VCICredentialFormat, PRE_AUTH_CODE_LITERAL } from './Generic.types';
+import { EndpointMetadata } from './ServerMetadata';
 
 export interface CommonAuthorizationRequest {
   /**
