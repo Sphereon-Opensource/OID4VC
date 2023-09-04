@@ -1,3 +1,4 @@
+import { CredentialMapper } from '@sphereon/ssi-types'
 import { fetch } from 'cross-fetch';
 import { Alg, AuthzFlowType, Jwt } from '@sphereon/oid4vci-common';
 import { importJWK, JWK, SignJWT } from 'jose';
@@ -50,6 +51,9 @@ describe('OID4VCI-Client using Mattr issuer should', () => {
       }
     })
     expect(credentialResponse.credential).toBeDefined()
+    const wrappedVC = CredentialMapper.toWrappedVerifiableCredential(credentialResponse.credential!)
+    expect(format.startsWith(wrappedVC.format)).toEqual(true)
+
   }
 
   it(
