@@ -1,3 +1,4 @@
+import { fetch } from 'cross-fetch';
 import { Alg, AuthzFlowType, Jwt } from '@sphereon/oid4vci-common';
 import { importJWK, JWK, SignJWT } from 'jose';
 
