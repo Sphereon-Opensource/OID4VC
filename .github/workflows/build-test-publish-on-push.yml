@@ -37,7 +37,7 @@ jobs:
           node-version: '16.x'
       - uses: pnpm/action-setup@v2
         with:
-          version: 8.1.0
+          version: 8
 #      - name: Get yarn cache directory path
 #        id: yarn-cache-dir-path
 #        run: echo "::set-output name=dir::$(yarn cache dir)"

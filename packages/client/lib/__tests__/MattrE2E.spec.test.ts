@@ -19,38 +19,51 @@ const jwk: JWK = {
 const did = `did:key:z6Mki5ZwZKN1dBQprfJTikUvkDxrHijiiQngkWviMF5gw2Hv`;
 const kid = `${did}#z6Mki5ZwZKN1dBQprfJTikUvkDxrHijiiQngkWviMF5gw2Hv`;
 describe('OID4VCI-Client using Mattr issuer should', () => {
+  async function test(format: 'ldp_vc' | 'jwt_vc_json') {
+    const offer = await getCredentialOffer(format)
+    const client = await OpenID4VCIClient.fromURI({
+      uri: offer.offerUrl,
+      flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
+      kid,
+      alg: Alg.EdDSA
+    })
+    expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)
+    expect(client.credentialOffer).toBeDefined()
+    expect(client.endpointMetadata).toBeDefined()
+    expect(client.getCredentialEndpoint()).toEqual(`${ISSUER_URL}/oidc/v1/auth/credential`)
+    expect(client.getAccessTokenEndpoint()).toEqual('https://launchpad.vii.electron.mattrlabs.io/oidc/v1/auth/token')
+
+    const accessToken = await client.acquireAccessToken()
+    console.log(accessToken)
+    expect(accessToken).toMatchObject({
+      expires_in: 3600,
+      scope: 'OpenBadgeCredential',
+      token_type: 'Bearer'
+    })
+
+    const credentialResponse = await client.acquireCredentials({
+      credentialTypes: 'OpenBadgeCredential',
+      format,
+      proofCallbacks: {
+        signCallback: proofOfPossessionCallbackFunction
+      }
+    })
+    expect(credentialResponse.credential).toBeDefined()
+  }
+
   it(
-    'succeed in a full flow with the client using OpenID4VCI version 11',
+    'succeed in a full flow with the client using OpenID4VCI version 11 and ldp_vc',
     async () => {
-      const offer = await getCredentialOffer();
-      const client = await OpenID4VCIClient.fromURI({
-        uri: offer.offerUrl,
-        flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
-        kid,
-        alg: Alg.EdDSA,
-      });
-      expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
-      expect(client.credentialOffer).toBeDefined();
-      expect(client.endpointMetadata).toBeDefined();
-      expect(client.getCredentialEndpoint()).toEqual(`${ISSUER_URL}/oidc/v1/auth/credential`);
-      expect(client.getAccessTokenEndpoint()).toEqual('https://launchpad.vii.electron.mattrlabs.io/oidc/v1/auth/token');
 
-      const accessToken = await client.acquireAccessToken();
-      console.log(accessToken);
-      expect(accessToken).toMatchObject({
-        expires_in: 3600,
-        scope: 'OpenBadgeCredential',
-        token_type: 'Bearer',
-      });
+      await test('ldp_vc')
+    },
+    UNIT_TEST_TIMEOUT,
+  );
+  it(
+    'succeed in a full flow with the client using OpenID4VCI version 11 and jwt_vc_json',
+    async () => {
 
-      const credentialResponse = await client.acquireCredentials({
-        credentialTypes: 'OpenBadgeCredential',
-        format: 'ldp_vc',
-        proofCallbacks: {
-          signCallback: proofOfPossessionCallbackFunction,
-        },
-      });
-      expect(credentialResponse.credential).toBeDefined();
+      await test('jwt_vc_json')
     },
     UNIT_TEST_TIMEOUT,
   );
@@ -61,7 +74,7 @@ interface CreateCredentialOfferResponse {
   offerUrl: string;
 }
 
-async function getCredentialOffer(): Promise<CreateCredentialOfferResponse> {
+async function getCredentialOffer(format: 'ldp_vc' | 'jwt_vc_json'): Promise<CreateCredentialOfferResponse> {
   const credentialOffer = await fetch('https://launchpad.mattrlabs.com/api/credential-offer', {
     method: 'post',
     headers: {
@@ -71,6 +84,7 @@ async function getCredentialOffer(): Promise<CreateCredentialOfferResponse> {
 
     //make sure to serialize your JSON body
     body: JSON.stringify({
+      format,
       type: 'OpenBadgeCredential',
       userId: '622a9f65-21c0-4c0b-9a6a-f7574c2a1549',
       userAuthenticationRequired: false,
