@@ -4,8 +4,8 @@ import {
   AccessTokenResponse,
   GrantTypes,
   OpenIDResponse,
-  WellKnownEndpoints
-} from '@sphereon/oid4vci-common'
+  WellKnownEndpoints,
+} from '@sphereon/oid4vci-common';
 import nock from 'nock';
 
 import { AccessTokenClient } from '../AccessTokenClient';

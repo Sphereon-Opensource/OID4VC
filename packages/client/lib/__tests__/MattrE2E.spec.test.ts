@@ -1,6 +1,6 @@
-import { CredentialMapper } from '@sphereon/ssi-types'
-import { fetch } from 'cross-fetch';
 import { Alg, AuthzFlowType, Jwt } from '@sphereon/oid4vci-common';
+import { CredentialMapper } from '@sphereon/ssi-types';
+import { fetch } from 'cross-fetch';
 import { importJWK, JWK, SignJWT } from 'jose';
 
 import { OpenID4VCIClient } from '..';
@@ -22,53 +22,50 @@ const did = `did:key:z6Mki5ZwZKN1dBQprfJTikUvkDxrHijiiQngkWviMF5gw2Hv`;
 const kid = `${did}#z6Mki5ZwZKN1dBQprfJTikUvkDxrHijiiQngkWviMF5gw2Hv`;
 describe('OID4VCI-Client using Mattr issuer should', () => {
   async function test(format: 'ldp_vc' | 'jwt_vc_json') {
-    const offer = await getCredentialOffer(format)
+    const offer = await getCredentialOffer(format);
     const client = await OpenID4VCIClient.fromURI({
       uri: offer.offerUrl,
       flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
       kid,
-      alg: Alg.EdDSA
-    })
-    expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)
-    expect(client.credentialOffer).toBeDefined()
-    expect(client.endpointMetadata).toBeDefined()
-    expect(client.getCredentialEndpoint()).toEqual(`${ISSUER_URL}/oidc/v1/auth/credential`)
-    expect(client.getAccessTokenEndpoint()).toEqual('https://launchpad.vii.electron.mattrlabs.io/oidc/v1/auth/token')
+      alg: Alg.EdDSA,
+    });
+    expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
+    expect(client.credentialOffer).toBeDefined();
+    expect(client.endpointMetadata).toBeDefined();
+    expect(client.getCredentialEndpoint()).toEqual(`${ISSUER_URL}/oidc/v1/auth/credential`);
+    expect(client.getAccessTokenEndpoint()).toEqual('https://launchpad.vii.electron.mattrlabs.io/oidc/v1/auth/token');
 
-    const accessToken = await client.acquireAccessToken()
-    console.log(accessToken)
+    const accessToken = await client.acquireAccessToken();
+    console.log(accessToken);
     expect(accessToken).toMatchObject({
       expires_in: 3600,
       scope: 'OpenBadgeCredential',
-      token_type: 'Bearer'
-    })
+      token_type: 'Bearer',
+    });
 
     const credentialResponse = await client.acquireCredentials({
       credentialTypes: 'OpenBadgeCredential',
       format,
       proofCallbacks: {
-        signCallback: proofOfPossessionCallbackFunction
-      }
-    })
-    expect(credentialResponse.credential).toBeDefined()
-    const wrappedVC = CredentialMapper.toWrappedVerifiableCredential(credentialResponse.credential!)
-    expect(format.startsWith(wrappedVC.format)).toEqual(true)
-
+        signCallback: proofOfPossessionCallbackFunction,
+      },
+    });
+    expect(credentialResponse.credential).toBeDefined();
+    const wrappedVC = CredentialMapper.toWrappedVerifiableCredential(credentialResponse.credential!);
+    expect(format.startsWith(wrappedVC.format)).toEqual(true);
   }
 
   it(
     'succeed in a full flow with the client using OpenID4VCI version 11 and ldp_vc',
     async () => {
-
-      await test('ldp_vc')
+      await test('ldp_vc');
     },
     UNIT_TEST_TIMEOUT,
   );
   it(
     'succeed in a full flow with the client using OpenID4VCI version 11 and jwt_vc_json',
     async () => {
-
-      await test('jwt_vc_json')
+      await test('jwt_vc_json');
     },
     UNIT_TEST_TIMEOUT,
   );

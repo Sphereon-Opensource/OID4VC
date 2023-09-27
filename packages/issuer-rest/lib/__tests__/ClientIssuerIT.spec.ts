@@ -252,54 +252,48 @@ describe('VcIssuer', () => {
 
   it('should retrieve server metadata', async () => {
     await expect(client.retrieveServerMetadata()).resolves.toEqual({
-      "authorizationServerType": "OID4VCI",
-      "authorization_server": "http://localhost:3456/test",
-      "credentialIssuerMetadata": {
-        "credential_endpoint": "http://localhost:3456/test/credential-endpoint",
-        "credential_issuer": "http://localhost:3456/test",
-        "credentials_supported": [
+      authorizationServerType: 'OID4VCI',
+      authorization_server: 'http://localhost:3456/test',
+      credentialIssuerMetadata: {
+        credential_endpoint: 'http://localhost:3456/test/credential-endpoint',
+        credential_issuer: 'http://localhost:3456/test',
+        credentials_supported: [
           {
-            "credentialSubject": {
-              "given_name": {
-                "locale": "en-US",
-                "name": "given name"
-              }
+            credentialSubject: {
+              given_name: {
+                locale: 'en-US',
+                name: 'given name',
+              },
             },
-            "cryptographic_binding_methods_supported": [
-              "did"
-            ],
-            "cryptographic_suites_supported": [
-              "ES256K"
-            ],
-            "display": [
+            cryptographic_binding_methods_supported: ['did'],
+            cryptographic_suites_supported: ['ES256K'],
+            display: [
               {
-                "background_color": "#12107c",
-                "locale": "en-US",
-                "logo": {
-                  "alt_text": "a square logo of a university",
-                  "url": "https://exampleuniversity.com/public/logo.png"
+                background_color: '#12107c',
+                locale: 'en-US',
+                logo: {
+                  alt_text: 'a square logo of a university',
+                  url: 'https://exampleuniversity.com/public/logo.png',
                 },
-                "name": "University Credential",
-                "text_color": "#FFFFFF"
-              }
+                name: 'University Credential',
+                text_color: '#FFFFFF',
+              },
             ],
-            "format": "jwt_vc_json",
-            "id": "UniversityDegree_JWT",
-            "types": [
-              "VerifiableCredential"
-            ]
-          }
+            format: 'jwt_vc_json',
+            id: 'UniversityDegree_JWT',
+            types: ['VerifiableCredential'],
+          },
         ],
-        "display": [
+        display: [
           {
-            "locale": "en-US",
-            "name": "example issuer"
-          }
-        ]
+            locale: 'en-US',
+            name: 'example issuer',
+          },
+        ],
       },
-      "credential_endpoint": "http://localhost:3456/test/credential-endpoint",
-      "issuer": "http://localhost:3456/test",
-      "token_endpoint": "http://localhost:3456/test/token"
+      credential_endpoint: 'http://localhost:3456/test/credential-endpoint',
+      issuer: 'http://localhost:3456/test',
+      token_endpoint: 'http://localhost:3456/test/token',
     })
   })
   it('should get state on server side', async () => {
