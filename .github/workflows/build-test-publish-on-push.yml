@@ -5,6 +5,8 @@ on:
     branches:
       - 'main'
       - 'develop'
+      - 'fix/**'
+      - 'fixes/**'
       - 'feature/**'
       - 'feat/**'
 
