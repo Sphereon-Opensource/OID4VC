@@ -8,7 +8,6 @@ import {
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
   CredentialSupported,
-  EndpointMetadata,
   EndpointMetadataResult,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
@@ -99,7 +98,7 @@ export class OpenID4VCIClient {
     return client;
   }
 
-  public async retrieveServerMetadata(): Promise<EndpointMetadata> {
+  public async retrieveServerMetadata(): Promise<EndpointMetadataResult> {
     this.assertIssuerData();
     if (!this._endpointMetadata) {
       this._endpointMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this.credentialOffer);
