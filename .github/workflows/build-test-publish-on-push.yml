@@ -87,6 +87,10 @@ jobs:
         if: github.ref == 'refs/heads/develop'
         run: pnpm publish:next
 
+      - name: publish @next when on fix
+        if: startsWith(github.ref, 'refs/heads/fix')
+        run: pnpm publish:next
+
       - name: publish @unstable when on unstable branch
         if: startsWith(github.ref, 'refs/heads/feat')
         run: pnpm publish:unstable
