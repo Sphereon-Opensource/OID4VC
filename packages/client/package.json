@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-client",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "OpenID for Verifiable Credential Issuance (OpenID4VCI) client",
   "source": "lib/index.ts",
   "main": "dist/index.js",
@@ -21,7 +21,6 @@
     "debug": "^4.3.4"
   },
   "devDependencies": {
-    "uint8arrays": "3.1.1",
     "@types/jest": "^29.5.3",
     "@types/node": "^18.17.4",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
@@ -40,7 +39,8 @@
     "open-cli": "^7.2.0",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
-    "typescript": "4.9.5"
+    "typescript": "4.9.5",
+    "uint8arrays": "3.1.1"
   },
   "engines": {
     "node": ">=16"
