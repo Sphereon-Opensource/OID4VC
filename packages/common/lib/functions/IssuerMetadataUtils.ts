@@ -7,8 +7,8 @@ import {
   IssuerMetadataV1_0_08,
   MetadataDisplay,
   OID4VCICredentialFormat,
-  OpenId4VCIVersion
-} from '../types'
+  OpenId4VCIVersion,
+} from '../types';
 
 export function getSupportedCredentials(opts?: {
   issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08;
@@ -56,16 +56,16 @@ export function getSupportedCredential(opts?: {
   /**
    * the following (not array part is a legacy code from version 1_0-08 which JFF plugfest 2 implementors used)
    */
-  let initiationTypes  :string[] | undefined
+  let initiationTypes: string[] | undefined;
   if (opts?.types) {
     if (typeof opts.types === 'string') {
-      initiationTypes = [opts.types]
+      initiationTypes = [opts.types];
     } else {
-      initiationTypes = opts.types
+      initiationTypes = opts.types;
     }
   }
   if (version === OpenId4VCIVersion.VER_1_0_08 && (!initiationTypes || initiationTypes?.length === 0)) {
-    initiationTypes = formats
+    initiationTypes = formats;
   }
   const supportedFormats: (CredentialOfferFormat | string)[] = formats && formats.length > 0 ? formats : ['jwt_vc_json', 'jwt_vc_json-ld', 'ldp_vc'];
 
@@ -73,7 +73,7 @@ export function getSupportedCredential(opts?: {
   if (opts?.types && typeof opts?.types === 'string') {
     const supported = credentialsSupported.filter(
       (sup) => sup.id === opts.types || (initiationTypes && arrayEqualsIgnoreOrder(sup.types, initiationTypes)),
-    )
+    );
     if (supported) {
       credentialSupportedOverlap.push(...supported);
     }

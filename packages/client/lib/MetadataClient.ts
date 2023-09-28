@@ -91,7 +91,7 @@ export class MetadataClient {
       }
       debug(`Issuer ${issuer} has ${authorizationServerType} Server metadata in well-known location`);
       if (!authMetadata.authorization_endpoint) {
-        throw Error(`Authorization Sever ${authorization_server} did not provide an authorization_endpoint`);
+        console.warn(`Issuer ${issuer} of type ${authorizationServerType} has no authorization_endpoint! Will use ${authorization_endpoint}`);
       } else if (authorization_endpoint && authMetadata.authorization_endpoint !== authorization_endpoint) {
         throw Error(
           `Credential issuer has a different authorization_endpoint (${authorization_endpoint}) from the Authorization Server (${authMetadata.authorization_endpoint})`,
