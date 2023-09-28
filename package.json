@@ -21,6 +21,9 @@
   "engines": {
     "node": ">=16"
   },
+  "resolutions": {
+    "node-fetch": "2.6.12"
+  },
   "prettier": {
     "endOfLine": "auto",
     "semi": false,

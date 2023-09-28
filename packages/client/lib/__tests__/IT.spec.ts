@@ -5,8 +5,9 @@ import {
   CredentialOfferRequestWithBaseUrl,
   Jwt,
   OpenId4VCIVersion,
-  ProofOfPossession, WellKnownEndpoints
-} from '@sphereon/oid4vci-common'
+  ProofOfPossession,
+  WellKnownEndpoints,
+} from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';

@@ -18,12 +18,12 @@
     "@sphereon/oid4vci-common": "workspace:*",
     "@sphereon/ssi-types": "^0.15.1",
     "cross-fetch": "^3.1.8",
-    "debug": "^4.3.4",
-    "uint8arrays": "^4.0.6"
+    "debug": "^4.3.4"
   },
   "devDependencies": {
+    "uint8arrays": "3.1.1",
     "@types/jest": "^29.5.3",
-    "@types/node": "^18.17.3",
+    "@types/node": "^18.17.4",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "codecov": "^3.8.3",

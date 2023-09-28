@@ -5,6 +5,8 @@ on:
     branches:
       - 'main'
       - 'develop'
+      - 'fix/**'
+      - 'fixes/**'
       - 'feature/**'
       - 'feat/**'
 
@@ -37,7 +39,7 @@ jobs:
           node-version: '16.x'
       - uses: pnpm/action-setup@v2
         with:
-          version: 8.1.0
+          version: 8
 #      - name: Get yarn cache directory path
 #        id: yarn-cache-dir-path
 #        run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -85,6 +87,10 @@ jobs:
 
       - name: publish @next when on develop
         if: github.ref == 'refs/heads/develop'
+        run: pnpm publish:next
+
+      - name: publish @next when on fix
+        if: startsWith(github.ref, 'refs/heads/fix')
         run: pnpm publish:next
 
       - name: publish @unstable when on unstable branch

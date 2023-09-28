@@ -210,3 +210,48 @@ describe('Metadataclient with Walt-id should', () => {
     );
   });
 });
+
+describe('Metadataclient with SpruceId should', () => {
+  beforeAll(() => {
+    nock.cleanAll();
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
+  it('succeed without OID4VCI and with OIDC metadata', async () => {
+    /*nock(WALT_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(WALT_OID4VCI_METADATA));
+
+    nock(WALT_ISSUER_URL)
+      .get(/.well-known\/.*!/)
+      .times(2)
+      .reply(404, JSON.stringify({ error: 'does not exist' }));
+*/
+    const metadata = await MetadataClient.retrieveAllMetadata('https://ngi-oidc4vci-test.spruceid.xyz');
+    expect(metadata.credential_endpoint).toEqual('https://ngi-oidc4vci-test.spruceid.xyz/credential');
+    expect(metadata.token_endpoint).toEqual('https://ngi-oidc4vci-test.spruceid.xyz/token');
+    expect(metadata.credentialIssuerMetadata).toEqual({
+      issuer: 'https://ngi-oidc4vci-test.spruceid.xyz',
+      credential_endpoint: 'https://ngi-oidc4vci-test.spruceid.xyz/credential',
+      token_endpoint: 'https://ngi-oidc4vci-test.spruceid.xyz/token',
+      jwks_uri: 'https://ngi-oidc4vci-test.spruceid.xyz/jwks',
+      grant_types_supported: ['urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+      credentials_supported: {
+        OpenBadgeCredential: {
+          formats: {
+            jwt_vc: {
+              types: ['VerifiableCredential', 'OpenBadgeCredential'],
+              cryptographic_binding_methods_supported: ['did'],
+              cryptographic_suites_supported: ['ES256', 'ES256K'],
+            },
+            ldp_vc: {
+              types: ['VerifiableCredential', 'OpenBadgeCredential'],
+              cryptographic_binding_methods_supported: ['did'],
+              cryptographic_suites_supported: ['Ed25519Signature2018'],
+            },
+          },
+        },
+      },
+    });
+  });
+});

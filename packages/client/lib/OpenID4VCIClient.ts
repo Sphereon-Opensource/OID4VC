@@ -8,7 +8,6 @@ import {
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
   CredentialSupported,
-  EndpointMetadata,
   EndpointMetadataResult,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
@@ -99,7 +98,7 @@ export class OpenID4VCIClient {
     return client;
   }
 
-  public async retrieveServerMetadata(): Promise<EndpointMetadata> {
+  public async retrieveServerMetadata(): Promise<EndpointMetadataResult> {
     this.assertIssuerData();
     if (!this._endpointMetadata) {
       this._endpointMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this.credentialOffer);
@@ -366,79 +365,29 @@ export class OpenID4VCIClient {
     return response.successBody;
   }
 
-  getCredentialsSupported(restrictToInitiationTypes: boolean, supportedType?: string): CredentialSupported[] {
+  getCredentialsSupported(
+    restrictToInitiationTypes: boolean,
+    format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
+  ): CredentialSupported[] {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),
-      supportedType,
-      credentialTypes: restrictToInitiationTypes ? this.getCredentialTypes() : undefined,
+      format: format,
+      types: restrictToInitiationTypes ? this.getCredentialTypes() : undefined,
     });
-    /*//FIXME: delegate to getCredentialsSupported from IssuerMetadataUtils
-    let credentialsSupported = this.endpointMetadata?.issuerMetadata?.credentials_supported
-
-    if (this.version() === OpenId4VCIVersion.VER_1_0_08 || typeof credentialsSupported === 'object') {
-      const issuerMetadata = this.endpointMetadata.issuerMetadata as IssuerMetadataV1_0_08
-      const v8CredentialsSupported = issuerMetadata.credentials_supported
-      credentialsSupported = []
-      credentialsSupported = Object.entries(v8CredentialsSupported).map((key, value) => )
-
-    }
-
-
-    if (!credentialsSupported) {
-      return []
-    } else if (!restrictToInitiationTypes) {
-      return credentialsSupported
-    }
-
-
-
-    /!**
-     * the following (not array part is a legacy code from version 1_0-08 which jff implementors used)
-     *!/
-    if (!Array.isArray(credentialsSupported)) {
-      const credentialsSupportedV8: CredentialSupportedV1_0_08 = credentialsSupported as CredentialSupportedV1_0_08;
-      const initiationTypes = supportedType ? [supportedType] : this.getCredentialTypes();
-      const supported: IssuerCredentialSubject = {};
-      for (const [key, value] of Object.entries(credentialsSupportedV8)) {
-        if (initiationTypes.includes(key)) {
-          supported[key] = value;
-        }
-      }
-      // todo: fix this later. we're returning CredentialSupportedV1_0_08 as a list of CredentialSupported (for v09 onward)
-      return supported as unknown as CredentialSupported[];
-    }
-    const initiationTypes = supportedType ? [supportedType] : this.getCredentialTypes()
-    const credentialSupportedOverlap: CredentialSupported[] = []
-    for (const supported of credentialsSupported) {
-      const supportedTypeOverlap: string[] = []
-      for (const type of supported.types) {
-        initiationTypes.includes(type)
-        supportedTypeOverlap.push(type)
-      }
-      if (supportedTypeOverlap.length > 0) {
-        credentialSupportedOverlap.push({
-          ...supported,
-          types: supportedTypeOverlap
-        })
-      }
-    }
-    return credentialSupportedOverlap as CredentialSupported[]*/
   }
 
-  getCredentialMetadata(type: string): CredentialSupported[] {
-    return this.getCredentialsSupported(false, type);
-  }
-
-  // todo https://sphereon.atlassian.net/browse/VDX-184
-  getCredentialTypes(): string[] {
+  getCredentialTypes(): string[][] {
     if (this.credentialOffer.version < OpenId4VCIVersion.VER_1_0_11) {
-      return typeof (this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type === 'string'
-        ? [(this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type as string]
-        : ((this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type as string[]);
+      const orig = this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08;
+      const types: string[] = typeof orig.credential_type === 'string' ? [orig.credential_type] : orig.credential_type;
+      const result: string[][] = [];
+      result[0] = types;
+      return result;
     } else {
-      // FIXME: this for sure isn't correct. It would also include VerifiableCredential. The whole call to this getCredentialsTypes should be changed to begin with
-      return this.credentialOffer.credential_offer.credentials.flatMap((c) => (typeof c === 'string' ? c : c.types));
+      return this.credentialOffer.credential_offer.credentials.map((c, index) => {
+        return typeof c === 'string' ? [c] : c.types;
+      });
     }
   }
 

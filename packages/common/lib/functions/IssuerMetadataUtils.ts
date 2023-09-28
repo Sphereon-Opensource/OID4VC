@@ -6,59 +6,99 @@ import {
   CredentialSupportedV1_0_08,
   IssuerMetadataV1_0_08,
   MetadataDisplay,
+  OID4VCICredentialFormat,
   OpenId4VCIVersion,
 } from '../types';
 
 export function getSupportedCredentials(opts?: {
   issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08;
   version: OpenId4VCIVersion;
-  credentialTypes?: (CredentialOfferFormat | string)[];
-  supportedType?: CredentialOfferFormat | string;
+  types?: string[][];
+  format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[];
+}): CredentialSupported[] {
+  if (opts?.types && Array.isArray(opts?.types)) {
+    return opts.types.flatMap((types) => getSupportedCredential({ ...opts, types }));
+  }
+  return getSupportedCredential(opts ? { ...opts, types: undefined } : undefined);
+}
+
+export function getSupportedCredential(opts?: {
+  issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08;
+  version: OpenId4VCIVersion;
+  types?: string | string[];
+  format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[];
 }): CredentialSupported[] {
   const { issuerMetadata } = opts ?? {};
+  let formats: (OID4VCICredentialFormat | string)[];
+  if (opts?.format && Array.isArray(opts.format)) {
+    formats = opts.format;
+  } else if (opts?.format && !Array.isArray(opts.format)) {
+    formats = [opts.format];
+  } else {
+    formats = [];
+  }
   let credentialsSupported: CredentialSupported[];
   if (!issuerMetadata) {
     return [];
   }
-  const { version, credentialTypes, supportedType } = opts ?? { version: OpenId4VCIVersion.VER_1_0_11 };
+  const { version, types } = opts ?? { version: OpenId4VCIVersion.VER_1_0_11 };
   if (version === OpenId4VCIVersion.VER_1_0_08 || !Array.isArray(issuerMetadata.credentials_supported)) {
     credentialsSupported = credentialsSupportedV8ToV11((issuerMetadata as IssuerMetadataV1_0_08).credentials_supported);
-    /*    const credentialsSupportedV8: CredentialSupportedV1_0_08 = credentialsSupported as CredentialSupportedV1_0_08
-        // const initiationTypes = credentialTypes.map(type => typeof type === 'string' ? [type] : type.types)
-        const supported: IssuerCredentialSubject = {}
-        for (const [key, value] of Object.entries(credentialsSupportedV8)) {
-          if (initiationTypes.find((type) => (typeof type === 'string' ? type === key : type.types.includes(key)))) {
-            supported[key] = value
-          }
-        }
-        // todo: fix this later. we're returning CredentialSupportedV1_0_08 as a list of CredentialSupported (for v09 onward)
-        return supported as unknown as CredentialSupported[]*/
   } else {
     credentialsSupported = (issuerMetadata as CredentialIssuerMetadata).credentials_supported;
   }
 
   if (credentialsSupported === undefined || credentialsSupported.length === 0) {
     return [];
-  } else if (!credentialTypes || credentialTypes.length === 0) {
+  } else if (!types || types.length === 0) {
     return credentialsSupported;
   }
   /**
    * the following (not array part is a legacy code from version 1_0-08 which JFF plugfest 2 implementors used)
    */
-  const initiationTypes = supportedType ? [supportedType] : credentialTypes;
+  let initiationTypes: string[] | undefined;
+  if (opts?.types) {
+    if (typeof opts.types === 'string') {
+      initiationTypes = [opts.types];
+    } else {
+      initiationTypes = opts.types;
+    }
+  }
+  if (version === OpenId4VCIVersion.VER_1_0_08 && (!initiationTypes || initiationTypes?.length === 0)) {
+    initiationTypes = formats;
+  }
+  const supportedFormats: (CredentialOfferFormat | string)[] = formats && formats.length > 0 ? formats : ['jwt_vc_json', 'jwt_vc_json-ld', 'ldp_vc'];
 
   const credentialSupportedOverlap: CredentialSupported[] = [];
-  for (const offerType of initiationTypes) {
-    if (typeof offerType === 'string') {
-      const supported = credentialsSupported.filter((sup) => sup.id === offerType || sup.types.includes(offerType));
-      if (supported) {
-        credentialSupportedOverlap.push(...supported);
+  if (opts?.types && typeof opts?.types === 'string') {
+    const supported = credentialsSupported.filter(
+      (sup) => sup.id === opts.types || (initiationTypes && arrayEqualsIgnoreOrder(sup.types, initiationTypes)),
+    );
+    if (supported) {
+      credentialSupportedOverlap.push(...supported);
+    }
+  } /*else if (initiationTypes && Array.isArray(initiationTypes) && initiationTypes.length === 1) {
+
+    const supported = credentialsSupported.filter(
+      (sup) => sup.id === initiationTypes![0] || (arrayEqualsIgnoreOrder(sup.types, initiationTypes!) && sup.types.includes(initiationTypes![0])),
+    );
+    if (supported) {
+      credentialSupportedOverlap.push(...supported);
+    }
+  }*/ else {
+    // Make sure we include Verifiable Credential both on the offer side as well as in the metadata side, to ensure consistency of the issuer does not.
+    if (initiationTypes && !initiationTypes.includes('VerifiableCredential')) {
+      initiationTypes.push('VerifiableCredential');
+    }
+    const supported = credentialsSupported.filter((sup) => {
+      const supTypes = sup.types;
+      if (!supTypes.includes('VerifiableCredential')) {
+        supTypes.push('VerifiableCredential');
       }
-    } else {
-      const supported = credentialsSupported.filter((sup) => arrayEqualsIgnoreOrder(sup.types, offerType.types) && sup.format === offerType.format);
-      if (supported) {
-        credentialSupportedOverlap.push(...supported);
-      }
+      return (!initiationTypes || arrayEqualsIgnoreOrder(supTypes, initiationTypes)) && supportedFormats.includes(sup.format);
+    });
+    if (supported) {
+      credentialSupportedOverlap.push(...supported);
     }
   }
   return credentialSupportedOverlap;
