@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-callback-example",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "OpenID 4 Verifiable Credential Issuance issuer callback example",
   "source": "lib/index.ts",
   "main": "dist/index.js",

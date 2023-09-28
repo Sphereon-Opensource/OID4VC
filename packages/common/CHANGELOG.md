@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.1](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.7.0...v0.7.1) (2023-09-28)
+
+
+### Bug Fixes
+
+* Better match credential offer types and formats onto issuer metadata ([4044c21](https://github.com/Sphereon-Opensource/OID4VCI/commit/4044c2175b4cbee16f44c8bb5499bba249ca4993))
+* Fix credential offer matching against metadata ([3c23bab](https://github.com/Sphereon-Opensource/OID4VCI/commit/3c23bab83569e04a4b5846fed83ce00d68e8ddce))
+* Fix credential offer matching against metadata ([b79027f](https://github.com/Sphereon-Opensource/OID4VCI/commit/b79027fe601ecccb1373ba399419e14f5ec2d7ff))
+* relax auth_endpoint handling. Doesn't have to be available when doing pre-auth flow. Client handles errors anyway in case of auth/par flow ([cb5f9c1](https://github.com/Sphereon-Opensource/OID4VCI/commit/cb5f9c1c12285508c6d403814d032e8883a59e7d))
+
+
+
+
+
 # [0.7.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.6.0...v0.7.0) (2023-08-19)
 
 ### Bug Fixes
