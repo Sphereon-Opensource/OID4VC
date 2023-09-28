@@ -36,7 +36,7 @@ describe('OID4VCI-Client using Mattr issuer should', () => {
     expect(client.getAccessTokenEndpoint()).toEqual('https://launchpad.vii.electron.mattrlabs.io/oidc/v1/auth/token');
 
     const accessToken = await client.acquireAccessToken();
-    console.log(accessToken);
+    // console.log(accessToken);
     expect(accessToken).toMatchObject({
       expires_in: 3600,
       scope: 'OpenBadgeCredential',

@@ -4,7 +4,7 @@ import { StateType } from '@sphereon/oid4vci-common/dist/types/StateManager.type
 export class MemoryStates<T extends StateType> implements IStateManager<T> {
   private readonly expiresInMS: number
   private readonly states: Map<string, T>
-  private cleanupIntervalId?: NodeJS.Timer
+  private cleanupIntervalId?: number | NodeJS.Timeout
 
   constructor(opts?: { expiresInSec?: number }) {
     this.expiresInMS = opts?.expiresInSec !== undefined ? opts?.expiresInSec * 1000 : 180000
