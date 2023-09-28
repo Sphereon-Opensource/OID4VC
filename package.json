@@ -11,6 +11,7 @@
     "fix:lint": "eslint . --fix --ext .ts",
     "fix:prettier": "prettier --write \"{packages,__tests__,!dist}/**/*.{ts,tsx,js,json,md,yml}\"",
     "build": "pnpm -r --stream build",
+    "build:clean": "lerna clean -y && pnpm install && lerna run build:clean --concurrency 1",
     "test:ci": "jest --config=jest.json",
     "test": "jest --verbose --config=jest.json --coverage=true --detectOpenHandles",
     "clean": "rimraf --glob **/dist **/coverage **/pnpm-lock.yaml packages/**/node_modules node_modules packages/**/tsconfig.tsbuildinfo",
