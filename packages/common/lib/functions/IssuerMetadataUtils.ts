@@ -70,22 +70,17 @@ export function getSupportedCredential(opts?: {
   const supportedFormats: (CredentialOfferFormat | string)[] = formats && formats.length > 0 ? formats : ['jwt_vc_json', 'jwt_vc_json-ld', 'ldp_vc'];
 
   const credentialSupportedOverlap: CredentialSupported[] = [];
-  if (opts?.types && typeof opts?.types === 'string') {
+  if ((opts?.types && typeof opts?.types === 'string') || opts?.types?.length === 1) {
+    const types = Array.isArray(opts.types) ? opts.types[0] : opts.types;
     const supported = credentialsSupported.filter(
-      (sup) => sup.id === opts.types || (initiationTypes && arrayEqualsIgnoreOrder(sup.types, initiationTypes)),
+      (sup) => sup.id === types || (initiationTypes && arrayEqualsIgnoreOrder(sup.types, initiationTypes)),
     );
     if (supported) {
       credentialSupportedOverlap.push(...supported);
     }
-  } /*else if (initiationTypes && Array.isArray(initiationTypes) && initiationTypes.length === 1) {
+  }
 
-    const supported = credentialsSupported.filter(
-      (sup) => sup.id === initiationTypes![0] || (arrayEqualsIgnoreOrder(sup.types, initiationTypes!) && sup.types.includes(initiationTypes![0])),
-    );
-    if (supported) {
-      credentialSupportedOverlap.push(...supported);
-    }
-  }*/ else {
+  if (credentialSupportedOverlap.length === 0) {
     // Make sure we include Verifiable Credential both on the offer side as well as in the metadata side, to ensure consistency of the issuer does not.
     if (initiationTypes && !initiationTypes.includes('VerifiableCredential')) {
       initiationTypes.push('VerifiableCredential');
