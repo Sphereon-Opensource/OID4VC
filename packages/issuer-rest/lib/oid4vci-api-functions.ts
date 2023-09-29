@@ -71,7 +71,7 @@ export function accessTokenEndpoint<DIDDoc extends object>(
   opts: ITokenEndpointOpts & ISingleEndpointOpts & { baseUrl: string | URL },
 ) {
   const tokenEndpoint = issuer.issuerMetadata.token_endpoint
-  const externalAS = !!tokenEndpoint
+  const externalAS = issuer.issuerMetadata.authorization_server
   if (externalAS) {
     console.log(`[OID4VCI] External Authorization Server ${tokenEndpoint} is being used. Not enabling issuer token endpoint`)
     return
