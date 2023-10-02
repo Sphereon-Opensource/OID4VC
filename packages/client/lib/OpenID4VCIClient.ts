@@ -365,6 +365,10 @@ export class OpenID4VCIClient {
     return response.successBody;
   }
 
+  // FIXME: We really should convert <v11 to v12 objects first. Right now the logic doesn't map nicely and is brittle.
+  // We should resolve IDs to objects first in case of strings.
+  // When < v11 convert into a v12 object. When v12 object retain it.
+  // Then match the object array on server metadata
   getCredentialsSupported(
     restrictToInitiationTypes: boolean,
     format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
@@ -373,11 +377,11 @@ export class OpenID4VCIClient {
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),
       format: format,
-      types: restrictToInitiationTypes ? this.getCredentialTypes() : undefined,
+      types: restrictToInitiationTypes ? this.getCredentialOfferTypes() : undefined,
     });
   }
 
-  getCredentialTypes(): string[][] {
+  getCredentialOfferTypes(): string[][] {
     if (this.credentialOffer.version < OpenId4VCIVersion.VER_1_0_11) {
       const orig = this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08;
       const types: string[] = typeof orig.credential_type === 'string' ? [orig.credential_type] : orig.credential_type;

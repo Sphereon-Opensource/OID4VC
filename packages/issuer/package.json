@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-issuer",
-  "version": "0.7.0",
+  "version": "0.7.3",
   "description": "OpenID 4 Verifiable Credential Issuance issuer REST endpoints",
   "source": "lib/index.ts",
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@sphereon/oid4vci-common": "workspace:*",
-    "@sphereon/ssi-types": "^0.15.1",
+    "@sphereon/ssi-types": "0.17.2",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
