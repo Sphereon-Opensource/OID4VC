@@ -41,7 +41,7 @@ import { v4 } from 'uuid'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
 import { LookupStateManager } from './state-manager'
-import { CredentialDataSupplier, CredentialSignerCallback } from './types'
+import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialSignerCallback } from './types'
 
 const SECOND = 1000
 
@@ -275,12 +275,14 @@ export class VcIssuer<DIDDoc extends object> {
           throw Error('Credential Offer missing')
         }
         const credentialDataSupplierInput = opts.credentialDataSupplierInput ?? session.credentialDataSupplierInput
-        const result = await credentialDataSupplier({
+
+          const result = await credentialDataSupplier({
           ...cNonceState,
-          credentialRequest: opts.credentialRequest,
-          credentialOffer /*todo: clientId: */,
+            credentialRequest: opts.credentialRequest,
+            credentialSupplierConfig: this._issuerMetadata.credential_supplier_config,
+            credentialOffer /*todo: clientId: */,
           ...(credentialDataSupplierInput && { credentialDataSupplierInput }),
-        })
+        } as CredentialDataSupplierArgs)
         credential = result.credential
         if (result.format) {
           format = result.format

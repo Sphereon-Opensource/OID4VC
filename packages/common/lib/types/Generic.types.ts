@@ -41,6 +41,10 @@ export type MetadataDisplay = NameAndLocale &
     name?: string; //OPTIONAL. String value of a display name for the Credential Issuer.
   };
 
+export interface CredentialSupplierConfig {
+  [key: string]: any; // This allows additional properties for credential suppliers
+}
+
 export interface CredentialIssuerMetadataOpts {
   credential_endpoint?: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   batch_credential_endpoint?: string; // OPTIONAL. URL of the Credential Issuer's Batch Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components. If omitted, the Credential Issuer does not support the Batch Credential Endpoint.
@@ -49,6 +53,7 @@ export interface CredentialIssuerMetadataOpts {
   authorization_server?: string; // OPTIONAL. Identifier of the OAuth 2.0 Authorization Server (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
   token_endpoint?: string;
   display?: MetadataDisplay[]; //  An array of objects, where each object contains display properties of a Credential Issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
+  credential_supplier_config?: CredentialSupplierConfig
 }
 
 // For now we extend the opts above. Only difference is that the credential endpoint is optional in the Opts, as it can come from other sources. The value is however required in the eventual Issuer Metadata
