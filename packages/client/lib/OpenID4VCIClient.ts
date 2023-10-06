@@ -11,7 +11,6 @@ import {
   EndpointMetadataResult,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
-  OpenIDResponse,
   ProofOfPossessionCallbacks,
   PushedAuthorizationResponse,
   ResponseType,
@@ -63,9 +62,6 @@ export class OpenID4VCIClient {
     alg?: Alg | string,
     clientId?: string,
   ) {
-    if (!credentialOffer.supportedFlows.includes(flowType)) {
-      throw Error(`Flows ${flowType} is not supported by issuer ${credentialOffer.credential_offer_uri}`);
-    }
     this._flowType = flowType;
     this._credentialOffer = credentialOffer;
     this._kid = kid;
@@ -146,11 +142,12 @@ export class OpenID4VCIClient {
       authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
       redirect_uri: redirectUri,
       scope: scope,
+      issuer_state: this.credentialOffer.issuerState,
     } as AuthorizationRequestV1_0_09;
 
     return convertJsonToURI(queryObj, {
       baseUrl: this._endpointMetadata.authorization_endpoint,
-      uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details'],
+      uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
       version: this.version(),
     });
   }
@@ -162,7 +159,7 @@ export class OpenID4VCIClient {
     authorizationDetails,
     redirectUri,
     scope,
-  }: AuthRequestOpts): Promise<OpenIDResponse<PushedAuthorizationResponse>> {
+  }: AuthRequestOpts): Promise<string> {
     // Scope and authorization_details can be used in the same authorization request
     // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
     if (!scope && !authorizationDetails) {
@@ -187,17 +184,27 @@ export class OpenID4VCIClient {
       scope = `openid ${scope}`;
     }
 
-    //fixme: handle this for v11
-    const queryObj: AuthorizationRequestV1_0_09 = {
+    const queryObj = {
       response_type: ResponseType.AUTH_CODE,
       client_id: clientId,
       code_challenge_method: codeChallengeMethod,
       code_challenge: codeChallenge,
       authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
       redirect_uri: redirectUri,
-      scope: scope,
+      scope: scope || 'openid',
+      issuer_state: this.credentialOffer.issuerState || '',
     };
-    return await formPost(parEndpoint, JSON.stringify(queryObj));
+
+    const response = await formPost<PushedAuthorizationResponse>(parEndpoint, new URLSearchParams(queryObj));
+
+    return convertJsonToURI(
+      { request_uri: response.successBody?.request_uri },
+      {
+        baseUrl: this._endpointMetadata.authorization_endpoint,
+        uriTypeProperties: ['request_uri'],
+        version: this.version(),
+      },
+    );
   }
 
   public handleAuthorizationDetails(authorizationDetails?: AuthDetails | AuthDetails[]): AuthDetails | AuthDetails[] | undefined {
@@ -237,7 +244,9 @@ export class OpenID4VCIClient {
     redirectUri?: string;
   }): Promise<AccessTokenResponse> {
     const { pin, clientId, codeVerifier, code, redirectUri } = opts ?? {};
+
     this.assertIssuerData();
+
     if (clientId) {
       this._clientId = clientId;
     }
@@ -300,24 +309,26 @@ export class OpenID4VCIClient {
       credentialOffer: this.credentialOffer,
       metadata: this.endpointMetadata,
     });
+
     requestBuilder.withTokenFromResponse(this.accessTokenResponse);
     if (this.endpointMetadata?.credentialIssuerMetadata) {
       const metadata = this.endpointMetadata.credentialIssuerMetadata;
-      const types = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
+      const types = Array.isArray(credentialTypes) ? credentialTypes.sort() : [credentialTypes];
+
       if (metadata.credentials_supported && Array.isArray(metadata.credentials_supported)) {
-        for (const type of types) {
-          let typeSupported = false;
-          for (const credentialSupported of metadata.credentials_supported) {
-            if (!credentialSupported.types || credentialSupported.types.length === 0) {
-              throw Error('types is required in the credentials supported');
-            }
-            if (credentialSupported.types.indexOf(type) != -1) {
-              typeSupported = true;
-            }
+        let typeSupported = false;
+
+        metadata.credentials_supported.forEach((supportedCredential) => {
+          if (!supportedCredential.types || supportedCredential.types.length === 0) {
+            throw Error('types is required in the credentials supported');
           }
-          if (!typeSupported) {
-            throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
+          if (supportedCredential.types.sort().every((t, i) => types[i] === t) || (types.length === 1 && types[0] === supportedCredential.id)) {
+            typeSupported = true;
           }
+        });
+
+        if (!typeSupported) {
+          throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
         }
       } else if (metadata.credentials_supported && !Array.isArray(metadata.credentials_supported)) {
         const credentialsSupported = metadata.credentials_supported as CredentialSupportedTypeV1_0_08;
@@ -389,7 +400,7 @@ export class OpenID4VCIClient {
       result[0] = types;
       return result;
     } else {
-      return this.credentialOffer.credential_offer.credentials.map((c, index) => {
+      return this.credentialOffer.credential_offer.credentials.map((c) => {
         return typeof c === 'string' ? [c] : c.types;
       });
     }

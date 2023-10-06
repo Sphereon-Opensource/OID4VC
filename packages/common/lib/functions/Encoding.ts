@@ -1,4 +1,4 @@
-import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, OpenId4VCIVersion, SearchValue } from '../types';
+import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, SearchValue } from '../types';
 
 /**
  * @function encodeJsonAsURI encodes a Json object into a URI
@@ -29,39 +29,35 @@ export function convertJsonToURI(
     return encodeURIComponent(key.replace(' ', ''));
   }
 
-  let components: string;
-  if (opts?.version && opts.version > OpenId4VCIVersion.VER_1_0_08) {
-    // v11 changed from encoding every param to a encoded json object with a credential_offer param key
-    components = encodeAndStripWhitespace(JSON.stringify(json));
-  } else {
-    for (const [key, value] of Object.entries(json)) {
-      if (!value) {
-        continue;
-      }
-      //Skip properties that are not of URL type
-      if (!opts?.uriTypeProperties?.includes(key)) {
-        results.push(`${key}=${value}`);
-        continue;
-      }
-      if (opts?.arrayTypeProperties?.includes(key) && Array.isArray(value)) {
-        results.push(value.map((v) => `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(v, /\./g)}`).join('&'));
-        continue;
-      }
-      const isBool = typeof value == 'boolean';
-      const isNumber = typeof value == 'number';
-      const isString = typeof value == 'string';
-      let encoded;
-      if (isBool || isNumber) {
-        encoded = `${encodeAndStripWhitespace(key)}=${value}`;
-      } else if (isString) {
-        encoded = `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(value, /\./g)}`;
-      } else {
-        encoded = `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(JSON.stringify(value), /\./g)}`;
-      }
-      results.push(encoded);
+  for (const [key, value] of Object.entries(json)) {
+    if (!value) {
+      continue;
     }
-    components = results.join('&');
+    //Skip properties that are not of URL type
+    if (!opts?.uriTypeProperties?.includes(key)) {
+      results.push(`${key}=${value}`);
+      continue;
+    }
+    if (opts?.arrayTypeProperties?.includes(key) && Array.isArray(value)) {
+      results.push(value.map((v) => `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(v, /\./g)}`).join('&'));
+      continue;
+    }
+    const isBool = typeof value == 'boolean';
+    const isNumber = typeof value == 'number';
+    const isString = typeof value == 'string';
+    let encoded;
+    if (isBool || isNumber) {
+      encoded = `${encodeAndStripWhitespace(key)}=${value}`;
+    } else if (isString) {
+      encoded = `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(value, /\./g)}`;
+    } else {
+      encoded = `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(JSON.stringify(value), /\./g)}`;
+    }
+    results.push(encoded);
   }
+
+  const components = results.join('&');
+
   if (opts?.baseUrl) {
     if (opts.baseUrl.endsWith('=')) {
       if (opts.param) {
