@@ -1,11 +1,4 @@
-import {
-  AccessTokenRequest,
-  AccessTokenRequestOpts,
-  AccessTokenResponse,
-  GrantTypes,
-  OpenIDResponse,
-  WellKnownEndpoints,
-} from '@sphereon/oid4vci-common';
+import { AccessTokenRequest, AccessTokenResponse, GrantTypes, OpenIDResponse, WellKnownEndpoints } from '@sphereon/oid4vci-common';
 import nock from 'nock';
 
 import { AccessTokenClient } from '../AccessTokenClient';
@@ -202,24 +195,6 @@ describe('AccessTokenClient should', () => {
         pin: '1234',
       }),
     ).rejects.toThrow(Error('Cannot set a pin, when the pin is not required.'));
-  });
-
-  it('get error if code_verifier is present when flow type is pre-authorized', async () => {
-    const accessTokenClient: AccessTokenClient = new AccessTokenClient();
-
-    nock(MOCK_URL).post(/.*/).reply(200, {});
-
-    const requestOpts: AccessTokenRequestOpts = {
-      credentialOffer: INITIATION_TEST,
-      pin: undefined,
-      codeVerifier: 'RylyWGQ-dzpObnEcoMBDIH9cTAwZXk1wYzktKxsOFgA',
-      code: 'LWCt225yj7gzT2cWeMP4hXj4B4oIYkEiGs4T6pfez91',
-      redirectUri: 'http://example.com/cb',
-    };
-
-    await expect(() => accessTokenClient.acquireAccessToken(requestOpts)).rejects.toThrow(
-      Error('Cannot pass a code_verifier when flow type is pre-authorized'),
-    );
   });
 
   it('get error if no as, issuer and metadata values are present', async () => {

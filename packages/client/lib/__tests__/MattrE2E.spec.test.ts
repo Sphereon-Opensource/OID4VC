@@ -1,4 +1,4 @@
-import { Alg, AuthzFlowType, Jwt } from '@sphereon/oid4vci-common';
+import { Alg, Jwt } from '@sphereon/oid4vci-common';
 import { CredentialMapper } from '@sphereon/ssi-types';
 import { fetch } from 'cross-fetch';
 import { importJWK, JWK, SignJWT } from 'jose';
@@ -25,11 +25,9 @@ describe('OID4VCI-Client using Mattr issuer should', () => {
     const offer = await getCredentialOffer(format);
     const client = await OpenID4VCIClient.fromURI({
       uri: offer.offerUrl,
-      flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
       kid,
       alg: Alg.EdDSA,
     });
-    expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
     expect(client.credentialOffer).toBeDefined();
     expect(client.endpointMetadata).toBeDefined();
     expect(client.getCredentialEndpoint()).toEqual(`${ISSUER_URL}/oidc/v1/auth/credential`);

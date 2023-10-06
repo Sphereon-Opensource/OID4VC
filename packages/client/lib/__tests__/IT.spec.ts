@@ -1,7 +1,6 @@
 import {
   AccessTokenResponse,
   Alg,
-  AuthzFlowType,
   CredentialOfferRequestWithBaseUrl,
   Jwt,
   OpenId4VCIVersion,
@@ -72,7 +71,6 @@ describe('OID4VCI-Client should', () => {
     succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
       uri: INITIATE_QR,
-      flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
       alg: Alg.ES256,
       clientId: 'test-clientId',
@@ -84,7 +82,6 @@ describe('OID4VCI-Client should', () => {
     succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
       uri: OFFER_QR,
-      flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
       alg: Alg.ES256,
       clientId: 'test-clientId',
@@ -93,7 +90,6 @@ describe('OID4VCI-Client should', () => {
   });
 
   async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
-    expect(client.flowType).toEqual(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
     expect(client.credentialOffer).toBeDefined();
     expect(client.endpointMetadata).toBeDefined();
     expect(client.getIssuer()).toEqual('https://issuer.research.identiproof.io');
