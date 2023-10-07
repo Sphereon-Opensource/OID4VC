@@ -116,13 +116,16 @@ export class OpenID4VCIClient {
 
     const queryObj: { [key: string]: string } = {
       response_type: ResponseType.AUTH_CODE,
-      client_id: this.clientId || '',
       code_challenge_method: codeChallengeMethod,
       code_challenge: codeChallenge,
       authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
       redirect_uri: redirectUri,
       scope: scope,
     };
+
+    if (this.clientId) {
+      queryObj['client_id'] = this.clientId;
+    }
 
     if (this.credentialOffer.issuerState) {
       queryObj['issuer_state'] = this.credentialOffer.issuerState;
@@ -167,13 +170,16 @@ export class OpenID4VCIClient {
 
     const queryObj: { [key: string]: string } = {
       response_type: ResponseType.AUTH_CODE,
-      client_id: this.clientId || '',
       code_challenge_method: codeChallengeMethod,
       code_challenge: codeChallenge,
       authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
       redirect_uri: redirectUri,
       scope: scope,
     };
+
+    if (this.clientId) {
+      queryObj['client_id'] = this.clientId;
+    }
 
     if (this.credentialOffer.issuerState) {
       queryObj['issuer_state'] = this.credentialOffer.issuerState;
