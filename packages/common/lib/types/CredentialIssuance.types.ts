@@ -56,11 +56,17 @@ export type SearchValue = {
   [Symbol.replace](string: string, replacer: (substring: string, ...args: any[]) => string): string;
 };
 
+export enum JsonURIMode {
+  JSON_STRINGIFY,
+  X_FORM_WWW_URLENCODED,
+}
+
 export type EncodeJsonAsURIOpts = {
   uriTypeProperties?: string[];
   arrayTypeProperties?: string[];
   baseUrl?: string;
   param?: string;
+  mode?: JsonURIMode;
   version?: OpenId4VCIVersion;
 };
 

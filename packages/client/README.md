@@ -57,7 +57,6 @@ import { OpenID4VCIClient } from '@sphereon/oid4vci-client';
 // The client is initiated from a URI. This URI is provided by the Issuer, typically as a URL or QR code.
 const client = await OpenID4VCIClient.fromURI({
   uri: 'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true',
-  flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW, // The flow to use
   kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#key-1', // Our DID.  You can defer this also to when the acquireCredential method is called
   alg: Alg.ES256, // The signing Algorithm we will use. You can defer this also to when the acquireCredential method is called
   clientId: 'test-clientId', // The clientId if the Authrozation Service requires it.  If a clientId is needed you can defer this also to when the acquireAccessToken method is called

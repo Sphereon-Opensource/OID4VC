@@ -4,10 +4,10 @@ import {
   AccessTokenResponse,
   assertedUniformCredentialOffer,
   AuthorizationServerOpts,
+  AuthzFlowType,
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
   GrantTypes,
-  isPreAuthCode,
   IssuerOpts,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
@@ -67,6 +67,7 @@ export class AccessTokenClient {
     issuerOpts?: IssuerOpts;
   }): Promise<OpenIDResponse<AccessTokenResponse>> {
     this.validate(accessTokenRequest, isPinRequired);
+
     const requestTokenURL = AccessTokenClient.determineTokenURL({
       asOpts,
       issuerOpts,
@@ -76,6 +77,7 @@ export class AccessTokenClient {
         ? await MetadataClient.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
         : undefined,
     });
+
     return this.sendAuthCode(requestTokenURL, accessTokenRequest);
   }
 
@@ -83,38 +85,36 @@ export class AccessTokenClient {
     const { asOpts, pin, codeVerifier, code, redirectUri } = opts;
     const credentialOfferRequest = await toUniformCredentialOfferRequest(opts.credentialOffer);
     const request: Partial<AccessTokenRequest> = {};
+
     if (asOpts?.clientId) {
       request.client_id = asOpts.clientId;
     }
 
-    this.assertNumericPin(this.isPinRequiredValue(credentialOfferRequest.credential_offer), pin);
-    request.user_pin = pin;
+    if (credentialOfferRequest.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
+      this.assertNumericPin(this.isPinRequiredValue(credentialOfferRequest.credential_offer), pin);
+      request.user_pin = pin;
 
-    const isPreAuth = isPreAuthCode(credentialOfferRequest);
-    if (isPreAuth) {
-      if (codeVerifier) {
-        throw new Error('Cannot pass a code_verifier when flow type is pre-authorized');
-      }
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
       // we actually know it is there because of the isPreAuthCode call
       request[PRE_AUTH_CODE_LITERAL] =
         credentialOfferRequest?.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.[PRE_AUTH_CODE_LITERAL];
-    }
-    if (!isPreAuth && credentialOfferRequest.credential_offer.grants?.authorization_code?.issuer_state) {
-      this.throwNotSupportedFlow(); // not supported yet
-      request.grant_type = GrantTypes.AUTHORIZATION_CODE;
-    }
-    if (codeVerifier) {
-      request.code_verifier = codeVerifier;
-      request.code = code;
-      request.redirect_uri = redirectUri;
-      request.grant_type = GrantTypes.AUTHORIZATION_CODE;
-    }
-    if (request.grant_type === GrantTypes.AUTHORIZATION_CODE && isPreAuth) {
-      throw Error('A pre_authorized_code flow cannot have an issuer state in the credential offer');
+
+      return request as AccessTokenRequest;
     }
 
-    return request as AccessTokenRequest;
+    if (credentialOfferRequest.supportedFlows.includes(AuthzFlowType.AUTHORIZATION_CODE_FLOW)) {
+      request.grant_type = GrantTypes.AUTHORIZATION_CODE;
+      request.code = code;
+      request.redirect_uri = redirectUri;
+
+      if (codeVerifier) {
+        request.code_verifier = codeVerifier;
+      }
+
+      return request as AccessTokenRequest;
+    }
+
+    throw new Error('Credential offer request does not follow neither pre-authorized code nor authorization code flow requirements.');
   }
 
   private assertPreAuthorizedGrantType(grantType: GrantTypes): void {
