@@ -7,8 +7,7 @@
 
 [![CI](https://github.com/Sphereon-Opensource/OID4VCI/actions/workflows/build-test-on-pr.yml/badge.svg)](https://github.com/Sphereon-Opensource/OID4VCI/actions/workflows/build-test-on-pr.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/OID4VCI/branch/develop/graph/badge.svg)](https://codecov.io/gh/Sphereon-Opensource/OID4VCI) [![NPM Version](https://img.shields.io/npm/v/@sphereon/oid4vci-client.svg)](https://npm.im/@sphereon/oid4vci-client)
 
-_IMPORTANT the packages are in an early development stage and currently only supports the pre-authorized code flow of
-OpenID4VCI! Work is underway for the Authorized Flows as well, but not fully supported yet_
+_IMPORTANT the packages are still in an early development stage, as such breaking changes are to be expected_
 
 # Background
 
@@ -44,7 +43,7 @@ The spec lists 2 flows:
 
 ## Authorized Code Flow
 
-This flow isn't fully supported yet, so you might run into issues trying to use it.
+This flow is supported but might need more work, so you might run into issues trying to use it.
 
 ## Pre-authorized Code Flow
 
