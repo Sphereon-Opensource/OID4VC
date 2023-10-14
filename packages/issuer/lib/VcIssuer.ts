@@ -276,11 +276,11 @@ export class VcIssuer<DIDDoc extends object> {
         }
         const credentialDataSupplierInput = opts.credentialDataSupplierInput ?? session.credentialDataSupplierInput
 
-          const result = await credentialDataSupplier({
+        const result = await credentialDataSupplier({
           ...cNonceState,
-            credentialRequest: opts.credentialRequest,
-            credentialSupplierConfig: this._issuerMetadata.credential_supplier_config,
-            credentialOffer /*todo: clientId: */,
+          credentialRequest: opts.credentialRequest,
+          credentialSupplierConfig: this._issuerMetadata.credential_supplier_config,
+          credentialOffer /*todo: clientId: */,
           ...(credentialDataSupplierInput && { credentialDataSupplierInput }),
         } as CredentialDataSupplierArgs)
         credential = result.credential

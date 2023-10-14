@@ -1,10 +1,11 @@
 import {
   AssertedUniformCredentialOffer,
   CNonceState,
-  CredentialDataSupplierInput, CredentialSupplierConfig,
+  CredentialDataSupplierInput,
+  CredentialSupplierConfig,
   JwtVerifyResult,
   OID4VCICredentialFormat,
-  UniformCredentialRequest
+  UniformCredentialRequest,
 } from '@sphereon/oid4vci-common'
 import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 

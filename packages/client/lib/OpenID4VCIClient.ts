@@ -8,6 +8,7 @@ import {
   CredentialResponse,
   CredentialSupported,
   EndpointMetadataResult,
+  JsonURIMode,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   ProofOfPossessionCallbacks,
@@ -134,6 +135,8 @@ export class OpenID4VCIClient {
     return convertJsonToURI(queryObj, {
       baseUrl: this._endpointMetadata.authorization_endpoint,
       uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
+      mode: JsonURIMode.X_FORM_WWW_URLENCODED,
+      // We do not add the version here, as this always needs to be form encoded
     });
   }
 
@@ -192,6 +195,7 @@ export class OpenID4VCIClient {
       {
         baseUrl: this._endpointMetadata.credentialIssuerMetadata.authorization_endpoint,
         uriTypeProperties: ['request_uri'],
+        mode: JsonURIMode.X_FORM_WWW_URLENCODED,
       },
     );
   }
