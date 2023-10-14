@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.1](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.7.3...v0.8.1) (2023-10-14)
+
+
+### Features
+
+* Allow for authorized code flows. Removes the param to determine the flow, as that is determined from the credential offer itself ([a78e1fc](https://github.com/Sphereon-Opensource/OID4VCI/commit/a78e1fc25e717cb240f2d753632595474f9b64da))
+* Allow for authorized code flows. Removes the param to determine the flow, as that is determined from the credential offer itself. Thanks to https://github.com/linasi for the PR ([861ee87](https://github.com/Sphereon-Opensource/OID4VCI/commit/861ee87e190d023df84d726e0d860a4621698967))
+
+
+
+
+
 ## [0.7.3](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.7.2...v0.7.3) (2023-09-30)
 
 
