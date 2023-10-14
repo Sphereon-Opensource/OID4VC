@@ -1,7 +1,6 @@
 import {
   AccessTokenResponse,
   Alg,
-  AuthorizationRequestV1_0_09,
   AuthzFlowType,
   CodeChallengeMethod,
   CredentialOfferPayloadV1_0_08,
@@ -9,9 +8,9 @@ import {
   CredentialResponse,
   CredentialSupported,
   EndpointMetadataResult,
+  JsonURIMode,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
-  OpenIDResponse,
   ProofOfPossessionCallbacks,
   PushedAuthorizationResponse,
   ResponseType,
@@ -39,7 +38,6 @@ interface AuthDetails {
 }
 
 interface AuthRequestOpts {
-  clientId: string;
   codeChallenge: string;
   codeChallengeMethod: CodeChallengeMethod;
   authorizationDetails?: AuthDetails | AuthDetails[];
@@ -48,7 +46,6 @@ interface AuthRequestOpts {
 }
 
 export class OpenID4VCIClient {
-  private readonly _flowType: AuthzFlowType;
   private readonly _credentialOffer: CredentialOfferRequestWithBaseUrl;
   private _clientId?: string;
   private _kid: string | undefined;
@@ -56,17 +53,7 @@ export class OpenID4VCIClient {
   private _endpointMetadata: EndpointMetadataResult | undefined;
   private _accessTokenResponse: AccessTokenResponse | undefined;
 
-  private constructor(
-    credentialOffer: CredentialOfferRequestWithBaseUrl,
-    flowType: AuthzFlowType,
-    kid?: string,
-    alg?: Alg | string,
-    clientId?: string,
-  ) {
-    if (!credentialOffer.supportedFlows.includes(flowType)) {
-      throw Error(`Flows ${flowType} is not supported by issuer ${credentialOffer.credential_offer_uri}`);
-    }
-    this._flowType = flowType;
+  private constructor(credentialOffer: CredentialOfferRequestWithBaseUrl, kid?: string, alg?: Alg | string, clientId?: string) {
     this._credentialOffer = credentialOffer;
     this._kid = kid;
     this._alg = alg;
@@ -75,7 +62,6 @@ export class OpenID4VCIClient {
 
   public static async fromURI({
     uri,
-    flowType,
     kid,
     alg,
     retrieveServerMetadata,
@@ -83,14 +69,13 @@ export class OpenID4VCIClient {
     resolveOfferUri,
   }: {
     uri: string;
-    flowType: AuthzFlowType;
     kid?: string;
     alg?: Alg | string;
     retrieveServerMetadata?: boolean;
     resolveOfferUri?: boolean;
     clientId?: string;
   }): Promise<OpenID4VCIClient> {
-    const client = new OpenID4VCIClient(await CredentialOfferClient.fromURI(uri, { resolve: resolveOfferUri }), flowType, kid, alg, clientId);
+    const client = new OpenID4VCIClient(await CredentialOfferClient.fromURI(uri, { resolve: resolveOfferUri }), kid, alg, clientId);
 
     if (retrieveServerMetadata === undefined || retrieveServerMetadata) {
       await client.retrieveServerMetadata();
@@ -106,14 +91,7 @@ export class OpenID4VCIClient {
     return this.endpointMetadata;
   }
 
-  public createAuthorizationRequestUrl({
-    clientId,
-    codeChallengeMethod,
-    codeChallenge,
-    authorizationDetails,
-    redirectUri,
-    scope,
-  }: AuthRequestOpts): string {
+  public createAuthorizationRequestUrl({ codeChallengeMethod, codeChallenge, authorizationDetails, redirectUri, scope }: AuthRequestOpts): string {
     // Scope and authorization_details can be used in the same authorization request
     // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
     if (!scope && !authorizationDetails) {
@@ -133,36 +111,42 @@ export class OpenID4VCIClient {
     }
 
     // add 'openid' scope if not present
-    if (scope && !scope.includes('openid')) {
-      scope = `openid ${scope}`;
+    if (!scope?.includes('openid')) {
+      scope = ['openid', scope].filter((s) => !!s).join(' ');
     }
 
-    //fixme: handle this for v11
-    const queryObj = {
+    const queryObj: { [key: string]: string } = {
       response_type: ResponseType.AUTH_CODE,
-      client_id: clientId,
       code_challenge_method: codeChallengeMethod,
       code_challenge: codeChallenge,
       authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
       redirect_uri: redirectUri,
       scope: scope,
-    } as AuthorizationRequestV1_0_09;
+    };
+
+    if (this.clientId) {
+      queryObj['client_id'] = this.clientId;
+    }
+
+    if (this.credentialOffer.issuerState) {
+      queryObj['issuer_state'] = this.credentialOffer.issuerState;
+    }
 
     return convertJsonToURI(queryObj, {
       baseUrl: this._endpointMetadata.authorization_endpoint,
-      uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details'],
-      version: this.version(),
+      uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
+      mode: JsonURIMode.X_FORM_WWW_URLENCODED,
+      // We do not add the version here, as this always needs to be form encoded
     });
   }
 
   public async acquirePushedAuthorizationRequestURI({
-    clientId,
     codeChallengeMethod,
     codeChallenge,
     authorizationDetails,
     redirectUri,
     scope,
-  }: AuthRequestOpts): Promise<OpenIDResponse<PushedAuthorizationResponse>> {
+  }: AuthRequestOpts): Promise<string> {
     // Scope and authorization_details can be used in the same authorization request
     // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
     if (!scope && !authorizationDetails) {
@@ -183,21 +167,37 @@ export class OpenID4VCIClient {
     const parEndpoint: string = this._endpointMetadata.credentialIssuerMetadata.pushed_authorization_request_endpoint;
 
     // add 'openid' scope if not present
-    if (scope && !scope.includes('openid')) {
-      scope = `openid ${scope}`;
+    if (!scope?.includes('openid')) {
+      scope = ['openid', scope].filter((s) => !!s).join(' ');
     }
 
-    //fixme: handle this for v11
-    const queryObj: AuthorizationRequestV1_0_09 = {
+    const queryObj: { [key: string]: string } = {
       response_type: ResponseType.AUTH_CODE,
-      client_id: clientId,
       code_challenge_method: codeChallengeMethod,
       code_challenge: codeChallenge,
       authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
       redirect_uri: redirectUri,
       scope: scope,
     };
-    return await formPost(parEndpoint, JSON.stringify(queryObj));
+
+    if (this.clientId) {
+      queryObj['client_id'] = this.clientId;
+    }
+
+    if (this.credentialOffer.issuerState) {
+      queryObj['issuer_state'] = this.credentialOffer.issuerState;
+    }
+
+    const response = await formPost<PushedAuthorizationResponse>(parEndpoint, new URLSearchParams(queryObj));
+
+    return convertJsonToURI(
+      { request_uri: response.successBody?.request_uri },
+      {
+        baseUrl: this._endpointMetadata.credentialIssuerMetadata.authorization_endpoint,
+        uriTypeProperties: ['request_uri'],
+        mode: JsonURIMode.X_FORM_WWW_URLENCODED,
+      },
+    );
   }
 
   public handleAuthorizationDetails(authorizationDetails?: AuthDetails | AuthDetails[]): AuthDetails | AuthDetails[] | undefined {
@@ -237,7 +237,9 @@ export class OpenID4VCIClient {
     redirectUri?: string;
   }): Promise<AccessTokenResponse> {
     const { pin, clientId, codeVerifier, code, redirectUri } = opts ?? {};
+
     this.assertIssuerData();
+
     if (clientId) {
       this._clientId = clientId;
     }
@@ -300,24 +302,29 @@ export class OpenID4VCIClient {
       credentialOffer: this.credentialOffer,
       metadata: this.endpointMetadata,
     });
+
     requestBuilder.withTokenFromResponse(this.accessTokenResponse);
     if (this.endpointMetadata?.credentialIssuerMetadata) {
       const metadata = this.endpointMetadata.credentialIssuerMetadata;
-      const types = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
+      const types = Array.isArray(credentialTypes) ? credentialTypes.sort() : [credentialTypes];
+
       if (metadata.credentials_supported && Array.isArray(metadata.credentials_supported)) {
-        for (const type of types) {
-          let typeSupported = false;
-          for (const credentialSupported of metadata.credentials_supported) {
-            if (!credentialSupported.types || credentialSupported.types.length === 0) {
-              throw Error('types is required in the credentials supported');
-            }
-            if (credentialSupported.types.indexOf(type) != -1) {
-              typeSupported = true;
-            }
+        let typeSupported = false;
+
+        metadata.credentials_supported.forEach((supportedCredential) => {
+          if (!supportedCredential.types || supportedCredential.types.length === 0) {
+            throw Error('types is required in the credentials supported');
           }
-          if (!typeSupported) {
-            throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
+          if (
+            supportedCredential.types.sort().every((t, i) => types[i] === t) ||
+            (types.length === 1 && (types[0] === supportedCredential.id || supportedCredential.types.includes(types[0])))
+          ) {
+            typeSupported = true;
           }
+        });
+
+        if (!typeSupported) {
+          throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
         }
       } else if (metadata.credentials_supported && !Array.isArray(metadata.credentials_supported)) {
         const credentialsSupported = metadata.credentials_supported as CredentialSupportedTypeV1_0_08;
@@ -389,14 +396,10 @@ export class OpenID4VCIClient {
       result[0] = types;
       return result;
     } else {
-      return this.credentialOffer.credential_offer.credentials.map((c, index) => {
+      return this.credentialOffer.credential_offer.credentials.map((c) => {
         return typeof c === 'string' ? [c] : c.types;
       });
     }
-  }
-
-  get flowType(): AuthzFlowType {
-    return this._flowType;
   }
 
   issuerSupportedFlowTypes(): AuthzFlowType[] {

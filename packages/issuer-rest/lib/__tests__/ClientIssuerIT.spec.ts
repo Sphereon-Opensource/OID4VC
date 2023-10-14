@@ -5,7 +5,6 @@ import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   AccessTokenResponse,
   Alg,
-  AuthzFlowType,
   CredentialOfferSession,
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
@@ -207,7 +206,6 @@ describe('VcIssuer', () => {
   it('should create client from credential offer URI', async () => {
     client = await OpenID4VCIClient.fromURI({
       uri,
-      flowType: AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW,
       kid: subjectDIDKey.didDocument.authentication[0],
       alg: 'ES256',
     })

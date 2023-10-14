@@ -2,6 +2,7 @@ import {
   AssertedUniformCredentialOffer,
   CNonceState,
   CredentialDataSupplierInput,
+  CredentialSupplierConfig,
   JwtVerifyResult,
   OID4VCICredentialFormat,
   UniformCredentialRequest,
@@ -21,8 +22,9 @@ export type CredentialSignerCallback<T extends object> = (opts: {
 
 export interface CredentialDataSupplierArgs extends CNonceState {
   credentialRequest: UniformCredentialRequest
-  clientId?: string
   credentialOffer: AssertedUniformCredentialOffer
+  clientId?: string
+  credentialSupplierConfig?: CredentialSupplierConfig
   credentialDataSupplierInput?: CredentialDataSupplierInput
 }
 
