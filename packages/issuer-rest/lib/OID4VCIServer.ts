@@ -111,7 +111,7 @@ export class OID4VCIServer<DIDDoc extends object> {
     if (opts?.endpointOpts?.createCredentialOfferOpts?.enabled !== false || process.env.CREDENTIAL_OFFER_ENDPOINT_EBALBED === 'true') {
       createCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.createCredentialOfferOpts)
     }
-    getCredentialOfferEndpoint(this.router, this.issuer, opts?.getCredentialOfferOpts)
+    getCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.getCredentialOfferOpts)
     getCredentialEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.tokenEndpointOpts, baseUrl: this.baseUrl })
     this.assertAccessTokenHandling()
     if (!this.isTokenEndpointDisabled(opts?.endpointOpts?.tokenEndpointOpts)) {
