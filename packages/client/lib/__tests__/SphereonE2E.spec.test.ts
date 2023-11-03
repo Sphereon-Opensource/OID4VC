@@ -76,60 +76,6 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
   )
 })
 
-describe('ismapolis bug report #63, https://github.com/Sphereon-Opensource/OID4VC-demo/issues/63, should', () => {
-  it('work as expected provided a correct JWT is supplied', async () => {
-    debug.enable('*')
-    const { uri } = await getCredentialOffer('jwt_vc_json')
-    const client = await OpenID4VCIClient.fromURI({ uri: uri, clientId: 'test-clientID' })
-    const metadata = await client.retrieveServerMetadata()
-    console.log(JSON.stringify(metadata))
-
-    //2. Adquire acces token from authorization server endpoint
-
-    const accessToken = await client.acquireAccessToken({})
-    console.log(`Access token: ${JSON.stringify(accessToken)}`)
-
-    //3. Create DID needed for later proof of possession
-    const { keys, didDocument } = await didts.jwk.generate({
-      type: 'secp256k1', // 'P-256', 'P-384', 'X25519', 'secp256k1'
-      accept: 'application/did+json',
-      secureRandom: () => {
-        return crypto.randomBytes(32)
-      }
-    })
-    const edPrivateKey = await importJWK(keys[0].privateKeyJwk)
-
-    async function signCallback(args: Jwt, kid?: string): Promise<string> {
-      if (!args.payload.aud) {
-        throw Error('aud required')
-      } else if (!kid) {
-        throw Error('kid required')
-      }
-      return await new SignJWT({ ...args.payload })
-        .setProtectedHeader({ alg: args.header.alg, kid, typ: 'openid4vci-proof+jwt' })
-        .setIssuedAt()
-        .setIssuer(kid)
-        .setAudience(args.payload.aud)
-        .setExpirationTime('2h')
-        .sign(edPrivateKey)
-    }
-
-    const callbacks: ProofOfPossessionCallbacks<never> = {
-      signCallback: signCallback
-    }
-
-    const credentialResponse = await client.acquireCredentials({
-      credentialTypes: 'GuestCredential',
-      proofCallbacks: callbacks,
-      format: 'jwt_vc_json',
-      alg: Alg.ES256K,
-      kid: didDocument.verificationMethod[0].id,
-      jti: v4()
-    })
-    console.log(JSON.stringify(credentialResponse.credential))
-  })
-})
-
 interface CreateCredentialOfferResponse {
   uri: string,
   userPinRequired: boolean
