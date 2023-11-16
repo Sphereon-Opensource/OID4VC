@@ -1,6 +1,7 @@
 import {
-  CredentialRequestV1_0_08,
   CredentialResponse,
+  getCredentialRequestForVersion,
+  getUniformFormat,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   OpenIDResponse,
@@ -53,24 +54,7 @@ export class CredentialRequestClient {
   }
 
   public async acquireCredentialsUsingRequest(uniformRequest: UniformCredentialRequest): Promise<OpenIDResponse<CredentialResponse>> {
-    let request: CredentialRequestV1_0_08 | UniformCredentialRequest = uniformRequest;
-    if (!this.isV11OrHigher()) {
-      let format: string = uniformRequest.format;
-      if (format === 'jwt_vc_json') {
-        format = 'jwt_vc';
-      } else if (format === 'jwt_vc_json-ld') {
-        format = 'ldp_vc';
-      }
-
-      request = {
-        format,
-        proof: uniformRequest.proof,
-        type:
-          'types' in uniformRequest
-            ? uniformRequest.types.filter((t) => t !== 'VerifiableCredential')[0]
-            : uniformRequest.credential_definition.types[0],
-      } as CredentialRequestV1_0_08;
-    }
+    const request = getCredentialRequestForVersion(uniformRequest, this.version());
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint;
     if (!isValidURL(credentialEndpoint)) {
       debug(`Invalid credential endpoint: ${credentialEndpoint}`);
@@ -92,20 +76,10 @@ export class CredentialRequestClient {
     const { proofInput } = opts;
     const formatSelection = opts.format ?? this.credentialRequestOpts.format;
 
-    let format: OID4VCICredentialFormat = formatSelection as OID4VCICredentialFormat;
-    if (opts.version < OpenId4VCIVersion.VER_1_0_11) {
-      if (formatSelection === 'jwt_vc' || formatSelection === 'jwt') {
-        format = 'jwt_vc_json';
-      } else if (formatSelection === 'ldp_vc' || formatSelection === 'ldp') {
-        format = 'jwt_vc_json-ld';
-      }
-    }
-
-    if (!format) {
+    if (!formatSelection) {
       throw Error(`Format of credential to be issued is missing`);
-    } else if (format !== 'jwt_vc_json-ld' && format !== 'jwt_vc_json' && format !== 'ldp_vc') {
-      throw Error(`Invalid format of credential to be issued: ${format}`);
     }
+    const format = getUniformFormat(formatSelection);
     const typesSelection =
       opts?.credentialTypes && (typeof opts.credentialTypes === 'string' || opts.credentialTypes.length > 0)
         ? opts.credentialTypes
@@ -113,7 +87,9 @@ export class CredentialRequestClient {
     const types = Array.isArray(typesSelection) ? typesSelection : [typesSelection];
     if (types.length === 0) {
       throw Error(`Credential type(s) need to be provided`);
-    } else if (!this.isV11OrHigher() && types.length !== 1) {
+    }
+    // FIXME: this is mixing up the type (as id) from v8/v9 and the types (from the vc.type) from v11
+    else if (!this.isV11OrHigher() && types.length !== 1) {
       throw Error('Only a single credential type is supported for V8/V9');
     }
 
@@ -121,16 +97,45 @@ export class CredentialRequestClient {
       'proof_type' in proofInput
         ? await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession, opts.version).build()
         : await proofInput.build();
-    return {
-      types,
-      format,
-      proof,
-    } as UniformCredentialRequest;
+
+    // TODO: we should move format specific logic
+    if (format === 'jwt_vc_json') {
+      return {
+        types,
+        format,
+        proof,
+      };
+    } else if (format === 'jwt_vc_json-ld' || format === 'ldp_vc') {
+      return {
+        format,
+        proof,
+        credential_definition: {
+          types,
+          // FIXME: this was not included in the original code, but it is required
+          '@context': [],
+        },
+      };
+    } else if (format === 'vc+sd-jwt') {
+      if (types.length > 1) {
+        throw Error(`Only a single credential type is supported for ${format}`);
+      }
+
+      return {
+        format,
+        proof,
+        credential_definition: {
+          vct: types[0],
+        },
+      };
+    }
+
+    throw new Error(`Unsupported format: ${format}`);
   }
 
   private version(): OpenId4VCIVersion {
     return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_11;
   }
+
   private isV11OrHigher(): boolean {
     return this.version() >= OpenId4VCIVersion.VER_1_0_11;
   }

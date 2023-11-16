@@ -3,10 +3,10 @@ import {
   CommonCredentialRequest,
   CredentialDataSupplierInput,
   CredentialOfferFormat,
-  CredentialRequestJwtVc,
-  CredentialRequestLdpVc,
+  CredentialRequestJwtVcJson,
+  CredentialRequestJwtVcJsonLdAndLdpVc,
+  CredentialRequestSdJwtVc,
   Grant,
-  IssuerCredentialDefinition,
 } from './Generic.types';
 
 export interface CredentialOfferV1_0_11 {
@@ -21,7 +21,7 @@ export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_11 {
   credentialDataSupplierInput?: CredentialDataSupplierInput;
 }
 
-export interface CommonCredentialOfferPayloadV1_0_11 {
+export interface CredentialOfferPayloadV1_0_11 {
   /**
    * REQUIRED. The URL of the Credential Issuer, the Wallet is requested to obtain one or more Credentials from.
    */
@@ -48,22 +48,8 @@ export interface CommonCredentialOfferPayloadV1_0_11 {
   grants?: Grant;
 }
 
-export interface CredentialOfferLdpVcV1_0_11 extends CommonCredentialOfferPayloadV1_0_11 {
-  /**
-   * REQUIRED. JSON object containing (and isolating) the detailed description of the credential type.
-   * This object MUST be processed using full JSON-LD processing. It consists of the following sub-claims:
-   *   - @context: REQUIRED. JSON array as defined in Appendix E.1.3.2
-   *   - types: REQUIRED. JSON array as defined in Appendix E.1.3.2.
-   *            This claim contains the type values the Wallet shall request in the subsequent Credential Request
-   */
-  credential_definition: IssuerCredentialDefinition;
-}
-
-export type CredentialOfferJwtVcV1_0_11 = CommonCredentialOfferPayloadV1_0_11;
-
-export type CredentialOfferPayloadV1_0_11 = CommonCredentialOfferPayloadV1_0_11 & (CredentialOfferLdpVcV1_0_11 | CredentialOfferJwtVcV1_0_11);
-
-export type CredentialRequestV1_0_11 = CommonCredentialRequest & (CredentialRequestJwtVc | CredentialRequestLdpVc);
+export type CredentialRequestV1_0_11 = CommonCredentialRequest &
+  (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc);
 
 export interface AuthorizationRequestV1_0_11 extends AuthorizationDetailsJwtVcJson, AuthorizationDetailsJwtVcJson {
   issuer_state?: string;

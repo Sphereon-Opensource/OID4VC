@@ -1,7 +1,6 @@
 import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   Alg,
-  CredentialOfferLdpVcV1_0_11,
   CredentialOfferSession,
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
@@ -58,11 +57,16 @@ describe('VcIssuer', () => {
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'did:key:test',
-          credential_definition: {
-            types: ['VerifiableCredential'],
-            '@context': ['https://www.w3.org/2018/credentials/v1'],
-            credentialSubject: {},
-          },
+          credentials: [
+            {
+              format: 'ldp_vc',
+              credential_definition: {
+                types: ['VerifiableCredential'],
+                '@context': ['https://www.w3.org/2018/credentials/v1'],
+                credentialSubject: {},
+              },
+            },
+          ],
           grants: {
             authorization_code: { issuer_state: issuerState },
             'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
@@ -70,7 +74,7 @@ describe('VcIssuer', () => {
               user_pin_required: true,
             },
           },
-        } as CredentialOfferLdpVcV1_0_11,
+        },
       },
     })
     vcIssuer = new VcIssuerBuilder<DIDDocument>()

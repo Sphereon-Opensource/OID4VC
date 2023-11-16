@@ -1,5 +1,12 @@
 import { CredentialOfferPayload, UniformCredentialOffer } from './CredentialIssuance.types';
-import { ErrorResponse, IssuerCredentialDefinition, IssuerCredentialSubject, OID4VCICredentialFormat, PRE_AUTH_CODE_LITERAL } from './Generic.types';
+import {
+  ErrorResponse,
+  IssuerCredentialSubject,
+  JsonLdIssuerCredentialDefinition,
+  OID4VCICredentialFormat,
+  PRE_AUTH_CODE_LITERAL,
+  SdJwtVcCredentialDefinition,
+} from './Generic.types';
 import { EndpointMetadata } from './ServerMetadata';
 
 export interface CommonAuthorizationRequest {
@@ -64,9 +71,9 @@ export interface CommonAuthorizationRequest {
 /**
  * string type added for conformity with our previous code in the client
  */
-export type AuthorizationDetails = AuthorizationDetailsJwtVcJson | AuthorizationRequestJwtVcJsonLdAndLdpVc | string;
+export type AuthorizationDetails = AuthorizationDetailsJwtVcJson | AuthorizationDetailsJwtVcJsonLdAndLdpVc | AuthorizationDetailsSdJwtVc | string;
 
-export type AuthorizationRequest = AuthorizationRequestJwtVcJson | AuthorizationDetailsJwtVcJsonLdAndLdpVc;
+export type AuthorizationRequest = AuthorizationRequestJwtVcJson | AuthorizationRequestJwtVcJsonLdAndLdpVc | AuthorizationRequestSdJwtVc;
 
 export interface AuthorizationRequestJwtVcJson extends CommonAuthorizationRequest {
   authorization_details?: AuthorizationDetailsJwtVcJson[];
@@ -74,6 +81,10 @@ export interface AuthorizationRequestJwtVcJson extends CommonAuthorizationReques
 
 export interface AuthorizationRequestJwtVcJsonLdAndLdpVc extends CommonAuthorizationRequest {
   authorization_details?: AuthorizationDetailsJwtVcJsonLdAndLdpVc[];
+}
+
+export interface AuthorizationRequestSdJwtVc extends CommonAuthorizationRequest {
+  authorization_details?: AuthorizationDetailsSdJwtVc[];
 }
 
 export interface CommonAuthorizationDetails {
@@ -94,12 +105,14 @@ export interface CommonAuthorizationDetails {
    * the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.
    */
   locations?: string[];
-  types: string[]; // This claim contains the type values the Wallet requests authorization for at the issuer.
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
 export interface AuthorizationDetailsJwtVcJson extends CommonAuthorizationDetails {
+  format: 'jwt_vc_json';
+
   /**
    * A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential.
    * The value MAY be a dictionary, which allows to represent the full (potentially deeply nested) structure of the
@@ -107,9 +120,13 @@ export interface AuthorizationDetailsJwtVcJson extends CommonAuthorizationDetail
    * credential to be issued.
    */
   credentialSubject?: IssuerCredentialSubject;
+
+  types: string[]; // This claim contains the type values the Wallet requests authorization for at the issuer.
 }
 
 export interface AuthorizationDetailsJwtVcJsonLdAndLdpVc extends CommonAuthorizationDetails {
+  format: 'ldp_vc' | 'jwt_vc_json-ld';
+
   /**
    * REQUIRED. JSON object containing (and isolating) the detailed description of the credential type.
    * This object MUST be processed using full JSON-LD processing. It consists of the following sub-claims:
@@ -117,7 +134,13 @@ export interface AuthorizationDetailsJwtVcJsonLdAndLdpVc extends CommonAuthoriza
    *   - types: REQUIRED. JSON array as defined in Appendix E.1.3.2.
    *            This claim contains the type values the Wallet shall request in the subsequent Credential Request
    */
-  credential_definition: IssuerCredentialDefinition;
+  credential_definition: JsonLdIssuerCredentialDefinition;
+}
+
+export interface AuthorizationDetailsSdJwtVc extends CommonAuthorizationDetails {
+  format: 'vc+sd-jwt';
+
+  credential_definition: SdJwtVcCredentialDefinition;
 }
 
 export enum GrantTypes {

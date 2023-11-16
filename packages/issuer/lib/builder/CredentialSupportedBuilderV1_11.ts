@@ -1,6 +1,8 @@
 import {
   CredentialsSupportedDisplay,
   CredentialSupported,
+  isFormat,
+  isNotFormat,
   IssuerCredentialSubject,
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
@@ -38,6 +40,9 @@ export class CredentialSupportedBuilderV1_11 {
   }
 
   withTypes(type: string | string[]): CredentialSupportedBuilderV1_11 {
+    if (this.format === 'vc+sd-jwt' && Array.isArray(type) && type.length > 1) {
+      throw new Error('Only one type is allowed for vc+sd-jwt')
+    }
     this.types = Array.isArray(type) ? type : [type]
     return this
   }
@@ -113,13 +118,26 @@ export class CredentialSupportedBuilderV1_11 {
     }
     if (!this.types) {
       throw new Error('types are required')
-    } else {
-      credentialSupported.types = this.types
     }
 
-    if (this.credentialSubject) {
-      credentialSupported.credentialSubject = this.credentialSubject
+    // SdJwtVc has a different format
+    if (isFormat(credentialSupported, 'vc+sd-jwt')) {
+      if (this.types.length > 1) {
+        throw new Error('Only one type is allowed for vc+sd-jwt')
+      }
+      credentialSupported.credential_definition = {
+        vct: this.types[0],
+      }
     }
+    // And else would work here, but this way we get the correct typing
+    else if (isNotFormat(credentialSupported, 'vc+sd-jwt')) {
+      credentialSupported.types = this.types
+
+      if (this.credentialSubject) {
+        credentialSupported.credentialSubject = this.credentialSubject
+      }
+    }
+
     if (this.cryptographicSuitesSupported) {
       credentialSupported.cryptographic_suites_supported = this.cryptographicSuitesSupported
     }

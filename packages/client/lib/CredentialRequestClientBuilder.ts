@@ -6,6 +6,7 @@ import {
   determineSpecVersionFromOffer,
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
+  getTypesFromOffer,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   UniformCredentialOfferRequest,
@@ -46,7 +47,7 @@ export class CredentialRequestClientBuilder {
       builder.withCredentialType((request.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type);
     } else {
       // todo: look whether this is correct
-      builder.withCredentialType(request.credential_offer.credentials.flatMap((c) => (typeof c === 'string' ? c : c.types)));
+      builder.withCredentialType(getTypesFromOffer(request.credential_offer));
     }
 
     return builder;
