@@ -404,7 +404,7 @@ export class VcIssuer<DIDDoc extends object> {
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
     try {
-      if (credentialRequest.format !== 'jwt_vc_json' && credentialRequest.format !== 'jwt_vc_json-ld') {
+      if (credentialRequest.format !== 'jwt_vc_json' && credentialRequest.format !== 'jwt_vc_json-ld' && credentialRequest.format !== 'vc+sd-jwt') {
         throw Error(`Format ${credentialRequest.format} not supported yet`)
       } else if (typeof this._jwtVerifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
         throw new Error(JWT_VERIFY_CONFIG_ERROR)
