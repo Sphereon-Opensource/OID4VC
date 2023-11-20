@@ -14,6 +14,14 @@
     "@sphereon/ssi-types": "0.17.2",
     "uuid": "^9.0.0"
   },
+  "peerDependencies": {
+    "awesome-qr": "^2.1.5-rc.0"
+  },
+  "peerDependenciesMeta": {
+    "awesome-qr": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@sphereon/oid4vci-client": "workspace:*",
     "@types/jest": "^29.5.3",

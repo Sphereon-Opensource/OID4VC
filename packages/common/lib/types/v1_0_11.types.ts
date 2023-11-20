@@ -8,6 +8,7 @@ import {
   Grant,
   IssuerCredentialDefinition,
 } from './Generic.types';
+import { QRCodeOpts } from './QRCode.types';
 
 export interface CredentialOfferV1_0_11 {
   credential_offer?: CredentialOfferPayloadV1_0_11;
@@ -18,6 +19,7 @@ export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_11 {
   baseUri?: string;
   scheme?: string;
   pinLength?: number;
+  qrCodeOpts?: QRCodeOpts;
   credentialDataSupplierInput?: CredentialDataSupplierInput;
 }
 

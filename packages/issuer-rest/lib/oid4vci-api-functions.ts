@@ -208,7 +208,8 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
       if (!credentials || credentials.length === 0) {
         return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'No credentials supplied' })
       }
-      const result = await issuer.createCredentialOfferURI({ ...request.body, grants, credentials })
+      const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
+      const result = await issuer.createCredentialOfferURI({ ...request.body, qrCodeOpts, grants, credentials })
       const resultResponse: ICreateCredentialOfferURIResponse = result
       if ('session' in resultResponse) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

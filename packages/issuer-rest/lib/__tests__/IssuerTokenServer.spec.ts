@@ -165,7 +165,7 @@ describe('OID4VCIServer', () => {
     expect(res.statusCode).toEqual(200)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
-      access_token: expect.stringContaining('eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE2O'),
+      access_token: expect.stringContaining('eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQi'),
       token_type: 'bearer',
       expires_in: 300000,
       c_nonce: expect.any(String),
