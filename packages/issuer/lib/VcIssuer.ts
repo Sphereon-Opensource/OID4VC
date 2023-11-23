@@ -1,5 +1,3 @@
-import * as process from 'process'
-
 import {
   Alg,
   ALG_ERROR,
@@ -30,6 +28,7 @@ import {
   NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
+  QRCodeOpts,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
   TYP_ERROR,
@@ -101,10 +100,10 @@ export class VcIssuer<DIDDoc extends object> {
     baseUri?: string
     scheme?: string
     pinLength?: number
+    qrCodeOpts?: QRCodeOpts
   }): Promise<CreateCredentialOfferURIResult> {
     let preAuthorizedCode: string | undefined = undefined
     let issuerState: string | undefined = undefined
-
     const { grants, credentials, credentialDefinition } = opts
 
     if (!grants?.authorization_code && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
@@ -139,6 +138,7 @@ export class VcIssuer<DIDDoc extends object> {
     }
 
     const baseUri = opts?.baseUri ?? this.defaultCredentialOfferBaseUri
+
     const credentialOfferObject = createCredentialOfferObject(this._issuerMetadata, {
       ...opts,
       credentialOffer: credentialOfferPayload,
@@ -200,9 +200,20 @@ export class VcIssuer<DIDDoc extends object> {
     if (issuerState) {
       await this.credentialOfferSessions.set(issuerState, session)
     }
+
+    const uri = createCredentialOfferURIFromObject(credentialOffer, { ...opts, baseUri })
+    let qrCodeDataUri: string | undefined
+    if (opts.qrCodeOpts) {
+      const { AwesomeQR } = await import('awesome-qr')
+      console.log(uri)
+
+      const qrCode = new AwesomeQR({ ...opts.qrCodeOpts, text: uri })
+      qrCodeDataUri = `data:image/png;base64,${(await qrCode.draw())!.toString('base64')}`
+    }
     return {
       session,
-      uri: createCredentialOfferURIFromObject(credentialOffer, { ...opts, baseUri }),
+      uri,
+      qrCodeDataUri,
       userPinRequired: userPinRequired ?? false,
       ...(userPin !== undefined && { userPin, pinLength: userPin?.length ?? 0 }),
     }
