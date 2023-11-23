@@ -15,7 +15,7 @@ export interface ImageInfo {
   [key: string]: unknown;
 }
 
-export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' /*| 'mso_mdoc'*/; // we do not support mdocs at this point
+export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'vc+sd-jwt' /*| 'mso_mdoc'*/; // we do not support mdocs at this point
 
 export interface NameAndLocale {
   name?: string; // REQUIRED. String value of a display name for the Credential.
@@ -62,8 +62,6 @@ export interface CredentialIssuerMetadata extends CredentialIssuerMetadataOpts, 
 }
 
 export interface CredentialSupportedBrief {
-  name?: string; // fixme: Probably should not be here, is part of the display object
-  types: string[]; // REQUIRED. JSON array designating the types a certain credential type supports
   cryptographic_binding_methods_supported?: string[]; // OPTIONAL. Array of case sensitive strings that identify how the Credential is bound to the identifier of the End-User who possesses the Credential
   cryptographic_suites_supported?: string[]; // OPTIONAL. Array of case sensitive strings that identify the cryptographic suites that are supported for the cryptographic_binding_methods_supported
 }
@@ -75,24 +73,61 @@ export type CommonCredentialSupported = CredentialSupportedBrief & {
   /**
    * following properties are non-mso_mdoc specific and we might wanna rethink them when we're going to support mso_mdoc
    */
-  credentialSubject?: IssuerCredentialSubject; // OPTIONAL. A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential. The value MAY be a dictionary, which allows to represent the full (potentially deeply nested) structure of the verifiable credential to be issued.
-  order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
 };
 
 export interface CredentialSupportedJwtVcJsonLdAndLdpVc extends CommonCredentialSupported {
+  types: string[]; // REQUIRED. JSON array designating the types a certain credential type supports
   '@context': ICredentialContextType[]; // REQUIRED. JSON array as defined in [VC_DATA], Section 4.1.
+  credentialSubject?: IssuerCredentialSubject; // OPTIONAL. A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential. The value MAY be a dictionary, which allows to represent the full (potentially deeply nested) structure of the verifiable credential to be issued.
+  order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
+  format: 'ldp_vc' | 'jwt_vc_json-ld';
 }
 
 export interface CredentialSupportedJwtVcJson extends CommonCredentialSupported {
+  types: string[]; // REQUIRED. JSON array designating the types a certain credential type supports
+  credentialSubject?: IssuerCredentialSubject; // OPTIONAL. A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential. The value MAY be a dictionary, which allows to represent the full (potentially deeply nested) structure of the verifiable credential to be issued.
+  order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
   format: 'jwt_vc_json';
 }
 
-export type CredentialSupported = CommonCredentialSupported & (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc);
-
-export interface CredentialOfferFormat {
-  format: OID4VCICredentialFormat | string;
-  types: string[];
+export interface SdJwtVcCredentialDefinition {
+  vct: string; // REQUIRED. JSON string designating the type of an SD-JWT vc
+  claims?: IssuerCredentialSubject;
 }
+
+export interface CredentialSupportedSdJwtVc extends CommonCredentialSupported {
+  format: 'vc+sd-jwt';
+
+  // REQUIRED. JSON object containing the detailed description of the credential type
+  credential_definition: SdJwtVcCredentialDefinition;
+  order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
+}
+
+export type CredentialSupported = CommonCredentialSupported &
+  (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc);
+
+export interface CommonCredentialOfferFormat {
+  format: OID4VCICredentialFormat | string;
+}
+
+export interface CredentialOfferFormatJwtVcJsonLdAndLdpVc extends CommonCredentialOfferFormat {
+  format: 'ldp_vc' | 'jwt_vc_json-ld';
+  // REQUIRED. JSON object containing (and isolating) the detailed description of the credential type. This object MUST be processed using full JSON-LD processing.
+  credential_definition: JsonLdIssuerCredentialDefinition;
+}
+
+export interface CredentialOfferFormatJwtVcJson extends CommonCredentialOfferFormat {
+  format: 'jwt_vc_json';
+  types: string[]; // REQUIRED. JSON array as defined in Appendix E.1.1.2. This claim contains the type values the Wallet shall request in the subsequent Credential Request.
+}
+
+export interface CredentialOfferFormatSdJwtVc extends CommonCredentialOfferFormat {
+  format: 'vc+sd-jwt';
+  credential_definition: SdJwtVcCredentialDefinition;
+}
+
+export type CredentialOfferFormat = CommonCredentialOfferFormat &
+  (CredentialOfferFormatJwtVcJsonLdAndLdpVc | CredentialOfferFormatJwtVcJson | CredentialOfferFormatSdJwtVc);
 
 /**
  * Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
@@ -108,10 +143,10 @@ export type CreateCredentialOfferURIResult = {
   userPinRequired: boolean;
 };
 
-export interface IssuerCredentialDefinition {
+export interface JsonLdIssuerCredentialDefinition {
   '@context': ICredentialContextType[];
   types: string[];
-  credentialSubject: IssuerCredentialSubject;
+  credentialSubject?: IssuerCredentialSubject;
 }
 
 export interface ErrorResponse extends Response {
@@ -128,15 +163,20 @@ export interface CommonCredentialRequest {
   proof?: ProofOfPossession;
 }
 
-export interface CredentialRequestJwtVc extends CommonCredentialRequest {
-  format: 'jwt_vc_json' | 'jwt_vc_json-ld';
+export interface CredentialRequestJwtVcJson extends CommonCredentialRequest {
+  format: 'jwt_vc_json';
   types: string[];
   credentialSubject?: IssuerCredentialSubject;
 }
 
-export interface CredentialRequestLdpVc extends CommonCredentialRequest {
-  format: 'ldp_vc';
-  credential_definition: IssuerCredentialDefinition;
+export interface CredentialRequestJwtVcJsonLdAndLdpVc extends CommonCredentialRequest {
+  format: 'ldp_vc' | 'jwt_vc_json-ld';
+  credential_definition: JsonLdIssuerCredentialDefinition;
+}
+
+export interface CredentialRequestSdJwtVc extends CommonCredentialRequest {
+  format: 'vc+sd-jwt';
+  credential_definition: SdJwtVcCredentialDefinition;
 }
 
 export interface CommonCredentialResponse {
@@ -154,6 +194,11 @@ export interface CredentialResponseLdpVc extends CommonCredentialResponse {
 
 export interface CredentialResponseJwtVc {
   format: 'jwt_vc_json' | 'jwt_vc_json-ld';
+  credential: string;
+}
+
+export interface CredentialResponseSdJwtVc {
+  format: 'vc+sd-jwt';
   credential: string;
 }
 

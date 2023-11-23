@@ -3,6 +3,7 @@ import { KeyObject } from 'crypto';
 import {
   Alg,
   EndpointMetadata,
+  getCredentialRequestForVersion,
   getIssuerFromCredentialOfferPayload,
   Jwt,
   OpenId4VCIVersion,
@@ -149,9 +150,7 @@ describe('Credential Request Client ', () => {
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json-ld', types: ['random'], proof })).rejects.toThrow(
+    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json', types: ['random'], proof })).rejects.toThrow(
       Error(URL_NOT_VALID),
     );
   });
@@ -194,10 +193,11 @@ describe('Credential Request Client with different issuers ', () => {
           jwt: getMockData('spruce')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
-        format: 'jwt_vc_json-ld',
+        format: 'jwt_vc',
         version: OpenId4VCIVersion.VER_1_0_08,
       });
-    expect(credentialRequest).toEqual(getMockData('spruce')?.credential.request);
+    const draft8CredentialRequest = getCredentialRequestForVersion(credentialRequest, OpenId4VCIVersion.VER_1_0_08);
+    expect(draft8CredentialRequest).toEqual(getMockData('spruce')?.credential.request);
   });
 
   it('should create correct CredentialRequest for Walt', async () => {
@@ -264,7 +264,8 @@ describe('Credential Request Client with different issuers ', () => {
         format: 'ldp_vc',
         version: OpenId4VCIVersion.VER_1_0_08,
       });
-    expect(credentialOffer).toEqual(getMockData('mattr')?.credential.request);
+    const credentialRequest = getCredentialRequestForVersion(credentialOffer, OpenId4VCIVersion.VER_1_0_08);
+    expect(credentialRequest).toEqual(getMockData('mattr')?.credential.request);
   });
 
   it('should create correct CredentialRequest for diwala', async () => {
@@ -286,6 +287,10 @@ describe('Credential Request Client with different issuers ', () => {
         format: 'ldp_vc',
         version: OpenId4VCIVersion.VER_1_0_08,
       });
-    expect(credentialOffer).toEqual(getMockData('diwala')?.credential.request);
+
+    // createCredentialRequest returns uniform format in draft 11
+    const credentialRequest = getCredentialRequestForVersion(credentialOffer, OpenId4VCIVersion.VER_1_0_08);
+
+    expect(credentialRequest).toEqual(getMockData('diwala')?.credential.request);
   });
 });

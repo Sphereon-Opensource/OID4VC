@@ -17,9 +17,9 @@ import {
   Grant,
   IAT_ERROR,
   ISSUER_CONFIG_ERROR,
-  IssuerCredentialDefinition,
   IssueStatus,
   IStateManager,
+  JsonLdIssuerCredentialDefinition,
   JWT_VERIFY_CONFIG_ERROR,
   JWTVerifyCallback,
   JwtVerifyResult,
@@ -94,7 +94,7 @@ export class VcIssuer<DIDDoc extends object> {
   public async createCredentialOfferURI(opts: {
     grants?: Grant
     credentials?: (CredentialOfferFormat | string)[]
-    credentialDefinition?: IssuerCredentialDefinition
+    credentialDefinition?: JsonLdIssuerCredentialDefinition
     credentialOfferUri?: string
     credentialDataSupplierInput?: CredentialDataSupplierInput // Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
     baseUri?: string

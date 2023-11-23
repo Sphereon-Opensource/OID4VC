@@ -15,7 +15,7 @@ import {
   PushedAuthorizationResponse,
   ResponseType,
 } from '@sphereon/oid4vci-common';
-import { getSupportedCredentials } from '@sphereon/oid4vci-common/dist/functions/IssuerMetadataUtils';
+import { getSupportedCredentials, getTypesFromCredentialSupported } from '@sphereon/oid4vci-common/dist/functions/IssuerMetadataUtils';
 import { CredentialSupportedTypeV1_0_08 } from '@sphereon/oid4vci-common/dist/types/v1_0_08.types';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
@@ -312,12 +312,10 @@ export class OpenID4VCIClient {
         let typeSupported = false;
 
         metadata.credentials_supported.forEach((supportedCredential) => {
-          if (!supportedCredential.types || supportedCredential.types.length === 0) {
-            throw Error('types is required in the credentials supported');
-          }
+          const subTypes = getTypesFromCredentialSupported(supportedCredential);
           if (
-            supportedCredential.types.sort().every((t, i) => types[i] === t) ||
-            (types.length === 1 && (types[0] === supportedCredential.id || supportedCredential.types.includes(types[0])))
+            subTypes.sort().every((t, i) => types[i] === t) ||
+            (types.length === 1 && (types[0] === supportedCredential.id || subTypes.includes(types[0])))
           ) {
             typeSupported = true;
           }
@@ -397,7 +395,15 @@ export class OpenID4VCIClient {
       return result;
     } else {
       return this.credentialOffer.credential_offer.credentials.map((c) => {
-        return typeof c === 'string' ? [c] : c.types;
+        if (typeof c === 'string') {
+          return [c];
+        } else if ('types' in c) {
+          return c.types;
+        } else if ('vct' in c.credential_definition) {
+          return [c.credential_definition.vct];
+        } else {
+          return c.credential_definition.types;
+        }
       });
     }
   }

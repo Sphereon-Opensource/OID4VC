@@ -340,3 +340,30 @@ function recordVersion(currentVersion: OpenId4VCIVersion, matchingVersion: OpenI
     `Invalid param. Some keys have been used from version: ${currentVersion} version while '${key}' is used from version: ${matchingVersion}`,
   );
 }
+
+export function getTypesFromOffer(credentialOffer: UniformCredentialOfferPayload, opts?: { filterVerifiableCredential: boolean }) {
+  const types = credentialOffer.credentials.reduce<string[]>((prev, curr) => {
+    // FIXME returning the string value is wrong (as it's an id), but just matching the current behavior of this library
+    // The credential_type (from draft 8) and the actual 'type' value in a VC (from draft 11) are mixed up
+    // Fix for this here: https://github.com/Sphereon-Opensource/OID4VCI/pull/54
+    if (typeof curr === 'string') {
+      return [...prev, curr];
+    } else if (curr.format === 'jwt_vc_json-ld' || curr.format === 'ldp_vc') {
+      return [...prev, ...curr.credential_definition.types];
+    } else if (curr.format === 'jwt_vc_json') {
+      return [...prev, ...curr.types];
+    } else if (curr.format === 'vc+sd-jwt') {
+      return [...prev, curr.credential_definition.vct];
+    }
+
+    return prev;
+  }, []);
+
+  if (!types || types.length === 0) {
+    throw Error('Could not deduce types from credential offer');
+  }
+  if (opts?.filterVerifiableCredential) {
+    return types.filter((type) => type !== 'VerifiableCredential');
+  }
+  return types;
+}

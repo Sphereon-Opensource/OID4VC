@@ -73,7 +73,7 @@ export function getSupportedCredential(opts?: {
   if ((opts?.types && typeof opts?.types === 'string') || opts?.types?.length === 1) {
     const types = Array.isArray(opts.types) ? opts.types[0] : opts.types;
     const supported = credentialsSupported.filter(
-      (sup) => sup.id === types || (initiationTypes && arrayEqualsIgnoreOrder(sup.types, initiationTypes)),
+      (sup) => sup.id === types || (initiationTypes && arrayEqualsIgnoreOrder(getTypesFromCredentialSupported(sup), initiationTypes)),
     );
     if (supported) {
       credentialSupportedOverlap.push(...supported);
@@ -86,7 +86,7 @@ export function getSupportedCredential(opts?: {
       initiationTypes.push('VerifiableCredential');
     }
     const supported = credentialsSupported.filter((sup) => {
-      const supTypes = sup.types;
+      const supTypes = getTypesFromCredentialSupported(sup);
       if (!supTypes.includes('VerifiableCredential')) {
         supTypes.push('VerifiableCredential');
       }
@@ -97,6 +97,23 @@ export function getSupportedCredential(opts?: {
     }
   }
   return credentialSupportedOverlap;
+}
+
+export function getTypesFromCredentialSupported(credentialSupported: CredentialSupported, opts?: { filterVerifiableCredential: boolean }) {
+  let types: string[] = [];
+  if (credentialSupported.format === 'jwt_vc_json' || credentialSupported.format === 'jwt_vc_json-ld' || credentialSupported.format === 'ldp_vc') {
+    types = credentialSupported.types;
+  } else if (credentialSupported.format === 'vc+sd-jwt') {
+    types = [credentialSupported.credential_definition.vct];
+  }
+
+  if (!types || types.length === 0) {
+    throw Error('Could not deduce types from credential supported');
+  }
+  if (opts?.filterVerifiableCredential) {
+    return types.filter((type) => type !== 'VerifiableCredential');
+  }
+  return types;
 }
 
 function arrayEqualsIgnoreOrder(a: string[], b: string[]) {
@@ -127,7 +144,7 @@ export function credentialSupportedV8ToV11(key: string, supportedV8: CredentialS
     }
     let credentialSupport: Partial<CredentialSupported> = {};
     credentialSupport = {
-      format,
+      format: format as OID4VCICredentialFormat,
       display: supportedV8.display,
       ...credentialSupportBrief,
       credentialSubject: supportedV8.claims,
