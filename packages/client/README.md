@@ -110,6 +110,7 @@ The Proof of Possession using a signature callback function. The example uses th
 
 ```typescript
 import * as jose from 'jose';
+import { DIDDocument } from 'did-resolver';
 
 const { privateKey, publicKey } = await jose.generateKeyPair('ES256');
 
@@ -124,7 +125,7 @@ async function signCallback(args: Jwt, kid: string): Promise<string> {
     .sign(privateKey);
 }
 
-const callbacks: ProofOfPossessionCallbacks = {
+const callbacks: ProofOfPossessionCallbacks<DIDDocument> = {
   signCallback,
 };
 ```
