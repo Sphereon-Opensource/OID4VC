@@ -129,7 +129,15 @@ describe('sd-jwt vc', () => {
         .reply(200, async (_, body) =>
           vcIssuer.issueCredential({
             credentialRequest: body as CredentialRequestV1_0_11,
-            credential: {} as any, // TODO: define the interface for credential when using sd-jwt
+            credential: {
+              vct: 'Hello',
+              iss: 'did:example:123',
+              iat: 123,
+              // Defines what can be disclosed (optional)
+              __disclosureFrame: {
+                name: true,
+              },
+            },
             newCNonce: 'new-c-nonce',
           }),
         );

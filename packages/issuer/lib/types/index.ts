@@ -7,11 +7,11 @@ import {
   OID4VCICredentialFormat,
   UniformCredentialRequest,
 } from '@sphereon/oid4vci-common'
-import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import { ICredential, SdJwtDecodedVerifiableCredentialPayload, SdJwtDisclosureFrame, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 export type CredentialSignerCallback<T extends object> = (opts: {
   credentialRequest: UniformCredentialRequest
-  credential: ICredential
+  credential: CredentialIssuanceInput
   format?: OID4VCICredentialFormat
   /**
    * We use object since we don't want to expose the DID Document TS type to too many interfaces.
@@ -28,8 +28,10 @@ export interface CredentialDataSupplierArgs extends CNonceState {
   credentialDataSupplierInput?: CredentialDataSupplierInput
 }
 
+export type CredentialIssuanceInput = ICredential | (SdJwtDecodedVerifiableCredentialPayload & { __disclosureFrame?: SdJwtDisclosureFrame })
+
 export interface CredentialDataSupplierResult {
-  credential: ICredential
+  credential: CredentialIssuanceInput
   format?: OID4VCICredentialFormat
   signCallback?: CredentialSignerCallback<any> // If the data supplier wants to actually sign directly
 }

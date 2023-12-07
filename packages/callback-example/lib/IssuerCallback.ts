@@ -4,7 +4,8 @@ import { Ed25519VerificationKey2020 } from '@digitalcredentials/ed25519-verifica
 import { securityLoader } from '@digitalcredentials/security-document-loader'
 import vc from '@digitalcredentials/vc'
 import { CredentialRequestV1_0_11 } from '@sphereon/oid4vci-common'
-import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import { CredentialIssuanceInput } from '@sphereon/oid4vci-issuer'
+import { W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 // Example on how to generate a did:key to issue a verifiable credential
 export const generateDid = async () => {
@@ -14,12 +15,12 @@ export const generateDid = async () => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getIssuerCallback = (credential: ICredential, keyPair: any, verificationMethod: string) => {
+export const getIssuerCallback = (credential: CredentialIssuanceInput, keyPair: any, verificationMethod: string) => {
   if (!credential) {
     throw new Error('A credential needs to be provided')
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return async (_opts: { credentialRequest?: CredentialRequestV1_0_11; credential?: ICredential }): Promise<W3CVerifiableCredential> => {
+  return async (_opts: { credentialRequest?: CredentialRequestV1_0_11; credential?: CredentialIssuanceInput }): Promise<W3CVerifiableCredential> => {
     const documentLoader = securityLoader().build()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const verificationKey: any = Array.from(keyPair.values())[0]
