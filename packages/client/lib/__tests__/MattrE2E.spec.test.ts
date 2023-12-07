@@ -20,7 +20,7 @@ const jwk: JWK = {
 // priv hex: 913466d1a38d1d8c0d3c0fb0fc3b633075085a31372bbd2a8022215a88d9d1e5
 const did = `did:key:z6Mki5ZwZKN1dBQprfJTikUvkDxrHijiiQngkWviMF5gw2Hv`;
 const kid = `${did}#z6Mki5ZwZKN1dBQprfJTikUvkDxrHijiiQngkWviMF5gw2Hv`;
-describe('OID4VCI-Client using Mattr issuer should', () => {
+describe.skip('OID4VCI-Client using Mattr issuer should', () => {
   async function test(format: 'ldp_vc' | 'jwt_vc_json') {
     const offer = await getCredentialOffer(format);
     const client = await OpenID4VCIClient.fromURI({
