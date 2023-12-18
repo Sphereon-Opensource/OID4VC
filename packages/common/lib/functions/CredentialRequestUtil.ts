@@ -9,7 +9,7 @@ export function getTypesFromRequest(credentialRequest: UniformCredentialRequest,
   } else if (credentialRequest.format === 'jwt_vc_json-ld' || credentialRequest.format === 'ldp_vc') {
     types = credentialRequest.credential_definition.types;
   } else if (credentialRequest.format === 'vc+sd-jwt') {
-    types = [credentialRequest.credential_definition.vct];
+    types = [credentialRequest.vct];
   }
 
   if (!types || types.length === 0) {

@@ -15,9 +15,7 @@ const issuerMetadata = new IssuerMetadataBuilderV1_11()
   .withTokenEndpoint('https://token-endpoint.example.com')
   .addSupportedCredential({
     format: 'vc+sd-jwt',
-    credential_definition: {
-      vct: 'SdJwtCredential',
-    },
+    vct: 'SdJwtCredential',
     id: 'SdJwtCredentialId',
   })
   .build();
@@ -98,9 +96,7 @@ describe('sd-jwt vc', () => {
       const supported = client.getCredentialsSupported(true, 'vc+sd-jwt');
       expect(supported).toEqual([
         {
-          credential_definition: {
-            vct: 'SdJwtCredential',
-          },
+          vct: 'SdJwtCredential',
           format: 'vc+sd-jwt',
           id: 'SdJwtCredentialId',
         },
@@ -143,7 +139,7 @@ describe('sd-jwt vc', () => {
         );
 
       const credentials = await client.acquireCredentials({
-        credentialTypes: [offered.credential_definition.vct],
+        credentialTypes: [offered.vct],
         format: 'vc+sd-jwt',
         alg,
         jwk,
@@ -156,7 +152,7 @@ describe('sd-jwt vc', () => {
       expect(credentials).toEqual({
         c_nonce: 'new-c-nonce',
         c_nonce_expires_in: 300000,
-        credential: 'sd-jwt', // TODO: make this a real sd-jwt vc
+        credential: 'sd-jwt',
         format: 'vc+sd-jwt',
       });
     },

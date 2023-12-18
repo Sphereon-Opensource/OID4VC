@@ -411,8 +411,8 @@ export class OpenID4VCIClient {
           return [c];
         } else if ('types' in c) {
           return c.types;
-        } else if ('vct' in c.credential_definition) {
-          return [c.credential_definition.vct];
+        } else if ('vct' in c) {
+          return [c.vct];
         } else {
           return c.credential_definition.types;
         }

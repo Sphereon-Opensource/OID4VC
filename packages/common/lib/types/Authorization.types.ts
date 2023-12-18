@@ -5,7 +5,6 @@ import {
   JsonLdIssuerCredentialDefinition,
   OID4VCICredentialFormat,
   PRE_AUTH_CODE_LITERAL,
-  SdJwtVcCredentialDefinition,
 } from './Generic.types';
 import { EndpointMetadata } from './ServerMetadata';
 
@@ -140,7 +139,8 @@ export interface AuthorizationDetailsJwtVcJsonLdAndLdpVc extends CommonAuthoriza
 export interface AuthorizationDetailsSdJwtVc extends CommonAuthorizationDetails {
   format: 'vc+sd-jwt';
 
-  credential_definition: SdJwtVcCredentialDefinition;
+  vct: string;
+  claims?: IssuerCredentialSubject;
 }
 
 export enum GrantTypes {

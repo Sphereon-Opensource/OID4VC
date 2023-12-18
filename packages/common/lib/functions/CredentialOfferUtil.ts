@@ -353,7 +353,7 @@ export function getTypesFromOffer(credentialOffer: UniformCredentialOfferPayload
     } else if (curr.format === 'jwt_vc_json') {
       return [...prev, ...curr.types];
     } else if (curr.format === 'vc+sd-jwt') {
-      return [...prev, curr.credential_definition.vct];
+      return [...prev, curr.vct];
     }
 
     return prev;
