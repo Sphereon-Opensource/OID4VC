@@ -101,7 +101,12 @@ export function getSupportedCredential(opts?: {
 
 export function getTypesFromCredentialSupported(credentialSupported: CredentialSupported, opts?: { filterVerifiableCredential: boolean }) {
   let types: string[] = [];
-  if (credentialSupported.format === 'jwt_vc_json' || credentialSupported.format === 'jwt_vc_json-ld' || credentialSupported.format === 'ldp_vc') {
+  if (
+    credentialSupported.format === 'jwt_vc_json' ||
+    credentialSupported.format === 'jwt_vc' ||
+    credentialSupported.format === 'jwt_vc_json-ld' ||
+    credentialSupported.format === 'ldp_vc'
+  ) {
     types = credentialSupported.types;
   } else if (credentialSupported.format === 'vc+sd-jwt') {
     types = [credentialSupported.credential_definition.vct];

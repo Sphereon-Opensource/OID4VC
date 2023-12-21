@@ -23,6 +23,25 @@ export class CredentialRequestClientBuilder {
   token?: string;
   version?: OpenId4VCIVersion;
 
+  public static fromCredentialIssuer({
+    credentialIssuer,
+    metadata,
+    version,
+    credentialTypes,
+  }: {
+    credentialIssuer: string;
+    metadata?: EndpointMetadata;
+    version?: OpenId4VCIVersion;
+    credentialTypes: string | string[];
+  }): CredentialRequestClientBuilder {
+    const issuer = credentialIssuer;
+    const builder = new CredentialRequestClientBuilder();
+    builder.withVersion(version ?? OpenId4VCIVersion.VER_1_0_11);
+    builder.withCredentialEndpoint(metadata?.credential_endpoint ?? (issuer.endsWith('/') ? `${issuer}credential` : `${issuer}/credential`));
+    builder.withCredentialType(credentialTypes);
+    return builder;
+  }
+
   public static async fromURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): Promise<CredentialRequestClientBuilder> {
     const offer = await CredentialOfferClient.fromURI(uri);
     return CredentialRequestClientBuilder.fromCredentialOfferRequest({ request: offer, ...offer, metadata, version: offer.version });
