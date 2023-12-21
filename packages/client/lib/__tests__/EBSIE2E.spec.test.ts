@@ -1,15 +1,15 @@
-import { Alg, CodeChallengeMethod, Jwt } from '@sphereon/oid4vci-common'
-import { toJwk } from '@sphereon/ssi-sdk-ext.key-utils'
-import { CredentialMapper } from '@sphereon/ssi-types'
+import { Alg, CodeChallengeMethod, Jwt } from '@sphereon/oid4vci-common';
+import { toJwk } from '@sphereon/ssi-sdk-ext.key-utils';
+import { CredentialMapper } from '@sphereon/ssi-types';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
-import { from } from '@trust/keyto'
-import { fetch } from 'cross-fetch'
-import debug from 'debug'
-import { base64url, importJWK, JWK, SignJWT } from 'jose'
-import * as u8a from 'uint8arrays'
+import { from } from '@trust/keyto';
+import { fetch } from 'cross-fetch';
+import debug from 'debug';
+import { base64url, importJWK, JWK, SignJWT } from 'jose';
+import * as u8a from 'uint8arrays';
 
-import { OpenID4VCIClient } from '..'
+import { OpenID4VCIClient } from '..';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -60,7 +60,7 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
       uri: offer,
       kid,
       alg: Alg.ES256,
-      clientId: DID_URL_ENCODED
+      clientId: DID_URL_ENCODED,
     });
     expect(client.credentialOffer).toBeDefined();
     expect(client.endpointMetadata).toBeDefined();
@@ -68,9 +68,13 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
     expect(client.getAccessTokenEndpoint()).toEqual(`${AUTH_URL}/token`);
 
     if (credentialType !== 'CTWalletCrossPreAuthorised') {
-      const url = client.createAuthorizationRequestUrl({redirectUri: 'openid4vc%3A', codeChallenge: 'mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs', codeChallengeMethod: CodeChallengeMethod.SHA256})
-      const result = await fetch(url)
-      console.log(result.text())
+      const url = client.createAuthorizationRequestUrl({
+        redirectUri: 'openid4vc%3A',
+        codeChallenge: 'mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs',
+        codeChallengeMethod: CodeChallengeMethod.SHA256,
+      });
+      const result = await fetch(url);
+      console.log(result.text());
     }
 
     const accessToken = await client.acquireAccessToken({ pin: '0891' });
@@ -90,7 +94,7 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
       },
       kid,
     });
-    console.log(JSON.stringify(credentialResponse, null, 2))
+    console.log(JSON.stringify(credentialResponse, null, 2));
     expect(credentialResponse.credential).toBeDefined();
     const wrappedVC = CredentialMapper.toWrappedVerifiableCredential(credentialResponse.credential!);
     expect(format.startsWith(wrappedVC.format)).toEqual(true);
@@ -99,7 +103,7 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
   it(
     'succeed in a full flow with the client using OpenID4VCI version 11 and jwt_vc_json',
     async () => {
-      await test('CTWalletCrossPreAuthorised')
+      await test('CTWalletCrossPreAuthorised');
       // await test('CTWalletCrossInTime');
     },
     UNIT_TEST_TIMEOUT,

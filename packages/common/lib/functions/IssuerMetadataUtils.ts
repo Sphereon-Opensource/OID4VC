@@ -43,7 +43,7 @@ export function getSupportedCredential(opts?: {
   }
   const { version, types } = opts ?? { version: OpenId4VCIVersion.VER_1_0_11 };
   if (version === OpenId4VCIVersion.VER_1_0_08 || !Array.isArray(issuerMetadata.credentials_supported)) {
-    credentialsSupported = credentialsSupportedV8ToV11((issuerMetadata as IssuerMetadataV1_0_08).credentials_supported);
+    credentialsSupported = credentialsSupportedV8ToV11((issuerMetadata as IssuerMetadataV1_0_08).credentials_supported ?? {});
   } else {
     credentialsSupported = (issuerMetadata as CredentialIssuerMetadata).credentials_supported;
   }

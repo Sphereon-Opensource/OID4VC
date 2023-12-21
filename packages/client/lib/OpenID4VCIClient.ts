@@ -60,7 +60,7 @@ export class OpenID4VCIClient {
     clientId,
     kid,
     alg,
-    credentialIssuer
+    credentialIssuer,
   }: {
     credentialOffer?: CredentialOfferRequestWithBaseUrl;
     kid?: string;
@@ -69,12 +69,11 @@ export class OpenID4VCIClient {
     credentialIssuer?: string;
   }) {
     this._credentialOffer = credentialOffer;
-    const issuer =
-      credentialIssuer ?? (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
+    const issuer = credentialIssuer ?? (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
     if (!issuer) {
-      throw Error('No credential issuer supplied or deduced from offer')
+      throw Error('No credential issuer supplied or deduced from offer');
     }
-    this._credentialIssuer = issuer
+    this._credentialIssuer = issuer;
     this._kid = kid;
     this._alg = alg;
     this._clientId = clientId;
@@ -154,7 +153,7 @@ export class OpenID4VCIClient {
       const creds = this.credentialOffer.credential_offer.credentials;
 
       authorizationDetails = creds
-        .flatMap((cred) => (typeof cred === 'string' ? this.getCredentialsSupported(true) : cred as CredentialSupported))
+        .flatMap((cred) => (typeof cred === 'string' ? this.getCredentialsSupported(true) : (cred as CredentialSupported)))
         .map((cred) => {
           return {
             ...cred,
