@@ -53,7 +53,7 @@ const kid = `${DID}#z2dmzD81cgPx8Vki7JbuuMmFYrWPgYoytykUZ3eyqht1j9Kbrm54tL4pRrDD
 
 // const jw = jose.importKey()
 describe('OID4VCI-Client using Sphereon issuer should', () => {
-  async function test(credentialType: 'CTWalletCrossPreAuthorised' | 'CTWalletCrossInTime') {
+  async function test(credentialType: 'CTWalletCrossPreAuthorisedInTime' | 'CTWalletCrossAuthorisedInTime') {
     debug.enable('*');
     const offer = await getCredentialOffer(credentialType);
     const client = await OpenID4VCIClient.fromURI({
@@ -67,7 +67,7 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
     expect(client.getCredentialEndpoint()).toEqual(`${ISSUER_URL}/credential`);
     expect(client.getAccessTokenEndpoint()).toEqual(`${AUTH_URL}/token`);
 
-    if (credentialType !== 'CTWalletCrossPreAuthorised') {
+    if (credentialType !== 'CTWalletCrossPreAuthorisedInTime') {
       const url = client.createAuthorizationRequestUrl({
         redirectUri: 'openid4vc%3A',
         codeChallenge: 'mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs',
@@ -100,17 +100,19 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
     expect(format.startsWith(wrappedVC.format)).toEqual(true);
   }
 
-  it(
+  // Current conformance tests is not stable as changes are being applied it seems
+
+  it.skip(
     'succeed in a full flow with the client using OpenID4VCI version 11 and jwt_vc_json',
     async () => {
-      await test('CTWalletCrossPreAuthorised');
-      // await test('CTWalletCrossInTime');
+      await test('CTWalletCrossPreAuthorisedInTime');
+      // await test('CTWalletCrossAuthorisedInTime');
     },
     UNIT_TEST_TIMEOUT,
   );
 });
 
-async function getCredentialOffer(credentialType: 'CTWalletCrossPreAuthorised' | 'CTWalletCrossInTime'): Promise<string> {
+async function getCredentialOffer(credentialType: 'CTWalletCrossPreAuthorisedInTime' | 'CTWalletCrossAuthorisedInTime'): Promise<string> {
   const credentialOffer = await fetch(
     `https://conformance-test.ebsi.eu/conformance/v3/issuer-mock/initiate-credential-offer?credential_type=${credentialType}&client_id=${DID_URL_ENCODED}&credential_offer_endpoint=openid-credential-offer%3A%2F%2F`,
     {
