@@ -1,9 +1,11 @@
-import { CodeChallengeMethod, WellKnownEndpoints } from '@sphereon/oid4vci-common';
+import { CodeChallengeMethod, EndpointMetadataResult, Jwt, WellKnownEndpoints } from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
+import { SignJWT } from 'jose'
 import nock from 'nock';
 
 import { OpenID4VCIClient } from '../OpenID4VCIClient';
+
 
 const MOCK_URL = 'https://server.example.com/';
 
@@ -95,25 +97,25 @@ describe('OpenID4VCIClient should', () => {
             format: 'ldp_vc',
             credential_definition: {
               '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
-              types: ['VerifiableCredential', 'UniversityDegreeCredential'],
-            },
+              types: ['VerifiableCredential', 'UniversityDegreeCredential']
+            }
           },
           {
             type: 'openid_credential',
             format: 'mso_mdoc',
-            doctype: 'org.iso.18013.5.1.mDL',
-          },
+            doctype: 'org.iso.18013.5.1.mDL'
+          }
         ],
-        redirectUri: 'http://localhost:8881/cb',
-      }),
+        redirectUri: 'http://localhost:8881/cb'
+      })
     ).toEqual(
-      'https://server.example.com/v1/auth/authorize?response_type=code&code_challenge_method=S256&code_challenge=mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs&authorization_details=%5B%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22ldp_vc%22%2C%22credential_definition%22%3A%7B%22%40context%22%3A%5B%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fv1%22%2C%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fexamples%2Fv1%22%5D%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%2C%22locations%22%3A%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%7D%2C%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22mso_mdoc%22%2C%22doctype%22%3A%22org%2Eiso%2E18013%2E5%2E1%2EmDL%22%2C%22locations%22%3A%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%7D%5D&redirect_uri=http%3A%2F%2Flocalhost%3A8881%2Fcb&scope=openid&client_id=test-client',
-    );
-  });
+      'https://server.example.com/v1/auth/authorize?response_type=code&code_challenge_method=S256&code_challenge=mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs&authorization_details=%5B%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22ldp_vc%22%2C%22credential_definition%22%3A%7B%22%40context%22%3A%5B%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fv1%22%2C%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fexamples%2Fv1%22%5D%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%2C%22locations%22%3A%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%7D%2C%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22mso_mdoc%22%2C%22doctype%22%3A%22org%2Eiso%2E18013%2E5%2E1%2EmDL%22%2C%22locations%22%3A%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%7D%5D&redirect_uri=http%3A%2F%2Flocalhost%3A8881%2Fcb&scope=openid&client_id=test-client'
+    )
+  })
   it('create an authorization request url with authorization_details object property', async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    client._endpointMetadata?.credentialIssuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client._endpointMetadata?.credentialIssuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`
 
     expect(
       client.createAuthorizationRequestUrl({
@@ -124,19 +126,19 @@ describe('OpenID4VCIClient should', () => {
           format: 'ldp_vc',
           credential_definition: {
             '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
-            types: ['VerifiableCredential', 'UniversityDegreeCredential'],
-          },
+            types: ['VerifiableCredential', 'UniversityDegreeCredential']
+          }
         },
-        redirectUri: 'http://localhost:8881/cb',
-      }),
+        redirectUri: 'http://localhost:8881/cb'
+      })
     ).toEqual(
-      'https://server.example.com/v1/auth/authorize?response_type=code&code_challenge_method=S256&code_challenge=mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs&authorization_details=%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22ldp_vc%22%2C%22credential_definition%22%3A%7B%22%40context%22%3A%5B%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fv1%22%2C%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fexamples%2Fv1%22%5D%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%2C%22locations%22%3A%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%7D&redirect_uri=http%3A%2F%2Flocalhost%3A8881%2Fcb&scope=openid&client_id=test-client',
-    );
-  });
+      'https://server.example.com/v1/auth/authorize?response_type=code&code_challenge_method=S256&code_challenge=mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs&authorization_details=%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22ldp_vc%22%2C%22credential_definition%22%3A%7B%22%40context%22%3A%5B%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fv1%22%2C%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fexamples%2Fv1%22%5D%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%2C%22locations%22%3A%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%7D&redirect_uri=http%3A%2F%2Flocalhost%3A8881%2Fcb&scope=openid&client_id=test-client'
+    )
+  })
   it('create an authorization request url with authorization_details and scope', async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    client._endpointMetadata.credentialIssuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client._endpointMetadata.credentialIssuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`
 
     expect(
       client.createAuthorizationRequestUrl({
@@ -148,14 +150,70 @@ describe('OpenID4VCIClient should', () => {
           locations: ['https://test.com'],
           credential_definition: {
             '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
-            types: ['VerifiableCredential', 'UniversityDegreeCredential'],
-          },
+            types: ['VerifiableCredential', 'UniversityDegreeCredential']
+          }
         },
         scope: 'openid',
-        redirectUri: 'http://localhost:8881/cb',
-      }),
+        redirectUri: 'http://localhost:8881/cb'
+      })
     ).toEqual(
-      'https://server.example.com/v1/auth/authorize?response_type=code&code_challenge_method=S256&code_challenge=mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs&authorization_details=%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22ldp_vc%22%2C%22locations%22%3A%5B%22https%3A%2F%2Ftest%2Ecom%22%2C%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%5D%2C%22credential_definition%22%3A%7B%22%40context%22%3A%5B%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fv1%22%2C%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fexamples%2Fv1%22%5D%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%7D&redirect_uri=http%3A%2F%2Flocalhost%3A8881%2Fcb&scope=openid&client_id=test-client',
-    );
-  });
-});
+      'https://server.example.com/v1/auth/authorize?response_type=code&code_challenge_method=S256&code_challenge=mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs&authorization_details=%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22ldp_vc%22%2C%22locations%22%3A%5B%22https%3A%2F%2Ftest%2Ecom%22%2C%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%5D%2C%22credential_definition%22%3A%7B%22%40context%22%3A%5B%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fv1%22%2C%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fexamples%2Fv1%22%5D%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%7D&redirect_uri=http%3A%2F%2Flocalhost%3A8881%2Fcb&scope=openid&client_id=test-client'
+    )
+  })
+})
+
+
+// Research code below
+const ESIGNET_ISSUER_URL = 'https://esignet.collab.mosip.net'
+describe('OpenID4VCIClient with authorizaion_code flow should', () => {
+  let client: OpenID4VCIClient
+  beforeEach(async () => {
+
+    const origResponse = await fetch('https://esignet.collab.mosip.net/.well-known/openid-credential-issuer')
+    const responseText = await origResponse.text()
+    console.log(responseText)
+
+    client = await OpenID4VCIClient.fromIssuer({
+      issuer: ESIGNET_ISSUER_URL,
+      clientId: 'MUq1H5M4OBr9fxSC2fJrY4felRmxtDw4iRls2lBZQzI'
+    })
+  })
+
+  let metaData: EndpointMetadataResult
+  it('retrieve server metadata', async () => {
+    metaData = await client.retrieveServerMetadata()
+    expect(metaData.token_endpoint).toBeDefined()
+    expect(metaData.issuer).toBeDefined()
+    expect(metaData.credential_endpoint).toBeDefined()
+    expect(metaData.credentialIssuerMetadata).toBeDefined()
+    expect(metaData.credentialIssuerMetadata.credentials_supported).toBeDefined()
+    expect(metaData.credentialIssuerMetadata.credentials_supported).toHaveLength(1)
+    console.log(metaData.credentialIssuerMetadata)
+  })
+
+
+  async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promise<string> {
+    return await new SignJWT({ ...args.payload })
+      .setProtectedHeader({ ...args.header, kid: kid! })
+      .setIssuer(kid!)
+      .setIssuedAt()
+      .setExpirationTime('2h')
+      .sign(importedJwk)
+  }
+
+  it('get credential', async () => {
+
+    const credentialsSupported = metaData.credentialIssuerMetadata.credentials_supported
+    const credentials = await client.acquireCredentials({
+      credentialTypes: credentialsSupported[0],
+      format: 'ldp_vc',
+      proofCallbacks: {
+        signCallback: proofOfPossessionCallbackFunction
+      }
+    })
+
+    expect(credentials).toBeDefined()
+    expect(credentials.credential).toBeDefined()
+  })
+
+})

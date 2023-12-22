@@ -15,7 +15,10 @@ import {
   PushedAuthorizationResponse,
   ResponseType,
 } from '@sphereon/oid4vci-common';
-import { getSupportedCredentials, getTypesFromCredentialSupported } from '@sphereon/oid4vci-common/dist/functions/IssuerMetadataUtils';
+import {
+  getSupportedCredentials,
+  getTypesFromCredentialSupported
+} from '@sphereon/oid4vci-common/dist/functions/IssuerMetadataUtils';
 import { CredentialSupportedTypeV1_0_08 } from '@sphereon/oid4vci-common/dist/types/v1_0_08.types';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
@@ -46,28 +49,31 @@ interface AuthRequestOpts {
 }
 
 export class OpenID4VCIClient {
-  private readonly _credentialOffer: CredentialOfferRequestWithBaseUrl;
+  private readonly _credentialOffer: CredentialOfferRequestWithBaseUrl | undefined;
   private _clientId?: string;
   private _kid: string | undefined;
   private _alg: Alg | string | undefined;
   private _endpointMetadata: EndpointMetadataResult | undefined;
   private _accessTokenResponse: AccessTokenResponse | undefined;
+  private _issuer: string | undefined;
 
-  private constructor(credentialOffer: CredentialOfferRequestWithBaseUrl, kid?: string, alg?: Alg | string, clientId?: string) {
+  private constructor(credentialOffer?: CredentialOfferRequestWithBaseUrl, issuer?: string, kid?: string, alg?: Alg | string, clientId?: string) {
     this._credentialOffer = credentialOffer;
+    this._issuer = issuer;
     this._kid = kid;
     this._alg = alg;
     this._clientId = clientId;
   }
 
+
   public static async fromURI({
-    uri,
-    kid,
-    alg,
-    retrieveServerMetadata,
-    clientId,
-    resolveOfferUri,
-  }: {
+                                uri,
+                                kid,
+                                alg,
+                                retrieveServerMetadata,
+                                clientId,
+                                resolveOfferUri
+                              }: {
     uri: string;
     kid?: string;
     alg?: Alg | string;
@@ -75,7 +81,28 @@ export class OpenID4VCIClient {
     resolveOfferUri?: boolean;
     clientId?: string;
   }): Promise<OpenID4VCIClient> {
-    const client = new OpenID4VCIClient(await CredentialOfferClient.fromURI(uri, { resolve: resolveOfferUri }), kid, alg, clientId);
+    const client = new OpenID4VCIClient(await CredentialOfferClient.fromURI(uri, { resolve: resolveOfferUri }), undefined, kid, alg, clientId);
+
+    if (retrieveServerMetadata === undefined || retrieveServerMetadata) {
+      await client.retrieveServerMetadata();
+    }
+    return client;
+  }
+
+  public static async fromIssuer({
+                                   issuer,
+                                   kid,
+                                   alg,
+                                   retrieveServerMetadata,
+                                   clientId
+                                 }: {
+    issuer: string;
+    kid?: string;
+    alg?: Alg | string;
+    retrieveServerMetadata?: boolean;
+    clientId?: string;
+  }): Promise<OpenID4VCIClient> {
+    const client = new OpenID4VCIClient(undefined, issuer, kid, alg, clientId);
 
     if (retrieveServerMetadata === undefined || retrieveServerMetadata) {
       await client.retrieveServerMetadata();
@@ -86,7 +113,11 @@ export class OpenID4VCIClient {
   public async retrieveServerMetadata(): Promise<EndpointMetadataResult> {
     this.assertIssuerData();
     if (!this._endpointMetadata) {
-      this._endpointMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this.credentialOffer);
+      if (this._issuer) {
+        this._endpointMetadata = await MetadataClient.retrieveAllMetadata(this._issuer);
+      } else {
+        this._endpointMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this.credentialOffer);
+      }
     }
     return this.endpointMetadata;
   }
@@ -376,13 +407,13 @@ export class OpenID4VCIClient {
   // Then match the object array on server metadata
   getCredentialsSupported(
     restrictToInitiationTypes: boolean,
-    format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
+    format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[]
   ): CredentialSupported[] {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),
       format: format,
-      types: restrictToInitiationTypes ? this.getCredentialOfferTypes() : undefined,
+      types: restrictToInitiationTypes ? this.getCredentialOfferTypes() : undefined
     });
   }
 
@@ -413,6 +444,9 @@ export class OpenID4VCIClient {
   }
 
   get credentialOffer(): CredentialOfferRequestWithBaseUrl {
+    if (!this._credentialOffer) {
+      throw new Error('no active credential offer available');
+    }
     return this._credentialOffer;
   }
 
@@ -473,7 +507,7 @@ export class OpenID4VCIClient {
   }
 
   private assertIssuerData(): void {
-    if (!this._credentialOffer) {
+    if (!this._credentialOffer && !this._issuer) {
       throw Error(`No issuance initiation or credential offer present`);
     }
   }
