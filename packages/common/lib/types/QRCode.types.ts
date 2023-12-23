@@ -60,7 +60,7 @@ export interface ComponentOptions {
      */
     protectors?: boolean;
   };
-};
+}
 
 export interface QRCodeOpts {
   /**
@@ -224,4 +224,4 @@ export interface QRCodeOpts {
    * @deafultValue 0.4
    */
   dotScale?: number;
-};
+}

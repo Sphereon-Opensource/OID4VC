@@ -75,8 +75,8 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-types':
-        specifier: 0.17.2
-        version: 0.17.2
+        specifier: 0.17.6-unstable.69
+        version: 0.17.6-unstable.69
       jose:
         specifier: ^4.10.0
         version: 4.14.6
@@ -118,8 +118,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.17.2
-        version: 0.17.2
+        specifier: 0.17.6-unstable.69
+        version: 0.17.6-unstable.69
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8
@@ -200,8 +200,8 @@ importers:
   packages/common:
     dependencies:
       '@sphereon/ssi-types':
-        specifier: 0.17.2
-        version: 0.17.2
+        specifier: 0.17.6-unstable.69
+        version: 0.17.6-unstable.69
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8
@@ -222,8 +222,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.17.2
-        version: 0.17.2
+        specifier: 0.17.6-unstable.69
+        version: 0.17.6-unstable.69
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0
@@ -256,11 +256,11 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-express-support':
-        specifier: 0.17.2
-        version: 0.17.2
+        specifier: 0.17.6-unstable.69
+        version: 0.17.6-unstable.69
       '@sphereon/ssi-types':
-        specifier: 0.17.2
-        version: 0.17.2
+        specifier: 0.17.6-unstable.69
+        version: 0.17.6-unstable.69
       body-parser:
         specifier: ^1.20.2
         version: 1.20.2
@@ -3349,6 +3349,12 @@ packages:
   /@react-native/polyfills@2.0.0:
     resolution: {integrity: sha512-K0aGNn1TjalKj+65D7ycc1//H9roAQ51GJVk5ZJQFb2teECGmzd86bYDC0aYdbRf7gtovescq4Zt6FR0tgXiHQ==}
 
+  /@sd-jwt/core@0.1.2-alpha.0:
+    resolution: {integrity: sha512-x4MVXar6WmPauZDRJ3aHwaY8o/bHzN77Ts7o43JKuuqIBFjPgAcSlRtd/Xk1rWhazFai4MCIwJDSQ1OQRJtNug==}
+    dependencies:
+      buffer: 6.0.3
+    dev: false
+
   /@segment/loosely-validate-event@2.0.0:
     resolution: {integrity: sha512-ZMCSfztDBqwotkl848ODgVcAmN4OItEWDCkshcKz0/W6gGSQayuuCtWV/MlodFivAZD793d6UgANd6wCXUfrIw==}
     dependencies:
@@ -3412,8 +3418,8 @@ packages:
     dependencies:
       '@sinonjs/commons': 3.0.0
 
-  /@sphereon/ssi-express-support@0.17.2:
-    resolution: {integrity: sha512-OrLC7YAelpUmCIzPRgHM97HBNFqDoSdJNNssstS6Ho0ZXswq4fsPDm+h49+//ogp1ERbuOl9Ywqhp+3DdLZCPA==}
+  /@sphereon/ssi-express-support@0.17.6-unstable.69:
+    resolution: {integrity: sha512-IpiiW6KPv5zjvlCCxyw4S093WL4na6zvJjoWI26te04Y4T1yYF3FfaGdcA+BAQl4URvvcp09mzay2Z8RwmDLSA==}
     peerDependencies:
       '@noble/hashes': 1.2.0
       passport-azure-ad: ^4.3.5
@@ -3443,9 +3449,10 @@ packages:
       - supports-color
     dev: false
 
-  /@sphereon/ssi-types@0.17.2:
-    resolution: {integrity: sha512-Qo1dkISavtPIe1WKZXZGyHvquoUvdUlDI0GLzb21clKFPuxbawXdlxpCqOh6NCNRfX7ohEeCUQdEA1PNBlnKYA==}
+  /@sphereon/ssi-types@0.17.6-unstable.69:
+    resolution: {integrity: sha512-VwjVd6XhoV5QecWcRh0RpBf5N324tfhYcQrVk9se3brqMNMauZTBbhUhk+QLdwFd+u/1+IfEWnS28HyIU7lXHQ==}
     dependencies:
+      '@sd-jwt/core': 0.1.2-alpha.0
       jwt-decode: 3.1.2
     dev: false
 
@@ -4964,7 +4971,7 @@ packages:
       minipass-pipeline: 1.2.4
       p-map: 4.0.0
       ssri: 10.0.5
-      tar: 6.2.0
+      tar: 6.1.11
       unique-filename: 3.0.0
     dev: true
 
@@ -10044,7 +10051,7 @@ packages:
       npmlog: 6.0.2
       rimraf: 3.0.2
       semver: 7.5.4
-      tar: 6.2.0
+      tar: 6.1.11
       which: 2.0.2
     transitivePeerDependencies:
       - supports-color
