@@ -1,4 +1,5 @@
 export * from './CredentialRequestUtil';
+export * from './CredentialResponseUtil';
 export * from './CredentialOfferUtil';
 export * from './Encoding';
 export * from './TypeConversionUtils';

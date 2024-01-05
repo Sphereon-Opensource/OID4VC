@@ -45,6 +45,7 @@ export class MetadataClient {
   public static async retrieveAllMetadata(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadataResult> {
     let token_endpoint: string | undefined;
     let credential_endpoint: string | undefined;
+    let deferred_credential_endpoint: string | undefined;
     let authorization_endpoint: string | undefined;
     let authorizationServerType: AuthorizationServerType = 'OID4VCI';
     let authorization_server: string = issuer;
@@ -53,6 +54,7 @@ export class MetadataClient {
     if (credentialIssuerMetadata) {
       debug(`Issuer ${issuer} OID4VCI well-known server metadata\r\n${JSON.stringify(credentialIssuerMetadata)}`);
       credential_endpoint = credentialIssuerMetadata.credential_endpoint;
+      deferred_credential_endpoint = credentialIssuerMetadata.deferred_credential_endpoint;
       if (credentialIssuerMetadata.token_endpoint) {
         token_endpoint = credentialIssuerMetadata.token_endpoint;
       }
@@ -111,10 +113,19 @@ export class MetadataClient {
       if (authMetadata.credential_endpoint) {
         if (credential_endpoint && authMetadata.credential_endpoint !== credential_endpoint) {
           debug(
-            `Credential issuer has a different credential_endpoint (${credential_endpoint}) from the Authorization Server (${authMetadata.token_endpoint}). Will use the issuer value`,
+            `Credential issuer has a different credential_endpoint (${credential_endpoint}) from the Authorization Server (${authMetadata.credential_endpoint}). Will use the issuer value`,
           );
         } else {
           credential_endpoint = authMetadata.credential_endpoint;
+        }
+      }
+      if (authMetadata.deferred_credential_endpoint) {
+        if (deferred_credential_endpoint && authMetadata.deferred_credential_endpoint !== deferred_credential_endpoint) {
+          debug(
+            `Credential issuer has a different deferred_credential_endpoint (${deferred_credential_endpoint}) from the Authorization Server (${authMetadata.deferred_credential_endpoint}). Will use the issuer value`,
+          );
+        } else {
+          deferred_credential_endpoint = authMetadata.deferred_credential_endpoint;
         }
       }
     }
@@ -148,6 +159,7 @@ export class MetadataClient {
       issuer,
       token_endpoint,
       credential_endpoint,
+      deferred_credential_endpoint,
       authorization_server,
       authorization_endpoint,
       authorizationServerType,

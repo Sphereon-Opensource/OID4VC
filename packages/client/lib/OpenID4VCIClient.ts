@@ -354,6 +354,8 @@ export class OpenID4VCIClient {
     kid,
     alg,
     jti,
+    deferredCredentialAwait,
+    deferredCredentialIntervalInMS,
   }: {
     credentialTypes: string | string[];
     proofCallbacks: ProofOfPossessionCallbacks<any>;
@@ -361,6 +363,8 @@ export class OpenID4VCIClient {
     kid?: string;
     alg?: Alg | string;
     jti?: string;
+    deferredCredentialAwait?: boolean;
+    deferredCredentialIntervalInMS?: number;
   }): Promise<CredentialResponse> {
     if (alg) {
       this._alg = alg;
@@ -382,6 +386,7 @@ export class OpenID4VCIClient {
         });
 
     requestBuilder.withTokenFromResponse(this.accessTokenResponse);
+    requestBuilder.withDeferredCredentialAwait(deferredCredentialAwait ?? false, deferredCredentialIntervalInMS);
     if (this.endpointMetadata?.credentialIssuerMetadata) {
       const metadata = this.endpointMetadata.credentialIssuerMetadata;
       const types = Array.isArray(credentialTypes) ? [...credentialTypes].sort() : [credentialTypes];
@@ -550,6 +555,13 @@ export class OpenID4VCIClient {
     return this.endpointMetadata ? this.endpointMetadata.credential_endpoint : `${this.getIssuer()}/credential`;
   }
 
+  public hasDeferredCredentialEndpoint(): boolean {
+    return !!this.getAccessTokenEndpoint();
+  }
+  public getDeferredCredentialEndpoint(): string {
+    this.assertIssuerData();
+    return this.endpointMetadata ? this.endpointMetadata.credential_endpoint : `${this.getIssuer()}/credential`;
+  }
   private assertIssuerData(): void {
     if (!this._credentialOffer && this.issuerSupportedFlowTypes().includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
       throw Error(`No issuance initiation or credential offer present`);

@@ -1,7 +1,9 @@
 import {
+  acquireDeferredCredential,
   CredentialResponse,
   getCredentialRequestForVersion,
   getUniformFormat,
+  isDeferredCredentialResponse,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   OpenIDResponse,
@@ -19,7 +21,10 @@ import { isValidURL, post } from './functions';
 const debug = Debug('sphereon:oid4vci:credential');
 
 export interface CredentialRequestOpts {
+  deferredCredentialAwait?: boolean;
+  deferredCredentialIntervalInMS?: number;
   credentialEndpoint: string;
+  deferredCredentialEndpoint?: string;
   credentialTypes: string[];
   format?: CredentialFormat | OID4VCICredentialFormat;
   proof: ProofOfPossession;
@@ -27,15 +32,44 @@ export interface CredentialRequestOpts {
   version: OpenId4VCIVersion;
 }
 
+export async function buildProof<DIDDoc>(
+  proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession,
+  opts: {
+    version: OpenId4VCIVersion;
+    cNonce?: string;
+  },
+) {
+  if ('proof_type' in proofInput) {
+    if (opts.cNonce) {
+      throw Error(`Cnonce param is only supported when using a Proof of Posession builder`);
+      //decodeJwt(proofInput.jwt).
+    }
+    return await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession, opts.version).build();
+  }
+  if (opts.cNonce) {
+    proofInput.withAccessTokenNonce(opts.cNonce);
+  }
+  return await proofInput.build();
+}
+
 export class CredentialRequestClient {
   private readonly _credentialRequestOpts: Partial<CredentialRequestOpts>;
+  private _isDeferred = false;
 
   get credentialRequestOpts(): CredentialRequestOpts {
     return this._credentialRequestOpts as CredentialRequestOpts;
   }
 
+  public isDeferred(): boolean {
+    return this._isDeferred;
+  }
+
   public getCredentialEndpoint(): string {
     return this.credentialRequestOpts.credentialEndpoint;
+  }
+
+  public getDeferredCredentialEndpoint(): string | undefined {
+    return this.credentialRequestOpts.deferredCredentialEndpoint;
   }
 
   public constructor(builder: CredentialRequestClientBuilder) {
@@ -63,9 +97,38 @@ export class CredentialRequestClient {
     debug(`Acquiring credential(s) from: ${credentialEndpoint}`);
     debug(`request\n: ${JSON.stringify(request, null, 2)}`);
     const requestToken: string = this.credentialRequestOpts.token;
-    const response: OpenIDResponse<CredentialResponse> = await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken });
+    let response: OpenIDResponse<CredentialResponse> = await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken });
+    this._isDeferred = isDeferredCredentialResponse(response);
+    if (this.isDeferred() && this.credentialRequestOpts.deferredCredentialAwait && response.successBody) {
+      response = await this.acquireDeferredCredential(response.successBody, { bearerToken: this.credentialRequestOpts.token });
+    }
+
     debug(`Credential endpoint ${credentialEndpoint} response:\r\n${JSON.stringify(response, null, 2)}`);
     return response;
+  }
+
+  public async acquireDeferredCredential(
+    response: Pick<CredentialResponse, 'transaction_id' | 'acceptance_token' | 'c_nonce'>,
+    opts?: {
+      bearerToken?: string;
+    },
+  ): Promise<OpenIDResponse<CredentialResponse>> {
+    const transactionId = response.transaction_id;
+    const bearerToken = response.acceptance_token ?? opts?.bearerToken;
+    const deferredCredentialEndpoint = this.getDeferredCredentialEndpoint();
+    if (!deferredCredentialEndpoint) {
+      throw Error(`No deferred credential endpoint supplied.`);
+    } else if (!bearerToken) {
+      throw Error(`No bearer token present and refresh for defered endpoint not supported yet`);
+      // todo updated bearer token with new c_nonce
+    }
+    return await acquireDeferredCredential({
+      bearerToken,
+      transactionId,
+      deferredCredentialEndpoint,
+      deferredCredentialAwait: this.credentialRequestOpts.deferredCredentialAwait,
+      deferredCredentialIntervalInMS: this.credentialRequestOpts.deferredCredentialIntervalInMS,
+    });
   }
 
   public async createCredentialRequest<DIDDoc>(opts: {
@@ -93,11 +156,7 @@ export class CredentialRequestClient {
     else if (!this.isV11OrHigher() && types.length !== 1) {
       throw Error('Only a single credential type is supported for V8/V9');
     }
-
-    const proof =
-      'proof_type' in proofInput
-        ? await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession, opts.version).build()
-        : await proofInput.build();
+    const proof = await buildProof(proofInput, opts);
 
     // TODO: we should move format specific logic
     if (format === 'jwt_vc_json' || format === 'jwt_vc') {

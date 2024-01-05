@@ -53,7 +53,7 @@ const kid = `${DID}#z2dmzD81cgPx8Vki7JbuuMmFYrWPgYoytykUZ3eyqht1j9Kbrm54tL4pRrDD
 
 // const jw = jose.importKey()
 describe('OID4VCI-Client using Sphereon issuer should', () => {
-  async function test(credentialType: 'CTWalletCrossPreAuthorisedInTime' | 'CTWalletCrossAuthorisedInTime') {
+  async function test(credentialType: 'CTWalletCrossPreAuthorisedInTime' | 'CTWalletCrossPreAuthorisedDeferred' | 'CTWalletCrossAuthorisedInTime') {
     debug.enable('*');
     const offer = await getCredentialOffer(credentialType);
     const client = await OpenID4VCIClient.fromURI({
@@ -93,6 +93,8 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
         signCallback: proofOfPossessionCallbackFunction,
       },
       kid,
+      deferredCredentialAwait: true,
+      deferredCredentialIntervalInMS: 5000,
     });
     console.log(JSON.stringify(credentialResponse, null, 2));
     expect(credentialResponse.credential).toBeDefined();
@@ -102,17 +104,20 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
 
   // Current conformance tests is not stable as changes are being applied it seems
 
-  it.skip(
+  it(
     'succeed in a full flow with the client using OpenID4VCI version 11 and jwt_vc_json',
     async () => {
       await test('CTWalletCrossPreAuthorisedInTime');
+      await test('CTWalletCrossPreAuthorisedDeferred');
       // await test('CTWalletCrossAuthorisedInTime');
     },
     UNIT_TEST_TIMEOUT,
   );
 });
 
-async function getCredentialOffer(credentialType: 'CTWalletCrossPreAuthorisedInTime' | 'CTWalletCrossAuthorisedInTime'): Promise<string> {
+async function getCredentialOffer(
+  credentialType: 'CTWalletCrossPreAuthorisedInTime' | 'CTWalletCrossAuthorisedInTime' | 'CTWalletCrossPreAuthorisedDeferred',
+): Promise<string> {
   const credentialOffer = await fetch(
     `https://conformance-test.ebsi.eu/conformance/v3/issuer-mock/initiate-credential-offer?credential_type=${credentialType}&client_id=${DID_URL_ENCODED}&credential_offer_endpoint=openid-credential-offer%3A%2F%2F`,
     {
