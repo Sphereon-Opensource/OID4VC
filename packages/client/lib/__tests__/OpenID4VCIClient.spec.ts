@@ -165,7 +165,7 @@ describe('OpenID4VCIClient should', () => {
 
 // Research code below
 const ESIGNET_ISSUER_URL = 'https://esignet.collab.mosip.net'
-describe('OpenID4VCIClient with authorizaion_code flow should', () => {
+describe('OpenID4VCIClient with authorization_code flow should', () => {
   let client: OpenID4VCIClient
   beforeEach(async () => {
 
