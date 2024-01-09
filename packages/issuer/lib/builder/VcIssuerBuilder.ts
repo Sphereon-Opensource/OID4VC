@@ -50,7 +50,7 @@ export class VcIssuerBuilder<DIDDoc extends object> {
   }
 
   public withAuthorizationServer(authorizationServer: string): this {
-    this.issuerMetadata.authorization_server = authorizationServer
+    this.issuerMetadata.authorization_servers = authorizationServer
     return this
   }
 

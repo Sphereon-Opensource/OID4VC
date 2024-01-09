@@ -121,6 +121,8 @@ export interface AuthorizationDetailsJwtVcJson extends CommonAuthorizationDetail
    */
   credentialSubject?: IssuerCredentialSubject;
 
+  issuer_state?: string;
+
   types: string[]; // This claim contains the type values the Wallet requests authorization for at the issuer.
 }
 

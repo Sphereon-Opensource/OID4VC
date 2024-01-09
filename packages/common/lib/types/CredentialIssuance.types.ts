@@ -3,9 +3,7 @@ import { W3CVerifiableCredential } from '@sphereon/ssi-types';
 import { AuthzFlowType } from './Authorization.types';
 import { OID4VCICredentialFormat } from './Generic.types';
 import { OpenId4VCIVersion } from './OpenID4VCIVersions.types';
-import { CredentialOfferPayloadV1_0_08 } from './v1_0_08.types';
-import { CredentialOfferPayloadV1_0_09, CredentialOfferV1_0_09 } from './v1_0_09.types';
-import { CredentialOfferPayloadV1_0_11, CredentialOfferV1_0_11 } from './v1_0_11.types';
+import { CredentialOfferPayloadV1_0_12, CredentialOfferV1_0_12 } from './v1_0_12.types';
 
 export interface CredentialResponse {
   credential?: W3CVerifiableCredential; // OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
@@ -23,9 +21,9 @@ export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOffe
   preAuthorizedCode?: string;
 }
 
-export type CredentialOffer = CredentialOfferV1_0_09 | CredentialOfferV1_0_11;
+export type CredentialOffer = CredentialOfferV1_0_12;
 
-export type CredentialOfferPayload = CredentialOfferPayloadV1_0_08 | CredentialOfferPayloadV1_0_09 | CredentialOfferPayloadV1_0_11;
+export type CredentialOfferPayload = CredentialOfferPayloadV1_0_12;
 
 export interface AssertedUniformCredentialOffer extends UniformCredentialOffer {
   credential_offer: UniformCredentialOfferPayload;
@@ -42,7 +40,7 @@ export interface UniformCredentialOfferRequest extends AssertedUniformCredential
   supportedFlows: AuthzFlowType[];
 }
 
-export type UniformCredentialOfferPayload = CredentialOfferPayloadV1_0_11;
+export type UniformCredentialOfferPayload = CredentialOfferPayloadV1_0_12;
 
 export interface ProofOfPossession {
   proof_type: 'jwt';

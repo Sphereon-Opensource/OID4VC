@@ -162,7 +162,7 @@ export class OID4VCIServer<DIDDoc extends object> {
   }
 
   private assertAccessTokenHandling(tokenEndpointOpts?: ITokenEndpointOpts) {
-    const authServer = this.issuer.issuerMetadata.authorization_server
+    const authServer = this.issuer.issuerMetadata.authorization_servers
     if (this.isTokenEndpointDisabled(tokenEndpointOpts)) {
       if (!authServer) {
         throw Error(

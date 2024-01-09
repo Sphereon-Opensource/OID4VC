@@ -3,7 +3,7 @@ import {
   CredentialIssuerMetadataOpts,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferSession,
-  CredentialOfferV1_0_11,
+  CredentialOfferV1_0_12,
   Grant,
   PIN_VALIDATION_ERROR,
   UniformCredentialOffer,

@@ -10,7 +10,7 @@ import {
   CredentialOfferFormat,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferSession,
-  CredentialOfferV1_0_11,
+  CredentialOfferV1_0_12,
   CredentialRequestV1_0_11,
   CredentialResponse,
   DID_NO_DIDDOC_ERROR,
