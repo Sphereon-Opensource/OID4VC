@@ -3,7 +3,7 @@ import {
   CredentialOfferPayload,
   CredentialOfferPayloadV1_0_09,
   CredentialOfferRequestWithBaseUrl,
-  CredentialOfferV1_0_11,
+  CredentialOfferV1_0_12,
   determineSpecVersionFromURI,
   OpenId4VCIVersion,
   toUniformCredentialOfferRequest,

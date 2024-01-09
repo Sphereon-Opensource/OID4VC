@@ -245,7 +245,7 @@ export class OpenID4VCIClient {
   private handleLocations(authorizationDetails: AuthDetails) {
     if (
       authorizationDetails &&
-      (this.endpointMetadata.credentialIssuerMetadata?.authorization_server || this.endpointMetadata.authorization_endpoint)
+      (this.endpointMetadata.credentialIssuerMetadata?.authorization_servers || this.endpointMetadata.authorization_endpoint)
     ) {
       if (authorizationDetails.locations) {
         if (Array.isArray(authorizationDetails.locations)) {

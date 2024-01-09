@@ -10,12 +10,12 @@ import {
 } from './Generic.types';
 import { QRCodeOpts } from './QRCode.types';
 
-export interface CredentialOfferV1_0_11 {
-  credential_offer?: CredentialOfferPayloadV1_0_11;
+export interface CredentialOfferV1_0_12 {
+  credential_offer?: CredentialOfferPayloadV1_0_12;
   credential_offer_uri?: string;
 }
 
-export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_11 {
+export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_12 {
   baseUri?: string;
   scheme?: string;
   pinLength?: number;
@@ -23,7 +23,7 @@ export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_11 {
   credentialDataSupplierInput?: CredentialDataSupplierInput;
 }
 
-export interface CredentialOfferPayloadV1_0_11 {
+export interface CredentialOfferPayloadV1_0_12 {
   /**
    * REQUIRED. The URL of the Credential Issuer, the Wallet is requested to obtain one or more Credentials from.
    */
@@ -50,14 +50,14 @@ export interface CredentialOfferPayloadV1_0_11 {
   grants?: Grant;
 }
 
-export type CredentialRequestV1_0_11 = CommonCredentialRequest &
+export type CredentialRequestV1_0_12 = CommonCredentialRequest &
   (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc);
 
-export interface AuthorizationRequestV1_0_11 extends AuthorizationDetailsJwtVcJson, AuthorizationDetailsJwtVcJson {
-  issuer_state?: string;
+
+export interface AuthorizationRequestV1_0_12 extends AuthorizationDetailsJwtVcJson, AuthorizationDetailsJwtVcJson {
 }
 
 // todo https://sphereon.atlassian.net/browse/VDX-185
-export function isAuthorizationRequestV1_0_11(request: CommonAuthorizationRequest): boolean {
+export function isAuthorizationRequestV1_0_12(request: CommonAuthorizationRequest): boolean {
   return request && 'issuer_state' in request;
 }

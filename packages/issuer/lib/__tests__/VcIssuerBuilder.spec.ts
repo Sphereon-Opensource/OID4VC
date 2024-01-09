@@ -39,7 +39,7 @@ describe('VcIssuer builder should', () => {
       .withCredentialsSupported(credentialsSupported)
       .build()
 
-    expect(vcIssuer.issuerMetadata.authorization_server).toEqual('https://authorization-server')
+    expect(vcIssuer.issuerMetadata.authorization_servers).toEqual('https://authorization-server')
     expect(vcIssuer.issuerMetadata.display).toBeDefined()
     expect(vcIssuer.issuerMetadata.credentials_supported[0].id).toEqual('UniversityDegree_JWT')
   })

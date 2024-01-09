@@ -17,7 +17,7 @@ export interface IssuerMetadataV1_0_08 {
     //  OPTIONAL. A JSON object containing display properties for the Credential issuer.
     display: NameAndLocale | NameAndLocale[]; // OPTIONAL. An array of objects, where each object contains display properties of a Credential issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
   };
-  authorization_server?: string;
+  authorization_servers?: string;
   token_endpoint?: string;
   display?: MetadataDisplay[];
   [x: string]: unknown;
