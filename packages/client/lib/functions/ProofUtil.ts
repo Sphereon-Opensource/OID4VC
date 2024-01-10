@@ -1,4 +1,15 @@
-import { BAD_PARAMS, JWS_NOT_VALID, Jwt, JWTHeader, JWTPayload, ProofOfPossession, ProofOfPossessionCallbacks, Typ } from '@sphereon/oid4vci-common';
+import {
+  BAD_PARAMS,
+  BaseJWK,
+  JWK,
+  JWS_NOT_VALID,
+  Jwt,
+  JWTHeader,
+  JWTPayload,
+  ProofOfPossession,
+  ProofOfPossessionCallbacks,
+  Typ,
+} from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
 const debug = Debug('sphereon:openid4vci:token');
@@ -61,6 +72,7 @@ const partiallyValidateJWS = (jws: string): void => {
 export interface JwtProps {
   typ?: Typ;
   kid?: string;
+  jwk?: JWK;
   issuer?: string;
   clientId?: string;
   alg?: string;
@@ -76,7 +88,8 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   const nonce = getJwtProperty<string>('nonce', false, jwtProps?.nonce, existingJwt?.payload?.nonce); // Officially this is required, but some implementations don't have it
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const alg = getJwtProperty<string>('alg', false, jwtProps?.alg, existingJwt?.header?.alg, 'ES256')!;
-  const kid = getJwtProperty<string>('kid', true, jwtProps?.kid, existingJwt?.header?.kid);
+  const kid = getJwtProperty<string>('kid', false, jwtProps?.kid, existingJwt?.header?.kid);
+  const jwk = getJwtProperty<BaseJWK>('jwk', false, jwtProps?.jwk, existingJwt?.header?.jwk);
   const jwt: Partial<Jwt> = existingJwt ? existingJwt : {};
   const now = +new Date();
   const jwtPayload: Partial<JWTPayload> = {
@@ -92,6 +105,7 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
     typ,
     alg,
     kid,
+    jwk,
   };
   return {
     payload: { ...jwt.payload, ...jwtPayload },
@@ -99,8 +113,8 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   };
 };
 
-const getJwtProperty = <T>(propertyName: string, required: boolean, option?: string, jwtProperty?: T, defaultValue?: T): T | undefined => {
-  if (option && jwtProperty && option !== jwtProperty) {
+const getJwtProperty = <T>(propertyName: string, required: boolean, option?: string | JWK, jwtProperty?: T, defaultValue?: T): T | undefined => {
+  if (typeof option === 'string' && option && jwtProperty && option !== jwtProperty) {
     throw Error(`Cannot have a property '${propertyName}' with value '${option}' and different JWT value '${jwtProperty}' at the same time`);
   }
   let result = (jwtProperty ? jwtProperty : option) as T | undefined;

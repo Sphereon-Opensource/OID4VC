@@ -2,6 +2,7 @@ import {
   AccessTokenResponse,
   Alg,
   EndpointMetadata,
+  JWK,
   Jwt,
   NO_JWT_PROVIDED,
   OpenId4VCIVersion,
@@ -19,6 +20,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
   private readonly version: OpenId4VCIVersion;
 
   private kid?: string;
+  private jwk?: JWK;
   private clientId?: string;
   private issuer?: string;
   private jwt?: Jwt;
@@ -46,7 +48,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
     if (jwt) {
       this.withJwt(jwt);
     } else {
-      this.withTyp(version < OpenId4VCIVersion.VER_1_0_11 ? 'jwt' : 'openid4vci-proof+jwt');
+      this.withTyp(version < OpenId4VCIVersion.VER_1_0_12 ? 'jwt' : 'openid4vci-proof+jwt');
     }
     if (accessTokenResponse) {
       this.withAccessTokenResponse(accessTokenResponse);
@@ -91,6 +93,11 @@ export class ProofOfPossessionBuilder<DIDDoc> {
     return this;
   }
 
+  withJWK(jwk: JWK): this {
+    this.jwk = jwk;
+    return this;
+  }
+
   withIssuer(issuer: string): this {
     this.issuer = issuer;
     return this;
@@ -107,7 +114,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
   }
 
   withTyp(typ: Typ): this {
-    if (this.version >= OpenId4VCIVersion.VER_1_0_11) {
+    if (this.version >= OpenId4VCIVersion.VER_1_0_12) {
       if (!!typ && typ !== 'openid4vci-proof+jwt') {
         throw Error('typ must be openid4vci-proof+jwt for version 1.0.11 and up');
       }
@@ -154,7 +161,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
     if (jwt.header.typ) {
       this.withTyp(jwt.header.typ as Typ);
     }
-    if (this.version >= OpenId4VCIVersion.VER_1_0_11) {
+    if (this.version >= OpenId4VCIVersion.VER_1_0_12) {
       this.withTyp('openid4vci-proof+jwt');
     }
     this.withAlg(jwt.header.alg);
@@ -180,8 +187,9 @@ export class ProofOfPossessionBuilder<DIDDoc> {
       return await createProofOfPossession(
         this.callbacks,
         {
-          typ: this.typ ?? (this.version < OpenId4VCIVersion.VER_1_0_11 ? 'jwt' : 'openid4vci-proof+jwt'),
+          typ: this.typ ?? (this.version < OpenId4VCIVersion.VER_1_0_12 ? 'jwt' : 'openid4vci-proof+jwt'),
           kid: this.kid,
+          jwk: this.jwk,
           jti: this.jti,
           alg: this.alg,
           issuer: this.issuer,

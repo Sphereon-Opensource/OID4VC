@@ -11,7 +11,7 @@ import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 
 import { VcIssuer } from '../VcIssuer'
-import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../builder'
+import { CredentialSupportedBuilderV1_12, VcIssuerBuilder } from '../builder'
 import { MemoryStates } from '../state-manager'
 
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
@@ -24,7 +24,7 @@ describe('VcIssuer', () => {
 
   beforeAll(async () => {
     jest.clearAllMocks()
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
+    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_12()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
@@ -78,7 +78,7 @@ describe('VcIssuer', () => {
       },
     })
     vcIssuer = new VcIssuerBuilder<DIDDocument>()
-      .withAuthorizationServer('https://authorization-server')
+      .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
       .withIssuerDisplay({

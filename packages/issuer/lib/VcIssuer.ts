@@ -8,10 +8,9 @@ import {
   CredentialDataSupplierInput,
   CredentialIssuerMetadataOpts,
   CredentialOfferFormat,
-  CredentialOfferPayloadV1_0_11,
+  CredentialOfferPayloadV1_0_12,
   CredentialOfferSession,
-  CredentialOfferV1_0_12,
-  CredentialRequestV1_0_11,
+  CredentialOfferV1_0_12, CredentialRequestV1_0_12,
   CredentialResponse,
   DID_NO_DIDDOC_ERROR,
   Grant,
@@ -33,14 +32,14 @@ import {
   toUniformCredentialOfferRequest,
   TYP_ERROR,
   UniformCredentialRequest,
-  URIState,
-} from '@sphereon/oid4vci-common'
-import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
+  URIState
+} from '@sphereon/oid4vci-common';
+import { CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
 import { LookupStateManager } from './state-manager'
-import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialSignerCallback } from './types'
+import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
 
 const SECOND = 1000
 
@@ -109,12 +108,12 @@ export class VcIssuer<DIDDoc extends object> {
     if (!grants?.authorization_code && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
       throw Error(`No grant issuer state or pre-authorized code could be deduced`)
     }
-    const credentialOfferPayload: CredentialOfferPayloadV1_0_11 = {
+    const credentialOfferPayload: CredentialOfferPayloadV1_0_12 = {
       ...(grants && { grants }),
       ...(credentials && { credentials }),
       ...(credentialDefinition && { credential_definition: credentialDefinition }),
       credential_issuer: this.issuerMetadata.credential_issuer,
-    } as CredentialOfferPayloadV1_0_11
+    } as CredentialOfferPayloadV1_0_12
     if (grants?.authorization_code) {
       issuerState = grants?.authorization_code.issuer_state
       if (!issuerState) {
@@ -174,9 +173,9 @@ export class VcIssuer<DIDDoc extends object> {
       {
         credential_offer: credentialOfferObject.credential_offer,
         credential_offer_uri: credentialOfferObject.credential_offer_uri,
-      } as CredentialOfferV1_0_11,
+      } as CredentialOfferV1_0_12,
       {
-        version: OpenId4VCIVersion.VER_1_0_11,
+        version: OpenId4VCIVersion.VER_1_0_12,
         resolve: false, // We are creating the object, so do not resolve
       },
     )
@@ -229,8 +228,8 @@ export class VcIssuer<DIDDoc extends object> {
    *  - cNonce an existing c_nonce
    */
   public async issueCredential(opts: {
-    credentialRequest: CredentialRequestV1_0_11
-    credential?: ICredential
+    credentialRequest: CredentialRequestV1_0_12
+    credential?: CredentialIssuanceInput
     credentialDataSupplier?: CredentialDataSupplier
     credentialDataSupplierInput?: CredentialDataSupplierInput
     newCNonce?: string
@@ -266,7 +265,7 @@ export class VcIssuer<DIDDoc extends object> {
       if (!opts.credential && this._credentialDataSupplier === undefined && opts.credentialDataSupplier === undefined) {
         throw Error(`Either a credential needs to be supplied or a credentialDataSupplier`)
       }
-      let credential: ICredential | undefined
+      let credential: CredentialIssuanceInput | undefined
       let format: OID4VCICredentialFormat = opts.credentialRequest.format
       let signerCallback: CredentialSignerCallback<DIDDoc> | undefined = opts.credentialSignerCallback
       if (opts.credential) {
@@ -306,14 +305,18 @@ export class VcIssuer<DIDDoc extends object> {
         throw Error('A credential needs to be supplied at this point')
       }
       if (did) {
-        const credentialSubjects = Array.isArray(credential.credentialSubject) ? credential.credentialSubject : [credential.credentialSubject]
-        credentialSubjects.map((subject) => {
-          if (!subject.id) {
-            subject.id = did
-          }
-          return subject
-        })
-        credential.credentialSubject = Array.isArray(credential.credentialSubject) ? credentialSubjects : credentialSubjects[0]
+        if (CredentialMapper.isSdJwtDecodedCredentialPayload(credential)) {
+          credential.sub = did
+        } else {
+          const credentialSubjects = Array.isArray(credential.credentialSubject) ? credential.credentialSubject : [credential.credentialSubject]
+          credentialSubjects.map((subject) => {
+            if (!subject.id) {
+              subject.id = did
+            }
+            return subject
+          })
+          credential.credentialSubject = Array.isArray(credential.credentialSubject) ? credentialSubjects : credentialSubjects[0]
+        }
       }
 
       const verifiableCredential = await this.issueCredentialImpl(
@@ -415,7 +418,7 @@ export class VcIssuer<DIDDoc extends object> {
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
     try {
-      if (credentialRequest.format !== 'jwt_vc_json' && credentialRequest.format !== 'jwt_vc_json-ld') {
+      if (credentialRequest.format !== 'jwt_vc_json' && credentialRequest.format !== 'jwt_vc_json-ld' && credentialRequest.format !== 'vc+sd-jwt') {
         throw Error(`Format ${credentialRequest.format} not supported yet`)
       } else if (typeof this._jwtVerifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
         throw new Error(JWT_VERIFY_CONFIG_ERROR)
@@ -537,7 +540,7 @@ export class VcIssuer<DIDDoc extends object> {
   private async issueCredentialImpl(
     opts: {
       credentialRequest: UniformCredentialRequest
-      credential: ICredential
+      credential: CredentialIssuanceInput
       jwtVerifyResult: JwtVerifyResult<DIDDoc>
       format?: OID4VCICredentialFormat
     },

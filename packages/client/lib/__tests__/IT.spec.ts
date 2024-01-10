@@ -154,7 +154,7 @@ describe('OID4VCI-Client should', () => {
         callbacks: {
           signCallback: proofOfPossessionCallbackFunction,
         },
-        version: OpenId4VCIVersion.VER_1_0_11,
+        version: OpenId4VCIVersion.VER_1_0_12,
       })
         .withEndpointMetadata({
           issuer: 'https://issuer.research.identiproof.io',

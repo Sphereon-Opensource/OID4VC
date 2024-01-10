@@ -14,7 +14,7 @@ import {
   OpenId4VCIVersion,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
-import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
+import { CredentialSupportedBuilderV1_12, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
@@ -70,7 +70,7 @@ describe('VcIssuer', () => {
       return new jose.SignJWT({ ...jwt.payload }).setProtectedHeader({ ...jwt.header, alg: Alg.ES256 }).sign(privateKey)
     }
 
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
+    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_12()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withTypes('VerifiableCredential')
@@ -245,7 +245,7 @@ describe('VcIssuer', () => {
       version: 1011,
     })
     expect(client.getIssuer()).toEqual(ISSUER_URL)
-    expect(client.version()).toEqual(OpenId4VCIVersion.VER_1_0_11)
+    expect(client.version()).toEqual(OpenId4VCIVersion.VER_1_0_12)
   })
 
   it('should retrieve server metadata', async () => {
@@ -296,7 +296,7 @@ describe('VcIssuer', () => {
   })
   it('should get state on server side', async () => {
     const preAuthCode =
-      client.credentialOffer.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
+      client.credentialOffer!.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
     expect(preAuthCode).toBeDefined()
 
     if (preAuthCode) {

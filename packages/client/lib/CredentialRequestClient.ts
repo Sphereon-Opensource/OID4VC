@@ -61,9 +61,10 @@ export class CredentialRequestClient {
       throw new Error(URL_NOT_VALID);
     }
     debug(`Acquiring credential(s) from: ${credentialEndpoint}`);
+    debug(`request\n: ${JSON.stringify(request, null, 2)}`);
     const requestToken: string = this.credentialRequestOpts.token;
     const response: OpenIDResponse<CredentialResponse> = await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken });
-    debug(`Credential endpoint ${credentialEndpoint} response:\r\n${response}`);
+    debug(`Credential endpoint ${credentialEndpoint} response:\r\n${JSON.stringify(response, null, 2)}`);
     return response;
   }
 
@@ -99,7 +100,7 @@ export class CredentialRequestClient {
         : await proofInput.build();
 
     // TODO: we should move format specific logic
-    if (format === 'jwt_vc_json') {
+    if (format === 'jwt_vc_json' || format === 'jwt_vc') {
       return {
         types,
         format,
@@ -123,9 +124,7 @@ export class CredentialRequestClient {
       return {
         format,
         proof,
-        credential_definition: {
-          vct: types[0],
-        },
+        vct: types[0],
       };
     }
 
@@ -133,10 +132,10 @@ export class CredentialRequestClient {
   }
 
   private version(): OpenId4VCIVersion {
-    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_11;
+    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_12;
   }
 
   private isV11OrHigher(): boolean {
-    return this.version() >= OpenId4VCIVersion.VER_1_0_11;
+    return this.version() >= OpenId4VCIVersion.VER_1_0_12;
   }
 }

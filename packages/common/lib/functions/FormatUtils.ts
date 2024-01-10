@@ -28,7 +28,7 @@ export function getUniformFormat(format: string | OID4VCICredentialFormat | Cred
 
   // Older formats
   if (format === 'jwt_vc' || format === 'jwt') {
-    return 'jwt_vc_json';
+    return 'jwt_vc';
   }
   if (format === 'ldp_vc' || format === 'ldp') {
     return 'ldp_vc';
@@ -38,15 +38,5 @@ export function getUniformFormat(format: string | OID4VCICredentialFormat | Cred
 }
 
 export function getFormatForVersion(format: string, version: OpenId4VCIVersion) {
-  const uniformFormat = isUniformFormat(format) ? format : getUniformFormat(format);
-
-  if (version === OpenId4VCIVersion.VER_1_0_08) {
-    if (uniformFormat === 'jwt_vc_json') {
-      return 'jwt_vc' as const;
-    } else if (uniformFormat === 'ldp_vc' || uniformFormat === 'jwt_vc_json-ld') {
-      return 'ldp_vc' as const;
-    }
-  }
-
-  return uniformFormat;
+  return isUniformFormat(format) ? format : getUniformFormat(format);
 }

@@ -1,7 +1,6 @@
 import {
   AccessTokenResponse,
   CredentialIssuerMetadata,
-  CredentialOfferPayloadV1_0_08,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
   EndpointMetadata,
@@ -23,6 +22,25 @@ export class CredentialRequestClientBuilder {
   token?: string;
   version?: OpenId4VCIVersion;
 
+  public static fromCredentialIssuer({
+    credentialIssuer,
+    metadata,
+    version,
+    credentialTypes,
+  }: {
+    credentialIssuer: string;
+    metadata?: EndpointMetadata;
+    version?: OpenId4VCIVersion;
+    credentialTypes: string | string[];
+  }): CredentialRequestClientBuilder {
+    const issuer = credentialIssuer;
+    const builder = new CredentialRequestClientBuilder();
+    builder.withVersion(version ?? OpenId4VCIVersion.VER_1_0_12);
+    builder.withCredentialEndpoint(metadata?.credential_endpoint ?? (issuer.endsWith('/') ? `${issuer}credential` : `${issuer}/credential`));
+    builder.withCredentialType(credentialTypes);
+    return builder;
+  }
+
   public static async fromURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): Promise<CredentialRequestClientBuilder> {
     const offer = await CredentialOfferClient.fromURI(uri);
     return CredentialRequestClientBuilder.fromCredentialOfferRequest({ request: offer, ...offer, metadata, version: offer.version });
@@ -42,13 +60,8 @@ export class CredentialRequestClientBuilder {
     builder.withVersion(version);
     builder.withCredentialEndpoint(metadata?.credential_endpoint ?? (issuer.endsWith('/') ? `${issuer}credential` : `${issuer}/credential`));
 
-    if (version <= OpenId4VCIVersion.VER_1_0_08) {
-      //todo: This basically sets all types available during initiation. Probably the user only wants a subset. So do we want to do this?
-      builder.withCredentialType((request.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type);
-    } else {
-      // todo: look whether this is correct
-      builder.withCredentialType(getTypesFromOffer(request.credential_offer));
-    }
+    // todo: look whether this is correct
+    builder.withCredentialType(getTypesFromOffer(request.credential_offer));
 
     return builder;
   }
@@ -104,7 +117,7 @@ export class CredentialRequestClientBuilder {
 
   public build(): CredentialRequestClient {
     if (!this.version) {
-      this.withVersion(OpenId4VCIVersion.VER_1_0_11);
+      this.withVersion(OpenId4VCIVersion.VER_1_0_12);
     }
     return new CredentialRequestClient(this);
   }

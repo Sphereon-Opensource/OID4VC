@@ -137,12 +137,12 @@ describe('OID4VCIServer', () => {
 
     expressSupport = ExpressBuilder.fromServerOpts({
       startListening: false,
-      port: 5000,
+      port: 9000,
       hostname: '0.0.0.0',
     }).build({ startListening: false })
     const vcIssuerServer = new OID4VCIServer(expressSupport, {
       issuer: vcIssuer,
-      baseUrl: 'http://localhost:5000',
+      baseUrl: 'http://localhost:9000',
       endpointOpts: {
         tokenEndpointOpts: {
           accessTokenSignerCallback: signerCallback,

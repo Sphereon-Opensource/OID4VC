@@ -5,7 +5,6 @@ import {
   JsonLdIssuerCredentialDefinition,
   OID4VCICredentialFormat,
   PRE_AUTH_CODE_LITERAL,
-  SdJwtVcCredentialDefinition,
 } from './Generic.types';
 import { EndpointMetadata } from './ServerMetadata';
 
@@ -111,7 +110,7 @@ export interface CommonAuthorizationDetails {
 }
 
 export interface AuthorizationDetailsJwtVcJson extends CommonAuthorizationDetails {
-  format: 'jwt_vc_json';
+  format: 'jwt_vc_json' | 'jwt_vc'; // jwt_vc added for backward compat
 
   /**
    * A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential.
@@ -142,7 +141,8 @@ export interface AuthorizationDetailsJwtVcJsonLdAndLdpVc extends CommonAuthoriza
 export interface AuthorizationDetailsSdJwtVc extends CommonAuthorizationDetails {
   format: 'vc+sd-jwt';
 
-  credential_definition: SdJwtVcCredentialDefinition;
+  vct: string;
+  claims?: IssuerCredentialSubject;
 }
 
 export enum GrantTypes {
@@ -180,7 +180,8 @@ export interface IssuerOpts {
 }
 
 export interface AccessTokenRequestOpts {
-  credentialOffer: UniformCredentialOffer;
+  credentialOffer?: UniformCredentialOffer;
+  credentialIssuer?: string;
   asOpts?: AuthorizationServerOpts;
   metadata?: EndpointMetadata;
   codeVerifier?: string; // only required for authorization flow
@@ -220,6 +221,7 @@ export interface OpenIDResponse<T> {
   origResponse: Response;
   successBody?: T;
   errorBody?: ErrorResponse;
+  selectedHost?: string;
 }
 
 export interface AccessTokenResponse {

@@ -1,15 +1,14 @@
 import {
   CredentialsSupportedDisplay,
   CredentialSupported,
-  isFormat,
-  isNotFormat,
   IssuerCredentialSubject,
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
   TokenErrorResponse,
 } from '@sphereon/oid4vci-common'
+import { ICredentialContextType } from '@sphereon/ssi-types';
 
-export class CredentialSupportedBuilderV1_11 {
+export class CredentialSupportedBuilderV1_12 {
   format?: OID4VCICredentialFormat
   id?: string
   types?: string[]
@@ -18,17 +17,17 @@ export class CredentialSupportedBuilderV1_11 {
   display?: CredentialsSupportedDisplay[]
   credentialSubject?: IssuerCredentialSubject
 
-  withFormat(credentialFormat: OID4VCICredentialFormat): CredentialSupportedBuilderV1_11 {
+  withFormat(credentialFormat: OID4VCICredentialFormat): CredentialSupportedBuilderV1_12 {
     this.format = credentialFormat
     return this
   }
 
-  withId(id: string): CredentialSupportedBuilderV1_11 {
+  withId(id: string): CredentialSupportedBuilderV1_12 {
     this.id = id
     return this
   }
 
-  addTypes(type: string | string[]): CredentialSupportedBuilderV1_11 {
+  addTypes(type: string | string[]): CredentialSupportedBuilderV1_12 {
     if (!Array.isArray(type)) {
       this.types = this.types ? [...this.types, type] : [type]
     } else {
@@ -39,7 +38,7 @@ export class CredentialSupportedBuilderV1_11 {
     return this
   }
 
-  withTypes(type: string | string[]): CredentialSupportedBuilderV1_11 {
+  withTypes(type: string | string[]): CredentialSupportedBuilderV1_12 {
     if (this.format === 'vc+sd-jwt' && Array.isArray(type) && type.length > 1) {
       throw new Error('Only one type is allowed for vc+sd-jwt')
     }
@@ -47,7 +46,7 @@ export class CredentialSupportedBuilderV1_11 {
     return this
   }
 
-  addCryptographicBindingMethod(method: string | string[]): CredentialSupportedBuilderV1_11 {
+  addCryptographicBindingMethod(method: string | string[]): CredentialSupportedBuilderV1_12 {
     if (!Array.isArray(method)) {
       this.cryptographicBindingMethodsSupported = this.cryptographicBindingMethodsSupported
         ? [...this.cryptographicBindingMethodsSupported, method]
@@ -60,12 +59,12 @@ export class CredentialSupportedBuilderV1_11 {
     return this
   }
 
-  withCryptographicBindingMethod(method: string | string[]): CredentialSupportedBuilderV1_11 {
+  withCryptographicBindingMethod(method: string | string[]): CredentialSupportedBuilderV1_12 {
     this.cryptographicBindingMethodsSupported = Array.isArray(method) ? method : [method]
     return this
   }
 
-  addCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedBuilderV1_11 {
+  addCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedBuilderV1_12 {
     if (!Array.isArray(suit)) {
       this.cryptographicSuitesSupported = this.cryptographicSuitesSupported ? [...this.cryptographicSuitesSupported, suit] : [suit]
     } else {
@@ -74,12 +73,12 @@ export class CredentialSupportedBuilderV1_11 {
     return this
   }
 
-  withCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedBuilderV1_11 {
+  withCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedBuilderV1_12 {
     this.cryptographicSuitesSupported = Array.isArray(suit) ? suit : [suit]
     return this
   }
 
-  addCredentialSupportedDisplay(credentialDisplay: CredentialsSupportedDisplay | CredentialsSupportedDisplay[]): CredentialSupportedBuilderV1_11 {
+  addCredentialSupportedDisplay(credentialDisplay: CredentialsSupportedDisplay | CredentialsSupportedDisplay[]): CredentialSupportedBuilderV1_12 {
     if (!Array.isArray(credentialDisplay)) {
       this.display = this.display ? [...this.display, credentialDisplay] : [credentialDisplay]
     } else {
@@ -88,7 +87,7 @@ export class CredentialSupportedBuilderV1_11 {
     return this
   }
 
-  withCredentialSupportedDisplay(credentialDisplay: CredentialsSupportedDisplay | CredentialsSupportedDisplay[]): CredentialSupportedBuilderV1_11 {
+  withCredentialSupportedDisplay(credentialDisplay: CredentialsSupportedDisplay | CredentialsSupportedDisplay[]): CredentialSupportedBuilderV1_12 {
     this.display = Array.isArray(credentialDisplay) ? credentialDisplay : [credentialDisplay]
     return this
   }
@@ -101,7 +100,7 @@ export class CredentialSupportedBuilderV1_11 {
   addCredentialSubjectPropertyDisplay(
     subjectProperty: string,
     issuerCredentialSubjectDisplay: IssuerCredentialSubjectDisplay,
-  ): CredentialSupportedBuilderV1_11 {
+  ): CredentialSupportedBuilderV1_12 {
     if (!this.credentialSubject) {
       this.credentialSubject = {}
     }
@@ -113,29 +112,40 @@ export class CredentialSupportedBuilderV1_11 {
     if (!this.format) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    const credentialSupported: Partial<CredentialSupported> = {
-      format: this.format,
-    }
+    let credentialSupported: CredentialSupported; // Partial<CredentialSupported> does not work in the v12 situation for some reason
     if (!this.types) {
       throw new Error('types are required')
     }
+    if (!this.types || this.types.length === 0) {
+      throw new Error('No type specified')
+    }
 
     // SdJwtVc has a different format
-    if (isFormat(credentialSupported, 'vc+sd-jwt')) {
+    if (this.format === 'vc+sd-jwt') {
       if (this.types.length > 1) {
-        throw new Error('Only one type is allowed for vc+sd-jwt')
+        throw new Error('Only one type is allowed for vc+sd-jwt');
       }
-      credentialSupported.credential_definition = {
-        vct: this.types[0],
-      }
-    }
-    // And else would work here, but this way we get the correct typing
-    else if (isNotFormat(credentialSupported, 'vc+sd-jwt')) {
-      credentialSupported.types = this.types
-
-      if (this.credentialSubject) {
-        credentialSupported.credentialSubject = this.credentialSubject
-      }
+      credentialSupported = {
+        format: this.format,
+        vct: this.types[0]
+      };
+    } else if (this.format === 'ldp_vc' || this.format === 'jwt_vc_json-ld') {
+      credentialSupported = {
+        format: this.format,
+        credential_definition: {
+          type: this.types as string[],
+          ...this.credentialSubject ? { credentialSubject: this.credentialSubject } : {},
+          '@context': [] as ICredentialContextType[]
+        }
+      };
+    } else {
+      credentialSupported = {
+        format: this.format,
+        credential_definition: {
+          type: this.types as string[],
+          ...this.credentialSubject ? { credentialSubject: this.credentialSubject } : {}
+        }
+      };
     }
 
     if (this.cryptographicSuitesSupported) {

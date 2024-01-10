@@ -1,7 +1,7 @@
 import {
   CredentialIssuerMetadata,
   CredentialIssuerMetadataOpts,
-  CredentialOfferPayloadV1_0_11,
+  CredentialOfferPayloadV1_0_12,
   CredentialOfferSession,
   CredentialOfferV1_0_12,
   Grant,
@@ -14,7 +14,7 @@ export function createCredentialOfferObject(
   issuerMetadata?: CredentialIssuerMetadataOpts,
   // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
   opts?: {
-    credentialOffer?: CredentialOfferPayloadV1_0_11
+    credentialOffer?: CredentialOfferPayloadV1_0_12
     credentialOfferUri?: string
     scheme?: string
     baseUri?: string
@@ -22,7 +22,7 @@ export function createCredentialOfferObject(
     preAuthorizedCode?: string
     userPinRequired?: boolean
   },
-): CredentialOfferV1_0_11 & { scheme: string; grants: Grant; baseUri: string } {
+): CredentialOfferV1_0_12 & { scheme: string; grants: Grant; baseUri: string } {
   if (!issuerMetadata && !opts?.credentialOffer && !opts?.credentialOfferUri) {
     throw new Error('You have to provide issuerMetadata or credentialOffer object for creating a deeplink')
   }
@@ -45,7 +45,7 @@ export function createCredentialOfferObject(
   baseUri = baseUri.replace(`${scheme}://`, '')
 
   const credential_offer_uri = opts?.credentialOfferUri ? `${scheme}://${baseUri}?credential_offer_uri=${opts?.credentialOfferUri}` : undefined
-  let credential_offer: CredentialOfferPayloadV1_0_11
+  let credential_offer: CredentialOfferPayloadV1_0_12
   if (opts?.credentialOffer) {
     credential_offer = {
       ...opts.credentialOffer,
@@ -55,7 +55,7 @@ export function createCredentialOfferObject(
     credential_offer = {
       credential_issuer: issuerMetadata?.credential_issuer,
       credentials: issuerMetadata?.credentials_supported,
-    } as CredentialOfferPayloadV1_0_11
+    } as CredentialOfferPayloadV1_0_12
   }
   // todo: check payload against issuer metadata. Especially strings in the credentials array: When processing, the Wallet MUST resolve this string value to the respective object.
 
@@ -78,7 +78,7 @@ export function createCredentialOfferObject(
 }
 
 export function createCredentialOfferURIFromObject(
-  credentialOffer: (CredentialOfferV1_0_11 | UniformCredentialOffer) & { scheme?: string; baseUri?: string; grant?: Grant },
+  credentialOffer: (CredentialOfferV1_0_12 | UniformCredentialOffer) & { scheme?: string; baseUri?: string; grant?: Grant },
   opts?: { scheme?: string; baseUri?: string },
 ) {
   const scheme = opts?.scheme?.replace('://', '') ?? credentialOffer?.scheme?.replace('://', '') ?? 'openid-credential-offer'
@@ -104,7 +104,7 @@ export function createCredentialOfferURI(
   // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
   opts?: {
     state?: string
-    credentialOffer?: CredentialOfferPayloadV1_0_11
+    credentialOffer?: CredentialOfferPayloadV1_0_12
     credentialOfferUri?: string
     scheme?: string
     preAuthorizedCode?: string

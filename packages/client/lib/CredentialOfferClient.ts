@@ -1,7 +1,5 @@
 import {
   CredentialOffer,
-  CredentialOfferPayload,
-  CredentialOfferPayloadV1_0_09,
   CredentialOfferRequestWithBaseUrl,
   CredentialOfferV1_0_12,
   determineSpecVersionFromURI,
@@ -24,24 +22,12 @@ export class CredentialOfferClient {
     const scheme = uri.split('://')[0];
     const baseUrl = uri.split('?')[0];
     const version = determineSpecVersionFromURI(uri);
-    let credentialOffer: CredentialOffer;
-    let credentialOfferPayload: CredentialOfferPayload;
-    if (version < OpenId4VCIVersion.VER_1_0_11) {
-      credentialOfferPayload = convertURIToJsonObject(uri, {
-        arrayTypeProperties: ['credential_type'],
-        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri'] : ['issuer', 'credential_type'],
-      }) as CredentialOfferPayloadV1_0_09;
-      credentialOffer = {
-        credential_offer: credentialOfferPayload,
-      };
-    } else {
-      credentialOffer = convertURIToJsonObject(uri, {
-        arrayTypeProperties: ['credentials'],
-        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri'] : ['credential_offer'],
-      }) as CredentialOfferV1_0_11;
-      if (credentialOffer?.credential_offer_uri === undefined && !credentialOffer?.credential_offer) {
-        throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri);
-      }
+    const credentialOffer: CredentialOffer = convertURIToJsonObject(uri, {
+      arrayTypeProperties: ['credentials'],
+      requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri'] : ['credential_offer'],
+    }) as CredentialOfferV1_0_12;
+    if (credentialOffer?.credential_offer_uri === undefined && !credentialOffer?.credential_offer) {
+      throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri);
     }
     const request = await toUniformCredentialOfferRequest(credentialOffer, {
       ...opts,
@@ -77,7 +63,7 @@ export class CredentialOfferClient {
 
     const isUri = requestWithBaseUrl.credential_offer_uri !== undefined;
 
-    if (version.valueOf() >= OpenId4VCIVersion.VER_1_0_11.valueOf()) {
+    if (version.valueOf() >= OpenId4VCIVersion.VER_1_0_12.valueOf()) {
       // v11 changed from encoding every param to a encoded json object with a credential_offer param key
       if (!baseUrl.includes('?')) {
         param = isUri ? 'credential_offer_uri' : 'credential_offer';
@@ -98,7 +84,7 @@ export class CredentialOfferClient {
       arrayTypeProperties: isUri ? [] : ['credential_type'],
       uriTypeProperties: isUri
         ? ['credential_offer_uri']
-        : version >= OpenId4VCIVersion.VER_1_0_11
+        : version >= OpenId4VCIVersion.VER_1_0_12
         ? ['credential_issuer', 'credential_type']
         : ['issuer', 'credential_type'],
       param,

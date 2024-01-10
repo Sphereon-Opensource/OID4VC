@@ -8,7 +8,7 @@ import {
   OID4VCICredentialFormat,
   QRCodeOpts,
 } from '@sphereon/oid4vci-common'
-import { CredentialSupportedBuilderV1_11, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { CredentialSupportedBuilderV1_12, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
 import express, { Express } from 'express'
 
@@ -24,7 +24,7 @@ import {
 } from './oid4vci-api-functions'
 
 function buildVCIFromEnvironment<DIDDoc extends object>() {
-  const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
+  const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_12()
     .withCryptographicSuitesSupported(process.env.cryptographic_suites_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
     .withFormat(process.env.credential_supported_format as unknown as OID4VCICredentialFormat)
@@ -50,7 +50,9 @@ function buildVCIFromEnvironment<DIDDoc extends object>() {
     .build()
   return new VcIssuerBuilder<DIDDoc>()
     .withUserPinRequired(process.env.user_pin_required as unknown as boolean)
-    .withAuthorizationServer(process.env.authorization_server as string)
+    .withAuthorizationServers(process.env.authorization_servers
+      ? (process.env.authorization_servers as string).split(',')
+      : [process.env.authorization_server as string])
     .withCredentialEndpoint(process.env.credential_endpoint as string)
     .withCredentialIssuer(process.env.credential_issuer as string)
     .withIssuerDisplay({
