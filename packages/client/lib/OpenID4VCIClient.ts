@@ -8,8 +8,6 @@ import {
   CredentialSupported,
   EndpointMetadataResult,
   getIssuerFromCredentialOfferPayload,
-  getSupportedCredentials,
-  getTypesFromCredentialSupported,
   JsonURIMode,
   JWK,
   KID_JWK_X5C_ERROR,
@@ -136,7 +134,7 @@ export class OpenID4VCIClient {
       if (this.credentialOffer) {
         this._endpointMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this.credentialOffer);
       } else if (this._credentialIssuer) {
-        this._endpointMetadata = await MetadataClient.retrieveAllMetadata(this._credentialIssuer);
+        this._endpointMetadata = await MetadataClient.retrieveAllMetadata([this._credentialIssuer]); // TODO multi-server support?
       } else {
         throw Error(`Cannot retrieve issuer metadata without either a credential offer, or issuer value`);
       }
@@ -412,7 +410,7 @@ export class OpenID4VCIClient {
       } else if (metadata.credentials_supported && !Array.isArray(metadata.credentials_supported)) {
         const credentialsSupported = metadata.credentials_supported as CredentialSupported;
         if (credentialsSupported.format === 'vc+sd-jwt') {
-          if (types.some((type) => !metadata.credentials_supported || credentialsSupported.credential_definition.vct === type)) { // TODO why are we doing iterating types and not using them?
+          if (types.some((type) => !metadata.credentials_supported || credentialsSupported.vct === type)) {
             throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
           }
         } else {
@@ -509,7 +507,7 @@ export class OpenID4VCIClient {
   }
 
   public version(): OpenId4VCIVersion {
-    return this.credentialOffer?.version ?? OpenId4VCIVersion.VER_1_0_11;
+    return this.credentialOffer?.version ?? OpenId4VCIVersion.VER_1_0_12;
   }
 
   public get endpointMetadata(): EndpointMetadataResult {

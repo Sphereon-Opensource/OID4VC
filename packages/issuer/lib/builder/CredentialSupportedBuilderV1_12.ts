@@ -1,12 +1,12 @@
 import {
   CredentialsSupportedDisplay,
   CredentialSupported,
-  isFormat,
   IssuerCredentialSubject,
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
   TokenErrorResponse,
 } from '@sphereon/oid4vci-common'
+import { ICredentialContextType } from '@sphereon/ssi-types';
 
 export class CredentialSupportedBuilderV1_12 {
   format?: OID4VCICredentialFormat
@@ -112,26 +112,40 @@ export class CredentialSupportedBuilderV1_12 {
     if (!this.format) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    const credentialSupported: Partial<CredentialSupported> = {
-      format: this.format,
-    }
+    let credentialSupported: CredentialSupported; // Partial<CredentialSupported> does not work in the v12 situation for some reason
     if (!this.types) {
       throw new Error('types are required')
     }
+    if (!this.types || this.types.length === 0) {
+      throw new Error('No type specified')
+    }
 
     // SdJwtVc has a different format
-    if (isFormat(credentialSupported, 'vc+sd-jwt')) {
+    if (this.format === 'vc+sd-jwt') {
       if (this.types.length > 1) {
-        throw new Error('Only one type is allowed for vc+sd-jwt')
+        throw new Error('Only one type is allowed for vc+sd-jwt');
       }
-      credentialSupported.vct = this.types[0]
-    }
-    // And else would work here, but this way we get the correct typing
-    else {
-      credentialSupported.credential_definition = {
-        type: this.types,
-        ...this.credentialSubject ? { credentialSubject: this.credentialSubject } : {}
-      }
+      credentialSupported = {
+        format: this.format,
+        vct: this.types[0]
+      };
+    } else if (this.format === 'ldp_vc' || this.format === 'jwt_vc_json-ld') {
+      credentialSupported = {
+        format: this.format,
+        credential_definition: {
+          type: this.types as string[],
+          ...this.credentialSubject ? { credentialSubject: this.credentialSubject } : {},
+          '@context': [] as ICredentialContextType[]
+        }
+      };
+    } else {
+      credentialSupported = {
+        format: this.format,
+        credential_definition: {
+          type: this.types as string[],
+          ...this.credentialSubject ? { credentialSubject: this.credentialSubject } : {}
+        }
+      };
     }
 
     if (this.cryptographicSuitesSupported) {

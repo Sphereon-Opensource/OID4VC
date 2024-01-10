@@ -35,7 +35,7 @@ export class CredentialRequestClientBuilder {
   }): CredentialRequestClientBuilder {
     const issuer = credentialIssuer;
     const builder = new CredentialRequestClientBuilder();
-    builder.withVersion(version ?? OpenId4VCIVersion.VER_1_0_11);
+    builder.withVersion(version ?? OpenId4VCIVersion.VER_1_0_12);
     builder.withCredentialEndpoint(metadata?.credential_endpoint ?? (issuer.endsWith('/') ? `${issuer}credential` : `${issuer}/credential`));
     builder.withCredentialType(credentialTypes);
     return builder;
