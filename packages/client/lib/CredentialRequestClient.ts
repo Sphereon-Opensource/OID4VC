@@ -133,10 +133,10 @@ export class CredentialRequestClient {
   }
 
   private version(): OpenId4VCIVersion {
-    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_11;
+    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_12;
   }
 
   private isV11OrHigher(): boolean {
-    return this.version() >= OpenId4VCIVersion.VER_1_0_11;
+    return this.version() >= OpenId4VCIVersion.VER_1_0_12;
   }
 }

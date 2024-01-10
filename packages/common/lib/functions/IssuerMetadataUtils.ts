@@ -2,16 +2,13 @@ import {
   CredentialIssuerMetadata,
   CredentialOfferFormat,
   CredentialSupported,
-  CredentialSupportedTypeV1_0_08,
-  CredentialSupportedV1_0_08,
-  IssuerMetadataV1_0_08,
   MetadataDisplay,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
 } from '../types';
 
 export function getSupportedCredentials(opts?: {
-  issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08;
+  issuerMetadata?: CredentialIssuerMetadata;
   version: OpenId4VCIVersion;
   types?: string[][];
   format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[];
@@ -23,7 +20,7 @@ export function getSupportedCredentials(opts?: {
 }
 
 export function getSupportedCredential(opts?: {
-  issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08;
+  issuerMetadata?: CredentialIssuerMetadata;
   version: OpenId4VCIVersion;
   types?: string | string[];
   format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[];
@@ -37,16 +34,12 @@ export function getSupportedCredential(opts?: {
   } else {
     formats = [];
   }
-  let credentialsSupported: CredentialSupported[];
+
   if (!issuerMetadata) {
     return [];
   }
-  const { version, types } = opts ?? { version: OpenId4VCIVersion.VER_1_0_11 };
-  if (version === OpenId4VCIVersion.VER_1_0_08 || !Array.isArray(issuerMetadata.credentials_supported)) {
-    credentialsSupported = credentialsSupportedV8ToV11((issuerMetadata as IssuerMetadataV1_0_08).credentials_supported);
-  } else {
-    credentialsSupported = (issuerMetadata as CredentialIssuerMetadata).credentials_supported;
-  }
+  const { types } = opts ?? {};
+  const credentialsSupported: CredentialSupported[] = (issuerMetadata as CredentialIssuerMetadata).credentials_supported;
 
   if (credentialsSupported === undefined || credentialsSupported.length === 0) {
     return [];
@@ -63,9 +56,6 @@ export function getSupportedCredential(opts?: {
     } else {
       initiationTypes = opts.types;
     }
-  }
-  if (version === OpenId4VCIVersion.VER_1_0_08 && (!initiationTypes || initiationTypes?.length === 0)) {
-    initiationTypes = formats;
   }
   const supportedFormats: (CredentialOfferFormat | string)[] = formats && formats.length > 0 ? formats : ['jwt_vc_json', 'jwt_vc_json-ld', 'ldp_vc'];
 
@@ -101,12 +91,11 @@ export function getSupportedCredential(opts?: {
 
 export function getTypesFromCredentialSupported(credentialSupported: CredentialSupported, opts?: { filterVerifiableCredential: boolean }) {
   let types: string[] = [];
-  if (credentialSupported.format === 'jwt_vc_json' || credentialSupported.format === 'jwt_vc_json-ld' || credentialSupported.format === 'ldp_vc') {
-    types = credentialSupported.types;
-  } else if (credentialSupported.format === 'vc+sd-jwt') {
+  if (credentialSupported.format === 'vc+sd-jwt') {
     types = [credentialSupported.credential_definition.vct];
+  } else {
+    types = credentialSupported.credential_definition.type;
   }
-
   if (!types || types.length === 0) {
     throw Error('Could not deduce types from credential supported');
   }
@@ -127,33 +116,8 @@ function arrayEqualsIgnoreOrder(a: string[], b: string[]) {
   return true;
 }
 
-export function credentialsSupportedV8ToV11(supportedV8: CredentialSupportedTypeV1_0_08): CredentialSupported[] {
-  return Object.entries(supportedV8).flatMap((entry) => {
-    const type = entry[0];
-    const supportedV8 = entry[1];
-    return credentialSupportedV8ToV11(type, supportedV8);
-  });
-}
 
-export function credentialSupportedV8ToV11(key: string, supportedV8: CredentialSupportedV1_0_08): CredentialSupported[] {
-  return Object.entries(supportedV8.formats).map((entry) => {
-    const format = entry[0];
-    const credentialSupportBrief = entry[1];
-    if (typeof format !== 'string') {
-      throw Error(`Unknown format received ${JSON.stringify(format)}`);
-    }
-    let credentialSupport: Partial<CredentialSupported> = {};
-    credentialSupport = {
-      format: format as OID4VCICredentialFormat,
-      display: supportedV8.display,
-      ...credentialSupportBrief,
-      credentialSubject: supportedV8.claims,
-    };
-    return credentialSupport as CredentialSupported;
-  });
-}
-
-export function getIssuerDisplays(metadata: CredentialIssuerMetadata | IssuerMetadataV1_0_08, opts?: { prefLocales: string[] }): MetadataDisplay[] {
+export function getIssuerDisplays(metadata: CredentialIssuerMetadata, opts?: { prefLocales: string[] }): MetadataDisplay[] {
   const matchedDisplays =
     metadata.display?.filter(
       (item) => !opts?.prefLocales || opts.prefLocales.length === 0 || (item.locale && opts.prefLocales.includes(item.locale)) || !item.locale,

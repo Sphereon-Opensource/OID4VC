@@ -74,7 +74,7 @@ export class AccessTokenClient {
       metadata: metadata
         ? metadata
         : issuerOpts?.fetchMetadata
-        ? await MetadataClient.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
+        ? await MetadataClient.retrieveAllMetadata([issuerOpts.issuer], { errorOnNotFound: false }) // TODO multi-server support?
         : undefined,
     });
 

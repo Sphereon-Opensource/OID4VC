@@ -13,7 +13,7 @@ import {
   ProofOfPossession,
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
-import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { CredentialSupportedBuilderV1_12, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer'
 import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
@@ -85,7 +85,7 @@ describe('issuerCallback', () => {
   const clientId = 'sphereon:wallet'
 
   beforeAll(async () => {
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
+    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_12()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
@@ -236,7 +236,7 @@ describe('issuerCallback', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_11,
+      version: OpenId4VCIVersion.VER_1_0_12,
     })
       .withClientId(clientId)
       .withKid(kid)
@@ -247,7 +247,7 @@ describe('issuerCallback', () => {
       credentialTypes: ['VerifiableCredential'],
       format: 'jwt_vc_json',
       proofInput: proof,
-      version: OpenId4VCIVersion.VER_1_0_11,
+      version: OpenId4VCIVersion.VER_1_0_12,
     })
     expect(credentialRequest).toEqual({
       format: 'jwt_vc_json',

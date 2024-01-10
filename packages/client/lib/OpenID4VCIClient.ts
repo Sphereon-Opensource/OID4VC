@@ -3,7 +3,6 @@ import {
   Alg,
   AuthzFlowType,
   CodeChallengeMethod,
-  CredentialOfferPayloadV1_0_08,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
   CredentialSupported,
@@ -13,10 +12,9 @@ import {
   OpenId4VCIVersion,
   ProofOfPossessionCallbacks,
   PushedAuthorizationResponse,
-  ResponseType,
+  ResponseType
 } from '@sphereon/oid4vci-common';
 import { getSupportedCredentials, getTypesFromCredentialSupported } from '@sphereon/oid4vci-common/dist/functions/IssuerMetadataUtils';
-import { CredentialSupportedTypeV1_0_08 } from '@sphereon/oid4vci-common/dist/types/v1_0_08.types';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
@@ -325,9 +323,15 @@ export class OpenID4VCIClient {
           throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
         }
       } else if (metadata.credentials_supported && !Array.isArray(metadata.credentials_supported)) {
-        const credentialsSupported = metadata.credentials_supported as CredentialSupportedTypeV1_0_08;
-        if (types.some((type) => !metadata.credentials_supported || !credentialsSupported[type])) {
-          throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
+        const credentialsSupported = metadata.credentials_supported as CredentialSupported;
+        if (credentialsSupported.format === 'vc+sd-jwt') {
+          if (types.some((type) => !metadata.credentials_supported || credentialsSupported.credential_definition.vct === type)) { // TODO why are we doing iterating types and not using them?
+            throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
+          }
+        } else {
+          if (types.some((type) => !metadata.credentials_supported || !credentialsSupported.credential_definition.type.includes(type))) {
+            throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
+          }
         }
       }
       // todo: Format check? We might end up with some disjoint type / format combinations supported by the server
@@ -387,25 +391,17 @@ export class OpenID4VCIClient {
   }
 
   getCredentialOfferTypes(): string[][] {
-    if (this.credentialOffer.version < OpenId4VCIVersion.VER_1_0_11) {
-      const orig = this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08;
-      const types: string[] = typeof orig.credential_type === 'string' ? [orig.credential_type] : orig.credential_type;
-      const result: string[][] = [];
-      result[0] = types;
-      return result;
-    } else {
-      return this.credentialOffer.credential_offer.credentials.map((c) => {
-        if (typeof c === 'string') {
-          return [c];
-        } else if ('types' in c) {
-          return c.types;
-        } else if ('vct' in c.credential_definition) {
-          return [c.credential_definition.vct];
-        } else {
-          return c.credential_definition.types;
-        }
-      });
-    }
+    return this.credentialOffer.credential_offer.credentials.map((c) => {
+      if (typeof c === 'string') {
+        return [c];
+      } else if ('types' in c) {
+        return c.types;
+      } else if ('vct' in c.credential_definition) {
+        return [c.credential_definition.vct];
+      } else {
+        return c.credential_definition.types;
+      }
+    });
   }
 
   issuerSupportedFlowTypes(): AuthzFlowType[] {

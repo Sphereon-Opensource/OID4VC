@@ -1,12 +1,12 @@
 import { CredentialIssuerMetadata, CredentialSupported, MetadataDisplay } from '@sphereon/oid4vci-common'
 
-import { CredentialSupportedBuilderV1_11 } from './CredentialSupportedBuilderV1_11'
+import { CredentialSupportedBuilderV1_12 } from './CredentialSupportedBuilderV1_12'
 import { DisplayBuilder } from './DisplayBuilder'
 
 export class IssuerMetadataBuilderV1_11 {
   credentialEndpoint: string | undefined
   credentialIssuer: string | undefined
-  supportedBuilders: CredentialSupportedBuilderV1_11[] = []
+  supportedBuilders: CredentialSupportedBuilderV1_12[] = []
   supportedCredentials: CredentialSupported[] = []
   displayBuilders: DisplayBuilder[] = []
   display: MetadataDisplay[] = []
@@ -39,13 +39,13 @@ export class IssuerMetadataBuilderV1_11 {
     return this
   }
 
-  public newSupportedCredentialBuilder(): CredentialSupportedBuilderV1_11 {
-    const builder = new CredentialSupportedBuilderV1_11()
+  public newSupportedCredentialBuilder(): CredentialSupportedBuilderV1_12 {
+    const builder = new CredentialSupportedBuilderV1_12()
     this.addSupportedCredentialBuilder(builder)
     return builder
   }
 
-  public addSupportedCredentialBuilder(supportedCredentialBuilder: CredentialSupportedBuilderV1_11) {
+  public addSupportedCredentialBuilder(supportedCredentialBuilder: CredentialSupportedBuilderV1_12) {
     this.supportedBuilders.push(supportedCredentialBuilder)
     return this
   }

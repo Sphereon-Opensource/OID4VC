@@ -8,10 +8,9 @@ import {
   CredentialDataSupplierInput,
   CredentialIssuerMetadataOpts,
   CredentialOfferFormat,
-  CredentialOfferPayloadV1_0_11,
+  CredentialOfferPayloadV1_0_12,
   CredentialOfferSession,
-  CredentialOfferV1_0_12,
-  CredentialRequestV1_0_11,
+  CredentialOfferV1_0_12, CredentialRequestV1_0_12,
   CredentialResponse,
   DID_NO_DIDDOC_ERROR,
   Grant,
@@ -33,8 +32,8 @@ import {
   toUniformCredentialOfferRequest,
   TYP_ERROR,
   UniformCredentialRequest,
-  URIState,
-} from '@sphereon/oid4vci-common'
+  URIState
+} from '@sphereon/oid4vci-common';
 import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
@@ -109,12 +108,12 @@ export class VcIssuer<DIDDoc extends object> {
     if (!grants?.authorization_code && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
       throw Error(`No grant issuer state or pre-authorized code could be deduced`)
     }
-    const credentialOfferPayload: CredentialOfferPayloadV1_0_11 = {
+    const credentialOfferPayload: CredentialOfferPayloadV1_0_12 = {
       ...(grants && { grants }),
       ...(credentials && { credentials }),
       ...(credentialDefinition && { credential_definition: credentialDefinition }),
       credential_issuer: this.issuerMetadata.credential_issuer,
-    } as CredentialOfferPayloadV1_0_11
+    } as CredentialOfferPayloadV1_0_12
     if (grants?.authorization_code) {
       issuerState = grants?.authorization_code.issuer_state
       if (!issuerState) {
@@ -174,9 +173,9 @@ export class VcIssuer<DIDDoc extends object> {
       {
         credential_offer: credentialOfferObject.credential_offer,
         credential_offer_uri: credentialOfferObject.credential_offer_uri,
-      } as CredentialOfferV1_0_11,
+      } as CredentialOfferV1_0_12,
       {
-        version: OpenId4VCIVersion.VER_1_0_11,
+        version: OpenId4VCIVersion.VER_1_0_12,
         resolve: false, // We are creating the object, so do not resolve
       },
     )
@@ -229,7 +228,7 @@ export class VcIssuer<DIDDoc extends object> {
    *  - cNonce an existing c_nonce
    */
   public async issueCredential(opts: {
-    credentialRequest: CredentialRequestV1_0_11
+    credentialRequest: CredentialRequestV1_0_12
     credential?: ICredential
     credentialDataSupplier?: CredentialDataSupplier
     credentialDataSupplierInput?: CredentialDataSupplierInput

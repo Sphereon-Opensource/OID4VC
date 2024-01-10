@@ -5,7 +5,7 @@ import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AuthorizationRequest,
   CredentialOfferRESTRequest,
-  CredentialRequestV1_0_11,
+  CredentialRequestV1_0_12,
   determineGrantTypes,
   getNumberOrUndefined,
   Grant,
@@ -141,7 +141,7 @@ export function getCredentialEndpoint<DIDDoc extends object>(
   console.log(`[OID4VCI] getCredential endpoint enabled at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
     try {
-      const credentialRequest = request.body as CredentialRequestV1_0_11
+      const credentialRequest = request.body as CredentialRequestV1_0_12
       const credential = await issuer.issueCredential({
         credentialRequest: credentialRequest,
         tokenExpiresIn: opts.tokenExpiresIn,

@@ -99,10 +99,20 @@ export type CommonCredentialSupported = CredentialSupportedBrief & {
     display?: CredentialsSupportedDisplay[];
 };
 
-export interface CredentialSupportedJwtVcJsonLdAndLdpVc extends CommonCredentialSupported {
-  types: string[]; // REQUIRED. JSON array designating the types a certain credential type supports
+
+export interface JwtVcCredentialDefinition  {
+  type: string[]; // REQUIRED. JSON array designating the types a certain credential type supports
+  credentialSubject?: IssuerCredentialSubject; // OPTIONAL. A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential. The value MAY be a dictionary, which allows to represent the full (potentially deeply nested) structure of the verifiable credential to be issued.
+}
+
+export interface JwtVcJsonLdAndLdpVcCredentialDefinition extends JwtVcCredentialDefinition {
+  type: string[]; // REQUIRED. JSON array designating the types a certain credential type supports
   '@context': ICredentialContextType[]; // REQUIRED. JSON array as defined in [VC_DATA], Section 4.1.
   credentialSubject?: IssuerCredentialSubject; // OPTIONAL. A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential. The value MAY be a dictionary, which allows to represent the full (potentially deeply nested) structure of the verifiable credential to be issued.
+}
+
+export interface CredentialSupportedJwtVcJsonLdAndLdpVc extends CommonCredentialSupported {
+  credential_definition: JwtVcJsonLdAndLdpVcCredentialDefinition; // REQUIRED. JSON object containing the detailed description of the credential type
   order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
   format: 'ldp_vc' | 'jwt_vc_json-ld';
 }
@@ -111,6 +121,7 @@ export interface JwtVcCredentialDefinition {
   type: string[]; // REQUIRED. JSON array designating the types a certain credential type supports
   credentialSubject?: IssuerCredentialSubject; // OPTIONAL. A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential. The value MAY be a dictionary, which allows to represent the full (potentially deeply nested) structure of the verifiable credential to be issued.
 }
+
 
 export interface CredentialSupportedJwtVcJson extends CommonCredentialSupported {
   credential_definition: JwtVcCredentialDefinition; // REQUIRED. JSON object containing the detailed description of the credential type

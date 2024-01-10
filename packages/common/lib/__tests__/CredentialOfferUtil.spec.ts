@@ -30,7 +30,7 @@ describe('CredentialOfferUtil should', () => {
   it(
     'get version 11 with sample URL',
     async () => {
-      expect(determineSpecVersionFromURI(CREDENTIAL_OFFER_QR_V11)).toEqual(OpenId4VCIVersion.VER_1_0_11);
+      expect(determineSpecVersionFromURI(CREDENTIAL_OFFER_QR_V11)).toEqual(OpenId4VCIVersion.VER_1_0_12);
     },
     UNIT_TEST_TIMEOUT,
   );
@@ -48,7 +48,7 @@ describe('CredentialOfferUtil should', () => {
   it(
     'get version 11 as default value',
     async () => {
-      expect(determineSpecVersionFromURI('test://uri')).toEqual(OpenId4VCIVersion.VER_1_0_11);
+      expect(determineSpecVersionFromURI('test://uri')).toEqual(OpenId4VCIVersion.VER_1_0_12);
     },
     UNIT_TEST_TIMEOUT,
   );

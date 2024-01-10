@@ -219,6 +219,7 @@ export interface OpenIDResponse<T> {
   origResponse: Response;
   successBody?: T;
   errorBody?: ErrorResponse;
+  selectedHost?: string;
 }
 
 export interface AccessTokenResponse {
