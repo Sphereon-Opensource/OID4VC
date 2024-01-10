@@ -82,7 +82,7 @@ describe('sd-jwt vc', () => {
         uri: offerUri.uri,
       });
 
-      expect(client.credentialOffer.credential_offer).toEqual({
+      expect(client.credentialOffer?.credential_offer).toEqual({
         credential_issuer: 'https://example.com',
         credentials: ['SdJwtCredentialId'],
         grants: {
