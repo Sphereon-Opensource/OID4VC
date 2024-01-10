@@ -296,7 +296,7 @@ describe('VcIssuer', () => {
   })
   it('should get state on server side', async () => {
     const preAuthCode =
-      client.credentialOffer.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
+      client.credentialOffer!.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
     expect(preAuthCode).toBeDefined()
 
     if (preAuthCode) {

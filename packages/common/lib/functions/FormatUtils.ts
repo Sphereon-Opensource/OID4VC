@@ -28,7 +28,7 @@ export function getUniformFormat(format: string | OID4VCICredentialFormat | Cred
 
   // Older formats
   if (format === 'jwt_vc' || format === 'jwt') {
-    return 'jwt_vc_json';
+    return 'jwt_vc';
   }
   if (format === 'ldp_vc' || format === 'ldp') {
     return 'ldp_vc';

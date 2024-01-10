@@ -167,7 +167,7 @@ describe('issuerCallback', () => {
       )
       .withCredentialSignerCallback((opts) =>
         Promise.resolve({
-          ...opts.credential,
+          ...(opts.credential as ICredential),
           proof: {
             type: IProofType.JwtProof2020,
             jwt: 'ye.ye.ye',

@@ -128,7 +128,7 @@ describe('Credential Request Client ', () => {
       version: OpenId4VCIVersion.VER_1_0_08,
     });
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy();
-    expect(credentialRequest.format).toEqual('jwt_vc_json');
+    expect(credentialRequest.format).toEqual('jwt_vc');
     const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
     expect(result?.successBody?.credential).toEqual(mockedVC);
   });
@@ -157,8 +157,15 @@ describe('Credential Request Client ', () => {
 });
 
 describe('Credential Request Client with Walt.id ', () => {
-  it('should have correct metadata endpoints', async function () {
+  beforeAll(() => {
     nock.cleanAll();
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
+  it('should have correct metadata endpoints', async function () {
+    // nock.cleanAll();
     const WALT_IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
     const credentialOffer = await CredentialOfferClient.fromURI(WALT_IRR_URI);

@@ -2,6 +2,7 @@ import {
   AccessTokenResponse,
   Alg,
   EndpointMetadata,
+  JWK,
   Jwt,
   NO_JWT_PROVIDED,
   OpenId4VCIVersion,
@@ -19,6 +20,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
   private readonly version: OpenId4VCIVersion;
 
   private kid?: string;
+  private jwk?: JWK;
   private clientId?: string;
   private issuer?: string;
   private jwt?: Jwt;
@@ -88,6 +90,11 @@ export class ProofOfPossessionBuilder<DIDDoc> {
 
   withKid(kid: string): this {
     this.kid = kid;
+    return this;
+  }
+
+  withJWK(jwk: JWK): this {
+    this.jwk = jwk;
     return this;
   }
 
@@ -182,6 +189,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
         {
           typ: this.typ ?? (this.version < OpenId4VCIVersion.VER_1_0_12 ? 'jwt' : 'openid4vci-proof+jwt'),
           kid: this.kid,
+          jwk: this.jwk,
           jti: this.jti,
           alg: this.alg,
           issuer: this.issuer,

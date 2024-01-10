@@ -91,10 +91,14 @@ export function getSupportedCredential(opts?: {
 
 export function getTypesFromCredentialSupported(credentialSupported: CredentialSupported, opts?: { filterVerifiableCredential: boolean }) {
   let types: string[] = [];
-  if (credentialSupported.format === 'vc+sd-jwt') {
-    types = [credentialSupported.credential_definition.vct];
+  if (credentialSupported.format !== 'vc+sd-jwt') {
+      credentialSupported.format === 'jwt_vc_json' ||
+      credentialSupported.format === 'jwt_vc' ||
+      credentialSupported.format === 'jwt_vc_json-ld' ||
+      credentialSupported.format === 'ldp_vc'
+      types = credentialSupported.credential_definition.type;
   } else {
-    types = credentialSupported.credential_definition.type;
+    types = [credentialSupported.credential_definition.vct];
   }
   if (!types || types.length === 0) {
     throw Error('Could not deduce types from credential supported');

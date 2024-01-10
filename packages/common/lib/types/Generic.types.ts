@@ -15,7 +15,7 @@ export interface ImageInfo {
   [key: string]: unknown;
 }
 
-export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'vc+sd-jwt' /*| 'mso_mdoc'*/; // we do not support mdocs at this point
+export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'vc+sd-jwt' | 'jwt_vc'; // jwt_vc is added for backwards compat /*| 'mso_mdoc'*/; // we do not support mdocs at this point
 
 export type KeyProofType = 'jwt' | 'cwt'
 
@@ -126,19 +126,15 @@ export interface JwtVcCredentialDefinition {
 export interface CredentialSupportedJwtVcJson extends CommonCredentialSupported {
   credential_definition: JwtVcCredentialDefinition; // REQUIRED. JSON object containing the detailed description of the credential type
   order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
-  format: 'jwt_vc_json';
-}
-
-export interface SdJwtVcCredentialDefinition {
-  vct: string; // REQUIRED. JSON string designating the type of an SD-JWT vc
-  claims?: IssuerCredentialSubject;
+  format: 'jwt_vc_json' | 'jwt_vc'; // jwt_vc added for backwards compat
 }
 
 export interface CredentialSupportedSdJwtVc extends CommonCredentialSupported {
   format: 'vc+sd-jwt';
 
-  // REQUIRED. JSON object containing the detailed description of the credential type
-  credential_definition: SdJwtVcCredentialDefinition;
+  vct: string;
+  claims?: IssuerCredentialSubject;
+
   order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
 }
 
@@ -156,13 +152,18 @@ export interface CredentialOfferFormatJwtVcJsonLdAndLdpVc extends CommonCredenti
 }
 
 export interface CredentialOfferFormatJwtVcJson extends CommonCredentialOfferFormat {
-  format: 'jwt_vc_json';
+  format: 'jwt_vc_json' | 'jwt_vc'; // jwt_vc is added for backwards compat
   types: string[]; // REQUIRED. JSON array as defined in Appendix E.1.1.2. This claim contains the type values the Wallet shall request in the subsequent Credential Request.
 }
 
+// NOTE: the sd-jwt format is added to oid4vci in a later draft version than currently
+// supported, so there's no defined offer format. However, based on the request structure
+// we support sd-jwt for older drafts of oid4vci as well
 export interface CredentialOfferFormatSdJwtVc extends CommonCredentialOfferFormat {
   format: 'vc+sd-jwt';
-  credential_definition: SdJwtVcCredentialDefinition;
+
+  vct: string;
+  claims?: IssuerCredentialSubject;
 }
 
 export type CredentialOfferFormat = CommonCredentialOfferFormat &
@@ -203,7 +204,7 @@ export interface CommonCredentialRequest {
 }
 
 export interface CredentialRequestJwtVcJson extends CommonCredentialRequest {
-  format: 'jwt_vc_json';
+  format: 'jwt_vc_json' | 'jwt_vc'; // jwt_vc for backwards compat
   types: string[];
   credentialSubject?: IssuerCredentialSubject;
 }
@@ -215,7 +216,8 @@ export interface CredentialRequestJwtVcJsonLdAndLdpVc extends CommonCredentialRe
 
 export interface CredentialRequestSdJwtVc extends CommonCredentialRequest {
   format: 'vc+sd-jwt';
-  credential_definition: SdJwtVcCredentialDefinition;
+  vct: string;
+  claims?: IssuerCredentialSubject;
 }
 
 export interface CommonCredentialResponse {

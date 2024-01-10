@@ -124,9 +124,7 @@ export class CredentialSupportedBuilderV1_12 {
       if (this.types.length > 1) {
         throw new Error('Only one type is allowed for vc+sd-jwt')
       }
-      credentialSupported.credential_definition = {
-        vct: this.types[0],
-      }
+      credentialSupported.vct = this.types[0]
     }
     // And else would work here, but this way we get the correct typing
     else {
