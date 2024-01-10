@@ -64,7 +64,7 @@ export class CredentialOfferClient {
     const isUri = requestWithBaseUrl.credential_offer_uri !== undefined;
 
     if (version.valueOf() >= OpenId4VCIVersion.VER_1_0_12.valueOf()) {
-      // v11 changed from encoding every param to a encoded json object with a credential_offer param key
+      // v11 changed from encoding every param to an encoded json object with a credential_offer param key
       if (!baseUrl.includes('?')) {
         param = isUri ? 'credential_offer_uri' : 'credential_offer';
       } else {
