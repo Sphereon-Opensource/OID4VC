@@ -29,6 +29,7 @@ import {
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   QRCodeOpts,
+  SdJwtVcCredentialDefinition,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
   TYP_ERROR,
@@ -94,7 +95,7 @@ export class VcIssuer<DIDDoc extends object> {
   public async createCredentialOfferURI(opts: {
     grants?: Grant
     credentials?: (CredentialOfferFormat | string)[]
-    credentialDefinition?: JsonLdIssuerCredentialDefinition
+    credentialDefinition?: JsonLdIssuerCredentialDefinition | SdJwtVcCredentialDefinition
     credentialOfferUri?: string
     credentialDataSupplierInput?: CredentialDataSupplierInput // Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
     baseUri?: string

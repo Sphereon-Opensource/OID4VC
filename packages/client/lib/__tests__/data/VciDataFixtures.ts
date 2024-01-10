@@ -358,7 +358,7 @@ const mockData: VciMockDataStructure = {
       url: 'https://jff.walt.id/issuer-api/default/oidc/credential',
       request: {
         types: ['OpenBadgeCredential'],
-        format: 'jwt_vc_json',
+        format: 'jwt_vc',
         proof: {
           proof_type: 'jwt',
           jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6andrOmV5SmhiR2NpT2lKRlV6STFOa3NpTENKMWMyVWlPaUp6YVdjaUxDSnJkSGtpT2lKRlF5SXNJbU55ZGlJNkluTmxZM0F5TlRack1TSXNJbmdpT2lKclpuVmpTa0V0VEhKck9VWjBPRmx5TFVkMlQzSmpia3N3YjNkc2RqUlhNblUwU3pJeFNHZHZTVlIzSWl3aWVTSTZJalozY0ZCUE1rOUNRVXBTU0ZFMVRXdEtXVlJaV0dsQlJFUXdOMU5OTlV0amVXcDNYMkUzVUUxWmVGa2lmUSMwIn0.eyJhdWQiOiJodHRwczovL2pmZi53YWx0LmlkL2lzc3Vlci1hcGkvZGVmYXVsdC9vaWRjLyIsImlhdCI6MTY4MTkxMTk0Mi4yMzgsImV4cCI6MTY4MTkxMjYwMi4yMzgsIm5vbmNlIjoiZjA2YTMxMDUtYTJlZC00NGZjLTk1NGItNGEyNTk3MDM0OTNiIiwiaXNzIjoic3BoZXJlb246c3NpLXdhbGxldCIsImp0aSI6IjA1OWM3ODA5LTlmOGYtNGE3ZS1hZDI4YTNhMTNhMGIzNmViIn0.RfiWyybxpe3nkx3b0yIsqDHQtvB1WwhDW4t0X-kijy2dsSfv2cYhSEmAzs1shg7OV4EW8fSzt_Te79xiVl6jCw',

@@ -68,6 +68,11 @@ describe('OpenID4VCIClient should', () => {
     expect(scope?.[0]).toBe('openid');
   });
   it('throw an error if no scope and no authorization_details is provided', async () => {
+    nock(MOCK_URL).get(/.*/).reply(200, {});
+    nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {});
+    nock(MOCK_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
+    // Use a client with issuer only to trigger the error
+    client = await OpenID4VCIClient.fromCredentialIssuer({ credentialIssuer: 'https://server.example.com' });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     client._endpointMetadata?.credentialIssuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;

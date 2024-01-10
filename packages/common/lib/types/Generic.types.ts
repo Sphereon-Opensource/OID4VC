@@ -15,7 +15,7 @@ export interface ImageInfo {
   [key: string]: unknown;
 }
 
-export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'vc+sd-jwt' /*| 'mso_mdoc'*/; // we do not support mdocs at this point
+export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'vc+sd-jwt' | 'jwt_vc'; // jwt_vc is added for backwards compat /*| 'mso_mdoc'*/; // we do not support mdocs at this point
 
 export interface NameAndLocale {
   name?: string; // REQUIRED. String value of a display name for the Credential.
@@ -87,7 +87,7 @@ export interface CredentialSupportedJwtVcJson extends CommonCredentialSupported 
   types: string[]; // REQUIRED. JSON array designating the types a certain credential type supports
   credentialSubject?: IssuerCredentialSubject; // OPTIONAL. A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential. The value MAY be a dictionary, which allows to represent the full (potentially deeply nested) structure of the verifiable credential to be issued.
   order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
-  format: 'jwt_vc_json';
+  format: 'jwt_vc_json' | 'jwt_vc'; // jwt_vc added for backwards compat
 }
 
 export interface CredentialSupportedSdJwtVc extends CommonCredentialSupported {
@@ -113,7 +113,7 @@ export interface CredentialOfferFormatJwtVcJsonLdAndLdpVc extends CommonCredenti
 }
 
 export interface CredentialOfferFormatJwtVcJson extends CommonCredentialOfferFormat {
-  format: 'jwt_vc_json';
+  format: 'jwt_vc_json' | 'jwt_vc'; // jwt_vc is added for backwards compat
   types: string[]; // REQUIRED. JSON array as defined in Appendix E.1.1.2. This claim contains the type values the Wallet shall request in the subsequent Credential Request.
 }
 
@@ -165,7 +165,7 @@ export interface CommonCredentialRequest {
 }
 
 export interface CredentialRequestJwtVcJson extends CommonCredentialRequest {
-  format: 'jwt_vc_json';
+  format: 'jwt_vc_json' | 'jwt_vc'; // jwt_vc for backwards compat
   types: string[];
   credentialSubject?: IssuerCredentialSubject;
 }
