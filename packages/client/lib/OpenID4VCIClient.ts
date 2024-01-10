@@ -12,6 +12,8 @@ import {
   getSupportedCredentials,
   getTypesFromCredentialSupported,
   JsonURIMode,
+  JWK,
+  KID_JWK_X5C_ERROR,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   ProofOfPossessionCallbacks,
@@ -51,6 +53,7 @@ export class OpenID4VCIClient {
   private _credentialIssuer: string;
   private _clientId?: string;
   private _kid: string | undefined;
+  private _jwk: JWK | undefined;
   private _alg: Alg | string | undefined;
   private _endpointMetadata: EndpointMetadataResult | undefined;
   private _accessTokenResponse: AccessTokenResponse | undefined;
@@ -352,6 +355,7 @@ export class OpenID4VCIClient {
     proofCallbacks,
     format,
     kid,
+    jwk,
     alg,
     jti,
     deferredCredentialAwait,
@@ -361,17 +365,19 @@ export class OpenID4VCIClient {
     proofCallbacks: ProofOfPossessionCallbacks<any>;
     format?: CredentialFormat | OID4VCICredentialFormat;
     kid?: string;
+    jwk?: JWK;
     alg?: Alg | string;
     jti?: string;
     deferredCredentialAwait?: boolean;
     deferredCredentialIntervalInMS?: number;
   }): Promise<CredentialResponse> {
-    if (alg) {
-      this._alg = alg;
+    if ([jwk, kid].filter((v) => v !== undefined).length > 1) {
+      throw new Error(KID_JWK_X5C_ERROR + `. jwk: ${jwk !== undefined}, kid: ${kid !== undefined}`);
     }
-    if (kid) {
-      this._kid = kid;
-    }
+
+    if (alg) this._alg = alg;
+    if (jwk) this._jwk = jwk;
+    if (kid) this._kid = kid;
 
     const requestBuilder = this.credentialOffer
       ? CredentialRequestClientBuilder.fromCredentialOffer({
@@ -423,8 +429,14 @@ export class OpenID4VCIClient {
       version: this.version(),
     })
       .withIssuer(this.getIssuer())
-      .withAlg(this.alg)
-      .withKid(this.kid);
+      .withAlg(this.alg);
+
+    if (this._jwk) {
+      proofBuilder.withJWK(this._jwk);
+    }
+    if (this._kid) {
+      proofBuilder.withKid(this._kid);
+    }
 
     if (this.clientId) {
       proofBuilder.withClientId(this.clientId);
@@ -485,8 +497,8 @@ export class OpenID4VCIClient {
           return [c];
         } else if ('types' in c) {
           return c.types;
-        } else if ('vct' in c.credential_definition) {
-          return [c.credential_definition.vct];
+        } else if ('vct' in c) {
+          return [c.vct];
         } else {
           return c.credential_definition.types;
         }

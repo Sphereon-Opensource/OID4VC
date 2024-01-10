@@ -109,7 +109,7 @@ export function getTypesFromCredentialSupported(credentialSupported: CredentialS
   ) {
     types = credentialSupported.types;
   } else if (credentialSupported.format === 'vc+sd-jwt') {
-    types = [credentialSupported.credential_definition.vct];
+    types = [credentialSupported.vct];
   }
 
   if (!types || types.length === 0) {

@@ -183,9 +183,7 @@ export class CredentialRequestClient {
       return {
         format,
         proof,
-        credential_definition: {
-          vct: types[0],
-        },
+        vct: types[0],
       };
     }
 
