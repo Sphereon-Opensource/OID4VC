@@ -310,8 +310,6 @@ export class VcIssuer<DIDDoc extends object> {
       // Bind credential to the provided proof of possession
       if (CredentialMapper.isSdJwtDecodedCredentialPayload(credential) && (kid || jwk) && !credential.cnf) {
         if (kid) {
-          // NOTE: any can be removed once this PR is released:
-          // https://github.com/Sphereon-Opensource/SSI-SDK/pull/150
           credential.cnf = {
             kid,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
