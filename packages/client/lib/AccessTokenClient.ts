@@ -80,7 +80,7 @@ export class AccessTokenClient {
         : undefined,
     });
 
-    return this.sendAuthCode(requestTokenURL, accessTokenRequest);
+    return this.sendAuthCode(requestTokenURL, accessTokenRequest, asOpts?.tokenProxyUrl);
   }
 
   public async createAccessTokenRequest(opts: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
@@ -199,8 +199,15 @@ export class AccessTokenClient {
     }
   }
 
-  private async sendAuthCode(requestTokenURL: string, accessTokenRequest: AccessTokenRequest): Promise<OpenIDResponse<AccessTokenResponse>> {
-    return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest));
+  private async sendAuthCode(requestTokenURL: string, accessTokenRequest: AccessTokenRequest, tokenProxyUrl: string | undefined): Promise<OpenIDResponse<AccessTokenResponse>> {
+    if (!tokenProxyUrl) {
+      return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest));
+    } else {
+      return await formPost(tokenProxyUrl, JSON.stringify({
+        ...accessTokenRequest,
+        issuerUrl: requestTokenURL
+      }), { contentType: 'application/json' }); // TODO maybe switch to x-www-form-urlencoded in proxy backend ot support both
+    }
   }
 
   public static determineTokenURL({

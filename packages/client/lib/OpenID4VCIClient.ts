@@ -306,8 +306,12 @@ export class OpenID4VCIClient {
     codeVerifier?: string;
     code?: string;
     redirectUri?: string;
+    tokenProxyUrl?: string;
   }): Promise<AccessTokenResponse> {
-    const { pin, clientId, codeVerifier, code, redirectUri } = opts ?? {};
+    const {
+      pin, clientId, codeVerifier, code,
+      redirectUri, tokenProxyUrl
+    } = opts ?? {};
 
     this.assertIssuerData();
 
@@ -325,7 +329,10 @@ export class OpenID4VCIClient {
         codeVerifier,
         code,
         redirectUri,
-        asOpts: { clientId },
+        asOpts: {
+          clientId,
+          tokenProxyUrl: tokenProxyUrl
+        }
       });
 
       if (response.errorBody) {

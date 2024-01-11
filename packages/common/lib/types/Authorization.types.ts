@@ -171,6 +171,7 @@ export interface AuthorizationServerOpts {
   as?: string; // If not provided the issuer hostname will be used!
   tokenEndpoint?: string; // Allows to override the default '/token' endpoint
   clientId?: string;
+  tokenProxyUrl?: string // Allows using a proxy server for use cases where a secret private key is needed to sign the access token request
 }
 
 export interface IssuerOpts {
