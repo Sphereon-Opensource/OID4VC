@@ -311,9 +311,7 @@ export class VcIssuer<DIDDoc extends object> {
       if (CredentialMapper.isSdJwtDecodedCredentialPayload(credential) && (kid || jwk) && !credential.cnf) {
         if (kid) {
           credential.cnf = {
-            kid,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any
+            kid
         } else if (jwk) {
           credential.cnf = {
             jwk,
