@@ -163,12 +163,14 @@ export class AccessTokenClient {
     }
   }
 
+/*
   private assertNonEmptyCodeVerifier(accessTokenRequest: AccessTokenRequest): void {
     if (!accessTokenRequest.code_verifier) {
       debug('No code_verifier present, whilst it is required');
       throw new Error('Authorization flow requires the code_verifier to be present');
     }
   }
+*/
 
   private assertNonEmptyCode(accessTokenRequest: AccessTokenRequest): void {
     if (!accessTokenRequest.code) {
@@ -191,7 +193,7 @@ export class AccessTokenClient {
       this.assertNumericPin(isPinRequired, accessTokenRequest.user_pin);
     } else if (accessTokenRequest.grant_type === GrantTypes.AUTHORIZATION_CODE) {
       this.assertAuthorizationGrantType(accessTokenRequest.grant_type);
-      this.assertNonEmptyCodeVerifier(accessTokenRequest);
+      // this.assertNonEmptyCodeVerifier(accessTokenRequest); TODO figure out of always required, for MOSIP I do not have it
       this.assertNonEmptyCode(accessTokenRequest);
       this.assertNonEmptyRedirectUri(accessTokenRequest);
     } else {
@@ -205,7 +207,7 @@ export class AccessTokenClient {
     } else {
       return await formPost(tokenProxyUrl, JSON.stringify({
         ...accessTokenRequest,
-        issuerUrl: requestTokenURL
+        issuer_url: requestTokenURL
       }), { contentType: 'application/json' }); // TODO maybe switch to x-www-form-urlencoded in proxy backend ot support both
     }
   }
