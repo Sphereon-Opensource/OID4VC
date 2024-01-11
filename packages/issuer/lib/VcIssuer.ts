@@ -312,6 +312,7 @@ export class VcIssuer<DIDDoc extends object> {
         if (kid) {
           credential.cnf = {
             kid
+          }
         } else if (jwk) {
           credential.cnf = {
             jwk,
