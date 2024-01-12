@@ -90,23 +90,32 @@ export function getSupportedCredential(opts?: {
 }
 
 export function getTypesFromCredentialSupported(credentialSupported: CredentialSupported, opts?: { filterVerifiableCredential: boolean }) {
-  let types: string[] = [];
+  const typesSet = new Set<string>()
+
+  if (credentialSupported.id) {
+    typesSet.add(credentialSupported.id)
+  }
+
   if (credentialSupported.format === 'jwt_vc_json' ||
-      credentialSupported.format === 'jwt_vc' ||
-      credentialSupported.format === 'jwt_vc_json-ld' ||
-      credentialSupported.format === 'ldp_vc') {
-      types = credentialSupported.credential_definition.type;
+    credentialSupported.format === 'jwt_vc' ||
+    credentialSupported.format === 'jwt_vc_json-ld' ||
+    credentialSupported.format === 'ldp_vc') {
+    credentialSupported.credential_definition.type.forEach(type => typesSet.add(type))
   } else if (credentialSupported.format === 'vc+sd-jwt') {
-    types = [credentialSupported.vct];
+    typesSet.add(credentialSupported.vct)
   }
-  if (!types || types.length === 0) {
-    throw Error('Could not deduce types from credential supported');
+
+  if (typesSet.size === 0) {
+    throw Error('Could not deduce types from credential supported')
   }
+
   if (opts?.filterVerifiableCredential) {
-    return types.filter((type) => type !== 'VerifiableCredential');
+    typesSet.delete('VerifiableCredential')
   }
-  return types;
+
+  return Array.from(typesSet)
 }
+
 
 function arrayEqualsIgnoreOrder(a: string[], b: string[]) {
   if (a.length !== b.length) return false;
