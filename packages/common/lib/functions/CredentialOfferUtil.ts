@@ -271,7 +271,7 @@ export function getTypesFromOffer(credentialOffer: UniformCredentialOfferPayload
     if (typeof curr === 'string') {
       return [...prev, curr];
     } else if (curr.format === 'jwt_vc_json-ld' || curr.format === 'ldp_vc') {
-      return [...prev, ...curr.credential_definition.types];
+      return [...prev, ...curr.credential_definition.type];
     } else if (curr.format === 'jwt_vc_json' || curr.format === 'jwt_vc') {
       return [...prev, ...curr.types];
     } else if (curr.format === 'vc+sd-jwt') {

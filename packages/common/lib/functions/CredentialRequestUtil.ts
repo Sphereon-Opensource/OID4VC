@@ -5,7 +5,7 @@ export function getTypesFromRequest(credentialRequest: UniformCredentialRequest,
   if (credentialRequest.format === 'jwt_vc_json' || credentialRequest.format === 'jwt_vc') {
     types = credentialRequest.types;
   } else if (credentialRequest.format === 'jwt_vc_json-ld' || credentialRequest.format === 'ldp_vc') {
-    types = credentialRequest.credential_definition.types;
+    types = credentialRequest.credential_definition.type;
   } else if (credentialRequest.format === 'vc+sd-jwt') {
     types = [credentialRequest.vct];
   }

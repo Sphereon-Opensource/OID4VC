@@ -49,7 +49,7 @@ describe('OID4VCIServer', () => {
               format: 'ldp_vc',
               credential_definition: {
                 '@context': ['test_context'],
-                types: ['VerifiableCredential'],
+                type: ['VerifiableCredential'],
                 credentialSubject: {},
               },
             },

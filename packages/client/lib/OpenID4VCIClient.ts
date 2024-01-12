@@ -500,7 +500,7 @@ export class OpenID4VCIClient {
         } else if ('vct' in c) {
           return [c.vct];
       } else {
-        return c.credential_definition.types;
+        return c.credential_definition.type;
       }
     });
   }

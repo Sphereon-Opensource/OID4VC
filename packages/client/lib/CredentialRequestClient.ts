@@ -104,14 +104,14 @@ export class CredentialRequestClient {
       return {
         types,
         format,
-        proof,
+        proof, // TODO Don't we need credential_definition here as well?
       };
     } else if (format === 'jwt_vc_json-ld' || format === 'ldp_vc') {
       return {
         format,
         proof,
         credential_definition: {
-          types,
+          type: types,
           // FIXME: this was not included in the original code, but it is required
           '@context': [],
         },

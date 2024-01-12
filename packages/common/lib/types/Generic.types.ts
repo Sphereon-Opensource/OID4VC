@@ -185,7 +185,7 @@ export type CreateCredentialOfferURIResult = {
 
 export interface JsonLdIssuerCredentialDefinition {
   '@context': ICredentialContextType[];
-  types: string[];
+  type: string[];
   credentialSubject?: IssuerCredentialSubject;
 }
 
