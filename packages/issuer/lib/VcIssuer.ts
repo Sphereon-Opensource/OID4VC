@@ -418,8 +418,10 @@ export class VcIssuer<DIDDoc extends object> {
   }) {
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
+
+    const supportedIssuanceFormats = ['jwt_vc_json', 'jwt_vc_json-ld', 'vc+sd-jwt', 'ldp_vc']
     try {
-      if (credentialRequest.format !== 'jwt_vc_json' && credentialRequest.format !== 'jwt_vc_json-ld' && credentialRequest.format !== 'vc+sd-jwt') {
+      if (!supportedIssuanceFormats.includes(credentialRequest.format)) {
         throw Error(`Format ${credentialRequest.format} not supported yet`)
       } else if (typeof this._jwtVerifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
         throw new Error(JWT_VERIFY_CONFIG_ERROR)
