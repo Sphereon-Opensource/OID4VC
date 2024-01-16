@@ -75,8 +75,8 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-types':
-        specifier: 0.17.6-unstable.69
-        version: 0.17.6-unstable.69
+        specifier: ^0.18.0
+        version: 0.18.0
       jose:
         specifier: ^4.10.0
         version: 4.14.6
@@ -118,8 +118,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.17.6-unstable.69
-        version: 0.17.6-unstable.69
+        specifier: ^0.18.0
+        version: 0.18.0
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8
@@ -206,8 +206,8 @@ importers:
   packages/common:
     dependencies:
       '@sphereon/ssi-types':
-        specifier: 0.17.6-unstable.69
-        version: 0.17.6-unstable.69
+        specifier: ^0.18.0
+        version: 0.18.0
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8
@@ -228,8 +228,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.17.6-unstable.69
-        version: 0.17.6-unstable.69
+        specifier: ^0.18.0
+        version: 0.18.0
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0
@@ -262,11 +262,11 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-express-support':
-        specifier: 0.17.6-unstable.69
-        version: 0.17.6-unstable.69
+        specifier: ^0.18.0
+        version: 0.18.0
       '@sphereon/ssi-types':
-        specifier: 0.17.6-unstable.69
-        version: 0.17.6-unstable.69
+        specifier: ^0.18.0
+        version: 0.18.0
       body-parser:
         specifier: ^1.20.2
         version: 1.20.2
@@ -3491,8 +3491,8 @@ packages:
       webcrypto-shim: 0.1.7
     dev: true
 
-  /@sphereon/ssi-express-support@0.17.6-unstable.69:
-    resolution: {integrity: sha512-IpiiW6KPv5zjvlCCxyw4S093WL4na6zvJjoWI26te04Y4T1yYF3FfaGdcA+BAQl4URvvcp09mzay2Z8RwmDLSA==}
+  /@sphereon/ssi-express-support@0.18.0:
+    resolution: {integrity: sha512-qrZkCdDwmu+wsc8ZGvcbSZ89vPCoXLEqHpBYbOuKlC5Dcl9qLiAU8SpC5I5tqCbfFE2mC7lw2ybtl0GYZRXbsQ==}
     peerDependencies:
       '@noble/hashes': 1.2.0
       passport-azure-ad: ^4.3.5
@@ -3548,8 +3548,8 @@ packages:
       - supports-color
     dev: true
 
-  /@sphereon/ssi-types@0.17.6-unstable.69:
-    resolution: {integrity: sha512-VwjVd6XhoV5QecWcRh0RpBf5N324tfhYcQrVk9se3brqMNMauZTBbhUhk+QLdwFd+u/1+IfEWnS28HyIU7lXHQ==}
+  /@sphereon/ssi-types@0.18.0:
+    resolution: {integrity: sha512-D2n42NAhHCwpL4K7BqQXO9dYQ8n3st/1eJQrLqokJ18B9r2gury3km4cp+ZdiIxfefUaP9RBCeuWaiRUvjZ94w==}
     dependencies:
       '@sd-jwt/core': 0.1.2-alpha.0
       jwt-decode: 3.1.2

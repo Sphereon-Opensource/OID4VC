@@ -255,6 +255,8 @@ export class VcIssuer<DIDDoc extends object> {
 
       const { preAuthSession, authSession, cNonceState, jwtVerifyResult } = validated
       const did = jwtVerifyResult.did
+      const jwk = jwtVerifyResult.jwk
+      const kid = jwtVerifyResult.kid
       const newcNonce = opts.newCNonce ? opts.newCNonce : v4()
       const newcNonceState = {
         cNonce: newcNonce,
@@ -305,19 +307,27 @@ export class VcIssuer<DIDDoc extends object> {
       if (!credential) {
         throw Error('A credential needs to be supplied at this point')
       }
-      if (did) {
-        if (CredentialMapper.isSdJwtDecodedCredentialPayload(credential)) {
-          credential.sub = did
-        } else {
-          const credentialSubjects = Array.isArray(credential.credentialSubject) ? credential.credentialSubject : [credential.credentialSubject]
-          credentialSubjects.map((subject) => {
-            if (!subject.id) {
-              subject.id = did
-            }
-            return subject
-          })
-          credential.credentialSubject = Array.isArray(credential.credentialSubject) ? credentialSubjects : credentialSubjects[0]
+      // Bind credential to the provided proof of possession
+      if (CredentialMapper.isSdJwtDecodedCredentialPayload(credential) && (kid || jwk) && !credential.cnf) {
+        if (kid) {
+          credential.cnf = {
+            kid
+          }
+        } else if (jwk) {
+          credential.cnf = {
+            jwk,
+          }
         }
+      }
+      if (did && !CredentialMapper.isSdJwtDecodedCredentialPayload(credential)) {
+        const credentialSubjects = Array.isArray(credential.credentialSubject) ? credential.credentialSubject : [credential.credentialSubject]
+        credentialSubjects.map((subject) => {
+          if (!subject.id) {
+            subject.id = did
+          }
+          return subject
+        })
+        credential.credentialSubject = Array.isArray(credential.credentialSubject) ? credentialSubjects : credentialSubjects[0]
       }
 
       const verifiableCredential = await this.issueCredentialImpl(
