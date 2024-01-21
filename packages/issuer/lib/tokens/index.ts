@@ -20,7 +20,7 @@ import {
   UNSUPPORTED_GRANT_TYPE_ERROR,
   USER_PIN_NOT_REQUIRED_ERROR,
   USER_PIN_REQUIRED_ERROR,
-} from '@sphereon/oid4vci-common'
+} from '@sphereon/oid4vc-common'
 import { v4 } from 'uuid'
 
 import { isPreAuthorizedCodeExpired } from '../functions'

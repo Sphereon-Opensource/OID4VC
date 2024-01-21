@@ -11,10 +11,10 @@
     "build:clean": "tsc --build --clean && tsc --build"
   },
   "dependencies": {
-    "@sphereon/oid4vci-common": "workspace:*",
+    "@sphereon/oid4vc-common": "workspace:*",
     "@sphereon/oid4vci-issuer": "workspace:*",
-    "@sphereon/ssi-express-support": "0.17.6-unstable.69",
-    "@sphereon/ssi-types": "0.17.6-unstable.69",
+    "@sphereon/ssi-express-support": "0.18.1",
+    "@sphereon/ssi-types": "0.18.1",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -42,7 +42,7 @@
     "ts-jest": "^29.1.0"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "files": [
     "lib/**/*",

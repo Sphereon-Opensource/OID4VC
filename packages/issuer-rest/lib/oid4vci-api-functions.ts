@@ -12,8 +12,8 @@ import {
   IssueStatusResponse,
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
   TokenErrorResponse,
-} from '@sphereon/oid4vci-common'
-import { adjustUrl, trimBoth, trimEnd, trimStart } from '@sphereon/oid4vci-common/dist/functions/HttpUtils'
+} from '@sphereon/oid4vc-common'
+import { adjustUrl, trimBoth, trimEnd, trimStart } from '@sphereon/oid4vc-common/dist/functions/HttpUtils'
 import { ITokenEndpointOpts, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
 import { CredentialFormat } from '@sphereon/ssi-types'

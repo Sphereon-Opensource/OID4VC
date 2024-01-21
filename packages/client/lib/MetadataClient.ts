@@ -8,7 +8,7 @@ import {
   getIssuerFromCredentialOfferPayload,
   OpenIDResponse,
   WellKnownEndpoints,
-} from '@sphereon/oid4vci-common';
+} from '@sphereon/oid4vc-common';
 import Debug from 'debug';
 
 import { getJson } from './functions';

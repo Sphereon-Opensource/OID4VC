@@ -14,7 +14,7 @@ import {
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
   UniformCredentialOfferPayload,
-} from '@sphereon/oid4vci-common';
+} from '@sphereon/oid4vc-common';
 import { ObjectUtils } from '@sphereon/ssi-types';
 import Debug from 'debug';
 

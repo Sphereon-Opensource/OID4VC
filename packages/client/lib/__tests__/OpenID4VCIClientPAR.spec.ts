@@ -1,4 +1,4 @@
-import { CodeChallengeMethod, WellKnownEndpoints } from '@sphereon/oid4vci-common';
+import { CodeChallengeMethod, WellKnownEndpoints } from '@sphereon/oid4vc-common';
 import nock from 'nock';
 
 import { OpenID4VCIClient } from '../OpenID4VCIClient';

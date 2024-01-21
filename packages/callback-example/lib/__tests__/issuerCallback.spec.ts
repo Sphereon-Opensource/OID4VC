@@ -1,6 +1,5 @@
 import { KeyObject } from 'crypto'
 
-import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '@sphereon/oid4vci-client'
 import {
   Alg,
   CNonceState,
@@ -11,8 +10,9 @@ import {
   JwtVerifyResult,
   OpenId4VCIVersion,
   ProofOfPossession,
-} from '@sphereon/oid4vci-common'
-import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
+} from '@sphereon/oid4vc-common'
+import { CredentialOfferSession } from '@sphereon/oid4vc-common/dist'
+import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '@sphereon/oid4vci-client'
 import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer'
 import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'

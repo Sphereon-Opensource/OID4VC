@@ -16,6 +16,9 @@
     },
     {
       "path": "callback-example"
+    },
+    {
+      "path": "siopv2"
     }
   ]
 }

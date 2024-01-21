@@ -1,4 +1,4 @@
-import { CNonceState, IStateManager, STATE_MISSING_ERROR } from '@sphereon/oid4vci-common'
+import { CNonceState, IStateManager, STATE_MISSING_ERROR } from '@sphereon/oid4vc-common'
 import { v4 } from 'uuid'
 
 import { MemoryStates } from '../state-manager'

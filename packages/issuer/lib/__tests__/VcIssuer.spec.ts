@@ -1,4 +1,3 @@
-import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   Alg,
   CredentialOfferSession,
@@ -6,7 +5,8 @@ import {
   IssuerCredentialSubjectDisplay,
   IssueStatus,
   STATE_MISSING_ERROR,
-} from '@sphereon/oid4vci-common'
+} from '@sphereon/oid4vc-common'
+import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 

@@ -8,7 +8,7 @@ import {
   OpenId4VCIVersion,
   ProofOfPossession,
   UniformCredentialRequest,
-} from '@sphereon/oid4vci-common';
+} from '@sphereon/oid4vc-common';
 import * as jose from 'jose';
 
 import { CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '..';

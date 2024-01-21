@@ -1,4 +1,4 @@
-import { CredentialOfferPayloadV1_0_11 } from '@sphereon/oid4vci-common'
+import { CredentialOfferPayloadV1_0_11 } from '@sphereon/oid4vc-common'
 
 import { createCredentialOfferURI } from '../index'
 

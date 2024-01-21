@@ -5,11 +5,11 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.8.1](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.7.3...v0.8.1) (2023-10-14)
 
-**Note:** Version bump only for package @sphereon/oid4vci-common
+**Note:** Version bump only for package @sphereon/oid4vc-common
 
 ## [0.7.3](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.7.2...v0.7.3) (2023-09-30)
 
-**Note:** Version bump only for package @sphereon/oid4vci-common
+**Note:** Version bump only for package @sphereon/oid4vc-common
 
 ## [0.7.2](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.7.1...v0.7.2) (2023-09-28)
 

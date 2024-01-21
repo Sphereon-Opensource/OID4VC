@@ -1,4 +1,4 @@
-import { Alg, CodeChallengeMethod, Jwt } from '@sphereon/oid4vci-common';
+import { Alg, CodeChallengeMethod, Jwt } from '@sphereon/oid4vc-common';
 import { toJwk } from '@sphereon/ssi-sdk-ext.key-utils';
 import { CredentialMapper } from '@sphereon/ssi-types';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment

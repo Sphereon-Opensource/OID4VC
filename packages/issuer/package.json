@@ -10,8 +10,8 @@
     "build:clean": "tsc --build --clean && tsc --build"
   },
   "dependencies": {
-    "@sphereon/oid4vci-common": "workspace:*",
-    "@sphereon/ssi-types": "0.17.6-unstable.69",
+    "@sphereon/oid4vc-common": "workspace:*",
+    "@sphereon/ssi-types": "0.18.1",
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
@@ -30,7 +30,7 @@
     "did-resolver": "^4.1.0"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "files": [
     "lib/**/*",

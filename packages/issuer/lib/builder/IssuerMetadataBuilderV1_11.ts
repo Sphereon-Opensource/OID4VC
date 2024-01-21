@@ -1,4 +1,4 @@
-import { CredentialIssuerMetadata, CredentialSupported, MetadataDisplay } from '@sphereon/oid4vci-common'
+import { CredentialIssuerMetadata, CredentialSupported, MetadataDisplay } from '@sphereon/oid4vc-common'
 
 import { CredentialSupportedBuilderV1_11 } from './CredentialSupportedBuilderV1_11'
 import { DisplayBuilder } from './DisplayBuilder'

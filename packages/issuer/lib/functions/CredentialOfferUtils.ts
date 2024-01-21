@@ -7,7 +7,7 @@ import {
   Grant,
   PIN_VALIDATION_ERROR,
   UniformCredentialOffer,
-} from '@sphereon/oid4vci-common'
+} from '@sphereon/oid4vc-common'
 import { v4 as uuidv4 } from 'uuid'
 
 export function createCredentialOfferObject(

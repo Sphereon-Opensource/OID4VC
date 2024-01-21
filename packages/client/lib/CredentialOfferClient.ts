@@ -7,7 +7,7 @@ import {
   determineSpecVersionFromURI,
   OpenId4VCIVersion,
   toUniformCredentialOfferRequest,
-} from '@sphereon/oid4vci-common';
+} from '@sphereon/oid4vc-common';
 import Debug from 'debug';
 
 import { convertJsonToURI, convertURIToJsonObject } from './functions';

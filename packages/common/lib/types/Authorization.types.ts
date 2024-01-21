@@ -156,6 +156,8 @@ export enum Encoding {
 
 export enum ResponseType {
   AUTH_CODE = 'code',
+  ID_TOKEN = 'id_token',
+  VP_TOKEN = 'vp_token',
 }
 
 export enum CodeChallengeMethod {

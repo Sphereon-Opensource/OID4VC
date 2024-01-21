@@ -34,7 +34,7 @@ import {
   TYP_ERROR,
   UniformCredentialRequest,
   URIState,
-} from '@sphereon/oid4vci-common'
+} from '@sphereon/oid4vc-common'
 import { CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 

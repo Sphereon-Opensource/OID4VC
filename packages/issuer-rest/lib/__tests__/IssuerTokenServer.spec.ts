@@ -9,7 +9,7 @@ import {
   Jwt,
   STATE_MISSING_ERROR,
   URIState,
-} from '@sphereon/oid4vci-common'
+} from '@sphereon/oid4vc-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'

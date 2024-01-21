@@ -1,5 +1,5 @@
-import { IStateManager, STATE_MISSING_ERROR } from '@sphereon/oid4vci-common'
-import { StateType } from '@sphereon/oid4vci-common/dist/types/StateManager.types'
+import { IStateManager, STATE_MISSING_ERROR } from '@sphereon/oid4vc-common'
+import { StateType } from '@sphereon/oid4vc-common/dist/types/StateManager.types'
 
 export class MemoryStates<T extends StateType> implements IStateManager<T> {
   private readonly expiresInMS: number

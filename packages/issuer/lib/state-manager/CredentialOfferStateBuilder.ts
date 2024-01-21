@@ -1,4 +1,4 @@
-import { AssertedUniformCredentialOffer, CredentialOfferSession } from '@sphereon/oid4vci-common'
+import { AssertedUniformCredentialOffer, CredentialOfferSession } from '@sphereon/oid4vc-common'
 
 export class CredentialOfferStateBuilder {
   private readonly credentialOfferState: Partial<CredentialOfferSession>

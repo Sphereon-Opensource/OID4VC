@@ -1,4 +1,4 @@
-import { AccessTokenRequest, CredentialRequestV1_0_11, CredentialSupportedSdJwtVc } from '@sphereon/oid4vci-common';
+import { AccessTokenRequest, CredentialRequestV1_0_11, CredentialSupportedSdJwtVc } from '@sphereon/oid4vc-common';
 import nock from 'nock';
 
 import { OpenID4VCIClient } from '..';

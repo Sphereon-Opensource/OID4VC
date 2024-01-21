@@ -7,7 +7,7 @@ import {
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
   TokenErrorResponse,
-} from '@sphereon/oid4vci-common'
+} from '@sphereon/oid4vc-common'
 
 export class CredentialSupportedBuilderV1_11 {
   format?: OID4VCICredentialFormat

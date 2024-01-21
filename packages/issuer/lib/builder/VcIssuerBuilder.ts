@@ -8,7 +8,7 @@ import {
   MetadataDisplay,
   TokenErrorResponse,
   URIState,
-} from '@sphereon/oid4vci-common'
+} from '@sphereon/oid4vc-common'
 
 import { VcIssuer } from '../VcIssuer'
 import { MemoryStates } from '../state-manager'

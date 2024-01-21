@@ -6,7 +6,7 @@ import {
   JwtVerifyResult,
   OID4VCICredentialFormat,
   UniformCredentialRequest,
-} from '@sphereon/oid4vci-common'
+} from '@sphereon/oid4vc-common'
 import { ICredential, SdJwtDecodedVerifiableCredentialPayload, SdJwtDisclosureFrame, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 export type CredentialSignerCallback<T extends object> = (opts: {

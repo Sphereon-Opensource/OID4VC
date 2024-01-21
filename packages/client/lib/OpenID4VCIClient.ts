@@ -19,7 +19,7 @@ import {
   ProofOfPossessionCallbacks,
   PushedAuthorizationResponse,
   ResponseType,
-} from '@sphereon/oid4vci-common';
+} from '@sphereon/oid4vc-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 

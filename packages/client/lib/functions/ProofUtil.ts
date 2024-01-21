@@ -9,7 +9,7 @@ import {
   ProofOfPossession,
   ProofOfPossessionCallbacks,
   Typ,
-} from '@sphereon/oid4vci-common';
+} from '@sphereon/oid4vc-common';
 import Debug from 'debug';
 
 const debug = Debug('sphereon:openid4vci:token');

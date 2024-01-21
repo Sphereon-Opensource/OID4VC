@@ -1,7 +1,6 @@
 import { KeyObject } from 'crypto'
 
 import * as didKeyDriver from '@digitalcredentials/did-method-key'
-import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   AccessTokenResponse,
   Alg,
@@ -12,7 +11,8 @@ import {
   JWTHeader,
   JWTPayload,
   OpenId4VCIVersion,
-} from '@sphereon/oid4vci-common'
+} from '@sphereon/oid4vc-common'
+import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
 import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'

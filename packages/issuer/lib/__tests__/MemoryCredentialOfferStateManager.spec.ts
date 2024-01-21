@@ -1,4 +1,4 @@
-import { CredentialOfferSession, IStateManager, STATE_MISSING_ERROR } from '@sphereon/oid4vci-common'
+import { CredentialOfferSession, IStateManager, STATE_MISSING_ERROR } from '@sphereon/oid4vc-common'
 
 import { CredentialOfferStateBuilder, MemoryStates } from '../state-manager'
 

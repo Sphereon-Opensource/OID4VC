@@ -1,4 +1,4 @@
-import { convertJsonToURI, convertURIToJsonObject, OpenId4VCIVersion } from '@sphereon/oid4vci-common';
+import { convertJsonToURI, convertURIToJsonObject, OpenId4VCIVersion } from '@sphereon/oid4vc-common';
 
 describe('JSON To URI v8', () => {
   it('should parse an object into open-id-URI with a single credential_type', () => {

@@ -1,4 +1,4 @@
-import { OID4VCICredentialFormat } from '@sphereon/oid4vci-common';
+import { OID4VCICredentialFormat } from '@sphereon/oid4vc-common';
 
 import { AuthorizationDetailsBuilder } from '../AuthorizationDetailsBuilder';
 

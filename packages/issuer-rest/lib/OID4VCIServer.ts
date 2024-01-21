@@ -7,7 +7,7 @@ import {
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
   QRCodeOpts,
-} from '@sphereon/oid4vci-common'
+} from '@sphereon/oid4vc-common'
 import { CredentialSupportedBuilderV1_11, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
 import express, { Express } from 'express'

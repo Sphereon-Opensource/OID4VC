@@ -10,7 +10,7 @@ import {
   ProofOfPossession,
   URL_NOT_VALID,
   WellKnownEndpoints,
-} from '@sphereon/oid4vci-common';
+} from '@sphereon/oid4vc-common';
 import * as jose from 'jose';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
