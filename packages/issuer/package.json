@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@sphereon/oid4vci-common": "workspace:*",
-    "@sphereon/ssi-types": "0.17.6-unstable.69",
+    "@sphereon/ssi-types": "^0.18.1",
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
@@ -27,10 +27,11 @@
     "@types/jest": "^29.5.3",
     "@types/node": "^18.17.3",
     "@types/uuid": "^9.0.2",
-    "did-resolver": "^4.1.0"
+    "did-resolver": "^4.1.0",
+    "typescript": "5.3.3"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "files": [
     "lib/**/*",
