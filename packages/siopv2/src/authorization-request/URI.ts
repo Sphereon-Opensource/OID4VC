@@ -22,20 +22,23 @@ import { CreateAuthorizationRequestOpts } from './types';
 
 export class URI implements AuthorizationRequestURI {
   private readonly _scheme: string;
-  private readonly _requestObjectJwt: RequestObjectJwt | undefined;
+  private readonly _requestObjectJwt?: RequestObjectJwt;
   private readonly _authorizationRequestPayload: AuthorizationRequestPayload;
   private readonly _encodedUri: string; // The encoded URI
   private readonly _encodingFormat: UrlEncodingFormat;
   // private _requestObjectBy: ObjectBy;
 
-  private _registrationMetadataPayload: RPRegistrationMetadataPayload;
+  private _registrationMetadataPayload: RPRegistrationMetadataPayload | undefined;
 
-  private constructor({ scheme, encodedUri, encodingFormat, authorizationRequestPayload, requestObjectJwt }: Partial<AuthorizationRequestURI>) {
-    this._scheme = scheme;
-    this._encodedUri = encodedUri;
-    this._encodingFormat = encodingFormat;
-    this._authorizationRequestPayload = authorizationRequestPayload;
-    this._requestObjectJwt = requestObjectJwt;
+  private constructor(args: Partial<AuthorizationRequestURI>) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const a = args as AuthorizationRequestURI;
+    this._scheme = a.scheme;
+    this._encodedUri = a.encodedUri;
+    this._encodingFormat = a.encodingFormat;
+    this._authorizationRequestPayload = a.authorizationRequestPayload;
+    this._requestObjectJwt = a.requestObjectJwt;
   }
 
   public static async fromUri(uri: string): Promise<URI> {
@@ -73,7 +76,7 @@ export class URI implements AuthorizationRequestURI {
       throw Error(SIOPErrors.BAD_PARAMS);
     }
     const authorizationRequest = await AuthorizationRequest.fromOpts(opts);
-    return await URI.fromAuthorizationRequest(authorizationRequest);
+    return await URI.fromAuthorizationRequest(authorizationRequest, { requestPassBy: opts.requestObject.passBy });
   }
 
   public async toAuthorizationRequest(): Promise<AuthorizationRequest> {
@@ -110,26 +113,32 @@ export class URI implements AuthorizationRequestURI {
    * part of the URI and which become part of the Request Object. If you generate a URI based upon the result of this method,
    * the URI will be constructed based on the Request Object only!
    */
-  static async fromRequestObject(requestObject: RequestObject): Promise<URI> {
+  static async fromRequestObject(requestObject: RequestObject, opts: { requestPassBy: PassBy }): Promise<URI> {
     if (!requestObject) {
       throw Error(SIOPErrors.BAD_PARAMS);
     }
-    return await URI.fromAuthorizationRequestPayload(requestObject.options, await AuthorizationRequest.fromUriOrJwt(await requestObject.toJwt()));
+    return await URI.fromAuthorizationRequestPayload({
+      opts: { ...requestObject.options, ...opts },
+      authorizationRequestPayload: await AuthorizationRequest.fromUriOrJwt(await requestObject.toJwt()),
+    });
   }
 
-  static async fromAuthorizationRequest(authorizationRequest: AuthorizationRequest): Promise<URI> {
+  static async fromAuthorizationRequest(authorizationRequest: AuthorizationRequest, opts: { requestPassBy: PassBy }): Promise<URI> {
     if (!authorizationRequest) {
       throw Error(SIOPErrors.BAD_PARAMS);
     }
-    return await URI.fromAuthorizationRequestPayload(
-      {
-        ...authorizationRequest.options.requestObject,
-        version: authorizationRequest.options.version,
-        uriScheme: authorizationRequest.options.uriScheme,
+    return await URI.fromAuthorizationRequestPayload({
+      opts: {
+        ...(authorizationRequest.options && {
+          ...authorizationRequest.options.requestObject,
+          version: authorizationRequest.options.version,
+          uriScheme: authorizationRequest.options.uriScheme,
+        }),
+        requestPassBy: opts.requestPassBy,
       },
-      authorizationRequest.payload,
-      authorizationRequest.requestObject,
-    );
+      authorizationRequestPayload: authorizationRequest.payload,
+      requestObject: authorizationRequest.requestObject,
+    });
   }
 
   /**
@@ -137,12 +146,17 @@ export class URI implements AuthorizationRequestURI {
    * @param opts Options to define the Uri Request
    * @param authorizationRequestPayload
    *
+   * @param requestObject
    */
-  private static async fromAuthorizationRequestPayload(
-    opts: { uriScheme?: string; passBy: PassBy; reference_uri?: string; version?: SupportedVersion },
-    authorizationRequestPayload: AuthorizationRequestPayload,
-    requestObject?: RequestObject,
-  ): Promise<URI> {
+  private static async fromAuthorizationRequestPayload({
+    opts,
+    authorizationRequestPayload,
+    requestObject,
+  }: {
+    authorizationRequestPayload: AuthorizationRequestPayload | string;
+    requestObject?: RequestObject;
+    opts: { uriScheme?: string; requestPassBy: PassBy; reference_uri?: string; version?: SupportedVersion };
+  }): Promise<URI> {
     if (!authorizationRequestPayload) {
       if (!requestObject || !(await requestObject.getPayload())) {
         throw Error(SIOPErrors.BAD_PARAMS);
@@ -154,16 +168,21 @@ export class URI implements AuthorizationRequestURI {
     const requestObjectJwt = requestObject
       ? await requestObject.toJwt()
       : typeof authorizationRequestPayload === 'string'
-      ? authorizationRequestPayload
-      : authorizationRequestPayload.request;
+        ? authorizationRequestPayload
+        : authorizationRequestPayload.request;
     if (isJwt && (!requestObjectJwt || !requestObjectJwt.startsWith('ey'))) {
       throw Error(SIOPErrors.NO_JWT);
     }
-    const requestObjectPayload: RequestObjectPayload = requestObjectJwt ? (decodeJWT(requestObjectJwt).payload as RequestObjectPayload) : undefined;
+    const requestObjectPayload: RequestObjectPayload | undefined = requestObjectJwt
+      ? (decodeJWT(requestObjectJwt).payload as RequestObjectPayload)
+      : undefined;
 
     if (requestObjectPayload) {
       // Only used to validate if the request object contains presentation definition(s)
-      await PresentationExchange.findValidPresentationDefinitions({ ...authorizationRequestPayload, ...requestObjectPayload });
+      await PresentationExchange.findValidPresentationDefinitions({
+        ...(typeof authorizationRequestPayload !== 'string' && authorizationRequestPayload),
+        ...requestObjectPayload,
+      });
 
       assertValidRequestObjectPayload(requestObjectPayload);
       if (requestObjectPayload.registration) {
@@ -175,7 +194,7 @@ export class URI implements AuthorizationRequestURI {
     if (!uniformAuthorizationRequestPayload) {
       throw Error(SIOPErrors.BAD_PARAMS);
     }
-    const type = opts.passBy;
+    const type = opts.requestPassBy;
     if (!type) {
       throw new Error(SIOPErrors.REQUEST_OBJECT_TYPE_NOT_SET);
     }
@@ -229,7 +248,11 @@ export class URI implements AuthorizationRequestURI {
       throw Error(SIOPErrors.BAD_PARAMS);
     }
     // We strip the uri scheme before passing it to the decode function
-    const scheme: string = uri.match(/^([a-zA-Z][a-zA-Z0-9-_]*:\/\/)/g)[0];
+    const matches = uri.match(/^([a-zA-Z][a-zA-Z0-9-_]*:\/\/)/g)
+    if (!Array.isArray(matches)) {
+      throw Error(SIOPErrors.BAD_PARAMS + `: no scheme`);
+    }
+    const scheme: string = matches[0];
     const authorizationRequestPayload = decodeUriAsJson(uri) as AuthorizationRequestPayload;
     return { scheme, authorizationRequestPayload };
   }
@@ -268,7 +291,7 @@ export class URI implements AuthorizationRequestURI {
     return this._scheme;
   }
 
-  get registrationMetadataPayload(): RPRegistrationMetadataPayload {
+  get registrationMetadataPayload(): RPRegistrationMetadataPayload | undefined {
     return this._registrationMetadataPayload;
   }
 }

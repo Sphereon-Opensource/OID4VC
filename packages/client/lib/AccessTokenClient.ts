@@ -76,8 +76,8 @@ export class AccessTokenClient {
       metadata: metadata
         ? metadata
         : issuerOpts?.fetchMetadata
-        ? await MetadataClient.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
-        : undefined,
+          ? await MetadataClient.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
+          : undefined,
     });
 
     return this.sendAuthCode(requestTokenURL, accessTokenRequest);

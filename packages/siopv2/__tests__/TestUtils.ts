@@ -9,6 +9,7 @@ import jwt_decode from 'jwt-decode';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 
+import { ResponseType } from '../../common/lib';
 import {
   assertValidMetadata,
   base64ToHexString,
@@ -16,7 +17,6 @@ import {
   KeyCurve,
   KeyType,
   ResponseIss,
-  ResponseType,
   RPRegistrationMetadataPayload,
   Scope,
   SigningAlgo,

@@ -1,4 +1,4 @@
-import { AuthzFlowType, CredentialOfferPayload } from '@sphereon/oid4vc-common';
+import { AuthzFlowType, CredentialOfferPayload } from '../../../common/lib';
 
 //todo: this file is just testing v9, we probably want to add v11 tests here as well
 describe('Authorization Flow Type determination', () => {

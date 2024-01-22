@@ -6,11 +6,11 @@
     "declarationDir": "dist",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
   },
   "references": [
     {
-      "path": "../common"
-    }
-  ]
+      "path": "../common",
+    },
+  ],
 }

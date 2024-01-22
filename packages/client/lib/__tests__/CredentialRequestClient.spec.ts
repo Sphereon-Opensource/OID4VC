@@ -1,5 +1,11 @@
 import { KeyObject } from 'crypto';
 
+import * as jose from 'jose';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import nock from 'nock';
+
+import { CredentialRequestClientBuilder, MetadataClient, ProofOfPossessionBuilder } from '..';
 import {
   Alg,
   EndpointMetadata,
@@ -10,13 +16,7 @@ import {
   ProofOfPossession,
   URL_NOT_VALID,
   WellKnownEndpoints,
-} from '@sphereon/oid4vc-common';
-import * as jose from 'jose';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import nock from 'nock';
-
-import { CredentialRequestClientBuilder, MetadataClient, ProofOfPossessionBuilder } from '..';
+} from '../../../common/lib';
 import { CredentialOfferClient } from '../CredentialOfferClient';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';

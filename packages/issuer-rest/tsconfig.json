@@ -4,14 +4,14 @@
     "rootDir": "./lib",
     "outDir": "./dist",
     "declarationDir": "./dist",
-    "esModuleInterop": true
+    "esModuleInterop": true,
   },
   "references": [
     {
-      "path": "../common"
+      "path": "../common",
     },
     {
-      "path": "../issuer"
-    }
-  ]
+      "path": "../issuer",
+    },
+  ],
 }

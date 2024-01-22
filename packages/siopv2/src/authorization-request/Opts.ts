@@ -1,5 +1,5 @@
 import { assertValidRequestObjectOpts } from '../request-object/Opts';
-import { ExternalVerification, InternalVerification, isExternalVerification, isInternalVerification, SIOPErrors } from '../types';
+import { ClientMetadataOpts, ExternalVerification, InternalVerification, isExternalVerification, isInternalVerification, SIOPErrors } from '../types';
 
 import { assertValidRequestRegistrationOpts } from './RequestRegistration';
 import { CreateAuthorizationRequestOpts, VerifyAuthorizationRequestOpts } from './types';
@@ -18,7 +18,9 @@ export const assertValidAuthorizationRequestOpts = (opts: CreateAuthorizationReq
     throw new Error(SIOPErrors.BAD_PARAMS);
   }
   assertValidRequestObjectOpts(opts.requestObject, false);
-  assertValidRequestRegistrationOpts(opts['registration'] ? opts['registration'] : opts.clientMetadata);
+  assertValidRequestRegistrationOpts(
+    'registration' in opts && opts['registration'] ? (opts['registration'] as ClientMetadataOpts) : opts.clientMetadata,
+  );
 };
 
 export const mergeVerificationOpts = (

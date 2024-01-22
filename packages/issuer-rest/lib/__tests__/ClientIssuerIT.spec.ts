@@ -1,6 +1,15 @@
 import { KeyObject } from 'crypto'
 
 import * as didKeyDriver from '@digitalcredentials/did-method-key'
+import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
+import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
+import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
+import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
+import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
+import { DIDDocument } from 'did-resolver'
+import * as jose from 'jose'
+
+import { OpenID4VCIClient } from '../../../client/lib'
 import {
   AccessTokenResponse,
   Alg,
@@ -11,16 +20,7 @@ import {
   JWTHeader,
   JWTPayload,
   OpenId4VCIVersion,
-} from '@sphereon/oid4vc-common'
-import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
-import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
-import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
-import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
-import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
-import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
-import { DIDDocument } from 'did-resolver'
-import * as jose from 'jose'
-
+} from '../../../common/lib'
 import { OID4VCIServer } from '../OID4VCIServer'
 
 const ISSUER_URL = 'http://localhost:3456/test'

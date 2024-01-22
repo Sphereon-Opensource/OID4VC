@@ -9,7 +9,6 @@ import {
   AuthorizationRequestPayload,
   CheckLinkedDomain,
   ClaimPayloadVID1,
-  ClientMetadataOpts,
   PassBy,
   RequestObjectPayload,
   RPRegistrationMetadataPayload,
@@ -20,14 +19,16 @@ import {
 import { createRequestRegistration } from './RequestRegistration';
 import { ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts, PropertyTarget, VerifyAuthorizationRequestOpts } from './types';
 
-export const createPresentationDefinitionClaimsProperties = (opts: ClaimPayloadOptsVID1): ClaimPayloadVID1 => {
-  if (!opts || !opts.vp_token || (!opts.vp_token.presentation_definition && !opts.vp_token.presentation_definition_uri)) {
+export const createPresentationDefinitionClaimsProperties = (opts?: ClaimPayloadOptsVID1): ClaimPayloadVID1 | undefined => {
+  if (!opts?.vp_token || (!opts.vp_token.presentation_definition && !opts.vp_token.presentation_definition_uri)) {
     return undefined;
   }
-  const discoveryResult = PEX.definitionVersionDiscovery(opts.vp_token.presentation_definition);
-  if (discoveryResult.error) {
-    throw new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID);
-  }
+  if (opts.vp_token.presentation_definition) {
+    const discoveryResult = PEX.definitionVersionDiscovery(opts.vp_token.presentation_definition);
+    if (discoveryResult.error) {
+      throw new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID);
+    }
+  } // todo: Also check definition by reference?
 
   return {
     ...(opts.id_token ? { id_token: opts.id_token } : {}),
@@ -48,17 +49,20 @@ export const createAuthorizationRequestPayload = async (
   const state = payload?.state ?? undefined;
   const nonce = payload?.nonce ? getNonce(state, payload.nonce) : undefined;
   // TODO: if opts['registration] throw Error to get rid of test code using that key
-  const clientMetadata = opts['registration'] ? opts['registration'] : (opts.clientMetadata as ClientMetadataOpts);
+  // registration is from older specs
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const clientMetadata = opts['registration'] ? opts['registration'] : opts.clientMetadata;
   const registration = await createRequestRegistration(clientMetadata, opts);
   const claims =
-    opts.version >= SupportedVersion.SIOPv2_ID1 ? opts.payload.claims : createPresentationDefinitionClaimsProperties(opts.payload.claims);
+    opts.version >= SupportedVersion.SIOPv2_ID1 ? opts?.payload?.claims : createPresentationDefinitionClaimsProperties(opts?.payload?.claims);
   const isRequestTarget = isTargetOrNoTargets(PropertyTarget.AUTHORIZATION_REQUEST, opts.requestObject.targets);
   const isRequestByValue = opts.requestObject.passBy === PassBy.VALUE;
 
   if (isRequestTarget && isRequestByValue && !requestObject) {
     throw Error(SIOPErrors.NO_JWT);
   }
-  const request = isRequestByValue ? await requestObject.toJwt() : undefined;
+  const request = isRequestByValue && requestObject ? await requestObject.toJwt() : undefined;
 
   const authRequestPayload = {
     ...payload,
@@ -67,14 +71,20 @@ export const createAuthorizationRequestPayload = async (
     ...(isRequestTarget && isRequestByValue && { request }),
     ...(nonce && { nonce }),
     ...(state && { state }),
-    ...(registration.payload && isTarget(PropertyTarget.AUTHORIZATION_REQUEST, registration.clientMetadataOpts.targets) ? registration.payload : {}),
+    ...(registration.payload &&
+    isTarget(
+      PropertyTarget.AUTHORIZATION_REQUEST,
+      registration.clientMetadataOpts.targets ?? [PropertyTarget.AUTHORIZATION_REQUEST, PropertyTarget.REQUEST_OBJECT],
+    )
+      ? registration.payload
+      : {}),
     ...(claims && { claims }),
   };
 
   return removeNullUndefined(authRequestPayload);
 };
 
-export const assertValidRPRegistrationMedataPayload = (regObj: RPRegistrationMetadataPayload) => {
+export const assertValidRPRegistrationMedataPayload = (regObj?: RPRegistrationMetadataPayload) => {
   if (regObj) {
     const valid = RPRegistrationMetadataPayloadSchema(regObj);
     if (!valid) {

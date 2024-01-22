@@ -1,8 +1,6 @@
-import { getIssuerFromCredentialOfferPayload, WellKnownEndpoints } from '@sphereon/oid4vc-common';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import nock from 'nock';
 
+import { getIssuerFromCredentialOfferPayload, WellKnownEndpoints } from '../../../common/lib';
 import { CredentialOfferClient } from '../CredentialOfferClient';
 import { MetadataClient } from '../MetadataClient';
 

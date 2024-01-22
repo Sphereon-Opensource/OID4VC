@@ -198,7 +198,7 @@ export const putPresentationSubmissionInLocation = async (
 export const assertValidVerifiablePresentations = async (args: {
   presentationDefinitions: PresentationDefinitionWithLocation[];
   presentations: WrappedVerifiablePresentation[];
-  verificationCallback: PresentationVerificationCallback;
+  verificationCallback?: PresentationVerificationCallback;
   opts?: {
     limitDisclosureSignatureSuites?: string[];
     restrictToFormats?: Format;
@@ -226,7 +226,7 @@ export const assertValidVerifiablePresentations = async (args: {
     throw new Error(SIOPErrors.AUTH_REQUEST_DOESNT_EXPECT_VP);
   } else if (args.presentationDefinitions && presentationsWithFormat && args.presentationDefinitions.length != presentationsWithFormat.length) {
     throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP);
-  } else if (args.presentationDefinitions && !args.opts.presentationSubmission) {
+  } else if (args.presentationDefinitions && !args.opts?.presentationSubmission) {
     throw new Error(`No presentation submission present. Please use presentationSubmission opt argument!`);
   } else if (args.presentationDefinitions && presentationsWithFormat) {
     await PresentationExchange.validatePresentationsAgainstDefinitions(

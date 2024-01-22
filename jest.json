@@ -1,6 +1,7 @@
 {
   "preset": "ts-jest",
   "moduleFileExtensions": [
+    "js",
     "ts",
     "tsx",
     "js",

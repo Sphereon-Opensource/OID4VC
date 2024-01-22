@@ -369,7 +369,7 @@ const op = OP.builder()
     scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
     subjectTypesSupported: [SubjectType.PAIRWISE],
     subjectSyntaxTypesSupported: ['did:ethr'],
-    passBy: PassBy.VALUE,
+    requestPassBy: PassBy.VALUE,
   })
   .build();
 ```

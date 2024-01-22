@@ -15,7 +15,7 @@ import { CreateAuthorizationRequestOpts } from './types';
 /*const ajv = new Ajv({ allowUnionTypes: true, strict: false });
 const validateRPRegistrationMetadata = ajv.compile(RPRegistrationMetadataPayloadSchema);*/
 
-export const assertValidRequestRegistrationOpts = (opts: ClientMetadataOpts) => {
+export const assertValidRequestRegistrationOpts = (opts?: ClientMetadataOpts) => {
   if (!opts) {
     throw new Error(SIOPErrors.REGISTRATION_NOT_SET);
   } else if (opts.passBy !== PassBy.REFERENCE && opts.passBy !== PassBy.VALUE) {
@@ -93,6 +93,8 @@ const createRPRegistrationMetadataPayload = (opts: RPRegistrationMetadataOpts): 
   const languageTaggedFields: Map<string, string> = LanguageTagUtils.getLanguageTaggedPropertiesMapped(opts, languageTagEnabledFieldsNamesMapping);
 
   languageTaggedFields.forEach((value: string, key: string) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     rpRegistrationMetadataPayload[key] = value;
   });
 

@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["test/**/*.ts", "generator/**/*.ts"],
+  "exclude": ["__tests__/**/*.ts", "generator/**/*.ts"],
   "ts-node": {
     "esm": false
   }

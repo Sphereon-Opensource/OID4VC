@@ -340,8 +340,9 @@ export class OpenID4VCIClient {
       } else if (!response.successBody) {
         debug(`Access token error. No success body`);
         throw Error(
-          `Retrieving an access token from ${this._endpointMetadata
-            ?.token_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`,
+          `Retrieving an access token from ${
+            this._endpointMetadata?.token_endpoint
+          } for issuer ${this.getIssuer()} failed as there was no success response body`,
         );
       }
       this._accessTokenResponse = response.successBody;
@@ -459,8 +460,9 @@ export class OpenID4VCIClient {
     } else if (!response.successBody) {
       debug(`Credential request error. No success body`);
       throw Error(
-        `Retrieving a credential from ${this._endpointMetadata
-          ?.credential_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`,
+        `Retrieving a credential from ${
+          this._endpointMetadata?.credential_endpoint
+        } for issuer ${this.getIssuer()} failed as there was no success response body`,
       );
     }
     return response.successBody;

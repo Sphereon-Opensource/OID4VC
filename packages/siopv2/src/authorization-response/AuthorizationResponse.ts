@@ -104,7 +104,7 @@ export class AuthorizationResponse {
     // const hasVpToken = await authorizationRequest.containsResponseType(ResponseType.VP_TOKEN);
 
     const idToken = wantsIdToken ? await IDToken.fromVerifiedAuthorizationRequest(verifiedAuthorizationRequest, responseOpts) : undefined;
-    const idTokenPayload = wantsIdToken ? await idToken.payload() : undefined;
+    const idTokenPayload = idToken ? await idToken.payload() : undefined;
     const authorizationResponsePayload = await createResponsePayload(authorizationRequest, responseOpts, idTokenPayload);
     const response = new AuthorizationResponse({
       authorizationResponsePayload,

@@ -82,8 +82,8 @@ export const getThumbprint = async (hexPrivateKey: string, did: string): Promise
 };
 */
 
-const check = (value, description) => {
-  if (typeof value !== 'string' || !value) {
+const check = (value: string | undefined, description: string) => {
+  if (!value) {
     throw Error(`${description} missing or invalid`);
   }
 };

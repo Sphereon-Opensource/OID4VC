@@ -37,7 +37,7 @@ export class IDToken {
     if (!authorizationRequestPayload) {
       throw new Error(SIOPErrors.NO_REQUEST);
     }
-    const idToken = new IDToken(null, await createIDTokenPayload(verifiedAuthorizationRequest, responseOpts), responseOpts);
+    const idToken = new IDToken(undefined, await createIDTokenPayload(verifiedAuthorizationRequest, responseOpts), responseOpts);
     if (verifyOpts) {
       await idToken.verify(verifyOpts);
     }
@@ -63,7 +63,7 @@ export class IDToken {
     if (!idTokenPayload) {
       throw new Error(SIOPErrors.NO_JWT);
     }
-    const idToken = new IDToken(null, idTokenPayload, responseOpts);
+    const idToken = new IDToken(undefined, idTokenPayload, responseOpts);
     if (verifyOpts) {
       await idToken.verify(verifyOpts);
     }

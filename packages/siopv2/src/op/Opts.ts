@@ -33,8 +33,8 @@ export const createResponseOptsFromBuilderOrExistingOpts = (opts: {
       ...(responseOpts?.version
         ? { version: responseOpts.version }
         : Array.isArray(opts.builder.supportedVersions) && opts.builder.supportedVersions.length > 0
-        ? { version: opts.builder.supportedVersions[0] }
-        : {}),
+          ? { version: opts.builder.supportedVersions[0] }
+          : {}),
     };
 
     if (!responseOpts.registration.passBy) {

@@ -31,6 +31,8 @@ export function getResolver(opts: ResolveOpts): Resolvable {
       const uniResolver = getUniResolver(getMethodFromDid(didMethod), { resolveUrl: opts.resolveUrl });
       uniResolvers.push(uniResolver);
     }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return new Resolver(...uniResolvers);
   } else {
     if (opts?.noUniversalResolverFallback) {
@@ -83,10 +85,16 @@ export function getResolverUnion(
     } else {
       methodResolver = resolverMap.get(dm);
     }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     uniResolvers.push(methodResolver);
   });
   return subjectTypes.indexOf(SubjectSyntaxTypesSupportedValues.DID.valueOf()) !== -1
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     ? new Resolver(...{ fallbackResolver, ...uniResolvers })
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     : new Resolver(...uniResolvers);
 }
 
@@ -100,7 +108,7 @@ export function mergeAllDidMethods(subjectSyntaxTypesSupported: string | string[
   return Array.from(unionSubjectSyntaxTypes) as string[];
 }
 
-export async function resolveDidDocument(did: string, opts?: ResolveOpts): Promise<DIDDocument> {
+export async function resolveDidDocument(did: string, opts?: ResolveOpts): Promise<DIDDocument | undefined> {
   // todo: The accept is only there because did:key used by Veramo requires it. According to the spec it is optional. It should not hurt, but let's test
   const result = await getResolver({ ...opts }).resolve(did, { accept: 'application/did+ld+json' });
   if (result?.didResolutionMetadata?.error) {
@@ -112,5 +120,5 @@ export async function resolveDidDocument(did: string, opts?: ResolveOpts): Promi
     // todo: This looks like a bug. It seems that sometimes we get back a DID document directly instead of a did resolution results
     return result as unknown as DIDDocument;
   }
-  return result.didDocument;
+  return result.didDocument ?? undefined;
 }

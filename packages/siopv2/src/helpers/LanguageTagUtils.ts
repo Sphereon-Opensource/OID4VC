@@ -14,7 +14,7 @@ export class LanguageTagUtils {
    * @param source is the object from which the language enabled fields and their values will be extracted.
    */
   static getAllLanguageTaggedProperties(source: unknown): Map<string, string> {
-    return this.getLanguageTaggedPropertiesMapped(source, undefined);
+    return this.getLanguageTaggedPropertiesMapped(source, new Map());
   }
 
   /**
@@ -42,6 +42,8 @@ export class LanguageTagUtils {
 
     const discoveredLanguageTaggedFields: Map<string, string> = new Map<string, string>();
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     Object.entries(source).forEach(([key, value]) => {
       const languageTagSeparatorIndexInKey: number = key.indexOf(this.LANGUAGE_TAG_SEPARATOR);
 
@@ -102,7 +104,7 @@ export class LanguageTagUtils {
     return languageTagSeparatorIndex > 0;
   }
 
-  private static assertValidTargetFieldNames(languageTagEnabledFieldsNamesMapping: Map<string, string>): void {
+  private static assertValidTargetFieldNames(languageTagEnabledFieldsNamesMapping?: Map<string, string>): void {
     if (languageTagEnabledFieldsNamesMapping) {
       if (!languageTagEnabledFieldsNamesMapping.size) {
         throw new Error(SIOPErrors.BAD_PARAMS + ' LanguageTagEnabledFieldsNamesMapping must be non-null or non-empty');

@@ -49,7 +49,7 @@ export class RequestObject {
     return new RequestObject(mergedOpts, await createRequestObjectPayload(mergedOpts));
   }
 
-  public static async fromJwt(requestObjectJwt: RequestObjectJwt) {
+  public static async fromJwt(requestObjectJwt?: RequestObjectJwt) {
     return requestObjectJwt ? new RequestObject(undefined, undefined, requestObjectJwt) : undefined;
   }
 

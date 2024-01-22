@@ -64,14 +64,14 @@ export class PresentationExchange {
       ...options,
       presentationSubmissionLocation: PresentationSubmissionLocation.EXTERNAL,
       proofOptions: {
-        ...options.proofOptions,
+        ...options?.proofOptions,
         proofPurpose: options?.proofOptions?.proofPurpose ?? IProofPurpose.authentication,
         type: options?.proofOptions?.type ?? IProofType.EcdsaSecp256k1Signature2019,
         /* challenge: options?.proofOptions?.challenge,
         domain: options?.proofOptions?.domain,*/
       },
       signatureOptions: {
-        ...options.signatureOptions,
+        ...options?.signatureOptions,
         // verificationMethod: options?.signatureOptions?.verificationMethod,
         keyEncoding: options?.signatureOptions?.keyEncoding ?? KeyEncoding.Hex,
       },
@@ -150,7 +150,7 @@ export class PresentationExchange {
     }
     // console.log(`Presentation (validate): ${JSON.stringify(verifiablePresentation)}`);
     const evaluationResults: EvaluationResults = new PEX({ hasher: opts?.hasher }).evaluatePresentation(presentationDefinition, wvp.original, opts);
-    if (evaluationResults.errors.length) {
+    if (evaluationResults.errors?.length) {
       throw new Error(`message: ${SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD}, details: ${JSON.stringify(evaluationResults.errors)}`);
     }
     return evaluationResults;
@@ -158,8 +158,14 @@ export class PresentationExchange {
 
   public static assertValidPresentationSubmission(presentationSubmission: PresentationSubmission) {
     const validationResult = PEX.validateSubmission(presentationSubmission);
-    if (validationResult[0].message != 'ok') {
-      throw new Error(`${SIOPErrors.RESPONSE_OPTS_PRESENTATIONS_SUBMISSION_IS_NOT_VALID}, details ${JSON.stringify(validationResult[0])}`);
+    if (Array.isArray(validationResult)) {
+      if (validationResult[0].message != 'ok') {
+        throw new Error(`${SIOPErrors.RESPONSE_OPTS_PRESENTATIONS_SUBMISSION_IS_NOT_VALID}, details ${JSON.stringify(validationResult[0])}`);
+      }
+    } else {
+      if (validationResult.message != 'ok') {
+        throw new Error(`${SIOPErrors.RESPONSE_OPTS_PRESENTATIONS_SUBMISSION_IS_NOT_VALID}, details ${JSON.stringify(validationResult)}`);
+      }
     }
   }
 
@@ -283,8 +289,14 @@ export class PresentationExchange {
 
   private static assertValidPresentationDefinition(presentationDefinition: IPresentationDefinition) {
     const validationResult = PEX.validateDefinition(presentationDefinition);
-    if (validationResult[0].message != 'ok') {
-      throw new Error(`${SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID}`);
+    if (Array.isArray(validationResult)) {
+      if (validationResult[0].message != 'ok') {
+        throw new Error(`${SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID}`);
+      }
+    } else {
+      if (validationResult.message != 'ok') {
+        throw new Error(`${SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID}`);
+      }
     }
   }
 
@@ -384,6 +396,9 @@ export class PresentationExchange {
       ...opts,
       presentationSubmission,
     });
+    if (!evaluationResults.value) {
+      throw new Error(`${SIOPErrors.RESPONSE_OPTS_PRESENTATIONS_SUBMISSION_IS_NOT_VALID}, details no presentation submission`);
+    }
     PresentationExchange.assertValidPresentationSubmission(evaluationResults.value);
     await PresentationExchange.validatePresentationAgainstDefinition(definition, checkedPresentation, {
       ...opts,

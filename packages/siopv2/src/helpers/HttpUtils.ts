@@ -63,11 +63,17 @@ const siopFetch = async <T>(
   }
   const headers = opts?.customHeaders ? opts.customHeaders : {};
   if (opts?.bearerToken) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     headers['Authorization'] = `Bearer ${opts.bearerToken}`;
   }
   const method = opts?.method ? opts.method : body ? 'POST' : 'GET';
   const accept = opts?.accept ? opts.accept : 'application/json';
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   headers['Content-Type'] = opts?.contentType ? opts.contentType : method !== 'GET' ? 'application/json' : undefined;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   headers['Accept'] = accept;
 
   const payload: RequestInit = {
@@ -87,6 +93,8 @@ const siopFetch = async <T>(
   const textResponseBody = await clonedResponse.text();
 
   const isJSONResponse =
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     (accept === 'application/json' || origResponse.headers['Content-Type'] === 'application/json') && textResponseBody.trim().startsWith('{');
   const responseBody = isJSONResponse ? JSON.parse(textResponseBody) : textResponseBody;
 
@@ -119,15 +127,18 @@ export const getWithUrl = async <T>(url: string, textResponse?: boolean): Promis
   }*/
 };
 
-export const fetchByReferenceOrUseByValue = async <T>(referenceURI: string, valueObject: T, textResponse?: boolean): Promise<T> => {
-  let response: T = valueObject;
+export const fetchByReferenceOrUseByValue = async <T>(referenceURI?: string, valueObject?: T, textResponse?: boolean): Promise<T> => {
+  let response: T | undefined = valueObject;
   if (referenceURI) {
     try {
       response = await getWithUrl(referenceURI, textResponse);
-    } catch (e) {
+    } catch (e: unknown) {
       console.log(e);
-      throw new Error(`${SIOPErrors.REG_PASS_BY_REFERENCE_INCORRECTLY}: ${e.message}, URL: ${referenceURI}`);
+      throw new Error(`${SIOPErrors.REG_PASS_BY_REFERENCE_INCORRECTLY}: ${e instanceof Error ? e.message : e}, URL: ${referenceURI}`);
     }
+  }
+  if (!response) {
+    throw Error(`Could not pass by value ${valueObject} or reference ${referenceURI}`)
   }
   return response;
 };

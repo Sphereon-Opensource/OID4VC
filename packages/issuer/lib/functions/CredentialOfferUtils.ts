@@ -49,6 +49,8 @@ export function createCredentialOfferObject(
   if (opts?.credentialOffer) {
     credential_offer = {
       ...opts.credentialOffer,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       credentials: opts.credentialOffer?.credentials ?? issuerMetadata?.credentials_supported,
     }
   } else {

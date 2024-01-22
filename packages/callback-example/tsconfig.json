@@ -3,17 +3,17 @@
   "compilerOptions": {
     "rootDir": "./lib",
     "outDir": "./dist",
-    "declarationDir": "./dist"
+    "declarationDir": "./dist",
   },
   "references": [
     {
-      "path": "../common"
+      "path": "../common",
     },
     {
-      "path": "../client"
+      "path": "../client",
     },
     {
-      "path": "../issuer"
-    }
-  ]
+      "path": "../issuer",
+    },
+  ],
 }

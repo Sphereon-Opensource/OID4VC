@@ -4,6 +4,7 @@ import { IPresentationDefinition, SdJwtDecodedVerifiableCredentialWithKbJwtInput
 import { OriginalVerifiableCredential } from '@sphereon/ssi-types';
 import { IVerifyCallbackArgs, IVerifyCredentialResult } from '@sphereon/wellknown-dids-client';
 
+import { ResponseType } from '../../common/lib';
 import {
   OP,
   PassBy,
@@ -13,7 +14,6 @@ import {
   PresentationVerificationCallback,
   PropertyTarget,
   ResponseIss,
-  ResponseType,
   RevocationVerification,
   RP,
   Scope,

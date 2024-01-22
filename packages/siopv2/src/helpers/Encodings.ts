@@ -14,9 +14,16 @@ export function decodeUriAsJson(uri: string) {
   }
   const parts = parse(queryString, { plainObjects: true, depth: 10, parameterLimit: 5000, ignoreQueryPrefix: true });
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const descriptors = parts?.claims?.['vp_token']?.presentation_definition?.['input_descriptors'];
   if (descriptors && Array.isArray(descriptors)) {
+    if (!parts.claims) {
+      parts.claims = {}
+    }
     // Whenever we have a [{'uri': 'str1'}, 'uri': 'str2'] qs changes this to {uri: ['str1','str2']} which means schema validation fails. So we have to fix that
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     parts.claims['vp_token'].presentation_definition['input_descriptors'] = descriptors.map((descriptor: InputDescriptorV1) => {
       if (Array.isArray(descriptor.schema)) {
         descriptor.schema = descriptor.schema.flatMap((val) => {
@@ -32,7 +39,7 @@ export function decodeUriAsJson(uri: string) {
     });
   }
 
-  const json = {};
+  const json: Record<string, unknown> = {};
   for (const key in parts) {
     const value = parts[key];
     if (!value) {
@@ -67,6 +74,8 @@ export function encodeJsonAsURI(json: unknown, _opts?: { arraysWithIndex?: strin
     return encodeURIComponent(key.replace(' ', ''));
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   for (const [key, value] of Object.entries(json)) {
     if (!value) {
       continue;

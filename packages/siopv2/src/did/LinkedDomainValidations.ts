@@ -1,3 +1,4 @@
+import { BAD_PARAMS } from '@sphereon/oid4vc-common'
 import { IDomainLinkageValidation, ValidationStatusEnum, VerifyCallback, WDCErrors, WellKnownDidVerifier } from '@sphereon/wellknown-dids-client';
 
 import { CheckLinkedDomain, DIDDocument, ExternalVerification, InternalVerification } from '../types';
@@ -10,7 +11,7 @@ function getValidationErrorMessages(validationResult: IDomainLinkageValidation):
   if (validationResult.message) {
     messages.push(validationResult.message);
   }
-  if (validationResult?.endpointDescriptors.length) {
+  if (validationResult?.endpointDescriptors?.length) {
     for (const endpointDescriptor of validationResult.endpointDescriptors) {
       if (endpointDescriptor.message) {
         messages.push(endpointDescriptor.message);
@@ -67,6 +68,9 @@ export async function validateLinkedDomainWithDid(did: string, verification: Int
     return;
   }
   try {
+    if (typeof wellknownDIDVerifyCallback !== 'function') {
+      throw Error(BAD_PARAMS + `: verify callback not supplied`)
+    }
     const validationResult = await checkWellKnownDid({ didDocument, verifyCallback: wellknownDIDVerifyCallback });
     if (validationResult.status === ValidationStatusEnum.INVALID) {
       const validationErrorMessages = getValidationErrorMessages(validationResult);
@@ -75,7 +79,9 @@ export async function validateLinkedDomainWithDid(did: string, verification: Int
         throw new Error(messageCondition.message ? messageCondition.message : validationErrorMessages[0]);
       }
     }
-  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+  } catch (err: any) {
     const messageCondition: { status: boolean; message?: string } = checkInvalidMessages([err.message]);
     if (checkLinkedDomain === CheckLinkedDomain.ALWAYS || (checkLinkedDomain === CheckLinkedDomain.IF_PRESENT && !messageCondition.status)) {
       throw new Error(err.message);

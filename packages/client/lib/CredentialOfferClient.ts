@@ -99,8 +99,8 @@ export class CredentialOfferClient {
       uriTypeProperties: isUri
         ? ['credential_offer_uri']
         : version >= OpenId4VCIVersion.VER_1_0_11
-        ? ['credential_issuer', 'credential_type']
-        : ['issuer', 'credential_type'],
+          ? ['credential_issuer', 'credential_type']
+          : ['issuer', 'credential_type'],
       param,
       version,
     });

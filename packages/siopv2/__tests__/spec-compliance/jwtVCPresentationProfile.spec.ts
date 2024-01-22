@@ -6,6 +6,7 @@ import { KeyLike } from 'jose';
 import nock from 'nock';
 import * as u8a from 'uint8arrays';
 
+import { ResponseType } from '../../../common/lib';
 import {
   AuthorizationRequest,
   AuthorizationResponse,
@@ -19,7 +20,6 @@ import {
   PresentationVerificationCallback,
   PropertyTarget,
   ResponseMode,
-  ResponseType,
   RevocationVerification,
   RP,
   SigningAlgo,

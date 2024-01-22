@@ -74,10 +74,15 @@ export const verifyTokenRequest = <T extends object>({
       })
     } catch (error) {
       if (error instanceof TokenError) {
-        return sendErrorResponse(response, error.statusCode, {
-          error: error.responseError,
-          error_description: error.getDescription(),
-        })
+        return sendErrorResponse(
+          response,
+          error.statusCode,
+          {
+            error: error.responseError,
+            error_description: error.getDescription(),
+          },
+          error,
+        )
       } else {
         return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: (error as Error).message }, error)
       }

@@ -3,22 +3,22 @@
   "files": [],
   "references": [
     {
-      "path": "common"
+      "path": "common",
     },
     {
-      "path": "issuer"
+      "path": "issuer",
     },
     {
-      "path": "client"
+      "path": "client",
     },
     {
-      "path": "issuer-rest"
+      "path": "issuer-rest",
     },
     {
-      "path": "callback-example"
+      "path": "callback-example",
     },
     {
-      "path": "siopv2"
-    }
-  ]
+      "path": "siopv2",
+    },
+  ],
 }
