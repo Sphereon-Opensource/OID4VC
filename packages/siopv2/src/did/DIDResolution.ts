@@ -90,12 +90,12 @@ export function getResolverUnion(
     uniResolvers.push(methodResolver);
   });
   return subjectTypes.indexOf(SubjectSyntaxTypesSupportedValues.DID.valueOf()) !== -1
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    ? new Resolver(...{ fallbackResolver, ...uniResolvers })
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    : new Resolver(...uniResolvers);
+    ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      new Resolver(...{ fallbackResolver, ...uniResolvers })
+    : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      new Resolver(...uniResolvers);
 }
 
 export function mergeAllDidMethods(subjectSyntaxTypesSupported: string | string[], resolvers: Map<string, Resolvable>): string[] {

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "incremental": true,
     "target": "ES6",
-    "outDir": "dist",
+    /*"outDir": "dist",*/
     "moduleResolution": "node",
     "module": "commonjs",
     "declaration": true,
@@ -24,7 +24,7 @@
     "noFallthroughCasesInSwitch": true,
     /* Report errors for fallthrough cases in switch statement. */
     /* Debugging Options */
-    "strict": true,
+    "strict": false,
     "traceResolution": false,
     /* Report module resolution log messages. */
     "listEmittedFiles": false,
@@ -37,6 +37,9 @@
       "ES2017"
     ],*/
     "types": ["jest", "node"],
+    "rootDir": "src",
+    "outDir": "dist",
+    "declarationDir": "dist"
   },
   "include": ["index.ts", "src/**/*.ts", "src/**/*.js", "__tests__/**/*.ts", "generator/*.ts"],
   "exclude": ["node_modules/**", "dist/**"],

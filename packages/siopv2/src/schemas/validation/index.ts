@@ -2,11 +2,13 @@ import {
   AuthorizationRequestPayloadVD11Schema,
   AuthorizationRequestPayloadVID1Schema,
   AuthorizationResponseOptsSchema,
-  /*CreateAuthorizationRequestOptsSchema, */ RPRegistrationMetadataPayloadSchema,
+  RPRegistrationMetadataPayloadSchema,
+  /*CreateAuthorizationRequestOptsSchema, */
 } from './schemaValidation.js';
 export {
   AuthorizationRequestPayloadVID1Schema,
   AuthorizationRequestPayloadVD11Schema,
   RPRegistrationMetadataPayloadSchema,
-  /*CreateAuthorizationRequestOptsSchema, */ AuthorizationResponseOptsSchema,
+  AuthorizationResponseOptsSchema,
+  /*CreateAuthorizationRequestOptsSchema, */
 };

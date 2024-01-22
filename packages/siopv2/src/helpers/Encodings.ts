@@ -19,7 +19,7 @@ export function decodeUriAsJson(uri: string) {
   const descriptors = parts?.claims?.['vp_token']?.presentation_definition?.['input_descriptors'];
   if (descriptors && Array.isArray(descriptors)) {
     if (!parts.claims) {
-      parts.claims = {}
+      parts.claims = {};
     }
     // Whenever we have a [{'uri': 'str1'}, 'uri': 'str2'] qs changes this to {uri: ['str1','str2']} which means schema validation fails. So we have to fix that
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

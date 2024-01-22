@@ -16,7 +16,7 @@
     "build:schemaGenerator": "node --loader=tsimp/loader generator/schemaGenerator.ts",
     "clean": "rimraf dist coverage",
     "fix.old": "run-s fix:*",
-    "fix:prettier.old": "prettier \"{src,s__}/**/*.ts\" --write",
+    "fix:prettier.old": "prettier \"{src,__tests__}/**/*.ts\" --write",
     "fix:lint.old": "eslint . --ext .ts --fix",
     "test.old": "run-s build test:*",
     "test:lint.old": "eslint . --ext .ts",

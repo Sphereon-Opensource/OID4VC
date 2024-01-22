@@ -1,4 +1,4 @@
-import { BAD_PARAMS } from '@sphereon/oid4vc-common'
+import { BAD_PARAMS } from '@sphereon/oid4vc-common';
 import { IDomainLinkageValidation, ValidationStatusEnum, VerifyCallback, WDCErrors, WellKnownDidVerifier } from '@sphereon/wellknown-dids-client';
 
 import { CheckLinkedDomain, DIDDocument, ExternalVerification, InternalVerification } from '../types';
@@ -69,7 +69,7 @@ export async function validateLinkedDomainWithDid(did: string, verification: Int
   }
   try {
     if (typeof wellknownDIDVerifyCallback !== 'function') {
-      throw Error(BAD_PARAMS + `: verify callback not supplied`)
+      throw Error(BAD_PARAMS + `: verify callback not supplied`);
     }
     const validationResult = await checkWellKnownDid({ didDocument, verifyCallback: wellknownDIDVerifyCallback });
     if (validationResult.status === ValidationStatusEnum.INVALID) {

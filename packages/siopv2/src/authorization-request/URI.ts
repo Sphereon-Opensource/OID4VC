@@ -248,7 +248,7 @@ export class URI implements AuthorizationRequestURI {
       throw Error(SIOPErrors.BAD_PARAMS);
     }
     // We strip the uri scheme before passing it to the decode function
-    const matches = uri.match(/^([a-zA-Z][a-zA-Z0-9-_]*:\/\/)/g)
+    const matches = uri.match(/^([a-zA-Z][a-zA-Z0-9-_]*:\/\/)/g);
     if (!Array.isArray(matches)) {
       throw Error(SIOPErrors.BAD_PARAMS + `: no scheme`);
     }

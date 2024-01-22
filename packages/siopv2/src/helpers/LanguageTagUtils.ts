@@ -14,7 +14,7 @@ export class LanguageTagUtils {
    * @param source is the object from which the language enabled fields and their values will be extracted.
    */
   static getAllLanguageTaggedProperties(source: unknown): Map<string, string> {
-    return this.getLanguageTaggedPropertiesMapped(source, new Map());
+    return this.getLanguageTaggedPropertiesMapped(source, undefined);
   }
 
   /**
@@ -36,7 +36,7 @@ export class LanguageTagUtils {
    * @param requiredFieldNamesMapping the fields which are supposed to be language enabled. These are the only fields which should be returned. And
    *                                  the fields names will be transformed as per the mapping provided.
    */
-  static getLanguageTaggedPropertiesMapped(source: unknown, requiredFieldNamesMapping: Map<string, string>): Map<string, string> {
+  static getLanguageTaggedPropertiesMapped(source: unknown, requiredFieldNamesMapping: Map<string, string> | undefined): Map<string, string> {
     this.assertSourceIsWorthChecking(source);
     this.assertValidTargetFieldNames(requiredFieldNamesMapping);
 
@@ -66,12 +66,15 @@ export class LanguageTagUtils {
     value: string,
     languageTagSeparatorIndexInKey: number,
     languageTagEnabledFieldsNamesMapping: Map<string, string>,
-    languageTaggedFields: Map<string, string>,
+    languageTaggedFields: Map<string, string> | undefined,
   ): void {
     const fieldName = this.getFieldName(key, languageTagSeparatorIndexInKey);
 
     const languageTag = this.getLanguageTag(key, languageTagSeparatorIndexInKey);
     if (Tags.check(languageTag)) {
+      if (!languageTaggedFields) {
+        throw Error('We could tag results but nowhere to store them');
+      }
       if (languageTagEnabledFieldsNamesMapping?.size) {
         if (languageTagEnabledFieldsNamesMapping.has(fieldName)) {
           languageTaggedFields.set(this.getMappedFieldName(languageTagEnabledFieldsNamesMapping, fieldName, languageTag), value);

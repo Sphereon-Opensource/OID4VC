@@ -127,7 +127,7 @@ export const getWithUrl = async <T>(url: string, textResponse?: boolean): Promis
   }*/
 };
 
-export const fetchByReferenceOrUseByValue = async <T>(referenceURI?: string, valueObject?: T, textResponse?: boolean): Promise<T> => {
+export const fetchByReferenceOrUseByValue = async <T>(referenceURI?: string, valueObject?: T, textResponse?: boolean): Promise<T | undefined> => {
   let response: T | undefined = valueObject;
   if (referenceURI) {
     try {
@@ -136,9 +136,6 @@ export const fetchByReferenceOrUseByValue = async <T>(referenceURI?: string, val
       console.log(e);
       throw new Error(`${SIOPErrors.REG_PASS_BY_REFERENCE_INCORRECTLY}: ${e instanceof Error ? e.message : e}, URL: ${referenceURI}`);
     }
-  }
-  if (!response) {
-    throw Error(`Could not pass by value ${valueObject} or reference ${referenceURI}`)
   }
   return response;
 };
