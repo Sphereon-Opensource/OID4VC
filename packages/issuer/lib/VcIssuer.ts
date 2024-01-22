@@ -311,7 +311,7 @@ export class VcIssuer<DIDDoc extends object> {
       if (CredentialMapper.isSdJwtDecodedCredentialPayload(credential) && (kid || jwk) && !credential.cnf) {
         if (kid) {
           credential.cnf = {
-            kid
+            kid,
           }
         } else if (jwk) {
           credential.cnf = {
