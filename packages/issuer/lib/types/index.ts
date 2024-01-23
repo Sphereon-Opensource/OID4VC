@@ -7,7 +7,13 @@ import {
   OID4VCICredentialFormat,
   UniformCredentialRequest,
 } from '@sphereon/oid4vci-common'
-import { ICredential, SdJwtDecodedVerifiableCredentialPayload, SdJwtDisclosureFrame, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import {
+  CompactSdJwtVc,
+  ICredential,
+  SdJwtDecodedVerifiableCredentialPayload,
+  SdJwtDisclosureFrame,
+  W3CVerifiableCredential,
+} from '@sphereon/ssi-types'
 
 export type CredentialSignerCallback<T extends object> = (opts: {
   credentialRequest: UniformCredentialRequest
@@ -18,7 +24,7 @@ export type CredentialSignerCallback<T extends object> = (opts: {
    * An implementation that wants to look into the DIDDoc would have to do a cast in the signer callback implementation
    */
   jwtVerifyResult: JwtVerifyResult<T>
-}) => Promise<W3CVerifiableCredential>
+}) => Promise<W3CVerifiableCredential | CompactSdJwtVc>
 
 export interface CredentialDataSupplierArgs extends CNonceState {
   credentialRequest: UniformCredentialRequest

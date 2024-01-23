@@ -35,7 +35,7 @@ import {
   UniformCredentialRequest,
   URIState,
 } from '@sphereon/oid4vci-common'
-import { CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import { CompactSdJwtVc, CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
@@ -558,7 +558,7 @@ export class VcIssuer<DIDDoc extends object> {
       format?: OID4VCICredentialFormat
     },
     issuerCallback?: CredentialSignerCallback<DIDDoc>,
-  ): Promise<W3CVerifiableCredential> {
+  ): Promise<W3CVerifiableCredential | CompactSdJwtVc> {
     if ((!opts.credential && !opts.credentialRequest) || !this._credentialSignerCallback) {
       throw new Error(ISSUER_CONFIG_ERROR)
     }
