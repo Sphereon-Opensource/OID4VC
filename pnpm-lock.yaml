@@ -128,8 +128,8 @@ importers:
         version: 4.3.4
     devDependencies:
       '@sphereon/ssi-sdk-ext.key-utils':
-        specifier: ^0.15.1-next.7
-        version: 0.15.1-unstable.11(expo-crypto@12.6.0)(expo@48.0.20)(msrcrypto@1.5.8)(react-native-securerandom@1.0.1)
+        specifier: ^0.16.0
+        version: 0.16.0(expo-crypto@12.6.0)(expo@48.0.20)(msrcrypto@1.5.8)(react-native-securerandom@1.0.1)
       '@transmute/did-key.js':
         specifier: ^0.3.0-unstable.10
         version: 0.3.0-unstable.10
@@ -3540,8 +3540,8 @@ packages:
       - supports-color
     dev: false
 
-  /@sphereon/ssi-sdk-ext.key-utils@0.15.1-unstable.11(expo-crypto@12.6.0)(expo@48.0.20)(msrcrypto@1.5.8)(react-native-securerandom@1.0.1):
-    resolution: {integrity: sha512-F0vR49mjSJ5Tm5sBvq6HduyAFoPbViTzRBG4J7NeUCubT3R35Jmjr2kWDrp8B1vbyQrCoBi5/TE5g30H2Hd4gA==}
+  /@sphereon/ssi-sdk-ext.key-utils@0.16.0(expo-crypto@12.6.0)(expo@48.0.20)(msrcrypto@1.5.8)(react-native-securerandom@1.0.1):
+    resolution: {integrity: sha512-gaPgoAG2R5pBdMwktPKP39QrcMUc5ny3U9fmzSdlBky0n0BCXv+ifeCSuVSFKQP5tBPeOKPyMH/JcaQWxoFzkA==}
     dependencies:
       '@ethersproject/random': 5.7.0
       '@sphereon/isomorphic-webcrypto': 2.4.0-unstable.4(expo-crypto@12.6.0)(expo@48.0.20)(msrcrypto@1.5.8)(react-native-securerandom@1.0.1)
