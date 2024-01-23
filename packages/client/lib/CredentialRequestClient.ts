@@ -42,7 +42,6 @@ export async function buildProof<DIDDoc>(
   if ('proof_type' in proofInput) {
     if (opts.cNonce) {
       throw Error(`Cnonce param is only supported when using a Proof of Posession builder`);
-      //decodeJwt(proofInput.jwt).
     }
     return await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession, opts.version).build();
   }
