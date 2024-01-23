@@ -195,7 +195,7 @@ export class AccessTokenClient {
       this.assertNonEmptyCode(accessTokenRequest);
       this.assertNonEmptyRedirectUri(accessTokenRequest);
     } else {
-      this.throwNotSupportedFlow;
+      this.throwNotSupportedFlow();
     }
   }
 

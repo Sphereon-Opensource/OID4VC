@@ -49,6 +49,7 @@ export interface AuthorizationServerMetadata {
 
   // VCI values. In case an AS provides a credential_endpoint itself
   credential_endpoint?: string;
+  deferred_credential_endpoint?: string;
 
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   [x: string]: any; //We use any, so you can access properties if you know the structure
@@ -66,6 +67,7 @@ export interface EndpointMetadata {
   issuer: string;
   token_endpoint: string;
   credential_endpoint: string;
+  deferred_credential_endpoint?: string;
   authorization_server?: string;
   authorization_endpoint?: string; // Can be undefined in pre-auth flow
 }

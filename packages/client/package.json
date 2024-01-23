@@ -25,7 +25,7 @@
     "@types/node": "^18.17.4",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
-    "@sphereon/ssi-sdk-ext.key-utils": "^0.15.1-next.7",
+    "@sphereon/ssi-sdk-ext.key-utils": "^0.16.0",
     "codecov": "^3.8.3",
     "dotenv": "^16.3.1",
     "eslint": "^8.46.0",
