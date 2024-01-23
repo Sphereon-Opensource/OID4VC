@@ -159,8 +159,8 @@ export enum ResponseType {
 }
 
 export enum CodeChallengeMethod {
-  TEXT = 'text',
-  SHA256 = 'S256',
+  plain = 'plain',
+  S256 = 'S256',
 }
 
 export interface AuthorizationServerOpts {

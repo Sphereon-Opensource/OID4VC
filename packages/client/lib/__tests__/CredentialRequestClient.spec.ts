@@ -157,7 +157,7 @@ describe('Credential Request Client ', () => {
 });
 
 describe('Credential Request Client with Walt.id ', () => {
-  beforeAll(() => {
+  beforeEach(() => {
     nock.cleanAll();
   });
 
@@ -165,7 +165,7 @@ describe('Credential Request Client with Walt.id ', () => {
     nock.cleanAll();
   });
   it('should have correct metadata endpoints', async function () {
-    // nock.cleanAll();
+    nock.cleanAll();
     const WALT_IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
     const credentialOffer = await CredentialOfferClient.fromURI(WALT_IRR_URI);
@@ -184,6 +184,13 @@ describe('Credential Request Client with Walt.id ', () => {
 });
 
 describe('Credential Request Client with different issuers ', () => {
+  beforeEach(() => {
+    nock.cleanAll();
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
   it('should create correct CredentialRequest for Spruce', async () => {
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fngi%2Doidc4vci%2Dtest%2Espruceid%2Exyz&credential_type=OpenBadgeCredential&pre-authorized_code=eyJhbGciOiJFUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOlsiT3BlbkJhZGdlQ3JlZGVudGlhbCJdLCJleHAiOiIyMDIzLTA0LTIwVDA5OjA0OjM2WiIsIm5vbmNlIjoibWFibmVpT0VSZVB3V3BuRFFweEt3UnRsVVRFRlhGUEwifQ.qOZRPN8sTv_knhp7WaWte2-aDULaPZX--2i9unF6QDQNUllqDhvxgIHMDCYHCV8O2_Gj-T2x1J84fDMajE3asg&user_pin_required=false';
@@ -208,6 +215,7 @@ describe('Credential Request Client with different issuers ', () => {
   });
 
   it('should create correct CredentialRequest for Walt', async () => {
+    nock.cleanAll();
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Fdefault%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA&user_pin_required=false';
     const credentialOffer = await (

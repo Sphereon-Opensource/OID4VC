@@ -29,34 +29,21 @@ import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { convertJsonToURI, formPost } from './functions';
+import { createPKCEOpts } from './functions/AuthorizationUtil';
+import { AuthDetails, AuthRequestOpts, PARMode, PKCEOpts } from './types';
 
 const debug = Debug('sphereon:oid4vci');
 
-interface AuthDetails {
-  type: 'openid_credential' | string;
-  locations?: string | string[];
-  format: CredentialFormat | CredentialFormat[];
-
-  [s: string]: unknown;
-}
-
-interface AuthRequestOpts {
-  codeChallenge: string;
-  codeChallengeMethod?: CodeChallengeMethod;
-  authorizationDetails?: AuthDetails | AuthDetails[];
-  redirectUri: string;
-  scope?: string;
-}
-
 export class OpenID4VCIClient {
   private readonly _credentialOffer?: CredentialOfferRequestWithBaseUrl;
-  private _credentialIssuer: string;
+  private readonly _credentialIssuer: string;
   private _clientId?: string;
   private _kid: string | undefined;
   private _jwk: JWK | undefined;
   private _alg: Alg | string | undefined;
   private _endpointMetadata: EndpointMetadataResult | undefined;
   private _accessTokenResponse: AccessTokenResponse | undefined;
+  private _pkce: PKCEOpts = { disabled: false, codeChallengeMethod: CodeChallengeMethod.S256 };
 
   private constructor({
     credentialOffer,
@@ -144,9 +131,13 @@ export class OpenID4VCIClient {
     return this.endpointMetadata;
   }
 
-  // todo: Unify this method with the par method
-
-  public createAuthorizationRequestUrl({ codeChallengeMethod, codeChallenge, authorizationDetails, redirectUri, scope }: AuthRequestOpts): string {
+  public async createAuthorizationRequestUrl(opts: AuthRequestOpts): Promise<string> {
+    const { redirectUri } = opts;
+    let { scope, authorizationDetails } = opts;
+    const parMode = this._endpointMetadata?.credentialIssuerMetadata?.require_pushed_authorization_requests
+      ? PARMode.REQUIRE
+      : opts.parMode ?? PARMode.AUTO;
+    this._pkce = createPKCEOpts({ ...this._pkce, ...opts.pkce });
     // Scope and authorization_details can be used in the same authorization request
     // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
     if (!scope && !authorizationDetails) {
@@ -181,16 +172,19 @@ export class OpenID4VCIClient {
     if (!this._endpointMetadata?.authorization_endpoint) {
       throw Error('Server metadata does not contain authorization endpoint');
     }
+    const parEndpoint = this._endpointMetadata.credentialIssuerMetadata?.pushed_authorization_request_endpoint;
 
     // add 'openid' scope if not present
     if (!scope?.includes('openid')) {
       scope = ['openid', scope].filter((s) => !!s).join(' ');
     }
 
-    const queryObj: { [key: string]: string } = {
+    let queryObj: { [key: string]: string } | PushedAuthorizationResponse = {
       response_type: ResponseType.AUTH_CODE,
-      code_challenge_method: codeChallengeMethod ?? CodeChallengeMethod.SHA256,
-      code_challenge: codeChallenge,
+      ...(!this._pkce.disabled && {
+        code_challenge_method: this._pkce.codeChallengeMethod ?? CodeChallengeMethod.S256,
+        code_challenge: this._pkce.codeChallenge,
+      }),
       authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
       redirect_uri: redirectUri,
       scope: scope,
@@ -202,75 +196,23 @@ export class OpenID4VCIClient {
 
     if (this.credentialOffer?.issuerState) {
       queryObj['issuer_state'] = this.credentialOffer.issuerState;
+    }
+    if (!parEndpoint && parMode === PARMode.REQUIRE) {
+      throw Error(`PAR mode is set to required by Authorization Server does not support PAR!`);
+    } else if (parEndpoint && parMode !== PARMode.NEVER) {
+      const parResponse = await formPost<PushedAuthorizationResponse>(parEndpoint, new URLSearchParams(queryObj));
+      if (parResponse.errorBody || !parResponse.successBody) {
+        throw Error(`PAR error`);
+      }
+      queryObj = { request_uri: parResponse.successBody.request_uri };
     }
 
     return convertJsonToURI(queryObj, {
       baseUrl: this._endpointMetadata.authorization_endpoint,
-      uriTypeProperties: ['redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
+      uriTypeProperties: ['request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
       mode: JsonURIMode.X_FORM_WWW_URLENCODED,
       // We do not add the version here, as this always needs to be form encoded
     });
-  }
-
-  // todo: Unify this method with the create auth request url method
-  public async acquirePushedAuthorizationRequestURI({
-    codeChallengeMethod,
-    codeChallenge,
-    authorizationDetails,
-    redirectUri,
-    scope,
-  }: AuthRequestOpts): Promise<string> {
-    // Scope and authorization_details can be used in the same authorization request
-    // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
-    if (!scope && !authorizationDetails) {
-      throw Error('Please provide a scope or authorization_details');
-    }
-
-    // Authorization servers supporting PAR SHOULD include the URL of their pushed authorization request endpoint in their authorization server metadata document
-    // Note that the presence of pushed_authorization_request_endpoint is sufficient for a client to determine that it may use the PAR flow.
-    // What happens if it doesn't ???
-    // let parEndpoint: string
-    if (
-      !this._endpointMetadata?.credentialIssuerMetadata ||
-      !('pushed_authorization_request_endpoint' in this._endpointMetadata.credentialIssuerMetadata) ||
-      typeof this._endpointMetadata.credentialIssuerMetadata.pushed_authorization_request_endpoint !== 'string'
-    ) {
-      throw Error('Server metadata does not contain pushed authorization request endpoint');
-    }
-    const parEndpoint: string = this._endpointMetadata.credentialIssuerMetadata.pushed_authorization_request_endpoint;
-
-    // add 'openid' scope if not present
-    if (!scope?.includes('openid')) {
-      scope = ['openid', scope].filter((s) => !!s).join(' ');
-    }
-
-    const queryObj: { [key: string]: string } = {
-      response_type: ResponseType.AUTH_CODE,
-      code_challenge_method: codeChallengeMethod ?? CodeChallengeMethod.SHA256,
-      code_challenge: codeChallenge,
-      authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
-      redirect_uri: redirectUri,
-      scope: scope,
-    };
-
-    if (this.clientId) {
-      queryObj['client_id'] = this.clientId;
-    }
-
-    if (this.credentialOffer?.issuerState) {
-      queryObj['issuer_state'] = this.credentialOffer.issuerState;
-    }
-
-    const response = await formPost<PushedAuthorizationResponse>(parEndpoint, new URLSearchParams(queryObj));
-
-    return convertJsonToURI(
-      { request_uri: response.successBody?.request_uri },
-      {
-        baseUrl: this._endpointMetadata.credentialIssuerMetadata.authorization_endpoint,
-        uriTypeProperties: ['request_uri'],
-        mode: JsonURIMode.X_FORM_WWW_URLENCODED,
-      },
-    );
   }
 
   public handleAuthorizationDetails(authorizationDetails?: AuthDetails | AuthDetails[]): AuthDetails | AuthDetails[] | undefined {
@@ -570,10 +512,12 @@ export class OpenID4VCIClient {
   public hasDeferredCredentialEndpoint(): boolean {
     return !!this.getAccessTokenEndpoint();
   }
+
   public getDeferredCredentialEndpoint(): string {
     this.assertIssuerData();
     return this.endpointMetadata ? this.endpointMetadata.credential_endpoint : `${this.getIssuer()}/credential`;
   }
+
   private assertIssuerData(): void {
     if (!this._credentialOffer && this.issuerSupportedFlowTypes().includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
       throw Error(`No issuance initiation or credential offer present`);

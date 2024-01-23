@@ -1,4 +1,4 @@
-import { Alg, CodeChallengeMethod, Jwt } from '@sphereon/oid4vci-common';
+import { Alg, Jwt } from '@sphereon/oid4vci-common';
 import { toJwk } from '@sphereon/ssi-sdk-ext.key-utils';
 import { CredentialMapper } from '@sphereon/ssi-types';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -68,10 +68,8 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
     expect(client.getAccessTokenEndpoint()).toEqual(`${AUTH_URL}/token`);
 
     if (credentialType !== 'CTWalletCrossPreAuthorisedInTime') {
-      const url = client.createAuthorizationRequestUrl({
+      const url = await client.createAuthorizationRequestUrl({
         redirectUri: 'openid4vc%3A',
-        codeChallenge: 'mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs',
-        codeChallengeMethod: CodeChallengeMethod.SHA256,
       });
       const result = await fetch(url);
       console.log(result.text());

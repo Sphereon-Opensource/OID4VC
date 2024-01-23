@@ -214,10 +214,22 @@ importers:
       jwt-decode:
         specifier: ^3.1.2
         version: 3.1.2
+      msrcrypto:
+        specifier: ^1.5.8
+        version: 1.5.8
+      sha.js:
+        specifier: ^2.4.11
+        version: 2.4.11
+      uint8arrays:
+        specifier: 3.1.1
+        version: 3.1.1
     devDependencies:
       '@types/jest':
         specifier: ^29.5.3
         version: 29.5.5
+      '@types/sha.js':
+        specifier: ^2.4.4
+        version: 2.4.4
       typescript:
         specifier: 5.3.3
         version: 5.3.3
@@ -4082,6 +4094,12 @@ packages:
     dependencies:
       '@types/http-errors': 2.0.2
       '@types/mime': 3.0.2
+      '@types/node': 18.18.0
+    dev: true
+
+  /@types/sha.js@2.4.4:
+    resolution: {integrity: sha512-Qukd+D6S2Hm0wLVt2Vh+/eWBIoUt+wF8jWjBsG4F8EFQRwKtYvtXCPcNl2OEUQ1R+eTr3xuSaBYUyM3WD1x/Qw==}
+    dependencies:
       '@types/node': 18.18.0
     dev: true
 
@@ -12165,7 +12183,6 @@ packages:
     dependencies:
       inherits: 2.0.4
       safe-buffer: 5.2.1
-    dev: true
 
   /shallow-clone@3.0.1:
     resolution: {integrity: sha512-/6KqX+GVUdqPuPPd2LxDDxzX6CAbjJehAAOKlNpqqUpAqPM6HeL8f+o3a+JsyGjn2lv0WY8UsTgUJjU9Ok55NA==}
