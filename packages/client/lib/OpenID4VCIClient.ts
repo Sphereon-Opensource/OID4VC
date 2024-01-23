@@ -251,8 +251,11 @@ export class OpenID4VCIClient {
     code?: string;
     redirectUri?: string;
   }): Promise<AccessTokenResponse> {
-    const { pin, clientId, codeVerifier, code, redirectUri } = opts ?? {};
+    const { pin, clientId, code, redirectUri } = opts ?? {};
 
+    if (opts?.codeVerifier) {
+      this._pkce.codeVerifier = opts.codeVerifier;
+    }
     this.assertIssuerData();
 
     if (clientId) {
@@ -266,7 +269,7 @@ export class OpenID4VCIClient {
         metadata: this.endpointMetadata,
         credentialIssuer: this.getIssuer(),
         pin,
-        codeVerifier,
+        ...(!this._pkce.disabled && { codeVerifier: this._pkce.codeVerifier }),
         code,
         redirectUri,
         asOpts: { clientId },
