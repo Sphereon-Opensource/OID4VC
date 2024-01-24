@@ -5,6 +5,7 @@ import {
   CredentialOfferRequestWithBaseUrl,
   CredentialOfferV1_0_11,
   determineSpecVersionFromURI,
+  getClientIdFromCredentialOfferPayload,
   OpenId4VCIVersion,
   toUniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common';
@@ -43,6 +44,7 @@ export class CredentialOfferClient {
         throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri);
       }
     }
+    const clientId = getClientIdFromCredentialOfferPayload(credentialOffer?.credential_offer);
     const request = await toUniformCredentialOfferRequest(credentialOffer, {
       ...opts,
       version,
@@ -53,6 +55,7 @@ export class CredentialOfferClient {
     return {
       scheme,
       baseUrl,
+      clientId,
       ...request,
       ...(grants?.authorization_code?.issuer_state && { issuerState: grants.authorization_code.issuer_state }),
       ...(grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code'] && {

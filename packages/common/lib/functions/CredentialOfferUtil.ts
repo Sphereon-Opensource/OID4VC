@@ -1,4 +1,5 @@
 import Debug from 'debug';
+import jwtDecode, { JwtPayload } from 'jwt-decode';
 
 import {
   AssertedUniformCredentialOffer,
@@ -67,6 +68,49 @@ export function getIssuerFromCredentialOfferPayload(request: CredentialOfferPayl
   }
   return 'issuer' in request ? request.issuer : request['credential_issuer'];
 }
+
+export const getClientIdFromCredentialOfferPayload = (credentialOffer?: CredentialOfferPayload): string | undefined => {
+  if (!credentialOffer) {
+    return;
+  }
+  if ('client_id' in credentialOffer) {
+    return credentialOffer.client_id;
+  }
+
+  const state: string | undefined = getStateFromCredentialOfferPayload(credentialOffer);
+  if (state && isJWT(state)) {
+    const decoded = jwtDecode<JwtPayload>(state, { header: false });
+    if ('client_id' in decoded && typeof decoded.client_id === 'string') {
+      return decoded.client_id;
+    }
+  }
+  return;
+};
+
+const isJWT = (input?: string) => {
+  if (!input) {
+    return false;
+  }
+  const noParts = input?.split('.').length;
+  return input?.startsWith('ey') && noParts === 3;
+};
+export const getStateFromCredentialOfferPayload = (credentialOffer: CredentialOfferPayload): string | undefined => {
+  if ('grants' in credentialOffer) {
+    if (credentialOffer.grants?.authorization_code) {
+      return credentialOffer.grants.authorization_code.issuer_state;
+    } else if (credentialOffer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
+      return credentialOffer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code'];
+    }
+  }
+  if ('op_state' in credentialOffer) {
+    // older spec versions
+    return credentialOffer.op_state;
+  } else if ('pre-authorized_code' in credentialOffer) {
+    return credentialOffer['pre-authorized_code'];
+  }
+
+  return;
+};
 
 export function determineSpecVersionFromOffer(offer: CredentialOfferPayload | CredentialOffer): OpenId4VCIVersion {
   if (isCredentialOfferV1_0_11(offer)) {

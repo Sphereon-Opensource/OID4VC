@@ -48,6 +48,11 @@ export interface CredentialOfferPayloadV1_0_11 {
    * using the respective metadata. When multiple grants are present, it's at the Wallet's discretion which one to use.
    */
   grants?: Grant;
+
+  /**
+   * Some implementations might include a client_id in the offer. For instance EBSI in a same-device flow. (Cross-device tucks it in the state JWT)
+   */
+  client_id?: string;
 }
 
 export type CredentialRequestV1_0_11 = CommonCredentialRequest &

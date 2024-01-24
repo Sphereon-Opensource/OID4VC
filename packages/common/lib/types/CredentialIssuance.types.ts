@@ -18,6 +18,7 @@ export interface CredentialResponse {
 
 export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOfferRequest {
   scheme: string;
+  clientId?: string;
   baseUrl: string;
   userPinRequired: boolean;
   issuerState?: string;
@@ -26,7 +27,9 @@ export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOffe
 
 export type CredentialOffer = CredentialOfferV1_0_09 | CredentialOfferV1_0_11;
 
-export type CredentialOfferPayload = CredentialOfferPayloadV1_0_08 | CredentialOfferPayloadV1_0_09 | CredentialOfferPayloadV1_0_11;
+export type CredentialOfferPayload = (CredentialOfferPayloadV1_0_08 | CredentialOfferPayloadV1_0_09 | CredentialOfferPayloadV1_0_11) & {
+  [x: string]: any;
+};
 
 export interface AssertedUniformCredentialOffer extends UniformCredentialOffer {
   credential_offer: UniformCredentialOfferPayload;
@@ -107,6 +110,7 @@ export interface JWK extends BaseJWK {
   x5t?: string;
   'x5t#S256'?: string;
   x5u?: string;
+
   [propName: string]: unknown;
 }
 
@@ -147,6 +151,7 @@ export interface JWSHeaderParameters extends JoseHeaderParameters {
   alg?: Alg | string; // REQUIRED by the JWT signer
   b64?: boolean;
   crit?: string[];
+
   [propName: string]: unknown;
 }
 
@@ -172,6 +177,7 @@ export interface JWTPayload {
 
 export type JWTSignerCallback = (jwt: Jwt, kid?: string) => Promise<string>;
 export type JWTVerifyCallback<DIDDoc> = (args: { jwt: string; kid?: string }) => Promise<JwtVerifyResult<DIDDoc>>;
+
 export interface JwtVerifyResult<DIDDoc> {
   jwt: Jwt;
   kid?: string;

@@ -139,7 +139,7 @@ export class OpenID4VCIClient {
       credentialOffer: credentialOfferClient,
       kid,
       alg,
-      clientId: clientId ?? authorizationRequest?.clientId,
+      clientId: clientId ?? authorizationRequest?.clientId ?? credentialOfferClient.clientId,
       pkce,
       authorizationRequest,
     });
