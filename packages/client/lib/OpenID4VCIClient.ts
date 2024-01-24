@@ -74,8 +74,7 @@ export class OpenID4VCIClient {
     this._alg = alg;
     this._clientId = clientId ?? (credentialOffer ? getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
     this._pkce = { ...this._pkce, ...pkce };
-    this._authorizationRequestOpts = authorizationRequest;
-    this.syncAuthorizationRequestOpts(authorizationRequest);
+    this._authorizationRequestOpts = this.syncAuthorizationRequestOpts(authorizationRequest);
   }
 
   public static async fromCredentialIssuer({
@@ -163,7 +162,7 @@ export class OpenID4VCIClient {
   public async createAuthorizationRequestUrl(opts?: { authorizationRequest?: AuthorizationRequestOpts; pkce?: PKCEOpts }): Promise<string> {
     if (!this._authorizationURL) {
       this.calculatePKCEOpts(opts?.pkce);
-      this.syncAuthorizationRequestOpts(opts?.authorizationRequest);
+      this._authorizationRequestOpts = this.syncAuthorizationRequestOpts(opts?.authorizationRequest);
       if (!this._authorizationRequestOpts) {
         throw Error(`No Authorization Request options present or provided in this call`);
       }
@@ -171,8 +170,7 @@ export class OpenID4VCIClient {
       // todo: Probably can go with current logic in MetadataClient who will always set the authorization_endpoint when found
       //  handling this because of the support for v1_0-08
       if (
-        this._endpointMetadata &&
-        this._endpointMetadata.credentialIssuerMetadata &&
+        this._endpointMetadata?.credentialIssuerMetadata &&
         'authorization_endpoint' in this._endpointMetadata.credentialIssuerMetadata
       ) {
         this._endpointMetadata.authorization_endpoint = this._endpointMetadata.credentialIssuerMetadata.authorization_endpoint as string;
@@ -518,21 +516,18 @@ export class OpenID4VCIClient {
     }
   }
 
-  private syncAuthorizationRequestOpts(opts?: AuthorizationRequestOpts) {
-    if (!this._authorizationRequestOpts && !opts) {
-      this._authorizationRequestOpts = { redirectUri: 'openid4vc%3A' }
+  private syncAuthorizationRequestOpts(opts?: AuthorizationRequestOpts): AuthorizationRequestOpts {
+    let authorizationRequestOpts = { ...this._authorizationRequestOpts, ...opts } as AuthorizationRequestOpts;
+    if (!authorizationRequestOpts) {
+      authorizationRequestOpts = { redirectUri: 'openid4vc%3A' }
     }
+    const clientId = authorizationRequestOpts.clientId ?? this._clientId
+    this._clientId = clientId;
+    authorizationRequestOpts.clientId = clientId;
 
-    const authorizationRequestOpts = { ...this._authorizationRequestOpts, ...opts } as AuthorizationRequestOpts;
-    if (authorizationRequestOpts.clientId) {
-      this._clientId = authorizationRequestOpts.clientId;
-    }
-    if (this._clientId && authorizationRequestOpts) {
-      authorizationRequestOpts.clientId = this._clientId;
-    }
     if (!authorizationRequestOpts.redirectUri) {
       authorizationRequestOpts.redirectUri = 'openid4vc%3A';
     }
-    this._authorizationRequestOpts = authorizationRequestOpts;
+    return authorizationRequestOpts;
   }
 }
