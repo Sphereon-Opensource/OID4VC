@@ -6,5 +6,6 @@ export * from './Encoding';
 export * from './TypeConversionUtils';
 export * from './IssuerMetadataUtils';
 export * from './FormatUtils';
+export * from './HttpUtils';
 export { randomBytes };
 export * from './RandomUtils';

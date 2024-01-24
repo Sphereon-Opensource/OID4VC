@@ -69,7 +69,9 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
 
     if (credentialType !== 'CTWalletCrossPreAuthorisedInTime') {
       const url = await client.createAuthorizationRequestUrl({
-        redirectUri: 'openid4vc%3A',
+        authorizationRequest: {
+          redirectUri: 'openid4vc%3A',
+        },
       });
       const result = await fetch(url);
       console.log(result.text());

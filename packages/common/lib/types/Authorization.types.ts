@@ -70,7 +70,9 @@ export interface CommonAuthorizationRequest {
 /**
  * string type added for conformity with our previous code in the client
  */
-export type AuthorizationDetails = AuthorizationDetailsJwtVcJson | AuthorizationDetailsJwtVcJsonLdAndLdpVc | AuthorizationDetailsSdJwtVc | string;
+export type AuthorizationDetails =
+  | (CommonAuthorizationDetails & (AuthorizationDetailsJwtVcJson | AuthorizationDetailsJwtVcJsonLdAndLdpVc | AuthorizationDetailsSdJwtVc))
+  | string;
 
 export type AuthorizationRequest = AuthorizationRequestJwtVcJson | AuthorizationRequestJwtVcJsonLdAndLdpVc | AuthorizationRequestSdJwtVc;
 
@@ -85,6 +87,16 @@ export interface AuthorizationRequestJwtVcJsonLdAndLdpVc extends CommonAuthoriza
 export interface AuthorizationRequestSdJwtVc extends CommonAuthorizationRequest {
   authorization_details?: AuthorizationDetailsSdJwtVc[];
 }
+
+/*
+export interface AuthDetails {
+  type: 'openid_credential' | string;
+  locations?: string | string[];
+  format: CredentialFormat | CredentialFormat[];
+
+  [s: string]: unknown;
+}
+*/
 
 export interface CommonAuthorizationDetails {
   /**
@@ -187,11 +199,58 @@ export interface AccessTokenRequestOpts {
   pin?: string; // Pin-number. Only used when required
 }
 
-export interface AuthorizationRequestOpts {
+/*export interface AuthorizationRequestOpts {
   clientId: string;
   codeChallenge: string;
   codeChallengeMethod: CodeChallengeMethod;
   authorizationDetails?: AuthorizationDetails[];
+  redirectUri: string;
+  scope?: string;
+}*/
+
+/**
+ * Determinse whether PAR should be used when supported
+ *
+ * REQUIRE: Require PAR, if AS does not support it throw an error
+ * AUTO: Use PAR is the AS supports it, otherwise construct a reqular URI,
+ * NEVER: Do not use PAR even if the AS supports it (not recommended)
+ */
+export enum PARMode {
+  REQUIRE,
+  AUTO,
+  NEVER,
+}
+
+/**
+ * Optional options to provide PKCE params like code verifier and challenge yourself, or to disable PKCE altogether. If not provide PKCE will still be used! If individual params are not provide, they will be generated/calculated
+ */
+export interface PKCEOpts {
+  /**
+   * PKCE is enabled by default even if you do not provide these options. Set this to true to disable PKCE
+   */
+  disabled?: boolean;
+
+  /**
+   * Provide a code_challenge, otherwise it will be calculated using the code_verifier and method
+   */
+  codeChallenge?: string;
+
+  /**
+   * The code_challenge_method, should always by S256
+   */
+  codeChallengeMethod?: CodeChallengeMethod;
+
+  /**
+   * Provide a code_verifier, otherwise it will be generated
+   */
+  codeVerifier?: string;
+}
+
+export interface AuthorizationRequestOpts {
+  clientId?: string;
+  pkce?: PKCEOpts;
+  parMode?: PARMode;
+  authorizationDetails?: AuthorizationDetails | AuthorizationDetails[];
   redirectUri: string;
   scope?: string;
 }

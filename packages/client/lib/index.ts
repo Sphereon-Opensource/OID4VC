@@ -1,4 +1,5 @@
 export * from './AccessTokenClient';
+export * from './CredentialRequestClient';
 export * from './CredentialOfferClient';
 export * from './CredentialRequestClient';
 export * from './CredentialRequestClientBuilder';

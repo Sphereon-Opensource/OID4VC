@@ -1,6 +1,7 @@
 import {
   AccessTokenResponse,
   Alg,
+  AuthorizationRequestOpts,
   AuthzFlowType,
   CodeChallengeMethod,
   CredentialOfferPayloadV1_0_08,
@@ -11,26 +12,23 @@ import {
   getIssuerFromCredentialOfferPayload,
   getSupportedCredentials,
   getTypesFromCredentialSupported,
-  JsonURIMode,
   JWK,
   KID_JWK_X5C_ERROR,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
+  PKCEOpts,
   ProofOfPossessionCallbacks,
-  PushedAuthorizationResponse,
-  ResponseType,
 } from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';
+import { createAuthorizationRequestUrl } from './AuthorizationCodeClient';
 import { CredentialOfferClient } from './CredentialOfferClient';
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
-import { convertJsonToURI, formPost } from './functions';
-import { createPKCEOpts } from './functions/AuthorizationUtil';
-import { AuthDetails, AuthRequestOpts, PARMode, PKCEOpts } from './types';
+import { generateMissingPKCEOpts } from './functions/AuthorizationUtil';
 
 const debug = Debug('sphereon:oid4vci');
 
@@ -44,6 +42,9 @@ export class OpenID4VCIClient {
   private _endpointMetadata: EndpointMetadataResult | undefined;
   private _accessTokenResponse: AccessTokenResponse | undefined;
   private _pkce: PKCEOpts = { disabled: false, codeChallengeMethod: CodeChallengeMethod.S256 };
+  private _authorizationRequestOpts?: AuthorizationRequestOpts;
+
+  private _authorizationURL?: string;
 
   private constructor({
     credentialOffer,
@@ -51,12 +52,16 @@ export class OpenID4VCIClient {
     kid,
     alg,
     credentialIssuer,
+    pkce,
+    authorizationRequest,
   }: {
     credentialOffer?: CredentialOfferRequestWithBaseUrl;
     kid?: string;
     alg?: Alg | string;
     clientId?: string;
     credentialIssuer?: string;
+    pkce?: PKCEOpts;
+    authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
   }) {
     this._credentialOffer = credentialOffer;
     const issuer = credentialIssuer ?? (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
@@ -67,6 +72,9 @@ export class OpenID4VCIClient {
     this._kid = kid;
     this._alg = alg;
     this._clientId = clientId;
+    this._pkce = { ...this._pkce, ...pkce };
+    this._authorizationRequestOpts = authorizationRequest;
+    this.syncAuthorizationRequestOpts(authorizationRequest);
   }
 
   public static async fromCredentialIssuer({
@@ -75,16 +83,32 @@ export class OpenID4VCIClient {
     retrieveServerMetadata,
     clientId,
     credentialIssuer,
+    pkce,
+    authorizationRequest,
+    createAuthorizationRequestURL,
   }: {
     credentialIssuer: string;
     kid?: string;
     alg?: Alg | string;
     retrieveServerMetadata?: boolean;
     clientId?: string;
+    createAuthorizationRequestURL?: boolean;
+    authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
+    pkce?: PKCEOpts;
   }) {
-    const client = new OpenID4VCIClient({ kid, alg, clientId, credentialIssuer });
+    const client = new OpenID4VCIClient({
+      kid,
+      alg,
+      clientId: clientId ?? authorizationRequest?.clientId,
+      credentialIssuer,
+      pkce,
+      authorizationRequest,
+    });
     if (retrieveServerMetadata === undefined || retrieveServerMetadata) {
       await client.retrieveServerMetadata();
+    }
+    if (createAuthorizationRequestURL === undefined || createAuthorizationRequestURL) {
+      await client.createAuthorizationRequestUrl({ authorizationRequest, pkce });
     }
     return client;
   }
@@ -95,26 +119,72 @@ export class OpenID4VCIClient {
     alg,
     retrieveServerMetadata,
     clientId,
+    pkce,
+    createAuthorizationRequestURL,
+    authorizationRequest,
     resolveOfferUri,
   }: {
     uri: string;
     kid?: string;
     alg?: Alg | string;
     retrieveServerMetadata?: boolean;
+    createAuthorizationRequestURL?: boolean;
     resolveOfferUri?: boolean;
+    pkce?: PKCEOpts;
     clientId?: string;
+    authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
   }): Promise<OpenID4VCIClient> {
+    const credentialOfferClient = await CredentialOfferClient.fromURI(uri, { resolve: resolveOfferUri });
     const client = new OpenID4VCIClient({
-      credentialOffer: await CredentialOfferClient.fromURI(uri, { resolve: resolveOfferUri }),
+      credentialOffer: credentialOfferClient,
       kid,
       alg,
-      clientId,
+      clientId: clientId ?? authorizationRequest?.clientId,
+      pkce,
+      authorizationRequest,
     });
 
     if (retrieveServerMetadata === undefined || retrieveServerMetadata) {
       await client.retrieveServerMetadata();
     }
+    if (
+      credentialOfferClient.supportedFlows.includes(AuthzFlowType.AUTHORIZATION_CODE_FLOW) &&
+      (createAuthorizationRequestURL === undefined || createAuthorizationRequestURL)
+    ) {
+      console.log(`AUTH REQ`);
+      await client.createAuthorizationRequestUrl({ authorizationRequest, pkce });
+      console.log(`AUTH REQ URL: ${client._authorizationURL}`);
+    }
+
     return client;
+  }
+
+  public async createAuthorizationRequestUrl(opts?: { authorizationRequest?: AuthorizationRequestOpts; pkce?: PKCEOpts }): Promise<string> {
+    if (!this._authorizationURL) {
+      this.calculatePKCEOpts(opts?.pkce);
+      this.syncAuthorizationRequestOpts(opts?.authorizationRequest);
+      if (!this._authorizationRequestOpts) {
+        throw Error(`No Authorization Request options present or provided in this call`);
+      }
+
+      // todo: Probably can go with current logic in MetadataClient who will always set the authorization_endpoint when found
+      //  handling this because of the support for v1_0-08
+      if (
+        this._endpointMetadata &&
+        this._endpointMetadata.credentialIssuerMetadata &&
+        'authorization_endpoint' in this._endpointMetadata.credentialIssuerMetadata
+      ) {
+        this._endpointMetadata.authorization_endpoint = this._endpointMetadata.credentialIssuerMetadata.authorization_endpoint as string;
+      }
+      this._authorizationURL = await createAuthorizationRequestUrl({
+        pkce: this._pkce,
+        endpointMetadata: this.endpointMetadata,
+        authorizationRequest: this._authorizationRequestOpts,
+        credentialOffer: this.credentialOffer,
+        credentialsSupported: this.getCredentialsSupported(true),
+      });
+    }
+    return this._authorizationURL;
   }
 
   public async retrieveServerMetadata(): Promise<EndpointMetadataResult> {
@@ -131,117 +201,8 @@ export class OpenID4VCIClient {
     return this.endpointMetadata;
   }
 
-  public async createAuthorizationRequestUrl(opts: AuthRequestOpts): Promise<string> {
-    const { redirectUri } = opts;
-    let { scope, authorizationDetails } = opts;
-    const parMode = this._endpointMetadata?.credentialIssuerMetadata?.require_pushed_authorization_requests
-      ? PARMode.REQUIRE
-      : opts.parMode ?? PARMode.AUTO;
-    this._pkce = createPKCEOpts({ ...this._pkce, ...opts.pkce });
-    // Scope and authorization_details can be used in the same authorization request
-    // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
-    if (!scope && !authorizationDetails) {
-      if (!this.credentialOffer) {
-        throw Error('Please provide a scope or authorization_details');
-      }
-      const creds = this.credentialOffer.credential_offer.credentials;
-
-      authorizationDetails = creds
-        .flatMap((cred) => (typeof cred === 'string' ? this.getCredentialsSupported(true) : (cred as CredentialSupported)))
-        .map((cred) => {
-          return {
-            ...cred,
-            type: 'openid_credential',
-            locations: [this._credentialIssuer],
-            format: cred.format,
-          } satisfies AuthDetails;
-        });
-      if (authorizationDetails.length === 0) {
-        throw Error(`Could not create authorization details from credential offer. Please pass in explicit details`);
-      }
-    }
-    // todo: Probably can go with current logic in MetadataClient who will always set the authorization_endpoint when found
-    //  handling this because of the support for v1_0-08
-    if (
-      this._endpointMetadata &&
-      this._endpointMetadata.credentialIssuerMetadata &&
-      'authorization_endpoint' in this._endpointMetadata.credentialIssuerMetadata
-    ) {
-      this._endpointMetadata.authorization_endpoint = this._endpointMetadata.credentialIssuerMetadata.authorization_endpoint as string;
-    }
-    if (!this._endpointMetadata?.authorization_endpoint) {
-      throw Error('Server metadata does not contain authorization endpoint');
-    }
-    const parEndpoint = this._endpointMetadata.credentialIssuerMetadata?.pushed_authorization_request_endpoint;
-
-    // add 'openid' scope if not present
-    if (!scope?.includes('openid')) {
-      scope = ['openid', scope].filter((s) => !!s).join(' ');
-    }
-
-    let queryObj: { [key: string]: string } | PushedAuthorizationResponse = {
-      response_type: ResponseType.AUTH_CODE,
-      ...(!this._pkce.disabled && {
-        code_challenge_method: this._pkce.codeChallengeMethod ?? CodeChallengeMethod.S256,
-        code_challenge: this._pkce.codeChallenge,
-      }),
-      authorization_details: JSON.stringify(this.handleAuthorizationDetails(authorizationDetails)),
-      redirect_uri: redirectUri,
-      scope: scope,
-    };
-
-    if (this.clientId) {
-      queryObj['client_id'] = this.clientId;
-    }
-
-    if (this.credentialOffer?.issuerState) {
-      queryObj['issuer_state'] = this.credentialOffer.issuerState;
-    }
-    if (!parEndpoint && parMode === PARMode.REQUIRE) {
-      throw Error(`PAR mode is set to required by Authorization Server does not support PAR!`);
-    } else if (parEndpoint && parMode !== PARMode.NEVER) {
-      const parResponse = await formPost<PushedAuthorizationResponse>(parEndpoint, new URLSearchParams(queryObj));
-      if (parResponse.errorBody || !parResponse.successBody) {
-        throw Error(`PAR error`);
-      }
-      queryObj = { request_uri: parResponse.successBody.request_uri };
-    }
-
-    return convertJsonToURI(queryObj, {
-      baseUrl: this._endpointMetadata.authorization_endpoint,
-      uriTypeProperties: ['request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
-      mode: JsonURIMode.X_FORM_WWW_URLENCODED,
-      // We do not add the version here, as this always needs to be form encoded
-    });
-  }
-
-  public handleAuthorizationDetails(authorizationDetails?: AuthDetails | AuthDetails[]): AuthDetails | AuthDetails[] | undefined {
-    if (authorizationDetails) {
-      if (Array.isArray(authorizationDetails)) {
-        return authorizationDetails.map((value) => this.handleLocations({ ...value }));
-      } else {
-        return this.handleLocations({ ...authorizationDetails });
-      }
-    }
-    return authorizationDetails;
-  }
-
-  private handleLocations(authorizationDetails: AuthDetails) {
-    if (
-      authorizationDetails &&
-      (this.endpointMetadata.credentialIssuerMetadata?.authorization_server || this.endpointMetadata.authorization_endpoint)
-    ) {
-      if (authorizationDetails.locations) {
-        if (Array.isArray(authorizationDetails.locations)) {
-          (authorizationDetails.locations as string[]).push(this.endpointMetadata.issuer);
-        } else {
-          authorizationDetails.locations = [authorizationDetails.locations as string, this.endpointMetadata.issuer];
-        }
-      } else {
-        authorizationDetails.locations = this.endpointMetadata.issuer;
-      }
-    }
-    return authorizationDetails;
+  private calculatePKCEOpts(pkce?: PKCEOpts) {
+    this._pkce = generateMissingPKCEOpts({ ...this._pkce, ...pkce });
   }
 
   public async acquireAccessToken(opts?: {
@@ -452,7 +413,22 @@ export class OpenID4VCIClient {
   }
 
   issuerSupportedFlowTypes(): AuthzFlowType[] {
-    return this.credentialOffer?.supportedFlows ?? [AuthzFlowType.AUTHORIZATION_CODE_FLOW];
+    return (
+      this.credentialOffer?.supportedFlows ??
+      (this._endpointMetadata?.credentialIssuerMetadata?.authorization_endpoint ? [AuthzFlowType.AUTHORIZATION_CODE_FLOW] : [])
+    );
+  }
+
+  isFlowTypeSupported(flowType: AuthzFlowType): boolean {
+    return this.issuerSupportedFlowTypes().includes(flowType);
+  }
+
+  get authorizationURL(): string | undefined {
+    return this._authorizationURL;
+  }
+
+  public hasAuthorizationURL(): boolean {
+    return !!this.authorizationURL;
   }
 
   get credentialOffer(): CredentialOfferRequestWithBaseUrl | undefined {
@@ -522,10 +498,10 @@ export class OpenID4VCIClient {
   }
 
   private assertIssuerData(): void {
-    if (!this._credentialOffer && this.issuerSupportedFlowTypes().includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
-      throw Error(`No issuance initiation or credential offer present`);
-    } else if (!this._credentialIssuer) {
+    if (!this._credentialIssuer) {
       throw Error(`No credential issuer value present`);
+    } else if (!this._credentialOffer && this._endpointMetadata && this.issuerSupportedFlowTypes().length === 0) {
+      throw Error(`No issuance initiation or credential offer present`);
     }
   }
 
@@ -539,5 +515,22 @@ export class OpenID4VCIClient {
     if (!this._accessTokenResponse) {
       throw Error(`No access token present`);
     }
+  }
+
+  private syncAuthorizationRequestOpts(opts?: AuthorizationRequestOpts) {
+    if (!this._authorizationRequestOpts && !opts) {
+      return;
+    }
+    const authorizationRequestOpts = { ...this._authorizationRequestOpts, ...opts } as AuthorizationRequestOpts;
+    if (authorizationRequestOpts.clientId) {
+      this._clientId = authorizationRequestOpts.clientId;
+    }
+    if (this._clientId && authorizationRequestOpts) {
+      authorizationRequestOpts.clientId = this._clientId;
+    }
+    if (!authorizationRequestOpts.redirectUri) {
+      authorizationRequestOpts.redirectUri = 'openid4vc%3A';
+    }
+    this._authorizationRequestOpts = authorizationRequestOpts;
   }
 }

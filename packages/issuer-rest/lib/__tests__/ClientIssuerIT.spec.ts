@@ -208,6 +208,7 @@ describe('VcIssuer', () => {
       uri,
       kid: subjectDIDKey.didDocument.authentication[0],
       alg: 'ES256',
+      createAuthorizationRequestURL: false,
     })
     expect(client.credentialOffer).toEqual({
       baseUrl: 'http://localhost:3456/test',
