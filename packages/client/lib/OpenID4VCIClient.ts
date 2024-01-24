@@ -8,7 +8,7 @@ import {
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
   CredentialSupported,
-  EndpointMetadataResult,
+  EndpointMetadataResult, getClientIdFromCredentialOfferPayload,
   getIssuerFromCredentialOfferPayload,
   getSupportedCredentials,
   getTypesFromCredentialSupported,
@@ -17,8 +17,8 @@ import {
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PKCEOpts,
-  ProofOfPossessionCallbacks,
-} from '@sphereon/oid4vci-common';
+  ProofOfPossessionCallbacks
+} from '@sphereon/oid4vci-common'
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
@@ -71,7 +71,7 @@ export class OpenID4VCIClient {
     this._credentialIssuer = issuer;
     this._kid = kid;
     this._alg = alg;
-    this._clientId = clientId;
+    this._clientId = clientId ?? (credentialOffer ? getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
     this._pkce = { ...this._pkce, ...pkce };
     this._authorizationRequestOpts = authorizationRequest;
     this.syncAuthorizationRequestOpts(authorizationRequest);
@@ -519,7 +519,11 @@ export class OpenID4VCIClient {
 
   private syncAuthorizationRequestOpts(opts?: AuthorizationRequestOpts) {
     if (!this._authorizationRequestOpts && !opts) {
-      return;
+      if (this.clientId) {
+        this._authorizationRequestOpts = { clientId: this.clientId } as AuthorizationRequestOpts
+      } else {
+        throw Error('No authorization request options present. Need at least a clientId and redirectUri')
+      }
     }
     const authorizationRequestOpts = { ...this._authorizationRequestOpts, ...opts } as AuthorizationRequestOpts;
     if (authorizationRequestOpts.clientId) {
