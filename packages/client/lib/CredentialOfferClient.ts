@@ -44,12 +44,12 @@ export class CredentialOfferClient {
         throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri);
       }
     }
-    const clientId = getClientIdFromCredentialOfferPayload(credentialOffer?.credential_offer);
+
     const request = await toUniformCredentialOfferRequest(credentialOffer, {
       ...opts,
       version,
     });
-
+    const clientId = getClientIdFromCredentialOfferPayload(request.credential_offer);
     const grants = request.credential_offer?.grants;
 
     return {
