@@ -75,6 +75,7 @@ export class OpenID4VCIClient {
     this._clientId = clientId ?? (credentialOffer ? getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
     this._pkce = { ...this._pkce, ...pkce };
     this._authorizationRequestOpts = this.syncAuthorizationRequestOpts(authorizationRequest);
+    console.log(`Authorization req options: ${JSON.stringify(this._authorizationRequestOpts, null, 2)}`);
   }
 
   public static async fromCredentialIssuer({
@@ -169,10 +170,7 @@ export class OpenID4VCIClient {
 
       // todo: Probably can go with current logic in MetadataClient who will always set the authorization_endpoint when found
       //  handling this because of the support for v1_0-08
-      if (
-        this._endpointMetadata?.credentialIssuerMetadata &&
-        'authorization_endpoint' in this._endpointMetadata.credentialIssuerMetadata
-      ) {
+      if (this._endpointMetadata?.credentialIssuerMetadata && 'authorization_endpoint' in this._endpointMetadata.credentialIssuerMetadata) {
         this._endpointMetadata.authorization_endpoint = this._endpointMetadata.credentialIssuerMetadata.authorization_endpoint as string;
       }
       this._authorizationURL = await createAuthorizationRequestUrl({
@@ -519,9 +517,9 @@ export class OpenID4VCIClient {
   private syncAuthorizationRequestOpts(opts?: AuthorizationRequestOpts): AuthorizationRequestOpts {
     let authorizationRequestOpts = { ...this._authorizationRequestOpts, ...opts } as AuthorizationRequestOpts;
     if (!authorizationRequestOpts) {
-      authorizationRequestOpts = { redirectUri: 'openid4vc%3A' }
+      authorizationRequestOpts = { redirectUri: 'openid4vc%3A' };
     }
-    const clientId = authorizationRequestOpts.clientId ?? this._clientId
+    const clientId = authorizationRequestOpts.clientId ?? this._clientId;
     this._clientId = clientId;
     authorizationRequestOpts.clientId = clientId;
 

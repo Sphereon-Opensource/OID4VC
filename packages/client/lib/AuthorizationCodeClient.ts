@@ -79,7 +79,7 @@ export const createAuthorizationRequestUrl = async ({
     }),
     authorization_details: JSON.stringify(handleAuthorizationDetails(endpointMetadata, authorizationDetails)),
     redirect_uri: redirectUri,
-    scope: scope,
+    scope,
   };
 
   if (authorizationRequest.clientId) {
@@ -92,13 +92,16 @@ export const createAuthorizationRequestUrl = async ({
   if (!parEndpoint && parMode === PARMode.REQUIRE) {
     throw Error(`PAR mode is set to required by Authorization Server does not support PAR!`);
   } else if (parEndpoint && parMode !== PARMode.NEVER) {
+    console.log(`USING PAR with endpoint ${parEndpoint}`);
     const parResponse = await formPost<PushedAuthorizationResponse>(parEndpoint, new URLSearchParams(queryObj));
     if (parResponse.errorBody || !parResponse.successBody) {
       throw Error(`PAR error`);
     }
+    console.log(`PAR response: ${(parResponse.successBody, null, 2)}`);
     queryObj = { request_uri: parResponse.successBody.request_uri };
   }
 
+  console.log(`QUERY obj: ` + JSON.stringify(queryObj, null, 2));
   const url = convertJsonToURI(queryObj, {
     baseUrl: endpointMetadata.authorization_endpoint,
     uriTypeProperties: ['request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
