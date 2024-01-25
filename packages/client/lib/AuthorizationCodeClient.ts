@@ -104,7 +104,8 @@ export const createAuthorizationRequestUrl = async ({
   console.log(`QUERY obj: ` + JSON.stringify(queryObj, null, 2));
   const url = convertJsonToURI(queryObj, {
     baseUrl: endpointMetadata.authorization_endpoint,
-    uriTypeProperties: ['request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
+    uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', /*'authorization_details', */'issuer_state'],
+    arrayTypeProperties: ['authorization_details'],
     mode: JsonURIMode.X_FORM_WWW_URLENCODED,
     // We do not add the version here, as this always needs to be form encoded
   });
@@ -140,7 +141,7 @@ const handleLocations = (endpointMetadata: EndpointMetadataResult, authorization
   if (authorizationDetails && (endpointMetadata.credentialIssuerMetadata?.authorization_server || endpointMetadata.authorization_endpoint)) {
     if (authorizationDetails.locations) {
       if (Array.isArray(authorizationDetails.locations)) {
-        (authorizationDetails.locations as string[]).push(endpointMetadata.issuer);
+        authorizationDetails.locations.push(endpointMetadata.issuer);
       } else {
         authorizationDetails.locations = [authorizationDetails.locations as string, endpointMetadata.issuer];
       }
