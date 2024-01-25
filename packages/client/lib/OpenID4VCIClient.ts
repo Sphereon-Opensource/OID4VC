@@ -462,6 +462,10 @@ export class OpenID4VCIClient {
     return this._clientId;
   }
 
+  public hasAccessTokenResponse(): boolean {
+    return !!this._accessTokenResponse;
+  }
+
   get accessTokenResponse(): AccessTokenResponse {
     this.assertAccessToken();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -470,7 +474,7 @@ export class OpenID4VCIClient {
 
   public getIssuer(): string {
     this.assertIssuerData();
-    return this._credentialIssuer!;
+    return this._credentialIssuer;
   }
 
   public getAccessTokenEndpoint(): string {
