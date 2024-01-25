@@ -7,5 +7,6 @@ export * from './TypeConversionUtils';
 export * from './IssuerMetadataUtils';
 export * from './FormatUtils';
 export * from './HttpUtils';
+export * from './AuthorizationResponseUtil';
 export { randomBytes };
 export * from './RandomUtils';

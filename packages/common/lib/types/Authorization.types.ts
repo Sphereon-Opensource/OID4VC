@@ -188,6 +188,9 @@ export interface IssuerOpts {
   fetchMetadata?: boolean;
 }
 
+export interface AccessTokenFromAuthorizationResponseOpts extends AccessTokenRequestOpts {
+  authorizationResponse: AuthorizationResponse;
+}
 export interface AccessTokenRequestOpts {
   credentialOffer?: UniformCredentialOffer;
   credentialIssuer?: string;
@@ -255,11 +258,14 @@ export interface AuthorizationRequestOpts {
   scope?: string;
 }
 
-export interface AuthorizationGrantResponse {
-  grant_type: string;
+export interface AuthorizationResponse {
   code: string;
   scope?: string;
   state?: string;
+}
+
+export interface AuthorizationGrantResponse extends AuthorizationResponse {
+  grant_type: string;
 }
 
 export interface AccessTokenRequest {
