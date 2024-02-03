@@ -251,7 +251,7 @@ export class OpenID4VCIClient {
         ...(!this._pkce.disabled && { codeVerifier: this._pkce.codeVerifier }),
         code,
         redirectUri,
-        asOpts: { clientId },
+        asOpts: { clientId: this.clientId },
       });
 
       if (response.errorBody) {
