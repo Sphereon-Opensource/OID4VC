@@ -88,7 +88,7 @@ export function convertJsonToURI(
  *          - arrayTypeProperties: properties that can show up more that once
  */
 export function convertURIToJsonObject(uri: string, opts?: DecodeURIAsJsonOpts): unknown {
-  if (!uri || !opts?.requiredProperties?.every((p) => uri.includes(p))) {
+  if (!uri || (opts?.requiredProperties && !opts.requiredProperties?.every((p) => uri.includes(p)))) {
     throw new Error(BAD_PARAMS);
   }
   const uriComponents = getURIComponentsAsArray(uri, opts?.arrayTypeProperties);
