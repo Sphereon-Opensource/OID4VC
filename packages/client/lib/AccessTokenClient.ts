@@ -176,14 +176,6 @@ export class AccessTokenClient {
       throw new Error('Authorization flow requires the code to be present');
     }
   }
-
-  private assertNonEmptyRedirectUri(accessTokenRequest: AccessTokenRequest): void {
-    if (!accessTokenRequest.redirect_uri) {
-      debug('No redirect_uri present, whilst it is required');
-      throw new Error('Authorization flow requires the redirect_uri to be present');
-    }
-  }
-
   private validate(accessTokenRequest: AccessTokenRequest, isPinRequired?: boolean): void {
     if (accessTokenRequest.grant_type === GrantTypes.PRE_AUTHORIZED_CODE) {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
@@ -193,7 +185,6 @@ export class AccessTokenClient {
       this.assertAuthorizationGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyCodeVerifier(accessTokenRequest);
       this.assertNonEmptyCode(accessTokenRequest);
-      this.assertNonEmptyRedirectUri(accessTokenRequest);
     } else {
       this.throwNotSupportedFlow();
     }
@@ -236,11 +227,14 @@ export class AccessTokenClient {
 
   private static creatTokenURLFromURL(url: string, allowInsecureEndpoints?: boolean, tokenEndpoint?: string): string {
     if (allowInsecureEndpoints !== true && url.startsWith('http:')) {
-      throw Error(`Unprotected token endpoints are not allowed ${url}. Adjust settings if you really need this (dev/test settings only!!)`);
+      throw Error(
+        `Unprotected token endpoints are not allowed ${url}. Use the 'allowInsecureEndpoints' param if you really need this for dev/testing!`,
+      );
     }
     const hostname = url.replace(/https?:\/\//, '').replace(/\/$/, '');
     const endpoint = tokenEndpoint ? (tokenEndpoint.startsWith('/') ? tokenEndpoint : tokenEndpoint.substring(1)) : '/token';
     const scheme = url.split('://')[0];
+    console.log(`scheme: ${scheme}, hostname: ${hostname}, endpoint: ${endpoint}`);
     return `${scheme ? scheme + '://' : 'https://'}${hostname}${endpoint}`;
   }
 
