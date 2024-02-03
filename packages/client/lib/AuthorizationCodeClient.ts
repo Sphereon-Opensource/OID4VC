@@ -27,7 +27,7 @@ export const createAuthorizationRequestUrl = async ({
   credentialOffer?: CredentialOfferRequestWithBaseUrl;
   credentialsSupported?: CredentialSupported[];
 }): Promise<string> => {
-  const { redirectUri } = authorizationRequest;
+  const { redirectUri, clientId } = authorizationRequest;
   let { scope, authorizationDetails } = authorizationRequest;
   const parMode = endpointMetadata?.credentialIssuerMetadata?.require_pushed_authorization_requests
     ? PARMode.REQUIRE
@@ -78,17 +78,12 @@ export const createAuthorizationRequestUrl = async ({
       code_challenge: pkce.codeChallenge,
     }),
     authorization_details: JSON.stringify(handleAuthorizationDetails(endpointMetadata, authorizationDetails)),
-    redirect_uri: redirectUri,
+    ...(redirectUri && { redirect_uri: redirectUri }),
+    ...(clientId && { client_id: clientId }),
+    ...(credentialOffer?.issuerState && { issuer_state: credentialOffer.issuerState }),
     scope,
   };
 
-  if (authorizationRequest.clientId) {
-    queryObj['client_id'] = authorizationRequest.clientId;
-  }
-
-  if (credentialOffer?.issuerState) {
-    queryObj['issuer_state'] = credentialOffer.issuerState;
-  }
   if (!parEndpoint && parMode === PARMode.REQUIRE) {
     throw Error(`PAR mode is set to required by Authorization Server does not support PAR!`);
   } else if (parEndpoint && parMode !== PARMode.NEVER) {

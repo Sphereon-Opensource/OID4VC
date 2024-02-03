@@ -9,6 +9,7 @@ import {
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
   CredentialSupported,
+  DefaultURISchemes,
   EndpointMetadataResult,
   getClientIdFromCredentialOfferPayload,
   getIssuerFromCredentialOfferPayload,
@@ -541,15 +542,14 @@ export class OpenID4VCIClient {
   private syncAuthorizationRequestOpts(opts?: AuthorizationRequestOpts): AuthorizationRequestOpts {
     let authorizationRequestOpts = { ...this._authorizationRequestOpts, ...opts } as AuthorizationRequestOpts;
     if (!authorizationRequestOpts) {
-      authorizationRequestOpts = { redirectUri: 'openid4vc://' };
+      // We only set a redirectUri if no options are provided.
+      // Note that this only works for mobile apps, that can handle a code query param on the default openid-credential-offer deeplink.
+      // Provide your own options if that is not desired!
+      authorizationRequestOpts = { redirectUri: `${DefaultURISchemes.CREDENTIAL_OFFER}://` };
     }
     const clientId = authorizationRequestOpts.clientId ?? this._clientId;
     this._clientId = clientId;
     authorizationRequestOpts.clientId = clientId;
-
-    if (!authorizationRequestOpts.redirectUri) {
-      authorizationRequestOpts.redirectUri = 'openid4vc://';
-    }
     return authorizationRequestOpts;
   }
 }

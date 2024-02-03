@@ -254,7 +254,7 @@ export interface AuthorizationRequestOpts {
   pkce?: PKCEOpts;
   parMode?: PARMode;
   authorizationDetails?: AuthorizationDetails | AuthorizationDetails[];
-  redirectUri: string;
+  redirectUri?: string;
   scope?: string;
 }
 
