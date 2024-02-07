@@ -75,7 +75,12 @@ export class OpenID4VCIClient {
     this._credentialIssuer = issuer;
     this._kid = kid;
     this._alg = alg;
-    this._clientId = clientId ?? (credentialOffer ? getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
+    // TODO: We need to refactor this and always explicitly call createAuthorizationRequestUrl, so we can have a credential selection first and use the kid as a default for the client id
+    this._clientId =
+      clientId ??
+      (credentialOffer && getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer)) ??
+      kid?.split('#')[0] ??
+      'com.sphereon.ssi.wallet';
     this._pkce = { ...this._pkce, ...pkce };
     this._authorizationRequestOpts = this.syncAuthorizationRequestOpts(authorizationRequest);
     console.log(`Authorization req options: ${JSON.stringify(this._authorizationRequestOpts, null, 2)}`);
@@ -548,6 +553,7 @@ export class OpenID4VCIClient {
       authorizationRequestOpts = { redirectUri: `${DefaultURISchemes.CREDENTIAL_OFFER}://` };
     }
     const clientId = authorizationRequestOpts.clientId ?? this._clientId;
+    // sync clientId
     this._clientId = clientId;
     authorizationRequestOpts.clientId = clientId;
     return authorizationRequestOpts;
