@@ -319,7 +319,7 @@ export class OpenID4VCIClient {
     requestBuilder.withDeferredCredentialAwait(deferredCredentialAwait ?? false, deferredCredentialIntervalInMS);
     if (this.endpointMetadata?.credentialIssuerMetadata) {
       const metadata = this.endpointMetadata.credentialIssuerMetadata;
-      const types = Array.isArray(credentialTypes) ? [...credentialTypes].sort() : [credentialTypes];
+      const types = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
 
       if (metadata.credentials_supported && Array.isArray(metadata.credentials_supported)) {
         let typeSupported = false;
@@ -327,7 +327,7 @@ export class OpenID4VCIClient {
         metadata.credentials_supported.forEach((supportedCredential) => {
           const subTypes = getTypesFromCredentialSupported(supportedCredential);
           if (
-            subTypes.sort().every((t, i) => types[i] === t) ||
+            subTypes.every((t, i) => types[i] === t) ||
             (types.length === 1 && (types[0] === supportedCredential.id || subTypes.includes(types[0])))
           ) {
             typeSupported = true;

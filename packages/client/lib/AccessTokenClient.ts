@@ -9,6 +9,7 @@ import {
   getIssuerFromCredentialOfferPayload,
   GrantTypes,
   IssuerOpts,
+  JsonURIMode,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
   TokenErrorResponse,
@@ -191,7 +192,7 @@ export class AccessTokenClient {
   }
 
   private async sendAuthCode(requestTokenURL: string, accessTokenRequest: AccessTokenRequest): Promise<OpenIDResponse<AccessTokenResponse>> {
-    return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest));
+    return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }));
   }
 
   public static determineTokenURL({
