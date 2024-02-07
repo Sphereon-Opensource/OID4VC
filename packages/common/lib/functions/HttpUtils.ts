@@ -87,7 +87,7 @@ const openIdFetch = async <T>(
 
   debug(`START fetching url: ${url}`);
   if (body) {
-    debug(`Body:\r\n${JSON.stringify(body)}`);
+    debug(`Body:\r\n${typeof body == 'string' ? body : JSON.stringify(body)}`);
   }
   debug(`Headers:\r\n${JSON.stringify(payload.headers)}`);
   const origResponse = await fetch(url, payload);
