@@ -53,7 +53,8 @@ const kid = `${DID}#z2dmzD81cgPx8Vki7JbuuMmFYrWPgYoytykUZ3eyqht1j9Kbrm54tL4pRrDD
 
 // const jw = jose.importKey()
 
-describe('OID4VCI-Client using Sphereon issuer should', () => {
+// EBSI returning a 500 in credential endpoint all of a sudden
+describe.skip('OID4VCI-Client using Sphereon issuer should', () => {
   async function test(credentialType: 'CTWalletCrossPreAuthorisedInTime' | 'CTWalletCrossPreAuthorisedDeferred' | 'CTWalletCrossAuthorisedInTime') {
     debug.enable('*');
     const offer = await getCredentialOffer(credentialType);
