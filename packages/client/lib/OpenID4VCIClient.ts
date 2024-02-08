@@ -24,13 +24,6 @@ import {
   toAuthorizationResponsePayload,
 } from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
-import { jwk } from '@transmute/did-key.js'
-import * as console from 'console'
-import * as console from 'console'
-import * as console from 'console'
-import * as console from 'console'
-import * as console from 'console'
-import debug from 'debug'
 import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';
