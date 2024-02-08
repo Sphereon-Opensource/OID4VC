@@ -24,6 +24,13 @@ import {
   toAuthorizationResponsePayload,
 } from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
+import { jwk } from '@transmute/did-key.js'
+import * as console from 'console'
+import * as console from 'console'
+import * as console from 'console'
+import * as console from 'console'
+import * as console from 'console'
+import debug from 'debug'
 import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';
@@ -485,6 +492,11 @@ export class OpenID4VCIClient {
       throw new Error('No value for alg is supplied');
     }
     return this._alg;
+  }
+
+
+  set clientId(value: string | undefined) {
+    this._clientId = value
   }
 
   get clientId(): string | undefined {
