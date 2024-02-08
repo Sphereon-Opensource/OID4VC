@@ -281,6 +281,7 @@ export class OpenID4VCIClient {
 
   public async acquireCredentials({
     credentialTypes,
+    context,
     proofCallbacks,
     format,
     kid,
@@ -291,6 +292,7 @@ export class OpenID4VCIClient {
     deferredCredentialIntervalInMS,
   }: {
     credentialTypes: string | string[];
+    context?: string[];
     proofCallbacks: ProofOfPossessionCallbacks<any>;
     format?: CredentialFormat | OID4VCICredentialFormat;
     kid?: string;
@@ -375,7 +377,8 @@ export class OpenID4VCIClient {
     }
     const response = await credentialRequestClient.acquireCredentialsUsingProof({
       proofInput: proofBuilder,
-      credentialTypes: credentialTypes,
+      credentialTypes,
+      context,
       format,
     });
     if (response.errorBody) {

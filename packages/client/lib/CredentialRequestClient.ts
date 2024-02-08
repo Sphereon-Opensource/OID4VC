@@ -78,11 +78,12 @@ export class CredentialRequestClient {
   public async acquireCredentialsUsingProof<DIDDoc>(opts: {
     proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
     credentialTypes?: string | string[];
+    context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
   }): Promise<OpenIDResponse<CredentialResponse>> {
-    const { credentialTypes, proofInput, format } = opts;
+    const { credentialTypes, proofInput, format, context } = opts;
 
-    const request = await this.createCredentialRequest({ proofInput, credentialTypes, format, version: this.version() });
+    const request = await this.createCredentialRequest({ proofInput, credentialTypes, context, format, version: this.version() });
     return await this.acquireCredentialsUsingRequest(request);
   }
 
@@ -133,6 +134,7 @@ export class CredentialRequestClient {
   public async createCredentialRequest<DIDDoc>(opts: {
     proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
     credentialTypes?: string | string[];
+    context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
     version: OpenId4VCIVersion;
   }): Promise<UniformCredentialRequest> {
@@ -165,13 +167,20 @@ export class CredentialRequestClient {
         proof,
       };
     } else if (format === 'jwt_vc_json-ld' || format === 'ldp_vc') {
+      if (this.version() >= OpenId4VCIVersion.VER_1_0_12 && !opts.context) {
+        throw Error('No @context value present, but it is required');
+      }
+
       return {
         format,
         proof,
+
+        // Ignored because v11 does not have the context value, but it is required in v12
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         credential_definition: {
           types,
-          // FIXME: this was not included in the original code, but it is required
-          '@context': [],
+          ...(opts.context && { '@context': opts.context }),
         },
       };
     } else if (format === 'vc+sd-jwt') {

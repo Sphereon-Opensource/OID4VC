@@ -113,7 +113,9 @@ export const getStateFromCredentialOfferPayload = (credentialOffer: CredentialOf
 };
 
 export function determineSpecVersionFromOffer(offer: CredentialOfferPayload | CredentialOffer): OpenId4VCIVersion {
-  if (isCredentialOfferV1_0_11(offer)) {
+  if (isCredentialOfferV1_0_12(offer)) {
+    return OpenId4VCIVersion.VER_1_0_12;
+  } else if (isCredentialOfferV1_0_11(offer)) {
     return OpenId4VCIVersion.VER_1_0_11;
   } else if (isCredentialOfferV1_0_09(offer)) {
     return OpenId4VCIVersion.VER_1_0_09;
@@ -179,6 +181,21 @@ function isCredentialOfferV1_0_11(offer: CredentialOfferPayload | CredentialOffe
   if ('credential_offer' in offer && offer['credential_offer']) {
     // offer, so check payload
     return isCredentialOfferV1_0_11(offer['credential_offer']);
+  }
+  return 'credential_offer_uri' in offer;
+}
+
+function isCredentialOfferV1_0_12(offer: CredentialOfferPayload | CredentialOffer): boolean {
+  if (!offer) {
+    return false;
+  }
+  if ('credential_issuer' in offer && 'credentials' in offer) {
+    // payload
+    return true;
+  }
+  if ('credential_offer' in offer && offer['credential_offer']) {
+    // offer, so check payload
+    return isCredentialOfferV1_0_12(offer['credential_offer']);
   }
   return 'credential_offer_uri' in offer;
 }
