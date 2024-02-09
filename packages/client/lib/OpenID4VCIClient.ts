@@ -83,7 +83,7 @@ export class OpenID4VCIClient {
       'com.sphereon.ssi.wallet';
     this._pkce = { ...this._pkce, ...pkce };
     this._authorizationRequestOpts = this.syncAuthorizationRequestOpts(authorizationRequest);
-    console.log(`Authorization req options: ${JSON.stringify(this._authorizationRequestOpts, null, 2)}`);
+    debug(`Authorization req options: ${JSON.stringify(this._authorizationRequestOpts, null, 2)}`);
   }
 
   public static async fromCredentialIssuer({
@@ -160,9 +160,8 @@ export class OpenID4VCIClient {
       credentialOfferClient.supportedFlows.includes(AuthzFlowType.AUTHORIZATION_CODE_FLOW) &&
       (createAuthorizationRequestURL === undefined || createAuthorizationRequestURL)
     ) {
-      console.log(`AUTH REQ`);
       await client.createAuthorizationRequestUrl({ authorizationRequest, pkce });
-      console.log(`AUTH REQ URL: ${client._authorizationURL}`);
+      debug(`Authorization Request URL: ${client._authorizationURL}`);
     }
 
     return client;
@@ -487,9 +486,8 @@ export class OpenID4VCIClient {
     return this._alg;
   }
 
-
   set clientId(value: string | undefined) {
-    this._clientId = value
+    this._clientId = value;
   }
 
   get clientId(): string | undefined {
