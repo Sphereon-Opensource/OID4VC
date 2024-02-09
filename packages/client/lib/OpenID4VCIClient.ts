@@ -76,11 +76,7 @@ export class OpenID4VCIClient {
     this._kid = kid;
     this._alg = alg;
     // TODO: We need to refactor this and always explicitly call createAuthorizationRequestUrl, so we can have a credential selection first and use the kid as a default for the client id
-    this._clientId =
-      clientId ??
-      (credentialOffer && getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer)) ??
-      kid?.split('#')[0] ??
-      'com.sphereon.ssi.wallet';
+    this._clientId = clientId ?? (credentialOffer && getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer)) ?? kid?.split('#')[0];
     this._pkce = { ...this._pkce, ...pkce };
     this._authorizationRequestOpts = this.syncAuthorizationRequestOpts(authorizationRequest);
     debug(`Authorization req options: ${JSON.stringify(this._authorizationRequestOpts, null, 2)}`);
@@ -208,6 +204,7 @@ export class OpenID4VCIClient {
         throw Error(`Cannot retrieve issuer metadata without either a credential offer, or issuer value`);
       }
     }
+
     return this.endpointMetadata;
   }
 
@@ -528,6 +525,24 @@ export class OpenID4VCIClient {
   public getDeferredCredentialEndpoint(): string {
     this.assertIssuerData();
     return this.endpointMetadata ? this.endpointMetadata.credential_endpoint : `${this.getIssuer()}/credential`;
+  }
+
+  /**
+   * Too bad we need a method like this, but EBSI is not exposing metadata
+   */
+  public isEBSI() {
+    if (
+      this.credentialOffer?.credential_offer.credentials.find(
+        (cred) =>
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          typeof cred !== 'string' && 'trust_framework' in cred && 'name' in cred.trust_framework && cred.trust_framework.name.includes('ebsi'),
+      )
+    ) {
+      return true;
+    }
+    this.assertIssuerData();
+    return this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu');
   }
 
   private assertIssuerData(): void {

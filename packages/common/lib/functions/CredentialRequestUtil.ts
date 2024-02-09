@@ -11,7 +11,9 @@ export function getTypesFromRequest(credentialRequest: UniformCredentialRequest,
     // @ts-ignore
     types =
       'credential_definition' in credentialRequest && credentialRequest.credential_definition
-        ? credentialRequest.credential_definition.types
+        ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          credentialRequest.credential_definition.types
         : credentialRequest.types;
   } else if (credentialRequest.format === 'vc+sd-jwt') {
     types = [credentialRequest.vct];

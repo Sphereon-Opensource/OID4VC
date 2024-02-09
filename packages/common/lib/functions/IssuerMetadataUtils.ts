@@ -1,4 +1,5 @@
 import {
+  AuthorizationServerMetadata,
   CredentialIssuerMetadata,
   CredentialOfferFormat,
   CredentialSupported,
@@ -164,4 +165,22 @@ export function getIssuerDisplays(metadata: CredentialIssuerMetadata | IssuerMet
       (item) => !opts?.prefLocales || opts.prefLocales.length === 0 || (item.locale && opts.prefLocales.includes(item.locale)) || !item.locale,
     ) ?? [];
   return matchedDisplays.sort((item) => (item.locale ? opts?.prefLocales.indexOf(item.locale) ?? 1 : Number.MAX_VALUE));
+}
+
+/**
+ * TODO check again when WAL-617 is done to replace how we get the issuer name.
+ */
+export function getIssuerName(
+  url: string,
+  credentialIssuerMetadata?: Partial<AuthorizationServerMetadata> & (CredentialIssuerMetadata | IssuerMetadataV1_0_08),
+): string {
+  if (credentialIssuerMetadata) {
+    const displays: Array<MetadataDisplay> = credentialIssuerMetadata ? getIssuerDisplays(credentialIssuerMetadata) : [];
+    for (const display of displays) {
+      if (display.name) {
+        return display.name;
+      }
+    }
+  }
+  return url;
 }
