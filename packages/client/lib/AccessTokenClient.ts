@@ -235,7 +235,6 @@ export class AccessTokenClient {
     const hostname = url.replace(/https?:\/\//, '').replace(/\/$/, '');
     const endpoint = tokenEndpoint ? (tokenEndpoint.startsWith('/') ? tokenEndpoint : tokenEndpoint.substring(1)) : '/token';
     const scheme = url.split('://')[0];
-    console.log(`scheme: ${scheme}, hostname: ${hostname}, endpoint: ${endpoint}`);
     return `${scheme ? scheme + '://' : 'https://'}${hostname}${endpoint}`;
   }
 

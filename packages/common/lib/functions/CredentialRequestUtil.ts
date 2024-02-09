@@ -1,9 +1,4 @@
-import {
-  CredentialRequestV1_0_08,
-  CredentialRequestV1_0_11,
-  OpenId4VCIVersion,
-  UniformCredentialRequest,
-} from '../types';
+import { CredentialRequestV1_0_08, CredentialRequestV1_0_11, OpenId4VCIVersion, UniformCredentialRequest } from '../types';
 
 import { getFormatForVersion } from './FormatUtils';
 
@@ -14,7 +9,10 @@ export function getTypesFromRequest(credentialRequest: UniformCredentialRequest,
   } else if (credentialRequest.format === 'jwt_vc_json-ld' || credentialRequest.format === 'ldp_vc') {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    types = 'credential_definition' in credentialRequest && credentialRequest.credential_definition ? credentialRequest.credential_definition.types : credentialRequest.types;
+    types =
+      'credential_definition' in credentialRequest && credentialRequest.credential_definition
+        ? credentialRequest.credential_definition.types
+        : credentialRequest.types;
   } else if (credentialRequest.format === 'vc+sd-jwt') {
     types = [credentialRequest.vct];
   }
@@ -41,7 +39,7 @@ export function getCredentialRequestForVersion(
       proof: credentialRequest.proof,
       type: types[0],
     } satisfies CredentialRequestV1_0_08;
- /* } else if (version === OpenId4VCIVersion.VER_1_0_11) {
+    /* } else if (version === OpenId4VCIVersion.VER_1_0_11) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const { credential_definition = undefined, ...requestv11 } = credentialRequest;

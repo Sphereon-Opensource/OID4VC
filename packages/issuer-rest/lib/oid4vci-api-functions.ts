@@ -1,6 +1,3 @@
-import console from 'console'
-import process from 'process'
-
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AuthorizationRequest,
@@ -353,7 +350,7 @@ export function getBaseUrl(url?: URL | string | undefined) {
     }
   }
   if (!baseUrl) {
-    throw Error(`Not base URL provided`)
+    throw Error(`No base URL provided`)
   }
   return trimEnd(baseUrl.toString(), '/')
 }

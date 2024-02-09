@@ -3,7 +3,7 @@ import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential 
 import { ProofOfPossession } from './CredentialIssuance.types';
 import { AuthorizationServerMetadata } from './ServerMetadata';
 import { CredentialOfferSession } from './StateManager.types';
-import { CredentialRequestV1_0_11 } from './v1_0_11.types'
+import { CredentialRequestV1_0_11 } from './v1_0_11.types';
 
 /**
  * Important Note: please be aware that these Common interfaces are based on versions v1_0.11 and v1_0.09
