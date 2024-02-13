@@ -36,6 +36,20 @@ import { generateMissingPKCEOpts } from './functions/AuthorizationUtil';
 
 const debug = Debug('sphereon:oid4vci');
 
+export interface OpenID4VCIClientState {
+  credentialIssuer: string;
+  credentialOffer?: CredentialOfferRequestWithBaseUrl
+  clientId?: string;
+  kid?: string;
+  jwk?: JWK;
+  alg?: Alg | string;
+  endpointMetadata?: EndpointMetadataResult;
+  accessTokenResponse?: AccessTokenResponse;
+  authorizationRequestOpts?: AuthorizationRequestOpts;
+  pkce: PKCEOpts;
+  authorizationURL?: string;
+}
+
 export class OpenID4VCIClient {
   private readonly _credentialOffer?: CredentialOfferRequestWithBaseUrl;
   private readonly _credentialIssuer: string;
@@ -58,6 +72,11 @@ export class OpenID4VCIClient {
     credentialIssuer,
     pkce,
     authorizationRequest,
+    jwk,
+    endpointMetadata,
+    accessTokenResponse,
+    authorizationRequestOpts,
+    authorizationURL
   }: {
     credentialOffer?: CredentialOfferRequestWithBaseUrl;
     kid?: string;
@@ -66,6 +85,11 @@ export class OpenID4VCIClient {
     credentialIssuer?: string;
     pkce?: PKCEOpts;
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
+    jwk?: JWK;
+    endpointMetadata?: EndpointMetadataResult;
+    accessTokenResponse?: AccessTokenResponse;
+    authorizationRequestOpts?: AuthorizationRequestOpts;
+    authorizationURL?: string;
   }) {
     this._credentialOffer = credentialOffer;
     const issuer = credentialIssuer ?? (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
@@ -78,7 +102,11 @@ export class OpenID4VCIClient {
     // TODO: We need to refactor this and always explicitly call createAuthorizationRequestUrl, so we can have a credential selection first and use the kid as a default for the client id
     this._clientId = clientId ?? (credentialOffer && getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer)) ?? kid?.split('#')[0];
     this._pkce = { ...this._pkce, ...pkce };
-    this._authorizationRequestOpts = this.syncAuthorizationRequestOpts(authorizationRequest);
+    this._authorizationRequestOpts = authorizationRequestOpts ?? this.syncAuthorizationRequestOpts(authorizationRequest);
+    this._jwk = jwk;
+    this._endpointMetadata = endpointMetadata;
+    this._accessTokenResponse = accessTokenResponse;
+    this._authorizationURL = authorizationURL
     debug(`Authorization req options: ${JSON.stringify(this._authorizationRequestOpts, null, 2)}`);
   }
 
@@ -116,6 +144,12 @@ export class OpenID4VCIClient {
       await client.createAuthorizationRequestUrl({ authorizationRequest, pkce });
     }
     return client;
+  }
+
+  public static async fromState({ state }: {state: OpenID4VCIClientState | string }): Promise<OpenID4VCIClient> {
+    const clientState = typeof state === 'string' ? JSON.parse(state) : state
+
+    return new OpenID4VCIClient(clientState);
   }
 
   public static async fromURI({
@@ -392,6 +426,22 @@ export class OpenID4VCIClient {
       );
     }
     return response.successBody;
+  }
+
+  public async exportState(): Promise<OpenID4VCIClientState> {
+    return {
+      credentialIssuer: this._credentialIssuer,
+      credentialOffer: this._credentialOffer,
+      clientId: this._clientId,
+      kid: this._kid,
+      jwk: this._jwk,
+      alg: this._alg,
+      endpointMetadata: this._endpointMetadata,
+      accessTokenResponse: this._accessTokenResponse,
+      authorizationRequestOpts: this._authorizationRequestOpts,
+      pkce: this._pkce,
+      authorizationURL: this._authorizationURL
+    }
   }
 
   // FIXME: We really should convert <v11 to v12 objects first. Right now the logic doesn't map nicely and is brittle.
