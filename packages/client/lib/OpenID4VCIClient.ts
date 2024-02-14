@@ -92,11 +92,14 @@ export class OpenID4VCIClient {
       // TODO: We need to refactor this and always explicitly call createAuthorizationRequestUrl, so we can have a credential selection first and use the kid as a default for the client id
       clientId: clientId ?? (credentialOffer && getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer)) ?? kid?.split('#')[0],
       pkce: { disabled: false, codeChallengeMethod: CodeChallengeMethod.S256, ...pkce },
-      authorizationRequestOpts: authorizationRequestOpts ?? this.syncAuthorizationRequestOpts(authorizationRequest),
       jwk,
       endpointMetadata,
       accessTokenResponse,
       authorizationURL
+    }
+    this._state = {
+      ...this._state,
+      authorizationRequestOpts: authorizationRequestOpts ?? this.syncAuthorizationRequestOpts(authorizationRequest),
     }
     debug(`Authorization req options: ${JSON.stringify(this._state.authorizationRequestOpts, null, 2)}`);
   }
@@ -595,7 +598,7 @@ export class OpenID4VCIClient {
   }
 
   private syncAuthorizationRequestOpts(opts?: AuthorizationRequestOpts): AuthorizationRequestOpts {
-    let authorizationRequestOpts = { ...this._state.authorizationRequestOpts, ...opts } as AuthorizationRequestOpts;
+    let authorizationRequestOpts = { ...this._state?.authorizationRequestOpts, ...opts } as AuthorizationRequestOpts;
     if (!authorizationRequestOpts) {
       // We only set a redirectUri if no options are provided.
       // Note that this only works for mobile apps, that can handle a code query param on the default openid-credential-offer deeplink.
