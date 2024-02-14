@@ -51,18 +51,7 @@ export interface OpenID4VCIClientState {
 }
 
 export class OpenID4VCIClient {
-  private readonly _credentialOffer?: CredentialOfferRequestWithBaseUrl;
-  private readonly _credentialIssuer: string;
-  private _clientId?: string;
-  private _kid: string | undefined;
-  private _jwk: JWK | undefined;
-  private _alg: Alg | string | undefined;
-  private _endpointMetadata: EndpointMetadataResult | undefined;
-  private _accessTokenResponse: AccessTokenResponse | undefined;
-  private _pkce: PKCEOpts = { disabled: false, codeChallengeMethod: CodeChallengeMethod.S256 };
-  private _authorizationRequestOpts?: AuthorizationRequestOpts;
-
-  private _authorizationURL?: string;
+  private readonly _state: OpenID4VCIClientState;
 
   private constructor({
     credentialOffer,
@@ -91,23 +80,25 @@ export class OpenID4VCIClient {
     authorizationRequestOpts?: AuthorizationRequestOpts;
     authorizationURL?: string;
   }) {
-    this._credentialOffer = credentialOffer;
     const issuer = credentialIssuer ?? (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
     if (!issuer) {
       throw Error('No credential issuer supplied or deduced from offer');
     }
-    this._credentialIssuer = issuer;
-    this._kid = kid;
-    this._alg = alg;
-    // TODO: We need to refactor this and always explicitly call createAuthorizationRequestUrl, so we can have a credential selection first and use the kid as a default for the client id
-    this._clientId = clientId ?? (credentialOffer && getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer)) ?? kid?.split('#')[0];
-    this._pkce = { ...this._pkce, ...pkce };
-    this._authorizationRequestOpts = authorizationRequestOpts ?? this.syncAuthorizationRequestOpts(authorizationRequest);
-    this._jwk = jwk;
-    this._endpointMetadata = endpointMetadata;
-    this._accessTokenResponse = accessTokenResponse;
-    this._authorizationURL = authorizationURL
-    debug(`Authorization req options: ${JSON.stringify(this._authorizationRequestOpts, null, 2)}`);
+    this._state = {
+      credentialOffer,
+      credentialIssuer: issuer,
+      kid,
+      alg,
+      // TODO: We need to refactor this and always explicitly call createAuthorizationRequestUrl, so we can have a credential selection first and use the kid as a default for the client id
+      clientId: clientId ?? (credentialOffer && getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer)) ?? kid?.split('#')[0],
+      pkce: { disabled: false, codeChallengeMethod: CodeChallengeMethod.S256, ...pkce },
+      authorizationRequestOpts: authorizationRequestOpts ?? this.syncAuthorizationRequestOpts(authorizationRequest),
+      jwk,
+      endpointMetadata,
+      accessTokenResponse,
+      authorizationURL
+    }
+    debug(`Authorization req options: ${JSON.stringify(this._state.authorizationRequestOpts, null, 2)}`);
   }
 
   public static async fromCredentialIssuer({
@@ -191,7 +182,7 @@ export class OpenID4VCIClient {
       (createAuthorizationRequestURL === undefined || createAuthorizationRequestURL)
     ) {
       await client.createAuthorizationRequestUrl({ authorizationRequest, pkce });
-      debug(`Authorization Request URL: ${client._authorizationURL}`);
+      debug(`Authorization Request URL: ${client._state.authorizationURL}`);
     }
 
     return client;
@@ -204,36 +195,36 @@ export class OpenID4VCIClient {
    * @param opts
    */
   public async createAuthorizationRequestUrl(opts?: { authorizationRequest?: AuthorizationRequestOpts; pkce?: PKCEOpts }): Promise<string> {
-    if (!this._authorizationURL) {
+    if (!this._state.authorizationURL) {
       this.calculatePKCEOpts(opts?.pkce);
-      this._authorizationRequestOpts = this.syncAuthorizationRequestOpts(opts?.authorizationRequest);
-      if (!this._authorizationRequestOpts) {
+      this._state.authorizationRequestOpts = this.syncAuthorizationRequestOpts(opts?.authorizationRequest);
+      if (!this._state.authorizationRequestOpts) {
         throw Error(`No Authorization Request options present or provided in this call`);
       }
 
       // todo: Probably can go with current logic in MetadataClient who will always set the authorization_endpoint when found
       //  handling this because of the support for v1_0-08
-      if (this._endpointMetadata?.credentialIssuerMetadata && 'authorization_endpoint' in this._endpointMetadata.credentialIssuerMetadata) {
-        this._endpointMetadata.authorization_endpoint = this._endpointMetadata.credentialIssuerMetadata.authorization_endpoint as string;
+      if (this._state.endpointMetadata?.credentialIssuerMetadata && 'authorization_endpoint' in this._state.endpointMetadata.credentialIssuerMetadata) {
+        this._state.endpointMetadata.authorization_endpoint = this._state.endpointMetadata.credentialIssuerMetadata.authorization_endpoint as string;
       }
-      this._authorizationURL = await createAuthorizationRequestUrl({
-        pkce: this._pkce,
+      this._state.authorizationURL = await createAuthorizationRequestUrl({
+        pkce: this._state.pkce,
         endpointMetadata: this.endpointMetadata,
-        authorizationRequest: this._authorizationRequestOpts,
+        authorizationRequest: this._state.authorizationRequestOpts,
         credentialOffer: this.credentialOffer,
         credentialsSupported: this.getCredentialsSupported(true),
       });
     }
-    return this._authorizationURL;
+    return this._state.authorizationURL;
   }
 
   public async retrieveServerMetadata(): Promise<EndpointMetadataResult> {
     this.assertIssuerData();
-    if (!this._endpointMetadata) {
+    if (!this._state.endpointMetadata) {
       if (this.credentialOffer) {
-        this._endpointMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this.credentialOffer);
-      } else if (this._credentialIssuer) {
-        this._endpointMetadata = await MetadataClient.retrieveAllMetadata(this._credentialIssuer);
+        this._state.endpointMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this.credentialOffer);
+      } else if (this._state.credentialIssuer) {
+        this._state.endpointMetadata = await MetadataClient.retrieveAllMetadata(this._state.credentialIssuer);
       } else {
         throw Error(`Cannot retrieve issuer metadata without either a credential offer, or issuer value`);
       }
@@ -243,7 +234,7 @@ export class OpenID4VCIClient {
   }
 
   private calculatePKCEOpts(pkce?: PKCEOpts) {
-    this._pkce = generateMissingPKCEOpts({ ...this._pkce, ...pkce });
+    this._state.pkce = generateMissingPKCEOpts({ ...this._state.pkce, ...pkce });
   }
 
   public async acquireAccessToken(opts?: {
@@ -259,23 +250,23 @@ export class OpenID4VCIClient {
     const code = opts?.code ?? (opts?.authorizationResponse ? toAuthorizationResponsePayload(opts.authorizationResponse).code : undefined);
 
     if (opts?.codeVerifier) {
-      this._pkce.codeVerifier = opts.codeVerifier;
+      this._state.pkce.codeVerifier = opts.codeVerifier;
     }
     this.assertIssuerData();
 
     if (clientId) {
-      this._clientId = clientId;
+      this._state.clientId = clientId;
     }
-    if (!this._accessTokenResponse) {
+    if (!this._state.accessTokenResponse) {
       const accessTokenClient = new AccessTokenClient();
 
-      if (redirectUri && redirectUri !== this._authorizationRequestOpts?.redirectUri) {
+      if (redirectUri && redirectUri !== this._state.authorizationRequestOpts?.redirectUri) {
         console.log(
-          `Redirect URI mismatch between access-token (${redirectUri}) and authorization request (${this._authorizationRequestOpts?.redirectUri}). According to the specification that is not allowed.`,
+          `Redirect URI mismatch between access-token (${redirectUri}) and authorization request (${this._state.authorizationRequestOpts?.redirectUri}). According to the specification that is not allowed.`,
         );
       }
-      if (this._authorizationRequestOpts?.redirectUri && !redirectUri) {
-        redirectUri = this._authorizationRequestOpts.redirectUri;
+      if (this._state.authorizationRequestOpts?.redirectUri && !redirectUri) {
+        redirectUri = this._state.authorizationRequestOpts.redirectUri;
       }
 
       const response = await accessTokenClient.acquireAccessToken({
@@ -283,7 +274,7 @@ export class OpenID4VCIClient {
         metadata: this.endpointMetadata,
         credentialIssuer: this.getIssuer(),
         pin,
-        ...(!this._pkce.disabled && { codeVerifier: this._pkce.codeVerifier }),
+        ...(!this._state.pkce.disabled && { codeVerifier: this._state.pkce.codeVerifier }),
         code,
         redirectUri,
         asOpts: { clientId: this.clientId },
@@ -292,18 +283,18 @@ export class OpenID4VCIClient {
       if (response.errorBody) {
         debug(`Access token error:\r\n${response.errorBody}`);
         throw Error(
-          `Retrieving an access token from ${this._endpointMetadata?.token_endpoint} for issuer ${this.getIssuer()} failed with status: ${
+          `Retrieving an access token from ${this._state.endpointMetadata?.token_endpoint} for issuer ${this.getIssuer()} failed with status: ${
             response.origResponse.status
           }`,
         );
       } else if (!response.successBody) {
         debug(`Access token error. No success body`);
         throw Error(
-          `Retrieving an access token from ${this._endpointMetadata
+          `Retrieving an access token from ${this._state.endpointMetadata
             ?.token_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`,
         );
       }
-      this._accessTokenResponse = response.successBody;
+      this._state.accessTokenResponse = response.successBody;
     }
 
     return this.accessTokenResponse;
@@ -336,9 +327,9 @@ export class OpenID4VCIClient {
       throw new Error(KID_JWK_X5C_ERROR + `. jwk: ${jwk !== undefined}, kid: ${kid !== undefined}`);
     }
 
-    if (alg) this._alg = alg;
-    if (jwk) this._jwk = jwk;
-    if (kid) this._kid = kid;
+    if (alg) this._state.alg = alg;
+    if (jwk) this._state.jwk = jwk;
+    if (kid) this._state.kid = kid;
 
     const requestBuilder = this.credentialOffer
       ? CredentialRequestClientBuilder.fromCredentialOffer({
@@ -392,11 +383,11 @@ export class OpenID4VCIClient {
       .withIssuer(this.getIssuer())
       .withAlg(this.alg);
 
-    if (this._jwk) {
-      proofBuilder.withJWK(this._jwk);
+    if (this._state.jwk) {
+      proofBuilder.withJWK(this._state.jwk);
     }
-    if (this._kid) {
-      proofBuilder.withKid(this._kid);
+    if (this._state.kid) {
+      proofBuilder.withKid(this._state.kid);
     }
 
     if (this.clientId) {
@@ -414,14 +405,14 @@ export class OpenID4VCIClient {
     if (response.errorBody) {
       debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`);
       throw Error(
-        `Retrieving a credential from ${this._endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${
+        `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${
           response.origResponse.status
         }`,
       );
     } else if (!response.successBody) {
       debug(`Credential request error. No success body`);
       throw Error(
-        `Retrieving a credential from ${this._endpointMetadata
+        `Retrieving a credential from ${this._state.endpointMetadata
           ?.credential_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`,
       );
     }
@@ -429,19 +420,7 @@ export class OpenID4VCIClient {
   }
 
   public async exportState(): Promise<OpenID4VCIClientState> {
-    return {
-      credentialIssuer: this._credentialIssuer,
-      credentialOffer: this._credentialOffer,
-      clientId: this._clientId,
-      kid: this._kid,
-      jwk: this._jwk,
-      alg: this._alg,
-      endpointMetadata: this._endpointMetadata,
-      accessTokenResponse: this._accessTokenResponse,
-      authorizationRequestOpts: this._authorizationRequestOpts,
-      pkce: this._pkce,
-      authorizationURL: this._authorizationURL
-    }
+    return this._state
   }
 
   // FIXME: We really should convert <v11 to v12 objects first. Right now the logic doesn't map nicely and is brittle.
@@ -487,7 +466,7 @@ export class OpenID4VCIClient {
   issuerSupportedFlowTypes(): AuthzFlowType[] {
     return (
       this.credentialOffer?.supportedFlows ??
-      (this._endpointMetadata?.credentialIssuerMetadata?.authorization_endpoint ? [AuthzFlowType.AUTHORIZATION_CODE_FLOW] : [])
+      (this._state.endpointMetadata?.credentialIssuerMetadata?.authorization_endpoint ? [AuthzFlowType.AUTHORIZATION_CODE_FLOW] : [])
     );
   }
 
@@ -496,7 +475,7 @@ export class OpenID4VCIClient {
   }
 
   get authorizationURL(): string | undefined {
-    return this._authorizationURL;
+    return this._state.authorizationURL;
   }
 
   public hasAuthorizationURL(): boolean {
@@ -504,7 +483,7 @@ export class OpenID4VCIClient {
   }
 
   get credentialOffer(): CredentialOfferRequestWithBaseUrl | undefined {
-    return this._credentialOffer;
+    return this._state.credentialOffer;
   }
 
   public version(): OpenId4VCIVersion {
@@ -514,46 +493,46 @@ export class OpenID4VCIClient {
   public get endpointMetadata(): EndpointMetadataResult {
     this.assertServerMetadata();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this._endpointMetadata!;
+    return this._state.endpointMetadata!;
   }
 
   get kid(): string {
     this.assertIssuerData();
-    if (!this._kid) {
+    if (!this._state.kid) {
       throw new Error('No value for kid is supplied');
     }
-    return this._kid;
+    return this._state.kid;
   }
 
   get alg(): string {
     this.assertIssuerData();
-    if (!this._alg) {
+    if (!this._state.alg) {
       throw new Error('No value for alg is supplied');
     }
-    return this._alg;
+    return this._state.alg;
   }
 
   set clientId(value: string | undefined) {
-    this._clientId = value;
+    this._state.clientId = value;
   }
 
   get clientId(): string | undefined {
-    return this._clientId;
+    return this._state.clientId;
   }
 
   public hasAccessTokenResponse(): boolean {
-    return !!this._accessTokenResponse;
+    return !!this._state.accessTokenResponse;
   }
 
   get accessTokenResponse(): AccessTokenResponse {
     this.assertAccessToken();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this._accessTokenResponse!;
+    return this._state.accessTokenResponse!;
   }
 
   public getIssuer(): string {
     this.assertIssuerData();
-    return this._credentialIssuer;
+    return this._state.credentialIssuer;
   }
 
   public getAccessTokenEndpoint(): string {
@@ -596,36 +575,36 @@ export class OpenID4VCIClient {
   }
 
   private assertIssuerData(): void {
-    if (!this._credentialIssuer) {
+    if (!this._state.credentialIssuer) {
       throw Error(`No credential issuer value present`);
-    } else if (!this._credentialOffer && this._endpointMetadata && this.issuerSupportedFlowTypes().length === 0) {
+    } else if (!this._state.credentialOffer && this._state.endpointMetadata && this.issuerSupportedFlowTypes().length === 0) {
       throw Error(`No issuance initiation or credential offer present`);
     }
   }
 
   private assertServerMetadata(): void {
-    if (!this._endpointMetadata) {
+    if (!this._state.endpointMetadata) {
       throw Error('No server metadata');
     }
   }
 
   private assertAccessToken(): void {
-    if (!this._accessTokenResponse) {
+    if (!this._state.accessTokenResponse) {
       throw Error(`No access token present`);
     }
   }
 
   private syncAuthorizationRequestOpts(opts?: AuthorizationRequestOpts): AuthorizationRequestOpts {
-    let authorizationRequestOpts = { ...this._authorizationRequestOpts, ...opts } as AuthorizationRequestOpts;
+    let authorizationRequestOpts = { ...this._state.authorizationRequestOpts, ...opts } as AuthorizationRequestOpts;
     if (!authorizationRequestOpts) {
       // We only set a redirectUri if no options are provided.
       // Note that this only works for mobile apps, that can handle a code query param on the default openid-credential-offer deeplink.
       // Provide your own options if that is not desired!
       authorizationRequestOpts = { redirectUri: `${DefaultURISchemes.CREDENTIAL_OFFER}://` };
     }
-    const clientId = authorizationRequestOpts.clientId ?? this._clientId;
+    const clientId = authorizationRequestOpts.clientId ?? this._state.clientId;
     // sync clientId
-    this._clientId = clientId;
+    this._state.clientId = clientId;
     authorizationRequestOpts.clientId = clientId;
     return authorizationRequestOpts;
   }
