@@ -92,14 +92,18 @@ export class OpenID4VCIClient {
       // TODO: We need to refactor this and always explicitly call createAuthorizationRequestUrl, so we can have a credential selection first and use the kid as a default for the client id
       clientId: clientId ?? (credentialOffer && getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer)) ?? kid?.split('#')[0],
       pkce: { disabled: false, codeChallengeMethod: CodeChallengeMethod.S256, ...pkce },
+      authorizationRequestOpts: authorizationRequestOpts,
       jwk,
       endpointMetadata,
       accessTokenResponse,
       authorizationURL
     }
-    this._state = {
-      ...this._state,
-      authorizationRequestOpts: authorizationRequestOpts ?? this.syncAuthorizationRequestOpts(authorizationRequest),
+    // Running syncAuthorizationRequestOpts later as it is using the state
+    if (!this._state.authorizationRequestOpts) {
+      this._state = {
+        ...this._state,
+        authorizationRequestOpts: this.syncAuthorizationRequestOpts(authorizationRequest),
+      }
     }
     debug(`Authorization req options: ${JSON.stringify(this._state.authorizationRequestOpts, null, 2)}`);
   }
@@ -422,8 +426,8 @@ export class OpenID4VCIClient {
     return response.successBody;
   }
 
-  public async exportState(): Promise<OpenID4VCIClientState> {
-    return this._state
+  public async exportState(): Promise<string> {
+    return JSON.stringify(this._state)
   }
 
   // FIXME: We really should convert <v11 to v12 objects first. Right now the logic doesn't map nicely and is brittle.
