@@ -22,6 +22,9 @@
       "optional": true
     }
   },
+  "react-native": {
+    "awesome-qr": false
+  },
   "devDependencies": {
     "@sphereon/oid4vci-client": "workspace:*",
     "@types/jest": "^29.5.3",
