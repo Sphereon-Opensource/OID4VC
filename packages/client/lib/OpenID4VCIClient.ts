@@ -92,7 +92,7 @@ export class OpenID4VCIClient {
       // TODO: We need to refactor this and always explicitly call createAuthorizationRequestUrl, so we can have a credential selection first and use the kid as a default for the client id
       clientId: clientId ?? (credentialOffer && getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer)) ?? kid?.split('#')[0],
       pkce: { disabled: false, codeChallengeMethod: CodeChallengeMethod.S256, ...pkce },
-      authorizationRequestOpts: authorizationRequestOpts,
+      authorizationRequestOpts,
       jwk,
       endpointMetadata,
       accessTokenResponse,
