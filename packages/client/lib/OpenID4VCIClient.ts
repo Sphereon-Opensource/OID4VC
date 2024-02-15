@@ -100,10 +100,7 @@ export class OpenID4VCIClient {
     }
     // Running syncAuthorizationRequestOpts later as it is using the state
     if (!this._state.authorizationRequestOpts) {
-      this._state = {
-        ...this._state,
-        authorizationRequestOpts: this.syncAuthorizationRequestOpts(authorizationRequest),
-      }
+      this._state.authorizationRequestOpts = this.syncAuthorizationRequestOpts(authorizationRequest)
     }
     debug(`Authorization req options: ${JSON.stringify(this._state.authorizationRequestOpts, null, 2)}`);
   }
