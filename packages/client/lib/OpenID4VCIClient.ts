@@ -38,7 +38,7 @@ const debug = Debug('sphereon:oid4vci');
 
 export interface OpenID4VCIClientState {
   credentialIssuer: string;
-  credentialOffer?: CredentialOfferRequestWithBaseUrl
+  credentialOffer?: CredentialOfferRequestWithBaseUrl;
   clientId?: string;
   kid?: string;
   jwk?: JWK;
@@ -65,7 +65,7 @@ export class OpenID4VCIClient {
     endpointMetadata,
     accessTokenResponse,
     authorizationRequestOpts,
-    authorizationURL
+    authorizationURL,
   }: {
     credentialOffer?: CredentialOfferRequestWithBaseUrl;
     kid?: string;
@@ -96,11 +96,11 @@ export class OpenID4VCIClient {
       jwk,
       endpointMetadata,
       accessTokenResponse,
-      authorizationURL
-    }
+      authorizationURL,
+    };
     // Running syncAuthorizationRequestOpts later as it is using the state
     if (!this._state.authorizationRequestOpts) {
-      this._state.authorizationRequestOpts = this.syncAuthorizationRequestOpts(authorizationRequest)
+      this._state.authorizationRequestOpts = this.syncAuthorizationRequestOpts(authorizationRequest);
     }
     debug(`Authorization req options: ${JSON.stringify(this._state.authorizationRequestOpts, null, 2)}`);
   }
@@ -141,8 +141,8 @@ export class OpenID4VCIClient {
     return client;
   }
 
-  public static async fromState({ state }: {state: OpenID4VCIClientState | string }): Promise<OpenID4VCIClient> {
-    const clientState = typeof state === 'string' ? JSON.parse(state) : state
+  public static async fromState({ state }: { state: OpenID4VCIClientState | string }): Promise<OpenID4VCIClient> {
+    const clientState = typeof state === 'string' ? JSON.parse(state) : state;
 
     return new OpenID4VCIClient(clientState);
   }
@@ -208,7 +208,10 @@ export class OpenID4VCIClient {
 
       // todo: Probably can go with current logic in MetadataClient who will always set the authorization_endpoint when found
       //  handling this because of the support for v1_0-08
-      if (this._state.endpointMetadata?.credentialIssuerMetadata && 'authorization_endpoint' in this._state.endpointMetadata.credentialIssuerMetadata) {
+      if (
+        this._state.endpointMetadata?.credentialIssuerMetadata &&
+        'authorization_endpoint' in this._state.endpointMetadata.credentialIssuerMetadata
+      ) {
         this._state.endpointMetadata.authorization_endpoint = this._state.endpointMetadata.credentialIssuerMetadata.authorization_endpoint as string;
       }
       this._state.authorizationURL = await createAuthorizationRequestUrl({
@@ -424,7 +427,7 @@ export class OpenID4VCIClient {
   }
 
   public async exportState(): Promise<string> {
-    return JSON.stringify(this._state)
+    return JSON.stringify(this._state);
   }
 
   // FIXME: We really should convert <v11 to v12 objects first. Right now the logic doesn't map nicely and is brittle.

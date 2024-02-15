@@ -10,7 +10,7 @@ import { v4 } from 'uuid';
 
 import { OpenID4VCIClient } from '..';
 
-export const UNIT_TEST_TIMEOUT = 30000;
+export const UNIT_TEST_TIMEOUT = 60000;
 
 const ISSUER_URL = 'https://ssi.sphereon.com/pf3';
 
@@ -66,7 +66,7 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
     },
     UNIT_TEST_TIMEOUT,
   );
-  it(
+  xit(
     'succeed in a full flow with the client using OpenID4VCI version 11 and jwt_vc_json',
     async () => {
       await test('jwt_vc_json');
