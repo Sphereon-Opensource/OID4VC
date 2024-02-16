@@ -10,16 +10,27 @@
     "build:clean": "tsc --build --clean && tsc --build"
   },
   "dependencies": {
-    "@sphereon/ssi-types": "0.17.2",
+    "@sphereon/ssi-types": "^0.18.1",
     "cross-fetch": "^3.1.8",
-    "jwt-decode": "^3.1.2"
+    "jwt-decode": "^3.1.2",
+    "uint8arrays": "3.1.1",
+    "sha.js": "^2.4.11"
   },
   "devDependencies": {
     "@types/jest": "^29.5.3",
-    "typescript": "5.0.4"
+    "@types/sha.js": "^2.4.4",
+    "typescript": "5.3.3"
+  },
+  "peerDependencies": {
+    "msrcrypto": "^1.5.8"
+  },
+  "peerDependenciesMeta": {
+    "msrcrypto": {
+      "optional": true
+    }
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "files": [
     "lib/**/*",

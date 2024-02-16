@@ -1,6 +1,3 @@
-import console from 'console'
-import process from 'process'
-
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AuthorizationRequest,
@@ -208,7 +205,8 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
       if (!credentials || credentials.length === 0) {
         return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'No credentials supplied' })
       }
-      const result = await issuer.createCredentialOfferURI({ ...request.body, grants, credentials })
+      const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
+      const result = await issuer.createCredentialOfferURI({ ...request.body, qrCodeOpts, grants, credentials })
       const resultResponse: ICreateCredentialOfferURIResponse = result
       if ('session' in resultResponse) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -352,7 +350,7 @@ export function getBaseUrl(url?: URL | string | undefined) {
     }
   }
   if (!baseUrl) {
-    throw Error(`Not base URL provided`)
+    throw Error(`No base URL provided`)
   }
   return trimEnd(baseUrl.toString(), '/')
 }

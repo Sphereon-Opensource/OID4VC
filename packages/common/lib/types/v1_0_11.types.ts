@@ -2,12 +2,15 @@ import { AuthorizationDetailsJwtVcJson, CommonAuthorizationRequest } from './Aut
 import {
   CommonCredentialRequest,
   CredentialDataSupplierInput,
+  CredentialIssuerMetadataOpts,
   CredentialOfferFormat,
-  CredentialRequestJwtVc,
-  CredentialRequestLdpVc,
+  CredentialRequestJwtVcJson,
+  CredentialRequestSdJwtVc,
   Grant,
-  IssuerCredentialDefinition,
+  JsonLdIssuerCredentialDefinition,
 } from './Generic.types';
+import { QRCodeOpts } from './QRCode.types';
+import { AuthorizationServerMetadata } from './ServerMetadata';
 
 export interface CredentialOfferV1_0_11 {
   credential_offer?: CredentialOfferPayloadV1_0_11;
@@ -18,10 +21,11 @@ export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_11 {
   baseUri?: string;
   scheme?: string;
   pinLength?: number;
+  qrCodeOpts?: QRCodeOpts;
   credentialDataSupplierInput?: CredentialDataSupplierInput;
 }
 
-export interface CommonCredentialOfferPayloadV1_0_11 {
+export interface CredentialOfferPayloadV1_0_11 {
   /**
    * REQUIRED. The URL of the Credential Issuer, the Wallet is requested to obtain one or more Credentials from.
    */
@@ -46,24 +50,25 @@ export interface CommonCredentialOfferPayloadV1_0_11 {
    * using the respective metadata. When multiple grants are present, it's at the Wallet's discretion which one to use.
    */
   grants?: Grant;
-}
 
-export interface CredentialOfferLdpVcV1_0_11 extends CommonCredentialOfferPayloadV1_0_11 {
   /**
-   * REQUIRED. JSON object containing (and isolating) the detailed description of the credential type.
-   * This object MUST be processed using full JSON-LD processing. It consists of the following sub-claims:
-   *   - @context: REQUIRED. JSON array as defined in Appendix E.1.3.2
-   *   - types: REQUIRED. JSON array as defined in Appendix E.1.3.2.
-   *            This claim contains the type values the Wallet shall request in the subsequent Credential Request
+   * Some implementations might include a client_id in the offer. For instance EBSI in a same-device flow. (Cross-device tucks it in the state JWT)
    */
-  credential_definition: IssuerCredentialDefinition;
+  client_id?: string;
 }
 
-export type CredentialOfferJwtVcV1_0_11 = CommonCredentialOfferPayloadV1_0_11;
+export type CredentialRequestV1_0_11 = CommonCredentialRequest &
+  (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVcV1_0_11 | CredentialRequestSdJwtVc);
 
-export type CredentialOfferPayloadV1_0_11 = CommonCredentialOfferPayloadV1_0_11 & (CredentialOfferLdpVcV1_0_11 | CredentialOfferJwtVcV1_0_11);
-
-export type CredentialRequestV1_0_11 = CommonCredentialRequest & (CredentialRequestJwtVc | CredentialRequestLdpVc);
+export interface CredentialRequestJwtVcJsonLdAndLdpVcV1_0_11
+  extends CommonCredentialRequest,
+    Pick<JsonLdIssuerCredentialDefinition, 'credentialSubject' | 'types'> {
+  format: 'ldp_vc' | 'jwt_vc_json-ld';
+}
+export interface CredentialIssuerMetadataV1_0_11 extends CredentialIssuerMetadataOpts, Partial<AuthorizationServerMetadata> {
+  credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
+  authorization_server?: string;
+}
 
 export interface AuthorizationRequestV1_0_11 extends AuthorizationDetailsJwtVcJson, AuthorizationDetailsJwtVcJson {
   issuer_state?: string;

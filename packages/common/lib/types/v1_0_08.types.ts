@@ -6,7 +6,7 @@ import { CredentialsSupportedDisplay, CredentialSupportedBrief, IssuerCredential
 export interface CredentialRequestV1_0_08 {
   type: string;
   format: CredentialFormat;
-  proof: ProofOfPossession;
+  proof?: ProofOfPossession;
 }
 
 export interface IssuerMetadataV1_0_08 {
@@ -34,11 +34,16 @@ export interface CredentialSupportedTypeV1_0_08 {
   [credentialType: string]: CredentialSupportedV1_0_08;
 }
 
+export interface CredentialSupportedFormatV1_0_08 extends CredentialSupportedBrief {
+  name?: string;
+  types: string[];
+}
+
 export interface CredentialSupportedV1_0_08 {
   display?: CredentialsSupportedDisplay[];
   formats: {
     // REQUIRED. A JSON object containing a list of key value pairs, where the key is a string identifying the format of the Credential. Below is a non-exhaustive list of valid key values defined by this specification:
-    [credentialFormat: string]: CredentialSupportedBrief;
+    [credentialFormat: string]: CredentialSupportedFormatV1_0_08;
   };
   claims?: IssuerCredentialSubject; // REQUIRED. A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential. The value is a JSON object detailing the specifics about the support for the claim with a following non-exhaustive list of parameters that MAY be included:
 }

@@ -9,6 +9,7 @@ import {
   getIssuerFromCredentialOfferPayload,
   GrantTypes,
   IssuerOpts,
+  JsonURIMode,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
   TokenErrorResponse,
@@ -27,9 +28,11 @@ export class AccessTokenClient {
   public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
     const { asOpts, pin, codeVerifier, code, redirectUri, metadata } = opts;
 
-    const credentialOffer = await assertedUniformCredentialOffer(opts.credentialOffer);
-    const isPinRequired = this.isPinRequiredValue(credentialOffer.credential_offer);
-    const issuer = getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) ?? (metadata?.issuer as string);
+    const credentialOffer = opts.credentialOffer ? await assertedUniformCredentialOffer(opts.credentialOffer) : undefined;
+    const isPinRequired = credentialOffer && this.isPinRequiredValue(credentialOffer.credential_offer);
+    const issuer =
+      opts.credentialIssuer ??
+      (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : (metadata?.issuer as string));
     if (!issuer) {
       throw Error('Issuer required at this point');
     }
@@ -83,14 +86,14 @@ export class AccessTokenClient {
 
   public async createAccessTokenRequest(opts: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
     const { asOpts, pin, codeVerifier, code, redirectUri } = opts;
-    const credentialOfferRequest = await toUniformCredentialOfferRequest(opts.credentialOffer);
+    const credentialOfferRequest = opts.credentialOffer ? await toUniformCredentialOfferRequest(opts.credentialOffer) : undefined;
     const request: Partial<AccessTokenRequest> = {};
 
     if (asOpts?.clientId) {
       request.client_id = asOpts.clientId;
     }
 
-    if (credentialOfferRequest.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
+    if (credentialOfferRequest?.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
       this.assertNumericPin(this.isPinRequiredValue(credentialOfferRequest.credential_offer), pin);
       request.user_pin = pin;
 
@@ -102,7 +105,7 @@ export class AccessTokenClient {
       return request as AccessTokenRequest;
     }
 
-    if (credentialOfferRequest.supportedFlows.includes(AuthzFlowType.AUTHORIZATION_CODE_FLOW)) {
+    if (!credentialOfferRequest || credentialOfferRequest.supportedFlows.includes(AuthzFlowType.AUTHORIZATION_CODE_FLOW)) {
       request.grant_type = GrantTypes.AUTHORIZATION_CODE;
       request.code = code;
       request.redirect_uri = redirectUri;
@@ -174,14 +177,6 @@ export class AccessTokenClient {
       throw new Error('Authorization flow requires the code to be present');
     }
   }
-
-  private assertNonEmptyRedirectUri(accessTokenRequest: AccessTokenRequest): void {
-    if (!accessTokenRequest.redirect_uri) {
-      debug('No redirect_uri present, whilst it is required');
-      throw new Error('Authorization flow requires the redirect_uri to be present');
-    }
-  }
-
   private validate(accessTokenRequest: AccessTokenRequest, isPinRequired?: boolean): void {
     if (accessTokenRequest.grant_type === GrantTypes.PRE_AUTHORIZED_CODE) {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
@@ -191,14 +186,13 @@ export class AccessTokenClient {
       this.assertAuthorizationGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyCodeVerifier(accessTokenRequest);
       this.assertNonEmptyCode(accessTokenRequest);
-      this.assertNonEmptyRedirectUri(accessTokenRequest);
     } else {
-      this.throwNotSupportedFlow;
+      this.throwNotSupportedFlow();
     }
   }
 
   private async sendAuthCode(requestTokenURL: string, accessTokenRequest: AccessTokenRequest): Promise<OpenIDResponse<AccessTokenResponse>> {
-    return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest));
+    return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }));
   }
 
   public static determineTokenURL({
@@ -234,7 +228,9 @@ export class AccessTokenClient {
 
   private static creatTokenURLFromURL(url: string, allowInsecureEndpoints?: boolean, tokenEndpoint?: string): string {
     if (allowInsecureEndpoints !== true && url.startsWith('http:')) {
-      throw Error(`Unprotected token endpoints are not allowed ${url}. Adjust settings if you really need this (dev/test settings only!!)`);
+      throw Error(
+        `Unprotected token endpoints are not allowed ${url}. Use the 'allowInsecureEndpoints' param if you really need this for dev/testing!`,
+      );
     }
     const hostname = url.replace(/https?:\/\//, '').replace(/\/$/, '');
     const endpoint = tokenEndpoint ? (tokenEndpoint.startsWith('/') ? tokenEndpoint : tokenEndpoint.substring(1)) : '/token';
@@ -243,7 +239,7 @@ export class AccessTokenClient {
   }
 
   private throwNotSupportedFlow(): void {
-    debug(`Only pre-authorized flow supported.`);
-    throw new Error('Only pre-authorized-code flow is supported');
+    debug(`Only pre-authorized or authorization code flows supported.`);
+    throw new Error('Only pre-authorized-code or authorization code flows are supported');
   }
 }

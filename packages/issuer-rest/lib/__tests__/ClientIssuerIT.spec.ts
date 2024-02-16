@@ -208,6 +208,7 @@ describe('VcIssuer', () => {
       uri,
       kid: subjectDIDKey.didDocument.authentication[0],
       alg: 'ES256',
+      createAuthorizationRequestURL: false,
     })
     expect(client.credentialOffer).toEqual({
       baseUrl: 'http://localhost:3456/test',
@@ -296,7 +297,7 @@ describe('VcIssuer', () => {
   })
   it('should get state on server side', async () => {
     const preAuthCode =
-      client.credentialOffer.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
+      client.credentialOffer!.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
     expect(preAuthCode).toBeDefined()
 
     if (preAuthCode) {

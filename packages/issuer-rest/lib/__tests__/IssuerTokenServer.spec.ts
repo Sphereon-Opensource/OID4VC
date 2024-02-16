@@ -4,7 +4,6 @@ import {
   Alg,
   CNonceState,
   CredentialIssuerMetadataOpts,
-  CredentialOfferLdpVcV1_0_11,
   CredentialOfferSession,
   IssueStatus,
   Jwt,
@@ -45,18 +44,24 @@ describe('OID4VCIServer', () => {
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'test_issuer',
-          credential_definition: {
-            '@context': ['test_context'],
-            types: ['VerifiableCredential'],
-            credentialSubject: {},
-          },
+          credentials: [
+            {
+              format: 'ldp_vc',
+              credential_definition: {
+                '@context': ['test_context'],
+                types: ['VerifiableCredential'],
+                credentialSubject: {},
+              },
+            },
+          ],
+
           grants: {
             'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
               user_pin_required: true,
               'pre-authorized_code': preAuthorizedCode1,
             },
           },
-        } as CredentialOfferLdpVcV1_0_11,
+        },
       },
     }
     const credentialOfferState2: CredentialOfferSession = {
@@ -75,7 +80,7 @@ describe('OID4VCIServer', () => {
               user_pin_required: false,
             },
           },
-        } as CredentialOfferLdpVcV1_0_11,
+        },
       },
     }
     const credentialOfferState3: CredentialOfferSession = { ...credentialOfferState1, preAuthorizedCode: preAuthorizedCode3, createdAt: 0 }
@@ -132,12 +137,12 @@ describe('OID4VCIServer', () => {
 
     expressSupport = ExpressBuilder.fromServerOpts({
       startListening: false,
-      port: 5000,
+      port: 9000,
       hostname: '0.0.0.0',
     }).build({ startListening: false })
     const vcIssuerServer = new OID4VCIServer(expressSupport, {
       issuer: vcIssuer,
-      baseUrl: 'http://localhost:5000',
+      baseUrl: 'http://localhost:9000',
       endpointOpts: {
         tokenEndpointOpts: {
           accessTokenSignerCallback: signerCallback,
@@ -165,7 +170,7 @@ describe('OID4VCIServer', () => {
     expect(res.statusCode).toEqual(200)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
-      access_token: expect.stringContaining('eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE2O'),
+      access_token: expect.stringContaining('eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQi'),
       token_type: 'bearer',
       expires_in: 300000,
       c_nonce: expect.any(String),

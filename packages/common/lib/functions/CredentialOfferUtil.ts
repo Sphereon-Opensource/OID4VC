@@ -1,4 +1,5 @@
 import Debug from 'debug';
+import jwtDecode, { JwtPayload } from 'jwt-decode';
 
 import {
   AssertedUniformCredentialOffer,
@@ -68,8 +69,53 @@ export function getIssuerFromCredentialOfferPayload(request: CredentialOfferPayl
   return 'issuer' in request ? request.issuer : request['credential_issuer'];
 }
 
+export const getClientIdFromCredentialOfferPayload = (credentialOffer?: CredentialOfferPayload): string | undefined => {
+  if (!credentialOffer) {
+    return;
+  }
+  if ('client_id' in credentialOffer) {
+    return credentialOffer.client_id;
+  }
+
+  const state: string | undefined = getStateFromCredentialOfferPayload(credentialOffer);
+  if (state && isJWT(state)) {
+    const decoded = jwtDecode<JwtPayload>(state, { header: false });
+    if ('client_id' in decoded && typeof decoded.client_id === 'string') {
+      return decoded.client_id;
+    }
+  }
+  return;
+};
+
+const isJWT = (input?: string) => {
+  if (!input) {
+    return false;
+  }
+  const noParts = input?.split('.').length;
+  return input?.startsWith('ey') && noParts === 3;
+};
+export const getStateFromCredentialOfferPayload = (credentialOffer: CredentialOfferPayload): string | undefined => {
+  if ('grants' in credentialOffer) {
+    if (credentialOffer.grants?.authorization_code) {
+      return credentialOffer.grants.authorization_code.issuer_state;
+    } else if (credentialOffer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
+      return credentialOffer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code'];
+    }
+  }
+  if ('op_state' in credentialOffer) {
+    // older spec versions
+    return credentialOffer.op_state;
+  } else if ('pre-authorized_code' in credentialOffer) {
+    return credentialOffer['pre-authorized_code'];
+  }
+
+  return;
+};
+
 export function determineSpecVersionFromOffer(offer: CredentialOfferPayload | CredentialOffer): OpenId4VCIVersion {
-  if (isCredentialOfferV1_0_11(offer)) {
+  if (isCredentialOfferV1_0_12(offer)) {
+    return OpenId4VCIVersion.VER_1_0_12;
+  } else if (isCredentialOfferV1_0_11(offer)) {
     return OpenId4VCIVersion.VER_1_0_11;
   } else if (isCredentialOfferV1_0_09(offer)) {
     return OpenId4VCIVersion.VER_1_0_09;
@@ -135,6 +181,21 @@ function isCredentialOfferV1_0_11(offer: CredentialOfferPayload | CredentialOffe
   if ('credential_offer' in offer && offer['credential_offer']) {
     // offer, so check payload
     return isCredentialOfferV1_0_11(offer['credential_offer']);
+  }
+  return 'credential_offer_uri' in offer;
+}
+
+function isCredentialOfferV1_0_12(offer: CredentialOfferPayload | CredentialOffer): boolean {
+  if (!offer) {
+    return false;
+  }
+  if ('credential_issuer' in offer && 'credentials' in offer) {
+    // payload
+    return true;
+  }
+  if ('credential_offer' in offer && offer['credential_offer']) {
+    // offer, so check payload
+    return isCredentialOfferV1_0_12(offer['credential_offer']);
   }
   return 'credential_offer_uri' in offer;
 }
@@ -339,4 +400,31 @@ function recordVersion(currentVersion: OpenId4VCIVersion, matchingVersion: OpenI
   throw new Error(
     `Invalid param. Some keys have been used from version: ${currentVersion} version while '${key}' is used from version: ${matchingVersion}`,
   );
+}
+
+export function getTypesFromOffer(credentialOffer: UniformCredentialOfferPayload, opts?: { filterVerifiableCredential: boolean }) {
+  const types = credentialOffer.credentials.reduce<string[]>((prev, curr) => {
+    // FIXME returning the string value is wrong (as it's an id), but just matching the current behavior of this library
+    // The credential_type (from draft 8) and the actual 'type' value in a VC (from draft 11) are mixed up
+    // Fix for this here: https://github.com/Sphereon-Opensource/OID4VCI/pull/54
+    if (typeof curr === 'string') {
+      return [...prev, curr];
+    } else if (curr.format === 'jwt_vc_json-ld' || curr.format === 'ldp_vc') {
+      return [...prev, ...curr.credential_definition.types];
+    } else if (curr.format === 'jwt_vc_json' || curr.format === 'jwt_vc') {
+      return [...prev, ...curr.types];
+    } else if (curr.format === 'vc+sd-jwt') {
+      return [...prev, curr.vct];
+    }
+
+    return prev;
+  }, []);
+
+  if (!types || types.length === 0) {
+    throw Error('Could not deduce types from credential offer');
+  }
+  if (opts?.filterVerifiableCredential) {
+    return types.filter((type) => type !== 'VerifiableCredential');
+  }
+  return types;
 }

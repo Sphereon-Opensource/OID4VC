@@ -1,4 +1,5 @@
 import {
+  AuthorizationServerMetadata,
   CredentialIssuerMetadata,
   CredentialOfferFormat,
   CredentialSupported,
@@ -43,7 +44,7 @@ export function getSupportedCredential(opts?: {
   }
   const { version, types } = opts ?? { version: OpenId4VCIVersion.VER_1_0_11 };
   if (version === OpenId4VCIVersion.VER_1_0_08 || !Array.isArray(issuerMetadata.credentials_supported)) {
-    credentialsSupported = credentialsSupportedV8ToV11((issuerMetadata as IssuerMetadataV1_0_08).credentials_supported);
+    credentialsSupported = credentialsSupportedV8ToV11((issuerMetadata as IssuerMetadataV1_0_08).credentials_supported ?? {});
   } else {
     credentialsSupported = (issuerMetadata as CredentialIssuerMetadata).credentials_supported;
   }
@@ -73,7 +74,7 @@ export function getSupportedCredential(opts?: {
   if ((opts?.types && typeof opts?.types === 'string') || opts?.types?.length === 1) {
     const types = Array.isArray(opts.types) ? opts.types[0] : opts.types;
     const supported = credentialsSupported.filter(
-      (sup) => sup.id === types || (initiationTypes && arrayEqualsIgnoreOrder(sup.types, initiationTypes)),
+      (sup) => sup.id === types || (initiationTypes && arrayEqualsIgnoreOrder(getTypesFromCredentialSupported(sup), initiationTypes)),
     );
     if (supported) {
       credentialSupportedOverlap.push(...supported);
@@ -86,7 +87,7 @@ export function getSupportedCredential(opts?: {
       initiationTypes.push('VerifiableCredential');
     }
     const supported = credentialsSupported.filter((sup) => {
-      const supTypes = sup.types;
+      const supTypes = getTypesFromCredentialSupported(sup);
       if (!supTypes.includes('VerifiableCredential')) {
         supTypes.push('VerifiableCredential');
       }
@@ -97,6 +98,28 @@ export function getSupportedCredential(opts?: {
     }
   }
   return credentialSupportedOverlap;
+}
+
+export function getTypesFromCredentialSupported(credentialSupported: CredentialSupported, opts?: { filterVerifiableCredential: boolean }) {
+  let types: string[] = [];
+  if (
+    credentialSupported.format === 'jwt_vc_json' ||
+    credentialSupported.format === 'jwt_vc' ||
+    credentialSupported.format === 'jwt_vc_json-ld' ||
+    credentialSupported.format === 'ldp_vc'
+  ) {
+    types = credentialSupported.types;
+  } else if (credentialSupported.format === 'vc+sd-jwt') {
+    types = [credentialSupported.vct];
+  }
+
+  if (!types || types.length === 0) {
+    throw Error('Could not deduce types from credential supported');
+  }
+  if (opts?.filterVerifiableCredential) {
+    return types.filter((type) => type !== 'VerifiableCredential');
+  }
+  return types;
 }
 
 function arrayEqualsIgnoreOrder(a: string[], b: string[]) {
@@ -127,7 +150,7 @@ export function credentialSupportedV8ToV11(key: string, supportedV8: CredentialS
     }
     let credentialSupport: Partial<CredentialSupported> = {};
     credentialSupport = {
-      format,
+      format: format as OID4VCICredentialFormat,
       display: supportedV8.display,
       ...credentialSupportBrief,
       credentialSubject: supportedV8.claims,
@@ -142,4 +165,22 @@ export function getIssuerDisplays(metadata: CredentialIssuerMetadata | IssuerMet
       (item) => !opts?.prefLocales || opts.prefLocales.length === 0 || (item.locale && opts.prefLocales.includes(item.locale)) || !item.locale,
     ) ?? [];
   return matchedDisplays.sort((item) => (item.locale ? opts?.prefLocales.indexOf(item.locale) ?? 1 : Number.MAX_VALUE));
+}
+
+/**
+ * TODO check again when WAL-617 is done to replace how we get the issuer name.
+ */
+export function getIssuerName(
+  url: string,
+  credentialIssuerMetadata?: Partial<AuthorizationServerMetadata> & (CredentialIssuerMetadata | IssuerMetadataV1_0_08),
+): string {
+  if (credentialIssuerMetadata) {
+    const displays: Array<MetadataDisplay> = credentialIssuerMetadata ? getIssuerDisplays(credentialIssuerMetadata) : [];
+    for (const display of displays) {
+      if (display.name) {
+        return display.name;
+      }
+    }
+  }
+  return url;
 }

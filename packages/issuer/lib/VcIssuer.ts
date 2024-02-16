@@ -1,5 +1,3 @@
-import * as process from 'process'
-
 import {
   Alg,
   ALG_ERROR,
@@ -19,9 +17,9 @@ import {
   Grant,
   IAT_ERROR,
   ISSUER_CONFIG_ERROR,
-  IssuerCredentialDefinition,
   IssueStatus,
   IStateManager,
+  JsonLdIssuerCredentialDefinition,
   JWT_VERIFY_CONFIG_ERROR,
   JWTVerifyCallback,
   JwtVerifyResult,
@@ -30,18 +28,19 @@ import {
   NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
+  QRCodeOpts,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
   TYP_ERROR,
   UniformCredentialRequest,
   URIState,
 } from '@sphereon/oid4vci-common'
-import { ICredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import { CompactSdJwtVc, CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
 import { LookupStateManager } from './state-manager'
-import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialSignerCallback } from './types'
+import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
 
 const SECOND = 1000
 
@@ -95,16 +94,16 @@ export class VcIssuer<DIDDoc extends object> {
   public async createCredentialOfferURI(opts: {
     grants?: Grant
     credentials?: (CredentialOfferFormat | string)[]
-    credentialDefinition?: IssuerCredentialDefinition
+    credentialDefinition?: JsonLdIssuerCredentialDefinition
     credentialOfferUri?: string
     credentialDataSupplierInput?: CredentialDataSupplierInput // Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
     baseUri?: string
     scheme?: string
     pinLength?: number
+    qrCodeOpts?: QRCodeOpts
   }): Promise<CreateCredentialOfferURIResult> {
     let preAuthorizedCode: string | undefined = undefined
     let issuerState: string | undefined = undefined
-
     const { grants, credentials, credentialDefinition } = opts
 
     if (!grants?.authorization_code && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
@@ -139,6 +138,7 @@ export class VcIssuer<DIDDoc extends object> {
     }
 
     const baseUri = opts?.baseUri ?? this.defaultCredentialOfferBaseUri
+
     const credentialOfferObject = createCredentialOfferObject(this._issuerMetadata, {
       ...opts,
       credentialOffer: credentialOfferPayload,
@@ -200,9 +200,20 @@ export class VcIssuer<DIDDoc extends object> {
     if (issuerState) {
       await this.credentialOfferSessions.set(issuerState, session)
     }
+
+    const uri = createCredentialOfferURIFromObject(credentialOffer, { ...opts, baseUri })
+    let qrCodeDataUri: string | undefined
+    if (opts.qrCodeOpts) {
+      const { AwesomeQR } = await import('awesome-qr')
+      console.log(uri)
+
+      const qrCode = new AwesomeQR({ ...opts.qrCodeOpts, text: uri })
+      qrCodeDataUri = `data:image/png;base64,${(await qrCode.draw())!.toString('base64')}`
+    }
     return {
       session,
-      uri: createCredentialOfferURIFromObject(credentialOffer, { ...opts, baseUri }),
+      uri,
+      qrCodeDataUri,
       userPinRequired: userPinRequired ?? false,
       ...(userPin !== undefined && { userPin, pinLength: userPin?.length ?? 0 }),
     }
@@ -219,7 +230,7 @@ export class VcIssuer<DIDDoc extends object> {
    */
   public async issueCredential(opts: {
     credentialRequest: CredentialRequestV1_0_11
-    credential?: ICredential
+    credential?: CredentialIssuanceInput
     credentialDataSupplier?: CredentialDataSupplier
     credentialDataSupplierInput?: CredentialDataSupplierInput
     newCNonce?: string
@@ -244,6 +255,8 @@ export class VcIssuer<DIDDoc extends object> {
 
       const { preAuthSession, authSession, cNonceState, jwtVerifyResult } = validated
       const did = jwtVerifyResult.did
+      const jwk = jwtVerifyResult.jwk
+      const kid = jwtVerifyResult.kid
       const newcNonce = opts.newCNonce ? opts.newCNonce : v4()
       const newcNonceState = {
         cNonce: newcNonce,
@@ -255,7 +268,7 @@ export class VcIssuer<DIDDoc extends object> {
       if (!opts.credential && this._credentialDataSupplier === undefined && opts.credentialDataSupplier === undefined) {
         throw Error(`Either a credential needs to be supplied or a credentialDataSupplier`)
       }
-      let credential: ICredential | undefined
+      let credential: CredentialIssuanceInput | undefined
       let format: OID4VCICredentialFormat = opts.credentialRequest.format
       let signerCallback: CredentialSignerCallback<DIDDoc> | undefined = opts.credentialSignerCallback
       if (opts.credential) {
@@ -294,7 +307,19 @@ export class VcIssuer<DIDDoc extends object> {
       if (!credential) {
         throw Error('A credential needs to be supplied at this point')
       }
-      if (did) {
+      // Bind credential to the provided proof of possession
+      if (CredentialMapper.isSdJwtDecodedCredentialPayload(credential) && (kid || jwk) && !credential.cnf) {
+        if (kid) {
+          credential.cnf = {
+            kid,
+          }
+        } else if (jwk) {
+          credential.cnf = {
+            jwk,
+          }
+        }
+      }
+      if (did && !CredentialMapper.isSdJwtDecodedCredentialPayload(credential)) {
         const credentialSubjects = Array.isArray(credential.credentialSubject) ? credential.credentialSubject : [credential.credentialSubject]
         credentialSubjects.map((subject) => {
           if (!subject.id) {
@@ -403,8 +428,10 @@ export class VcIssuer<DIDDoc extends object> {
   }) {
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
+
+    const supportedIssuanceFormats = ['jwt_vc_json', 'jwt_vc_json-ld', 'vc+sd-jwt', 'ldp_vc']
     try {
-      if (credentialRequest.format !== 'jwt_vc_json' && credentialRequest.format !== 'jwt_vc_json-ld') {
+      if (!supportedIssuanceFormats.includes(credentialRequest.format)) {
         throw Error(`Format ${credentialRequest.format} not supported yet`)
       } else if (typeof this._jwtVerifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
         throw new Error(JWT_VERIFY_CONFIG_ERROR)
@@ -526,12 +553,12 @@ export class VcIssuer<DIDDoc extends object> {
   private async issueCredentialImpl(
     opts: {
       credentialRequest: UniformCredentialRequest
-      credential: ICredential
+      credential: CredentialIssuanceInput
       jwtVerifyResult: JwtVerifyResult<DIDDoc>
       format?: OID4VCICredentialFormat
     },
     issuerCallback?: CredentialSignerCallback<DIDDoc>,
-  ): Promise<W3CVerifiableCredential> {
+  ): Promise<W3CVerifiableCredential | CompactSdJwtVc> {
     if ((!opts.credential && !opts.credentialRequest) || !this._credentialSignerCallback) {
       throw new Error(ISSUER_CONFIG_ERROR)
     }

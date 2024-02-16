@@ -10,13 +10,15 @@ import { CredentialOfferPayloadV1_0_11, CredentialOfferV1_0_11 } from './v1_0_11
 export interface CredentialResponse {
   credential?: W3CVerifiableCredential; // OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
   format: OID4VCICredentialFormat /* | OID4VCICredentialFormat[]*/; // REQUIRED. JSON string denoting the format of the issued Credential
-  acceptance_token?: string; // OPTIONAL. A JSON string containing a security token subsequently used to obtain a Credential. MUST be present when credential is not returned
+  transaction_id?: string; //OPTIONAL. A string identifying a Deferred Issuance transaction. This claim is contained in the response if the Credential Issuer was unable to immediately issue the credential. The value is subsequently used to obtain the respective Credential with the Deferred Credential Endpoint (see Section 9). It MUST be present when the credential parameter is not returned. It MUST be invalidated after the credential for which it was meant has been obtained by the Wallet.
+  acceptance_token?: string; //deprecated // OPTIONAL. A JSON string containing a security token subsequently used to obtain a Credential. MUST be present when credential is not returned
   c_nonce?: string; // OPTIONAL. JSON string containing a nonce to be used to create a proof of possession of key material when requesting a Credential (see Section 7.2). When received, the Wallet MUST use this nonce value for its subsequent credential requests until the Credential Issuer provides a fresh nonce
   c_nonce_expires_in?: number; // OPTIONAL. JSON integer denoting the lifetime in seconds of the c_nonce
 }
 
 export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOfferRequest {
   scheme: string;
+  clientId?: string;
   baseUrl: string;
   userPinRequired: boolean;
   issuerState?: string;
@@ -25,7 +27,9 @@ export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOffe
 
 export type CredentialOffer = CredentialOfferV1_0_09 | CredentialOfferV1_0_11;
 
-export type CredentialOfferPayload = CredentialOfferPayloadV1_0_08 | CredentialOfferPayloadV1_0_09 | CredentialOfferPayloadV1_0_11;
+export type CredentialOfferPayload = (CredentialOfferPayloadV1_0_08 | CredentialOfferPayloadV1_0_09 | CredentialOfferPayloadV1_0_11) & {
+  [x: string]: any;
+};
 
 export interface AssertedUniformCredentialOffer extends UniformCredentialOffer {
   credential_offer: UniformCredentialOfferPayload;
@@ -106,6 +110,7 @@ export interface JWK extends BaseJWK {
   x5t?: string;
   'x5t#S256'?: string;
   x5u?: string;
+
   [propName: string]: unknown;
 }
 
@@ -146,6 +151,7 @@ export interface JWSHeaderParameters extends JoseHeaderParameters {
   alg?: Alg | string; // REQUIRED by the JWT signer
   b64?: boolean;
   crit?: string[];
+
   [propName: string]: unknown;
 }
 
@@ -171,6 +177,7 @@ export interface JWTPayload {
 
 export type JWTSignerCallback = (jwt: Jwt, kid?: string) => Promise<string>;
 export type JWTVerifyCallback<DIDDoc> = (args: { jwt: string; kid?: string }) => Promise<JwtVerifyResult<DIDDoc>>;
+
 export interface JwtVerifyResult<DIDDoc> {
   jwt: Jwt;
   kid?: string;

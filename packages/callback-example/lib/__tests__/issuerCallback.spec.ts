@@ -4,7 +4,6 @@ import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossess
 import {
   Alg,
   CNonceState,
-  CredentialOfferLdpVcV1_0_11,
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
@@ -118,11 +117,16 @@ describe('issuerCallback', () => {
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'did:key:test',
-          credential_definition: {
-            types: ['VerifiableCredential'],
-            '@context': ['https://www.w3.org/2018/credentials/v1'],
-            credentialSubject: {},
-          },
+          credentials: [
+            {
+              format: 'ldp_vc',
+              credential_definition: {
+                types: ['VerifiableCredential'],
+                '@context': ['https://www.w3.org/2018/credentials/v1'],
+                credentialSubject: {},
+              },
+            },
+          ],
           grants: {
             authorization_code: { issuer_state: 'test_code' },
             'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
@@ -130,7 +134,7 @@ describe('issuerCallback', () => {
               user_pin_required: true,
             },
           },
-        } as CredentialOfferLdpVcV1_0_11,
+        },
       },
     })
 
@@ -163,7 +167,7 @@ describe('issuerCallback', () => {
       )
       .withCredentialSignerCallback((opts) =>
         Promise.resolve({
-          ...opts.credential,
+          ...(opts.credential as ICredential),
           proof: {
             type: IProofType.JwtProof2020,
             jwt: 'ye.ye.ye',

@@ -1,5 +1,11 @@
 import { CredentialOfferPayload, UniformCredentialOffer } from './CredentialIssuance.types';
-import { ErrorResponse, IssuerCredentialDefinition, IssuerCredentialSubject, OID4VCICredentialFormat, PRE_AUTH_CODE_LITERAL } from './Generic.types';
+import {
+  ErrorResponse,
+  IssuerCredentialSubject,
+  JsonLdIssuerCredentialDefinition,
+  OID4VCICredentialFormat,
+  PRE_AUTH_CODE_LITERAL,
+} from './Generic.types';
 import { EndpointMetadata } from './ServerMetadata';
 
 export interface CommonAuthorizationRequest {
@@ -64,9 +70,11 @@ export interface CommonAuthorizationRequest {
 /**
  * string type added for conformity with our previous code in the client
  */
-export type AuthorizationDetails = AuthorizationDetailsJwtVcJson | AuthorizationRequestJwtVcJsonLdAndLdpVc | string;
+export type AuthorizationDetails =
+  | (CommonAuthorizationDetails & (AuthorizationDetailsJwtVcJson | AuthorizationDetailsJwtVcJsonLdAndLdpVc | AuthorizationDetailsSdJwtVc))
+  | string;
 
-export type AuthorizationRequest = AuthorizationRequestJwtVcJson | AuthorizationDetailsJwtVcJsonLdAndLdpVc;
+export type AuthorizationRequest = AuthorizationRequestJwtVcJson | AuthorizationRequestJwtVcJsonLdAndLdpVc | AuthorizationRequestSdJwtVc;
 
 export interface AuthorizationRequestJwtVcJson extends CommonAuthorizationRequest {
   authorization_details?: AuthorizationDetailsJwtVcJson[];
@@ -75,6 +83,20 @@ export interface AuthorizationRequestJwtVcJson extends CommonAuthorizationReques
 export interface AuthorizationRequestJwtVcJsonLdAndLdpVc extends CommonAuthorizationRequest {
   authorization_details?: AuthorizationDetailsJwtVcJsonLdAndLdpVc[];
 }
+
+export interface AuthorizationRequestSdJwtVc extends CommonAuthorizationRequest {
+  authorization_details?: AuthorizationDetailsSdJwtVc[];
+}
+
+/*
+export interface AuthDetails {
+  type: 'openid_credential' | string;
+  locations?: string | string[];
+  format: CredentialFormat | CredentialFormat[];
+
+  [s: string]: unknown;
+}
+*/
 
 export interface CommonAuthorizationDetails {
   /**
@@ -94,12 +116,14 @@ export interface CommonAuthorizationDetails {
    * the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.
    */
   locations?: string[];
-  types: string[]; // This claim contains the type values the Wallet requests authorization for at the issuer.
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
 export interface AuthorizationDetailsJwtVcJson extends CommonAuthorizationDetails {
+  format: 'jwt_vc_json' | 'jwt_vc'; // jwt_vc added for backward compat
+
   /**
    * A JSON object containing a list of key value pairs, where the key identifies the claim offered in the Credential.
    * The value MAY be a dictionary, which allows to represent the full (potentially deeply nested) structure of the
@@ -107,9 +131,13 @@ export interface AuthorizationDetailsJwtVcJson extends CommonAuthorizationDetail
    * credential to be issued.
    */
   credentialSubject?: IssuerCredentialSubject;
+
+  types: string[]; // This claim contains the type values the Wallet requests authorization for at the issuer.
 }
 
 export interface AuthorizationDetailsJwtVcJsonLdAndLdpVc extends CommonAuthorizationDetails {
+  format: 'ldp_vc' | 'jwt_vc_json-ld';
+
   /**
    * REQUIRED. JSON object containing (and isolating) the detailed description of the credential type.
    * This object MUST be processed using full JSON-LD processing. It consists of the following sub-claims:
@@ -117,7 +145,14 @@ export interface AuthorizationDetailsJwtVcJsonLdAndLdpVc extends CommonAuthoriza
    *   - types: REQUIRED. JSON array as defined in Appendix E.1.3.2.
    *            This claim contains the type values the Wallet shall request in the subsequent Credential Request
    */
-  credential_definition: IssuerCredentialDefinition;
+  credential_definition: JsonLdIssuerCredentialDefinition;
+}
+
+export interface AuthorizationDetailsSdJwtVc extends CommonAuthorizationDetails {
+  format: 'vc+sd-jwt';
+
+  vct: string;
+  claims?: IssuerCredentialSubject;
 }
 
 export enum GrantTypes {
@@ -136,8 +171,8 @@ export enum ResponseType {
 }
 
 export enum CodeChallengeMethod {
-  TEXT = 'text',
-  SHA256 = 'S256',
+  plain = 'plain',
+  S256 = 'S256',
 }
 
 export interface AuthorizationServerOpts {
@@ -153,8 +188,12 @@ export interface IssuerOpts {
   fetchMetadata?: boolean;
 }
 
+export interface AccessTokenFromAuthorizationResponseOpts extends AccessTokenRequestOpts {
+  authorizationResponse: AuthorizationResponse;
+}
 export interface AccessTokenRequestOpts {
-  credentialOffer: UniformCredentialOffer;
+  credentialOffer?: UniformCredentialOffer;
+  credentialIssuer?: string;
   asOpts?: AuthorizationServerOpts;
   metadata?: EndpointMetadata;
   codeVerifier?: string; // only required for authorization flow
@@ -163,20 +202,70 @@ export interface AccessTokenRequestOpts {
   pin?: string; // Pin-number. Only used when required
 }
 
-export interface AuthorizationRequestOpts {
+/*export interface AuthorizationRequestOpts {
   clientId: string;
   codeChallenge: string;
   codeChallengeMethod: CodeChallengeMethod;
   authorizationDetails?: AuthorizationDetails[];
   redirectUri: string;
   scope?: string;
+}*/
+
+/**
+ * Determinse whether PAR should be used when supported
+ *
+ * REQUIRE: Require PAR, if AS does not support it throw an error
+ * AUTO: Use PAR is the AS supports it, otherwise construct a reqular URI,
+ * NEVER: Do not use PAR even if the AS supports it (not recommended)
+ */
+export enum PARMode {
+  REQUIRE,
+  AUTO,
+  NEVER,
 }
 
-export interface AuthorizationGrantResponse {
-  grant_type: string;
+/**
+ * Optional options to provide PKCE params like code verifier and challenge yourself, or to disable PKCE altogether. If not provide PKCE will still be used! If individual params are not provide, they will be generated/calculated
+ */
+export interface PKCEOpts {
+  /**
+   * PKCE is enabled by default even if you do not provide these options. Set this to true to disable PKCE
+   */
+  disabled?: boolean;
+
+  /**
+   * Provide a code_challenge, otherwise it will be calculated using the code_verifier and method
+   */
+  codeChallenge?: string;
+
+  /**
+   * The code_challenge_method, should always by S256
+   */
+  codeChallengeMethod?: CodeChallengeMethod;
+
+  /**
+   * Provide a code_verifier, otherwise it will be generated
+   */
+  codeVerifier?: string;
+}
+
+export interface AuthorizationRequestOpts {
+  clientId?: string;
+  pkce?: PKCEOpts;
+  parMode?: PARMode;
+  authorizationDetails?: AuthorizationDetails | AuthorizationDetails[];
+  redirectUri?: string;
+  scope?: string;
+}
+
+export interface AuthorizationResponse {
   code: string;
   scope?: string;
   state?: string;
+}
+
+export interface AuthorizationGrantResponse extends AuthorizationResponse {
+  grant_type: string;
 }
 
 export interface AccessTokenRequest {

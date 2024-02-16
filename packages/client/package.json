@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@sphereon/oid4vci-common": "workspace:*",
-    "@sphereon/ssi-types": "0.17.2",
+    "@sphereon/ssi-types": "^0.18.1",
     "cross-fetch": "^3.1.8",
     "debug": "^4.3.4"
   },
@@ -25,6 +25,7 @@
     "@types/node": "^18.17.4",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
+    "@sphereon/ssi-sdk-ext.key-utils": "^0.16.0",
     "codecov": "^3.8.3",
     "dotenv": "^16.3.1",
     "eslint": "^8.46.0",
@@ -36,14 +37,18 @@
     "jose": "^4.14.4",
     "nock": "^13.3.2",
     "npm-run-all": "^4.1.5",
+    "uuid": "^9.0.1",
+    "@transmute/did-key.js": "^0.3.0-unstable.10",
+    "@trust/keyto": "^2.0.0-alpha1",
+    "@types/uuid": "^9.0.6",
     "open-cli": "^7.2.0",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
-    "typescript": "4.9.5",
-    "uint8arrays": "3.1.1"
+    "uint8arrays": "3.1.1",
+    "typescript": "5.3.3"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "files": [
     "lib/**/*",

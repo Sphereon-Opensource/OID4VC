@@ -3,6 +3,7 @@ import { KeyObject } from 'crypto';
 import {
   Alg,
   EndpointMetadata,
+  getCredentialRequestForVersion,
   getIssuerFromCredentialOfferPayload,
   Jwt,
   OpenId4VCIVersion,
@@ -127,7 +128,7 @@ describe('Credential Request Client ', () => {
       version: OpenId4VCIVersion.VER_1_0_08,
     });
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy();
-    expect(credentialRequest.format).toEqual('jwt_vc_json');
+    expect(credentialRequest.format).toEqual('jwt_vc');
     const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
     expect(result?.successBody?.credential).toEqual(mockedVC);
   });
@@ -149,15 +150,20 @@ describe('Credential Request Client ', () => {
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json-ld', types: ['random'], proof })).rejects.toThrow(
+    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json', types: ['random'], proof })).rejects.toThrow(
       Error(URL_NOT_VALID),
     );
   });
 });
 
 describe('Credential Request Client with Walt.id ', () => {
+  beforeEach(() => {
+    nock.cleanAll();
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
   it('should have correct metadata endpoints', async function () {
     nock.cleanAll();
     const WALT_IRR_URI =
@@ -178,6 +184,13 @@ describe('Credential Request Client with Walt.id ', () => {
 });
 
 describe('Credential Request Client with different issuers ', () => {
+  beforeEach(() => {
+    nock.cleanAll();
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
   it('should create correct CredentialRequest for Spruce', async () => {
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fngi%2Doidc4vci%2Dtest%2Espruceid%2Exyz&credential_type=OpenBadgeCredential&pre-authorized_code=eyJhbGciOiJFUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOlsiT3BlbkJhZGdlQ3JlZGVudGlhbCJdLCJleHAiOiIyMDIzLTA0LTIwVDA5OjA0OjM2WiIsIm5vbmNlIjoibWFibmVpT0VSZVB3V3BuRFFweEt3UnRsVVRFRlhGUEwifQ.qOZRPN8sTv_knhp7WaWte2-aDULaPZX--2i9unF6QDQNUllqDhvxgIHMDCYHCV8O2_Gj-T2x1J84fDMajE3asg&user_pin_required=false';
@@ -194,13 +207,15 @@ describe('Credential Request Client with different issuers ', () => {
           jwt: getMockData('spruce')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
-        format: 'jwt_vc_json-ld',
+        format: 'jwt_vc',
         version: OpenId4VCIVersion.VER_1_0_08,
       });
-    expect(credentialRequest).toEqual(getMockData('spruce')?.credential.request);
+    const draft8CredentialRequest = getCredentialRequestForVersion(credentialRequest, OpenId4VCIVersion.VER_1_0_08);
+    expect(draft8CredentialRequest).toEqual(getMockData('spruce')?.credential.request);
   });
 
   it('should create correct CredentialRequest for Walt', async () => {
+    nock.cleanAll();
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Fdefault%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA&user_pin_required=false';
     const credentialOffer = await (
@@ -264,7 +279,8 @@ describe('Credential Request Client with different issuers ', () => {
         format: 'ldp_vc',
         version: OpenId4VCIVersion.VER_1_0_08,
       });
-    expect(credentialOffer).toEqual(getMockData('mattr')?.credential.request);
+    const credentialRequest = getCredentialRequestForVersion(credentialOffer, OpenId4VCIVersion.VER_1_0_08);
+    expect(credentialRequest).toEqual(getMockData('mattr')?.credential.request);
   });
 
   it('should create correct CredentialRequest for diwala', async () => {
@@ -286,6 +302,10 @@ describe('Credential Request Client with different issuers ', () => {
         format: 'ldp_vc',
         version: OpenId4VCIVersion.VER_1_0_08,
       });
-    expect(credentialOffer).toEqual(getMockData('diwala')?.credential.request);
+
+    // createCredentialRequest returns uniform format in draft 11
+    const credentialRequest = getCredentialRequestForVersion(credentialOffer, OpenId4VCIVersion.VER_1_0_08);
+
+    expect(credentialRequest).toEqual(getMockData('diwala')?.credential.request);
   });
 });

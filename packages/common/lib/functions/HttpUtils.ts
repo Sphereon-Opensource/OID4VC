@@ -8,7 +8,7 @@ const debug = Debug('sphereon:openid4vci:http');
 export const getJson = async <T>(
   URL: string,
   opts?: {
-    bearerToken?: string;
+    bearerToken?: (() => Promise<string>) | string;
     contentType?: string;
     accept?: string;
     customHeaders?: Record<string, string>;
@@ -22,7 +22,7 @@ export const formPost = async <T>(
   url: string,
   body: BodyInit,
   opts?: {
-    bearerToken?: string;
+    bearerToken?: (() => Promise<string>) | string;
     contentType?: string;
     accept?: string;
     customHeaders?: Record<string, string>;
@@ -36,7 +36,7 @@ export const post = async <T>(
   url: string,
   body?: BodyInit,
   opts?: {
-    bearerToken?: string;
+    bearerToken?: (() => Promise<string>) | string;
     contentType?: string;
     accept?: string;
     customHeaders?: Record<string, string>;
@@ -51,7 +51,7 @@ const openIdFetch = async <T>(
   body?: BodyInit,
   opts?: {
     method?: string;
-    bearerToken?: string;
+    bearerToken?: (() => Promise<string>) | string;
     contentType?: string;
     accept?: string;
     customHeaders?: Record<string, string>;
@@ -60,7 +60,7 @@ const openIdFetch = async <T>(
 ): Promise<OpenIDResponse<T>> => {
   const headers: Record<string, string> = opts?.customHeaders ?? {};
   if (opts?.bearerToken) {
-    headers['Authorization'] = `Bearer ${opts.bearerToken}`;
+    headers['Authorization'] = `Bearer ${typeof opts.bearerToken === 'function' ? await opts.bearerToken() : opts.bearerToken}`;
   }
   const method = opts?.method ? opts.method : body ? 'POST' : 'GET';
   const accept = opts?.accept ? opts.accept : 'application/json';
@@ -87,7 +87,7 @@ const openIdFetch = async <T>(
 
   debug(`START fetching url: ${url}`);
   if (body) {
-    debug(`Body:\r\n${JSON.stringify(body)}`);
+    debug(`Body:\r\n${typeof body == 'string' ? body : JSON.stringify(body)}`);
   }
   debug(`Headers:\r\n${JSON.stringify(payload.headers)}`);
   const origResponse = await fetch(url, payload);

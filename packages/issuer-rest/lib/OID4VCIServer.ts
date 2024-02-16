@@ -1,7 +1,13 @@
 import * as console from 'console'
 import process from 'process'
 
-import { AuthorizationRequest, CredentialSupported, IssuerCredentialSubjectDisplay, OID4VCICredentialFormat } from '@sphereon/oid4vci-common'
+import {
+  AuthorizationRequest,
+  CredentialSupported,
+  IssuerCredentialSubjectDisplay,
+  OID4VCICredentialFormat,
+  QRCodeOpts,
+} from '@sphereon/oid4vci-common'
 import { CredentialSupportedBuilderV1_11, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
 import express, { Express } from 'express'
@@ -70,6 +76,7 @@ export interface IGetCredentialOfferEndpointOpts extends ISingleEndpointOpts {
 
 export interface ICreateCredentialOfferEndpointOpts extends ISingleEndpointOpts {
   getOfferPath?: string
+  qrCodeOpts?: QRCodeOpts
 }
 
 export interface IGetIssueStatusEndpointOpts extends ISingleEndpointOpts {
@@ -111,7 +118,7 @@ export class OID4VCIServer<DIDDoc extends object> {
     if (opts?.endpointOpts?.createCredentialOfferOpts?.enabled !== false || process.env.CREDENTIAL_OFFER_ENDPOINT_EBALBED === 'true') {
       createCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.createCredentialOfferOpts)
     }
-    getCredentialOfferEndpoint(this.router, this.issuer, opts?.getCredentialOfferOpts)
+    getCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.getCredentialOfferOpts)
     getCredentialEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.tokenEndpointOpts, baseUrl: this.baseUrl })
     this.assertAccessTokenHandling()
     if (!this.isTokenEndpointDisabled(opts?.endpointOpts?.tokenEndpointOpts)) {
