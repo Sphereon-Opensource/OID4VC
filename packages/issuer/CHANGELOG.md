@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.8.1...v0.9.0) (2024-02-16)
+
+### Bug Fixes
+
+- Add back jwt_vc format support for older versions ([9f06ab1](https://github.com/Sphereon-Opensource/OID4VCI/commit/9f06ab1e0efef89848fb6e6a2b80ed874717e580))
+- add sd-jwt to issuer callback ([93b1242](https://github.com/Sphereon-Opensource/OID4VCI/commit/93b1242d99dc21400c337b2f552a9f2da9da375c))
+- disable awesome-qr in rn ([3daf0d3](https://github.com/Sphereon-Opensource/OID4VCI/commit/3daf0d3e59b37c8ac91aa050b3a7cf1ff49cbfc3))
+- **sd-jwt:** cnf instead of kid ([510a4e8](https://github.com/Sphereon-Opensource/OID4VCI/commit/510a4e856c14d5daf933b60ba6d945deadf68d1c))
+
+### Features
+
+- Add EBSI support ([7577e3d](https://github.com/Sphereon-Opensource/OID4VCI/commit/7577e3d8a4818fe0955fce944220d6fb415a58a7))
+- add sd-jwt issuer support and e2e test ([951bf2c](https://github.com/Sphereon-Opensource/OID4VCI/commit/951bf2cb20d0a2a085a8a346d1ed519c71e31a07))
+- add sd-jwt support ([a37ef06](https://github.com/Sphereon-Opensource/OID4VCI/commit/a37ef06d38fdc7a6d5acc372cd2da8935b4c414e))
+- ldp issuance ([bf8865a](https://github.com/Sphereon-Opensource/OID4VCI/commit/bf8865a93ebf7b1f3150da815137e2b945e3e8ec))
+- Support sd-jwt 0.2.0 library ([77c9c24](https://github.com/Sphereon-Opensource/OID4VCI/commit/77c9c246ac994dff1b0ca80eb42819bf9bb1844a))
+
 ## [0.8.1](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.7.3...v0.8.1) (2023-10-14)
 
 **Note:** Version bump only for package @sphereon/oid4vci-issuer
