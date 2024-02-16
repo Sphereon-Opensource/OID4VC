@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.8.1...v0.9.0) (2024-02-16)
+
+### Bug Fixes
+
+- Add back jwt_vc format support for older versions ([9f06ab1](https://github.com/Sphereon-Opensource/OID4VCI/commit/9f06ab1e0efef89848fb6e6a2b80ed874717e580))
+- Do not set a default redirect_uri, unless no authorization request options are set at all ([6c96089](https://github.com/Sphereon-Opensource/OID4VCI/commit/6c96089f1d328c60cd040f34a3d06ae3b0df392b))
+- Do not set default client_id ([7a1afbc](https://github.com/Sphereon-Opensource/OID4VCI/commit/7a1afbcee3de7c7b0dbe3e32330f0a96e1dcfa1e))
+- Do not sort credential types, as issuers might rely on their order ([59fba74](https://github.com/Sphereon-Opensource/OID4VCI/commit/59fba745091ef0c69a46aed1a4f7faec2416c2bd))
+- the client_id used in the auth request was not taken into account when requesting access token ([2bc039c](https://github.com/Sphereon-Opensource/OID4VCI/commit/2bc039c66666d4acf59cebdddfd0b46ad795e0bc))
+
+### Features
+
+- Add deferred support ([99dc87d](https://github.com/Sphereon-Opensource/OID4VCI/commit/99dc87d3748cb1f71aa67237b28b6c4bb667eb29))
+- Add EBSI support ([7577e3d](https://github.com/Sphereon-Opensource/OID4VCI/commit/7577e3d8a4818fe0955fce944220d6fb415a58a7))
+- Add initial support for creating a client without credential offer ([13659a7](https://github.com/Sphereon-Opensource/OID4VCI/commit/13659a7b82789cc0f011d3c056ced13b3cbed290))
+- add sd-jwt issuer support and e2e test ([951bf2c](https://github.com/Sphereon-Opensource/OID4VCI/commit/951bf2cb20d0a2a085a8a346d1ed519c71e31a07))
+- add sd-jwt support ([a37ef06](https://github.com/Sphereon-Opensource/OID4VCI/commit/a37ef06d38fdc7a6d5acc372cd2da8935b4c414e))
+- Add support to get a client id from an offer, and from state JWTs. EBSI for instance is using this ([f089116](https://github.com/Sphereon-Opensource/OID4VCI/commit/f0891164a7a6863940c264afa386144a1e4ac19a))
+- added state recovery ([8ee6584](https://github.com/Sphereon-Opensource/OID4VCI/commit/8ee65844ca5d95030aa34b2a41077628ef1754f0))
+- Allow to create an authorization request URL when initiating the OID4VCI client ([84ea215](https://github.com/Sphereon-Opensource/OID4VCI/commit/84ea215c10da042417dabc1d30b2e3898b635bab))
+- Allow to set the clientId at a later point on the VCI client ([042b183](https://github.com/Sphereon-Opensource/OID4VCI/commit/042b183c0df91946905a6049145aa4ec16d62849))
+- EBSI compatibility ([c44107f](https://github.com/Sphereon-Opensource/OID4VCI/commit/c44107f580744292a987ba2cda5795e443aaa9df))
+- Make sure redirect_uri is the same for authorization and token endpoint when used and made redirect_uri optional. The redirect_uri is automatically passed to the token request in case one was used for authorization ([394fcb7](https://github.com/Sphereon-Opensource/OID4VCI/commit/394fcb71d1ac9557685e323e6b8bf4afa7d1b910))
+- PAR improvements ([99f55c2](https://github.com/Sphereon-Opensource/OID4VCI/commit/99f55c23e907022954b0eb169e276f3ef9ffb8ae))
+- PKCE support improvements. ([5d5cb06](https://github.com/Sphereon-Opensource/OID4VCI/commit/5d5cb060fda0790641c1b0d8d513af16ac041970))
+- Support sd-jwt 0.2.0 library ([77c9c24](https://github.com/Sphereon-Opensource/OID4VCI/commit/77c9c246ac994dff1b0ca80eb42819bf9bb1844a))
+
 ## [0.8.1](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.7.3...v0.8.1) (2023-10-14)
 
 **Note:** Version bump only for package @sphereon/oid4vci-client

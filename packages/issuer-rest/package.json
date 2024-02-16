@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-issuer-server",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "OpenID 4 Verifiable Credential Issuance Server",
   "source": "lib/index.ts",
   "main": "dist/index.js",
@@ -21,8 +21,8 @@
     "dotenv-flow": "^3.2.0",
     "express": "^4.18.2",
     "http-terminator": "^3.2.0",
-    "uuid": "^9.0.0",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@digitalcredentials/did-method-key": "^2.0.3",

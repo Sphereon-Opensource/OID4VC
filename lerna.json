@@ -1,15 +1,10 @@
 {
-  "packages": [
-    "packages/*"
-  ],
-  "version": "0.8.1",
+  "packages": ["packages/*"],
+  "version": "0.9.0",
   "npmClient": "pnpm",
   "command": {
     "publish": {
-      "allowBranch": [
-        "main",
-        "master"
-      ],
+      "allowBranch": ["main", "master"],
       "conventionalCommits": true,
       "gitRemote": "origin",
       "message": "chore(release): %s"
