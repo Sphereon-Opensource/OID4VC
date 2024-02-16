@@ -124,10 +124,22 @@ export interface ProofOfPossessionCallbacks<DIDDoc> {
   verifyCallback?: JWTVerifyCallback<DIDDoc>;
 }
 
+/**
+ * Signature algorithms.
+ *
+ * TODO: Move towards string literal unions and string type, given we do not provide signature/key implementations in this library to begin with
+ * @See: https://github.com/Sphereon-Opensource/OID4VCI/issues/88
+ */
 export enum Alg {
   EdDSA = 'EdDSA',
   ES256 = 'ES256',
   ES256K = 'ES256K',
+  PS256 = 'PS256',
+  PS384 = 'PS384',
+  PS512 = 'PS512',
+  RS256 = 'RS256',
+  RS384 = 'RS384',
+  RS512 = 'RS512',
 }
 
 export type Typ =
