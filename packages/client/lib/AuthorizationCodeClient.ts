@@ -6,13 +6,13 @@ import {
   CredentialOfferRequestWithBaseUrl,
   CredentialSupported,
   EndpointMetadataResult,
+  formPost,
   JsonURIMode,
   PARMode,
   PKCEOpts,
   PushedAuthorizationResponse,
   ResponseType,
 } from '@sphereon/oid4vci-common';
-import { formPost } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
 const debug = Debug('sphereon:oid4vci');
@@ -91,12 +91,24 @@ export const createAuthorizationRequestUrl = async ({
     throw Error(`PAR mode is set to required by Authorization Server does not support PAR!`);
   } else if (parEndpoint && parMode !== PARMode.NEVER) {
     debug(`USING PAR with endpoint ${parEndpoint}`);
-    const parResponse = await formPost<PushedAuthorizationResponse>(parEndpoint, new URLSearchParams(queryObj));
+    const parResponse = await formPost<PushedAuthorizationResponse>(
+      parEndpoint,
+      convertJsonToURI(queryObj, {
+        mode: JsonURIMode.X_FORM_WWW_URLENCODED,
+        uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
+      }),
+      { contentType: 'application/x-www-form-urlencoded', accept: 'application/json' },
+    );
     if (parResponse.errorBody || !parResponse.successBody) {
-      throw Error(`PAR error`);
+      console.log(JSON.stringify(parResponse.errorBody));
+      console.log('Falling back to regular request URI, since PAR failed');
+      if (parMode === PARMode.REQUIRE) {
+        throw Error(`PAR error: ${parResponse.origResponse.statusText}`);
+      }
+    } else {
+      debug(`PAR response: ${(parResponse.successBody, null, 2)}`);
+      queryObj = { request_uri: parResponse.successBody.request_uri };
     }
-    debug(`PAR response: ${(parResponse.successBody, null, 2)}`);
-    queryObj = { request_uri: parResponse.successBody.request_uri };
   }
 
   debug(`Object that will become query params: ` + JSON.stringify(queryObj, null, 2));
