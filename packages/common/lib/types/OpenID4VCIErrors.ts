@@ -1,4 +1,4 @@
-import { Alg } from './CredentialIssuance.types';
+import { Alg } from './CredentialIssuance.types'
 
 export const BAD_PARAMS = 'Wrong parameters provided';
 export const URL_NOT_VALID = 'Request url is not valid';
@@ -6,7 +6,7 @@ export const JWS_NOT_VALID = 'JWS is not valid';
 export const PROOF_CANT_BE_CONSTRUCTED = "Proof can't be constructed.";
 export const NO_JWT_PROVIDED = 'No JWT provided';
 export const TYP_ERROR = 'Typ must be "openid4vci-proof+jwt"';
-export const ALG_ERROR = `Algorithm is a required field and must be one of: ${Object.keys(Alg).join(', ')}`;
+export const ALG_ERROR = `Algorithm is a required field, you are free to use the signing algorithm of your choice or one of the following: ${Object.keys(Alg).join(', ')}`;
 export const KID_JWK_X5C_ERROR = 'Only one must be present: kid, jwk or x5c';
 export const KID_DID_NO_DID_ERROR = 'A DID value needs to be returned when kid is present';
 export const DID_NO_DIDDOC_ERROR = 'A DID Document needs to be resolved when a DID is encountered';
