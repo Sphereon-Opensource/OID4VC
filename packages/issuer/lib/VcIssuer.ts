@@ -1,5 +1,4 @@
 import {
-  Alg,
   ALG_ERROR,
   AUD_ERROR,
   CNonceState,
@@ -33,14 +32,19 @@ import {
   toUniformCredentialOfferRequest,
   TYP_ERROR,
   UniformCredentialRequest,
-  URIState,
+  URIState
 } from '@sphereon/oid4vci-common'
 import { CompactSdJwtVc, CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
 import { LookupStateManager } from './state-manager'
-import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
+import {
+  CredentialDataSupplier,
+  CredentialDataSupplierArgs,
+  CredentialIssuanceInput,
+  CredentialSignerCallback
+} from './types'
 
 const SECOND = 1000
 
@@ -463,7 +467,7 @@ export class VcIssuer<DIDDoc extends object> {
 
       if (typ !== 'openid4vci-proof+jwt') {
         throw Error(TYP_ERROR)
-      } else if (!alg || !(alg in Alg)) {
+      } else if (!alg) {
         throw Error(ALG_ERROR)
       } else if (!([kid, jwk, x5c].filter((x) => !!x).length === 1)) {
         // only 1 is allowed, but need to look into whether jwk and x5c are allowed together
