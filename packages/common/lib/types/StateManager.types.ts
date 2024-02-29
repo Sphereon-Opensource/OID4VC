@@ -20,7 +20,7 @@ export interface CredentialOfferSession extends StateType {
 export enum IssueStatus {
   OFFER_CREATED = 'OFFER_CREATED',
   OFFER_URI_RETRIEVED = 'OFFER_URI_RETRIEVED', // This state is optional. as an offer uri is optional
-  ACCESS_TOKEN_REQUESTED = 'ACCESS_TOKEN_CREATED', // Optional state, given the token endpoint could also be on a separate AS
+  ACCESS_TOKEN_REQUESTED = 'ACCESS_TOKEN_REQUESTED', // Optional state, given the token endpoint could also be on a separate AS
   ACCESS_TOKEN_CREATED = 'ACCESS_TOKEN_CREATED', // Optional state, given the token endpoint could also be on a separate AS
   CREDENTIAL_REQUEST_RECEIVED = 'CREDENTIAL_REQUEST_RECEIVED', // Credential request received. Next state would either be error or issued
   CREDENTIAL_ISSUED = 'CREDENTIAL_ISSUED',
