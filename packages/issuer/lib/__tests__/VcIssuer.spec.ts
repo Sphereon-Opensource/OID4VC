@@ -1,11 +1,12 @@
 import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   Alg,
+  ALG_ERROR,
   CredentialOfferSession,
   CredentialSupported,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
-  STATE_MISSING_ERROR,
+  STATE_MISSING_ERROR
 } from '@sphereon/oid4vci-common'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
@@ -16,13 +17,36 @@ import { MemoryStates } from '../state-manager'
 
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
 
+const verifiableCredential = {
+  '@context': [
+    'https://www.w3.org/2018/credentials/v1',
+    'https://w3id.org/security/suites/jws-2020/v1'
+  ],
+  id: 'http://university.example/credentials/1872',
+  type: [
+    'VerifiableCredential',
+    'ExampleAlumniCredential'
+  ],
+  issuer: 'https://university.example/issuers/565049',
+  issuanceDate: new Date().toISOString(),
+  credentialSubject: {
+    id: 'did:example:ebfeb1f712ebc6f1c276e12ec21',
+    alumniOf: {
+      id: 'did:example:c276e12ec21ebfeb1f712ebc6f1',
+      name: 'Example University'
+    }
+  }
+}
+
 describe('VcIssuer', () => {
   let vcIssuer: VcIssuer<DIDDocument>
   const issuerState = 'previously-created-state'
   const clientId = 'sphereon:wallet'
   const preAuthorizedCode = 'test_code'
 
-  beforeAll(async () => {
+  const jwtVerifyCallback: jest.Mock = jest.fn()
+
+  beforeEach(async () => {
     jest.clearAllMocks()
     const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
       .withCryptographicSuitesSupported('ES256K')
@@ -105,29 +129,7 @@ describe('VcIssuer', () => {
           },
         }),
       )
-      .withJWTVerifyCallback(() =>
-        Promise.resolve({
-          did: 'did:example:1234',
-          kid: 'did:example:1234#auth',
-          alg: 'ES256k',
-          didDocument: {
-            '@context': 'https://www.w3.org/ns/did/v1',
-            id: 'did:example:1234',
-          },
-          jwt: {
-            header: {
-              typ: 'openid4vci-proof+jwt',
-              alg: Alg.ES256K,
-              kid: 'test-kid',
-            },
-            payload: {
-              aud: 'https://credential-issuer',
-              iat: +new Date(),
-              nonce: 'test-nonce',
-            },
-          },
-        }),
-      )
+      .withJWTVerifyCallback(jwtVerifyCallback)
       .build()
   })
 
@@ -272,6 +274,29 @@ describe('VcIssuer', () => {
 
   // Of course this doesn't work. The state is part of the proof to begin with
   it('should fail issuing credential if an invalid state is used', async () => {
+    jwtVerifyCallback.mockResolvedValue({
+        did: 'did:example:1234',
+        kid: 'did:example:1234#auth',
+        alg: Alg.ES256K,
+        didDocument: {
+          '@context': 'https://www.w3.org/ns/did/v1',
+          id: 'did:example:1234',
+        },
+        jwt: {
+          header: {
+            typ: 'openid4vci-proof+jwt',
+            alg: Alg.ES256K,
+            kid: 'test-kid',
+          },
+          payload: {
+            aud: IDENTIPROOF_ISSUER_URL,
+            iat: +new Date(),
+            nonce: 'test-nonce',
+          },
+        }
+      }
+    )
+
     await expect(
       vcIssuer.issueCredential({
         credentialRequest: {
@@ -287,23 +312,65 @@ describe('VcIssuer', () => {
     ).rejects.toThrow(Error(STATE_MISSING_ERROR + ' (test-nonce)'))
   })
 
-  // Of course this doesn't work. The state is part of the proof to begin with
-  xit('should issue credential if a valid state is passed in', async () => {
-    await expect(
+  it.each([...Object.values<string>(Alg), 'CUSTOM'])('should issue %s signed credential if a valid state is passed in', async (alg: string) => {
+    jwtVerifyCallback.mockResolvedValue({
+        did: 'did:example:1234',
+        kid: 'did:example:1234#auth',
+        alg: alg,
+        didDocument: {
+          '@context': 'https://www.w3.org/ns/did/v1',
+          id: 'did:example:1234',
+        },
+        jwt: {
+          header: {
+            typ: 'openid4vci-proof+jwt',
+            alg: alg,
+            kid: 'test-kid',
+          },
+          payload: {
+            aud: IDENTIPROOF_ISSUER_URL,
+            iat: +new Date(),
+            nonce: 'test-nonce',
+          },
+        }
+      }
+    )
+
+    let createdAt = +new Date()
+    await vcIssuer.cNonces.set('test-nonce', {
+      cNonce: 'test-nonce',
+      preAuthorizedCode: 'test-pre-authorized-code',
+      createdAt: createdAt
+    })
+    await vcIssuer.credentialOfferSessions.set('test-pre-authorized-code', {
+      createdAt: createdAt,
+      preAuthorizedCode: 'test-pre-authorized-code',
+      credentialOffer: {
+        credential_offer: {
+          credential_issuer: 'did:key:test',
+          credentials: []
+        }
+      },
+      lastUpdatedAt: createdAt,
+      status: IssueStatus.ACCESS_TOKEN_CREATED
+    })
+
+    expect(
       vcIssuer.issueCredential({
+        credential: verifiableCredential,
         credentialRequest: {
           types: ['VerifiableCredential'],
           format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',
-            jwt: 'ye.ye.ye',
-          },
+            jwt: 'ye.ye.ye'
+          }
         },
-        // issuerState,
-      }),
+        newCNonce: 'new-test-nonce'
+      })
     ).resolves.toEqual({
-      c_nonce: expect.any(String),
-      c_nonce_expires_in: 90000,
+      c_nonce: 'new-test-nonce',
+      c_nonce_expires_in: 300000,
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         credentialSubject: {},
@@ -314,11 +381,54 @@ describe('VcIssuer', () => {
           jwt: 'ye.ye.ye',
           proofPurpose: 'assertionMethod',
           type: 'JwtProof2020',
-          verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
+          verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf'
         },
-        type: ['VerifiableCredential'],
+        type: ['VerifiableCredential']
       },
-      format: 'jwt_vc_json',
+      format: 'jwt_vc_json'
     })
+  })
+
+  it('should fail issuing credential if the signing algorithm is missing', async () => {
+    let createdAt = +new Date()
+    await vcIssuer.cNonces.set('test-nonce', {
+      cNonce: 'test-nonce',
+      preAuthorizedCode: 'test-pre-authorized-code',
+      createdAt: createdAt
+    })
+
+    jwtVerifyCallback.mockResolvedValue({
+        did: 'did:example:1234',
+        kid: 'did:example:1234#auth',
+        alg: undefined,
+        didDocument: {
+          '@context': 'https://www.w3.org/ns/did/v1',
+          id: 'did:example:1234',
+        },
+        jwt: {
+          header: {
+            typ: 'openid4vci-proof+jwt',
+            alg: undefined,
+            kid: 'test-kid',
+          },
+          payload: {
+            aud: IDENTIPROOF_ISSUER_URL,
+            iat: +new Date(),
+            nonce: 'test-nonce',
+          },
+        }
+      }
+    )
+
+    expect(vcIssuer.issueCredential({
+      credentialRequest: {
+        types: ['VerifiableCredential'],
+        format: 'jwt_vc_json',
+        proof: {
+          proof_type: 'jwt',
+          jwt: 'ye.ye.ye',
+        },
+      },
+    })).rejects.toThrow(Error(ALG_ERROR))
   })
 })
