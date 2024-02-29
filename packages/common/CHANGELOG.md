@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.9.0...v0.10.0) (2024-02-29)
+
+### Bug Fixes
+
+- enum type ([c39d8e1](https://github.com/Sphereon-Opensource/OID4VCI/commit/c39d8e1d0b10f6f683dbd229c14e6299a9163e1c))
+- Extend Alg enum to allow for more algorithms. refs [#88](https://github.com/Sphereon-Opensource/OID4VCI/issues/88) ([6e76f57](https://github.com/Sphereon-Opensource/OID4VCI/commit/6e76f5759d2cf989f246ed8a4d45e6c5bd2cb06f))
+
+### Features
+
+- Open the signing algorithm list in the credential issuance process, refs [#88](https://github.com/Sphereon-Opensource/OID4VCI/issues/88) ([d9b17af](https://github.com/Sphereon-Opensource/OID4VCI/commit/d9b17af8098f55b688891de5e536fa95560ef8af))
+
 # [0.9.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.8.1...v0.9.0) (2024-02-16)
 
 ### Bug Fixes
