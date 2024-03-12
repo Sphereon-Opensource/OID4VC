@@ -46,6 +46,7 @@ export interface OpenID4VCIClientState {
   endpointMetadata?: EndpointMetadataResult;
   accessTokenResponse?: AccessTokenResponse;
   authorizationRequestOpts?: AuthorizationRequestOpts;
+  authorizationCodeResponse?: AuthorizationResponse;
   pkce: PKCEOpts;
   authorizationURL?: string;
 }
@@ -65,6 +66,7 @@ export class OpenID4VCIClient {
     endpointMetadata,
     accessTokenResponse,
     authorizationRequestOpts,
+    authorizationCodeResponse,
     authorizationURL,
   }: {
     credentialOffer?: CredentialOfferRequestWithBaseUrl;
@@ -78,6 +80,7 @@ export class OpenID4VCIClient {
     endpointMetadata?: EndpointMetadataResult;
     accessTokenResponse?: AccessTokenResponse;
     authorizationRequestOpts?: AuthorizationRequestOpts;
+    authorizationCodeResponse?: AuthorizationResponse;
     authorizationURL?: string;
   }) {
     const issuer = credentialIssuer ?? (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
@@ -93,6 +96,7 @@ export class OpenID4VCIClient {
       clientId: clientId ?? (credentialOffer && getClientIdFromCredentialOfferPayload(credentialOffer.credential_offer)) ?? kid?.split('#')[0],
       pkce: { disabled: false, codeChallengeMethod: CodeChallengeMethod.S256, ...pkce },
       authorizationRequestOpts,
+      authorizationCodeResponse,
       jwk,
       endpointMetadata,
       accessTokenResponse,
@@ -254,7 +258,12 @@ export class OpenID4VCIClient {
   }): Promise<AccessTokenResponse> {
     const { pin, clientId } = opts ?? {};
     let { redirectUri } = opts ?? {};
-    const code = opts?.code ?? (opts?.authorizationResponse ? toAuthorizationResponsePayload(opts.authorizationResponse).code : undefined);
+    if (opts?.authorizationResponse) {
+      this._state.authorizationCodeResponse = { ...toAuthorizationResponsePayload(opts.authorizationResponse) };
+    } else if (opts?.code) {
+      this._state.authorizationCodeResponse = { code: opts.code };
+    }
+    const code = this._state.authorizationCodeResponse?.code;
 
     if (opts?.codeVerifier) {
       this._state.pkce.codeVerifier = opts.codeVerifier;

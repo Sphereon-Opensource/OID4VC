@@ -32,19 +32,14 @@ import {
   toUniformCredentialOfferRequest,
   TYP_ERROR,
   UniformCredentialRequest,
-  URIState
+  URIState,
 } from '@sphereon/oid4vci-common'
 import { CompactSdJwtVc, CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
 import { LookupStateManager } from './state-manager'
-import {
-  CredentialDataSupplier,
-  CredentialDataSupplierArgs,
-  CredentialIssuanceInput,
-  CredentialSignerCallback
-} from './types'
+import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
 
 const SECOND = 1000
 
