@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.1](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.10.0...v0.10.1) (2024-03-12)
+
+### Bug Fixes
+
+- await session state updates ([963fb88](https://github.com/Sphereon-Opensource/OID4VCI/commit/963fb88201af15ccfce189bb3ac7eedc846833d0))
+
 # [0.10.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.9.0...v0.10.0) (2024-02-29)
 
 **Note:** Version bump only for package @sphereon/oid4vci-callback-example
