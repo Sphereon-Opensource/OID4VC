@@ -5,9 +5,9 @@ import {
   CredentialIssuerMetadataOpts,
   CredentialOfferFormat,
   CredentialRequestJwtVcJson,
+  CredentialRequestJwtVcJsonLdAndLdpVc,
   CredentialRequestSdJwtVc,
   Grant,
-  JsonLdIssuerCredentialDefinition,
 } from './Generic.types';
 import { QRCodeOpts } from './QRCode.types';
 import { AuthorizationServerMetadata } from './ServerMetadata';
@@ -58,13 +58,8 @@ export interface CredentialOfferPayloadV1_0_11 {
 }
 
 export type CredentialRequestV1_0_11 = CommonCredentialRequest &
-  (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVcV1_0_11 | CredentialRequestSdJwtVc);
+  (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc);
 
-export interface CredentialRequestJwtVcJsonLdAndLdpVcV1_0_11
-  extends CommonCredentialRequest,
-    Pick<JsonLdIssuerCredentialDefinition, 'credentialSubject' | 'types'> {
-  format: 'ldp_vc' | 'jwt_vc_json-ld';
-}
 export interface CredentialIssuerMetadataV1_0_11 extends CredentialIssuerMetadataOpts, Partial<AuthorizationServerMetadata> {
   credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   authorization_server?: string;

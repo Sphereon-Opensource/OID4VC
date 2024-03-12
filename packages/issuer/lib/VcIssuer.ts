@@ -32,19 +32,14 @@ import {
   toUniformCredentialOfferRequest,
   TYP_ERROR,
   UniformCredentialRequest,
-  URIState
+  URIState,
 } from '@sphereon/oid4vci-common'
 import { CompactSdJwtVc, CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
 import { LookupStateManager } from './state-manager'
-import {
-  CredentialDataSupplier,
-  CredentialDataSupplierArgs,
-  CredentialIssuanceInput,
-  CredentialSignerCallback
-} from './types'
+import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
 
 const SECOND = 1000
 
@@ -350,17 +345,17 @@ export class VcIssuer<DIDDoc extends object> {
         throw new Error(CREDENTIAL_MISSING_ERROR)
       }
       // remove the previous nonce
-      this.cNonces.delete(cNonceState.cNonce)
+      await this.cNonces.delete(cNonceState.cNonce)
 
       if (preAuthorizedCode && preAuthSession) {
         preAuthSession.lastUpdatedAt = +new Date()
         preAuthSession.status = IssueStatus.CREDENTIAL_ISSUED
-        this._credentialOfferSessions.set(preAuthorizedCode, preAuthSession)
+        await this._credentialOfferSessions.set(preAuthorizedCode, preAuthSession)
       } else if (issuerState && authSession) {
         // If both were set we used the pre auth flow above as well, hence the else if
         authSession.lastUpdatedAt = +new Date()
         authSession.status = IssueStatus.CREDENTIAL_ISSUED
-        this._credentialOfferSessions.set(issuerState, authSession)
+        await this._credentialOfferSessions.set(issuerState, authSession)
       }
 
       return {
@@ -390,7 +385,7 @@ export class VcIssuer<DIDDoc extends object> {
         preAuthSession.lastUpdatedAt = +new Date()
         preAuthSession.status = IssueStatus.ERROR
         preAuthSession.error = error instanceof Error ? error.message : error?.toString()
-        this._credentialOfferSessions.set(preAuthorizedCode, preAuthSession)
+        await this._credentialOfferSessions.set(preAuthorizedCode, preAuthSession)
       }
     }
     if (issuerState) {
@@ -399,7 +394,7 @@ export class VcIssuer<DIDDoc extends object> {
         authSession.lastUpdatedAt = +new Date()
         authSession.status = IssueStatus.ERROR
         authSession.error = error instanceof Error ? error.message : error?.toString()
-        this._credentialOfferSessions.set(issuerState, authSession)
+        await this._credentialOfferSessions.set(issuerState, authSession)
       }
     }
   }

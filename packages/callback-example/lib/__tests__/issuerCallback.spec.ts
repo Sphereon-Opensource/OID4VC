@@ -139,7 +139,7 @@ describe('issuerCallback', () => {
     })
 
     const nonces = new MemoryStates<CNonceState>()
-    nonces.set('test_value', { cNonce: 'test_value', createdAt: +new Date(), issuerState: 'existing-state' })
+    await nonces.set('test_value', { cNonce: 'test_value', createdAt: +new Date(), issuerState: 'existing-state' })
     vcIssuer = new VcIssuerBuilder<DIDDocument>()
       .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')

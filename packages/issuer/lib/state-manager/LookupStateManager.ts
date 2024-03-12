@@ -48,8 +48,8 @@ export class LookupStateManager<K extends StateType, V extends StateType> implem
   }
 
   async delete(id: string): Promise<boolean> {
-    return await this.assertedValueId(id).then((value) => {
-      this.keyValueMapper.delete(id)
+    return await this.assertedValueId(id).then(async (value) => {
+      await this.keyValueMapper.delete(id)
       return this.valueStateManager.delete(value)
     })
   }
@@ -68,8 +68,8 @@ export class LookupStateManager<K extends StateType, V extends StateType> implem
   }
 
   async setMapped(id: string, keyValue: K, stateValue: V): Promise<void> {
-    this.keyValueMapper.set(id, keyValue)
-    this.valueStateManager.set(id, stateValue)
+    await this.keyValueMapper.set(id, keyValue)
+    await this.valueStateManager.set(id, stateValue)
   }
 
   async getAsserted(id: string): Promise<V> {
