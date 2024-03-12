@@ -7,14 +7,12 @@ export function getTypesFromRequest(credentialRequest: UniformCredentialRequest,
   if (credentialRequest.format === 'jwt_vc_json' || credentialRequest.format === 'jwt_vc') {
     types = credentialRequest.types;
   } else if (credentialRequest.format === 'jwt_vc_json-ld' || credentialRequest.format === 'ldp_vc') {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     types =
       'credential_definition' in credentialRequest && credentialRequest.credential_definition
-        ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        ? credentialRequest.credential_definition.types
+        : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          credentialRequest.credential_definition.types
-        : credentialRequest.types;
+          credentialRequest.types;
   } else if (credentialRequest.format === 'vc+sd-jwt') {
     types = [credentialRequest.vct];
   }
