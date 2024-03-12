@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.1](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.10.0...v0.10.1) (2024-03-12)
+
+### Bug Fixes
+
+- type for cred request ldp ([dbbe447](https://github.com/Sphereon-Opensource/OID4VCI/commit/dbbe44784f60234897c1b9ccdac09259a1226066))
+
 # [0.10.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.9.0...v0.10.0) (2024-02-29)
 
 ### Bug Fixes
