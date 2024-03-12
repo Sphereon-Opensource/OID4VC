@@ -88,7 +88,7 @@ export const assertValidAccessTokenRequest = async (
   const credentialOfferSession = await credentialOfferSessions.getAsserted(request[PRE_AUTH_CODE_LITERAL])
   credentialOfferSession.status = IssueStatus.ACCESS_TOKEN_REQUESTED
   credentialOfferSession.lastUpdatedAt = +new Date()
-  credentialOfferSessions.set(request[PRE_AUTH_CODE_LITERAL], credentialOfferSession)
+  await credentialOfferSessions.set(request[PRE_AUTH_CODE_LITERAL], credentialOfferSession)
   if (!isValidGrant(credentialOfferSession, request.grant_type)) {
     throw new TokenError(400, TokenErrorResponse.invalid_grant, UNSUPPORTED_GRANT_TYPE_ERROR)
   }
@@ -165,6 +165,6 @@ export const createAccessTokenResponse = async (
   const credentialOfferSession = await credentialOfferSessions.getAsserted(preAuthorizedCode)
   credentialOfferSession.status = IssueStatus.ACCESS_TOKEN_CREATED
   credentialOfferSession.lastUpdatedAt = +new Date()
-  credentialOfferSessions.set(preAuthorizedCode, credentialOfferSession)
+  await credentialOfferSessions.set(preAuthorizedCode, credentialOfferSession)
   return response
 }
