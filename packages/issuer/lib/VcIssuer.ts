@@ -41,8 +41,6 @@ import { assertValidPinNumber, createCredentialOfferObject, createCredentialOffe
 import { LookupStateManager } from './state-manager'
 import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
 
-const SECOND = 1000
-
 export class VcIssuer<DIDDoc extends object> {
   private readonly _issuerMetadata: CredentialIssuerMetadataOpts
   private readonly _userPinRequired: boolean
@@ -79,8 +77,7 @@ export class VcIssuer<DIDDoc extends object> {
     this._credentialSignerCallback = args?.credentialSignerCallback
     this._jwtVerifyCallback = args?.jwtVerifyCallback
     this._credentialDataSupplier = args?.credentialDataSupplier
-    this._cNonceExpiresIn =
-      ((args?.cNonceExpiresIn ?? (process.env.C_NONCE_EXPIRES_IN ? parseInt(process.env.C_NONCE_EXPIRES_IN) : 300)) as number) * SECOND
+    this._cNonceExpiresIn = (args?.cNonceExpiresIn ?? (process.env.C_NONCE_EXPIRES_IN ? parseInt(process.env.C_NONCE_EXPIRES_IN) : 300)) as number
   }
 
   public getCredentialOfferSessionById(id: string): Promise<CredentialOfferSession> {
@@ -247,7 +244,7 @@ export class VcIssuer<DIDDoc extends object> {
       }
       const validated = await this.validateCredentialRequestProof({
         ...opts,
-        tokenExpiresIn: opts.tokenExpiresIn ?? 180000,
+        tokenExpiresIn: opts.tokenExpiresIn ?? 180,
       })
       preAuthorizedCode = validated.preAuthorizedCode
       issuerState = validated.issuerState

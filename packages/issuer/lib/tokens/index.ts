@@ -43,12 +43,14 @@ export const generateAccessToken = async (
   },
 ): Promise<string> => {
   const { accessTokenIssuer, alg, accessTokenSignerCallback, tokenExpiresIn, preAuthorizedCode } = opts
-  const iat = new Date().getTime()
+  // JWT uses seconds for iat and exp
+  const iat = new Date().getTime() / 1000
+  const exp = iat + tokenExpiresIn
   const jwt: Jwt = {
     header: { typ: 'JWT', alg: alg ?? Alg.ES256K },
     payload: {
       iat,
-      exp: tokenExpiresIn,
+      exp,
       iss: accessTokenIssuer,
       ...(preAuthorizedCode && { preAuthorizedCode }),
     },
