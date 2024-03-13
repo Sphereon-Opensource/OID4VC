@@ -148,7 +148,7 @@ describe('OID4VCIServer', () => {
           accessTokenSignerCallback: signerCallback,
           accessTokenIssuer: 'https://www.example.com',
           preAuthorizedCodeExpirationDuration: 2000,
-          tokenExpiresIn: 300000,
+          tokenExpiresIn: 300,
         },
       },
     })
@@ -172,11 +172,11 @@ describe('OID4VCIServer', () => {
     expect(actual).toEqual({
       access_token: expect.stringContaining('eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQi'),
       token_type: 'bearer',
-      expires_in: 300000,
+      expires_in: 300,
       c_nonce: expect.any(String),
-      c_nonce_expires_in: 300000,
+      c_nonce_expires_in: 300,
       authorization_pending: false,
-      interval: 300000,
+      interval: 300,
     })
   })
   it('should return http code 400 with message User pin is required', async () => {

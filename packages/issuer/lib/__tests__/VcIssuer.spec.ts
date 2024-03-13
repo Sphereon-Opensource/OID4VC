@@ -362,7 +362,7 @@ describe('VcIssuer', () => {
       }),
     ).resolves.toEqual({
       c_nonce: 'new-test-nonce',
-      c_nonce_expires_in: 300000,
+      c_nonce_expires_in: 300,
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         credentialSubject: {},

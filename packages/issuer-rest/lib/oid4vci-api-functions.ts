@@ -79,8 +79,8 @@ export function accessTokenEndpoint<DIDDoc extends object>(
   const accessTokenIssuer = opts?.accessTokenIssuer ?? process.env.ACCESS_TOKEN_ISSUER ?? issuer.issuerMetadata.credential_issuer
 
   const preAuthorizedCodeExpirationDuration =
-    opts?.preAuthorizedCodeExpirationDuration ?? getNumberOrUndefined(process.env.PRE_AUTHORIZED_CODE_EXPIRATION_DURATION) ?? 300000
-  const interval = opts?.interval ?? getNumberOrUndefined(process.env.INTERVAL) ?? 300000
+    opts?.preAuthorizedCodeExpirationDuration ?? getNumberOrUndefined(process.env.PRE_AUTHORIZED_CODE_EXPIRATION_DURATION) ?? 300
+  const interval = opts?.interval ?? getNumberOrUndefined(process.env.INTERVAL) ?? 300
   const tokenExpiresIn = opts?.tokenExpiresIn ?? 300
 
   // todo: this means we cannot sign JWTs or issue access tokens when configured from env vars!

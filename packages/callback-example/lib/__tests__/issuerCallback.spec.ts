@@ -267,7 +267,7 @@ describe('issuerCallback', () => {
 
     expect(credentialResponse).toEqual({
       c_nonce: expect.any(String),
-      c_nonce_expires_in: 300000,
+      c_nonce_expires_in: 300,
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],
         credentialSubject: {
