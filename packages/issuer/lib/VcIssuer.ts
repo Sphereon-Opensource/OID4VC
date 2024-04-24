@@ -230,8 +230,8 @@ export class VcIssuer<DIDDoc extends object> {
     credentialDataSupplier?: CredentialDataSupplier
     credentialDataSupplierInput?: CredentialDataSupplierInput
     newCNonce?: string
-    cNonceExpiresIn?: number
-    tokenExpiresIn?: number
+    cNonceExpiresIn?: number // expiration duration in seconds
+    tokenExpiresIn?: number // expiration duration in seconds
     jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
     credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
     responseCNonce?: string
@@ -417,7 +417,7 @@ export class VcIssuer<DIDDoc extends object> {
     tokenExpiresIn,
   }: {
     credentialRequest: UniformCredentialRequest
-    tokenExpiresIn: number
+    tokenExpiresIn: number  // expiration duration in seconds
     // grants?: Grant,
     clientId?: string
     jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
@@ -519,7 +519,8 @@ export class VcIssuer<DIDDoc extends object> {
       }
       if (!iat) {
         throw new Error(IAT_ERROR)
-      } else if (iat > createdAt + tokenExpiresIn * 1000) {
+      } else if (iat > (createdAt/1000 + tokenExpiresIn)) {
+        // createdAt is in milliseconds whilst iat and tokenExpiresIn are in seconds
         throw new Error(IAT_ERROR)
       }
       // todo: Add a check of iat against current TS on server with a skew
