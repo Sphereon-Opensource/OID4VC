@@ -14,10 +14,10 @@ import { v4 } from 'uuid'
  * @param interval
  */
 export const handleTokenRequest = <T extends object>({
-  tokenExpiresIn,
+  tokenExpiresIn, // expiration in seconds
   accessTokenSignerCallback,
   accessTokenIssuer,
-  cNonceExpiresIn,
+  cNonceExpiresIn, // expiration in seconds
   issuer,
   interval,
 }: Required<Pick<ITokenEndpointOpts, 'accessTokenIssuer' | 'cNonceExpiresIn' | 'interval' | 'accessTokenSignerCallback' | 'tokenExpiresIn'>> & {

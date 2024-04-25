@@ -9,7 +9,7 @@ import { IDENTIPROOF_ISSUER_URL } from './MetadataMocks';
 
 const jwt: Jwt = {
   header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'jwt' },
-  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL, iat: Date.now() },
+  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL, iat: Date.now()/1000 },
 };
 
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1';

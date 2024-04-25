@@ -284,7 +284,7 @@ describe('VcIssuer', () => {
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
-          iat: +new Date(),
+          iat: +new Date()/1000,
           nonce: 'test-nonce',
         },
       },
@@ -322,7 +322,7 @@ describe('VcIssuer', () => {
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
-          iat: +new Date(),
+          iat: +new Date()/1000,
           nonce: 'test-nonce',
         },
       },
@@ -405,7 +405,7 @@ describe('VcIssuer', () => {
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
-          iat: +new Date(),
+          iat: +new Date()/1000,
           nonce: 'test-nonce',
         },
       },

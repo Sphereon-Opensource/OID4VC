@@ -37,7 +37,7 @@ async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promi
   }
   return await new jose.SignJWT({ ...args.payload })
     .setProtectedHeader({ ...args.header })
-    .setIssuedAt(+new Date())
+    .setIssuedAt(args.payload.iat ?? Math.round(+new Date()/1000))
     .setIssuer(kid)
     .setAudience(args.payload.aud)
     .setExpirationTime('2h')
