@@ -43,7 +43,7 @@ const vcIssuer = new VcIssuerBuilder()
         },
         payload: {
           aud: issuerMetadata.credential_issuer,
-          iat: +new Date(),
+          iat: +new Date()/1000,
           nonce: 'a-c-nonce',
         },
       },

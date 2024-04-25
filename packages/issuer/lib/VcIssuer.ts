@@ -519,7 +519,7 @@ export class VcIssuer<DIDDoc extends object> {
       }
       if (!iat) {
         throw new Error(IAT_ERROR)
-      } else if (iat > (createdAt/1000 + tokenExpiresIn)) {
+      } else if (iat > Math.round(createdAt/1000) + tokenExpiresIn) {
         // createdAt is in milliseconds whilst iat and tokenExpiresIn are in seconds
         throw new Error(IAT_ERROR)
       }
