@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.3](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.10.2...v0.10.3) (2024-04-25)
+
+### Bug Fixes
+
+- Fix iat expiration check ([1260291](https://github.com/Sphereon-Opensource/OID4VCI/commit/126029124ee0c566eeaab60993a65da5afa9ab31))
+- issuance and expiration sometimes used milliseconds instead of seconds ([afc2a8a](https://github.com/Sphereon-Opensource/OID4VCI/commit/afc2a8a9171bae7e30ed7c7d9bd094d8cbd49b80))
+- seconds to ms ([cbd60a6](https://github.com/Sphereon-Opensource/OID4VCI/commit/cbd60a6b6e91d645d03da73ef47c69b4add63e38))
+
 ## [0.10.2](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.10.1...v0.10.2) (2024-03-13)
 
 ### Bug Fixes
