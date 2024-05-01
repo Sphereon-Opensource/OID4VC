@@ -2,7 +2,7 @@ import {
   CNonceState,
   CredentialIssuerMetadata,
   CredentialOfferSession,
-  CredentialSupported,
+  CredentialConfigurationSupported,
   IStateManager,
   JWTVerifyCallback,
   MetadataDisplay,
@@ -14,10 +14,10 @@ import { VcIssuer } from '../VcIssuer'
 import { MemoryStates } from '../state-manager'
 import { CredentialDataSupplier, CredentialSignerCallback } from '../types'
 
-import { IssuerMetadataBuilderV1_11 } from './IssuerMetadataBuilderV1_11'
+import { IssuerMetadataBuilderV1_13 } from './IssuerMetadataBuilderV1_13'
 
 export class VcIssuerBuilder<DIDDoc extends object> {
-  issuerMetadataBuilder?: IssuerMetadataBuilderV1_11
+  issuerMetadataBuilder?: IssuerMetadataBuilderV1_13
   issuerMetadata: Partial<CredentialIssuerMetadata> = {}
   defaultCredentialOfferBaseUri?: string
   userPinRequired?: boolean
@@ -34,7 +34,7 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     return this
   }
 
-  public withIssuerMetadataBuilder(builder: IssuerMetadataBuilderV1_11) {
+  public withIssuerMetadataBuilder(builder: IssuerMetadataBuilderV1_13) {
     this.issuerMetadataBuilder = builder
     return this
   }
@@ -80,12 +80,12 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     return this
   }
 
-  public withCredentialsSupported(credentialSupported: CredentialSupported | CredentialSupported[]): this {
+  public withCredentialsSupported(credentialSupported: CredentialConfigurationSupported | CredentialConfigurationSupported[]): this {
     this.issuerMetadata.credentials_supported = Array.isArray(credentialSupported) ? credentialSupported : [credentialSupported]
     return this
   }
 
-  public addCredentialsSupported(credentialSupported: CredentialSupported): this {
+  public addCredentialsSupported(credentialSupported: CredentialConfigurationSupported): this {
     this.issuerMetadata.credentials_supported = [...(this.issuerMetadata.credentials_supported ?? []), credentialSupported]
     return this
   }

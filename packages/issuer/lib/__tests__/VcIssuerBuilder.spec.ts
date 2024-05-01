@@ -1,11 +1,11 @@
-import { CredentialSupported, IssuerCredentialSubjectDisplay, IssueStatus, TokenErrorResponse } from '@sphereon/oid4vci-common'
+import { CredentialConfigurationSupported, IssuerCredentialSubjectDisplay, IssueStatus, TokenErrorResponse } from '@sphereon/oid4vci-common'
 import { v4 } from 'uuid'
 
-import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../index'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../index'
 
 describe('VcIssuer builder should', () => {
   it('generate a VcIssuer', () => {
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
+    const credentialsSupported: CredentialConfigurationSupported = new CredentialSupportedBuilderV1_13()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
@@ -45,7 +45,7 @@ describe('VcIssuer builder should', () => {
   })
 
   it('fail to generate a VcIssuer', () => {
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
+    const credentialsSupported: CredentialConfigurationSupported = new CredentialSupportedBuilderV1_13()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
@@ -81,7 +81,7 @@ describe('VcIssuer builder should', () => {
 
   it('fail to generate a CredentialSupportedV1_11', () => {
     expect(() =>
-      new CredentialSupportedBuilderV1_11()
+      new CredentialSupportedBuilderV1_13()
         .withCryptographicSuitesSupported('ES256K')
         .withCryptographicBindingMethod('did')
         .withId('UniversityDegree_JWT')
@@ -89,7 +89,7 @@ describe('VcIssuer builder should', () => {
     ).toThrowError(TokenErrorResponse.invalid_request)
   })
   it('should successfully attach an instance of the ICredentialOfferStateManager to the VcIssuer instance', async () => {
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
+    const credentialsSupported: CredentialConfigurationSupported = new CredentialSupportedBuilderV1_13()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')

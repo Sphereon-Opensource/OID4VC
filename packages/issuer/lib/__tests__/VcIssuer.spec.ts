@@ -3,7 +3,7 @@ import {
   Alg,
   ALG_ERROR,
   CredentialOfferSession,
-  CredentialSupported,
+  CredentialConfigurationSupported,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
   STATE_MISSING_ERROR,
@@ -12,7 +12,7 @@ import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 
 import { VcIssuer } from '../VcIssuer'
-import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../builder'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../builder'
 import { MemoryStates } from '../state-manager'
 
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
@@ -42,7 +42,7 @@ describe('VcIssuer', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
+    const credentialsSupported: CredentialConfigurationSupported = new CredentialSupportedBuilderV1_13()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')

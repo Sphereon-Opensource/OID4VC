@@ -1,6 +1,6 @@
 import {
   CredentialsSupportedDisplay,
-  CredentialSupported,
+  CredentialConfigurationSupported,
   isFormat,
   isNotFormat,
   IssuerCredentialSubject,
@@ -109,11 +109,11 @@ export class CredentialSupportedBuilderV1_13 {
     return this
   }
 
-  public build(): CredentialSupported {
+  public build(): CredentialConfigurationSupported {
     if (!this.format) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    const credentialSupported: Partial<CredentialSupported> = {
+    const credentialSupported: Partial<CredentialConfigurationSupported> = {
       format: this.format,
     }
     if (!this.types) {
@@ -137,7 +137,7 @@ export class CredentialSupportedBuilderV1_13 {
     }
 
     if (this.cryptographicSuitesSupported) {
-      credentialSupported.cryptographic_suites_supported = this.cryptographicSuitesSupported
+      credentialSupported.credential_signing_alg_values_supported = this.cryptographicSuitesSupported
     }
     if (this.cryptographicBindingMethodsSupported) {
       credentialSupported.cryptographic_binding_methods_supported = this.cryptographicBindingMethodsSupported
@@ -148,6 +148,6 @@ export class CredentialSupportedBuilderV1_13 {
     if (this.display) {
       credentialSupported.display = this.display
     }
-    return credentialSupported as CredentialSupported
+    return credentialSupported as CredentialConfigurationSupported
   }
 }

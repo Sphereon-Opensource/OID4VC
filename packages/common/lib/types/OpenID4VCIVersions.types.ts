@@ -3,6 +3,7 @@ export enum OpenId4VCIVersion {
   VER_1_0_09 = 1009,
   VER_1_0_11 = 1011,
   VER_1_0_12 = 1012,
+  VER_1_0_13 = 1013,
   VER_UNKNOWN = Number.MAX_VALUE,
 }
 

@@ -78,12 +78,12 @@ const mockData: VciMockDataStructure = {
               jwt_vc: {
                 types: ['VerifiableCredential', 'OpenBadgeCredential'],
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K'],
               },
               ldp_vc: {
                 types: ['VerifiableCredential', 'OpenBadgeCredential'],
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['Ed25519Signature2018'],
+                credential_signing_alg_values_supported: ['Ed25519Signature2018'],
               },
             },
           },
@@ -148,7 +148,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -160,7 +160,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableId'],
               },
             },
@@ -174,7 +174,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -186,7 +186,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableDiploma'],
               },
             },
@@ -200,7 +200,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -212,7 +212,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableVaccinationCertificate'],
               },
             },
@@ -226,7 +226,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -238,7 +238,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'VerifiableAttestation', 'ProofOfResidence'],
               },
             },
@@ -252,7 +252,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -264,7 +264,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'ParticipantCredential'],
               },
             },
@@ -278,7 +278,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -290,7 +290,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'VerifiableAttestation', 'Europass'],
               },
             },
@@ -304,7 +304,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -316,7 +316,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'OpenBadgeCredential'],
               },
             },
@@ -393,7 +393,7 @@ const mockData: VciMockDataStructure = {
               ldp_vc: {
                 types: ['VerifiableCredential', 'OpenBadgeCredential'],
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -403,7 +403,7 @@ const mockData: VciMockDataStructure = {
               jwt_vc: {
                 types: ['VerifiableCredential', 'OpenBadgeCredential'],
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'EdDSA', 'ES256K', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'EdDSA', 'ES256K', 'RS256', 'PS256'],
               },
             },
             claims: {
@@ -418,7 +418,7 @@ const mockData: VciMockDataStructure = {
               ldp_vc: {
                 types: ['VerifiableCredential', 'VaccinationCertificate'],
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -428,7 +428,7 @@ const mockData: VciMockDataStructure = {
               jwt_vc: {
                 types: ['VerifiableCredential', 'VaccinationCertificate'],
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'EdDSA', 'ES256K', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'EdDSA', 'ES256K', 'RS256', 'PS256'],
               },
             },
           },
@@ -514,7 +514,7 @@ const mockData: VciMockDataStructure = {
                 description: 'Government of Kakapo PRC.',
                 types: ['PermanentResidentCard'],
                 binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['Ed25519Signature2018'],
+                credential_signing_alg_values_supported: ['Ed25519Signature2018'],
               } as CredentialSupportedFormatV1_0_08,
             },
           },
@@ -525,7 +525,7 @@ const mockData: VciMockDataStructure = {
                 description: 'Microcredential from the MyCreds Network.',
                 types: ['AcademicAward'],
                 binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['Ed25519Signature2018'],
+                credential_signing_alg_values_supported: ['Ed25519Signature2018'],
               } as CredentialSupportedFormatV1_0_08,
             },
           },
@@ -536,7 +536,7 @@ const mockData: VciMockDataStructure = {
                 description: 'Example',
                 types: ['LearnerProfile'],
                 binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['Ed25519Signature2018'],
+                credential_signing_alg_values_supported: ['Ed25519Signature2018'],
               } as CredentialSupportedFormatV1_0_08,
             },
           },
@@ -547,7 +547,7 @@ const mockData: VciMockDataStructure = {
                 description: "MATTR's submission for JFF Plugfest 2",
                 types: ['OpenBadgeCredential'],
                 binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['Ed25519Signature2018'],
+                credential_signing_alg_values_supported: ['Ed25519Signature2018'],
               } as CredentialSupportedFormatV1_0_08,
             },
           },
@@ -659,7 +659,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 types: ['VerifiableCredential', 'OpenBadgeCredential'],
-                cryptographic_suites_supported: ['Ed25519Signature2018'],
+                credential_signing_alg_values_supported: ['Ed25519Signature2018'],
                 cryptographic_binding_methods_supported: ['did'],
               },
             },

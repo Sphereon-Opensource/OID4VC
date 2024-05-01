@@ -8,7 +8,7 @@ import {
   CredentialOfferPayloadV1_0_08,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
-  CredentialSupported,
+  CredentialConfigurationSupported,
   DefaultURISchemes,
   EndpointMetadataResult,
   getClientIdFromCredentialOfferPayload,
@@ -446,7 +446,7 @@ export class OpenID4VCIClient {
   getCredentialsSupported(
     restrictToInitiationTypes: boolean,
     format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
-  ): CredentialSupported[] {
+  ): CredentialConfigurationSupported[] {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),

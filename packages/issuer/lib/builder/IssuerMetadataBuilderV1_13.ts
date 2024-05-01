@@ -1,4 +1,4 @@
-import { CredentialIssuerMetadata, CredentialSupported, MetadataDisplay } from '@sphereon/oid4vci-common'
+import { CredentialIssuerMetadata, CredentialConfigurationSupported, MetadataDisplay } from '@sphereon/oid4vci-common'
 
 import { CredentialSupportedBuilderV1_13 } from './CredentialSupportedBuilderV1_13'
 import { DisplayBuilder } from './DisplayBuilder'
@@ -7,7 +7,7 @@ export class IssuerMetadataBuilderV1_13 {
   credentialEndpoint: string | undefined
   credentialIssuer: string | undefined
   supportedBuilders: CredentialSupportedBuilderV1_13[] = []
-  supportedCredentials: CredentialSupported[] = []
+  supportedCredentials: CredentialConfigurationSupported[] = []
   displayBuilders: DisplayBuilder[] = []
   display: MetadataDisplay[] = []
   batchCredentialEndpoint?: string
@@ -58,7 +58,7 @@ export class IssuerMetadataBuilderV1_13 {
     return this
   }
 
-  public addSupportedCredential(supportedCredential: CredentialSupported) {
+  public addSupportedCredential(supportedCredential: CredentialConfigurationSupported) {
     this.supportedCredentials.push(supportedCredential)
     return this
   }
@@ -88,7 +88,7 @@ export class IssuerMetadataBuilderV1_13 {
     } else if (!this.credentialEndpoint) {
       throw Error('No credential endpoint supplied')
     }
-    const supportedCredentials: CredentialSupported[] = []
+    const supportedCredentials: CredentialConfigurationSupported[] = []
     supportedCredentials.push(...this.supportedCredentials)
     supportedCredentials.push(...this.supportedBuilders.map((builder) => builder.build()))
     if (supportedCredentials.length === 0) {
@@ -104,7 +104,7 @@ export class IssuerMetadataBuilderV1_13 {
       credential_endpoint: this.credentialEndpoint,
       credentials_supported: supportedCredentials,
       // batch_credential_endpoint: this.batchCredentialEndpoint; // not implemented yet
-      ...(this.authorizationServer && { authorization_server: this.authorizationServer }),
+      ...(this.authorizationServers && { authorization_servers: this.authorizationServers }),
       ...(this.tokenEndpoint && { token_endpoint: this.tokenEndpoint }),
       ...(display.length > 0 && { display }),
     }

@@ -4,7 +4,7 @@ import {
   CodeChallengeMethod,
   convertJsonToURI,
   CredentialOfferRequestWithBaseUrl,
-  CredentialSupported,
+  CredentialConfigurationSupported,
   EndpointMetadataResult,
   formPost,
   JsonURIMode,
@@ -28,7 +28,7 @@ export const createAuthorizationRequestUrl = async ({
   endpointMetadata: EndpointMetadataResult;
   authorizationRequest: AuthorizationRequestOpts;
   credentialOffer?: CredentialOfferRequestWithBaseUrl;
-  credentialsSupported?: CredentialSupported[];
+  credentialsSupported?: CredentialConfigurationSupported[];
 }): Promise<string> => {
   const { redirectUri, clientId } = authorizationRequest;
   let { scope, authorizationDetails } = authorizationRequest;
@@ -47,7 +47,7 @@ export const createAuthorizationRequestUrl = async ({
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     authorizationDetails = creds
-      .flatMap((cred) => (typeof cred === 'string' ? credentialsSupported : (cred as CredentialSupported)))
+      .flatMap((cred) => (typeof cred === 'string' ? credentialsSupported : (cred as CredentialConfigurationSupported)))
       .filter((cred) => !!cred)
       .map((cred) => {
         return {

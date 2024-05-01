@@ -6,7 +6,7 @@ import {
   AccessTokenResponse,
   Alg,
   CredentialOfferSession,
-  CredentialSupported,
+  CredentialConfigurationSupported,
   IssuerCredentialSubjectDisplay,
   Jwt,
   JWTHeader,
@@ -14,7 +14,7 @@ import {
   OpenId4VCIVersion,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
-import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
@@ -70,7 +70,7 @@ describe('VcIssuer', () => {
       return new jose.SignJWT({ ...jwt.payload }).setProtectedHeader({ ...jwt.header, alg: Alg.ES256 }).sign(privateKey)
     }
 
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
+    const credentialsSupported: CredentialConfigurationSupported = new CredentialSupportedBuilderV1_13()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withTypes('VerifiableCredential')

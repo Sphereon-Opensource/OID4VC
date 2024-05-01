@@ -4,14 +4,14 @@ import { AccessTokenRequest, CredentialRequestV1_0_11, CredentialSupportedSdJwtV
 import nock from 'nock';
 
 import { OpenID4VCIClient } from '..';
-import { createAccessTokenResponse, IssuerMetadataBuilderV1_11, VcIssuerBuilder } from '../../../issuer';
+import { createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilder } from '../../../issuer';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
 const alg = 'ES256';
 const jwk = { kty: 'EC', crv: 'P-256', x: 'zQOowIC1gWJtdddB5GAt4lau6Lt8Ihy771iAfam-1pc', y: 'cjD_7o3gdQ1vgiQy3_sMGs7WrwCMU9FQYimA3HxnMlw' };
 
-const issuerMetadata = new IssuerMetadataBuilderV1_11()
+const issuerMetadata = new IssuerMetadataBuilderV1_13()
   .withCredentialIssuer('https://example.com')
   .withCredentialEndpoint('https://credenital-endpoint.example.com')
   .withTokenEndpoint('https://token-endpoint.example.com')

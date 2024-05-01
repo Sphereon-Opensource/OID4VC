@@ -104,13 +104,19 @@ export interface CommonAuthorizationDetails {
    * MUST be set to openid_credential for the purpose of this specification.
    */
   type: 'openid_credential' | string;
+
+  /**
+   *  REQUIRED when format parameter is not present. String specifying a unique identifier of the Credential being described in the credential_configurations_supported map in the Credential Issuer Metadata as defined in Section 11.2.3. The referenced object in the credential_configurations_supported map conveys the details, such as the format, for issuance of the requested Credential. This specification defines Credential Format specific Issuer Metadata in Appendix A. It MUST NOT be present if format parameter is present.
+   */
+  credential_configuration_id?: string; // FIXME maybe split up and make this & format required again
+
   /**
    * REQUIRED. JSON string representing the format in which the Credential is requested to be issued.
    * This Credential format identifier determines further claims in the authorization details object
    * specifically used to identify the Credential type to be issued. This specification defines
    * Credential Format Profiles in Appendix E.
    */
-  format: OID4VCICredentialFormat;
+  format?: OID4VCICredentialFormat;
   /**
    * If the Credential Issuer metadata contains an authorization_server parameter,
    * the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.

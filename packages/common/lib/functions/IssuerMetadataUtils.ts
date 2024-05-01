@@ -2,7 +2,7 @@ import {
   AuthorizationServerMetadata,
   CredentialIssuerMetadata,
   CredentialOfferFormat,
-  CredentialSupported,
+  CredentialConfigurationSupported,
   CredentialSupportedTypeV1_0_08,
   CredentialSupportedV1_0_08,
   IssuerMetadataV1_0_08,
@@ -10,13 +10,14 @@ import {
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
 } from '../types';
+import { IssuerMetadataV1_0_13 } from '../types/v1_0_13.types';
 
 export function getSupportedCredentials(opts?: {
-  issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08;
+  issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08 | IssuerMetadataV1_0_13;
   version: OpenId4VCIVersion;
   types?: string[][];
   format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[];
-}): CredentialSupported[] {
+}): CredentialConfigurationSupported[] {
   if (opts?.types && Array.isArray(opts?.types)) {
     return opts.types.flatMap((types) => getSupportedCredential({ ...opts, types }));
   }
@@ -24,11 +25,11 @@ export function getSupportedCredentials(opts?: {
 }
 
 export function getSupportedCredential(opts?: {
-  issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08;
+  issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08 | IssuerMetadataV1_0_13;
   version: OpenId4VCIVersion;
   types?: string | string[];
   format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[];
-}): CredentialSupported[] {
+}): Record<string, CredentialConfigurationSupported> {
   const { issuerMetadata } = opts ?? {};
   let formats: (OID4VCICredentialFormat | string)[];
   if (opts?.format && Array.isArray(opts.format)) {
@@ -38,21 +39,22 @@ export function getSupportedCredential(opts?: {
   } else {
     formats = [];
   }
-  let credentialsSupported: CredentialSupported[];
+  let credentialConfigsSupported: Record<string, CredentialConfigurationSupported>;
   if (!issuerMetadata) {
-    return [];
+    return {};
   }
-  const { version, types } = opts ?? { version: OpenId4VCIVersion.VER_1_0_11 };
-  if (version === OpenId4VCIVersion.VER_1_0_08 || !Array.isArray(issuerMetadata.credentials_supported)) {
-    credentialsSupported = credentialsSupportedV8ToV11((issuerMetadata as IssuerMetadataV1_0_08).credentials_supported ?? {});
+  const { version, types } = opts ?? { version: OpenId4VCIVersion.VER_1_0_13 };
+  if (version === OpenId4VCIVersion.VER_1_0_08
+    || (!Array.isArray(issuerMetadata.credentials_supported) && !Array.isArray(issuerMetadata.credential_configurations_supported))) {
+    credentialConfigsSupported = credentialsSupportedV8ToV13((issuerMetadata as IssuerMetadataV1_0_08).credentials_supported ?? {});
   } else {
-    credentialsSupported = (issuerMetadata as CredentialIssuerMetadata).credentials_supported;
+    credentialConfigsSupported = (issuerMetadata as CredentialIssuerMetadata).credential_configurations_supported;
   }
 
-  if (credentialsSupported === undefined || credentialsSupported.length === 0) {
-    return [];
+  if (credentialConfigsSupported === undefined || Object.keys(credentialConfigsSupported).length === 0) {
+    return {};
   } else if (!types || types.length === 0) {
-    return credentialsSupported;
+    return credentialConfigsSupported;
   }
   /**
    * the following (not array part is a legacy code from version 1_0-08 which JFF plugfest 2 implementors used)
@@ -70,10 +72,10 @@ export function getSupportedCredential(opts?: {
   }
   const supportedFormats: (CredentialOfferFormat | string)[] = formats && formats.length > 0 ? formats : ['jwt_vc_json', 'jwt_vc_json-ld', 'ldp_vc'];
 
-  const credentialSupportedOverlap: CredentialSupported[] = [];
+  const credentialSupportedOverlap: Record<string, CredentialConfigurationSupported> ={};
   if ((opts?.types && typeof opts?.types === 'string') || opts?.types?.length === 1) {
     const types = Array.isArray(opts.types) ? opts.types[0] : opts.types;
-    const supported = credentialsSupported.filter(
+    const supported = credentialConfigsSupported.filter(
       (sup) => sup.id === types || (initiationTypes && arrayEqualsIgnoreOrder(getTypesFromCredentialSupported(sup), initiationTypes)),
     );
     if (supported) {
@@ -86,7 +88,7 @@ export function getSupportedCredential(opts?: {
     if (initiationTypes && !initiationTypes.includes('VerifiableCredential')) {
       initiationTypes.push('VerifiableCredential');
     }
-    const supported = credentialsSupported.filter((sup) => {
+    const supported = credentialConfigsSupported.filter((sup) => {
       const supTypes = getTypesFromCredentialSupported(sup);
       if (!supTypes.includes('VerifiableCredential')) {
         supTypes.push('VerifiableCredential');
@@ -100,7 +102,7 @@ export function getSupportedCredential(opts?: {
   return credentialSupportedOverlap;
 }
 
-export function getTypesFromCredentialSupported(credentialSupported: CredentialSupported, opts?: { filterVerifiableCredential: boolean }) {
+export function getTypesFromCredentialSupported(credentialSupported: CredentialConfigurationSupported, opts?: { filterVerifiableCredential: boolean }) {
   let types: string[] = [];
   if (
     credentialSupported.format === 'jwt_vc_json' ||
@@ -133,30 +135,33 @@ function arrayEqualsIgnoreOrder(a: string[], b: string[]) {
   return true;
 }
 
-export function credentialsSupportedV8ToV11(supportedV8: CredentialSupportedTypeV1_0_08): CredentialSupported[] {
-  return Object.entries(supportedV8).flatMap((entry) => {
+export function credentialsSupportedV8ToV13(supportedV8: CredentialSupportedTypeV1_0_08): Record<string, CredentialConfigurationSupported> {
+  const credentialConfigsSupported:Record<string, CredentialConfigurationSupported> = {};
+  Object.entries(supportedV8).flatMap((entry) => {
     const type = entry[0];
     const supportedV8 = entry[1];
-    return credentialSupportedV8ToV11(type, supportedV8);
+    Object.assign(credentialConfigsSupported, credentialSupportedV8ToV13(type, supportedV8));
   });
+  return credentialConfigsSupported;
 }
 
-export function credentialSupportedV8ToV11(key: string, supportedV8: CredentialSupportedV1_0_08): CredentialSupported[] {
-  return Object.entries(supportedV8.formats).map((entry) => {
+export function credentialSupportedV8ToV13(key: string, supportedV8: CredentialSupportedV1_0_08): Record<string, CredentialConfigurationSupported> {
+  const credentialConfigsSupported:Record<string, CredentialConfigurationSupported> = {};
+  Object.entries(supportedV8.formats).map((entry) => {
     const format = entry[0];
     const credentialSupportBrief = entry[1];
     if (typeof format !== 'string') {
       throw Error(`Unknown format received ${JSON.stringify(format)}`);
     }
-    let credentialSupport: Partial<CredentialSupported> = {};
-    credentialSupport = {
+    const credentialConfigSupported: Partial<CredentialConfigurationSupported> = {
       format: format as OID4VCICredentialFormat,
       display: supportedV8.display,
       ...credentialSupportBrief,
       credentialSubject: supportedV8.claims,
     };
-    return credentialSupport as CredentialSupported;
+    credentialConfigsSupported[key] = credentialConfigSupported as CredentialConfigurationSupported;
   });
+  return credentialConfigsSupported;
 }
 
 export function getIssuerDisplays(metadata: CredentialIssuerMetadata | IssuerMetadataV1_0_08, opts?: { prefLocales: string[] }): MetadataDisplay[] {
