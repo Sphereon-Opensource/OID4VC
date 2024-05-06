@@ -51,6 +51,8 @@ client you can use to finish the pre-authorized code flows.
 This initiates the client using a URI obtained from the Issuer using a link (URL) or QR code typically. We are also
 already fetching the Server Metadata
 
+
+Using openid-initiate-issuance scheme
 ```typescript
 import { OpenID4VCIClient } from '@sphereon/oid4vci-client';
 
@@ -66,6 +68,24 @@ const client = await OpenID4VCIClient.fromURI({
 console.log(client.getIssuer()); // https://issuer.research.identiproof.io
 console.log(client.getCredentialEndpoint()); // https://issuer.research.identiproof.io/credential
 console.log(client.getAccessTokenEndpoint()); // https://auth.research.identiproof.io/oauth2/token
+```
+
+Using https scheme
+```typescript
+import { OpenID4VCIClient } from '@sphereon/oid4vci-client';
+
+// The client is initiated from a URI. This URI is provided by the Issuer, typically as a URL or QR code.
+const client = await OpenID4VCIClient.fromURI({
+  uri: 'https://launchpad.vii.electron.mattrlabs.io?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Flaunchpad.vii.electron.mattrlabs.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22ldp_vc%22%2C%22types%22%3A%5B%22OpenBadgeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22UPZohaodPlLBnGsqB02n2tIupCIg8nKRRUEUHWA665X%22%7D%7D%7D',
+  kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#key-1', // Our DID.  You can defer this also to when the acquireCredential method is called
+  alg: Alg.ES256, // The signing Algorithm we will use. You can defer this also to when the acquireCredential method is called
+  clientId: 'test-clientId', // The clientId if the Authrozation Service requires it.  If a clientId is needed you can defer this also to when the acquireAccessToken method is called
+  retrieveServerMetadata: true, // Already retrieve the server metadata. Can also be done afterwards by invoking a method yourself.
+});
+
+console.log(client.getIssuer()); // https://launchpad.vii.electron.mattrlabs.io
+console.log(client.getCredentialEndpoint()); // https://launchpad.vii.electron.mattrlabs.io/credential
+console.log(client.getAccessTokenEndpoint()); // https://launchpad.vii.electron.mattrlabs.io/oauth2/token
 ```
 
 ## Server metadata

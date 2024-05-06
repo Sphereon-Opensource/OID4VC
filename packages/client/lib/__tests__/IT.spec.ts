@@ -50,7 +50,8 @@ describe('OID4VCI-Client should', () => {
   const INITIATE_QR =
     'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true';
   const OFFER_QR =
-    'openid-credential-offer://credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D';
+    'openid-credential-offer://credential_offer=%7B%22credential_issuer%22:%22https://issuer.research.identiproof.io%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D';
+  const HTTPS = 'https://issuer.research.identiproof.io?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true'
 
   function succeedWithAFullFlowWithClientSetup() {
     nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
@@ -78,7 +79,7 @@ describe('OID4VCI-Client should', () => {
     await assertionOfsucceedWithAFullFlowWithClient(client);
   });
 
-  test.skip('succeed with a full flow wit the client using OpenID4VCI version 11', async () => {
+  test.skip('succeed with a full flow with the client using OpenID4VCI version 11 and deeplink', async () => {
     succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
       uri: OFFER_QR,
@@ -88,6 +89,28 @@ describe('OID4VCI-Client should', () => {
     });
     await assertionOfsucceedWithAFullFlowWithClient(client);
   });
+
+  /*
+openid-initiate-issuance://?issuer=https://issuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true
+
+####################################################################################################################################
+
+openid-credential-offer://credential_offer={"credential_issuer":"https://issuer.research.identiproof.io","credentials":[{"format":"jwt_vc_json","types":["VerifiableCredential","UniversityDegreeCredential"]}],"issuer_state":"eyJhbGciOiJSU0Et...FYUaBy"}
+
+####################################################################################################################################
+
+https://issuer.research.identiproof.io?issuer=https://issuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true
+   */
+  it('succeed with a full flow with the client using OpenID4VCI version 11 and https', async () => {
+    succeedWithAFullFlowWithClientSetup()
+    const client = await OpenID4VCIClient.fromURI({
+      uri: HTTPS,
+      kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
+      alg: Alg.ES256,
+      clientId: 'test-clientId'
+    })
+    await assertionOfsucceedWithAFullFlowWithClient(client);
+  })
 
   async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
     expect(client.credentialOffer).toBeDefined();
