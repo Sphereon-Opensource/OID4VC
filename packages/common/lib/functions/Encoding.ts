@@ -81,17 +81,46 @@ export function convertJsonToURI(
 }
 
 /**
- * @function decodeUriAsJson decodes a URI into a Json object
+ * @type {(uri: string, opts?: DecodeURIAsJsonOpts): unknown} convertURIToJsonObject converts an URI into a Json object decoding its properties
  * @param uri string
- * @param opts:
+ * @param opts
  *          - requiredProperties: the required properties
  *          - arrayTypeProperties: properties that can show up more that once
+ * @returns JSON object
  */
 export function convertURIToJsonObject(uri: string, opts?: DecodeURIAsJsonOpts): unknown {
   if (!uri || (opts?.requiredProperties && !opts.requiredProperties?.every((p) => uri.includes(p)))) {
     throw new Error(BAD_PARAMS);
   }
+
+  if (opts?.arrayTypeProperties && opts.arrayTypeProperties.includes('credential_offer_uri')) {
+    const value = uri.includes('?') ? uri.split('?')[1].split('=') : uri
+     if (!Array.isArray(value) || value[0] !== 'credential_offer_uri') {
+       throw new Error(`URL does not include credential_offer_uri`)
+     }
+    return {
+      credential_offer_uri: value[1]
+    }
+  }
+
+  if (opts?.arrayTypeProperties && opts.arrayTypeProperties.includes('credential_offer')) {
+    const decodedUri = decodeURIComponent(uri)
+    const value = decodedUri.includes('?') ? decodedUri.split('?')[1].split('=') : decodedUri
+    if (!Array.isArray(value) || value[0] !== 'credential_offer') {
+      throw new Error(`URL does not include credential_offer`)
+    }
+    try {
+      const json = JSON.parse(value[1])
+      return {
+        credential_offer: json
+      }
+    } catch(e) {
+      console.log(e)
+    }
+  }
+
   const uriComponents = getURIComponentsAsArray(uri, opts?.arrayTypeProperties);
+
   return decodeJsonProperties(uriComponents);
 }
 
@@ -128,8 +157,8 @@ function decodeJsonProperties(parts: string[] | string[][]): unknown {
 
 /**
  * @function get URI Components as Array
- * @param uri string
- * @param arrayTypes array of string containing array like keys
+ * @param {string} uri uri
+ * @param {string[]} [arrayTypes] array of string containing array like keys
  */
 function getURIComponentsAsArray(uri: string, arrayTypes?: string[]): string[] | string[][] {
   const parts = uri.includes('?') ? uri.split('?')[1] : uri.includes('://') ? uri.split('://')[1] : uri;
