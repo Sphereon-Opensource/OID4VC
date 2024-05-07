@@ -1,4 +1,12 @@
-import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, JsonURIMode, OpenId4VCIVersion, SearchValue } from '../types';
+import {
+  BAD_PARAMS,
+  CredentialOfferV1_0_11,
+  DecodeURIAsJsonOpts,
+  EncodeJsonAsURIOpts,
+  JsonURIMode,
+  OpenId4VCIVersion,
+  SearchValue
+} from '../types'
 
 /**
  * @type {(json: {[s:string]: never} | ArrayLike<never> | string | object, opts?: EncodeJsonAsURIOpts)} encodes a Json object into a URI
@@ -94,34 +102,32 @@ export function convertURIToJsonObject(uri: string, opts?: DecodeURIAsJsonOpts):
   }
 
   if (opts?.arrayTypeProperties && opts.arrayTypeProperties.includes('credential_offer_uri')) {
-    const value = uri.includes('?') ? uri.split('?')[1].split('=') : uri
-     if (!Array.isArray(value) || value[0] !== 'credential_offer_uri') {
-       throw new Error(`URL does not include credential_offer_uri`)
-     }
-    return {
-      credential_offer_uri: value[1]
-    }
+    return encodedCredentialOfferUri2Json({ uri })
   }
 
   if (opts?.arrayTypeProperties && opts.arrayTypeProperties.includes('credential_offer')) {
-    const decodedUri = decodeURIComponent(uri)
-    const value = decodedUri.includes('?') ? decodedUri.split('?')[1].split('=') : decodedUri
-    if (!Array.isArray(value) || value[0] !== 'credential_offer') {
-      throw new Error(`URL does not include credential_offer`)
-    }
-    try {
-      const json = JSON.parse(value[1])
-      return {
-        credential_offer: json
-      }
-    } catch(e) {
-      console.log(e)
-    }
+    return encodedCredentialOffer2Json({ uri })
   }
 
   const uriComponents = getURIComponentsAsArray(uri, opts?.arrayTypeProperties);
-
   return decodeJsonProperties(uriComponents);
+}
+
+function encodedCredentialOfferUri2Json(args: { uri: string }): Pick<CredentialOfferV1_0_11, 'credential_offer_uri'> {
+  const { uri } = args
+  const value = uri.includes('?') ? uri.split('?')[1].split('=') : uri
+  return {
+    credential_offer_uri: value[1]
+  }
+}
+
+function encodedCredentialOffer2Json(args: { uri: string }): Pick<CredentialOfferV1_0_11, 'credential_offer'> {
+  const { uri } = args
+  const decodedUri = decodeURIComponent(uri)
+  const value = decodedUri.includes('?') ? decodedUri.split('?')[1].split('=') : decodedUri
+  return {
+    credential_offer: JSON.parse(value[1])
+  }
 }
 
 function decodeJsonProperties(parts: string[] | string[][]): unknown {
