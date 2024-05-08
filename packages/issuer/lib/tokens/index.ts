@@ -134,8 +134,8 @@ export const createAccessTokenResponse = async (
     credentialOfferSessions: IStateManager<CredentialOfferSession>
     cNonces: IStateManager<CNonceState>
     cNonce?: string
-    cNonceExpiresIn?: number
-    tokenExpiresIn: number
+    cNonceExpiresIn?: number // expiration in seconds
+    tokenExpiresIn: number // expiration in seconds
     // preAuthorizedCodeExpirationDuration?: number
     accessTokenSignerCallback: JWTSignerCallback
     accessTokenIssuer: string

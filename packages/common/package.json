@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-common",
-  "version": "0.10.1",
+  "version": "0.10.3",
   "description": "OpenID 4 Verifiable Credential Issuance Common Types",
   "source": "lib/index.ts",
   "main": "dist/index.js",
@@ -10,7 +10,7 @@
     "build:clean": "tsc --build --clean && tsc --build"
   },
   "dependencies": {
-    "@sphereon/ssi-types": "^0.18.1",
+    "@sphereon/ssi-types": "^0.23.0",
     "cross-fetch": "^3.1.8",
     "jwt-decode": "^3.1.2",
     "sha.js": "^2.4.11",
@@ -19,7 +19,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.3",
     "@types/sha.js": "^2.4.4",
-    "typescript": "5.3.3"
+    "typescript": "5.4.5"
   },
   "peerDependencies": {
     "msrcrypto": "^1.5.8"
