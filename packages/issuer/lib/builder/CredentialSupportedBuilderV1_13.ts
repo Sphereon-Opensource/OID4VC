@@ -1,6 +1,6 @@
 import {
-  CredentialsSupportedDisplay,
   CredentialConfigurationSupported,
+  CredentialsSupportedDisplay,
   isFormat,
   isNotFormat,
   IssuerCredentialSubject,
@@ -109,7 +109,7 @@ export class CredentialSupportedBuilderV1_13 {
     return this
   }
 
-  public build(): CredentialConfigurationSupported {
+  public build(): Record<string, CredentialConfigurationSupported> {
     if (!this.format) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
@@ -148,6 +148,9 @@ export class CredentialSupportedBuilderV1_13 {
     if (this.display) {
       credentialSupported.display = this.display
     }
-    return credentialSupported as CredentialConfigurationSupported
+    const supportedConfiguration: Record<string, CredentialConfigurationSupported> = {}
+    //TODO: is this the correct approach here? since the id is not mandatory, I'm relying on a none-unique value
+    supportedConfiguration[this.id ?? this.format] = credentialSupported as CredentialConfigurationSupported
+    return supportedConfiguration
   }
 }

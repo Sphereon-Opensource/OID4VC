@@ -1,4 +1,4 @@
-import { CredentialIssuerMetadata, CredentialConfigurationSupported, MetadataDisplay } from '@sphereon/oid4vci-common'
+import { CredentialConfigurationSupported, CredentialIssuerMetadata, MetadataDisplay } from '@sphereon/oid4vci-common'
 
 import { CredentialSupportedBuilderV1_13 } from './CredentialSupportedBuilderV1_13'
 import { DisplayBuilder } from './DisplayBuilder'
@@ -7,7 +7,7 @@ export class IssuerMetadataBuilderV1_13 {
   credentialEndpoint: string | undefined
   credentialIssuer: string | undefined
   supportedBuilders: CredentialSupportedBuilderV1_13[] = []
-  supportedCredentials: CredentialConfigurationSupported[] = []
+  credentialConfigurationsSupported: Record<string, CredentialConfigurationSupported> = {}
   displayBuilders: DisplayBuilder[] = []
   display: MetadataDisplay[] = []
   batchCredentialEndpoint?: string
@@ -58,8 +58,8 @@ export class IssuerMetadataBuilderV1_13 {
     return this
   }
 
-  public addSupportedCredential(supportedCredential: CredentialConfigurationSupported) {
-    this.supportedCredentials.push(supportedCredential)
+  public addCredentialConfigurationsSupported(id: string, supportedCredential: CredentialConfigurationSupported) {
+    this.credentialConfigurationsSupported[id] = supportedCredential
     return this
   }
 
@@ -88,10 +88,14 @@ export class IssuerMetadataBuilderV1_13 {
     } else if (!this.credentialEndpoint) {
       throw Error('No credential endpoint supplied')
     }
-    const supportedCredentials: CredentialConfigurationSupported[] = []
-    supportedCredentials.push(...this.supportedCredentials)
-    supportedCredentials.push(...this.supportedBuilders.map((builder) => builder.build()))
-    if (supportedCredentials.length === 0) {
+    const credential_configurations_supported: Record<string, CredentialConfigurationSupported> = this.credentialConfigurationsSupported
+    const configurationsEntryList: Record<string, CredentialConfigurationSupported>[] = this.supportedBuilders.map((builder)=>builder.build())
+    configurationsEntryList.forEach(configRecord => {
+      Object.keys(configRecord).forEach(key => {
+        credential_configurations_supported[key] = configRecord[key];
+      });
+    });
+    if (Object.keys(credential_configurations_supported).length === 0) {
       throw Error('No supported credentials supplied')
     }
 
@@ -102,11 +106,11 @@ export class IssuerMetadataBuilderV1_13 {
     return {
       credential_issuer: this.credentialIssuer,
       credential_endpoint: this.credentialEndpoint,
-      credentials_supported: supportedCredentials,
+      credential_configurations_supported,
       // batch_credential_endpoint: this.batchCredentialEndpoint; // not implemented yet
       ...(this.authorizationServers && { authorization_servers: this.authorizationServers }),
       ...(this.tokenEndpoint && { token_endpoint: this.tokenEndpoint }),
       ...(display.length > 0 && { display }),
-    }
+    } as CredentialIssuerMetadata
   }
 }

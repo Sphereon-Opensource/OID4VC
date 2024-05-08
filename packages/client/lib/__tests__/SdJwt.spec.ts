@@ -4,7 +4,7 @@ import { AccessTokenRequest, CredentialRequestV1_0_11, CredentialSupportedSdJwtV
 import nock from 'nock';
 
 import { OpenID4VCIClient } from '..';
-import { createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilder } from '../../../issuer';
+import { createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilderV1_0_11 } from '../../../issuer';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -15,14 +15,14 @@ const issuerMetadata = new IssuerMetadataBuilderV1_13()
   .withCredentialIssuer('https://example.com')
   .withCredentialEndpoint('https://credenital-endpoint.example.com')
   .withTokenEndpoint('https://token-endpoint.example.com')
-  .addSupportedCredential({
+  .addCredentialConfigurationsSupported({
     format: 'vc+sd-jwt',
     vct: 'SdJwtCredential',
     id: 'SdJwtCredentialId',
   })
   .build();
 
-const vcIssuer = new VcIssuerBuilder()
+const vcIssuer = new VcIssuerBuilderV1_0_11()
   .withIssuerMetadata(issuerMetadata)
   .withInMemoryCNonceState()
   .withInMemoryCredentialOfferState()

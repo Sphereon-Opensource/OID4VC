@@ -5,10 +5,10 @@ import {
   AuthorizationResponse,
   AuthzFlowType,
   CodeChallengeMethod,
+  CredentialConfigurationSupported,
   CredentialOfferPayloadV1_0_08,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
-  CredentialConfigurationSupported,
   DefaultURISchemes,
   EndpointMetadataResult,
   getClientIdFromCredentialOfferPayload,
@@ -446,7 +446,7 @@ export class OpenID4VCIClient {
   getCredentialsSupported(
     restrictToInitiationTypes: boolean,
     format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
-  ): CredentialConfigurationSupported[] {
+  ): Record<string, CredentialConfigurationSupported> {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),

@@ -24,7 +24,7 @@ import {
 } from './oid4vci-api-functions'
 
 function buildVCIFromEnvironment<DIDDoc extends object>() {
-  const credentialsSupported: CredentialConfigurationSupported = new CredentialSupportedBuilderV1_13()
+  const credentialsSupported: Record<string, CredentialConfigurationSupported> = new CredentialSupportedBuilderV1_13()
     .withCryptographicSuitesSupported(process.env.cryptographic_suites_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
     .withFormat(process.env.credential_supported_format as unknown as OID4VCICredentialFormat)
@@ -49,15 +49,15 @@ function buildVCIFromEnvironment<DIDDoc extends object>() {
     )
     .build()
   return new VcIssuerBuilder<DIDDoc>()
-    .withUserPinRequired(process.env.user_pin_required as unknown as boolean)
-    .withAuthorizationServer(process.env.authorization_server as string)
+    .withTXCode({ length: process.env.user_pin_length as unknown as number, input_mode: process.env.user_pin_input_mode as 'numeric' | 'text'})
+    .withAuthorizationServers(process.env.authorization_server as string)
     .withCredentialEndpoint(process.env.credential_endpoint as string)
     .withCredentialIssuer(process.env.credential_issuer as string)
     .withIssuerDisplay({
       name: process.env.issuer_name as string,
       locale: process.env.issuer_locale as string,
     })
-    .withCredentialsSupported(credentialsSupported)
+    .withCredentialConfigurationsSupported(credentialsSupported)
     .withInMemoryCredentialOfferState()
     .withInMemoryCNonceState()
     .build()

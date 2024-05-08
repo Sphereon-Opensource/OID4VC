@@ -3,7 +3,7 @@ import {
   AUD_ERROR,
   CNonceState,
   CreateCredentialOfferURIResult,
-  CREDENTIAL_MISSING_ERROR,
+  CREDENTIAL_MISSING_ERROR, CredentialConfigurationSupported,
   CredentialDataSupplierInput,
   CredentialIssuerMetadataOpts,
   CredentialOfferFormat,
@@ -32,7 +32,7 @@ import {
   toUniformCredentialOfferRequest,
   TYP_ERROR,
   UniformCredentialRequest,
-  URIState,
+  URIState, WRONG_METADATA_FORMAT
 } from '@sphereon/oid4vci-common'
 import { CompactSdJwtVc, CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
@@ -532,13 +532,32 @@ export class VcIssuer<DIDDoc extends object> {
   }
 
   private isMetadataSupportCredentialRequestFormat(requestFormat: string | string[]): boolean {
-    for (const credentialSupported of this._issuerMetadata.credentials_supported) {
-      if (!Array.isArray(requestFormat) && credentialSupported.format === requestFormat) {
-        return true
-      } else if (Array.isArray(requestFormat)) {
-        for (const format of requestFormat as string[]) {
-          if (credentialSupported.format === format) {
-            return true
+    if (!('credential_configurations_supported' in this._issuerMetadata) && !this._issuerMetadata.credentials_supported) {
+      return false
+    } else if ('credential_configurations_supported' in this._issuerMetadata && this._issuerMetadata.credentials_supported) {
+      throw Error(WRONG_METADATA_FORMAT)
+    }
+    if ('credential_configurations_supported' in this._issuerMetadata) {
+      for (const credentialSupported of Object.values(this._issuerMetadata['credential_configurations_supported'] as Record<string, CredentialConfigurationSupported>)) {
+        if (!Array.isArray(requestFormat) && credentialSupported.format === requestFormat) {
+          return true
+        } else if (Array.isArray(requestFormat)) {
+          for (const format of requestFormat as string[]) {
+            if (credentialSupported.format === format) {
+              return true
+            }
+          }
+        }
+      }
+    } else {
+      for (const credentialSupported of this._issuerMetadata.credentials_supported) {
+        if (!Array.isArray(requestFormat) && credentialSupported.format === requestFormat) {
+          return true
+        } else if (Array.isArray(requestFormat)) {
+          for (const format of requestFormat as string[]) {
+            if (credentialSupported.format === format) {
+              return true
+            }
           }
         }
       }

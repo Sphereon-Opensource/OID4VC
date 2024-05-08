@@ -1,7 +1,7 @@
 import { CredentialConfigurationSupported, IssuerCredentialSubjectDisplay, IssueStatus, TokenErrorResponse } from '@sphereon/oid4vci-common'
 import { v4 } from 'uuid'
 
-import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../index'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilderV1_0_11 } from '../index'
 
 describe('VcIssuer builder should', () => {
   it('generate a VcIssuer', () => {
@@ -26,7 +26,7 @@ describe('VcIssuer builder should', () => {
         locale: 'en-US',
       } as IssuerCredentialSubjectDisplay)
       .build()
-    const vcIssuer = new VcIssuerBuilder()
+    const vcIssuer = new VcIssuerBuilderV1_0_11()
       .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer('https://credential-issuer')
@@ -67,7 +67,7 @@ describe('VcIssuer builder should', () => {
       } as IssuerCredentialSubjectDisplay)
       .build()
     expect(() =>
-      new VcIssuerBuilder()
+      new VcIssuerBuilderV1_0_11()
         .withAuthorizationServer('https://authorization-server')
         .withCredentialEndpoint('https://credential-endpoint')
         .withIssuerDisplay({
@@ -110,7 +110,7 @@ describe('VcIssuer builder should', () => {
         locale: 'en-US',
       } as IssuerCredentialSubjectDisplay)
       .build()
-    const vcIssuer = new VcIssuerBuilder()
+    const vcIssuer = new VcIssuerBuilderV1_0_11()
       .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer('https://credential-issuer')

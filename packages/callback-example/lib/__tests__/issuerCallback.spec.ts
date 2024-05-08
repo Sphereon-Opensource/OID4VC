@@ -13,7 +13,7 @@ import {
   ProofOfPossession,
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
-import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilderV1_0_11 } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer'
 import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
@@ -140,7 +140,7 @@ describe('issuerCallback', () => {
 
     const nonces = new MemoryStates<CNonceState>()
     await nonces.set('test_value', { cNonce: 'test_value', createdAt: +new Date(), issuerState: 'existing-state' })
-    vcIssuer = new VcIssuerBuilder<DIDDocument>()
+    vcIssuer = new VcIssuerBuilderV1_0_11<DIDDocument>()
       .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)

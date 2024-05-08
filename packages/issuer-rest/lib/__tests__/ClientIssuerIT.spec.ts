@@ -5,8 +5,8 @@ import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   AccessTokenResponse,
   Alg,
-  CredentialOfferSession,
   CredentialConfigurationSupported,
+  CredentialOfferSession,
   IssuerCredentialSubjectDisplay,
   Jwt,
   JWTHeader,
@@ -14,7 +14,7 @@ import {
   OpenId4VCIVersion,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
-import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilderV1_0_11 } from '@sphereon/oid4vci-issuer/dist/builder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
@@ -101,7 +101,7 @@ describe('VcIssuer', () => {
       credentialSubject: {},
     }
 
-    vcIssuer = new VcIssuerBuilder<DIDDocument>()
+    vcIssuer = new VcIssuerBuilderV1_0_11<DIDDocument>()
       // .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
       .withDefaultCredentialOfferBaseUri('http://localhost:3456/test')

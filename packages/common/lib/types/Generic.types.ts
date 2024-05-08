@@ -55,15 +55,42 @@ export interface CredentialSupplierConfig {
 export interface CredentialIssuerMetadataOpts {
   credential_endpoint?: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   batch_credential_endpoint?: string; // OPTIONAL. URL of the Credential Issuer's Batch Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components. If omitted, the Credential Issuer does not support the Batch Credential Endpoint.
-  deferred_credential_endpoint?: string; // OPTIONAL. URL of the Credential Issuer's Deferred Credential Endpoint, as defined in Section 9. This URL MUST use the https scheme and MAY contain port, path, and query parameter components. If omitted, the Credential Issuer does not support the Deferred Credential Endpoint.
-  notification_endpoint?: string; // OPTIONAL. URL of the Credential Issuer's Notification Endpoint, as defined in Section 10. This URL MUST use the https scheme and MAY contain port, path, and query parameter components. If omitted, the Credential Issuer does not support the Notification Endpoint.
-  credential_configurations_supported?: Record<string, CredentialConfigurationSupported>; // REQUIRED. A JSON array containing a list of JSON objects, each of them representing metadata about a separate credential type that the Credential Issuer can issue. The JSON objects in the array MUST conform to the structure of the Section 10.2.3.1.
-  credential_issuer?: string; // REQUIRED. The Credential Issuer's identifier.
-  authorization_servers?: string[]; // OPTIONAL. Array of strings that identify the OAuth 2.0 Authorization Servers (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
-  signed_metadata?: string; // OPTIONAL. String that is a signed JWT. This JWT contains Credential Issuer metadata parameters as claims.
-  display?: MetadataDisplay[]; //  An array of objects, where each object contains display properties of a Credential Issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
+  credentials_supported: CredentialConfigurationSupported[]; // REQUIRED. A JSON array containing a list of JSON objects, each of them representing metadata about a separate credential type that the Credential Issuer can issue. The JSON objects in the array MUST conform to the structure of the Section 10.2.3.1.
+  credential_issuer: string; // REQUIRED. The Credential Issuer's identifier.
+  authorization_server?: string; // OPTIONAL. Identifier of the OAuth 2.0 Authorization Server (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
+  // authorization_servers?: string[]; // OPTIONAL. Array of strings that identify the OAuth 2.0 Authorization Servers (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
   token_endpoint?: string;
+  display?: MetadataDisplay[]; //  An array of objects, where each object contains display properties of a Credential Issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
   credential_supplier_config?: CredentialSupplierConfig;
+}
+
+//todo: investigate if these values are enough.
+type AlgValue = 'RS256' | 'ES256' | 'PS256' | 'HS256' | string
+type EncValue = 'A128GCM'| 'A256GCM' | 'A128CBC-HS256' | 'A256CBC-HS512' | string
+
+export interface ResponseEncryption {
+  /**
+   * REQUIRED. Array containing a list of the JWE [RFC7516] encryption algorithms
+   * (alg values) [RFC7518] supported by the Credential and Batch Credential Endpoint to encode the
+   * Credential or Batch Credential Response in a JWT
+   */
+  alg_values_supported: AlgValue[];
+
+  /**
+   * REQUIRED. Array containing a list of the JWE [RFC7516] encryption algorithms
+   * (enc values) [RFC7518] supported by the Credential and Batch Credential Endpoint to encode the
+   * Credential or Batch Credential Response in a JWT
+   */
+  enc_values_supported: EncValue[];
+
+  /**
+   * REQUIRED. Boolean value specifying whether the Credential Issuer requires the
+   * additional encryption on top of TLS for the Credential Response. If the value is true, the Credential
+   * Issuer requires encryption for every Credential Response and therefore the Wallet MUST provide
+   * encryption keys in the Credential Request. If the value is false, the Wallet MAY chose whether it
+   * provides encryption keys or not.
+   */
+  encryption_required: boolean;
 }
 
 // For now we extend the opts above. Only difference is that the credential endpoint is optional in the Opts, as it can come from other sources. The value is however required in the eventual Issuer Metadata
@@ -291,6 +318,7 @@ export interface GrantUrnIetf {
    * REQUIRED. The code representing the Credential Issuer's authorization for the Wallet to obtain Credentials of a certain type.
    */
   'pre-authorized_code': string;
+  //v13
   /**
    * OPTIONAL. Object specifying whether the Authorization Server expects presentation of a Transaction Code by the
    * End-User along with the Token Request in a Pre-Authorized Code Flow. If the Authorization Server does not expect a
@@ -301,7 +329,7 @@ export interface GrantUrnIetf {
    * the respective Token Request as defined in Section 6.1. If no length or description is given, this object may be empty,
    * indicating that a Transaction Code is required.
    */
-  tx_code: TxCode;
+  tx_code?: TxCode;
 
   //v12
   /**
@@ -314,6 +342,20 @@ export interface GrantUrnIetf {
    * OPTIONAL string that the Wallet can use to identify the Authorization Server to use with this grant type when authorization_servers parameter in the Credential Issuer metadata has multiple entries. MUST NOT be used otherwise. The value of this parameter MUST match with one of the values in the authorization_servers array obtained from the Credential Issuer metadata
    */
   authorization_server?: string;
+
+  // v12 feature
+  /**
+   * OPTIONAL. Boolean value specifying whether the AS
+   * expects presentation of the End-User PIN along with the Token Request
+   * in a Pre-Authorized Code Flow. Default is false. This PIN is intended
+   * to bind the Pre-Authorized Code to a certain transaction to prevent
+   * replay of this code by an attacker that, for example, scanned the QR
+   * code while standing behind the legitimate End-User. It is RECOMMENDED
+   * to send a PIN via a separate channel. If the Wallet decides to use
+   * the Pre-Authorized Code Flow, a PIN value MUST be sent in
+   * the user_pin parameter with the respective Token Request.
+   */
+  user_pin_required?: boolean
 }
 
 export const PRE_AUTH_CODE_LITERAL = 'pre-authorized_code';

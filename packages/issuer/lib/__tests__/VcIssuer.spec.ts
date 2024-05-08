@@ -2,8 +2,8 @@ import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   Alg,
   ALG_ERROR,
-  CredentialOfferSession,
   CredentialConfigurationSupported,
+  CredentialOfferSession,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
   STATE_MISSING_ERROR,
@@ -12,7 +12,7 @@ import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 
 import { VcIssuer } from '../VcIssuer'
-import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../builder'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilderV1_0_11 } from '../builder'
 import { MemoryStates } from '../state-manager'
 
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
@@ -95,7 +95,7 @@ describe('VcIssuer', () => {
         },
       },
     })
-    vcIssuer = new VcIssuerBuilder<DIDDocument>()
+    vcIssuer = new VcIssuerBuilderV1_0_11<DIDDocument>()
       .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
