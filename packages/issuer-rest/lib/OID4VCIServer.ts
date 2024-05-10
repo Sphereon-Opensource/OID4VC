@@ -7,6 +7,7 @@ import {
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
   QRCodeOpts,
+  TxCode,
 } from '@sphereon/oid4vci-common'
 import { CredentialSupportedBuilderV1_13, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
@@ -49,7 +50,7 @@ function buildVCIFromEnvironment<DIDDoc extends object>() {
     )
     .build()
   return new VcIssuerBuilder<DIDDoc>()
-    .withTXCode({ length: process.env.user_pin_length as unknown as number, input_mode: process.env.user_pin_input_mode as 'numeric' | 'text'})
+    .withTXCode({ length: process.env.user_pin_length as unknown as number, input_mode: process.env.user_pin_input_mode as 'numeric' | 'text' })
     .withAuthorizationServers(process.env.authorization_server as string)
     .withCredentialEndpoint(process.env.credential_endpoint as string)
     .withCredentialIssuer(process.env.credential_issuer as string)
@@ -66,8 +67,7 @@ function buildVCIFromEnvironment<DIDDoc extends object>() {
 export type ICreateCredentialOfferURIResponse = {
   uri: string
   userPin?: string
-  userPinLength?: number
-  userPinRequired: boolean
+  tsCode?: TxCode
 }
 
 export interface IGetCredentialOfferEndpointOpts extends ISingleEndpointOpts {
@@ -162,7 +162,7 @@ export class OID4VCIServer<DIDDoc extends object> {
   }
 
   private assertAccessTokenHandling(tokenEndpointOpts?: ITokenEndpointOpts) {
-    const authServer = this.issuer.issuerMetadata.authorization_server
+    const authServer = this.issuer.issuerMetadata.authorization_servers
     if (this.isTokenEndpointDisabled(tokenEndpointOpts)) {
       if (!authServer) {
         throw Error(

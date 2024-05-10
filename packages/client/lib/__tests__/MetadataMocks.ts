@@ -1,4 +1,4 @@
-import { AuthzFlowType, CredentialOfferRequestWithBaseUrl } from '@sphereon/oid4vci-common';
+import { AuthzFlowType, CredentialOfferPayloadV1_0_13, CredentialOfferRequestWithBaseUrl } from '@sphereon/oid4vci-common';
 
 export const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io';
 export const IDENTIPROOF_AS_URL = 'https://auth.research.identiproof.io';
@@ -8,34 +8,41 @@ export const WALT_ISSUER_URL = 'https://jff.walt.id/issuer-api/oidc';
 export const INITIATION_TEST_HTTPS_URI =
   'https://server.example.com?issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy';
 export const INITIATION_TEST_URI =
-  'openid-initiate-issuance://?credential_type=OpenBadgeCredential&issuer=https%3A%2F%2Fjff%2Ewalt%2Eid%2Fissuer-api%2Foidc%2F&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
+  'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F%22%2C%22credential_configuration_ids%22%3A%5B%22OpenBadgeCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE%22%2C%22tx_code%22%3A%7B%22description%22%3A%22Please%20provide%20the%20one-time%20code%20that%20was%20sent%20via%20e-mail%22%2C%22input_mode%22%3A%22numeric%22%2C%22length%22%3A4%7D%7D%7D%7D';
 
 export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
-  baseUrl: 'openid-initiate-issuance://',
+  baseUrl: 'openid-credential-offer://',
   credential_offer: {
+    credential_configuration_ids: ['OpenBadgeCredential'],
     credential_issuer: 'https://jff.walt.id/issuer-api/oidc/',
-    credentials: ['OpenBadgeCredential'],
     grants: {
       'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
         'pre-authorized_code':
           'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
-        user_pin_required: false,
+        tx_code: {
+          length: 4,
+          description: 'Please provide the one-time code that was sent via e-mail',
+          input_mode: 'numeric',
+        },
       },
     },
-  },
+  } as CredentialOfferPayloadV1_0_13,
   original_credential_offer: {
-    credential_type: ['OpenBadgeCredential'],
-    issuer: 'https://jff.walt.id/issuer-api/oidc/',
-    'pre-authorized_code':
-      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
-    user_pin_required: 'false',
-  },
+    credential_issuer: 'https://jff.walt.id/issuer-api/oidc/',
+    credential_configuration_ids: ['OpenBadgeCredential'],
+    grants: {
+      'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+        'pre-authorized_code':
+          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
+        tx_code: { description: 'Please provide the one-time code that was sent via e-mail', input_mode: 'numeric', length: 4 },
+      },
+    },
+  } as CredentialOfferPayloadV1_0_13,
   preAuthorizedCode:
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
-  scheme: 'openid-initiate-issuance',
+  scheme: 'openid-credential-offer',
   supportedFlows: [AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW],
-  userPinRequired: false,
-  version: 1008,
+  version: 1013,
 };
 export const IDENTIPROOF_AS_METADATA = {
   issuer: 'https://auth.research.identiproof.io',

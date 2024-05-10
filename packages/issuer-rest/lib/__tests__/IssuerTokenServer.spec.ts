@@ -3,7 +3,7 @@ import { KeyObject } from 'crypto'
 import {
   Alg,
   CNonceState,
-  CredentialIssuerMetadataOpts,
+  CredentialIssuerMetadataOptsV1_0_13,
   CredentialOfferSession,
   IssueStatus,
   Jwt,
@@ -92,11 +92,11 @@ describe('OID4VCIServer', () => {
     const vcIssuer: VcIssuer<DIDDocument> = new VcIssuer<DIDDocument>(
       {
         // authorization_server: 'https://authorization-server',
-        // credential_endpoint: 'https://credential-endpoint',
+        credential_endpoint: 'http://localhost:9000',
         credential_issuer: 'https://credential-issuer',
         display: [{ name: 'example issuer', locale: 'en-US' }],
-        credentials_supported: [
-          {
+        credential_configurations_supported: {
+          UniversityDegree_JWT: {
             format: 'jwt_vc_json',
             types: ['VerifiableCredential', 'UniversityDegreeCredential'],
             credentialSubject: {
@@ -125,8 +125,8 @@ describe('OID4VCIServer', () => {
               },
             ],
           },
-        ],
-      } as CredentialIssuerMetadataOpts,
+        },
+      } as CredentialIssuerMetadataOptsV1_0_13,
       {
         cNonceExpiresIn: 300,
         credentialOfferSessions,

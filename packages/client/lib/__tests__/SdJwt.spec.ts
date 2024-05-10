@@ -1,10 +1,10 @@
-import { AccessTokenRequest, CredentialRequestV1_0_11, CredentialSupportedSdJwtVc } from '@sphereon/oid4vci-common';
+import { AccessTokenRequest, CredentialOfferPayloadV1_0_13, CredentialRequestV1_0_11, CredentialSupportedSdJwtVc } from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
 
-import { OpenID4VCIClient } from '..';
-import { createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilderV1_0_11 } from '../../../issuer';
+import { OpenID4VCIClient } from '..'
+import { createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilder } from '../../../issuer';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -15,14 +15,14 @@ const issuerMetadata = new IssuerMetadataBuilderV1_13()
   .withCredentialIssuer('https://example.com')
   .withCredentialEndpoint('https://credenital-endpoint.example.com')
   .withTokenEndpoint('https://token-endpoint.example.com')
-  .addCredentialConfigurationsSupported({
+  .addCredentialConfigurationsSupported('SdJwtCredentialId', {
     format: 'vc+sd-jwt',
     vct: 'SdJwtCredential',
     id: 'SdJwtCredentialId',
   })
   .build();
 
-const vcIssuer = new VcIssuerBuilderV1_0_11()
+const vcIssuer = new VcIssuerBuilder()
   .withIssuerMetadata(issuerMetadata)
   .withInMemoryCNonceState()
   .withInMemoryCredentialOfferState()
@@ -43,7 +43,7 @@ const vcIssuer = new VcIssuerBuilderV1_0_11()
         },
         payload: {
           aud: issuerMetadata.credential_issuer,
-          iat: +new Date()/1000,
+          iat: +new Date() / 1000,
           nonce: 'a-c-nonce',
         },
       },
@@ -63,21 +63,25 @@ describe('sd-jwt vc', () => {
     'succeed with a full flow',
     async () => {
       const offerUri = await vcIssuer.createCredentialOfferURI({
+        credential_issuer: 'https://example.com',
         grants: {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+            tx_code: {
+              input_mode: 'text',
+              length: 3
+            },
             'pre-authorized_code': '123',
-            user_pin_required: false,
           },
         },
-        credentials: ['SdJwtCredentialId'],
-      });
+        credential_configuration_ids: ['SdJwtCredentialId'],
+      } as CredentialOfferPayloadV1_0_13);
 
       nock(vcIssuer.issuerMetadata.credential_issuer).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(issuerMetadata));
       nock(vcIssuer.issuerMetadata.credential_issuer).get('/.well-known/openid-configuration').reply(404);
       nock(vcIssuer.issuerMetadata.credential_issuer).get('/.well-known/oauth-authorization-server').reply(404);
 
       expect(offerUri.uri).toEqual(
-        'openid-credential-offer://?credential_offer=%7B%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22123%22%2C%22user_pin_required%22%3Afalse%7D%7D%2C%22credentials%22%3A%5B%22SdJwtCredentialId%22%5D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%7D',
+        'openid-credential-offer://?credential_offer=%7B%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22123%22%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredentialId%22%5D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredentialId%22%5D%7D',
       );
 
       const client = await OpenID4VCIClient.fromURI({
@@ -95,7 +99,7 @@ describe('sd-jwt vc', () => {
         },
       });
 
-      const supported = client.getCredentialsSupported(true, 'vc+sd-jwt');
+      const supported = client.getCredentialsSupported('vc+sd-jwt');
       expect(supported).toEqual([
         {
           vct: 'SdJwtCredential',

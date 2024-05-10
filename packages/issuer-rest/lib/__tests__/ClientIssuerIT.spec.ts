@@ -14,7 +14,7 @@ import {
   OpenId4VCIVersion,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
-import { CredentialSupportedBuilderV1_13, VcIssuerBuilderV1_0_11 } from '@sphereon/oid4vci-issuer/dist/builder'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
@@ -56,7 +56,6 @@ describe('VcIssuer', () => {
   const preAuthorizedCode2 = 'SplxlOBeZQQYbYS6WxSbIA2'
   const preAuthorizedCode3 = 'SplxlOBeZQQYbYS6WxSbIA3'
 */
-
   beforeAll(async () => {
     jest.clearAllMocks()
 
@@ -70,7 +69,7 @@ describe('VcIssuer', () => {
       return new jose.SignJWT({ ...jwt.payload }).setProtectedHeader({ ...jwt.header, alg: Alg.ES256 }).sign(privateKey)
     }
 
-    const credentialsSupported: CredentialConfigurationSupported = new CredentialSupportedBuilderV1_13()
+    const credentialsSupported: Record<string, CredentialConfigurationSupported> = new CredentialSupportedBuilderV1_13()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withTypes('VerifiableCredential')
@@ -101,7 +100,7 @@ describe('VcIssuer', () => {
       credentialSubject: {},
     }
 
-    vcIssuer = new VcIssuerBuilderV1_0_11<DIDDocument>()
+    vcIssuer = new VcIssuerBuilder<DIDDocument>()
       // .withAuthorizationServer('https://authorization-server')
       .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
       .withDefaultCredentialOfferBaseUri('http://localhost:3456/test')
@@ -110,7 +109,7 @@ describe('VcIssuer', () => {
         name: 'example issuer',
         locale: 'en-US',
       })
-      .withCredentialsSupported(credentialsSupported)
+      .withCredentialConfigurationsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
       .withInMemoryCNonceState()
       .withInMemoryCredentialOfferURIState()
@@ -191,7 +190,10 @@ describe('VcIssuer', () => {
           },
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             'pre-authorized_code': preAuthorizedCode,
-            user_pin_required: true,
+            tx_code: {
+              input_mode: 'text',
+              length: 4,
+            },
           },
         },
         credentials: ['UniversityDegree_JWT'],
@@ -199,13 +201,13 @@ describe('VcIssuer', () => {
       })
       .then((response) => response.uri)
     expect(uri).toEqual(
-      'http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D%2C%22credentials%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%7D',
+      'http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%7D%7D%2C%22credentials%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%7D',
     )
   })
 
   it('should create client from credential offer URI', async () => {
     client = await OpenID4VCIClient.fromURI({
-      uri,
+      uri: `http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%7D`,
       kid: subjectDIDKey.didDocument.authentication[0],
       alg: 'ES256',
       createAuthorizationRequestURL: false,
@@ -214,50 +216,48 @@ describe('VcIssuer', () => {
       baseUrl: 'http://localhost:3456/test',
       credential_offer: {
         credential_issuer: 'http://localhost:3456/test',
-        credentials: ['UniversityDegree_JWT'],
+        credential_configuration_ids: ['UniversityDegree_JWT'],
         grants: {
           authorization_code: {
             issuer_state: 'previously-created-state',
           },
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-            'pre-authorized_code': 'test_code',
-            user_pin_required: true,
+            'pre-authorized_code': 'test_code'
           },
         },
       },
       issuerState: 'previously-created-state',
       original_credential_offer: {
         credential_issuer: 'http://localhost:3456/test',
-        credentials: ['UniversityDegree_JWT'],
+        credential_configuration_ids: ['UniversityDegree_JWT'],
         grants: {
           authorization_code: {
             issuer_state: 'previously-created-state',
           },
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             'pre-authorized_code': 'test_code',
-            user_pin_required: true,
           },
         },
       },
       preAuthorizedCode: 'test_code',
       scheme: 'http',
       supportedFlows: ['Authorization Code Flow', 'Pre-Authorized Code Flow'],
-      userPinRequired: true,
-      version: 1011,
+      version: 1013,
     })
     expect(client.getIssuer()).toEqual(ISSUER_URL)
-    expect(client.version()).toEqual(OpenId4VCIVersion.VER_1_0_11)
+    expect(client.version()).toEqual(OpenId4VCIVersion.VER_1_0_13)
   })
 
   it('should retrieve server metadata', async () => {
     await expect(client.retrieveServerMetadata()).resolves.toEqual({
       authorizationServerType: 'OID4VCI',
+      deferred_credential_endpoint: undefined,
       authorization_server: 'http://localhost:3456/test',
       credentialIssuerMetadata: {
         credential_endpoint: 'http://localhost:3456/test/credential-endpoint',
         credential_issuer: 'http://localhost:3456/test',
-        credentials_supported: [
-          {
+        credential_configurations_supported: {
+          UniversityDegree_JWT: {
             credentialSubject: {
               given_name: {
                 locale: 'en-US',
@@ -265,7 +265,7 @@ describe('VcIssuer', () => {
               },
             },
             cryptographic_binding_methods_supported: ['did'],
-            cryptographic_suites_supported: ['ES256K'],
+            credential_signing_alg_values_supported: ['ES256K'],
             display: [
               {
                 background_color: '#12107c',
@@ -282,7 +282,7 @@ describe('VcIssuer', () => {
             id: 'UniversityDegree_JWT',
             types: ['VerifiableCredential'],
           },
-        ],
+        },
         display: [
           {
             locale: 'en-US',
@@ -314,7 +314,7 @@ describe('VcIssuer', () => {
     async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promise<string> {
       return await new jose.SignJWT({ ...args.payload })
         .setProtectedHeader({ ...args.header })
-        .setIssuedAt(args.payload.iat ?? Math.round(+new Date()/1000))
+        .setIssuedAt(args.payload.iat ?? Math.round(+new Date() / 1000))
         .setIssuer(kid!)
         .setAudience(args.payload.aud!)
         .setExpirationTime('2h')

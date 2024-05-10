@@ -1,10 +1,14 @@
 import {
+  CredentialOffer,
+  CredentialOfferPayload,
+  CredentialOfferPayloadV1_0_09,
   CredentialOfferRequestWithBaseUrl,
-  CredentialOfferV1_0_13,
+  CredentialOfferRequestWithBaseUrlV1_0_11,
+  CredentialOfferV1_0_11,
   determineSpecVersionFromURI,
   getClientIdFromCredentialOfferPayload,
   OpenId4VCIVersion,
-  toUniformCredentialOfferRequest,
+  toUniformCredentialOfferRequestV1_0_11,
 } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
@@ -12,8 +16,8 @@ import { convertJsonToURI, convertURIToJsonObject } from './functions';
 
 const debug = Debug('sphereon:oid4vci:offer');
 
-export class CredentialOfferClient {
-  public static async fromURI(uri: string, opts?: { resolve?: boolean }): Promise<CredentialOfferRequestWithBaseUrl> {
+export class CredentialOfferClientV1_0_11 {
+  public static async fromURI(uri: string, opts?: { resolve?: boolean }): Promise<CredentialOfferRequestWithBaseUrlV1_0_11> {
     debug(`Credential Offer URI: ${uri}`);
     if (!uri.includes('?') || !uri.includes('://')) {
       debug(`Invalid Credential Offer URI: ${uri}`);
@@ -22,15 +26,27 @@ export class CredentialOfferClient {
     const scheme = uri.split('://')[0];
     const baseUrl = uri.split('?')[0];
     const version = determineSpecVersionFromURI(uri);
-    const credentialOffer: CredentialOfferV1_0_13 = convertURIToJsonObject(uri, {
-      arrayTypeProperties: ['credential_configuration_ids'],
-      requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri'] : ['credential_offer'],
-    }) as CredentialOfferV1_0_13;
-    if (credentialOffer?.credential_offer_uri === undefined && !credentialOffer?.credential_offer) {
-      throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri);
+    let credentialOffer: CredentialOffer;
+    let credentialOfferPayload: CredentialOfferPayload;
+    if (version < OpenId4VCIVersion.VER_1_0_11) {
+      credentialOfferPayload = convertURIToJsonObject(uri, {
+        arrayTypeProperties: ['credential_type'],
+        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri'] : ['issuer', 'credential_type'],
+      }) as CredentialOfferPayloadV1_0_09;
+      credentialOffer = {
+        credential_offer: credentialOfferPayload,
+      };
+    } else {
+      credentialOffer = convertURIToJsonObject(uri, {
+        arrayTypeProperties: ['credentials'],
+        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri'] : ['credential_offer'],
+      }) as CredentialOfferV1_0_11;
+      if (credentialOffer?.credential_offer_uri === undefined && !credentialOffer?.credential_offer) {
+        throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri);
+      }
     }
 
-    const request = await toUniformCredentialOfferRequest(credentialOffer, {
+    const request = await toUniformCredentialOfferRequestV1_0_11(credentialOffer, {
       ...opts,
       version,
     });
@@ -40,15 +56,13 @@ export class CredentialOfferClient {
     return {
       scheme,
       baseUrl,
-      ...(clientId && { clientId }),
+      clientId,
       ...request,
       ...(grants?.authorization_code?.issuer_state && { issuerState: grants.authorization_code.issuer_state }),
       ...(grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code'] && {
         preAuthorizedCode: grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']['pre-authorized_code'],
       }),
-      ...(request.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code && {
-        // txCode: request.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code,
-      }),
+      userPinRequired: request.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.user_pin_required ?? false,
     };
   }
 
@@ -88,7 +102,7 @@ export class CredentialOfferClient {
       arrayTypeProperties: isUri ? [] : ['credential_type'],
       uriTypeProperties: isUri
         ? ['credential_offer_uri']
-        : version >= OpenId4VCIVersion.VER_1_0_13
+        : version >= OpenId4VCIVersion.VER_1_0_11
           ? ['credential_issuer', 'credential_type']
           : ['issuer', 'credential_type'],
       param,

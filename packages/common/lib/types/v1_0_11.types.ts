@@ -1,4 +1,5 @@
-import { AuthorizationDetailsJwtVcJson, CommonAuthorizationRequest } from './Authorization.types';
+import { AuthorizationDetailsJwtVcJson, AuthorizationServerOpts, CommonAuthorizationRequest } from './Authorization.types';
+import { UniformCredentialOffer, UniformCredentialOfferRequest } from './CredentialIssuance.types';
 import {
   CommonCredentialRequest,
   CredentialDataSupplierInput,
@@ -10,19 +11,39 @@ import {
   Grant,
 } from './Generic.types';
 import { QRCodeOpts } from './QRCode.types';
-import { AuthorizationServerMetadata } from './ServerMetadata';
+import { AuthorizationServerMetadata, EndpointMetadata } from './ServerMetadata';
+
+export interface AccessTokenRequestOptsV1_0_11 {
+  credentialOffer?: UniformCredentialOffer;
+  credentialIssuer?: string;
+  asOpts?: AuthorizationServerOpts;
+  metadata?: EndpointMetadata;
+  codeVerifier?: string; // only required for authorization flow
+  code?: string; // only required for authorization flow
+  redirectUri?: string; // only required for authorization flow
+  pin?: string; // Pin-number. Only used when required
+}
 
 export interface CredentialOfferV1_0_11 {
   credential_offer?: CredentialOfferPayloadV1_0_11;
   credential_offer_uri?: string;
 }
 
-export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_11 {
+export interface CredentialOfferRESTRequestV1_0_11 extends CredentialOfferV1_0_11 {
   baseUri?: string;
   scheme?: string;
   pinLength?: number;
   qrCodeOpts?: QRCodeOpts;
   credentialDataSupplierInput?: CredentialDataSupplierInput;
+}
+
+export interface CredentialOfferRequestWithBaseUrlV1_0_11 extends UniformCredentialOfferRequest {
+  scheme: string;
+  clientId?: string;
+  baseUrl: string;
+  userPinRequired: boolean;
+  issuerState?: string;
+  preAuthorizedCode?: string;
 }
 
 export interface CredentialOfferPayloadV1_0_11 {

@@ -5,7 +5,8 @@ import {
   assertedUniformCredentialOffer,
   AuthorizationServerOpts,
   AuthzFlowType,
-  CredentialOfferPayloadV1_0_13,
+  CredentialOfferPayloadV1_0_11,
+  CredentialOfferV1_0_11,
   CredentialOfferV1_0_13,
   determineSpecVersionFromOffer,
   EndpointMetadata,
@@ -18,7 +19,7 @@ import {
   PRE_AUTH_CODE_LITERAL,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
-  TxCode,
+  toUniformCredentialOfferRequestV1_0_11,
   UniformCredentialOfferPayload,
 } from '@sphereon/oid4vci-common';
 import { ObjectUtils } from '@sphereon/ssi-types';
@@ -34,8 +35,7 @@ export class AccessTokenClient {
     const { asOpts, pin, codeVerifier, code, redirectUri, metadata } = opts;
 
     const credentialOffer = opts.credentialOffer ? await assertedUniformCredentialOffer(opts.credentialOffer) : undefined;
-    const txCode: TxCode | undefined =
-      credentialOffer?.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code ?? undefined;
+    const isPinRequired = credentialOffer && this.isPinRequiredValue(credentialOffer.credential_offer);
     const issuer =
       opts.credentialIssuer ??
       (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : (metadata?.issuer as string));
@@ -54,9 +54,8 @@ export class AccessTokenClient {
         code,
         redirectUri,
         pin,
-        txCode,
       }),
-      txCode,
+      isPinRequired,
       metadata,
       asOpts,
       issuerOpts,
@@ -65,18 +64,18 @@ export class AccessTokenClient {
 
   public async acquireAccessTokenUsingRequest({
     accessTokenRequest,
-    txCode,
+    isPinRequired,
     metadata,
     asOpts,
     issuerOpts,
   }: {
     accessTokenRequest: AccessTokenRequest;
-    txCode?: TxCode;
+    isPinRequired?: boolean;
     metadata?: EndpointMetadata;
     asOpts?: AuthorizationServerOpts;
     issuerOpts?: IssuerOpts;
   }): Promise<OpenIDResponse<AccessTokenResponse>> {
-    this.validate(accessTokenRequest, txCode);
+    this.validate(accessTokenRequest, isPinRequired);
 
     const requestTokenURL = AccessTokenClient.determineTokenURL({
       asOpts,
@@ -93,11 +92,11 @@ export class AccessTokenClient {
 
   public async createAccessTokenRequest(opts: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
     const { asOpts, pin, codeVerifier, code, redirectUri } = opts;
-    const credentialOfferRequest =
-      opts.credentialOffer &&
-      determineSpecVersionFromOffer(opts.credentialOffer as CredentialOfferPayloadV1_0_13).valueOf() <= OpenId4VCIVersion.VER_1_0_13.valueOf()
-        ? await toUniformCredentialOfferRequest(opts.credentialOffer as CredentialOfferV1_0_13)
-        : undefined;
+    const credentialOfferRequest = opts.credentialOffer
+      ? determineSpecVersionFromOffer(opts.credentialOffer as CredentialOfferPayloadV1_0_11).valueOf() <= OpenId4VCIVersion.VER_1_0_11.valueOf()
+        ? await toUniformCredentialOfferRequestV1_0_11(opts.credentialOffer as CredentialOfferV1_0_11)
+        : await toUniformCredentialOfferRequest(opts.credentialOffer as CredentialOfferV1_0_13)
+      : undefined;
     const request: Partial<AccessTokenRequest> = {};
 
     if (asOpts?.clientId) {
@@ -149,14 +148,14 @@ export class AccessTokenClient {
       throw new Error(TokenErrorResponse.invalid_request);
     }
     const issuer = getIssuerFromCredentialOfferPayload(requestPayload);
-    if (requestPayload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code) {
-      isPinRequired = true;
+    if (requestPayload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
+      isPinRequired = requestPayload.grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.user_pin_required ?? false;
     }
     debug(`Pin required for issuer ${issuer}: ${isPinRequired}`);
     return isPinRequired;
   }
 
-  private assertNumericPin(isPinRequired: boolean, pin?: string): void {
+  private assertNumericPin(isPinRequired?: boolean, pin?: string): void {
     if (isPinRequired) {
       if (!pin || !/^\d{1,8}$/.test(pin)) {
         debug(`Pin is not 1 to 8 digits long`);
@@ -188,11 +187,11 @@ export class AccessTokenClient {
       throw new Error('Authorization flow requires the code to be present');
     }
   }
-  private validate(accessTokenRequest: AccessTokenRequest, txCode?: TxCode): void {
+  private validate(accessTokenRequest: AccessTokenRequest, isPinRequired?: boolean): void {
     if (accessTokenRequest.grant_type === GrantTypes.PRE_AUTHORIZED_CODE) {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyPreAuthorizedCode(accessTokenRequest);
-      this.assertNumericPin(!!txCode, accessTokenRequest.user_pin);
+      this.assertNumericPin(isPinRequired, accessTokenRequest.user_pin);
     } else if (accessTokenRequest.grant_type === GrantTypes.AUTHORIZATION_CODE) {
       this.assertAuthorizationGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyCodeVerifier(accessTokenRequest);

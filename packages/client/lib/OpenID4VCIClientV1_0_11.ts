@@ -6,6 +6,8 @@ import {
   AuthzFlowType,
   CodeChallengeMethod,
   CredentialConfigurationSupported,
+  CredentialOfferPayloadV1_0_08,
+  CredentialOfferPayloadV1_0_11,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
   DefaultURISchemes,
@@ -26,7 +28,7 @@ import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';
-import { createAuthorizationRequestUrl } from './AuthorizationCodeClient';
+import { createAuthorizationRequestUrlV1_0_11 } from './AuthorizationCodeClientV1_0_11';
 import { CredentialOfferClient } from './CredentialOfferClient';
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { MetadataClient } from './MetadataClient';
@@ -35,7 +37,7 @@ import { generateMissingPKCEOpts } from './functions/AuthorizationUtil';
 
 const debug = Debug('sphereon:oid4vci');
 
-export interface OpenID4VCIClientState {
+export interface OpenID4VCIClientStateV1_0_11 {
   credentialIssuer: string;
   credentialOffer?: CredentialOfferRequestWithBaseUrl;
   clientId?: string;
@@ -50,8 +52,8 @@ export interface OpenID4VCIClientState {
   authorizationURL?: string;
 }
 
-export class OpenID4VCIClient {
-  private readonly _state: OpenID4VCIClientState;
+export class OpenID4VCIClientV1_0_11 {
+  private readonly _state: OpenID4VCIClientStateV1_0_11;
 
   private constructor({
     credentialOffer,
@@ -127,7 +129,7 @@ export class OpenID4VCIClient {
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
     pkce?: PKCEOpts;
   }) {
-    const client = new OpenID4VCIClient({
+    const client = new OpenID4VCIClientV1_0_11({
       kid,
       alg,
       clientId: clientId ?? authorizationRequest?.clientId,
@@ -144,10 +146,10 @@ export class OpenID4VCIClient {
     return client;
   }
 
-  public static async fromState({ state }: { state: OpenID4VCIClientState | string }): Promise<OpenID4VCIClient> {
+  public static async fromState({ state }: { state: OpenID4VCIClientStateV1_0_11 | string }): Promise<OpenID4VCIClientV1_0_11> {
     const clientState = typeof state === 'string' ? JSON.parse(state) : state;
 
-    return new OpenID4VCIClient(clientState);
+    return new OpenID4VCIClientV1_0_11(clientState);
   }
 
   public static async fromURI({
@@ -170,9 +172,9 @@ export class OpenID4VCIClient {
     pkce?: PKCEOpts;
     clientId?: string;
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
-  }): Promise<OpenID4VCIClient> {
+  }): Promise<OpenID4VCIClientV1_0_11> {
     const credentialOfferClient = await CredentialOfferClient.fromURI(uri, { resolve: resolveOfferUri });
-    const client = new OpenID4VCIClient({
+    const client = new OpenID4VCIClientV1_0_11({
       credentialOffer: credentialOfferClient,
       kid,
       alg,
@@ -217,12 +219,12 @@ export class OpenID4VCIClient {
       ) {
         this._state.endpointMetadata.authorization_endpoint = this._state.endpointMetadata.credentialIssuerMetadata.authorization_endpoint as string;
       }
-      this._state.authorizationURL = await createAuthorizationRequestUrl({
+      this._state.authorizationURL = await createAuthorizationRequestUrlV1_0_11({
         pkce: this._state.pkce,
         endpointMetadata: this.endpointMetadata,
         authorizationRequest: this._state.authorizationRequestOpts,
         credentialOffer: this.credentialOffer,
-        credentialConfigurationSupported: this.getCredentialsSupported(),
+        credentialsSupported: Object.values(this.getCredentialsSupported()),
       });
     }
     return this._state.authorizationURL;
@@ -440,6 +442,22 @@ export class OpenID4VCIClient {
     return JSON.stringify(this._state);
   }
 
+  // FIXME: We really should convert <v11 to v12 objects first. Right now the logic doesn't map nicely and is brittle.
+  // We should resolve IDs to objects first in case of strings.
+  // When < v11 convert into a v12 object. When v12 object retain it.
+  // Then match the object array on server metadata
+  getCredentialsSupportedV11(
+    restrictToInitiationTypes: boolean,
+    format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
+  ): Record<string, CredentialConfigurationSupported> {
+    return getSupportedCredentials({
+      issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
+      version: this.version(),
+      format: format,
+      types: restrictToInitiationTypes ? this.getCredentialOfferTypes() : undefined,
+    });
+  }
+
   getCredentialsSupported(
     format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
   ): Record<string, CredentialConfigurationSupported> {
@@ -451,11 +469,49 @@ export class OpenID4VCIClient {
     });
   }
 
+  getCredentialOfferTypes(): string[][] {
+    if (!this.credentialOffer) {
+      return [];
+    } else if (this.credentialOffer.version < OpenId4VCIVersion.VER_1_0_11) {
+      const orig = this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08;
+      const types: string[] = typeof orig.credential_type === 'string' ? [orig.credential_type] : orig.credential_type;
+      const result: string[][] = [];
+      result[0] = types;
+      return result;
+    } else if (this.credentialOffer.version < OpenId4VCIVersion.VER_1_0_13) {
+      return (this.credentialOffer.credential_offer as CredentialOfferPayloadV1_0_11).credentials.map((c) => {
+        if (typeof c === 'string') {
+          return [c];
+        } else if ('types' in c) {
+          return c.types;
+        } else if ('vct' in c) {
+          return [c.vct];
+        } else {
+          return c.credential_definition.types;
+        }
+      });
+    }
+    // we don't have this for v13. v13 only has credential_configuration_ids which is not translatable to type
+    return [];
+  }
+
   issuerSupportedFlowTypes(): AuthzFlowType[] {
     return (
       this.credentialOffer?.supportedFlows ??
       (this._state.endpointMetadata?.credentialIssuerMetadata?.authorization_endpoint ? [AuthzFlowType.AUTHORIZATION_CODE_FLOW] : [])
     );
+  }
+
+  isFlowTypeSupported(flowType: AuthzFlowType): boolean {
+    return this.issuerSupportedFlowTypes().includes(flowType);
+  }
+
+  get authorizationURL(): string | undefined {
+    return this._state.authorizationURL;
+  }
+
+  public hasAuthorizationURL(): boolean {
+    return !!this.authorizationURL;
   }
 
   get credentialOffer(): CredentialOfferRequestWithBaseUrl | undefined {
@@ -496,6 +552,10 @@ export class OpenID4VCIClient {
     return this._state.clientId;
   }
 
+  public hasAccessTokenResponse(): boolean {
+    return !!this._state.accessTokenResponse;
+  }
+
   get accessTokenResponse(): AccessTokenResponse {
     this.assertAccessToken();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -507,9 +567,44 @@ export class OpenID4VCIClient {
     return this._state.credentialIssuer;
   }
 
+  public getAccessTokenEndpoint(): string {
+    this.assertIssuerData();
+    return this.endpointMetadata
+      ? this.endpointMetadata.token_endpoint
+      : AccessTokenClient.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
+  }
+
+  public getCredentialEndpoint(): string {
+    this.assertIssuerData();
+    return this.endpointMetadata ? this.endpointMetadata.credential_endpoint : `${this.getIssuer()}/credential`;
+  }
+
+  public hasDeferredCredentialEndpoint(): boolean {
+    return !!this.getAccessTokenEndpoint();
+  }
+
   public getDeferredCredentialEndpoint(): string {
     this.assertIssuerData();
     return this.endpointMetadata ? this.endpointMetadata.credential_endpoint : `${this.getIssuer()}/credential`;
+  }
+
+  /**
+   * Too bad we need a method like this, but EBSI is not exposing metadata
+   */
+  public isEBSI() {
+    if (
+      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11)['credentials'] &&
+      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11).credentials.find(
+        (cred) =>
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          typeof cred !== 'string' && 'trust_framework' in cred && 'name' in cred.trust_framework && cred.trust_framework.name.includes('ebsi'),
+      )
+    ) {
+      return true;
+    }
+    this.assertIssuerData();
+    return this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu');
   }
 
   private assertIssuerData(): void {

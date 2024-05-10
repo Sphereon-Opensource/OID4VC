@@ -3,12 +3,11 @@ import {
   CredentialRequestJwtVcJson,
   CredentialRequestJwtVcJsonLdAndLdpVc,
   CredentialRequestSdJwtVc,
-  Grant
+  Grant,
 } from './Generic.types';
 
 export type CredentialRequestV1_0_12 = CommonCredentialRequest &
   (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc);
-
 
 export interface CredentialOfferPayloadV1_0_12 {
   /**

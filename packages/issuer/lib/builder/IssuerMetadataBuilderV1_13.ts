@@ -25,7 +25,7 @@ export class IssuerMetadataBuilderV1_13 {
   }
 
   public withAuthorizationServer(authorizationServer: string) {
-    if(this.authorizationServers === undefined) {
+    if (this.authorizationServers === undefined) {
       this.authorizationServers = []
     }
     this.authorizationServers.push(authorizationServer)
@@ -89,12 +89,12 @@ export class IssuerMetadataBuilderV1_13 {
       throw Error('No credential endpoint supplied')
     }
     const credential_configurations_supported: Record<string, CredentialConfigurationSupported> = this.credentialConfigurationsSupported
-    const configurationsEntryList: Record<string, CredentialConfigurationSupported>[] = this.supportedBuilders.map((builder)=>builder.build())
-    configurationsEntryList.forEach(configRecord => {
-      Object.keys(configRecord).forEach(key => {
-        credential_configurations_supported[key] = configRecord[key];
-      });
-    });
+    const configurationsEntryList: Record<string, CredentialConfigurationSupported>[] = this.supportedBuilders.map((builder) => builder.build())
+    configurationsEntryList.forEach((configRecord) => {
+      Object.keys(configRecord).forEach((key) => {
+        credential_configurations_supported[key] = configRecord[key]
+      })
+    })
     if (Object.keys(credential_configurations_supported).length === 0) {
       throw Error('No supported credentials supplied')
     }

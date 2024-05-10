@@ -5,6 +5,7 @@ import {
   JsonLdIssuerCredentialDefinition,
   OID4VCICredentialFormat,
   PRE_AUTH_CODE_LITERAL,
+  TxCode,
 } from './Generic.types';
 import { EndpointMetadata } from './ServerMetadata';
 
@@ -206,6 +207,7 @@ export interface AccessTokenRequestOpts {
   code?: string; // only required for authorization flow
   redirectUri?: string; // only required for authorization flow
   pin?: string; // Pin-number. Only used when required
+  txCode?: TxCode; // OPTIONAL. String value containing a Transaction Code. This value MUST be present if a tx_code object was present in the Credential Offer (including if the object was empty). This parameter MUST only be used if the grant_type is urn:ietf:params:oauth:grant-type:pre-authorized_code.
 }
 
 /*export interface AuthorizationRequestOpts {

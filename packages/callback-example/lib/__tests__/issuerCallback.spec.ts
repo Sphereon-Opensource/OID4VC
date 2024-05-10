@@ -13,7 +13,7 @@ import {
   ProofOfPossession,
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
-import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilderV1_0_11 } from '@sphereon/oid4vci-issuer'
+import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer'
 import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
@@ -37,7 +37,7 @@ async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promi
   }
   return await new jose.SignJWT({ ...args.payload })
     .setProtectedHeader({ ...args.header })
-    .setIssuedAt(args.payload.iat ?? Math.round(+new Date()/1000))
+    .setIssuedAt(args.payload.iat ?? Math.round(+new Date() / 1000))
     .setIssuer(kid)
     .setAudience(args.payload.aud)
     .setExpirationTime('2h')
@@ -85,27 +85,28 @@ describe('issuerCallback', () => {
   const clientId = 'sphereon:wallet'
 
   beforeAll(async () => {
-    const credentialsSupported: CredentialConfigurationSupported = new CredentialSupportedBuilderV1_13()
-      .withCryptographicSuitesSupported('ES256K')
-      .withCryptographicBindingMethod('did')
-      .withFormat('jwt_vc_json')
-      .withTypes('VerifiableCredential')
-      .withId('UniversityDegree_JWT')
-      .withCredentialSupportedDisplay({
-        name: 'University Credential',
-        locale: 'en-US',
-        logo: {
-          url: 'https://exampleuniversity.com/public/logo.png',
-          alt_text: 'a square logo of a university',
-        },
-        background_color: '#12107c',
-        text_color: '#FFFFFF',
-      })
-      .addCredentialSubjectPropertyDisplay('given_name', {
-        name: 'given name',
-        locale: 'en-US',
-      } as IssuerCredentialSubjectDisplay)
-      .build()
+    const credentialsSupported: Record<string, CredentialConfigurationSupported> =
+      new CredentialSupportedBuilderV1_13()
+        .withCryptographicSuitesSupported('ES256K')
+        .withCryptographicBindingMethod('did')
+        .withFormat('jwt_vc_json')
+        .withTypes('VerifiableCredential')
+        .withId('UniversityDegree_JWT')
+        .withCredentialSupportedDisplay({
+          name: 'University Credential',
+          locale: 'en-US',
+          logo: {
+            url: 'https://exampleuniversity.com/public/logo.png',
+            alt_text: 'a square logo of a university',
+          },
+          background_color: '#12107c',
+          text_color: '#FFFFFF',
+        })
+        .addCredentialSubjectPropertyDisplay('given_name', {
+          name: 'given name',
+          locale: 'en-US',
+        } as IssuerCredentialSubjectDisplay)
+        .build()
     const stateManager = new MemoryStates<CredentialOfferSession>()
     await stateManager.set('existing-state', {
       issuerState: 'existing-state',
@@ -140,15 +141,15 @@ describe('issuerCallback', () => {
 
     const nonces = new MemoryStates<CNonceState>()
     await nonces.set('test_value', { cNonce: 'test_value', createdAt: +new Date(), issuerState: 'existing-state' })
-    vcIssuer = new VcIssuerBuilderV1_0_11<DIDDocument>()
-      .withAuthorizationServer('https://authorization-server')
+    vcIssuer = new VcIssuerBuilder<DIDDocument>()
+      .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',
       })
-      .withCredentialsSupported(credentialsSupported)
+      .withCredentialConfigurationsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
       .withCNonceStateManager(nonces)
       .withJWTVerifyCallback(verifyCallbackFunction)

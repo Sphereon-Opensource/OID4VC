@@ -2,11 +2,12 @@ import {
   AccessTokenResponse,
   CredentialIssuerMetadata,
   CredentialOfferPayloadV1_0_08,
+  CredentialOfferPayloadV1_0_11,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
-  getTypesFromOffer,
+  getTypesFromOfferV1_0_11,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   UniformCredentialOfferRequest,
@@ -73,9 +74,9 @@ export class CredentialRequestClientBuilder {
     if (version <= OpenId4VCIVersion.VER_1_0_08) {
       //todo: This basically sets all types available during initiation. Probably the user only wants a subset. So do we want to do this?
       builder.withCredentialType((request.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type);
-    } else {
+    } else if (version <= OpenId4VCIVersion.VER_1_0_11) {
       // todo: look whether this is correct
-      builder.withCredentialType(getTypesFromOffer(request.credential_offer));
+      builder.withCredentialType(getTypesFromOfferV1_0_11(request.credential_offer as CredentialOfferPayloadV1_0_11));
     }
 
     return builder;

@@ -3,7 +3,7 @@ import { CredentialMapper } from '@sphereon/ssi-types';
 import { fetch } from 'cross-fetch';
 import { importJWK, JWK, SignJWT } from 'jose';
 
-import { OpenID4VCIClient } from '..';
+import { OpenID4VCIClientV1_0_11 } from '..';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -23,7 +23,7 @@ const kid = `${did}#z6Mki5ZwZKN1dBQprfJTikUvkDxrHijiiQngkWviMF5gw2Hv`;
 describe.skip('OID4VCI-Client using Mattr issuer should', () => {
   async function test(format: 'ldp_vc' | 'jwt_vc_json') {
     const offer = await getCredentialOffer(format);
-    const client = await OpenID4VCIClient.fromURI({
+    const client = await OpenID4VCIClientV1_0_11.fromURI({
       uri: offer.offerUrl,
       kid,
       alg: Alg.EdDSA,

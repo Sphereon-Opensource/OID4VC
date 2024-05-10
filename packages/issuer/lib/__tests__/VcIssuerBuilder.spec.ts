@@ -1,11 +1,11 @@
 import { CredentialConfigurationSupported, IssuerCredentialSubjectDisplay, IssueStatus, TokenErrorResponse } from '@sphereon/oid4vci-common'
 import { v4 } from 'uuid'
 
-import { CredentialSupportedBuilderV1_13, VcIssuerBuilderV1_0_11 } from '../index'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../index'
 
 describe('VcIssuer builder should', () => {
   it('generate a VcIssuer', () => {
-    const credentialsSupported: CredentialConfigurationSupported = new CredentialSupportedBuilderV1_13()
+    const credentialsSupported: Record<string, CredentialConfigurationSupported> = new CredentialSupportedBuilderV1_13()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
@@ -26,8 +26,8 @@ describe('VcIssuer builder should', () => {
         locale: 'en-US',
       } as IssuerCredentialSubjectDisplay)
       .build()
-    const vcIssuer = new VcIssuerBuilderV1_0_11()
-      .withAuthorizationServer('https://authorization-server')
+    const vcIssuer = new VcIssuerBuilder()
+      .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer('https://credential-issuer')
       .withIssuerDisplay({
@@ -36,16 +36,16 @@ describe('VcIssuer builder should', () => {
       })
       .withInMemoryCredentialOfferState()
       .withInMemoryCNonceState()
-      .withCredentialsSupported(credentialsSupported)
+      .withCredentialConfigurationsSupported(credentialsSupported)
       .build()
 
-    expect(vcIssuer.issuerMetadata.authorization_server).toEqual('https://authorization-server')
+    expect(vcIssuer.issuerMetadata.authorization_servers).toEqual(['https://authorization-server'])
     expect(vcIssuer.issuerMetadata.display).toBeDefined()
-    expect(vcIssuer.issuerMetadata.credentials_supported[0].id).toEqual('UniversityDegree_JWT')
+    expect(vcIssuer.issuerMetadata.credential_configurations_supported!['UniversityDegree_JWT']).toBeDefined()
   })
 
   it('fail to generate a VcIssuer', () => {
-    const credentialsSupported: CredentialConfigurationSupported = new CredentialSupportedBuilderV1_13()
+    const credentialsSupported: Record<string, CredentialConfigurationSupported> = new CredentialSupportedBuilderV1_13()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
@@ -67,14 +67,14 @@ describe('VcIssuer builder should', () => {
       } as IssuerCredentialSubjectDisplay)
       .build()
     expect(() =>
-      new VcIssuerBuilderV1_0_11()
-        .withAuthorizationServer('https://authorization-server')
+      new VcIssuerBuilder()
+        .withAuthorizationServers('https://authorization-server')
         .withCredentialEndpoint('https://credential-endpoint')
         .withIssuerDisplay({
           name: 'example issuer',
           locale: 'en-US',
         })
-        .withCredentialsSupported(credentialsSupported)
+        .withCredentialConfigurationsSupported(credentialsSupported)
         .build(),
     ).toThrowError(TokenErrorResponse.invalid_request)
   })
@@ -89,7 +89,7 @@ describe('VcIssuer builder should', () => {
     ).toThrowError(TokenErrorResponse.invalid_request)
   })
   it('should successfully attach an instance of the ICredentialOfferStateManager to the VcIssuer instance', async () => {
-    const credentialsSupported: CredentialConfigurationSupported = new CredentialSupportedBuilderV1_13()
+    const credentialsSupported: Record<string, CredentialConfigurationSupported> = new CredentialSupportedBuilderV1_13()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
@@ -110,15 +110,15 @@ describe('VcIssuer builder should', () => {
         locale: 'en-US',
       } as IssuerCredentialSubjectDisplay)
       .build()
-    const vcIssuer = new VcIssuerBuilderV1_0_11()
-      .withAuthorizationServer('https://authorization-server')
+    const vcIssuer = new VcIssuerBuilder()
+      .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer('https://credential-issuer')
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',
       })
-      .withCredentialsSupported(credentialsSupported)
+      .withCredentialConfigurationsSupported(credentialsSupported)
       .withInMemoryCredentialOfferState()
       .withInMemoryCNonceState()
       .build()

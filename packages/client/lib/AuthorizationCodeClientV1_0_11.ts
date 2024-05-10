@@ -5,13 +5,11 @@ import {
   convertJsonToURI,
   CredentialConfigurationSupported,
   CredentialOfferFormat,
-  CredentialOfferPayloadV1_0_13,
+  CredentialOfferPayloadV1_0_11,
   CredentialOfferRequestWithBaseUrl,
-  determineSpecVersionFromOffer,
   EndpointMetadataResult,
   formPost,
   JsonURIMode,
-  OpenId4VCIVersion,
   PARMode,
   PKCEOpts,
   PushedAuthorizationResponse,
@@ -21,28 +19,18 @@ import Debug from 'debug';
 
 const debug = Debug('sphereon:oid4vci');
 
-function filterSupportedCredentials(
-  credentialOffer: CredentialOfferPayloadV1_0_13,
-  credentialsSupported?: Record<string, CredentialConfigurationSupported>,
-): CredentialConfigurationSupported[] {
-  if (!credentialOffer.credential_configuration_ids || !credentialsSupported) {
-    return [];
-  }
-  return credentialOffer.credential_configuration_ids.map((id) => credentialsSupported[id]).filter((cred) => cred !== undefined);
-}
-
-export const createAuthorizationRequestUrl = async ({
+export const createAuthorizationRequestUrlV1_0_11 = async ({
   pkce,
   endpointMetadata,
   authorizationRequest,
   credentialOffer,
-  credentialConfigurationSupported,
+  credentialsSupported,
 }: {
   pkce: PKCEOpts;
   endpointMetadata: EndpointMetadataResult;
   authorizationRequest: AuthorizationRequestOpts;
   credentialOffer?: CredentialOfferRequestWithBaseUrl;
-  credentialConfigurationSupported?: Record<string, CredentialConfigurationSupported>;
+  credentialsSupported?: CredentialConfigurationSupported[];
 }): Promise<string> => {
   const { redirectUri, clientId } = authorizationRequest;
   let { scope, authorizationDetails } = authorizationRequest;
@@ -55,19 +43,15 @@ export const createAuthorizationRequestUrl = async ({
     if (!credentialOffer) {
       throw Error('Please provide a scope or authorization_details if no credential offer is present');
     }
-    if ('credentials' in credentialOffer.credential_offer) {
-      throw new Error('CredentialOffer format is wrong.');
-    }
-    const creds: (CredentialConfigurationSupported | CredentialOfferFormat | string)[] =
-      determineSpecVersionFromOffer(credentialOffer.credential_offer) === OpenId4VCIVersion.VER_1_0_13
-        ? filterSupportedCredentials(credentialOffer.credential_offer as CredentialOfferPayloadV1_0_13, credentialConfigurationSupported)
-        : [];
+    const creds: (CredentialOfferFormat | string)[] = (credentialOffer.credential_offer as CredentialOfferPayloadV1_0_11).credentials;
 
     // FIXME: complains about VCT for sd-jwt
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     authorizationDetails = creds
-      .flatMap((cred) => cred as CredentialConfigurationSupported)
+      .flatMap((cred) =>
+        typeof cred === 'string' && credentialsSupported ? Object.values(credentialsSupported) : (cred as CredentialConfigurationSupported),
+      )
       .filter((cred) => !!cred)
       .map((cred) => {
         return {
@@ -100,7 +84,7 @@ export const createAuthorizationRequestUrl = async ({
       code_challenge_method: pkce.codeChallengeMethod ?? CodeChallengeMethod.S256,
       code_challenge: pkce.codeChallenge,
     }),
-    authorization_details: JSON.stringify(handleAuthorizationDetails(endpointMetadata, authorizationDetails)),
+    authorization_details: JSON.stringify(handleAuthorizationDetailsV1_0_11(endpointMetadata, authorizationDetails)),
     ...(redirectUri && { redirect_uri: redirectUri }),
     ...(clientId && { client_id: clientId }),
     ...(credentialOffer?.issuerState && { issuer_state: credentialOffer.issuerState }),
@@ -143,7 +127,7 @@ export const createAuthorizationRequestUrl = async ({
   return url;
 };
 
-const handleAuthorizationDetails = (
+const handleAuthorizationDetailsV1_0_11 = (
   endpointMetadata: EndpointMetadataResult,
   authorizationDetails?: AuthorizationDetails | AuthorizationDetails[],
 ): AuthorizationDetails | AuthorizationDetails[] | undefined => {

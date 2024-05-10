@@ -1,8 +1,4 @@
-import {
-  ICredentialContextType,
-  IVerifiableCredential,
-  W3CVerifiableCredential
-} from '@sphereon/ssi-types';
+import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 import { ProofOfPossession } from './CredentialIssuance.types';
 import { AuthorizationServerMetadata } from './ServerMetadata';
@@ -58,15 +54,14 @@ export interface CredentialIssuerMetadataOpts {
   credentials_supported: CredentialConfigurationSupported[]; // REQUIRED. A JSON array containing a list of JSON objects, each of them representing metadata about a separate credential type that the Credential Issuer can issue. The JSON objects in the array MUST conform to the structure of the Section 10.2.3.1.
   credential_issuer: string; // REQUIRED. The Credential Issuer's identifier.
   authorization_server?: string; // OPTIONAL. Identifier of the OAuth 2.0 Authorization Server (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
-  // authorization_servers?: string[]; // OPTIONAL. Array of strings that identify the OAuth 2.0 Authorization Servers (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
   token_endpoint?: string;
   display?: MetadataDisplay[]; //  An array of objects, where each object contains display properties of a Credential Issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
   credential_supplier_config?: CredentialSupplierConfig;
 }
 
 //todo: investigate if these values are enough.
-type AlgValue = 'RS256' | 'ES256' | 'PS256' | 'HS256' | string
-type EncValue = 'A128GCM'| 'A256GCM' | 'A128CBC-HS256' | 'A256CBC-HS512' | string
+type AlgValue = 'RS256' | 'ES256' | 'PS256' | 'HS256' | string;
+type EncValue = 'A128GCM' | 'A256GCM' | 'A128CBC-HS256' | 'A256CBC-HS512' | string;
 
 export interface ResponseEncryption {
   /**
@@ -95,7 +90,6 @@ export interface ResponseEncryption {
 
 // For now we extend the opts above. Only difference is that the credential endpoint is optional in the Opts, as it can come from other sources. The value is however required in the eventual Issuer Metadata
 export interface CredentialIssuerMetadata extends CredentialIssuerMetadataOpts, Partial<AuthorizationServerMetadata> {
-
   authorization_servers?: string[]; // OPTIONAL. Array of strings that identify the OAuth 2.0 Authorization Servers (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
   credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   credential_configurations_supported: Record<string, CredentialConfigurationSupported>; // REQUIRED. A JSON array containing a list of JSON objects, each of them representing metadata about a separate credential type that the Credential Issuer can issue. The JSON objects in the array MUST conform to the structure of the Section 10.2.3.1.
@@ -114,15 +108,15 @@ export interface CredentialSupportedBrief {
 }
 
 export interface ProofType {
-  proof_signing_alg_values_supported: string[]
+  proof_signing_alg_values_supported: string[];
 }
 
 export type CommonCredentialSupported = CredentialSupportedBrief & {
   format: OID4VCICredentialFormat | string; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
   id?: string; // OPTIONAL. A JSON string identifying the respective object. The value MUST be unique across all credentials_supported entries in the Credential Issuer Metadata
   display?: CredentialsSupportedDisplay[]; // OPTIONAL. An array of objects, where each object contains the display properties of the supported credential for a certain language
-  scope?: string;// OPTIONAL. A JSON string identifying the scope value that this Credential Issuer supports for this particular Credential. The value can be the same across multiple credential_configurations_supported objects. The Authorization Server MUST be able to uniquely identify the Credential Issuer based on the scope value. The Wallet can use this value in the Authorization Request as defined in Section 5.1.2. Scope values in this Credential Issuer metadata MAY duplicate those in the scopes_supported parameter of the Authorization Server.
-  proof_types_supported?: Record<KeyProofType, ProofType>
+  scope?: string; // OPTIONAL. A JSON string identifying the scope value that this Credential Issuer supports for this particular Credential. The value can be the same across multiple credential_configurations_supported objects. The Authorization Server MUST be able to uniquely identify the Credential Issuer based on the scope value. The Wallet can use this value in the Authorization Request as defined in Section 5.1.2. Scope values in this Credential Issuer metadata MAY duplicate those in the scopes_supported parameter of the Authorization Server.
+  proof_types_supported?: Record<KeyProofType, ProofType>;
 
   /**
    * following properties are non-mso_mdoc specific and we might wanna rethink them when we're going to support mso_mdoc
@@ -194,8 +188,7 @@ export type CreateCredentialOfferURIResult = {
   qrCodeDataUri?: string;
   session: CredentialOfferSession;
   userPin?: string;
-  userPinLength?: number;
-  userPinRequired: boolean;
+  txCode?: TxCode;
 };
 
 export interface JsonLdIssuerCredentialDefinition {
@@ -244,17 +237,17 @@ export interface CommonCredentialResponse {
 }
 
 export interface CredentialResponseLdpVc extends CommonCredentialResponse {
-//  format: 'ldp_vc';
+  //  format: 'ldp_vc';
   credential: IVerifiableCredential;
 }
 
 export interface CredentialResponseJwtVc {
-//  format: 'jwt_vc_json' | 'jwt_vc_json-ld';  TODO do we still need this for previous version support?
+  //  format: 'jwt_vc_json' | 'jwt_vc_json-ld';  TODO do we still need this for previous version support?
   credential: string;
 }
 
 export interface CredentialResponseSdJwtVc {
-//  format: 'vc+sd-jwt';   TODO do we still need this for previous version support?
+  //  format: 'vc+sd-jwt';   TODO do we still need this for previous version support?
   credential: string;
 }
 
@@ -291,11 +284,10 @@ export interface GrantAuthorizationCode {
   authorization_server?: string;
 }
 
-
 export interface TxCode {
   /**
-  * OPTIONAL. String specifying the input character set. Possible values are numeric (only digits) and text (any characters). The default is numeric.
-  */
+   * OPTIONAL. String specifying the input character set. Possible values are numeric (only digits) and text (any characters). The default is numeric.
+   */
   input_mode?: InputCharSet;
 
   /**
@@ -317,8 +309,9 @@ export interface GrantUrnIetf {
   /**
    * REQUIRED. The code representing the Credential Issuer's authorization for the Wallet to obtain Credentials of a certain type.
    */
+  // v12, v13
   'pre-authorized_code': string;
-  //v13
+  // v13
   /**
    * OPTIONAL. Object specifying whether the Authorization Server expects presentation of a Transaction Code by the
    * End-User along with the Token Request in a Pre-Authorized Code Flow. If the Authorization Server does not expect a
@@ -331,13 +324,13 @@ export interface GrantUrnIetf {
    */
   tx_code?: TxCode;
 
-  //v12
+  // v12, v13
   /**
    * OPTIONAL. The minimum amount of time in seconds that the Wallet SHOULD wait between polling requests to the token endpoint (in case the Authorization Server responds with error code authorization_pending - see Section 6.3). If no value is provided, Wallets MUST use 5 as the default.
    */
   interval?: number;
 
-  // v12 feature
+  // v12, v13 feature
   /**
    * OPTIONAL string that the Wallet can use to identify the Authorization Server to use with this grant type when authorization_servers parameter in the Credential Issuer metadata has multiple entries. MUST NOT be used otherwise. The value of this parameter MUST match with one of the values in the authorization_servers array obtained from the Credential Issuer metadata
    */
@@ -355,7 +348,7 @@ export interface GrantUrnIetf {
    * the Pre-Authorized Code Flow, a PIN value MUST be sent in
    * the user_pin parameter with the respective Token Request.
    */
-  user_pin_required?: boolean
+  user_pin_required?: boolean;
 }
 
 export const PRE_AUTH_CODE_LITERAL = 'pre-authorized_code';

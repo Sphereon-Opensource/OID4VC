@@ -9,6 +9,8 @@ import {
   CredentialOfferPayloadV1_0_08,
   CredentialOfferPayloadV1_0_09,
   CredentialOfferPayloadV1_0_11,
+  CredentialOfferPayloadV1_0_13,
+  CredentialOfferV1_0_13,
   DefaultURISchemes,
   Grant,
   GrantTypes,
@@ -34,12 +36,13 @@ export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
   // version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_09, 'credentials');
   // version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_09, 'initiate_issuance_uri')
 
-  version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_11, 'credential_offer_uri=');
-  version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_11, 'credential_issuer');
-  version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_11, 'grants');
+  version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_11, 'credentials');
+  version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_11, 'urn:ietf:params:oauth:grant-type:pre-authorized_code');
 
+  version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_13, 'credential_configuration_ids');
+  version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_13, 'tx_code');
   if (version === OpenId4VCIVersion.VER_UNKNOWN) {
-    version = OpenId4VCIVersion.VER_1_0_11;
+    version = OpenId4VCIVersion.VER_1_0_13;
   }
   return version;
 }
@@ -48,9 +51,12 @@ export function determineSpecVersionFromScheme(credentialOfferURI: string, openI
   const scheme = getScheme(credentialOfferURI);
   if (credentialOfferURI.includes(DefaultURISchemes.INITIATE_ISSUANCE)) {
     return recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_1_0_08, scheme);
-  } else if (credentialOfferURI.includes(DefaultURISchemes.CREDENTIAL_OFFER)) {
+  }
+  // todo: drop support for v1_0_8. version 11 and version 13 have the same scheme 'openid-credential-offer'
+  /*else if (credentialOfferURI.includes(DefaultURISchemes.CREDENTIAL_OFFER)) {
     return recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_1_0_11, scheme);
-  } else {
+  }*/
+  else {
     return recordVersion(openId4VCIVersion, OpenId4VCIVersion.VER_UNKNOWN, scheme);
   }
 }
@@ -217,7 +223,7 @@ function isCredentialOfferV1_0_13(offer: CredentialOfferPayload | CredentialOffe
   return 'credential_offer_uri' in offer;
 }
 
-export async function toUniformCredentialOfferRequest(
+export async function toUniformCredentialOfferRequestV1_0_11(
   offer: CredentialOffer,
   opts?: {
     resolve?: boolean;
@@ -231,6 +237,38 @@ export async function toUniformCredentialOfferRequest(
     credentialOfferURI = offer.credential_offer_uri;
     if (opts?.resolve || opts?.resolve === undefined) {
       originalCredentialOffer = (await resolveCredentialOfferURI(credentialOfferURI)) as CredentialOfferPayloadV1_0_11;
+    } else if (!originalCredentialOffer) {
+      throw Error(`Credential offer uri (${credentialOfferURI}) found, but resolution was explicitly disabled and credential_offer was supplied`);
+    }
+  }
+  if (!originalCredentialOffer) {
+    throw Error('No credential offer available');
+  }
+  const payload = toUniformCredentialOfferPayload(originalCredentialOffer, opts);
+  const supportedFlows = determineFlowType(payload, version);
+  return {
+    credential_offer: payload,
+    original_credential_offer: originalCredentialOffer,
+    ...(credentialOfferURI && { credential_offer_uri: credentialOfferURI }),
+    supportedFlows,
+    version,
+  };
+}
+
+export async function toUniformCredentialOfferRequest(
+  offer: CredentialOfferV1_0_13,
+  opts?: {
+    resolve?: boolean;
+    version?: OpenId4VCIVersion;
+  },
+): Promise<UniformCredentialOfferRequest> {
+  const version = opts?.version ?? determineSpecVersionFromOffer(offer);
+  let originalCredentialOffer = offer.credential_offer;
+  let credentialOfferURI: string | undefined;
+  if ('credential_offer_uri' in offer && offer?.credential_offer_uri !== undefined) {
+    credentialOfferURI = offer.credential_offer_uri;
+    if (opts?.resolve || opts?.resolve === undefined) {
+      originalCredentialOffer = (await resolveCredentialOfferURI(credentialOfferURI)) as CredentialOfferPayloadV1_0_13;
     } else if (!originalCredentialOffer) {
       throw Error(`Credential offer uri (${credentialOfferURI}) found, but resolution was explicitly disabled and credential_offer was supplied`);
     }
@@ -419,7 +457,7 @@ function recordVersion(currentVersion: OpenId4VCIVersion, matchingVersion: OpenI
   );
 }
 
-export function getTypesFromOffer(credentialOffer: UniformCredentialOfferPayload, opts?: { filterVerifiableCredential: boolean }) {
+export function getTypesFromOfferV1_0_11(credentialOffer: CredentialOfferPayloadV1_0_11, opts?: { filterVerifiableCredential: boolean }) {
   const types = credentialOffer.credentials.reduce<string[]>((prev, curr) => {
     // FIXME returning the string value is wrong (as it's an id), but just matching the current behavior of this library
     // The credential_type (from draft 8) and the actual 'type' value in a VC (from draft 11) are mixed up

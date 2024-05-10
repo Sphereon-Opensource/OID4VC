@@ -3,18 +3,18 @@ import { CodeChallengeMethod, WellKnownEndpoints } from '@sphereon/oid4vci-commo
 // @ts-ignore
 import nock from 'nock';
 
-import { OpenID4VCIClient } from '../OpenID4VCIClient';
+import { OpenID4VCIClientV1_0_11 } from '../OpenID4VCIClientV1_0_11';
 
 const MOCK_URL = 'https://server.example.com/';
 
 describe('OpenID4VCIClient should', () => {
-  let client: OpenID4VCIClient;
+  let client: OpenID4VCIClientV1_0_11;
 
   beforeEach(async () => {
     nock(MOCK_URL).get(/.*/).reply(200, {});
     nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {});
     nock(MOCK_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
-    client = await OpenID4VCIClient.fromURI({
+    client = await OpenID4VCIClientV1_0_11.fromURI({
       clientId: 'test-client',
       uri: 'openid-initiate-issuance://?issuer=https://server.example.com&credential_type=TestCredential',
       createAuthorizationRequestURL: false,
@@ -77,7 +77,7 @@ describe('OpenID4VCIClient should', () => {
     nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, {});
     nock(MOCK_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(200, {});
     // Use a client with issuer only to trigger the error
-    client = await OpenID4VCIClient.fromCredentialIssuer({
+    client = await OpenID4VCIClientV1_0_11.fromCredentialIssuer({
       credentialIssuer: MOCK_URL,
       createAuthorizationRequestURL: false,
       retrieveServerMetadata: false,

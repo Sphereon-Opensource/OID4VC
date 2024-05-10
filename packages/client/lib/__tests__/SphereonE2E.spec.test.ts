@@ -8,7 +8,7 @@ import debug from 'debug';
 import { importJWK, JWK, SignJWT } from 'jose';
 import { v4 } from 'uuid';
 
-import { OpenID4VCIClient } from '..';
+import { OpenID4VCIClientV1_0_11 } from '..';
 
 export const UNIT_TEST_TIMEOUT = 60000;
 
@@ -29,7 +29,7 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
   async function test(format: 'ldp_vc' | 'jwt_vc_json') {
     debug.enable('*');
     const offer = await getCredentialOffer(format);
-    const client = await OpenID4VCIClient.fromURI({
+    const client = await OpenID4VCIClientV1_0_11.fromURI({
       uri: offer.uri,
       kid,
       alg: Alg.EdDSA,
@@ -118,7 +118,7 @@ describe('ismapolis bug report #63, https://github.com/Sphereon-Opensource/OID4V
   it('work as expected provided a correct JWT is supplied', async () => {
     debug.enable('*');
     const { uri } = await getCredentialOffer('jwt_vc_json');
-    const client = await OpenID4VCIClient.fromURI({ uri: uri, clientId: 'test-clientID' });
+    const client = await OpenID4VCIClientV1_0_11.fromURI({ uri: uri, clientId: 'test-clientID' });
     const metadata = await client.retrieveServerMetadata();
     console.log(JSON.stringify(metadata));
 

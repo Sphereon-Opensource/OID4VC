@@ -12,7 +12,7 @@ import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 
 import { VcIssuer } from '../VcIssuer'
-import { CredentialSupportedBuilderV1_13, VcIssuerBuilderV1_0_11 } from '../builder'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../builder'
 import { MemoryStates } from '../state-manager'
 
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
@@ -42,7 +42,7 @@ describe('VcIssuer', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
-    const credentialsSupported: CredentialConfigurationSupported = new CredentialSupportedBuilderV1_13()
+    const credentialsSupported: Record<string, CredentialConfigurationSupported> = new CredentialSupportedBuilderV1_13()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
@@ -89,21 +89,24 @@ describe('VcIssuer', () => {
             authorization_code: { issuer_state: issuerState },
             'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
               'pre-authorized_code': preAuthorizedCode,
-              user_pin_required: true,
+              tx_code: {
+                input_mode: 'text',
+                length: 4,
+              },
             },
           },
         },
       },
     })
-    vcIssuer = new VcIssuerBuilderV1_0_11<DIDDocument>()
-      .withAuthorizationServer('https://authorization-server')
+    vcIssuer = new VcIssuerBuilder<DIDDocument>()
+      .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',
       })
-      .withCredentialsSupported(credentialsSupported)
+      .withCredentialConfigurationsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
       .withInMemoryCNonceState()
       .withInMemoryCredentialOfferURIState()
@@ -259,7 +262,11 @@ describe('VcIssuer', () => {
           },
           scheme: 'http',
           baseUri: 'issuer-example.com',
-          credentials: [''],
+          credentials: {
+            'Credential': {
+              format: 'ldp_vc'
+            } as CredentialConfigurationSupported
+          },
           credentialOfferUri: 'https://somehost.com/offer-id',
         })
         .then((response) => response.uri),
@@ -284,7 +291,7 @@ describe('VcIssuer', () => {
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
-          iat: +new Date()/1000,
+          iat: +new Date() / 1000,
           nonce: 'test-nonce',
         },
       },
@@ -322,7 +329,7 @@ describe('VcIssuer', () => {
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
-          iat: +new Date()/1000,
+          iat: +new Date() / 1000,
           nonce: 'test-nonce',
         },
       },
@@ -405,7 +412,7 @@ describe('VcIssuer', () => {
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
-          iat: +new Date()/1000,
+          iat: +new Date() / 1000,
           nonce: 'test-nonce',
         },
       },

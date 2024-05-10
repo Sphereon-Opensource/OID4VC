@@ -121,7 +121,10 @@ describe('AccessTokenClient should', () => {
       await expect(
         accessTokenClient.acquireAccessTokenUsingRequest({
           accessTokenRequest,
-          isPinRequired: true,
+          txCode: {
+            length: 8,
+            input_mode: 'text',
+          },
           asOpts: { as: MOCK_URL },
         }),
       ).rejects.toThrow('A valid pin consisting of maximal 8 numeric characters must be present.');
@@ -146,7 +149,10 @@ describe('AccessTokenClient should', () => {
       await expect(
         accessTokenClient.acquireAccessTokenUsingRequest({
           accessTokenRequest,
-          isPinRequired: true,
+          txCode: {
+            length: 9,
+            input_mode: 'text',
+          },
           asOpts: { as: MOCK_URL },
         }),
       ).rejects.toThrow(Error('A valid pin consisting of maximal 8 numeric characters must be present.'));
@@ -178,7 +184,10 @@ describe('AccessTokenClient should', () => {
 
       const response = await accessTokenClient.acquireAccessTokenUsingRequest({
         accessTokenRequest,
-        isPinRequired: true,
+        txCode: {
+          length: 8,
+          input_mode: 'text',
+        },
         asOpts: { as: MOCK_URL },
       });
       expect(response.successBody).toEqual(body);

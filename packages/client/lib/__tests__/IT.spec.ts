@@ -11,7 +11,7 @@ import {
 // @ts-ignore
 import nock from 'nock';
 
-import { AccessTokenClient, CredentialRequestClientBuilder, OpenID4VCIClient, ProofOfPossessionBuilder } from '..';
+import { AccessTokenClient, CredentialRequestClientBuilder, OpenID4VCIClientV1_0_11, ProofOfPossessionBuilder } from '..';
 import { CredentialOfferClient } from '../CredentialOfferClient';
 
 import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
@@ -69,7 +69,7 @@ describe('OID4VCI-Client should', () => {
 
   it('succeed with a full flow with the client using OpenID4VCI version 9', async () => {
     succeedWithAFullFlowWithClientSetup();
-    const client = await OpenID4VCIClient.fromURI({
+    const client = await OpenID4VCIClientV1_0_11.fromURI({
       uri: INITIATE_QR,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
       alg: Alg.ES256,
@@ -80,7 +80,7 @@ describe('OID4VCI-Client should', () => {
 
   test.skip('succeed with a full flow wit the client using OpenID4VCI version 11', async () => {
     succeedWithAFullFlowWithClientSetup();
-    const client = await OpenID4VCIClient.fromURI({
+    const client = await OpenID4VCIClientV1_0_11.fromURI({
       uri: OFFER_QR,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
       alg: Alg.ES256,
@@ -89,7 +89,7 @@ describe('OID4VCI-Client should', () => {
     await assertionOfsucceedWithAFullFlowWithClient(client);
   });
 
-  async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
+  async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClientV1_0_11) {
     expect(client.credentialOffer).toBeDefined();
     expect(client.endpointMetadata).toBeDefined();
     expect(client.getIssuer()).toEqual('https://issuer.research.identiproof.io');

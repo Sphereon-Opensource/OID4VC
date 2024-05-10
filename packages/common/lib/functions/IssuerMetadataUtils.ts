@@ -7,9 +7,9 @@ import {
   IssuerMetadataV1_0_08,
   MetadataDisplay,
   OID4VCICredentialFormat,
-  OpenId4VCIVersion
-} from '../types'
-import { CredentialIssuerMetadataOptsV1_0_13, IssuerMetadataV1_0_13 } from '../types/v1_0_13.types'
+  OpenId4VCIVersion,
+} from '../types';
+import { CredentialIssuerMetadataOptsV1_0_13, IssuerMetadataV1_0_13 } from '../types/v1_0_13.types';
 
 export function getSupportedCredentials(options?: {
   issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08 | IssuerMetadataV1_0_13;
@@ -18,12 +18,17 @@ export function getSupportedCredentials(options?: {
   format?: OID4VCICredentialFormat | string | (OID4VCICredentialFormat | string)[];
 }): Record<string, CredentialConfigurationSupported> {
   if (options?.types && Array.isArray(options.types)) {
-    return options.types.map(typeSet => {
-      return getSupportedCredential({ ...options, types: typeSet });
-    }).reduce((acc, result) => {
-      Object.assign(acc, result);
-      return acc;
-    }, {} as Record<string, CredentialConfigurationSupported>);
+    return options.types
+      .map((typeSet) => {
+        return getSupportedCredential({ ...options, types: typeSet });
+      })
+      .reduce(
+        (acc, result) => {
+          Object.assign(acc, result);
+          return acc;
+        },
+        {} as Record<string, CredentialConfigurationSupported>,
+      );
   }
 
   return getSupportedCredential(options ? { ...options, types: undefined } : undefined);
@@ -81,7 +86,10 @@ export function getSupportedCredential(opts?: {
   return filteredConfigs;
 }
 
-export function getTypesFromCredentialSupported(credentialSupported: CredentialConfigurationSupported, opts?: { filterVerifiableCredential: boolean }) {
+export function getTypesFromCredentialSupported(
+  credentialSupported: CredentialConfigurationSupported,
+  opts?: { filterVerifiableCredential: boolean },
+) {
   let types: string[] = [];
   if (
     credentialSupported.format === 'jwt_vc_json' ||
@@ -104,7 +112,7 @@ export function getTypesFromCredentialSupported(credentialSupported: CredentialC
 }
 
 export function credentialsSupportedV8ToV13(supportedV8: CredentialSupportedTypeV1_0_08): Record<string, CredentialConfigurationSupported> {
-  const credentialConfigsSupported:Record<string, CredentialConfigurationSupported> = {};
+  const credentialConfigsSupported: Record<string, CredentialConfigurationSupported> = {};
   Object.entries(supportedV8).flatMap((entry) => {
     const type = entry[0];
     const supportedV8 = entry[1];
@@ -114,7 +122,7 @@ export function credentialsSupportedV8ToV13(supportedV8: CredentialSupportedType
 }
 
 export function credentialSupportedV8ToV13(key: string, supportedV8: CredentialSupportedV1_0_08): Record<string, CredentialConfigurationSupported> {
-  const credentialConfigsSupported:Record<string, CredentialConfigurationSupported> = {};
+  const credentialConfigsSupported: Record<string, CredentialConfigurationSupported> = {};
   Object.entries(supportedV8.formats).map((entry) => {
     const format = entry[0];
     const credentialSupportBrief = entry[1];

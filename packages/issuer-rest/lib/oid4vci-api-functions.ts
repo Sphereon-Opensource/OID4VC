@@ -1,7 +1,7 @@
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AuthorizationRequest,
-  CredentialOfferRESTRequest,
+  CredentialOfferRESTRequestV1_0_11,
   CredentialRequestV1_0_11,
   determineGrantTypes,
   getNumberOrUndefined,
@@ -68,7 +68,7 @@ export function accessTokenEndpoint<DIDDoc extends object>(
   opts: ITokenEndpointOpts & ISingleEndpointOpts & { baseUrl: string | URL },
 ) {
   const tokenEndpoint = issuer.issuerMetadata.token_endpoint
-  const externalAS = issuer.issuerMetadata.authorization_server
+  const externalAS = issuer.issuerMetadata.authorization_servers
   if (externalAS) {
     console.log(`[OID4VCI] External Authorization Server ${tokenEndpoint} is being used. Not enabling issuer token endpoint`)
     return
@@ -194,7 +194,7 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
 ) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers', { stripBasePath: true })
   console.log(`[OID4VCI] createCredentialOffer endpoint enabled at ${path}`)
-  router.post(path, async (request: Request<CredentialOfferRESTRequest>, response: Response<ICreateCredentialOfferURIResponse>) => {
+  router.post(path, async (request: Request<CredentialOfferRESTRequestV1_0_11>, response: Response<ICreateCredentialOfferURIResponse>) => {
     try {
       const grantTypes = determineGrantTypes(request.body)
       if (grantTypes.length === 0) {

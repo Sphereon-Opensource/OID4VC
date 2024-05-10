@@ -6,8 +6,9 @@ import {
   IStateManager,
   JWTVerifyCallback,
   MetadataDisplay,
-  TokenErrorResponse, TxCode,
-  URIState
+  TokenErrorResponse,
+  TxCode,
+  URIState,
 } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 
@@ -20,7 +21,7 @@ import { IssuerMetadataBuilderV1_13 } from './IssuerMetadataBuilderV1_13'
 export class VcIssuerBuilder<DIDDoc extends object> {
   issuerMetadataBuilder?: IssuerMetadataBuilderV1_13
   issuerMetadata: Partial<CredentialIssuerMetadataOptsV1_0_13> = {}
-  txCode?:TxCode
+  txCode?: TxCode
   defaultCredentialOfferBaseUri?: string
   userPinRequired?: boolean
   cNonceExpiresIn?: number
@@ -52,7 +53,7 @@ export class VcIssuerBuilder<DIDDoc extends object> {
   }
 
   public withAuthorizationServers(authorizationServers: string | string[]): this {
-    this.issuerMetadata.authorization_servers = typeof authorizationServers === 'string'? [authorizationServers]: authorizationServers
+    this.issuerMetadata.authorization_servers = typeof authorizationServers === 'string' ? [authorizationServers] : authorizationServers
     return this
   }
 
@@ -95,7 +96,7 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     return this
   }
 
-  public withTXCode(txCode:TxCode): this {
+  public withTXCode(txCode: TxCode): this {
     this.txCode = txCode
     return this
   }
@@ -163,11 +164,7 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     // Let's make sure these get merged correctly:
     metadata.credential_configurations_supported = this.issuerMetadata.credential_configurations_supported
     metadata.display = [...(this.issuerMetadata.display ?? []), ...(builder?.display ?? [])]
-    if (
-      !metadata.credential_endpoint ||
-      !metadata.credential_issuer ||
-      !this.issuerMetadata.credential_configurations_supported
-    ) {
+    if (!metadata.credential_endpoint || !metadata.credential_issuer || !this.issuerMetadata.credential_configurations_supported) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
     return new VcIssuer(metadata as CredentialIssuerMetadata, {

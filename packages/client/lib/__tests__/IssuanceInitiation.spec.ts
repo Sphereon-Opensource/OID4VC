@@ -25,7 +25,6 @@ describe('Issuance Initiation', () => {
       },
       scheme: 'https',
       supportedFlows: ['Authorization Code Flow'],
-      userPinRequired: false,
       version: 1008,
     });
   });
