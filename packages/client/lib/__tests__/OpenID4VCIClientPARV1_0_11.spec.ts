@@ -6,7 +6,7 @@ import nock from 'nock';
 import { OpenID4VCIClientV1_0_11 } from '../OpenID4VCIClientV1_0_11';
 
 const MOCK_URL = 'https://server.example.com/';
-describe('OpenID4VCIClient', () => {
+describe('OpenID4VCIClientV1_0_11', () => {
   let client: OpenID4VCIClientV1_0_11;
 
   beforeEach(async () => {

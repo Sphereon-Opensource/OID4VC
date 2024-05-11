@@ -1,5 +1,5 @@
 import {
-  acquireDeferredCredential, CredentialRequestV1_0_13,
+  acquireDeferredCredential,
   CredentialResponse,
   getCredentialRequestForVersion,
   getUniformFormat,
@@ -9,18 +9,19 @@ import {
   OpenIDResponse,
   ProofOfPossession,
   UniformCredentialRequest,
-  URL_NOT_VALID
-} from '@sphereon/oid4vci-common'
-import { CredentialFormat } from '@sphereon/ssi-types'
-import Debug from 'debug'
+  URL_NOT_VALID,
+} from '@sphereon/oid4vci-common';
+import { CredentialFormat } from '@sphereon/ssi-types';
+import Debug from 'debug';
 
-import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder'
-import { isValidURL, post } from './functions'
-import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
+import { buildProof } from './CredentialRequestClient'
+import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11'
+import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
+import { isValidURL, post } from './functions';
 
 const debug = Debug('sphereon:oid4vci:credential');
 
-export interface CredentialRequestOpts {
+export interface CredentialRequestOptsV1_0_11 {
   deferredCredentialAwait?: boolean;
   deferredCredentialIntervalInMS?: number;
   credentialEndpoint: string;
@@ -32,31 +33,12 @@ export interface CredentialRequestOpts {
   version: OpenId4VCIVersion;
 }
 
-export async function buildProof<DIDDoc>(
-  proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession,
-  opts: {
-    version: OpenId4VCIVersion;
-    cNonce?: string;
-  },
-) {
-  if ('proof_type' in proofInput) {
-    if (opts.cNonce) {
-      throw Error(`Cnonce param is only supported when using a Proof of possession builder`);
-    }
-    return await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession, opts.version).build();
-  }
-  if (opts.cNonce) {
-    proofInput.withAccessTokenNonce(opts.cNonce);
-  }
-  return await proofInput.build();
-}
-
-export class CredentialRequestClient {
-  private readonly _credentialRequestOpts: Partial<CredentialRequestOpts>;
+export class CredentialRequestClientV1_0_11 {
+  private readonly _credentialRequestOpts: Partial<CredentialRequestOptsV1_0_11>;
   private _isDeferred = false;
 
-  get credentialRequestOpts(): CredentialRequestOpts {
-    return this._credentialRequestOpts as CredentialRequestOpts;
+  get credentialRequestOpts(): CredentialRequestOptsV1_0_11 {
+    return this._credentialRequestOpts as CredentialRequestOptsV1_0_11;
   }
 
   public isDeferred(): boolean {
@@ -71,7 +53,7 @@ export class CredentialRequestClient {
     return this.credentialRequestOpts.deferredCredentialEndpoint;
   }
 
-  public constructor(builder: CredentialRequestClientBuilder) {
+  public constructor(builder: CredentialRequestClientBuilderV1_0_11) {
     this._credentialRequestOpts = { ...builder };
   }
 
@@ -88,10 +70,7 @@ export class CredentialRequestClient {
   }
 
   public async acquireCredentialsUsingRequest(uniformRequest: UniformCredentialRequest): Promise<OpenIDResponse<CredentialResponse>> {
-    if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
-      throw new Error('Versions below v1.0.13 (draft 13) are not supported.')
-    }
-    const request: CredentialRequestV1_0_13 = getCredentialRequestForVersion(uniformRequest, this.version()) as CredentialRequestV1_0_13;
+    const request = getCredentialRequestForVersion(uniformRequest, this.version());
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint;
     if (!isValidURL(credentialEndpoint)) {
       debug(`Invalid credential endpoint: ${credentialEndpoint}`);
@@ -157,7 +136,7 @@ export class CredentialRequestClient {
       throw Error(`Credential type(s) need to be provided`);
     }
     // FIXME: this is mixing up the type (as id) from v8/v9 and the types (from the vc.type) from v11
-    else if (!this.isV13OrHigher() && types.length !== 1) {
+    else if (!this.isV11OrHigher() && types.length !== 1) {
       throw Error('Only a single credential type is supported for V8/V9');
     }
     const proof = await buildProof(proofInput, opts);
@@ -202,10 +181,10 @@ export class CredentialRequestClient {
   }
 
   private version(): OpenId4VCIVersion {
-    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_13;
+    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_11;
   }
 
-  private isV13OrHigher(): boolean {
-    return this.version() >= OpenId4VCIVersion.VER_1_0_13;
+  private isV11OrHigher(): boolean {
+    return this.version() >= OpenId4VCIVersion.VER_1_0_11;
   }
 }

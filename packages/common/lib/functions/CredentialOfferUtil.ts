@@ -37,7 +37,7 @@ export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
   // version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_09, 'initiate_issuance_uri')
 
   version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_11, 'credentials');
-  version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_11, 'urn:ietf:params:oauth:grant-type:pre-authorized_code');
+  version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_11, 'grants.user_pin_required');
 
   version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_13, 'credential_configuration_ids');
   version = getVersionFromURIParam(uri, version, OpenId4VCIVersion.VER_1_0_13, 'tx_code');

@@ -199,6 +199,7 @@ describe('AccessTokenClient should', () => {
     const accessTokenClient: AccessTokenClient = new AccessTokenClient();
 
     nock(MOCK_URL).post(/.*/).reply(200, {});
+    nock(INITIATION_TEST.credential_offer.credential_issuer+'token').post(/.*/).reply(200, {});
 
     await expect(() =>
       accessTokenClient.acquireAccessToken({

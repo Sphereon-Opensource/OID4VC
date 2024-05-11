@@ -46,9 +46,10 @@ export class CredentialOfferClient {
       ...(grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code'] && {
         preAuthorizedCode: grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']['pre-authorized_code'],
       }),
-      ...(request.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code && {
-        // txCode: request.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code,
-      }),
+      ...(request.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code &&
+        {
+          // txCode: request.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code,
+        }),
     };
   }
 

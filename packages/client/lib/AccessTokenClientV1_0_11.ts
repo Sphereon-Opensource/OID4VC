@@ -30,7 +30,7 @@ import { convertJsonToURI, formPost } from './functions';
 
 const debug = Debug('sphereon:oid4vci:token');
 
-export class AccessTokenClient {
+export class AccessTokenClientV1_0_11 {
   public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
     const { asOpts, pin, codeVerifier, code, redirectUri, metadata } = opts;
 
@@ -77,7 +77,7 @@ export class AccessTokenClient {
   }): Promise<OpenIDResponse<AccessTokenResponse>> {
     this.validate(accessTokenRequest, isPinRequired);
 
-    const requestTokenURL = AccessTokenClient.determineTokenURL({
+    const requestTokenURL = AccessTokenClientV1_0_11.determineTokenURL({
       asOpts,
       issuerOpts,
       metadata: metadata

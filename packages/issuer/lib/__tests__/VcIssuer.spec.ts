@@ -263,9 +263,9 @@ describe('VcIssuer', () => {
           scheme: 'http',
           baseUri: 'issuer-example.com',
           credentials: {
-            'Credential': {
-              format: 'ldp_vc'
-            } as CredentialConfigurationSupported
+            Credential: {
+              format: 'ldp_vc',
+            } as CredentialConfigurationSupported,
           },
           credentialOfferUri: 'https://somehost.com/offer-id',
         })

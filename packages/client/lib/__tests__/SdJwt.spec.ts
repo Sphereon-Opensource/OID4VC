@@ -1,9 +1,9 @@
-import { AccessTokenRequest, CredentialOfferPayloadV1_0_13, CredentialRequestV1_0_11, CredentialSupportedSdJwtVc } from '@sphereon/oid4vci-common'
+import { AccessTokenRequest, CredentialOfferPayloadV1_0_13, CredentialRequestV1_0_11, CredentialSupportedSdJwtVc } from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
 
-import { OpenID4VCIClient } from '..'
+import { OpenID4VCIClient } from '..';
 import { createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilder } from '../../../issuer';
 
 export const UNIT_TEST_TIMEOUT = 30000;
@@ -68,7 +68,7 @@ describe('sd-jwt vc', () => {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             tx_code: {
               input_mode: 'text',
-              length: 3
+              length: 3,
             },
             'pre-authorized_code': '123',
           },
@@ -81,7 +81,7 @@ describe('sd-jwt vc', () => {
       nock(vcIssuer.issuerMetadata.credential_issuer).get('/.well-known/oauth-authorization-server').reply(404);
 
       expect(offerUri.uri).toEqual(
-        'openid-credential-offer://?credential_offer=%7B%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22123%22%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredentialId%22%5D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredentialId%22%5D%7D',
+        'openid-credential-offer://?credential_offer=%7B%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22123%22%7D%7D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredentialId%22%5D%7D',
       );
 
       const client = await OpenID4VCIClient.fromURI({

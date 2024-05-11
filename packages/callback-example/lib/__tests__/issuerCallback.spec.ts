@@ -4,13 +4,13 @@ import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossess
 import {
   Alg,
   CNonceState,
-  CredentialConfigurationSupported,
+  CredentialConfigurationSupported, CredentialIssuerMetadata,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
   Jwt,
   JwtVerifyResult,
   OpenId4VCIVersion,
-  ProofOfPossession,
+  ProofOfPossession
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
 import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
@@ -23,7 +23,7 @@ import * as jose from 'jose'
 import { generateDid, getIssuerCallback, verifyCredential } from '../IssuerCallback'
 
 const INITIATION_TEST_URI =
-  'openid-initiate-issuance://?credential_type=OpenBadgeCredential&issuer=https%3A%2F%2Fjff%2Ewalt%2Eid%2Fissuer-api%2Foidc%2F&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false'
+  'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credential_configuration_ids%22:%5B%22UniversityDegreeCredential%22%5D,%22grants%22:%7B%22urn:ietf:params:oauth:grant-type:pre-authorized_code%22:%7B%22pre-authorized_code%22:%22oaKazRN8I0IbtZ0C7JuMn5%22,%22tx_code%22:%7B%22input_mode%22:%22text%22,%22description%22:%22Please%20enter%20the%20serial%20number%20of%20your%20physical%20drivers%20license%22%7D%7D%7D%7D'
 const IDENTIPROOF_ISSUER_URL = 'https://example.com/credential'
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21#keys-1'
 let keypair: KeyPair // Proof of Possession JWT
@@ -85,28 +85,27 @@ describe('issuerCallback', () => {
   const clientId = 'sphereon:wallet'
 
   beforeAll(async () => {
-    const credentialsSupported: Record<string, CredentialConfigurationSupported> =
-      new CredentialSupportedBuilderV1_13()
-        .withCryptographicSuitesSupported('ES256K')
-        .withCryptographicBindingMethod('did')
-        .withFormat('jwt_vc_json')
-        .withTypes('VerifiableCredential')
-        .withId('UniversityDegree_JWT')
-        .withCredentialSupportedDisplay({
-          name: 'University Credential',
-          locale: 'en-US',
-          logo: {
-            url: 'https://exampleuniversity.com/public/logo.png',
-            alt_text: 'a square logo of a university',
-          },
-          background_color: '#12107c',
-          text_color: '#FFFFFF',
-        })
-        .addCredentialSubjectPropertyDisplay('given_name', {
-          name: 'given name',
-          locale: 'en-US',
-        } as IssuerCredentialSubjectDisplay)
-        .build()
+    const credentialsSupported: Record<string, CredentialConfigurationSupported> = new CredentialSupportedBuilderV1_13()
+      .withCryptographicSuitesSupported('ES256K')
+      .withCryptographicBindingMethod('did')
+      .withFormat('jwt_vc_json')
+      .withTypes('VerifiableCredential')
+      .withId('UniversityDegree_JWT')
+      .withCredentialSupportedDisplay({
+        name: 'University Credential',
+        locale: 'en-US',
+        logo: {
+          url: 'https://exampleuniversity.com/public/logo.png',
+          alt_text: 'a square logo of a university',
+        },
+        background_color: '#12107c',
+        text_color: '#FFFFFF',
+      })
+      .addCredentialSubjectPropertyDisplay('given_name', {
+        name: 'given name',
+        locale: 'en-US',
+      } as IssuerCredentialSubjectDisplay)
+      .build()
     const stateManager = new MemoryStates<CredentialOfferSession>()
     await stateManager.set('existing-state', {
       issuerState: 'existing-state',
@@ -215,7 +214,10 @@ describe('issuerCallback', () => {
   it('Should pass requesting a verifiable credential using the client', async () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc_json')
+      .withCredentialEndpointFromMetadata({
+        credential_configurations_supported: {"VeriCred":{format: 'jwt_vc_json' } as CredentialConfigurationSupported}
+      } as unknown as CredentialIssuerMetadata)
+    .withFormat('jwt_vc_json')
       .withCredentialType('credentialType')
       .withToken('token')
 
@@ -237,7 +239,7 @@ describe('issuerCallback', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_11,
+      version: OpenId4VCIVersion.VER_1_0_13,
     })
       .withClientId(clientId)
       .withKid(kid)
@@ -248,7 +250,7 @@ describe('issuerCallback', () => {
       credentialTypes: ['VerifiableCredential'],
       format: 'jwt_vc_json',
       proofInput: proof,
-      version: OpenId4VCIVersion.VER_1_0_11,
+      version: OpenId4VCIVersion.VER_1_0_13,
     })
     expect(credentialRequest).toEqual({
       format: 'jwt_vc_json',

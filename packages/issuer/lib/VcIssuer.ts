@@ -99,15 +99,14 @@ export class VcIssuer<DIDDoc extends object> {
   }): Promise<CreateCredentialOfferURIResult> {
     let preAuthorizedCode: string | undefined = undefined
     let issuerState: string | undefined = undefined
-    const { grants, credentials, credentialDefinition } = opts
+    const { grants, credentials } = opts
 
     if (!grants?.authorization_code && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
       throw Error(`No grant issuer state or pre-authorized code could be deduced`)
     }
     const credentialOfferPayload: CredentialOfferPayloadV1_0_13 = {
       ...(grants && { grants }),
-      ...(credentials && { credentials }),
-      ...(credentialDefinition && { credential_configuration_ids:  credentials? Object.keys(credentials): []}),
+      ...(credentials && { credential_configuration_ids: credentials ? Object.keys(credentials) : [] }),
       credential_issuer: this.issuerMetadata.credential_issuer,
     } as CredentialOfferPayloadV1_0_13
     if (grants?.authorization_code) {

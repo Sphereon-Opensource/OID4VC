@@ -27,10 +27,10 @@ import {
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
-import { AccessTokenClient } from './AccessTokenClient';
+import { AccessTokenClientV1_0_11 } from './AccessTokenClientV1_0_11'
 import { createAuthorizationRequestUrlV1_0_11 } from './AuthorizationCodeClientV1_0_11';
-import { CredentialOfferClient } from './CredentialOfferClient';
-import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
+import { CredentialOfferClientV1_0_11 } from './CredentialOfferClientV1_0_11';
+import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11'
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { generateMissingPKCEOpts } from './functions/AuthorizationUtil';
@@ -173,7 +173,7 @@ export class OpenID4VCIClientV1_0_11 {
     clientId?: string;
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
   }): Promise<OpenID4VCIClientV1_0_11> {
-    const credentialOfferClient = await CredentialOfferClient.fromURI(uri, { resolve: resolveOfferUri });
+    const credentialOfferClient = await CredentialOfferClientV1_0_11.fromURI(uri, { resolve: resolveOfferUri });
     const client = new OpenID4VCIClientV1_0_11({
       credentialOffer: credentialOfferClient,
       kid,
@@ -275,7 +275,7 @@ export class OpenID4VCIClientV1_0_11 {
       this._state.clientId = clientId;
     }
     if (!this._state.accessTokenResponse) {
-      const accessTokenClient = new AccessTokenClient();
+      const accessTokenClient = new AccessTokenClientV1_0_11();
 
       if (redirectUri && redirectUri !== this._state.authorizationRequestOpts?.redirectUri) {
         console.log(
@@ -350,11 +350,11 @@ export class OpenID4VCIClientV1_0_11 {
     if (kid) this._state.kid = kid;
 
     const requestBuilder = this.credentialOffer
-      ? CredentialRequestClientBuilder.fromCredentialOffer({
+      ? CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({
           credentialOffer: this.credentialOffer,
           metadata: this.endpointMetadata,
         })
-      : CredentialRequestClientBuilder.fromCredentialIssuer({
+      : CredentialRequestClientBuilderV1_0_11.fromCredentialIssuer({
           credentialIssuer: this.getIssuer(),
           credentialTypes,
           metadata: this.endpointMetadata,
@@ -571,7 +571,7 @@ export class OpenID4VCIClientV1_0_11 {
     this.assertIssuerData();
     return this.endpointMetadata
       ? this.endpointMetadata.token_endpoint
-      : AccessTokenClient.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
+      : AccessTokenClientV1_0_11.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
   }
 
   public getCredentialEndpoint(): string {

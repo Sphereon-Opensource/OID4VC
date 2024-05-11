@@ -196,12 +196,12 @@ describe('VcIssuer', () => {
             },
           },
         },
-        credentials: ['UniversityDegree_JWT'],
+        credentials: { 'UniversityDegree_JWT': {format: 'ldp_vc', id: 'UniversityDegree_JWT'} as CredentialConfigurationSupported },
         scheme: 'http',
       })
       .then((response) => response.uri)
     expect(uri).toEqual(
-      'http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%7D%7D%2C%22credentials%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%7D',
+      'http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%7D',
     )
   })
 
@@ -222,7 +222,7 @@ describe('VcIssuer', () => {
             issuer_state: 'previously-created-state',
           },
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-            'pre-authorized_code': 'test_code'
+            'pre-authorized_code': 'test_code',
           },
         },
       },
@@ -310,6 +310,7 @@ describe('VcIssuer', () => {
     accessToken = await client.acquireAccessToken({ pin: credOfferSession.userPin })
     expect(accessToken).toBeDefined()
   })
+
   it('should issue credential', async () => {
     async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promise<string> {
       return await new jose.SignJWT({ ...args.payload })
