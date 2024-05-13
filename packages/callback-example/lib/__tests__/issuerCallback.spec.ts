@@ -4,13 +4,14 @@ import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossess
 import {
   Alg,
   CNonceState,
-  CredentialConfigurationSupported, CredentialIssuerMetadata,
+  CredentialConfigurationSupported,
+  CredentialIssuerMetadata,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
   Jwt,
   JwtVerifyResult,
   OpenId4VCIVersion,
-  ProofOfPossession
+  ProofOfPossession,
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
 import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
@@ -215,9 +216,9 @@ describe('issuerCallback', () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialEndpointFromMetadata({
-        credential_configurations_supported: {"VeriCred":{format: 'jwt_vc_json' } as CredentialConfigurationSupported}
+        credential_configurations_supported: { VeriCred: { format: 'jwt_vc_json' } as CredentialConfigurationSupported },
       } as unknown as CredentialIssuerMetadata)
-    .withFormat('jwt_vc_json')
+      .withFormat('jwt_vc_json')
       .withCredentialType('credentialType')
       .withToken('token')
 

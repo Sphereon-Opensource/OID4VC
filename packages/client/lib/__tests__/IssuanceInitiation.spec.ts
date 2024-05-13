@@ -10,7 +10,9 @@ describe('Issuance Initiation', () => {
   });
 
   it('Should return Issuance Initiation URI from request', async () => {
-    expect(CredentialOfferClient.toURI(INITIATION_TEST)).toEqual('openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F%22%2C%22credential_configuration_ids%22%3A%5B%22OpenBadgeCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE%22%2C%22tx_code%22%3A%7B%22description%22%3A%22Pleaseprovide%20the%20one-time%20code%20that%20was%20sent%20via%20e-mail%22%2C%22input_mode%22%3A%22numeric%22%2C%22length%22%3A4%7D%7D%7D%7D');
+    expect(CredentialOfferClient.toURI(INITIATION_TEST)).toEqual(
+      'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F%22%2C%22credential_configuration_ids%22%3A%5B%22OpenBadgeCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE%22%2C%22tx_code%22%3A%7B%22description%22%3A%22Pleaseprovide%20the%20one-time%20code%20that%20was%20sent%20via%20e-mail%22%2C%22input_mode%22%3A%22numeric%22%2C%22length%22%3A4%7D%7D%7D%7D',
+    );
   });
 
   it('Should throw error on invalid URI', async () => {

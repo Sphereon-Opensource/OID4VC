@@ -9,7 +9,7 @@ import {
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
 } from '../types';
-import { CredentialIssuerMetadataOptsV1_0_13, IssuerMetadataV1_0_13 } from '../types/v1_0_13.types';
+import { IssuerMetadataV1_0_13 } from '../types';
 
 export function getSupportedCredentials(options?: {
   issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08 | IssuerMetadataV1_0_13;
@@ -40,41 +40,18 @@ export function getSupportedCredential(opts?: {
   types?: string | string[];
   format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[];
 }): Record<string, CredentialConfigurationSupported> {
-  // Safely extract properties from opts with default values
   const { issuerMetadata, types, format } = opts ?? {};
 
-  // Default to an empty object if no metadata is provided
-  if (!issuerMetadata) {
+  if (!issuerMetadata || !issuerMetadata.credential_configurations_supported) {
     return {};
   }
 
-  // Handle formats array
-  let formats: (OID4VCICredentialFormat | string)[] = [];
-  if (Array.isArray(format)) {
-    formats = format;
-  } else if (format) {
-    formats = [format];
-  }
-
-  // Define and fill credential configuration based on version and metadata
-  let credentialConfigsSupported: Record<string, CredentialConfigurationSupported> = {};
-  if (Object.keys(credentialConfigsSupported).length === 0) {
-    return {};
-  } else if ('credential_configurations_supported' in issuerMetadata) {
-    credentialConfigsSupported = (issuerMetadata as CredentialIssuerMetadataOptsV1_0_13).credential_configurations_supported!;
-  }
-
-  // Exit early if no credentials are supported or no filtering is required
-  if (!types && Object.keys(credentialConfigsSupported).length > 0) {
-    return credentialConfigsSupported;
-  }
-
-  // Normalize types to an array
+  const configurations = issuerMetadata.credential_configurations_supported;
+  const formats = Array.isArray(format) ? format : format ? [format] : [];
   const normalizedTypes = Array.isArray(types) ? types : types ? [types] : [];
 
-  // Filter configurations based on types and formats
   const filteredConfigs: Record<string, CredentialConfigurationSupported> = {};
-  Object.entries(credentialConfigsSupported).forEach(([key, value]) => {
+  Object.entries(configurations).forEach(([key, value]) => {
     const isTypeMatch = normalizedTypes.length === 0 || normalizedTypes.includes(key);
     const isFormatMatch = formats.length === 0 || formats.includes(value.format);
 

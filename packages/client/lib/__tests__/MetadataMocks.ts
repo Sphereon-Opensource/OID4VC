@@ -1,8 +1,4 @@
-import {
-  AuthzFlowType,
-  CredentialOfferPayloadV1_0_13,
-  CredentialOfferRequestWithBaseUrl,
-} from '@sphereon/oid4vci-common';
+import { AuthzFlowType, CredentialOfferPayloadV1_0_13, CredentialOfferRequestWithBaseUrl } from '@sphereon/oid4vci-common';
 
 export const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io';
 export const IDENTIPROOF_AS_URL = 'https://auth.research.identiproof.io';

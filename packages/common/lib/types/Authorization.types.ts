@@ -198,6 +198,9 @@ export interface IssuerOpts {
 export interface AccessTokenFromAuthorizationResponseOpts extends AccessTokenRequestOpts {
   authorizationResponse: AuthorizationResponse;
 }
+
+export type TxCodeAndPinRequired = { isPinRequired?: boolean; txCode?: TxCode };
+
 export interface AccessTokenRequestOpts {
   credentialOffer?: UniformCredentialOffer;
   credentialIssuer?: string;
@@ -207,7 +210,7 @@ export interface AccessTokenRequestOpts {
   code?: string; // only required for authorization flow
   redirectUri?: string; // only required for authorization flow
   pin?: string; // Pin-number. Only used when required
-  txCode?: TxCode; // OPTIONAL. String value containing a Transaction Code. This value MUST be present if a tx_code object was present in the Credential Offer (including if the object was empty). This parameter MUST only be used if the grant_type is urn:ietf:params:oauth:grant-type:pre-authorized_code.
+  pinMetadata?: TxCodeAndPinRequired; // OPTIONAL. String value containing a Transaction Code. This value MUST be present if a tx_code object was present in the Credential Offer (including if the object was empty). This parameter MUST only be used if the grant_type is urn:ietf:params:oauth:grant-type:pre-authorized_code.
 }
 
 /*export interface AuthorizationRequestOpts {

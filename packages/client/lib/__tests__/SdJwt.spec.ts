@@ -1,4 +1,4 @@
-import { AccessTokenRequest, CredentialOfferPayloadV1_0_13, CredentialRequestV1_0_11, CredentialSupportedSdJwtVc } from '@sphereon/oid4vci-common';
+import { AccessTokenRequest, CredentialRequestV1_0_11, CredentialSupportedSdJwtVc } from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
@@ -63,7 +63,6 @@ describe('sd-jwt vc', () => {
     'succeed with a full flow',
     async () => {
       const offerUri = await vcIssuer.createCredentialOfferURI({
-        credential_issuer: 'https://example.com',
         grants: {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             tx_code: {
@@ -73,15 +72,21 @@ describe('sd-jwt vc', () => {
             'pre-authorized_code': '123',
           },
         },
-        credential_configuration_ids: ['SdJwtCredentialId'],
-      } as CredentialOfferPayloadV1_0_13);
+        credentials: {
+          SdJwtCredentialId: {
+            format: 'vc+sd-jwt',
+            vct: 'SdJwtCredential',
+            id: 'SdJwtCredentialId',
+          },
+        },
+      });
 
       nock(vcIssuer.issuerMetadata.credential_issuer).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(issuerMetadata));
       nock(vcIssuer.issuerMetadata.credential_issuer).get('/.well-known/openid-configuration').reply(404);
       nock(vcIssuer.issuerMetadata.credential_issuer).get('/.well-known/oauth-authorization-server').reply(404);
 
       expect(offerUri.uri).toEqual(
-        'openid-credential-offer://?credential_offer=%7B%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22123%22%7D%7D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredentialId%22%5D%7D',
+        'openid-credential-offer://?credential_offer=%7B%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22123%22%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredentialId%22%5D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%7D',
       );
 
       const client = await OpenID4VCIClient.fromURI({
@@ -90,23 +95,16 @@ describe('sd-jwt vc', () => {
 
       expect(client.credentialOffer?.credential_offer).toEqual({
         credential_issuer: 'https://example.com',
-        credentials: ['SdJwtCredentialId'],
+        credential_configuration_ids: ['SdJwtCredentialId'],
         grants: {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             'pre-authorized_code': '123',
-            user_pin_required: false,
           },
         },
       });
 
       const supported = client.getCredentialsSupported('vc+sd-jwt');
-      expect(supported).toEqual([
-        {
-          vct: 'SdJwtCredential',
-          format: 'vc+sd-jwt',
-          id: 'SdJwtCredentialId',
-        },
-      ]);
+      expect(supported).toEqual({ SdJwtCredentialId: { format: 'vc+sd-jwt', id: 'SdJwtCredentialId', vct: 'SdJwtCredential' } });
 
       const offered = supported[0] as CredentialSupportedSdJwtVc;
 

@@ -16,15 +16,15 @@ import * as jose from 'jose';
 // @ts-ignore
 import nock from 'nock';
 
-import { CredentialOfferClientV1_0_11, CredentialRequestClientBuilderV1_0_11, MetadataClient, ProofOfPossessionBuilder } from '..'
+import { CredentialOfferClientV1_0_11, CredentialRequestClientBuilderV1_0_11, MetadataClient, ProofOfPossessionBuilder } from '..';
 
 import {
   IDENTIPROOF_ISSUER_URL,
   IDENTIPROOF_OID4VCI_METADATA,
   INITIATION_TEST,
   INITIATION_TEST_V1_0_08,
-  WALT_OID4VCI_METADATA
-} from './MetadataMocks'
+  WALT_OID4VCI_METADATA,
+} from './MetadataMocks';
 import { getMockData } from './data/VciDataFixtures';
 
 const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN';

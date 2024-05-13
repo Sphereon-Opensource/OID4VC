@@ -27,10 +27,10 @@ import {
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
-import { AccessTokenClientV1_0_11 } from './AccessTokenClientV1_0_11'
+import { AccessTokenClientV1_0_11 } from './AccessTokenClientV1_0_11';
 import { createAuthorizationRequestUrlV1_0_11 } from './AuthorizationCodeClientV1_0_11';
 import { CredentialOfferClientV1_0_11 } from './CredentialOfferClientV1_0_11';
-import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11'
+import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { generateMissingPKCEOpts } from './functions/AuthorizationUtil';

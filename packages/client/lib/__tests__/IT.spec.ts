@@ -1,24 +1,26 @@
 import {
   AccessTokenResponse,
-  Alg, CredentialOfferPayloadV1_0_13,
+  Alg,
+  CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
   Jwt,
   OpenId4VCIVersion,
   ProofOfPossession,
-  WellKnownEndpoints
-} from '@sphereon/oid4vci-common'
+  WellKnownEndpoints,
+} from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
 
 import {
-  AccessTokenClient, AccessTokenClientV1_0_11,
+  AccessTokenClient,
+  AccessTokenClientV1_0_11,
   CredentialOfferClientV1_0_11,
   CredentialRequestClientBuilder,
   CredentialRequestClientBuilderV1_0_11,
   OpenID4VCIClientV1_0_11,
-  ProofOfPossessionBuilder
-} from '..'
+  ProofOfPossessionBuilder,
+} from '..';
 import { CredentialOfferClient } from '../CredentialOfferClient';
 
 import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA } from './MetadataMocks';
@@ -60,7 +62,7 @@ describe('OID4VCI-Client should', () => {
     'openid-credential-offer://credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D';
 
   const INITIATE_QR_V1_0_13 =
-    'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22:%22https://issuer.research.identiproof.io%22,%22credential_configuration_ids%22:%5B%22OpenBadgeCredentialUrl%22%5D,%22grants%22:%7B%22urn:ietf:params:oauth:grant-type:pre-authorized_code%22:%7B%22pre-authorized_code%22:%22oaKazRN8I0IbtZ0C7JuMn5%22,%22tx_code%22:%7B%22input_mode%22:%22text%22,%22description%22:%22Please%20enter%20the%20serial%20number%20of%20your%20physical%20drivers%20license%22%7D%7D%7D%7D';
+    'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22:%22https://issuer.research.identiproof.io%22,%22credential_configuration_ids%22:%5B%22OpenBadgeCredentialUrl%22%5D,%22grants%22:%7B%22urn:ietf:params:oauth:grant-type:pre-authorized_code%22:%7B%22pre-authorized_code%22:%22oaKazRN8I0IbtZ0C7JuMn5%22,%22tx_code%22:%7B%22input_mode%22:%22text%22,%22length%22:22,%22description%22:%22Please%20enter%20the%20serial%20number%20of%20your%20physical%20drivers%20license%22%7D%7D%7D%7D';
 
   function succeedWithAFullFlowWithClientSetup() {
     nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
@@ -135,8 +137,8 @@ describe('OID4VCI-Client should', () => {
       });
 
       nock(ISSUER_URL)
-      .post(/token.*/)
-      .reply(200, JSON.stringify(mockedAccessTokenResponse));
+        .post(/token.*/)
+        .reply(200, JSON.stringify(mockedAccessTokenResponse));
 
       /* The actual access token calls */
       const accessTokenClient: AccessTokenClientV1_0_11 = new AccessTokenClientV1_0_11();
@@ -144,16 +146,16 @@ describe('OID4VCI-Client should', () => {
       expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
       // Get the credential
       nock(ISSUER_URL)
-      .post(/credential/)
-      .reply(200, {
-        format: 'jwt-vc',
-        credential: mockedVC,
-      });
+        .post(/credential/)
+        .reply(200, {
+          format: 'jwt-vc',
+          credential: mockedVC,
+        });
       const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({ credentialOffer: credentialOffer })
-      .withFormat('jwt_vc')
+        .withFormat('jwt_vc')
 
-      .withTokenFromResponse(accessTokenResponse.successBody!)
-      .build();
+        .withTokenFromResponse(accessTokenResponse.successBody!)
+        .build();
 
       //TS2322: Type '(args: ProofOfPossessionCallbackArgs) => Promise<string>'
       // is not assignable to type 'ProofOfPossessionCallback'.
@@ -166,13 +168,13 @@ describe('OID4VCI-Client should', () => {
         },
         version: OpenId4VCIVersion.VER_1_0_11,
       })
-      .withEndpointMetadata({
-        issuer: 'https://issuer.research.identiproof.io',
-        credential_endpoint: 'https://issuer.research.identiproof.io/credential',
-        token_endpoint: 'https://issuer.research.identiproof.io/token',
-      })
-      .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
-      .build();
+        .withEndpointMetadata({
+          issuer: 'https://issuer.research.identiproof.io',
+          credential_endpoint: 'https://issuer.research.identiproof.io/credential',
+          token_endpoint: 'https://issuer.research.identiproof.io/token',
+        })
+        .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
+        .build();
       const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof });
       expect(credResponse.successBody?.credential).toEqual(mockedVC);
     },
@@ -184,17 +186,18 @@ describe('OID4VCI-Client should', () => {
     async () => {
       /* Convert the URI into an object */
       const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_13);
-
+      const preAuthorizedCode = 'oaKazRN8I0IbtZ0C7JuMn5';
       expect(credentialOffer.baseUrl).toEqual('openid-credential-offer://');
       expect((credentialOffer.credential_offer as CredentialOfferPayloadV1_0_13).credential_configuration_ids).toEqual(['OpenBadgeCredentialUrl']);
       expect(credentialOffer.original_credential_offer.grants).toEqual({
-        "urn:ietf:params:oauth:grant-type:pre-authorized_code":{
-          "pre-authorized_code":"oaKazRN8I0IbtZ0C7JuMn5",
-          "tx_code":{
-          "input_mode":"text",
-            "description":"Please enter the serial number of your physical drivers license"
-          }
-        }
+        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+          'pre-authorized_code': preAuthorizedCode,
+          tx_code: {
+            input_mode: 'text',
+            description: 'Please enter the serial number of your physical drivers license',
+            length: preAuthorizedCode.length,
+          },
+        },
       });
 
       nock(ISSUER_URL)
@@ -236,7 +239,10 @@ describe('OID4VCI-Client should', () => {
         })
         .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
         .build();
-      const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof, credentialTypes: credentialOffer.original_credential_offer.credential_configuration_ids });
+      const credResponse = await credReqClient.acquireCredentialsUsingProof({
+        proofInput: proof,
+        credentialTypes: credentialOffer.original_credential_offer.credential_configuration_ids,
+      });
       expect(credResponse.successBody?.credential).toEqual(mockedVC);
     },
     UNIT_TEST_TIMEOUT,

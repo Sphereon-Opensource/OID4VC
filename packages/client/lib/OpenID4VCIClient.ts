@@ -283,7 +283,6 @@ export class OpenID4VCIClient {
       if (this._state.authorizationRequestOpts?.redirectUri && !redirectUri) {
         redirectUri = this._state.authorizationRequestOpts.redirectUri;
       }
-
       const response = await accessTokenClient.acquireAccessToken({
         credentialOffer: this.credentialOffer,
         metadata: this.endpointMetadata,

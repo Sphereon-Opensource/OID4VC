@@ -1,5 +1,6 @@
 import {
-  acquireDeferredCredential, CredentialRequestV1_0_13,
+  acquireDeferredCredential,
+  CredentialRequestV1_0_13,
   CredentialResponse,
   getCredentialRequestForVersion,
   getUniformFormat,
@@ -9,14 +10,14 @@ import {
   OpenIDResponse,
   ProofOfPossession,
   UniformCredentialRequest,
-  URL_NOT_VALID
-} from '@sphereon/oid4vci-common'
-import { CredentialFormat } from '@sphereon/ssi-types'
-import Debug from 'debug'
+  URL_NOT_VALID,
+} from '@sphereon/oid4vci-common';
+import { CredentialFormat } from '@sphereon/ssi-types';
+import Debug from 'debug';
 
-import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder'
-import { isValidURL, post } from './functions'
-import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
+import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
+import { isValidURL, post } from './functions';
+import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 
 const debug = Debug('sphereon:oid4vci:credential');
 
@@ -89,7 +90,7 @@ export class CredentialRequestClient {
 
   public async acquireCredentialsUsingRequest(uniformRequest: UniformCredentialRequest): Promise<OpenIDResponse<CredentialResponse>> {
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
-      throw new Error('Versions below v1.0.13 (draft 13) are not supported.')
+      throw new Error('Versions below v1.0.13 (draft 13) are not supported.');
     }
     const request: CredentialRequestV1_0_13 = getCredentialRequestForVersion(uniformRequest, this.version()) as CredentialRequestV1_0_13;
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint;

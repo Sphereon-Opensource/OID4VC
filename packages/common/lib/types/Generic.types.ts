@@ -4,7 +4,7 @@ import { ProofOfPossession } from './CredentialIssuance.types';
 import { AuthorizationServerMetadata } from './ServerMetadata';
 import { CredentialOfferSession } from './StateManager.types';
 import { CredentialRequestV1_0_11 } from './v1_0_11.types';
-import { CredentialRequestV1_0_13 } from './v1_0_13.types'
+import { CredentialRequestV1_0_13 } from './v1_0_13.types';
 
 export type InputCharSet = 'numeric' | 'text';
 export type KeyProofType = 'jwt' | 'cwt' | 'ldp_vp';

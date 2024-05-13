@@ -18,7 +18,7 @@ import {
   PRE_AUTH_CODE_LITERAL,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
-  TxCode,
+  TxCodeAndPinRequired,
   UniformCredentialOfferPayload,
 } from '@sphereon/oid4vci-common';
 import { ObjectUtils } from '@sphereon/ssi-types';
@@ -34,8 +34,7 @@ export class AccessTokenClient {
     const { asOpts, pin, codeVerifier, code, redirectUri, metadata } = opts;
 
     const credentialOffer = opts.credentialOffer ? await assertedUniformCredentialOffer(opts.credentialOffer) : undefined;
-    const txCode: TxCode | undefined =
-      credentialOffer?.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code ?? undefined;
+    const pinMetadata: TxCodeAndPinRequired | undefined = credentialOffer && this.getPinMetadata(credentialOffer.credential_offer);
     const issuer =
       opts.credentialIssuer ??
       (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : (metadata?.issuer as string));
@@ -54,9 +53,9 @@ export class AccessTokenClient {
         code,
         redirectUri,
         pin,
-        txCode,
+        pinMetadata,
       }),
-      txCode,
+      pinMetadata,
       metadata,
       asOpts,
       issuerOpts,
@@ -65,18 +64,18 @@ export class AccessTokenClient {
 
   public async acquireAccessTokenUsingRequest({
     accessTokenRequest,
-    txCode,
+    pinMetadata,
     metadata,
     asOpts,
     issuerOpts,
   }: {
     accessTokenRequest: AccessTokenRequest;
-    txCode?: TxCode;
+    pinMetadata?: TxCodeAndPinRequired;
     metadata?: EndpointMetadata;
     asOpts?: AuthorizationServerOpts;
     issuerOpts?: IssuerOpts;
   }): Promise<OpenIDResponse<AccessTokenResponse>> {
-    this.validate(accessTokenRequest, txCode);
+    this.validate(accessTokenRequest, pinMetadata);
 
     const requestTokenURL = AccessTokenClient.determineTokenURL({
       asOpts,
@@ -105,7 +104,7 @@ export class AccessTokenClient {
     }
 
     if (credentialOfferRequest?.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
-      this.assertNumericPin(this.isPinRequiredValue(credentialOfferRequest.credential_offer), pin);
+      this.assertAlphanumericPin(opts.pinMetadata, pin);
       request.user_pin = pin;
 
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
@@ -143,24 +142,39 @@ export class AccessTokenClient {
     }
   }
 
-  private isPinRequiredValue(requestPayload: UniformCredentialOfferPayload): boolean {
-    let isPinRequired = false;
+  private getPinMetadata(requestPayload: UniformCredentialOfferPayload): TxCodeAndPinRequired {
     if (!requestPayload) {
       throw new Error(TokenErrorResponse.invalid_request);
     }
     const issuer = getIssuerFromCredentialOfferPayload(requestPayload);
-    if (requestPayload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code) {
-      isPinRequired = true;
-    }
+
+    const grantDetails = requestPayload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code'];
+    const isPinRequired = !!grantDetails?.tx_code || !!grantDetails?.['pre-authorized_code'];
+
     debug(`Pin required for issuer ${issuer}: ${isPinRequired}`);
-    return isPinRequired;
+    return {
+      txCode: grantDetails?.tx_code,
+      isPinRequired,
+    };
   }
 
-  private assertNumericPin(isPinRequired: boolean, pin?: string): void {
-    if (isPinRequired) {
-      if (!pin || !/^\d{1,8}$/.test(pin)) {
-        debug(`Pin is not 1 to 8 digits long`);
-        throw new Error('A valid pin consisting of maximal 8 numeric characters must be present.');
+  private assertAlphanumericPin(pinMeta?: TxCodeAndPinRequired, pin?: string): void {
+    if (pinMeta && pinMeta.isPinRequired) {
+      let regex;
+      if (pinMeta.txCode && pinMeta.txCode.input_mode === 'numeric') {
+        regex = new RegExp(`^\\d{1,${pinMeta.txCode.length || 8}}$`);
+      } else if (pinMeta.txCode && pinMeta.txCode.input_mode === 'text') {
+        regex = new RegExp(`^[a-zA-Z0-9]{1,${pinMeta.txCode.length || 8}}$`);
+      } else {
+        // default regex that limits the length to 8
+        regex = /^[a-zA-Z0-9]{1,8}$/;
+      }
+
+      if (!pin || !regex.test(pin)) {
+        debug(
+          `Pin is not valid. Expected format: ${pinMeta?.txCode?.input_mode || 'alphanumeric'}, Length: up to ${pinMeta?.txCode?.length || 8} characters`,
+        );
+        throw new Error('A valid pin must be present according to the specified transaction code requirements.');
       }
     } else if (pin) {
       debug(`Pin set, whilst not required`);
@@ -188,11 +202,11 @@ export class AccessTokenClient {
       throw new Error('Authorization flow requires the code to be present');
     }
   }
-  private validate(accessTokenRequest: AccessTokenRequest, txCode?: TxCode): void {
+  private validate(accessTokenRequest: AccessTokenRequest, pinMeta?: TxCodeAndPinRequired): void {
     if (accessTokenRequest.grant_type === GrantTypes.PRE_AUTHORIZED_CODE) {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyPreAuthorizedCode(accessTokenRequest);
-      this.assertNumericPin(!!txCode, accessTokenRequest.user_pin);
+      this.assertAlphanumericPin(pinMeta, accessTokenRequest['pre-authorized_code']);
     } else if (accessTokenRequest.grant_type === GrantTypes.AUTHORIZATION_CODE) {
       this.assertAuthorizationGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyCodeVerifier(accessTokenRequest);

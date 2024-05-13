@@ -3,7 +3,7 @@ import { getIssuerFromCredentialOfferPayload, WellKnownEndpoints } from '@sphere
 // @ts-ignore
 import nock from 'nock';
 
-import { CredentialOfferClientV1_0_11 } from '../CredentialOfferClientV1_0_11'
+import { CredentialOfferClientV1_0_11 } from '../CredentialOfferClientV1_0_11';
 import { MetadataClient } from '../MetadataClient';
 
 import {

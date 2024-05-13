@@ -1,4 +1,4 @@
-import { BAD_PARAMS, PARMode, WellKnownEndpoints } from '@sphereon/oid4vci-common';
+import { PARMode, WellKnownEndpoints } from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
@@ -59,7 +59,7 @@ describe('OpenID4VCIClientV1_0_11', () => {
           redirectUri: 'http://localhost:8881/cb',
         },
       }),
-    ).rejects.toThrow(Error(BAD_PARAMS));
+    ).rejects.toThrow('Could not create authorization details from credential offer. Please pass in explicit details');
   });
 
   it('should not fail when only authorization_details is present', async () => {

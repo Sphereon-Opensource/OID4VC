@@ -14,8 +14,8 @@ import {
 } from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 
-import { CredentialOfferClientV1_0_11 } from './CredentialOfferClientV1_0_11'
-import { CredentialRequestClientV1_0_11 } from './CredentialRequestClientV1_0_11'
+import { CredentialOfferClientV1_0_11 } from './CredentialOfferClientV1_0_11';
+import { CredentialRequestClientV1_0_11 } from './CredentialRequestClientV1_0_11';
 
 export class CredentialRequestClientBuilderV1_0_11 {
   credentialEndpoint?: string;
