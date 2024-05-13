@@ -106,7 +106,7 @@ describe('sd-jwt vc', () => {
       const supported = client.getCredentialsSupported('vc+sd-jwt');
       expect(supported).toEqual({ SdJwtCredentialId: { format: 'vc+sd-jwt', id: 'SdJwtCredentialId', vct: 'SdJwtCredential' } });
 
-      const offered = supported[0] as CredentialSupportedSdJwtVc;
+      const offered = supported['SdJwtCredentialId'] as CredentialSupportedSdJwtVc;
 
       nock(issuerMetadata.token_endpoint as string)
         .post('/')
@@ -122,7 +122,7 @@ describe('sd-jwt vc', () => {
           });
         });
 
-      await client.acquireAccessToken({});
+      await client.acquireAccessToken({pin: '123'});
 
       nock(issuerMetadata.credential_endpoint as string)
         .post('/')
