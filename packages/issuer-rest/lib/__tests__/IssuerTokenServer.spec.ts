@@ -97,21 +97,22 @@ describe('OID4VCIServer', () => {
         display: [{ name: 'example issuer', locale: 'en-US' }],
         credential_configurations_supported: {
           UniversityDegree_JWT: {
-            format: 'jwt_vc_json',
-            types: ['VerifiableCredential', 'UniversityDegreeCredential'],
-            credentialSubject: {
-              given_name: {
-                display: [
-                  {
-                    name: 'given name',
-                    locale: 'en-US',
-                  },
-                ],
+            credential_definition: {
+              type: ['VerifiableCredential', 'UniversityDegreeCredential'],
+              credentialSubject: {
+                given_name: {
+                  display: [
+                    {
+                      name: 'given name',
+                      locale: 'en-US',
+                    },
+                  ],
+                },
               },
             },
-            cryptographic_suites_supported: ['ES256K'],
+            format: 'jwt_vc_json',
+            credential_signing_alg_values_supported: ['ES256K'],
             cryptographic_binding_methods_supported: ['did'],
-            id: 'UniversityDegree_JWT',
             display: [
               {
                 name: 'University Credential',

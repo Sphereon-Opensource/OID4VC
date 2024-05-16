@@ -6,6 +6,7 @@ import {
   Jwt,
   OpenId4VCIVersion,
   ProofOfPossession,
+  resolveCredentialOfferURI,
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -244,6 +245,136 @@ describe('OID4VCI-Client should', () => {
         credentialTypes: credentialOffer.original_credential_offer.credential_configuration_ids,
       });
       expect(credResponse.successBody?.credential).toEqual(mockedVC);
+    },
+    UNIT_TEST_TIMEOUT,
+  );
+});
+
+describe('OIDVCI-Client for v1_0_13 should', () => {
+  const INITIATE_QR_V1_0_13_CREDENCO =
+    'openid-credential-offer://mijnkvk.acc.credenco.com/?credential_offer_uri=https%3A%2F%2Fmijnkvk.acc.credenco.com%2Fopenid4vc%2FcredentialOffer%3Fid%3D32fc4ebf-9e31-4149-9877-e3c0b602d559';
+
+  const mockedCredentialOffer = {
+    credential_issuer: 'https://mijnkvk.acc.credenco.com',
+    credential_configuration_ids: ['BevoegdheidUittreksel_jwt_vc_json'],
+    grants: {
+      authorization_code: {
+        issuer_state: '32fc4ebf-9e31-4149-9877-e3c0b602d559',
+      },
+      'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+        pre_authorized_code:
+          'eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiIzMmZjNGViZi05ZTMxLTQxNDktOTg3Ny1lM2MwYjYwMmQ1NTkiLCJpc3MiOiJodHRwczovL21pam5rdmsuYWNjLmNyZWRlbmNvLmNvbSIsImF1ZCI6IlRPS0VOIn0.754aiQ87O0vHYSpRvPqAS9cLOgf-pewdeXbpLziRwsxEp9mENfaXpY62muYpzOaWcYmTOydkzhFul-NDYXJZCA',
+      },
+    },
+  };
+
+  beforeEach(() => {
+    // Mock the HTTP GET request to the credential offer URI
+    nock('https://mijnkvk.acc.credenco.com')
+      .get('/openid4vc/credentialOffer?id=32fc4ebf-9e31-4149-9877-e3c0b602d559')
+      .reply(200, mockedCredentialOffer)
+      .persist(); // Use .persist() if you want the mock to remain active for multiple tests
+  });
+
+  afterEach(() => {
+    // Clean up all mocks
+    nock.cleanAll();
+  });
+
+  /*function succeedWithAFullFlowWithClientSetup() {
+    nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
+    nock(IDENTIPROOF_AS_URL).get('/.well-known/oauth-authorization-server').reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
+    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
+    nock(IDENTIPROOF_AS_URL)
+    .post(/oauth2\/token.*!/)
+    .reply(200, JSON.stringify(mockedAccessTokenResponse));
+    nock(ISSUER_URL)
+    .post(/credential/)
+    .reply(200, {
+      format: 'jwt-vc',
+      credential: mockedVC,
+    });
+  }*/
+
+  it('should successfully resolve the credential offer URI', async () => {
+    const uri = 'https://mijnkvk.acc.credenco.com/openid4vc/credentialOffer?id=32fc4ebf-9e31-4149-9877-e3c0b602d559';
+
+    const credentialOffer = await resolveCredentialOfferURI(uri);
+
+    expect(credentialOffer).toEqual(mockedCredentialOffer);
+  });
+
+  it(
+    'succeed credenco with a full flow without the client v1_0_13',
+    async () => {
+      /* Convert the URI into an object */
+      // openid-credential-offer://?credential_offer%3D%7B%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22adhjhdjajkdkhjhdj%22%2C%22user_pin_required%22%3Atrue%7D%7D%7D
+      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_13_CREDENCO);
+      /**
+       * {"credential_issuer":"https://mijnkvk.acc.credenco.com","credential_configuration_ids":["BevoegdheidUittreksel_jwt_vc_json"],"grants":{"authorization_code":{"issuer_state":"32fc4ebf-9e31-4149-9877-e3c0b602d559"},"urn:ietf:params:oauth:grant-type:pre-authorized_code":{"pre-authorized_code":"eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiIzMmZjNGViZi05ZTMxLTQxNDktOTg3Ny1lM2MwYjYwMmQ1NTkiLCJpc3MiOiJodHRwczovL21pam5rdmsuYWNjLmNyZWRlbmNvLmNvbSIsImF1ZCI6IlRPS0VOIn0.754aiQ87O0vHYSpRvPqAS9cLOgf-pewdeXbpLziRwsxEp9mENfaXpY62muYpzOaWcYmTOydkzhFul-NDYXJZCA"}}}
+       */
+      const preAuthorizedCode =
+        'eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiIzMmZjNGViZi05ZTMxLTQxNDktOTg3Ny1lM2MwYjYwMmQ1NTkiLCJpc3MiOiJodHRwczovL21pam5rdmsuYWNjLmNyZWRlbmNvLmNvbSIsImF1ZCI6IlRPS0VOIn0.754aiQ87O0vHYSpRvPqAS9cLOgf-pewdeXbpLziRwsxEp9mENfaXpY62muYpzOaWcYmTOydkzhFul-NDYXJZCA';
+      expect(credentialOffer.baseUrl).toEqual('openid-credential-offer://mijnkvk.acc.credenco.com/');
+      expect((credentialOffer.credential_offer as CredentialOfferPayloadV1_0_13).credential_configuration_ids).toEqual([
+        'BevoegdheidUittreksel_jwt_vc_json',
+      ]);
+      expect(credentialOffer.original_credential_offer.grants).toEqual({
+        authorization_code: {
+          issuer_state: '32fc4ebf-9e31-4149-9877-e3c0b602d559',
+        },
+        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+          pre_authorized_code: preAuthorizedCode,
+        },
+      });
+
+      /*nock(ISSUER_URL)
+      .post(/token.*!/)
+      .reply(200, JSON.stringify(mockedAccessTokenResponse));*/
+
+      /* The actual access token calls */
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
+      const accessTokenResponse = await accessTokenClient.acquireAccessToken({
+        credentialOffer: credentialOffer,
+        pin: preAuthorizedCode /*, metadata: {}*/,
+      });
+      expect(accessTokenResponse.successBody).toEqual({});
+      /*// Get the credential
+      nock(ISSUER_URL)
+      .post(/credential/)
+      .reply(200, {
+        format: 'jwt-vc',
+        credential: mockedVC,
+      });
+      const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: credentialOffer })
+      .withFormat('jwt_vc')
+
+      .withTokenFromResponse(accessTokenResponse.successBody!)
+      .build();
+
+      //TS2322: Type '(args: ProofOfPossessionCallbackArgs) => Promise<string>'
+      // is not assignable to type 'ProofOfPossessionCallback'.
+      // Types of parameters 'args' and 'args' are incompatible.
+      // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
+      const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+        jwt,
+        callbacks: {
+          signCallback: proofOfPossessionCallbackFunction,
+        },
+        version: OpenId4VCIVersion.VER_1_0_11,
+      })
+      .withEndpointMetadata({
+        issuer: 'https://issuer.research.identiproof.io',
+        credential_endpoint: 'https://issuer.research.identiproof.io/credential',
+        token_endpoint: 'https://issuer.research.identiproof.io/token',
+      })
+      .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
+      .build();
+      const credResponse = await credReqClient.acquireCredentialsUsingProof({
+        proofInput: proof,
+        credentialTypes: credentialOffer.original_credential_offer.credential_configuration_ids,
+      });
+      expect(credResponse.successBody?.credential).toEqual(mockedVC);*/
     },
     UNIT_TEST_TIMEOUT,
   );

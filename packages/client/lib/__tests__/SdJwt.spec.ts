@@ -1,4 +1,9 @@
-import { AccessTokenRequest, CredentialRequestV1_0_11, CredentialSupportedSdJwtVc } from '@sphereon/oid4vci-common';
+import {
+  AccessTokenRequest,
+  CredentialConfigurationSupportedV1_0_13,
+  CredentialRequestV1_0_11,
+  CredentialSupportedSdJwtVc,
+} from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
@@ -19,7 +24,7 @@ const issuerMetadata = new IssuerMetadataBuilderV1_13()
     format: 'vc+sd-jwt',
     vct: 'SdJwtCredential',
     id: 'SdJwtCredentialId',
-  })
+  } as CredentialConfigurationSupportedV1_0_13)
   .build();
 
 const vcIssuer = new VcIssuerBuilder()
@@ -122,7 +127,7 @@ describe('sd-jwt vc', () => {
           });
         });
 
-      await client.acquireAccessToken({pin: '123'});
+      await client.acquireAccessToken({ pin: '123' });
 
       nock(issuerMetadata.credential_endpoint as string)
         .post('/')

@@ -4,7 +4,7 @@ import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossess
 import {
   Alg,
   CNonceState,
-  CredentialConfigurationSupported,
+  CredentialSupported,
   CredentialIssuerMetadata,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
@@ -86,7 +86,7 @@ describe('issuerCallback', () => {
   const clientId = 'sphereon:wallet'
 
   beforeAll(async () => {
-    const credentialsSupported: Record<string, CredentialConfigurationSupported> = new CredentialSupportedBuilderV1_13()
+    const credentialsSupported: Record<string, CredentialSupported> = new CredentialSupportedBuilderV1_13()
       .withCryptographicSuitesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
@@ -216,7 +216,7 @@ describe('issuerCallback', () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialEndpointFromMetadata({
-        credential_configurations_supported: { VeriCred: { format: 'jwt_vc_json' } as CredentialConfigurationSupported },
+        credential_configurations_supported: { VeriCred: { format: 'jwt_vc_json' } as CredentialSupported },
       } as unknown as CredentialIssuerMetadata)
       .withFormat('jwt_vc_json')
       .withCredentialType('credentialType')

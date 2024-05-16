@@ -1,20 +1,23 @@
 import {
-  CredentialConfigurationSupported,
+  CredentialConfigurationSupportedV1_0_13,
+  CredentialDefinitionV1_0_13,
   CredentialsSupportedDisplay,
-  isFormat,
-  isNotFormat,
   IssuerCredentialSubject,
   IssuerCredentialSubjectDisplay,
+  KeyProofType,
   OID4VCICredentialFormat,
+  ProofType,
   TokenErrorResponse,
 } from '@sphereon/oid4vci-common'
 
 export class CredentialSupportedBuilderV1_13 {
   format?: OID4VCICredentialFormat
-  id?: string
-  types?: string[]
+  scope?: string
+  credentialName?: string
+  credentialDefinition?: CredentialDefinitionV1_0_13
   cryptographicBindingMethodsSupported?: ('jwk' | 'cose_key' | 'did' | string)[]
-  cryptographicSuitesSupported?: ('jwt_vc' | 'ldp_vc' | string)[]
+  credentialSigningAlgValuesSupported?: string[]
+  proofTypesSupported?: Record<KeyProofType, ProofType>
   display?: CredentialsSupportedDisplay[]
   credentialSubject?: IssuerCredentialSubject
 
@@ -23,30 +26,23 @@ export class CredentialSupportedBuilderV1_13 {
     return this
   }
 
-  withId(id: string): CredentialSupportedBuilderV1_13 {
-    this.id = id
+  withCredentialName(credentialName: string): CredentialSupportedBuilderV1_13 {
+    this.credentialName = credentialName
     return this
   }
 
-  addTypes(type: string | string[]): CredentialSupportedBuilderV1_13 {
-    if (!Array.isArray(type)) {
-      this.types = this.types ? [...this.types, type] : [type]
-    } else {
-      this.cryptographicBindingMethodsSupported = this.cryptographicBindingMethodsSupported
-        ? [...this.cryptographicBindingMethodsSupported, ...type]
-        : type
+  withCredentialDefinition(credentialDefinition: CredentialDefinitionV1_0_13): CredentialSupportedBuilderV1_13 {
+    if (!credentialDefinition.type) {
+      throw new Error('credentialDefinition should contain a type array')
     }
+    this.credentialDefinition = credentialDefinition
     return this
   }
 
-  withTypes(type: string | string[]): CredentialSupportedBuilderV1_13 {
-    if (this.format === 'vc+sd-jwt' && Array.isArray(type) && type.length > 1) {
-      throw new Error('Only one type is allowed for vc+sd-jwt')
-    }
-    this.types = Array.isArray(type) ? type : [type]
+  withScope(scope: string): CredentialSupportedBuilderV1_13 {
+    this.scope = scope
     return this
   }
-
   addCryptographicBindingMethod(method: string | string[]): CredentialSupportedBuilderV1_13 {
     if (!Array.isArray(method)) {
       this.cryptographicBindingMethodsSupported = this.cryptographicBindingMethodsSupported
@@ -65,17 +61,34 @@ export class CredentialSupportedBuilderV1_13 {
     return this
   }
 
-  addCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedBuilderV1_13 {
-    if (!Array.isArray(suit)) {
-      this.cryptographicSuitesSupported = this.cryptographicSuitesSupported ? [...this.cryptographicSuitesSupported, suit] : [suit]
+  addCredentialSigningAlgValuesSupported(algValues: string | string[]): CredentialSupportedBuilderV1_13 {
+    if (!Array.isArray(algValues)) {
+      this.credentialSigningAlgValuesSupported = this.credentialSigningAlgValuesSupported
+        ? [...this.credentialSigningAlgValuesSupported, algValues]
+        : [algValues]
     } else {
-      this.cryptographicSuitesSupported = this.cryptographicSuitesSupported ? [...this.cryptographicSuitesSupported, ...suit] : suit
+      this.credentialSigningAlgValuesSupported = this.credentialSigningAlgValuesSupported
+        ? [...this.credentialSigningAlgValuesSupported, ...algValues]
+        : algValues
     }
     return this
   }
 
-  withCryptographicSuitesSupported(suit: string | string[]): CredentialSupportedBuilderV1_13 {
-    this.cryptographicSuitesSupported = Array.isArray(suit) ? suit : [suit]
+  withCredentialSigningAlgValuesSupported(algValues: string | string[]): CredentialSupportedBuilderV1_13 {
+    this.credentialSigningAlgValuesSupported = Array.isArray(algValues) ? algValues : [algValues]
+    return this
+  }
+
+  addProofTypesSupported(keyProofType: KeyProofType, proofType: ProofType): CredentialSupportedBuilderV1_13 {
+    if (!this.proofTypesSupported) {
+      this.proofTypesSupported = {} as Record<KeyProofType, ProofType>
+    }
+    this.proofTypesSupported[keyProofType] = proofType
+    return this
+  }
+
+  withProofTypesSupported(proofTypesSupported: Record<KeyProofType, ProofType>): CredentialSupportedBuilderV1_13 {
+    this.proofTypesSupported = proofTypesSupported
     return this
   }
 
@@ -93,7 +106,7 @@ export class CredentialSupportedBuilderV1_13 {
     return this
   }
 
-  withCredentialSubjectDisplay(credentialSubject: IssuerCredentialSubject) {
+  withCredentialSubject(credentialSubject: IssuerCredentialSubject) {
     this.credentialSubject = credentialSubject
     return this
   }
@@ -109,17 +122,27 @@ export class CredentialSupportedBuilderV1_13 {
     return this
   }
 
-  public build(): Record<string, CredentialConfigurationSupported> {
+  public build(): Record<string, CredentialConfigurationSupportedV1_0_13> {
     if (!this.format) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    const credentialSupported: Partial<CredentialConfigurationSupported> = {
-      format: this.format,
-    }
-    if (!this.types) {
-      throw new Error('types are required')
-    }
 
+    const credentialSupported: CredentialConfigurationSupportedV1_0_13 = {
+      format: this.format,
+    } as CredentialConfigurationSupportedV1_0_13
+
+    if (!this.credentialDefinition) {
+      throw new Error('credentialDefinition is required')
+    }
+    credentialSupported.credential_definition = this.credentialDefinition
+    if (this.scope) {
+      credentialSupported.scope = this.scope
+    }
+    if (!this.credentialName) {
+      throw new Error('A unique credential name is required')
+    }
+    //TODO: right now commented out all the special handlings for sd-jwt
+    /*
     // SdJwtVc has a different format
     if (isFormat(credentialSupported, 'vc+sd-jwt')) {
       if (this.types.length > 1) {
@@ -134,23 +157,21 @@ export class CredentialSupportedBuilderV1_13 {
       if (this.credentialSubject) {
         credentialSupported.credentialSubject = this.credentialSubject
       }
-    }
+    }*/
 
-    if (this.cryptographicSuitesSupported) {
-      credentialSupported.credential_signing_alg_values_supported = this.cryptographicSuitesSupported
+    if (this.credentialSigningAlgValuesSupported) {
+      credentialSupported.credential_signing_alg_values_supported = this.credentialSigningAlgValuesSupported
     }
     if (this.cryptographicBindingMethodsSupported) {
       credentialSupported.cryptographic_binding_methods_supported = this.cryptographicBindingMethodsSupported
     }
-    if (this.id) {
-      credentialSupported.id = this.id
-    }
     if (this.display) {
       credentialSupported.display = this.display
     }
-    const supportedConfiguration: Record<string, CredentialConfigurationSupported> = {}
-    //TODO: is this the correct approach here? since the id is not mandatory, I'm relying on a none-unique value
-    supportedConfiguration[this.id ?? this.format] = credentialSupported as CredentialConfigurationSupported
+
+    const supportedConfiguration: Record<string, CredentialConfigurationSupportedV1_0_13> = {}
+    supportedConfiguration[this.credentialName] = credentialSupported as CredentialConfigurationSupportedV1_0_13
+
     return supportedConfiguration
   }
 }

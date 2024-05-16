@@ -1,8 +1,8 @@
 import {
   CNonceState,
-  CredentialConfigurationSupported,
-  CredentialIssuerMetadata,
+  CredentialConfigurationSupportedV1_0_13,
   CredentialOfferSession,
+  IssuerMetadataV1_0_13,
   IStateManager,
   JWTVerifyCallback,
   MetadataDisplay,
@@ -32,7 +32,7 @@ export class VcIssuerBuilder<DIDDoc extends object> {
   jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
   credentialDataSupplier?: CredentialDataSupplier
 
-  public withIssuerMetadata(issuerMetadata: CredentialIssuerMetadata) {
+  public withIssuerMetadata(issuerMetadata: IssuerMetadataV1_0_13) {
     this.issuerMetadata = issuerMetadata
     return this
   }
@@ -83,12 +83,12 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     return this
   }
 
-  public withCredentialConfigurationsSupported(credentialConfigurationsSupported: Record<string, CredentialConfigurationSupported>) {
+  public withCredentialConfigurationsSupported(credentialConfigurationsSupported: Record<string, CredentialConfigurationSupportedV1_0_13>) {
     this.issuerMetadata.credential_configurations_supported = credentialConfigurationsSupported
     return this
   }
 
-  public addCredentialConfigurationsSupported(id: string, supportedCredential: CredentialConfigurationSupported) {
+  public addCredentialConfigurationsSupported(id: string, supportedCredential: CredentialConfigurationSupportedV1_0_13) {
     if (!this.issuerMetadata.credential_configurations_supported) {
       this.issuerMetadata.credential_configurations_supported = {}
     }
@@ -160,14 +160,14 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     }
 
     const builder = this.issuerMetadataBuilder?.build()
-    const metadata: Partial<CredentialIssuerMetadata> = { ...this.issuerMetadata, ...builder }
+    const metadata: Partial<IssuerMetadataV1_0_13> = { ...this.issuerMetadata, ...builder }
     // Let's make sure these get merged correctly:
     metadata.credential_configurations_supported = this.issuerMetadata.credential_configurations_supported
     metadata.display = [...(this.issuerMetadata.display ?? []), ...(builder?.display ?? [])]
     if (!metadata.credential_endpoint || !metadata.credential_issuer || !this.issuerMetadata.credential_configurations_supported) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    return new VcIssuer(metadata as CredentialIssuerMetadata, {
+    return new VcIssuer(metadata as IssuerMetadataV1_0_13, {
       //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
       ...(this.txCode && { txCode: this.txCode }),
       defaultCredentialOfferBaseUri: this.defaultCredentialOfferBaseUri,

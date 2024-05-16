@@ -1,32 +1,57 @@
 import {
   CommonCredentialRequest,
-  CredentialConfigurationSupported,
   CredentialDataSupplierInput,
   CredentialRequestJwtVcJson,
   CredentialRequestJwtVcJsonLdAndLdpVc,
   CredentialRequestSdJwtVc,
+  CredentialsSupportedDisplay,
   CredentialSupplierConfig,
   Grant,
+  IssuerCredentialSubject,
+  KeyProofType,
   MetadataDisplay,
-  NameAndLocale,
+  OID4VCICredentialFormat,
+  ProofType,
   ResponseEncryption,
 } from './Generic.types';
 import { QRCodeOpts } from './QRCode.types';
+import { AuthorizationServerMetadata, AuthorizationServerType, EndpointMetadata } from './ServerMetadata';
 
 export interface IssuerMetadataV1_0_13 {
   issuer?: string;
+  credential_configurations_supported: Record<string, CredentialConfigurationSupportedV1_0_13>; // REQUIRED. A JSON object containing a list of key value pairs, where the key is a string serving as an abstract identifier of the Credential. This identifier is RECOMMENDED to be collision resistant - it can be globally unique, but does not have to be when naming conflicts are unlikely to arise in a given use case. The value is a JSON object. The JSON object MUST conform to the structure of the Section 11.2.1.
+  credential_issuer: string; // A Credential Issuer is identified by a case sensitive URL using the https scheme that contains scheme, host and, optionally, port number and path components, but no query or fragment components.
   credential_endpoint: string; // REQUIRED. URL of the OP's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
-  credential_configurations_supported: CredentialConfigurationSupported; // REQUIRED. A JSON object containing a list of key value pairs, where the key is a string serving as an abstract identifier of the Credential. This identifier is RECOMMENDED to be collision resistant - it can be globally unique, but does not have to be when naming conflicts are unlikely to arise in a given use case. The value is a JSON object. The JSON object MUST conform to the structure of the Section 11.2.1.
-  credential_issuer?: {
-    //  OPTIONAL. A JSON object containing display properties for the Credential issuer.
-    display: NameAndLocale | NameAndLocale[]; // OPTIONAL. An array of objects, where each object contains display properties of a Credential issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
-  };
   authorization_servers?: string[];
+  batch_credential_endpoint?: string;
+  deferred_credential_endpoint?: string;
+  notification_endpoint?: string;
+  credential_response_encryption?: ResponseEncryption;
   token_endpoint?: string;
   display?: MetadataDisplay[];
 
   [x: string]: unknown;
 }
+
+export type CredentialDefinitionV1_0_13 = {
+  type: string[];
+  credentialSubject?: IssuerCredentialSubject;
+};
+
+export type CredentialConfigurationSupportedV1_0_13 = {
+  credential_definition: CredentialDefinitionV1_0_13;
+  /**
+   * TODO: These two (vct and id) are solely added because of backward compatibility with sd-jwt. as soons as we have a clear understanding of the new sd-jwt issuer protocol we can remove this
+   */
+  vct?: string;
+  id?: string;
+  format: OID4VCICredentialFormat; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
+  scope?: string; // OPTIONAL. A JSON string identifying the scope value that this Credential Issuer supports for this particular Credential. The value can be the same across multiple credential_configurations_supported objects. The Authorization Server MUST be able to uniquely identify the Credential Issuer based on the scope value. The Wallet can use this value in the Authorization Request as defined in Section 5.1.2. Scope values in this Credential Issuer metadata MAY duplicate those in the scopes_supported parameter of the Authorization Server.
+  cryptographic_binding_methods_supported?: string[];
+  credential_signing_alg_values_supported?: string[];
+  proof_types_supported?: Record<KeyProofType, ProofType>;
+  display?: CredentialsSupportedDisplay[]; // OPTIONAL. An array of objects, where each object contains the display properties of the supported credential for a certain language
+};
 
 export type CredentialRequestV1_0_13 = CommonCredentialRequest &
   (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc);
@@ -83,7 +108,7 @@ export interface CredentialIssuerMetadataOptsV1_0_13 {
   notification_endpoint?: string; // OPTIONAL. URL of the Credential Issuer's Notification Endpoint, as defined in Section 10. This URL MUST use the https scheme and MAY contain port, path, and query parameter components. If omitted, the Credential Issuer does not support the Notification Endpoint.
   credential_response_encryption?: ResponseEncryption; // OPTIONAL. Object containing information about whether the Credential Issuer supports encryption of the Credential and Batch Credential Response on top of TLS.
   credential_identifiers_supported?: boolean; // OPTIONAL. Boolean value specifying whether the Credential Issuer supports returning credential_identifiers parameter in the authorization_details Token Response parameter, with true indicating support. If omitted, the default value is false.
-  credential_configurations_supported?: Record<string, CredentialConfigurationSupported>; // REQUIRED. A JSON array containing a list of JSON objects, each of them representing metadata about a separate credential type that the Credential Issuer can issue. The JSON objects in the array MUST conform to the structure of the Section 10.2.3.1.
+  credential_configurations_supported: Record<string, CredentialConfigurationSupportedV1_0_13>; // REQUIRED. A JSON array containing a list of JSON objects, each of them representing metadata about a separate credential type that the Credential Issuer can issue. The JSON objects in the array MUST conform to the structure of the Section 10.2.3.1.
   credential_issuer: string; // REQUIRED. The Credential Issuer's identifier.
   authorization_servers?: string[]; // OPTIONAL. Array of strings that identify the OAuth 2.0 Authorization Servers (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
   signed_metadata?: string; // OPTIONAL. String that is a signed JWT. This JWT contains Credential Issuer metadata parameters as claims.
@@ -92,4 +117,24 @@ export interface CredentialIssuerMetadataOptsV1_0_13 {
   //todo: these two are not mentioned in the spec
   token_endpoint?: string;
   credential_supplier_config?: CredentialSupplierConfig;
+}
+
+export interface EndpointMetadataResultV1_0_13 extends EndpointMetadata {
+  // The EndpointMetadata are snake-case so they can easily be used in payloads/JSON.
+  // The values below should not end up in requests/responses directly, so they are using our normal CamelCase convention
+  authorizationServerType: AuthorizationServerType;
+  authorizationServerMetadata?: AuthorizationServerMetadata;
+  credentialIssuerMetadata?: Partial<AuthorizationServerMetadata> & IssuerMetadataV1_0_13;
+}
+
+// For now we extend the opts above. Only difference is that the credential endpoint is optional in the Opts, as it can come from other sources. The value is however required in the eventual Issuer Metadata
+export interface CredentialIssuerMetadataV1_0_13 extends CredentialIssuerMetadataOptsV1_0_13, Partial<AuthorizationServerMetadata> {
+  authorization_servers?: string[]; // OPTIONAL. Array of strings that identify the OAuth 2.0 Authorization Servers (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
+  credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
+  credential_configurations_supported: Record<string, CredentialConfigurationSupportedV1_0_13>; // REQUIRED. A JSON array containing a list of JSON objects, each of them representing metadata about a separate credential type that the Credential Issuer can issue. The JSON objects in the array MUST conform to the structure of the Section 10.2.3.1.
+  credential_issuer: string; // REQUIRED. The Credential Issuer's identifier.
+  credential_response_encryption_alg_values_supported?: string; // OPTIONAL. Array containing a list of the JWE [RFC7516] encryption algorithms (alg values) [RFC7518] supported by the Credential and/or Batch Credential Endpoint to encode the Credential or Batch Credential Response in a JWT [RFC7519].
+  credential_response_encryption_enc_values_supported?: string; //OPTIONAL. Array containing a list of the JWE [RFC7516] encryption algorithms (enc values) [RFC7518] supported by the Credential and/or Batch Credential Endpoint to encode the Credential or Batch Credential Response in a JWT [RFC7519].
+  require_credential_response_encryption?: boolean; //OPTIONAL. Boolean value specifying whether the Credential Issuer requires additional encryption on top of TLS for the Credential Response and expects encryption parameters to be present in the Credential Request and/or Batch Credential Request, with true indicating support. When the value is true, credential_response_encryption_alg_values_supported parameter MUST also be provided. If omitted, the default value is false.
+  credential_identifiers_supported?: boolean; // OPTIONAL. Boolean value specifying whether the Credential Issuer supports returning credential_identifiers parameter in the authorization_details Token Response parameter, with true indicating support. If omitted, the default value is false.
 }

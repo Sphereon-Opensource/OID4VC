@@ -2,7 +2,8 @@ import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   Alg,
   ALG_ERROR,
-  CredentialConfigurationSupported,
+  CredentialSupported,
+  CredentialConfigurationSupportedV1_0_13,
   CredentialOfferSession,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
@@ -42,12 +43,14 @@ describe('VcIssuer', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
-    const credentialsSupported: Record<string, CredentialConfigurationSupported> = new CredentialSupportedBuilderV1_13()
-      .withCryptographicSuitesSupported('ES256K')
+    const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+      .withCredentialSigningAlgValuesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
-      .withTypes('VerifiableCredential')
-      .withId('UniversityDegree_JWT')
+      .withCredentialName('UniversityDegree_JWT')
+      .withCredentialDefinition({
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
@@ -265,7 +268,7 @@ describe('VcIssuer', () => {
           credentials: {
             Credential: {
               format: 'ldp_vc',
-            } as CredentialConfigurationSupported,
+            } as CredentialSupported,
           },
           credentialOfferUri: 'https://somehost.com/offer-id',
         })

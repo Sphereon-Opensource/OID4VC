@@ -5,11 +5,11 @@ import {
   AuthorizationResponse,
   AuthzFlowType,
   CodeChallengeMethod,
-  CredentialConfigurationSupported,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
+  CredentialSupported,
   DefaultURISchemes,
-  EndpointMetadataResult,
+  EndpointMetadataResultV1_0_13,
   getClientIdFromCredentialOfferPayload,
   getIssuerFromCredentialOfferPayload,
   getSupportedCredentials,
@@ -19,9 +19,8 @@ import {
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PKCEOpts,
-  ProofOfPossessionCallbacks,
-  toAuthorizationResponsePayload,
-} from '@sphereon/oid4vci-common';
+  ProofOfPossessionCallbacks, toAuthorizationResponsePayload
+} from '@sphereon/oid4vci-common'
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
@@ -42,7 +41,7 @@ export interface OpenID4VCIClientState {
   kid?: string;
   jwk?: JWK;
   alg?: Alg | string;
-  endpointMetadata?: EndpointMetadataResult;
+  endpointMetadata?: EndpointMetadataResultV1_0_13;
   accessTokenResponse?: AccessTokenResponse;
   authorizationRequestOpts?: AuthorizationRequestOpts;
   authorizationCodeResponse?: AuthorizationResponse;
@@ -76,7 +75,7 @@ export class OpenID4VCIClient {
     pkce?: PKCEOpts;
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
     jwk?: JWK;
-    endpointMetadata?: EndpointMetadataResult;
+    endpointMetadata?: EndpointMetadataResultV1_0_13;
     accessTokenResponse?: AccessTokenResponse;
     authorizationRequestOpts?: AuthorizationRequestOpts;
     authorizationCodeResponse?: AuthorizationResponse;
@@ -228,7 +227,7 @@ export class OpenID4VCIClient {
     return this._state.authorizationURL;
   }
 
-  public async retrieveServerMetadata(): Promise<EndpointMetadataResult> {
+  public async retrieveServerMetadata(): Promise<EndpointMetadataResultV1_0_13> {
     this.assertIssuerData();
     if (!this._state.endpointMetadata) {
       if (this.credentialOffer) {
@@ -441,7 +440,7 @@ export class OpenID4VCIClient {
 
   getCredentialsSupported(
     format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
-  ): Record<string, CredentialConfigurationSupported> {
+  ): Record<string, CredentialSupported> {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),
@@ -465,7 +464,7 @@ export class OpenID4VCIClient {
     return this.credentialOffer?.version ?? OpenId4VCIVersion.VER_1_0_11;
   }
 
-  public get endpointMetadata(): EndpointMetadataResult {
+  public get endpointMetadata(): EndpointMetadataResultV1_0_13 {
     this.assertServerMetadata();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this._state.endpointMetadata!;

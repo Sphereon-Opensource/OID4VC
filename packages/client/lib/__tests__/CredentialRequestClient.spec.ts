@@ -283,4 +283,30 @@ describe('Credential Request Client with different issuers ', () => {
 
     expect(credentialRequest).toEqual(getMockData('diwala')?.credential.request);
   });
+
+  it('should create correct CredentialRequest for credenco', async () => {
+    const IRR_URI =
+      'openid-credential-offer://mijnkvk.acc.credenco.com/?credential_offer_uri=https%3A%2F%2Fmijnkvk.acc.credenco.com%2Fopenid4vc%2FcredentialOffer%3Fid%3D32fc4ebf-9e31-4149-9877-e3c0b602d559';
+    const credentialOffer = await (
+      await CredentialRequestClientBuilder.fromURI({
+        uri: IRR_URI,
+        metadata: getMockData('credenco')?.metadata as unknown as EndpointMetadata,
+      })
+    )
+      .build()
+      .createCredentialRequest({
+        proofInput: {
+          proof_type: 'jwt',
+          jwt: getMockData('diwala')?.credential.request.proof.jwt as string,
+        },
+        credentialTypes: ['OpenBadgeCredential'],
+        format: 'ldp_vc',
+        version: OpenId4VCIVersion.VER_1_0_08,
+      });
+
+    // createCredentialRequest returns uniform format in draft 11
+    const credentialRequest = getCredentialRequestForVersion(credentialOffer, OpenId4VCIVersion.VER_1_0_08);
+
+    expect(credentialRequest).toEqual(getMockData('diwala')?.credential.request);
+  });
 });

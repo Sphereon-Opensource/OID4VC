@@ -3,7 +3,7 @@ import process from 'process'
 
 import {
   AuthorizationRequest,
-  CredentialConfigurationSupported,
+  CredentialConfigurationSupportedV1_0_13,
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
   QRCodeOpts,
@@ -25,12 +25,16 @@ import {
 } from './oid4vci-api-functions'
 
 function buildVCIFromEnvironment<DIDDoc extends object>() {
-  const credentialsSupported: Record<string, CredentialConfigurationSupported> = new CredentialSupportedBuilderV1_13()
-    .withCryptographicSuitesSupported(process.env.cryptographic_suites_supported as string)
+  const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+    .withCredentialSigningAlgValuesSupported(process.env.credential_signing_alg_values_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
     .withFormat(process.env.credential_supported_format as unknown as OID4VCICredentialFormat)
-    .withId(process.env.credential_supported_id as string)
-    .withTypes([process.env.credential_supported_types_1 as string, process.env.credential_supported_types_2 as string])
+    .withCredentialName(process.env.credential_supported_name_1 as string)
+    .withCredentialDefinition({
+      type: [process.env.credential_supported_1_definition_type_1 as string, process.env.credential_supported_1_definition_type_2 as string],
+      // TODO: setup credentialSubject here from env
+      // credentialSubject
+    })
     .withCredentialSupportedDisplay({
       name: process.env.credential_display_name as string,
       locale: process.env.credential_display_locale as string,

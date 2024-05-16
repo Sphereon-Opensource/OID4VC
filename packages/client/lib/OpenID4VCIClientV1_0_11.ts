@@ -5,13 +5,13 @@ import {
   AuthorizationResponse,
   AuthzFlowType,
   CodeChallengeMethod,
-  CredentialConfigurationSupported,
   CredentialOfferPayloadV1_0_08,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
+  CredentialSupported,
   DefaultURISchemes,
-  EndpointMetadataResult,
+  EndpointMetadataResultV1_0_11,
   getClientIdFromCredentialOfferPayload,
   getIssuerFromCredentialOfferPayload,
   getSupportedCredentials,
@@ -31,7 +31,7 @@ import { AccessTokenClientV1_0_11 } from './AccessTokenClientV1_0_11';
 import { createAuthorizationRequestUrlV1_0_11 } from './AuthorizationCodeClientV1_0_11';
 import { CredentialOfferClientV1_0_11 } from './CredentialOfferClientV1_0_11';
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
-import { MetadataClient } from './MetadataClient';
+import { MetadataClientV1_0_11 } from './MetadataClientV1_0_11'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { generateMissingPKCEOpts } from './functions/AuthorizationUtil';
 
@@ -44,7 +44,7 @@ export interface OpenID4VCIClientStateV1_0_11 {
   kid?: string;
   jwk?: JWK;
   alg?: Alg | string;
-  endpointMetadata?: EndpointMetadataResult;
+  endpointMetadata?: EndpointMetadataResultV1_0_11;
   accessTokenResponse?: AccessTokenResponse;
   authorizationRequestOpts?: AuthorizationRequestOpts;
   authorizationCodeResponse?: AuthorizationResponse;
@@ -78,7 +78,7 @@ export class OpenID4VCIClientV1_0_11 {
     pkce?: PKCEOpts;
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
     jwk?: JWK;
-    endpointMetadata?: EndpointMetadataResult;
+    endpointMetadata?: EndpointMetadataResultV1_0_11;
     accessTokenResponse?: AccessTokenResponse;
     authorizationRequestOpts?: AuthorizationRequestOpts;
     authorizationCodeResponse?: AuthorizationResponse;
@@ -230,13 +230,13 @@ export class OpenID4VCIClientV1_0_11 {
     return this._state.authorizationURL;
   }
 
-  public async retrieveServerMetadata(): Promise<EndpointMetadataResult> {
+  public async retrieveServerMetadata(): Promise<EndpointMetadataResultV1_0_11> {
     this.assertIssuerData();
     if (!this._state.endpointMetadata) {
       if (this.credentialOffer) {
-        this._state.endpointMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this.credentialOffer);
+        this._state.endpointMetadata = await MetadataClientV1_0_11.retrieveAllMetadataFromCredentialOffer(this.credentialOffer);
       } else if (this._state.credentialIssuer) {
-        this._state.endpointMetadata = await MetadataClient.retrieveAllMetadata(this._state.credentialIssuer);
+        this._state.endpointMetadata = await MetadataClientV1_0_11.retrieveAllMetadata(this._state.credentialIssuer);
       } else {
         throw Error(`Cannot retrieve issuer metadata without either a credential offer, or issuer value`);
       }
@@ -449,7 +449,7 @@ export class OpenID4VCIClientV1_0_11 {
   getCredentialsSupportedV11(
     restrictToInitiationTypes: boolean,
     format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
-  ): Record<string, CredentialConfigurationSupported> {
+  ): Record<string, CredentialSupported> {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),
@@ -460,7 +460,7 @@ export class OpenID4VCIClientV1_0_11 {
 
   getCredentialsSupported(
     format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
-  ): Record<string, CredentialConfigurationSupported> {
+  ): Record<string, CredentialSupported> {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),
@@ -522,7 +522,7 @@ export class OpenID4VCIClientV1_0_11 {
     return this.credentialOffer?.version ?? OpenId4VCIVersion.VER_1_0_11;
   }
 
-  public get endpointMetadata(): EndpointMetadataResult {
+  public get endpointMetadata(): EndpointMetadataResultV1_0_11 {
     this.assertServerMetadata();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this._state.endpointMetadata!;

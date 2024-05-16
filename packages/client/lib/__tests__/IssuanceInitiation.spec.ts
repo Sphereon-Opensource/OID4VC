@@ -1,4 +1,7 @@
 import { OpenId4VCIVersion } from '@sphereon/oid4vci-common';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import nock from 'nock';
 
 import { CredentialOfferClient } from '../CredentialOfferClient';
 
@@ -29,5 +32,33 @@ describe('Issuance Initiation', () => {
     expect(client.scheme).toEqual('openid-credential-offer');
     expect(client.credential_offer.credential_issuer).toEqual('https://launchpad.vii.electron.mattrlabs.io');
     expect(client.preAuthorizedCode).toEqual('UPZohaodPlLBnGsqB02n2tIupCIg8nKRRUEUHWA665X');
+  });
+
+  it('Should return credenco Credential Offer', async () => {
+    nock('https://mijnkvk.acc.credenco.com')
+      .get('/openid4vc/credentialOffer?id=32fc4ebf-9e31-4149-9877-e3c0b602d559')
+      .reply(200, {
+        credential_issuer: 'https://mijnkvk.acc.credenco.com',
+        credential_configuration_ids: ['BevoegdheidUittreksel_jwt_vc_json'],
+        grants: {
+          authorization_code: {
+            issuer_state: '32fc4ebf-9e31-4149-9877-e3c0b602d559',
+          },
+          'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+            'pre-authorized_code':
+              'eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiIzMmZjNGViZi05ZTMxLTQxNDktOTg3Ny1lM2MwYjYwMmQ1NTkiLCJpc3MiOiJodHRwczovL21pam5rdmsuYWNjLmNyZWRlbmNvLmNvbSIsImF1ZCI6IlRPS0VOIn0.754aiQ87O0vHYSpRvPqAS9cLOgf-pewdeXbpLziRwsxEp9mENfaXpY62muYpzOaWcYmTOydkzhFul-NDYXJZCA',
+          },
+        },
+      });
+    const client = await CredentialOfferClient.fromURI(
+      'openid-credential-offer://mijnkvk.acc.credenco.com/?credential_offer_uri=https%3A%2F%2Fmijnkvk.acc.credenco.com%2Fopenid4vc%2FcredentialOffer%3Fid%3D32fc4ebf-9e31-4149-9877-e3c0b602d559',
+    );
+    expect(client.version).toEqual(OpenId4VCIVersion.VER_1_0_13);
+    expect(client.baseUrl).toEqual('openid-credential-offer://mijnkvk.acc.credenco.com/');
+    expect(client.scheme).toEqual('openid-credential-offer');
+    expect(client.credential_offer.credential_issuer).toEqual('https://mijnkvk.acc.credenco.com');
+    expect(client.preAuthorizedCode).toEqual(
+      'eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiIzMmZjNGViZi05ZTMxLTQxNDktOTg3Ny1lM2MwYjYwMmQ1NTkiLCJpc3MiOiJodHRwczovL21pam5rdmsuYWNjLmNyZWRlbmNvLmNvbSIsImF1ZCI6IlRPS0VOIn0.754aiQ87O0vHYSpRvPqAS9cLOgf-pewdeXbpLziRwsxEp9mENfaXpY62muYpzOaWcYmTOydkzhFul-NDYXJZCA',
+    );
   });
 });

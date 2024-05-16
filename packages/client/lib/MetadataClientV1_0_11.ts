@@ -1,12 +1,11 @@
 import {
   AuthorizationServerMetadata,
   AuthorizationServerType,
-  CredentialIssuerMetadataV1_0_13,
-  CredentialOfferPayloadV1_0_13,
+  CredentialIssuerMetadataV1_0_11,
+  CredentialOfferPayload,
   CredentialOfferRequestWithBaseUrl,
-  EndpointMetadataResultV1_0_13,
-  getIssuerFromCredentialOfferPayload,
-  IssuerMetadataV1_0_13,
+  EndpointMetadataResultV1_0_11,
+  getIssuerFromCredentialOfferPayload, IssuerMetadataV1_0_08,
   OpenIDResponse,
   WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
@@ -16,24 +15,24 @@ import { retrieveWellknown } from './functions/OpenIDUtils'
 
 const debug = Debug('sphereon:oid4vci:metadata');
 
-export class MetadataClient {
+export class MetadataClientV1_0_11 {
   /**
    * Retrieve metadata using the Initiation obtained from a previous step
    *
    * @param credentialOffer
    */
-  public static async retrieveAllMetadataFromCredentialOffer(credentialOffer: CredentialOfferRequestWithBaseUrl): Promise<EndpointMetadataResultV1_0_13> {
-    return MetadataClient.retrieveAllMetadataFromCredentialOfferRequest(credentialOffer.credential_offer as CredentialOfferPayloadV1_0_13);
+  public static async retrieveAllMetadataFromCredentialOffer(credentialOffer: CredentialOfferRequestWithBaseUrl): Promise<EndpointMetadataResultV1_0_11> {
+    return MetadataClientV1_0_11.retrieveAllMetadataFromCredentialOfferRequest(credentialOffer.credential_offer);
   }
 
   /**
    * Retrieve the metada using the initiation request obtained from a previous step
    * @param request
    */
-  public static async retrieveAllMetadataFromCredentialOfferRequest(request: CredentialOfferPayloadV1_0_13): Promise<EndpointMetadataResultV1_0_13> {
+  public static async retrieveAllMetadataFromCredentialOfferRequest(request: CredentialOfferPayload): Promise<EndpointMetadataResultV1_0_11> {
     const issuer = getIssuerFromCredentialOfferPayload(request);
     if (issuer) {
-      return MetadataClient.retrieveAllMetadata(issuer);
+      return MetadataClientV1_0_11.retrieveAllMetadata(issuer);
     }
     throw new Error("can't retrieve metadata from CredentialOfferRequest. No issuer field is present");
   }
@@ -43,14 +42,14 @@ export class MetadataClient {
    * @param issuer The issuer URL
    * @param opts
    */
-  public static async retrieveAllMetadata(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadataResultV1_0_13> {
+  public static async retrieveAllMetadata(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadataResultV1_0_11> {
     let token_endpoint: string | undefined;
     let credential_endpoint: string | undefined;
     let deferred_credential_endpoint: string | undefined;
     let authorization_endpoint: string | undefined;
     let authorizationServerType: AuthorizationServerType = 'OID4VCI';
-    let authorization_servers: string[] = [issuer];
-    const oid4vciResponse = await MetadataClient.retrieveOpenID4VCIServerMetadata(issuer, { errorOnNotFound: false }); // We will handle errors later, given we will also try other metadata locations
+    let authorization_server: string = issuer;
+    const oid4vciResponse = await MetadataClientV1_0_11.retrieveOpenID4VCIServerMetadata(issuer, { errorOnNotFound: false }); // We will handle errors later, given we will also try other metadata locations
     let credentialIssuerMetadata = oid4vciResponse?.successBody;
     if (credentialIssuerMetadata) {
       debug(`Issuer ${issuer} OID4VCI well-known server metadata\r\n${JSON.stringify(credentialIssuerMetadata)}`);
@@ -59,14 +58,16 @@ export class MetadataClient {
       if (credentialIssuerMetadata.token_endpoint) {
         token_endpoint = credentialIssuerMetadata.token_endpoint;
       }
-      if (credentialIssuerMetadata.authorization_servers) {
-        authorization_servers = credentialIssuerMetadata.authorization_servers;
+      if (credentialIssuerMetadata.authorization_server) {
+        authorization_server = credentialIssuerMetadata.authorization_server;
+      }
+      if (credentialIssuerMetadata.authorization_endpoint) {
+        authorization_endpoint = credentialIssuerMetadata.authorization_endpoint;
       }
     }
     // No specific OID4VCI endpoint. Either can be an OAuth2 AS or an OIDC IDP. Let's start with OIDC first
-    // TODO: for now we're taking just the first one
     let response: OpenIDResponse<AuthorizationServerMetadata> = await retrieveWellknown(
-      authorization_servers[0],
+      authorization_server,
       WellKnownEndpoints.OPENID_CONFIGURATION,
       {
         errorOnNotFound: false,
@@ -78,14 +79,13 @@ export class MetadataClient {
       authorizationServerType = 'OIDC';
     } else {
       // Now let's do OAuth2
-      // TODO: for now we're taking just the first one
-      response = await retrieveWellknown(authorization_servers[0], WellKnownEndpoints.OAUTH_AS, { errorOnNotFound: false });
+      response = await retrieveWellknown(authorization_server, WellKnownEndpoints.OAUTH_AS, { errorOnNotFound: false });
       authMetadata = response.successBody;
     }
     if (!authMetadata) {
       // We will always throw an error, no matter whether the user provided the option not to, because this is bad.
-      if (!authorization_servers.includes(issuer)) {
-        throw Error(`Issuer ${issuer} provided a separate authorization server ${authorization_servers}, but that server did not provide metadata`);
+      if (issuer !== authorization_server) {
+        throw Error(`Issuer ${issuer} provided a separate authorization server ${authorization_server}, but that server did not provide metadata`);
       }
     } else {
       if (!authorizationServerType) {
@@ -103,7 +103,7 @@ export class MetadataClient {
       }
       authorization_endpoint = authMetadata.authorization_endpoint;
       if (!authMetadata.token_endpoint) {
-        throw Error(`Authorization Sever ${authorization_servers} did not provide a token_endpoint`);
+        throw Error(`Authorization Sever ${authorization_server} did not provide a token_endpoint`);
       } else if (token_endpoint && authMetadata.token_endpoint !== token_endpoint) {
         throw Error(
           `Credential issuer has a different token_endpoint (${token_endpoint}) from the Authorization Server (${authMetadata.token_endpoint})`,
@@ -152,7 +152,7 @@ export class MetadataClient {
 
     if (!credentialIssuerMetadata && authMetadata) {
       // Apparently everything worked out and the issuer is exposing everything in oAuth2/OIDC well-knowns. Spec is vague about this situation, but we can support it
-      credentialIssuerMetadata = authMetadata as CredentialIssuerMetadataV1_0_13;
+      credentialIssuerMetadata = authMetadata as CredentialIssuerMetadataV1_0_11;
     }
     debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`);
     return {
@@ -160,10 +160,10 @@ export class MetadataClient {
       token_endpoint,
       credential_endpoint,
       deferred_credential_endpoint,
-      authorization_server: authorization_servers[0],
+      authorization_server,
       authorization_endpoint,
       authorizationServerType,
-      credentialIssuerMetadata: credentialIssuerMetadata,
+      credentialIssuerMetadata: credentialIssuerMetadata as unknown as (Partial<AuthorizationServerMetadata> & IssuerMetadataV1_0_08),
       authorizationServerMetadata: authMetadata,
     };
   }
@@ -178,7 +178,7 @@ export class MetadataClient {
     opts?: {
       errorOnNotFound?: boolean;
     },
-  ): Promise<OpenIDResponse<IssuerMetadataV1_0_13> | undefined> {
+  ): Promise<OpenIDResponse<CredentialIssuerMetadataV1_0_11> | undefined> {
     return retrieveWellknown(issuerHost, WellKnownEndpoints.OPENID4VCI_ISSUER, {
       errorOnNotFound: opts?.errorOnNotFound === undefined ? true : opts.errorOnNotFound,
     });

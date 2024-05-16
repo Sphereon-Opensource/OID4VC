@@ -159,26 +159,33 @@ export class AccessTokenClient {
   }
 
   private assertAlphanumericPin(pinMeta?: TxCodeAndPinRequired, pin?: string): void {
-    if (pinMeta && pinMeta.isPinRequired) {
+    if (pinMeta?.isPinRequired) {
       let regex;
-      if (pinMeta.txCode && pinMeta.txCode.input_mode === 'numeric') {
-        regex = new RegExp(`^\\d{1,${pinMeta.txCode.length || 8}}$`);
-      } else if (pinMeta.txCode && pinMeta.txCode.input_mode === 'text') {
-        regex = new RegExp(`^[a-zA-Z0-9]{1,${pinMeta.txCode.length || 8}}$`);
-      } else {
-        // default regex that limits the length to 8
-        regex = /^[a-zA-Z0-9]{1,8}$/;
+
+      if (pinMeta.txCode) {
+        const { input_mode, length } = pinMeta.txCode;
+
+        if (input_mode === 'numeric') {
+          // Create a regex for numeric input. If no length specified, allow any length of numeric input.
+          regex = length ? new RegExp(`^\\d{1,${length}}$`) : /^\d+$/;
+        } else if (input_mode === 'text') {
+          // Create a regex for text input. If no length specified, allow any length of alphanumeric input.
+          regex = length ? new RegExp(`^[a-zA-Z0-9]{1,${length}}$`) : /^[a-zA-Z0-9]+$/;
+        }
       }
+
+      // Default regex for alphanumeric with no specific length limit if no input_mode is specified.
+      regex = regex || /^[a-zA-Z0-9]+$/;
 
       if (!pin || !regex.test(pin)) {
         debug(
-          `Pin is not valid. Expected format: ${pinMeta?.txCode?.input_mode || 'alphanumeric'}, Length: up to ${pinMeta?.txCode?.length || 8} characters`,
+          `Pin is not valid. Expected format: ${pinMeta?.txCode?.input_mode || 'alphanumeric'}, Length: up to ${pinMeta?.txCode?.length || 'any number of'} characters`,
         );
         throw new Error('A valid pin must be present according to the specified transaction code requirements.');
       }
     } else if (pin) {
-      debug(`Pin set, whilst not required`);
-      throw new Error('Cannot set a pin, when the pin is not required.');
+      debug('Pin set, whilst not required');
+      throw new Error('Cannot set a pin when the pin is not required.');
     }
   }
 

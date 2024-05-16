@@ -3,28 +3,28 @@ import {
   AuthorizationRequestOpts,
   CodeChallengeMethod,
   convertJsonToURI,
-  CredentialConfigurationSupported,
   CredentialOfferFormat,
   CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
+  CredentialSupported,
   determineSpecVersionFromOffer,
-  EndpointMetadataResult,
+  EndpointMetadataResultV1_0_13,
   formPost,
   JsonURIMode,
   OpenId4VCIVersion,
   PARMode,
   PKCEOpts,
-  PushedAuthorizationResponse,
-  ResponseType,
-} from '@sphereon/oid4vci-common';
+  PushedAuthorizationResponse, 
+  ResponseType
+} from '@sphereon/oid4vci-common'
 import Debug from 'debug';
 
 const debug = Debug('sphereon:oid4vci');
 
 function filterSupportedCredentials(
   credentialOffer: CredentialOfferPayloadV1_0_13,
-  credentialsSupported?: Record<string, CredentialConfigurationSupported>,
-): CredentialConfigurationSupported[] {
+  credentialsSupported?: Record<string, CredentialSupported>,
+): CredentialSupported[] {
   if (!credentialOffer.credential_configuration_ids || !credentialsSupported) {
     return [];
   }
@@ -39,10 +39,10 @@ export const createAuthorizationRequestUrl = async ({
   credentialConfigurationSupported,
 }: {
   pkce: PKCEOpts;
-  endpointMetadata: EndpointMetadataResult;
+  endpointMetadata: EndpointMetadataResultV1_0_13;
   authorizationRequest: AuthorizationRequestOpts;
   credentialOffer?: CredentialOfferRequestWithBaseUrl;
-  credentialConfigurationSupported?: Record<string, CredentialConfigurationSupported>;
+  credentialConfigurationSupported?: Record<string, CredentialSupported>;
 }): Promise<string> => {
   const { redirectUri, clientId } = authorizationRequest;
   let { scope, authorizationDetails } = authorizationRequest;
@@ -58,7 +58,7 @@ export const createAuthorizationRequestUrl = async ({
     if ('credentials' in credentialOffer.credential_offer) {
       throw new Error('CredentialOffer format is wrong.');
     }
-    const creds: (CredentialConfigurationSupported | CredentialOfferFormat | string)[] =
+    const creds: (CredentialSupported | CredentialOfferFormat | string)[] =
       determineSpecVersionFromOffer(credentialOffer.credential_offer) === OpenId4VCIVersion.VER_1_0_13
         ? filterSupportedCredentials(credentialOffer.credential_offer as CredentialOfferPayloadV1_0_13, credentialConfigurationSupported)
         : [];
@@ -67,7 +67,7 @@ export const createAuthorizationRequestUrl = async ({
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     authorizationDetails = creds
-      .flatMap((cred) => cred as CredentialConfigurationSupported)
+      .flatMap((cred) => cred as CredentialSupported)
       .filter((cred) => !!cred)
       .map((cred) => {
         return {
@@ -144,7 +144,7 @@ export const createAuthorizationRequestUrl = async ({
 };
 
 const handleAuthorizationDetails = (
-  endpointMetadata: EndpointMetadataResult,
+  endpointMetadata: EndpointMetadataResultV1_0_13,
   authorizationDetails?: AuthorizationDetails | AuthorizationDetails[],
 ): AuthorizationDetails | AuthorizationDetails[] | undefined => {
   if (authorizationDetails) {
@@ -163,7 +163,7 @@ const handleAuthorizationDetails = (
   return authorizationDetails;
 };
 
-const handleLocations = (endpointMetadata: EndpointMetadataResult, authorizationDetails: AuthorizationDetails) => {
+const handleLocations = (endpointMetadata: EndpointMetadataResultV1_0_13, authorizationDetails: AuthorizationDetails) => {
   if (typeof authorizationDetails === 'string') {
     // backwards compat for older versions of the lib
     return authorizationDetails;

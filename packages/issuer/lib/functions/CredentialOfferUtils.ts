@@ -1,10 +1,10 @@
 import {
-  CredentialIssuerMetadata,
   CredentialIssuerMetadataOptsV1_0_13,
   CredentialOfferPayloadV1_0_13,
   CredentialOfferSession,
   CredentialOfferV1_0_13,
   Grant,
+  IssuerMetadataV1_0_13,
   PIN_VALIDATION_ERROR,
   TxCode,
   UniformCredentialOffer,
@@ -119,7 +119,7 @@ export function createCredentialOfferURIFromObject(
 }
 
 export function createCredentialOfferURI(
-  issuerMetadata?: CredentialIssuerMetadata,
+  issuerMetadata?: IssuerMetadataV1_0_13,
   // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
   opts?: {
     state?: string

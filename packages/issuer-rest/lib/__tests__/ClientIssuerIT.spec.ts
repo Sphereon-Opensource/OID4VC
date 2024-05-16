@@ -5,7 +5,8 @@ import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   AccessTokenResponse,
   Alg,
-  CredentialConfigurationSupported,
+  CredentialSupported,
+  CredentialConfigurationSupportedV1_0_13,
   CredentialOfferSession,
   IssuerCredentialSubjectDisplay,
   Jwt,
@@ -69,12 +70,14 @@ describe('VcIssuer', () => {
       return new jose.SignJWT({ ...jwt.payload }).setProtectedHeader({ ...jwt.header, alg: Alg.ES256 }).sign(privateKey)
     }
 
-    const credentialsSupported: Record<string, CredentialConfigurationSupported> = new CredentialSupportedBuilderV1_13()
-      .withCryptographicSuitesSupported('ES256K')
+    const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+      .withCredentialSigningAlgValuesSupported('ES256K')
       .withCryptographicBindingMethod('did')
-      .withTypes('VerifiableCredential')
       .withFormat('jwt_vc_json')
-      .withId('UniversityDegree_JWT')
+      .withCredentialName('UniversityDegree_JWT')
+      .withCredentialDefinition({
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
@@ -196,7 +199,7 @@ describe('VcIssuer', () => {
             },
           },
         },
-        credentials: { UniversityDegree_JWT: { format: 'ldp_vc', id: 'UniversityDegree_JWT' } as CredentialConfigurationSupported },
+        credentials: { UniversityDegree_JWT: { format: 'ldp_vc', id: 'UniversityDegree_JWT' } as CredentialSupported },
         scheme: 'http',
       })
       .then((response) => response.uri)
@@ -327,7 +330,17 @@ describe('VcIssuer', () => {
         .setExpirationTime('2h')
         .sign(subjectKeypair.privateKey)
     }
-
+    client = await OpenID4VCIClient.fromURI({
+      uri: `http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22testcode%22%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%7D`,
+      kid: subjectDIDKey.didDocument.authentication[0],
+      alg: 'ES256',
+      createAuthorizationRequestURL: false,
+    })
+    console.log('getting access token')
+    accessToken = await client.acquireAccessToken({
+      pin: 'testcode',
+    })
+    console.log(`access token: ${accessToken}`)
     const credentialResponse = await client.acquireCredentials({
       credentialTypes: ['VerifiableCredential'],
       format: 'jwt_vc_json',

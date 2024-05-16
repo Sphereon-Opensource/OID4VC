@@ -1,4 +1,4 @@
-import { CredentialConfigurationSupported, CredentialIssuerMetadata, MetadataDisplay } from '@sphereon/oid4vci-common'
+import { CredentialConfigurationSupportedV1_0_13, IssuerMetadataV1_0_13, MetadataDisplay } from '@sphereon/oid4vci-common'
 
 import { CredentialSupportedBuilderV1_13 } from './CredentialSupportedBuilderV1_13'
 import { DisplayBuilder } from './DisplayBuilder'
@@ -7,7 +7,7 @@ export class IssuerMetadataBuilderV1_13 {
   credentialEndpoint: string | undefined
   credentialIssuer: string | undefined
   supportedBuilders: CredentialSupportedBuilderV1_13[] = []
-  credentialConfigurationsSupported: Record<string, CredentialConfigurationSupported> = {}
+  credentialConfigurationsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = {}
   displayBuilders: DisplayBuilder[] = []
   display: MetadataDisplay[] = []
   batchCredentialEndpoint?: string
@@ -58,7 +58,7 @@ export class IssuerMetadataBuilderV1_13 {
     return this
   }
 
-  public addCredentialConfigurationsSupported(id: string, supportedCredential: CredentialConfigurationSupported) {
+  public addCredentialConfigurationsSupported(id: string, supportedCredential: CredentialConfigurationSupportedV1_0_13) {
     this.credentialConfigurationsSupported[id] = supportedCredential
     return this
   }
@@ -82,14 +82,16 @@ export class IssuerMetadataBuilderV1_13 {
     return builder
   }
 
-  public build(): CredentialIssuerMetadata {
+  public build(): IssuerMetadataV1_0_13 {
     if (!this.credentialIssuer) {
       throw Error('No credential issuer supplied')
     } else if (!this.credentialEndpoint) {
       throw Error('No credential endpoint supplied')
     }
-    const credential_configurations_supported: Record<string, CredentialConfigurationSupported> = this.credentialConfigurationsSupported
-    const configurationsEntryList: Record<string, CredentialConfigurationSupported>[] = this.supportedBuilders.map((builder) => builder.build())
+    const credential_configurations_supported: Record<string, CredentialConfigurationSupportedV1_0_13> = this.credentialConfigurationsSupported
+    const configurationsEntryList: Record<string, CredentialConfigurationSupportedV1_0_13>[] = this.supportedBuilders.map((builder) =>
+      builder.build(),
+    )
     configurationsEntryList.forEach((configRecord) => {
       Object.keys(configRecord).forEach((key) => {
         credential_configurations_supported[key] = configRecord[key]
@@ -111,6 +113,6 @@ export class IssuerMetadataBuilderV1_13 {
       ...(this.authorizationServers && { authorization_servers: this.authorizationServers }),
       ...(this.tokenEndpoint && { token_endpoint: this.tokenEndpoint }),
       ...(display.length > 0 && { display }),
-    } as CredentialIssuerMetadata
+    } as IssuerMetadataV1_0_13
   }
 }

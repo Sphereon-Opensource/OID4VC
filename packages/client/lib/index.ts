@@ -10,6 +10,7 @@ export * from './CredentialRequestClientBuilder';
 export * from './CredentialRequestClientBuilderV1_0_11';
 export * from './functions';
 export * from './MetadataClient';
+export * from './MetadataClientV1_0_11';
 export * from './OpenID4VCIClient';
 export * from './OpenID4VCIClientV1_0_11';
 export * from './ProofOfPossessionBuilder';

@@ -3,11 +3,11 @@ import {
   AuthorizationRequestOpts,
   CodeChallengeMethod,
   convertJsonToURI,
-  CredentialConfigurationSupported,
+  CredentialSupported,
   CredentialOfferFormat,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferRequestWithBaseUrl,
-  EndpointMetadataResult,
+  EndpointMetadataResultV1_0_11,
   formPost,
   JsonURIMode,
   PARMode,
@@ -27,10 +27,10 @@ export const createAuthorizationRequestUrlV1_0_11 = async ({
   credentialsSupported,
 }: {
   pkce: PKCEOpts;
-  endpointMetadata: EndpointMetadataResult;
+  endpointMetadata: EndpointMetadataResultV1_0_11;
   authorizationRequest: AuthorizationRequestOpts;
   credentialOffer?: CredentialOfferRequestWithBaseUrl;
-  credentialsSupported?: CredentialConfigurationSupported[];
+  credentialsSupported?: CredentialSupported[];
 }): Promise<string> => {
   const { redirectUri, clientId } = authorizationRequest;
   let { scope, authorizationDetails } = authorizationRequest;
@@ -50,7 +50,7 @@ export const createAuthorizationRequestUrlV1_0_11 = async ({
     // @ts-ignore
     authorizationDetails = creds
       .flatMap((cred) =>
-        typeof cred === 'string' && credentialsSupported ? Object.values(credentialsSupported) : (cred as CredentialConfigurationSupported),
+        typeof cred === 'string' && credentialsSupported ? Object.values(credentialsSupported) : (cred as CredentialSupported),
       )
       .filter((cred) => !!cred)
       .map((cred) => {
@@ -128,7 +128,7 @@ export const createAuthorizationRequestUrlV1_0_11 = async ({
 };
 
 const handleAuthorizationDetailsV1_0_11 = (
-  endpointMetadata: EndpointMetadataResult,
+  endpointMetadata: EndpointMetadataResultV1_0_11,
   authorizationDetails?: AuthorizationDetails | AuthorizationDetails[],
 ): AuthorizationDetails | AuthorizationDetails[] | undefined => {
   if (authorizationDetails) {
@@ -147,7 +147,7 @@ const handleAuthorizationDetailsV1_0_11 = (
   return authorizationDetails;
 };
 
-const handleLocations = (endpointMetadata: EndpointMetadataResult, authorizationDetails: AuthorizationDetails) => {
+const handleLocations = (endpointMetadata: EndpointMetadataResultV1_0_11, authorizationDetails: AuthorizationDetails) => {
   if (typeof authorizationDetails === 'string') {
     // backwards compat for older versions of the lib
     return authorizationDetails;
