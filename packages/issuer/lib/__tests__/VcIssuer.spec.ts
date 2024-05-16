@@ -2,7 +2,6 @@ import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   Alg,
   ALG_ERROR,
-  CredentialSupported,
   CredentialConfigurationSupportedV1_0_13,
   CredentialOfferSession,
   IssuerCredentialSubjectDisplay,
