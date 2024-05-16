@@ -199,7 +199,9 @@ describe('VcIssuer', () => {
             },
           },
         },
-        credentials: { UniversityDegree_JWT: { format: 'ldp_vc', id: 'UniversityDegree_JWT' } as CredentialSupported },
+        credentials: { UniversityDegree_JWT: { format: 'ldp_vc', credential_definition: {
+          type: ['VerifiableCredential']
+            } } as CredentialConfigurationSupportedV1_0_13 },
         scheme: 'http',
       })
       .then((response) => response.uri)
