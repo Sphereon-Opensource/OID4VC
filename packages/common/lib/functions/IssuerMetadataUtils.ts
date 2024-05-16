@@ -1,14 +1,14 @@
 import {
   AuthorizationServerMetadata,
-  CredentialSupported,
+  CredentialConfigurationSupportedV1_0_13,
   CredentialIssuerMetadata,
+  CredentialSupported,
   CredentialSupportedTypeV1_0_08,
   CredentialSupportedV1_0_08,
   IssuerMetadataV1_0_08,
   MetadataDisplay,
-  OID4VCICredentialFormat,
-  OpenId4VCIVersion,
-} from '../types';
+  OID4VCICredentialFormat, OpenId4VCIVersion
+} from '../types'
 import { IssuerMetadataV1_0_13 } from '../types';
 
 export function getSupportedCredentials(options?: {
@@ -16,7 +16,7 @@ export function getSupportedCredentials(options?: {
   version: OpenId4VCIVersion;
   types?: string[][];
   format?: OID4VCICredentialFormat | string | (OID4VCICredentialFormat | string)[];
-}): Record<string, CredentialSupported> {
+}): Record<string, CredentialConfigurationSupportedV1_0_13> {
   if (options?.types && Array.isArray(options.types)) {
     return options.types
       .map((typeSet) => {
@@ -27,7 +27,7 @@ export function getSupportedCredentials(options?: {
           Object.assign(acc, result);
           return acc;
         },
-        {} as Record<string, CredentialSupported>,
+        {} as Record<string, CredentialConfigurationSupportedV1_0_13>,
       );
   }
 
@@ -39,7 +39,7 @@ export function getSupportedCredential(opts?: {
   version: OpenId4VCIVersion;
   types?: string | string[];
   format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[];
-}): Record<string, CredentialSupported> {
+}): Record<string, CredentialConfigurationSupportedV1_0_13> {
   const { issuerMetadata, types, format } = opts ?? {};
 
   if (!issuerMetadata || !issuerMetadata.credential_configurations_supported) {
@@ -50,7 +50,7 @@ export function getSupportedCredential(opts?: {
   const formats = Array.isArray(format) ? format : format ? [format] : [];
   const normalizedTypes = Array.isArray(types) ? types : types ? [types] : [];
 
-  const filteredConfigs: Record<string, CredentialSupported> = {};
+  const filteredConfigs: Record<string, CredentialConfigurationSupportedV1_0_13> = {};
   Object.entries(configurations).forEach(([key, value]) => {
     const isTypeMatch = normalizedTypes.length === 0 || normalizedTypes.includes(key);
     const isFormatMatch = formats.length === 0 || formats.includes(value.format);

@@ -455,7 +455,7 @@ export class OpenID4VCIClientV1_0_11 {
       version: this.version(),
       format: format,
       types: restrictToInitiationTypes ? this.getCredentialOfferTypes() : undefined,
-    });
+    }) as Record<string, CredentialSupported>;
   }
 
   getCredentialsSupported(
@@ -466,7 +466,7 @@ export class OpenID4VCIClientV1_0_11 {
       version: this.version(),
       format: format,
       types: undefined,
-    });
+    }) as Record<string, CredentialSupported>;
   }
 
   getCredentialOfferTypes(): string[][] {

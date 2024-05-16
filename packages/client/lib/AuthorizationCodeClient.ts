@@ -3,7 +3,7 @@ import {
   AuthorizationRequestOpts,
   CodeChallengeMethod,
   convertJsonToURI,
-  CredentialOfferFormat,
+  CredentialConfigurationSupportedV1_0_13,
   CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
   CredentialSupported,
@@ -14,7 +14,7 @@ import {
   OpenId4VCIVersion,
   PARMode,
   PKCEOpts,
-  PushedAuthorizationResponse, 
+  PushedAuthorizationResponse,
   ResponseType
 } from '@sphereon/oid4vci-common'
 import Debug from 'debug';
@@ -23,8 +23,8 @@ const debug = Debug('sphereon:oid4vci');
 
 function filterSupportedCredentials(
   credentialOffer: CredentialOfferPayloadV1_0_13,
-  credentialsSupported?: Record<string, CredentialSupported>,
-): CredentialSupported[] {
+  credentialsSupported?: Record<string, CredentialConfigurationSupportedV1_0_13>,
+): CredentialConfigurationSupportedV1_0_13[] {
   if (!credentialOffer.credential_configuration_ids || !credentialsSupported) {
     return [];
   }
@@ -42,7 +42,7 @@ export const createAuthorizationRequestUrl = async ({
   endpointMetadata: EndpointMetadataResultV1_0_13;
   authorizationRequest: AuthorizationRequestOpts;
   credentialOffer?: CredentialOfferRequestWithBaseUrl;
-  credentialConfigurationSupported?: Record<string, CredentialSupported>;
+  credentialConfigurationSupported?: Record<string, CredentialConfigurationSupportedV1_0_13>;
 }): Promise<string> => {
   const { redirectUri, clientId } = authorizationRequest;
   let { scope, authorizationDetails } = authorizationRequest;
@@ -58,7 +58,7 @@ export const createAuthorizationRequestUrl = async ({
     if ('credentials' in credentialOffer.credential_offer) {
       throw new Error('CredentialOffer format is wrong.');
     }
-    const creds: (CredentialSupported | CredentialOfferFormat | string)[] =
+    const creds: CredentialConfigurationSupportedV1_0_13[] =
       determineSpecVersionFromOffer(credentialOffer.credential_offer) === OpenId4VCIVersion.VER_1_0_13
         ? filterSupportedCredentials(credentialOffer.credential_offer as CredentialOfferPayloadV1_0_13, credentialConfigurationSupported)
         : [];
