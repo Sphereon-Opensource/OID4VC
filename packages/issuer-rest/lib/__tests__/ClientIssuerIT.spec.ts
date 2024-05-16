@@ -5,9 +5,9 @@ import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
 import {
   AccessTokenResponse,
   Alg,
-  CredentialSupported,
   CredentialConfigurationSupportedV1_0_13,
   CredentialOfferSession,
+  CredentialSupported,
   IssuerCredentialSubjectDisplay,
   Jwt,
   JWTHeader,
