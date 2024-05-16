@@ -175,7 +175,7 @@ export class AccessTokenClient {
       }
 
       // Default regex for alphanumeric with no specific length limit if no input_mode is specified.
-      regex = regex || /^[a-zA-Z0-9]+$/;
+      regex = regex || /^[a-zA-Z0-9]+$|^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
 
       if (!pin || !regex.test(pin)) {
         debug(

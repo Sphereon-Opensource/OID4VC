@@ -262,7 +262,7 @@ describe('OIDVCI-Client for v1_0_13 should', () => {
         issuer_state: '32fc4ebf-9e31-4149-9877-e3c0b602d559',
       },
       'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-        pre_authorized_code:
+        'pre-authorized_code':
           'eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiIzMmZjNGViZi05ZTMxLTQxNDktOTg3Ny1lM2MwYjYwMmQ1NTkiLCJpc3MiOiJodHRwczovL21pam5rdmsuYWNjLmNyZWRlbmNvLmNvbSIsImF1ZCI6IlRPS0VOIn0.754aiQ87O0vHYSpRvPqAS9cLOgf-pewdeXbpLziRwsxEp9mENfaXpY62muYpzOaWcYmTOydkzhFul-NDYXJZCA',
       },
     },
@@ -324,7 +324,7 @@ describe('OIDVCI-Client for v1_0_13 should', () => {
           issuer_state: '32fc4ebf-9e31-4149-9877-e3c0b602d559',
         },
         'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-          pre_authorized_code: preAuthorizedCode,
+          'pre-authorized_code': preAuthorizedCode,
         },
       });
 
