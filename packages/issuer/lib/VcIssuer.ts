@@ -4,7 +4,6 @@ import {
   CNonceState,
   CreateCredentialOfferURIResult,
   CREDENTIAL_MISSING_ERROR,
-  CredentialSupported,
   CredentialConfigurationSupportedV1_0_13,
   CredentialDataSupplierInput,
   CredentialOfferPayloadV1_0_13,
@@ -89,7 +88,7 @@ export class VcIssuer<DIDDoc extends object> {
 
   public async createCredentialOfferURI(opts: {
     grants?: Grant
-    credentials?: Record<string, CredentialSupported>
+    credentials?: Record<string, CredentialConfigurationSupportedV1_0_13>
     credentialDefinition?: JsonLdIssuerCredentialDefinition
     credentialOfferUri?: string
     credentialDataSupplierInput?: CredentialDataSupplierInput // Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
