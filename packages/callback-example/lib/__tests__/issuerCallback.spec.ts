@@ -4,14 +4,13 @@ import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossess
 import {
   Alg,
   CNonceState,
-  CredentialSupported,
-  CredentialIssuerMetadata,
+  CredentialConfigurationSupportedV1_0_13,
+  CredentialIssuerMetadataV1_0_13,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
   Jwt,
   JwtVerifyResult,
-  OpenId4VCIVersion,
-  ProofOfPossession,
+  OpenId4VCIVersion, ProofOfPossession
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
 import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
@@ -86,12 +85,14 @@ describe('issuerCallback', () => {
   const clientId = 'sphereon:wallet'
 
   beforeAll(async () => {
-    const credentialsSupported: Record<string, CredentialSupported> = new CredentialSupportedBuilderV1_13()
-      .withCryptographicSuitesSupported('ES256K')
+    const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+      .withCredentialSigningAlgValuesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
-      .withTypes('VerifiableCredential')
-      .withId('UniversityDegree_JWT')
+      .withCredentialName('UniversityDegree_JWT')
+    .withCredentialDefinition({
+      type: ['VerifiableCredential', 'UniversityDegree_JWT']
+    })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
@@ -216,8 +217,8 @@ describe('issuerCallback', () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialEndpointFromMetadata({
-        credential_configurations_supported: { VeriCred: { format: 'jwt_vc_json' } as CredentialSupported },
-      } as unknown as CredentialIssuerMetadata)
+        credential_configurations_supported: { VeriCred: { format: 'jwt_vc_json' } },
+      } as unknown as CredentialIssuerMetadataV1_0_13)
       .withFormat('jwt_vc_json')
       .withCredentialType('credentialType')
       .withToken('token')

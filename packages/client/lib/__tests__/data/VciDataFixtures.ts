@@ -759,8 +759,7 @@ const mockData: VciMockDataStructure = {
         credential_configurations_supported: {
           BevoegdheidUittreksel_jwt_vc_json: {
             credential_definition: {
-              type: ['VerifiableCredential', 'BevoegdheidUittreksel'],
-              value_type: {
+              credentialSubject: {
                 functie: {
                   display: [
                     {
@@ -855,6 +854,7 @@ const mockData: VciMockDataStructure = {
                   ],
                 },
               },
+              type: ['VerifiableCredential', 'BevoegdheidUittreksel'],
             },
             credential_signing_alg_values_supported: ['EdDSA', 'ES256', 'ES256K', 'RSA'],
             cryptographic_binding_methods_supported: ['did:web', 'did:jwk', 'did:ebsi'],
@@ -874,15 +874,14 @@ const mockData: VciMockDataStructure = {
               },
               {
                 locale: 'en-US',
-                name: 'Power of Attorney',
+                name: 'Authorized representative',
               },
             ],
             format: 'jwt_vc_json',
           },
           KVKRegistration_jwt_vc_json: {
             credential_definition: {
-              type: ['VerifiableCredential', 'VerifiableAttestation', 'KVKRegistration'],
-              value_type: {
+              credentialSubject: {
                 einddatum: {
                   display: [
                     {
@@ -962,6 +961,7 @@ const mockData: VciMockDataStructure = {
                   mandatory: true,
                 },
               },
+              type: ['VerifiableCredential', 'VerifiableAttestation', 'KVKRegistration'],
             },
             credential_signing_alg_values_supported: ['EdDSA', 'ES256', 'ES256K', 'RSA'],
             cryptographic_binding_methods_supported: ['did:web', 'did:jwk', 'did:ebsi'],
@@ -988,8 +988,7 @@ const mockData: VciMockDataStructure = {
           },
           RSIN_jwt_vc_json: {
             credential_definition: {
-              type: ['VerifiableCredential', 'VerifiableAttestation', 'RSIN'],
-              value_type: {
+              credentialSubject: {
                 naam: {
                   display: [
                     {
@@ -1021,6 +1020,7 @@ const mockData: VciMockDataStructure = {
                   ],
                 },
               },
+              type: ['VerifiableCredential', 'VerifiableAttestation', 'RSIN'],
             },
             credential_signing_alg_values_supported: ['EdDSA', 'ES256', 'ES256K', 'RSA'],
             cryptographic_binding_methods_supported: ['did:web', 'did:jwk', 'did:ebsi'],

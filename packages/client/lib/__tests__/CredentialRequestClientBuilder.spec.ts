@@ -2,13 +2,13 @@ import { KeyObject } from 'crypto';
 
 import {
   Alg,
-  CredentialIssuerMetadata,
+  CredentialIssuerMetadataV1_0_13,
   Jwt,
   JwtVerifyResult,
   OpenId4VCIVersion,
   ProofOfPossession,
-  UniformCredentialRequest,
-} from '@sphereon/oid4vci-common';
+  UniformCredentialRequest
+} from '@sphereon/oid4vci-common'
 import * as jose from 'jose';
 
 import { CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '..';
@@ -124,7 +124,7 @@ describe('Credential Request Client Builder', () => {
   it('should build correctly with endpoint from metadata', async () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withFormat('jwt_vc')
-      .withCredentialEndpointFromMetadata(IDENTIPROOF_OID4VCI_METADATA as unknown as CredentialIssuerMetadata)
+      .withCredentialEndpointFromMetadata(IDENTIPROOF_OID4VCI_METADATA as unknown as CredentialIssuerMetadataV1_0_13)
       .build();
     expect(credReqClient.credentialRequestOpts.credentialEndpoint).toBe(`${IDENTIPROOF_ISSUER_URL}/credential`);
   });

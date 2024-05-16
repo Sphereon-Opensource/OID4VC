@@ -253,7 +253,9 @@ describe('VcIssuer', () => {
 
   it('should retrieve server metadata', async () => {
     await expect(client.retrieveServerMetadata()).resolves.toEqual({
+      authorizationServerMetadata: undefined,
       authorizationServerType: 'OID4VCI',
+      authorization_endpoint: undefined,
       deferred_credential_endpoint: undefined,
       authorization_server: 'http://localhost:3456/test',
       credentialIssuerMetadata: {
@@ -261,11 +263,11 @@ describe('VcIssuer', () => {
         credential_issuer: 'http://localhost:3456/test',
         credential_configurations_supported: {
           UniversityDegree_JWT: {
-            credentialSubject: {
-              given_name: {
-                locale: 'en-US',
-                name: 'given name',
-              },
+            credential_definition: {
+              type: [
+                'VerifiableCredential',
+                'UniversityDegree_JWT',
+              ],
             },
             cryptographic_binding_methods_supported: ['did'],
             credential_signing_alg_values_supported: ['ES256K'],
@@ -282,8 +284,6 @@ describe('VcIssuer', () => {
               },
             ],
             format: 'jwt_vc_json',
-            id: 'UniversityDegree_JWT',
-            types: ['VerifiableCredential'],
           },
         },
         display: [
