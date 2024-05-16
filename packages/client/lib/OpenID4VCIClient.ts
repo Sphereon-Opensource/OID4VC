@@ -4,7 +4,8 @@ import {
   AuthorizationRequestOpts,
   AuthorizationResponse,
   AuthzFlowType,
-  CodeChallengeMethod, CredentialConfigurationSupportedV1_0_13,
+  CodeChallengeMethod,
+  CredentialConfigurationSupportedV1_0_13,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
   DefaultURISchemes,
@@ -502,6 +503,10 @@ export class OpenID4VCIClient {
   public getIssuer(): string {
     this.assertIssuerData();
     return this._state.credentialIssuer;
+  }
+
+  public getAuthorizationURL(): string|undefined {
+    return this._state.authorizationURL;
   }
 
   public getDeferredCredentialEndpoint(): string {
