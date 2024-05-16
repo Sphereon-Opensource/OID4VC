@@ -505,7 +505,7 @@ export class OpenID4VCIClient {
     return this._state.credentialIssuer;
   }
 
-  public getAuthorizationURL(): string|undefined {
+  get authorizationURL(): string|undefined {
     return this._state.authorizationURL;
   }
 
