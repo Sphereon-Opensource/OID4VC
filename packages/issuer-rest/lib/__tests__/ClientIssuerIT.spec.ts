@@ -7,7 +7,6 @@ import {
   Alg,
   CredentialConfigurationSupportedV1_0_13,
   CredentialOfferSession,
-  CredentialSupported,
   IssuerCredentialSubjectDisplay,
   Jwt,
   JWTHeader,
