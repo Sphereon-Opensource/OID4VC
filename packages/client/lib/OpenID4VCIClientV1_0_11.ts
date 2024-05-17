@@ -9,7 +9,7 @@ import {
   CredentialOfferPayloadV1_0_11,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
-  CredentialSupported,
+  CredentialConfigurationSupported,
   DefaultURISchemes,
   EndpointMetadataResultV1_0_11,
   getClientIdFromCredentialOfferPayload,
@@ -449,24 +449,24 @@ export class OpenID4VCIClientV1_0_11 {
   getCredentialsSupportedV11(
     restrictToInitiationTypes: boolean,
     format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
-  ): Record<string, CredentialSupported> {
+  ): Record<string, CredentialConfigurationSupported> {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),
       format: format,
       types: restrictToInitiationTypes ? this.getCredentialOfferTypes() : undefined,
-    }) as Record<string, CredentialSupported>;
+    }) as Record<string, CredentialConfigurationSupported>;
   }
 
   getCredentialsSupported(
     format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
-  ): Record<string, CredentialSupported> {
+  ): Record<string, CredentialConfigurationSupported> {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),
       format: format,
       types: undefined,
-    }) as Record<string, CredentialSupported>;
+    }) as Record<string, CredentialConfigurationSupported>;
   }
 
   getCredentialOfferTypes(): string[][] {

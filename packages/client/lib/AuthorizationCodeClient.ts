@@ -6,7 +6,7 @@ import {
   CredentialConfigurationSupportedV1_0_13,
   CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
-  CredentialSupported,
+  CredentialConfigurationSupported,
   determineSpecVersionFromOffer,
   EndpointMetadataResultV1_0_13,
   formPost,
@@ -67,7 +67,7 @@ export const createAuthorizationRequestUrl = async ({
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     authorizationDetails = creds
-      .flatMap((cred) => cred as CredentialSupported)
+      .flatMap((cred) => cred as CredentialConfigurationSupported)
       .filter((cred) => !!cred)
       .map((cred) => {
         return {

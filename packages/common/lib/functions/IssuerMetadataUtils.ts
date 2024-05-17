@@ -2,7 +2,7 @@ import {
   AuthorizationServerMetadata,
   CredentialConfigurationSupportedV1_0_13,
   CredentialIssuerMetadata,
-  CredentialSupported,
+  CredentialConfigurationSupported,
   CredentialSupportedTypeV1_0_08,
   CredentialSupportedV1_0_08,
   IssuerMetadataV1_0_08,
@@ -64,7 +64,7 @@ export function getSupportedCredential(opts?: {
 }
 
 export function getTypesFromCredentialSupported(
-  credentialSupported: CredentialSupported,
+  credentialSupported: CredentialConfigurationSupported,
   opts?: { filterVerifiableCredential: boolean },
 ) {
   let types: string[] = [];
@@ -90,8 +90,8 @@ export function getTypesFromCredentialSupported(
   return types;
 }
 
-export function credentialsSupportedV8ToV13(supportedV8: CredentialSupportedTypeV1_0_08): Record<string, CredentialSupported> {
-  const credentialConfigsSupported: Record<string, CredentialSupported> = {};
+export function credentialsSupportedV8ToV13(supportedV8: CredentialSupportedTypeV1_0_08): Record<string, CredentialConfigurationSupported> {
+  const credentialConfigsSupported: Record<string, CredentialConfigurationSupported> = {};
   Object.entries(supportedV8).flatMap((entry) => {
     const type = entry[0];
     const supportedV8 = entry[1];
@@ -100,21 +100,21 @@ export function credentialsSupportedV8ToV13(supportedV8: CredentialSupportedType
   return credentialConfigsSupported;
 }
 
-export function credentialSupportedV8ToV13(key: string, supportedV8: CredentialSupportedV1_0_08): Record<string, CredentialSupported> {
-  const credentialConfigsSupported: Record<string, CredentialSupported> = {};
+export function credentialSupportedV8ToV13(key: string, supportedV8: CredentialSupportedV1_0_08): Record<string, CredentialConfigurationSupported> {
+  const credentialConfigsSupported: Record<string, CredentialConfigurationSupported> = {};
   Object.entries(supportedV8.formats).map((entry) => {
     const format = entry[0];
     const credentialSupportBrief = entry[1];
     if (typeof format !== 'string') {
       throw Error(`Unknown format received ${JSON.stringify(format)}`);
     }
-    const credentialConfigSupported: Partial<CredentialSupported> = {
+    const credentialConfigSupported: Partial<CredentialConfigurationSupported> = {
       format: format as OID4VCICredentialFormat,
       display: supportedV8.display,
       ...credentialSupportBrief,
       credentialSubject: supportedV8.claims,
     };
-    credentialConfigsSupported[key] = credentialConfigSupported as CredentialSupported;
+    credentialConfigsSupported[key] = credentialConfigSupported as CredentialConfigurationSupported;
   });
   return credentialConfigsSupported;
 }

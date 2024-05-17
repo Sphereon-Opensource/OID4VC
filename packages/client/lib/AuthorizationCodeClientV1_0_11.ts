@@ -3,7 +3,7 @@ import {
   AuthorizationRequestOpts,
   CodeChallengeMethod,
   convertJsonToURI,
-  CredentialSupported,
+  CredentialConfigurationSupported,
   CredentialOfferFormat,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferRequestWithBaseUrl,
@@ -30,7 +30,7 @@ export const createAuthorizationRequestUrlV1_0_11 = async ({
   endpointMetadata: EndpointMetadataResultV1_0_11;
   authorizationRequest: AuthorizationRequestOpts;
   credentialOffer?: CredentialOfferRequestWithBaseUrl;
-  credentialsSupported?: CredentialSupported[];
+  credentialsSupported?: CredentialConfigurationSupported[];
 }): Promise<string> => {
   const { redirectUri, clientId } = authorizationRequest;
   let { scope, authorizationDetails } = authorizationRequest;
@@ -50,7 +50,7 @@ export const createAuthorizationRequestUrlV1_0_11 = async ({
     // @ts-ignore
     authorizationDetails = creds
       .flatMap((cred) =>
-        typeof cred === 'string' && credentialsSupported ? Object.values(credentialsSupported) : (cred as CredentialSupported),
+        typeof cred === 'string' && credentialsSupported ? Object.values(credentialsSupported) : (cred as CredentialConfigurationSupported),
       )
       .filter((cred) => !!cred)
       .map((cred) => {
