@@ -213,7 +213,7 @@ export class AccessTokenClient {
     if (accessTokenRequest.grant_type === GrantTypes.PRE_AUTHORIZED_CODE) {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyPreAuthorizedCode(accessTokenRequest);
-      this.assertAlphanumericPin(pinMeta, accessTokenRequest['pre-authorized_code']);
+      this.assertAlphanumericPin(pinMeta, accessTokenRequest.user_pin);
     } else if (accessTokenRequest.grant_type === GrantTypes.AUTHORIZATION_CODE) {
       this.assertAuthorizationGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyCodeVerifier(accessTokenRequest);

@@ -28,6 +28,7 @@ describe('AccessTokenClient should', () => {
 
       const accessTokenRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
+        user_pin: '20221013',
         'pre-authorized_code': '20221013',
         client_id: 'sphereon',
       } as AccessTokenRequest;
@@ -219,12 +220,11 @@ describe('AccessTokenClient should', () => {
       .post(/.*/)
       .reply(200, {});
 
-    await expect(() =>
-      accessTokenClient.acquireAccessToken({
-        credentialOffer: INITIATION_TEST,
-        pin: '1234',
-      }),
-    ).rejects.toThrow(Error('A valid pin must be present according to the specified transaction code requirements.'));
+    const response: OpenIDResponse<AccessTokenResponse> = await accessTokenClient.acquireAccessToken({
+      credentialOffer: INITIATION_TEST,
+      pin: '1234',
+    })
+    expect(response.successBody).toBeDefined()
   });
 
   it('get error if no as, issuer and metadata values are present', async () => {
