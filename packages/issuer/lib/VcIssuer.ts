@@ -3,7 +3,7 @@ import {
   AUD_ERROR,
   CNonceState,
   CreateCredentialOfferURIResult,
-  CREDENTIAL_MISSING_ERROR,
+  CREDENTIAL_MISSING_ERROR, CredentialConfigurationSupported,
   CredentialConfigurationSupportedV1_0_13,
   CredentialDataSupplierInput,
   CredentialOfferPayloadV1_0_13,
@@ -32,7 +32,7 @@ import {
   TxCode,
   TYP_ERROR,
   UniformCredentialRequest,
-  URIState,
+  URIState
 } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 import { CompactSdJwtVc, CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
@@ -88,7 +88,7 @@ export class VcIssuer<DIDDoc extends object> {
 
   public async createCredentialOfferURI(opts: {
     grants?: Grant
-    credentials?: Record<string, CredentialConfigurationSupportedV1_0_13>
+    credentials?: Record<string, CredentialConfigurationSupported>
     credentialDefinition?: JsonLdIssuerCredentialDefinition
     credentialOfferUri?: string
     credentialDataSupplierInput?: CredentialDataSupplierInput // Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
