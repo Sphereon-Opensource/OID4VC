@@ -99,9 +99,7 @@ export const assertValidAccessTokenRequest = async (
   the Authorization Server expects a PIN in the pre-authorized flow but the client does not provide a PIN
    */
   if (
-    credentialOfferSession.credentialOffer.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.[
-      'pre-authorized_code'
-    ] &&
+    credentialOfferSession.credentialOffer.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code &&
     !request.user_pin
   ) {
     throw new TokenError(400, TokenErrorResponse.invalid_request, USER_PIN_REQUIRED_ERROR)

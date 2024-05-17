@@ -187,8 +187,8 @@ describe('OID4VCIServer', () => {
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
-      error: 'invalid_request',
-      error_description: 'User pin is required',
+      error: 'invalid_grant',
+      error_description: 'PIN is invalid',
     })
   })
   it('should return http code 400 with message pre-authorized_code is required', async () => {
