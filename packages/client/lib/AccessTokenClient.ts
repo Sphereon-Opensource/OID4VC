@@ -149,7 +149,7 @@ export class AccessTokenClient {
     const issuer = getIssuerFromCredentialOfferPayload(requestPayload);
 
     const grantDetails = requestPayload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code'];
-    const isPinRequired = !!grantDetails?.tx_code || !!grantDetails?.['pre-authorized_code'];
+    const isPinRequired = !!grantDetails?.tx_code ?? false;
 
     debug(`Pin required for issuer ${issuer}: ${isPinRequired}`);
     return {

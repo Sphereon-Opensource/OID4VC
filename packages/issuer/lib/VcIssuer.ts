@@ -135,6 +135,7 @@ export class VcIssuer<DIDDoc extends object> {
 
     const credentialOfferObject = createCredentialOfferObject(this._issuerMetadata, {
       ...opts,
+      txCode,
       credentialOffer: credentialOfferPayload,
       baseUri,
       preAuthorizedCode,

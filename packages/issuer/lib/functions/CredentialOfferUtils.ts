@@ -3,11 +3,11 @@ import {
   CredentialOfferPayloadV1_0_13,
   CredentialOfferSession,
   CredentialOfferV1_0_13,
-  Grant,
+  Grant, GrantUrnIetf,
   IssuerMetadataV1_0_13,
   PIN_VALIDATION_ERROR,
   TxCode,
-  UniformCredentialOffer,
+  UniformCredentialOffer
 } from '@sphereon/oid4vci-common'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -20,6 +20,7 @@ export function createCredentialOfferObject(
     scheme?: string
     baseUri?: string
     issuerState?: string
+    grants?: Grant
     txCode?: TxCode
     preAuthorizedCode?: string
   },
@@ -67,7 +68,7 @@ export function createCredentialOfferObject(
   if (opts?.preAuthorizedCode) {
     credential_offer.grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'] = {
       'pre-authorized_code': opts.preAuthorizedCode,
-      tx_code: opts.txCode,
+      tx_code: ((opts.grants as Grant)?.['urn:ietf:params:oauth:grant-type:pre-authorized_code'] as GrantUrnIetf).tx_code ?? undefined,
     }
   } else if (!credential_offer.grants?.authorization_code?.issuer_state) {
     credential_offer.grants = {
