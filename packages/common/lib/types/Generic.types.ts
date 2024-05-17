@@ -3,8 +3,16 @@ import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential 
 import { ProofOfPossession } from './CredentialIssuance.types';
 import { AuthorizationServerMetadata } from './ServerMetadata';
 import { CredentialOfferSession } from './StateManager.types';
-import { CredentialRequestV1_0_11 } from './v1_0_11.types';
-import { CredentialRequestV1_0_13 } from './v1_0_13.types';
+import { IssuerMetadataV1_0_08 } from './v1_0_08.types'
+import {
+  CredentialRequestV1_0_11,
+  EndpointMetadataResultV1_0_11
+} from './v1_0_11.types'
+import {
+  CredentialRequestV1_0_13,
+  EndpointMetadataResultV1_0_13,
+  IssuerMetadataV1_0_13
+} from './v1_0_13.types'
 
 export type InputCharSet = 'numeric' | 'text';
 export type KeyProofType = 'jwt' | 'cwt' | 'ldp_vp';
@@ -353,3 +361,7 @@ export interface GrantUrnIetf {
 }
 
 export const PRE_AUTH_CODE_LITERAL = 'pre-authorized_code';
+
+export type EndpointMetadataResult = EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11
+
+export type IssuerMetadata = IssuerMetadataV1_0_13 | IssuerMetadataV1_0_08
