@@ -6,15 +6,15 @@ import {
   CredentialConfigurationSupported,
   CredentialOfferFormat,
   CredentialOfferPayloadV1_0_11,
-  CredentialOfferRequestWithBaseUrl,
+  CredentialOfferRequestWithBaseUrl, CredentialsSupportedLegacy,
   EndpointMetadataResultV1_0_11,
   formPost,
   JsonURIMode,
   PARMode,
   PKCEOpts,
   PushedAuthorizationResponse,
-  ResponseType,
-} from '@sphereon/oid4vci-common';
+  ResponseType
+} from '@sphereon/oid4vci-common'
 import Debug from 'debug';
 
 const debug = Debug('sphereon:oid4vci');
@@ -30,7 +30,7 @@ export const createAuthorizationRequestUrlV1_0_11 = async ({
   endpointMetadata: EndpointMetadataResultV1_0_11;
   authorizationRequest: AuthorizationRequestOpts;
   credentialOffer?: CredentialOfferRequestWithBaseUrl;
-  credentialsSupported?: CredentialConfigurationSupported[];
+  credentialsSupported?: CredentialsSupportedLegacy[];
 }): Promise<string> => {
   const { redirectUri, clientId } = authorizationRequest;
   let { scope, authorizationDetails } = authorizationRequest;

@@ -1,14 +1,14 @@
 import {
   CNonceState,
   CredentialConfigurationSupportedV1_0_13,
-  CredentialOfferSession,
+  CredentialOfferSession, IssuerMetadata,
   IssuerMetadataV1_0_13,
   IStateManager,
   JWTVerifyCallback,
   MetadataDisplay,
   TokenErrorResponse,
   TxCode,
-  URIState,
+  URIState
 } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 
@@ -32,8 +32,11 @@ export class VcIssuerBuilder<DIDDoc extends object> {
   jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
   credentialDataSupplier?: CredentialDataSupplier
 
-  public withIssuerMetadata(issuerMetadata: IssuerMetadataV1_0_13) {
-    this.issuerMetadata = issuerMetadata
+  public withIssuerMetadata(issuerMetadata: IssuerMetadata) {
+    if (!issuerMetadata.credential_configurations_supported) {
+      throw new Error('IssuerMetadata should be from type v1_0_13 or higher.')
+    }
+    this.issuerMetadata = issuerMetadata as IssuerMetadataV1_0_13
     return this
   }
 

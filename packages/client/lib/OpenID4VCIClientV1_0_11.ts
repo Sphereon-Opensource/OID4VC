@@ -5,11 +5,12 @@ import {
   AuthorizationResponse,
   AuthzFlowType,
   CodeChallengeMethod,
+  CredentialConfigurationSupported,
   CredentialOfferPayloadV1_0_08,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
-  CredentialConfigurationSupported,
+  CredentialsSupportedLegacy,
   DefaultURISchemes,
   EndpointMetadataResultV1_0_11,
   getClientIdFromCredentialOfferPayload,
@@ -21,9 +22,8 @@ import {
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PKCEOpts,
-  ProofOfPossessionCallbacks,
-  toAuthorizationResponsePayload,
-} from '@sphereon/oid4vci-common';
+  ProofOfPossessionCallbacks, toAuthorizationResponsePayload
+} from '@sphereon/oid4vci-common'
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
@@ -224,7 +224,7 @@ export class OpenID4VCIClientV1_0_11 {
         endpointMetadata: this.endpointMetadata,
         authorizationRequest: this._state.authorizationRequestOpts,
         credentialOffer: this.credentialOffer,
-        credentialsSupported: Object.values(this.getCredentialsSupported()),
+        credentialsSupported: Object.values(this.getCredentialsSupported()) as CredentialsSupportedLegacy[],
       });
     }
     return this._state.authorizationURL;

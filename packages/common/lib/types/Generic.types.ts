@@ -160,6 +160,8 @@ export interface CredentialSupportedSdJwtVc extends CommonCredentialSupported {
 export type CredentialConfigurationSupported = CredentialConfigurationSupportedV1_0_13 | (CommonCredentialSupported &
   (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc));
 
+export type CredentialsSupportedLegacy = (CommonCredentialSupported & (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc))
+
 export interface CommonCredentialOfferFormat {
   format: OID4VCICredentialFormat | string;
 }
