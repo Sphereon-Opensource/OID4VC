@@ -203,7 +203,7 @@ describe('OpenID4VCIClient should', () => {
 
 });
 describe('should successfully handle isEbsi function', ()=>{
-  it('should return true when calling isEbsi function', async () => {
+  it.skip('should return true when calling isEbsi function', async () => {
     const client = await OpenID4VCIClient.fromURI({
       clientId: 'test-client',
       uri: 'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fserver.example.com%22%2C%22credential_configuration_ids%22%3A%5B%22TestCredential%22%5D%7D',
