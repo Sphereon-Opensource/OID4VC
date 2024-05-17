@@ -9,6 +9,7 @@ import {
   EndpointMetadataResultV1_0_11
 } from './v1_0_11.types'
 import {
+  CredentialConfigurationSupportedV1_0_13,
   CredentialRequestV1_0_13,
   EndpointMetadataResultV1_0_13,
   IssuerMetadataV1_0_13
@@ -156,8 +157,8 @@ export interface CredentialSupportedSdJwtVc extends CommonCredentialSupported {
   order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
 }
 
-export type CredentialSupported = CommonCredentialSupported &
-  (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc);
+export type CredentialSupported = CredentialConfigurationSupportedV1_0_13 | (CommonCredentialSupported &
+  (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc));
 
 export interface CommonCredentialOfferFormat {
   format: OID4VCICredentialFormat | string;
@@ -365,3 +366,4 @@ export const PRE_AUTH_CODE_LITERAL = 'pre-authorized_code';
 export type EndpointMetadataResult = EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11
 
 export type IssuerMetadata = IssuerMetadataV1_0_13 | IssuerMetadataV1_0_08
+

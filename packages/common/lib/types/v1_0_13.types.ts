@@ -40,10 +40,6 @@ export type CredentialDefinitionV1_0_13 = {
 
 export type CredentialConfigurationSupportedV1_0_13 = {
   credential_definition: CredentialDefinitionV1_0_13;
-  /**
-   * TODO: These two (vct and id) are solely added because of backward compatibility with sd-jwt. as soons as we have a clear understanding of the new sd-jwt issuer protocol we can remove this
-   */
-  vct?: string;
   id?: string;
   format: OID4VCICredentialFormat; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
   scope?: string; // OPTIONAL. A JSON string identifying the scope value that this Credential Issuer supports for this particular Credential. The value can be the same across multiple credential_configurations_supported objects. The Authorization Server MUST be able to uniquely identify the Credential Issuer based on the scope value. The Wallet can use this value in the Authorization Request as defined in Section 5.1.2. Scope values in this Credential Issuer metadata MAY duplicate those in the scopes_supported parameter of the Authorization Server.
