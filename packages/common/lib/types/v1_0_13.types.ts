@@ -51,6 +51,7 @@ export type CredentialConfigurationSupportedV1_0_13 = {
   credential_signing_alg_values_supported?: string[];
   proof_types_supported?: Record<KeyProofType, ProofType>;
   display?: CredentialsSupportedDisplay[]; // OPTIONAL. An array of objects, where each object contains the display properties of the supported credential for a certain language
+  [x: string]: unknown;
 };
 
 export type CredentialRequestV1_0_13 = CommonCredentialRequest &

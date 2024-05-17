@@ -6,6 +6,7 @@ import {
   AuthzFlowType,
   CodeChallengeMethod,
   CredentialConfigurationSupportedV1_0_13,
+  CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
   DefaultURISchemes,
@@ -513,6 +514,39 @@ export class OpenID4VCIClient {
     this.assertIssuerData();
     return this.endpointMetadata ? this.endpointMetadata.credential_endpoint : `${this.getIssuer()}/credential`;
   }
+
+  /**
+   * Too bad we need a method like this, but EBSI is not exposing metadata
+   */
+  public isEBSI(): boolean {
+    const credentialOffer = this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_13;
+
+    if (credentialOffer?.credential_configuration_ids) {
+      const credentialConfigurations = this.endpointMetadata.credentialIssuerMetadata?.credential_configurations_supported;
+
+      if (credentialConfigurations) {
+        const isEBSITrustFramework = credentialOffer.credential_configuration_ids
+        .map(id => credentialConfigurations[id])
+        .filter((config): config is CredentialConfigurationSupportedV1_0_13 =>
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          config !== undefined && 'trust_framework' in config && 'name' in config.trust_framework
+        )
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        .some(config => config.trust_framework.name.includes('ebsi'));
+
+        if (isEBSITrustFramework) {
+          return true;
+        }
+      }
+    }
+
+    this.assertIssuerData();
+    return this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu') ?? false;
+  }
+
+
 
   private assertIssuerData(): void {
     if (!this._state.credentialIssuer) {
