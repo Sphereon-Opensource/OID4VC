@@ -6,15 +6,16 @@ import {
   CredentialConfigurationSupported,
   CredentialOfferFormat,
   CredentialOfferPayloadV1_0_11,
-  CredentialOfferRequestWithBaseUrl, CredentialsSupportedLegacy,
+  CredentialOfferRequestWithBaseUrl,
+  CredentialsSupportedLegacy,
   EndpointMetadataResultV1_0_11,
   formPost,
   JsonURIMode,
   PARMode,
   PKCEOpts,
   PushedAuthorizationResponse,
-  ResponseType
-} from '@sphereon/oid4vci-common'
+  ResponseType,
+} from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
 const debug = Debug('sphereon:oid4vci');

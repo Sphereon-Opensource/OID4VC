@@ -10,7 +10,8 @@ import {
   IssueStatus,
   Jwt,
   JwtVerifyResult,
-  OpenId4VCIVersion, ProofOfPossession
+  OpenId4VCIVersion,
+  ProofOfPossession,
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
 import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
@@ -90,9 +91,9 @@ describe('issuerCallback', () => {
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
       .withCredentialName('UniversityDegree_JWT')
-    .withCredentialDefinition({
-      type: ['VerifiableCredential', 'UniversityDegree_JWT']
-    })
+      .withCredentialDefinition({
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',

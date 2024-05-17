@@ -198,9 +198,14 @@ describe('VcIssuer', () => {
             },
           },
         },
-        credentials: { UniversityDegree_JWT: { format: 'ldp_vc', credential_definition: {
-          type: ['VerifiableCredential']
-            } } as CredentialConfigurationSupportedV1_0_13 },
+        credentials: {
+          UniversityDegree_JWT: {
+            format: 'ldp_vc',
+            credential_definition: {
+              type: ['VerifiableCredential'],
+            },
+          } as CredentialConfigurationSupportedV1_0_13,
+        },
         scheme: 'http',
       })
       .then((response) => response.uri)
@@ -265,10 +270,7 @@ describe('VcIssuer', () => {
         credential_configurations_supported: {
           UniversityDegree_JWT: {
             credential_definition: {
-              type: [
-                'VerifiableCredential',
-                'UniversityDegree_JWT',
-              ],
+              type: ['VerifiableCredential', 'UniversityDegree_JWT'],
             },
             cryptographic_binding_methods_supported: ['did'],
             credential_signing_alg_values_supported: ['ES256K'],

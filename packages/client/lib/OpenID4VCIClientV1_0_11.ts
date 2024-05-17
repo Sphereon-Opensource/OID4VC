@@ -22,8 +22,9 @@ import {
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PKCEOpts,
-  ProofOfPossessionCallbacks, toAuthorizationResponsePayload
-} from '@sphereon/oid4vci-common'
+  ProofOfPossessionCallbacks,
+  toAuthorizationResponsePayload,
+} from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
@@ -31,7 +32,7 @@ import { AccessTokenClientV1_0_11 } from './AccessTokenClientV1_0_11';
 import { createAuthorizationRequestUrlV1_0_11 } from './AuthorizationCodeClientV1_0_11';
 import { CredentialOfferClientV1_0_11 } from './CredentialOfferClientV1_0_11';
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
-import { MetadataClientV1_0_11 } from './MetadataClientV1_0_11'
+import { MetadataClientV1_0_11 } from './MetadataClientV1_0_11';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { generateMissingPKCEOpts } from './functions/AuthorizationUtil';
 

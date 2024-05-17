@@ -10,8 +10,8 @@ import {
   getTypesFromOfferV1_0_11,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
-  UniformCredentialOfferRequest
-} from '@sphereon/oid4vci-common'
+  UniformCredentialOfferRequest,
+} from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialOfferClient } from './CredentialOfferClient';

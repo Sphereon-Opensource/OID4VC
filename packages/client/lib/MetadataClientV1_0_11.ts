@@ -5,13 +5,14 @@ import {
   CredentialOfferPayload,
   CredentialOfferRequestWithBaseUrl,
   EndpointMetadataResultV1_0_11,
-  getIssuerFromCredentialOfferPayload, IssuerMetadataV1_0_08,
+  getIssuerFromCredentialOfferPayload,
+  IssuerMetadataV1_0_08,
   OpenIDResponse,
-  WellKnownEndpoints
-} from '@sphereon/oid4vci-common'
+  WellKnownEndpoints,
+} from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
-import { retrieveWellknown } from './functions/OpenIDUtils'
+import { retrieveWellknown } from './functions/OpenIDUtils';
 
 const debug = Debug('sphereon:oid4vci:metadata');
 
@@ -21,7 +22,9 @@ export class MetadataClientV1_0_11 {
    *
    * @param credentialOffer
    */
-  public static async retrieveAllMetadataFromCredentialOffer(credentialOffer: CredentialOfferRequestWithBaseUrl): Promise<EndpointMetadataResultV1_0_11> {
+  public static async retrieveAllMetadataFromCredentialOffer(
+    credentialOffer: CredentialOfferRequestWithBaseUrl,
+  ): Promise<EndpointMetadataResultV1_0_11> {
     return MetadataClientV1_0_11.retrieveAllMetadataFromCredentialOfferRequest(credentialOffer.credential_offer);
   }
 
@@ -163,7 +166,7 @@ export class MetadataClientV1_0_11 {
       authorization_server,
       authorization_endpoint,
       authorizationServerType,
-      credentialIssuerMetadata: credentialIssuerMetadata as unknown as (Partial<AuthorizationServerMetadata> & IssuerMetadataV1_0_08),
+      credentialIssuerMetadata: credentialIssuerMetadata as unknown as Partial<AuthorizationServerMetadata> & IssuerMetadataV1_0_08,
       authorizationServerMetadata: authMetadata,
     };
   }

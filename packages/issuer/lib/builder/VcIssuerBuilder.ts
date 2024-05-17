@@ -1,14 +1,15 @@
 import {
   CNonceState,
   CredentialConfigurationSupportedV1_0_13,
-  CredentialOfferSession, IssuerMetadata,
+  CredentialOfferSession,
+  IssuerMetadata,
   IssuerMetadataV1_0_13,
   IStateManager,
   JWTVerifyCallback,
   MetadataDisplay,
   TokenErrorResponse,
   TxCode,
-  URIState
+  URIState,
 } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 

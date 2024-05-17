@@ -5,7 +5,7 @@ import nock from 'nock';
 
 import { CredentialOfferClientV1_0_11 } from '../CredentialOfferClientV1_0_11';
 import { MetadataClient } from '../MetadataClient';
-import { retrieveWellknown } from '../functions/OpenIDUtils'
+import { retrieveWellknown } from '../functions/OpenIDUtils';
 
 import {
   DANUBE_ISSUER_URL,
@@ -319,6 +319,8 @@ describe('Metadataclient with Credenco should', () => {
     const metadata = await MetadataClient.retrieveAllMetadata('https://mijnkvk.acc.credenco.com/');
     expect(metadata.credential_endpoint).toEqual('https://mijnkvk.acc.credenco.com/credential');
     expect(metadata.token_endpoint).toEqual('https://mijnkvk.acc.credenco.com/token');
-    expect(metadata.credentialIssuerMetadata?.credential_configurations_supported).toEqual(getMockData('credenco')?.metadata.openid4vci_metadata.credential_configurations_supported);
+    expect(metadata.credentialIssuerMetadata?.credential_configurations_supported).toEqual(
+      getMockData('credenco')?.metadata.openid4vci_metadata.credential_configurations_supported,
+    );
   });
 });

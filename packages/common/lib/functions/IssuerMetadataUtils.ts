@@ -1,18 +1,18 @@
 import {
   AuthorizationServerMetadata,
+  CredentialConfigurationSupported,
   CredentialConfigurationSupportedV1_0_13,
   CredentialIssuerMetadata,
-  CredentialConfigurationSupported,
   CredentialSupportedTypeV1_0_08,
   CredentialSupportedV1_0_08,
-  IssuerMetadataV1_0_08,
+  IssuerMetadata,
   MetadataDisplay,
-  OID4VCICredentialFormat, OpenId4VCIVersion
-} from '../types'
-import { IssuerMetadataV1_0_13 } from '../types';
+  OID4VCICredentialFormat,
+  OpenId4VCIVersion,
+} from '../types';
 
 export function getSupportedCredentials(options?: {
-  issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08 | IssuerMetadataV1_0_13;
+  issuerMetadata?: CredentialIssuerMetadata | IssuerMetadata;
   version: OpenId4VCIVersion;
   types?: string[][];
   format?: OID4VCICredentialFormat | string | (OID4VCICredentialFormat | string)[];
@@ -35,7 +35,7 @@ export function getSupportedCredentials(options?: {
 }
 
 export function getSupportedCredential(opts?: {
-  issuerMetadata?: CredentialIssuerMetadata | IssuerMetadataV1_0_08 | IssuerMetadataV1_0_13;
+  issuerMetadata?: CredentialIssuerMetadata | IssuerMetadata;
   version: OpenId4VCIVersion;
   types?: string | string[];
   format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[];
@@ -74,7 +74,11 @@ export function getTypesFromCredentialSupported(
     credentialSupported.format === 'jwt_vc_json-ld' ||
     credentialSupported.format === 'ldp_vc'
   ) {
-    types = credentialSupported.types? credentialSupported.types as string[]: 'credential_definition' in credentialSupported? credentialSupported.credential_definition.type: [];
+    types = credentialSupported.types
+      ? (credentialSupported.types as string[])
+      : 'credential_definition' in credentialSupported
+        ? credentialSupported.credential_definition.type
+        : [];
   } else if (credentialSupported.format === 'vc+sd-jwt') {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -119,7 +123,7 @@ export function credentialSupportedV8ToV13(key: string, supportedV8: CredentialS
   return credentialConfigsSupported;
 }
 
-export function getIssuerDisplays(metadata: CredentialIssuerMetadata | IssuerMetadataV1_0_08, opts?: { prefLocales: string[] }): MetadataDisplay[] {
+export function getIssuerDisplays(metadata: CredentialIssuerMetadata | IssuerMetadata, opts?: { prefLocales: string[] }): MetadataDisplay[] {
   const matchedDisplays =
     metadata.display?.filter(
       (item) => !opts?.prefLocales || opts.prefLocales.length === 0 || (item.locale && opts.prefLocales.includes(item.locale)) || !item.locale,
@@ -132,7 +136,7 @@ export function getIssuerDisplays(metadata: CredentialIssuerMetadata | IssuerMet
  */
 export function getIssuerName(
   url: string,
-  credentialIssuerMetadata?: Partial<AuthorizationServerMetadata> & (CredentialIssuerMetadata | IssuerMetadataV1_0_08),
+  credentialIssuerMetadata?: Partial<AuthorizationServerMetadata> & (CredentialIssuerMetadata | IssuerMetadata),
 ): string {
   if (credentialIssuerMetadata) {
     const displays: Array<MetadataDisplay> = credentialIssuerMetadata ? getIssuerDisplays(credentialIssuerMetadata) : [];

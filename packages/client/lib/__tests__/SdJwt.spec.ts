@@ -80,7 +80,7 @@ describe('sd-jwt vc', () => {
         credentials: {
           SdJwtCredentialId: {
             credential_definition: {
-              type: ['SdJwtCredential']
+              type: ['SdJwtCredential'],
             },
             format: 'vc+sd-jwt',
             vct: 'SdJwtCredential',

@@ -289,20 +289,20 @@ describe('Credential Request Client with different issuers ', () => {
     const IRR_URI =
       'openid-credential-offer://mijnkvk.acc.credenco.com/?credential_offer_uri=https%3A%2F%2Fmijnkvk.acc.credenco.com%2Fopenid4vc%2FcredentialOffer%3Fid%3D32fc4ebf-9e31-4149-9877-e3c0b602d559';
     nock('https://mijnkvk.acc.credenco.com')
-    .get('/openid4vc/credentialOffer?id=32fc4ebf-9e31-4149-9877-e3c0b602d559')
-    .reply(200, {
-      credential_issuer: 'https://mijnkvk.acc.credenco.com',
-      credential_configuration_ids: ['BevoegdheidUittreksel_jwt_vc_json'],
-      grants: {
-        authorization_code: {
-          issuer_state: '32fc4ebf-9e31-4149-9877-e3c0b602d559',
+      .get('/openid4vc/credentialOffer?id=32fc4ebf-9e31-4149-9877-e3c0b602d559')
+      .reply(200, {
+        credential_issuer: 'https://mijnkvk.acc.credenco.com',
+        credential_configuration_ids: ['BevoegdheidUittreksel_jwt_vc_json'],
+        grants: {
+          authorization_code: {
+            issuer_state: '32fc4ebf-9e31-4149-9877-e3c0b602d559',
+          },
+          'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+            'pre-authorized_code':
+              'eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiIzMmZjNGViZi05ZTMxLTQxNDktOTg3Ny1lM2MwYjYwMmQ1NTkiLCJpc3MiOiJodHRwczovL21pam5rdmsuYWNjLmNyZWRlbmNvLmNvbSIsImF1ZCI6IlRPS0VOIn0.754aiQ87O0vHYSpRvPqAS9cLOgf-pewdeXbpLziRwsxEp9mENfaXpY62muYpzOaWcYmTOydkzhFul-NDYXJZCA',
+          },
         },
-        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-          'pre-authorized_code':
-            'eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiIzMmZjNGViZi05ZTMxLTQxNDktOTg3Ny1lM2MwYjYwMmQ1NTkiLCJpc3MiOiJodHRwczovL21pam5rdmsuYWNjLmNyZWRlbmNvLmNvbSIsImF1ZCI6IlRPS0VOIn0.754aiQ87O0vHYSpRvPqAS9cLOgf-pewdeXbpLziRwsxEp9mENfaXpY62muYpzOaWcYmTOydkzhFul-NDYXJZCA',
-        },
-      },
-    });
+      });
     const credentialOffer = await (
       await CredentialRequestClientBuilder.fromURI({
         uri: IRR_URI,

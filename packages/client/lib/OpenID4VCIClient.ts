@@ -20,8 +20,9 @@ import {
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PKCEOpts,
-  ProofOfPossessionCallbacks, toAuthorizationResponsePayload
-} from '@sphereon/oid4vci-common'
+  ProofOfPossessionCallbacks,
+  toAuthorizationResponsePayload,
+} from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
@@ -506,7 +507,7 @@ export class OpenID4VCIClient {
     return this._state.credentialIssuer;
   }
 
-  get authorizationURL(): string|undefined {
+  get authorizationURL(): string | undefined {
     return this._state.authorizationURL;
   }
 
@@ -526,15 +527,16 @@ export class OpenID4VCIClient {
 
       if (credentialConfigurations) {
         const isEBSITrustFramework = credentialOffer.credential_configuration_ids
-        .map(id => credentialConfigurations[id])
-        .filter((config): config is CredentialConfigurationSupportedV1_0_13 =>
+          .map((id) => credentialConfigurations[id])
+          .filter(
+            (config): config is CredentialConfigurationSupportedV1_0_13 =>
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              config !== undefined && 'trust_framework' in config && 'name' in config.trust_framework,
+          )
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          config !== undefined && 'trust_framework' in config && 'name' in config.trust_framework
-        )
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        .some(config => config.trust_framework.name.includes('ebsi'));
+          .some((config) => config.trust_framework.name.includes('ebsi'));
 
         if (isEBSITrustFramework) {
           return true;
@@ -545,8 +547,6 @@ export class OpenID4VCIClient {
     this.assertIssuerData();
     return this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu') ?? false;
   }
-
-
 
   private assertIssuerData(): void {
     if (!this._state.credentialIssuer) {

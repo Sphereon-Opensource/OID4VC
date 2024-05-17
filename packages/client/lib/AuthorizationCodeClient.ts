@@ -15,8 +15,8 @@ import {
   PARMode,
   PKCEOpts,
   PushedAuthorizationResponse,
-  ResponseType
-} from '@sphereon/oid4vci-common'
+  ResponseType,
+} from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
 const debug = Debug('sphereon:oid4vci');

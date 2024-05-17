@@ -7,8 +7,8 @@ import {
   JwtVerifyResult,
   OpenId4VCIVersion,
   ProofOfPossession,
-  UniformCredentialRequest
-} from '@sphereon/oid4vci-common'
+  UniformCredentialRequest,
+} from '@sphereon/oid4vci-common';
 import * as jose from 'jose';
 
 import { CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '..';
