@@ -159,7 +159,7 @@ export class AccessTokenClient {
   }
 
   private assertAlphanumericPin(pinMeta?: TxCodeAndPinRequired, pin?: string): void {
-    if (pinMeta?.isPinRequired) {
+    if (pinMeta && pinMeta.isPinRequired) {
       let regex;
 
       if (pinMeta.txCode) {
