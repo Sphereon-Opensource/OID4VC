@@ -1,15 +1,14 @@
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
-  AuthorizationRequest,
-  CredentialOfferRESTRequestV1_0_11,
+  AuthorizationRequest, CredentialOfferRESTRequestV1_0_11,
   CredentialRequestV1_0_11,
   determineGrantTypes,
   getNumberOrUndefined,
   Grant,
   IssueStatusResponse,
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
-  TokenErrorResponse,
-} from '@sphereon/oid4vci-common'
+  TokenErrorResponse
+} from '@sphereon/oid4vci-common';
 import { adjustUrl, trimBoth, trimEnd, trimStart } from '@sphereon/oid4vci-common/dist/functions/HttpUtils'
 import { ITokenEndpointOpts, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
@@ -201,12 +200,12 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
         return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_grant, error_description: 'No grant type supplied' })
       }
       const grants = request.body.grants as Grant
-      const credentials = request.body.credentials as (string | CredentialFormat)[]
-      if (!credentials || credentials.length === 0) {
-        return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'No credentials supplied' })
+      const credentialIds = request.body.credentials as (string | CredentialFormat)[]
+      if (!credentialIds || credentialIds.length === 0) {
+        return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'No credential ids supplied' })
       }
       const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
-      const result = await issuer.createCredentialOfferURI({ ...request.body, qrCodeOpts, grants, credentials })
+      const result = await issuer.createCredentialOfferURI({ ...request.body, qrCodeOpts, grants })
       const resultResponse: ICreateCredentialOfferURIResponse = result
       if ('session' in resultResponse) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
