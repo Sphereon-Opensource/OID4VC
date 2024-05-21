@@ -46,24 +46,25 @@ export function getSupportedCredential(opts?: {
     return {};
   }
 
-  const configurationIds: string[] = Object.keys(issuerMetadata.credential_configurations_supported);
+  const credentialConfigurations: Record<string, CredentialConfigurationSupportedV1_0_13> =
+    issuerMetadata.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_13>;
   const normalizedTypes: string[] = Array.isArray(types) ? types : types ? [types] : [];
   const normalizedFormats: string[] = Array.isArray(format) ? format : format ? [format] : [];
 
-  return configurationIds.reduce((filteredConfigs, id) => {
-    const config = (issuerMetadata.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_13>)[id];
+  return Object.entries(credentialConfigurations).reduce(
+    (filteredConfigs, [id, config]) => {
+      const isTypeMatch = normalizedTypes.length === 0 || normalizedTypes.some((type) => config.credential_definition.type.includes(type));
+      const isFormatMatch = normalizedFormats.length === 0 || normalizedFormats.includes(config.format);
 
-    const isTypeMatch = normalizedTypes.length === 0 || normalizedTypes.includes(id);
-    const isFormatMatch = normalizedFormats.length === 0 || normalizedFormats.includes(config.format);
+      if (isTypeMatch && isFormatMatch) {
+        filteredConfigs[id] = config;
+      }
 
-    if (isTypeMatch && isFormatMatch) {
-      filteredConfigs[id] = config;
-    }
-
-    return filteredConfigs;
-  }, {} as Record<string, CredentialConfigurationSupportedV1_0_13>);
+      return filteredConfigs;
+    },
+    {} as Record<string, CredentialConfigurationSupportedV1_0_13>,
+  );
 }
-
 
 export function getTypesFromCredentialSupported(
   credentialSupported: CredentialConfigurationSupported,
