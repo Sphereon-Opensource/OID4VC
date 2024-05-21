@@ -3,11 +3,12 @@ import {
   CredentialOfferPayloadV1_0_13,
   CredentialOfferSession,
   CredentialOfferV1_0_13,
-  Grant, GrantUrnIetf,
+  Grant,
+  GrantUrnIetf,
   IssuerMetadataV1_0_13,
   PIN_VALIDATION_ERROR,
   TxCode,
-  UniformCredentialOffer
+  UniformCredentialOffer,
 } from '@sphereon/oid4vci-common'
 import { v4 as uuidv4 } from 'uuid'
 

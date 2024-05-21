@@ -108,9 +108,9 @@ describe('sd-jwt vc', () => {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             'pre-authorized_code': '123',
             tx_code: {
-              input_mode: "text",
+              input_mode: 'text',
               length: 3,
-      },
+            },
           },
         },
       });

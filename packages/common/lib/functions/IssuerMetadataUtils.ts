@@ -38,7 +38,7 @@ export function getSupportedCredential(opts?: {
   issuerMetadata?: CredentialIssuerMetadata | IssuerMetadata;
   version: OpenId4VCIVersion;
   types?: string | string[];
-  format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[];
+  format?: OID4VCICredentialFormat | string | (OID4VCICredentialFormat | string)[];
 }): Record<string, CredentialConfigurationSupportedV1_0_13> {
   const { issuerMetadata, types, format } = opts ?? {};
 
@@ -46,22 +46,24 @@ export function getSupportedCredential(opts?: {
     return {};
   }
 
-  const configurations = issuerMetadata.credential_configurations_supported;
-  const formats = Array.isArray(format) ? format : format ? [format] : [];
-  const normalizedTypes = Array.isArray(types) ? types : types ? [types] : [];
+  const configurationIds: string[] = Object.keys(issuerMetadata.credential_configurations_supported);
+  const normalizedTypes: string[] = Array.isArray(types) ? types : types ? [types] : [];
+  const normalizedFormats: string[] = Array.isArray(format) ? format : format ? [format] : [];
 
-  const filteredConfigs: Record<string, CredentialConfigurationSupportedV1_0_13> = {};
-  Object.entries(configurations).forEach(([key, value]) => {
-    const isTypeMatch = normalizedTypes.length === 0 || normalizedTypes.includes(key);
-    const isFormatMatch = formats.length === 0 || formats.includes(value.format);
+  return configurationIds.reduce((filteredConfigs, id) => {
+    const config = (issuerMetadata.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_13>)[id];
+
+    const isTypeMatch = normalizedTypes.length === 0 || normalizedTypes.includes(id);
+    const isFormatMatch = normalizedFormats.length === 0 || normalizedFormats.includes(config.format);
 
     if (isTypeMatch && isFormatMatch) {
-      filteredConfigs[key] = value;
+      filteredConfigs[id] = config;
     }
-  });
 
-  return filteredConfigs;
+    return filteredConfigs;
+  }, {} as Record<string, CredentialConfigurationSupportedV1_0_13>);
 }
+
 
 export function getTypesFromCredentialSupported(
   credentialSupported: CredentialConfigurationSupported,

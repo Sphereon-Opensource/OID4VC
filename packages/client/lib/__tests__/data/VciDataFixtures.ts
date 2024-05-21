@@ -869,12 +869,24 @@ const mockData: VciMockDataStructure = {
                 text_color: '#00526e',
               },
               {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK gestylede achtergrond',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
                 locale: 'nl-NL',
                 name: 'Bevoegdheid uittreksel',
+                text_color: '#00526e',
               },
               {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
                 locale: 'en-US',
                 name: 'Authorized representative',
+                text_color: '#00526e',
               },
             ],
             format: 'jwt_vc_json',
@@ -976,12 +988,24 @@ const mockData: VciMockDataStructure = {
                 text_color: '#00526e',
               },
               {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK gestylede achtergrond',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
                 locale: 'nl-NL',
                 name: 'KVK Registratie',
+                text_color: '#00526e',
               },
               {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
                 locale: 'en-US',
                 name: 'Chamber of Commerce Registration',
+                text_color: '#00526e',
               },
             ],
             format: 'jwt_vc_json',
@@ -1035,14 +1059,26 @@ const mockData: VciMockDataStructure = {
                 text_color: '#00526e',
               },
               {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK gestylede achtergrond',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
                 description: 'Rechtspersonen en Samenwerkingsverbanden Identificatienummer',
                 locale: 'nl-NL',
                 name: 'RSIN',
+                text_color: '#00526e',
               },
               {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
                 description: 'Identification number for legal entities and associations',
                 locale: 'en-US',
                 name: 'RSIN',
+                text_color: '#00526e',
               },
             ],
             format: 'jwt_vc_json',
@@ -1331,12 +1367,24 @@ const mockData: VciMockDataStructure = {
                 text_color: '#00526e',
               },
               {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK gestylede achtergrond',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
                 locale: 'nl-NL',
                 name: 'Bevoegdheid uittreksel',
+                text_color: '#00526e',
               },
               {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
                 locale: 'en-US',
-                name: 'Power of Attorney',
+                name: 'Authorized representative',
+                text_color: '#00526e',
               },
             ],
             format: 'jwt_vc_json',

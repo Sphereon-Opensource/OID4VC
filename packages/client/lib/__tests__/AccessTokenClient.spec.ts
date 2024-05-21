@@ -223,8 +223,8 @@ describe('AccessTokenClient should', () => {
     const response: OpenIDResponse<AccessTokenResponse> = await accessTokenClient.acquireAccessToken({
       credentialOffer: INITIATION_TEST,
       pin: '1234',
-    })
-    expect(response.successBody).toBeDefined()
+    });
+    expect(response.successBody).toBeDefined();
   });
 
   it('get error if no as, issuer and metadata values are present', async () => {
