@@ -1,18 +1,16 @@
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
-  AuthorizationRequest, CredentialOfferRESTRequestV1_0_11,
-  CredentialRequestV1_0_11,
-  determineGrantTypes,
+  AuthorizationRequest, CredentialOfferRESTRequest, CredentialRequestV1_0_11,
+  determineGrantTypes, determineSpecVersionFromOffer,
   getNumberOrUndefined,
   Grant,
   IssueStatusResponse,
-  JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
+  JWT_SIGNER_CALLBACK_REQUIRED_ERROR, OpenId4VCIVersion,
   TokenErrorResponse
 } from '@sphereon/oid4vci-common';
 import { adjustUrl, trimBoth, trimEnd, trimStart } from '@sphereon/oid4vci-common/dist/functions/HttpUtils'
 import { ITokenEndpointOpts, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
-import { CredentialFormat } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -193,16 +191,21 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
 ) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers', { stripBasePath: true })
   console.log(`[OID4VCI] createCredentialOffer endpoint enabled at ${path}`)
-  router.post(path, async (request: Request<CredentialOfferRESTRequestV1_0_11>, response: Response<ICreateCredentialOfferURIResponse>) => {
+  router.post(path, async (request: Request<CredentialOfferRESTRequest>, response: Response<ICreateCredentialOfferURIResponse>) => {
     try {
+      const specVersion = determineSpecVersionFromOffer(request.body.original_credential_offer)
+      if(specVersion < OpenId4VCIVersion.VER_1_0_13) {
+        return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_client, error_description: 'credential offer request should be of version 1.0.13 or above' })
+      }
+
       const grantTypes = determineGrantTypes(request.body)
       if (grantTypes.length === 0) {
         return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_grant, error_description: 'No grant type supplied' })
       }
       const grants = request.body.grants as Grant
-      const credentialIds = request.body.credentials as (string | CredentialFormat)[]
-      if (!credentialIds || credentialIds.length === 0) {
-        return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'No credential ids supplied' })
+      const credentialConfigIds = request.body.credential_configuration_ids as string []
+      if (!credentialConfigIds || credentialConfigIds.length === 0) {
+        return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'credential_configuration_ids missing credential_configuration_ids in credential offer payload' })
       }
       const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
       const result = await issuer.createCredentialOfferURI({ ...request.body, qrCodeOpts, grants })
