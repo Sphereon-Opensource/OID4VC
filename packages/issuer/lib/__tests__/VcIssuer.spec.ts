@@ -264,12 +264,7 @@ describe('VcIssuer', () => {
           },
           scheme: 'http',
           baseUri: 'issuer-example.com',
-          credentials: {
-            Credential: {
-              credential_definition: { type: ['VerifiableCredential'] },
-              format: 'ldp_vc',
-            },
-          },
+          credential_configuration_ids: ['VerifiableCredential'],
           credentialOfferUri: 'https://somehost.com/offer-id',
         })
         .then((response) => response.uri),
