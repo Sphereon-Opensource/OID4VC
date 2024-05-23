@@ -41,6 +41,9 @@ export class CredentialOfferClient {
         arrayTypeProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri'] : ['credential_offer'],
         requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri'] : ['credential_offer'],
       }) as CredentialOfferV1_0_11;
+      if (credentialOffer?.credential_offer_uri === undefined && !credentialOffer?.credential_offer) {
+        throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri);
+      }
     }
 
     const request = await toUniformCredentialOfferRequest(credentialOffer, {
