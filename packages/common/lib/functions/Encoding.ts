@@ -1,9 +1,17 @@
-import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, JsonURIMode, OpenId4VCIVersion, SearchValue } from '../types';
+import {
+  BAD_PARAMS,
+  CredentialOfferV1_0_11,
+  DecodeURIAsJsonOpts,
+  EncodeJsonAsURIOpts,
+  JsonURIMode,
+  OpenId4VCIVersion,
+  SearchValue
+} from '../types'
 
 /**
- * @function encodeJsonAsURI encodes a Json object into a URI
- * @param json object
- * @param opts:
+ * @type {(json: {[s:string]: never} | ArrayLike<never> | string | object, opts?: EncodeJsonAsURIOpts)} encodes a Json object into a URI
+ * @param { {[s:string]: never} | ArrayLike<never> | string | object } json
+ * @param {EncodeJsonAsURIOpts} [opts] Option to encode json as uri
  *          - urlTypeProperties: a list of properties of which the value is a URL
  *          - arrayTypeProperties: a list of properties which are an array
  */
@@ -81,18 +89,45 @@ export function convertJsonToURI(
 }
 
 /**
- * @function decodeUriAsJson decodes a URI into a Json object
- * @param uri string
- * @param opts:
+ * @type {(uri: string, opts?: DecodeURIAsJsonOpts): unknown} convertURIToJsonObject converts an URI into a Json object decoding its properties
+ * @param {string} uri
+ * @param {DecodeURIAsJsonOpts} [opts]
  *          - requiredProperties: the required properties
  *          - arrayTypeProperties: properties that can show up more that once
+ * @returns JSON object
  */
 export function convertURIToJsonObject(uri: string, opts?: DecodeURIAsJsonOpts): unknown {
   if (!uri || (opts?.requiredProperties && !opts.requiredProperties?.every((p) => uri.includes(p)))) {
     throw new Error(BAD_PARAMS);
   }
+
+  if (opts?.arrayTypeProperties && opts.arrayTypeProperties.includes('credential_offer_uri')) {
+    return encodedCredentialOfferUri2Json({ uri })
+  }
+
+  if (opts?.arrayTypeProperties && opts.arrayTypeProperties.includes('credential_offer')) {
+    return encodedCredentialOffer2Json({ uri })
+  }
+
   const uriComponents = getURIComponentsAsArray(uri, opts?.arrayTypeProperties);
   return decodeJsonProperties(uriComponents);
+}
+
+function encodedCredentialOfferUri2Json(args: { uri: string }): Pick<CredentialOfferV1_0_11, 'credential_offer_uri'> {
+  const { uri } = args
+  const value = uri.includes('?') ? uri.split('?')[1].split('=') : uri
+  return {
+    credential_offer_uri: value[1]
+  }
+}
+
+function encodedCredentialOffer2Json(args: { uri: string }): Pick<CredentialOfferV1_0_11, 'credential_offer'> {
+  const { uri } = args
+  const decodedUri = decodeURIComponent(uri)
+  const value = decodedUri.includes('?') ? decodedUri.split('?')[1].split('=') : decodedUri
+  return {
+    credential_offer: JSON.parse(value[1])
+  }
 }
 
 function decodeJsonProperties(parts: string[] | string[][]): unknown {
@@ -128,8 +163,8 @@ function decodeJsonProperties(parts: string[] | string[][]): unknown {
 
 /**
  * @function get URI Components as Array
- * @param uri string
- * @param arrayTypes array of string containing array like keys
+ * @param {string} uri uri
+ * @param {string[]} [arrayTypes] array of string containing array like keys
  */
 function getURIComponentsAsArray(uri: string, arrayTypes?: string[]): string[] | string[][] {
   const parts = uri.includes('?') ? uri.split('?')[1] : uri.includes('://') ? uri.split('://')[1] : uri;
