@@ -28,6 +28,8 @@ export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOffe
 
 export type CredentialOffer = CredentialOfferV1_0_09 | CredentialOfferV1_0_11 | CredentialOfferV1_0_13;
 
+export type CredentialOfferPayloadLatest = CredentialOfferPayloadV1_0_13
+
 export type CredentialRequest = UniformCredentialRequest | CredentialRequestV1_0_13 | CredentialRequestV1_0_11 | CredentialRequestV1_0_08;
 
 export type CredentialOfferPayload = (
