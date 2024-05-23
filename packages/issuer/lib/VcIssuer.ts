@@ -8,7 +8,7 @@ import {
   CredentialDataSupplierInput,
   CredentialOfferPayloadV1_0_13,
   CredentialOfferSession,
-  CredentialOfferV1_0_13,
+  CredentialOfferV1_0_13, CredentialRequest,
   CredentialRequestV1_0_13,
   CredentialResponse,
   DID_NO_DIDDOC_ERROR,
@@ -32,7 +32,7 @@ import {
   TxCode,
   TYP_ERROR,
   UniformCredentialRequest,
-  URIState,
+  URIState
 } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 import { CompactSdJwtVc, CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
@@ -222,7 +222,7 @@ export class VcIssuer<DIDDoc extends object> {
    *  - cNonce an existing c_nonce
    */
   public async issueCredential(opts: {
-    credentialRequest: CredentialRequestV1_0_13
+    credentialRequest: CredentialRequest
     credential?: CredentialIssuanceInput
     credentialDataSupplier?: CredentialDataSupplier
     credentialDataSupplierInput?: CredentialDataSupplierInput
@@ -233,6 +233,10 @@ export class VcIssuer<DIDDoc extends object> {
     credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
     responseCNonce?: string
   }): Promise<CredentialResponse> {
+    if (!('credential_identifier' in opts.credentialRequest)) {
+      throw new Error('credential request should be of spec version 1.0.13 or above')
+    }
+    const credentialRequest: CredentialRequestV1_0_13 = opts.credentialRequest
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
     try {
@@ -262,7 +266,7 @@ export class VcIssuer<DIDDoc extends object> {
         throw Error(`Either a credential needs to be supplied or a credentialDataSupplier`)
       }
       let credential: CredentialIssuanceInput | undefined
-      let format: OID4VCICredentialFormat = opts.credentialRequest.format
+      let format: OID4VCICredentialFormat = credentialRequest.format
       let signerCallback: CredentialSignerCallback<DIDDoc> | undefined = opts.credentialSignerCallback
       if (opts.credential) {
         credential = opts.credential
@@ -413,7 +417,7 @@ export class VcIssuer<DIDDoc extends object> {
     jwtVerifyCallback,
     tokenExpiresIn,
   }: {
-    credentialRequest: UniformCredentialRequest
+    credentialRequest: CredentialRequest
     tokenExpiresIn: number // expiration duration in seconds
     // grants?: Grant,
     clientId?: string

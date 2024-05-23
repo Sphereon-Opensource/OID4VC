@@ -8,7 +8,7 @@ import {
 // @ts-ignore
 import nock from 'nock';
 
-import { OpenID4VCIClient } from '..';
+import { OpenID4VCIClient } from '..'
 import { createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilder } from '../../../issuer';
 
 export const UNIT_TEST_TIMEOUT = 30000;
@@ -126,12 +126,11 @@ describe('sd-jwt vc', () => {
         });
 
       await client.acquireAccessToken({ pin: '123' });
-
       nock(issuerMetadata.credential_endpoint as string)
         .post('/')
         .reply(200, async (_, body) =>
           vcIssuer.issueCredential({
-            credentialRequest: body as CredentialRequestV1_0_13,
+            credentialRequest: { ...(body as CredentialRequestV1_0_13), credential_identifier: offered.vct },
             credential: {
               vct: 'Hello',
               iss: 'did:example:123',
