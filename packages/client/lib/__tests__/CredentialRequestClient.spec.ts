@@ -21,9 +21,9 @@ import {
   CredentialOfferClientV1_0_11,
   CredentialRequestClientBuilder,
   CredentialRequestClientBuilderV1_0_11,
-  MetadataClient,
-  ProofOfPossessionBuilder,
-} from '..';
+  MetadataClientV1_0_11,
+  ProofOfPossessionBuilder
+} from '..'
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';
 import { getMockData } from './data/VciDataFixtures';
@@ -153,7 +153,7 @@ describe('Credential Request Client with Walt.id ', () => {
     const credentialOffer = await CredentialOfferClientV1_0_11.fromURI(WALT_IRR_URI);
 
     const request = credentialOffer.credential_offer;
-    const metadata = await MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(request) as string);
+    const metadata = await MetadataClientV1_0_11.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(request) as string);
     expect(metadata.credential_endpoint).toEqual(WALT_OID4VCI_METADATA.credential_endpoint);
     expect(metadata.token_endpoint).toEqual(WALT_OID4VCI_METADATA.token_endpoint);
 

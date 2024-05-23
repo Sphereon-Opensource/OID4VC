@@ -8,7 +8,7 @@ import {
 // @ts-ignore
 import nock from 'nock';
 
-import { OpenID4VCIClient } from '..'
+import { OpenID4VCIClient } from '..';
 import { createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilder } from '../../../issuer';
 
 export const UNIT_TEST_TIMEOUT = 30000;

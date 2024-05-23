@@ -8,7 +8,8 @@ import {
   CredentialDataSupplierInput,
   CredentialOfferPayloadV1_0_13,
   CredentialOfferSession,
-  CredentialOfferV1_0_13, CredentialRequest,
+  CredentialOfferV1_0_13,
+  CredentialRequest,
   CredentialRequestV1_0_13,
   CredentialResponse,
   DID_NO_DIDDOC_ERROR,
@@ -32,7 +33,7 @@ import {
   TxCode,
   TYP_ERROR,
   UniformCredentialRequest,
-  URIState
+  URIState,
 } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 import { CompactSdJwtVc, CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'

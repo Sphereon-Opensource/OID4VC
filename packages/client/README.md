@@ -51,8 +51,8 @@ client you can use to finish the pre-authorized code flows.
 This initiates the client using a URI obtained from the Issuer using a link (URL) or QR code typically. We are also
 already fetching the Server Metadata
 
-
 Using openid-initiate-issuance scheme
+
 ```typescript
 import { OpenID4VCIClient } from '@sphereon/oid4vci-client';
 
@@ -71,6 +71,7 @@ console.log(client.getAccessTokenEndpoint()); // https://auth.research.identipro
 ```
 
 Using https scheme
+
 ```typescript
 import { OpenID4VCIClient } from '@sphereon/oid4vci-client';
 

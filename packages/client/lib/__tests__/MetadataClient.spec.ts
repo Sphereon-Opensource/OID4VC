@@ -300,22 +300,7 @@ describe.skip('Metadataclient with SpruceId should', () => {
 });
 
 describe('Metadataclient with Credenco should', () => {
-  beforeAll(() => {
-    nock.cleanAll();
-  });
-
-  afterEach(() => {
-    nock.cleanAll();
-  });
-
   it('succeed without OID4VCI and with OIDC metadata', async () => {
-    /*nock(WALT_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(WALT_OID4VCI_METADATA));
-
-    nock(WALT_ISSUER_URL)
-      .get(/.well-known\/.*!/)
-      .times(2)
-      .reply(404, JSON.stringify({ error: 'does not exist' }));
-*/
     const metadata = await MetadataClient.retrieveAllMetadata('https://mijnkvk.acc.credenco.com/');
     expect(metadata.credential_endpoint).toEqual('https://mijnkvk.acc.credenco.com/credential');
     expect(metadata.token_endpoint).toEqual('https://mijnkvk.acc.credenco.com/token');
