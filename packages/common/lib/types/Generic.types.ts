@@ -67,8 +67,8 @@ export interface CredentialIssuerMetadataOpts {
 }
 
 //todo: investigate if these values are enough.
-type AlgValue = 'RS256' | 'ES256' | 'PS256' | 'HS256' | string;
-type EncValue = 'A128GCM' | 'A256GCM' | 'A128CBC-HS256' | 'A256CBC-HS512' | string;
+export type AlgValue = 'RS256' | 'ES256' | 'PS256' | 'HS256' | string;
+export type EncValue = 'A128GCM' | 'A256GCM' | 'A128CBC-HS256' | 'A256CBC-HS512' | string;
 
 export interface ResponseEncryption {
   /**

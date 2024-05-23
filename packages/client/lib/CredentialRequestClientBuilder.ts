@@ -1,13 +1,11 @@
 import {
   AccessTokenResponse,
   CredentialIssuerMetadataV1_0_13,
-  CredentialOfferPayloadV1_0_08,
-  CredentialOfferPayloadV1_0_11,
+  CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
   EndpointMetadata,
   getIssuerFromCredentialOfferPayload,
-  getTypesFromOfferV1_0_11,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   UniformCredentialOfferRequest,
@@ -22,7 +20,7 @@ export class CredentialRequestClientBuilder {
   deferredCredentialEndpoint?: string;
   deferredCredentialAwait = false;
   deferredCredentialIntervalInMS = 5000;
-  credentialTypes: string[] = [];
+  credentialType?: string;
   format?: CredentialFormat | OID4VCICredentialFormat;
   token?: string;
   version?: OpenId4VCIVersion;
@@ -31,12 +29,12 @@ export class CredentialRequestClientBuilder {
     credentialIssuer,
     metadata,
     version,
-    credentialTypes,
+    credentialType,
   }: {
     credentialIssuer: string;
     metadata?: EndpointMetadata;
     version?: OpenId4VCIVersion;
-    credentialTypes: string | string[];
+    credentialType: string;
   }): CredentialRequestClientBuilder {
     const issuer = credentialIssuer;
     const builder = new CredentialRequestClientBuilder();
@@ -45,7 +43,7 @@ export class CredentialRequestClientBuilder {
     if (metadata?.deferred_credential_endpoint) {
       builder.withDeferredCredentialEndpoint(metadata.deferred_credential_endpoint);
     }
-    builder.withCredentialType(credentialTypes);
+    builder.withCredentialType(credentialType);
     return builder;
   }
 
@@ -63,6 +61,9 @@ export class CredentialRequestClientBuilder {
   }): CredentialRequestClientBuilder {
     const { request, metadata } = opts;
     const version = opts.version ?? request.version ?? determineSpecVersionFromOffer(request.original_credential_offer);
+    if (version < OpenId4VCIVersion.VER_1_0_13) {
+      throw new Error('Versions below v1.0.13 (draft 13) are not supported.');
+    }
     const builder = new CredentialRequestClientBuilder();
     const issuer = getIssuerFromCredentialOfferPayload(request.credential_offer) ?? (metadata?.issuer as string);
     builder.withVersion(version);
@@ -70,15 +71,11 @@ export class CredentialRequestClientBuilder {
     if (metadata?.deferred_credential_endpoint) {
       builder.withDeferredCredentialEndpoint(metadata.deferred_credential_endpoint);
     }
-
-    if (version <= OpenId4VCIVersion.VER_1_0_08) {
-      //todo: This basically sets all types available during initiation. Probably the user only wants a subset. So do we want to do this?
-      builder.withCredentialType((request.original_credential_offer as CredentialOfferPayloadV1_0_08).credential_type);
-    } else if (version <= OpenId4VCIVersion.VER_1_0_11) {
-      // todo: look whether this is correct
-      builder.withCredentialType(getTypesFromOfferV1_0_11(request.credential_offer as CredentialOfferPayloadV1_0_11));
+    const types: string[] = (request.credential_offer as CredentialOfferPayloadV1_0_13).credential_configuration_ids;
+    // if there's only one in the offer, we pre-select it. if not, you should provide the credentialType
+    if (types.length && types.length === 1) {
+      builder.withCredentialType(types[0]);
     }
-
     return builder;
   }
 
@@ -122,8 +119,8 @@ export class CredentialRequestClientBuilder {
     return this;
   }
 
-  public withCredentialType(credentialTypes: string | string[]): this {
-    this.credentialTypes = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
+  public withCredentialType(credentialType: string): this {
+    this.credentialType = credentialType;
     return this;
   }
 

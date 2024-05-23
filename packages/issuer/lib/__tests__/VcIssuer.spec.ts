@@ -298,7 +298,7 @@ describe('VcIssuer', () => {
     await expect(
       vcIssuer.issueCredential({
         credentialRequest: {
-          types: ['VerifiableCredential'],
+          credential_identifier: 'VerifiableCredential',
           format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',
@@ -356,7 +356,7 @@ describe('VcIssuer', () => {
       vcIssuer.issueCredential({
         credential: verifiableCredential,
         credentialRequest: {
-          types: ['VerifiableCredential'],
+          credential_identifier: 'VerifiableCredential',
           format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',
@@ -419,7 +419,7 @@ describe('VcIssuer', () => {
     expect(
       vcIssuer.issueCredential({
         credentialRequest: {
-          types: ['VerifiableCredential'],
+          credential_identifier: 'VerifiableCredential',
           format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',

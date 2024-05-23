@@ -340,7 +340,7 @@ describe('VcIssuer', () => {
     })
     console.log(`access token: ${accessToken}`)
     const credentialResponse = await client.acquireCredentials({
-      credentialTypes: ['VerifiableCredential'],
+      credentialType: 'VerifiableCredential',
       format: 'jwt_vc_json',
       proofCallbacks: { signCallback: proofOfPossessionCallbackFunction },
     })

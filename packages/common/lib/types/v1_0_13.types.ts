@@ -1,11 +1,10 @@
+import { JWK, ProofOfPossession } from './CredentialIssuance.types';
 import {
-  CommonCredentialRequest,
+  AlgValue,
   CredentialDataSupplierInput,
-  CredentialRequestJwtVcJson,
-  CredentialRequestJwtVcJsonLdAndLdpVc,
-  CredentialRequestSdJwtVc,
   CredentialsSupportedDisplay,
   CredentialSupplierConfig,
+  EncValue,
   Grant,
   IssuerCredentialSubject,
   KeyProofType,
@@ -54,8 +53,20 @@ export type CredentialConfigurationSupportedV1_0_13 = {
   [x: string]: unknown;
 };
 
-export type CredentialRequestV1_0_13 = CommonCredentialRequest &
-  (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc);
+export type CredentialRequestV1_0_13 = {
+  format: OID4VCICredentialFormat;
+  proof?: ProofOfPossession;
+  credential_identifier: string;
+  credential_response_encryption?: {
+    jwk: JWK;
+    alg: AlgValue;
+    enc: EncValue;
+  };
+  /**
+   * fixme: Added this to address sd-jwt requests. probably we need to revisit this
+   */
+  vct?: string;
+};
 
 export interface CredentialOfferV1_0_13 {
   credential_offer?: CredentialOfferPayloadV1_0_13;

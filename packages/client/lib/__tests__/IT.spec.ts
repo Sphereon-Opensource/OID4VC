@@ -242,7 +242,7 @@ describe('OID4VCI-Client should', () => {
         .build();
       const credResponse = await credReqClient.acquireCredentialsUsingProof({
         proofInput: proof,
-        credentialTypes: credentialOffer.original_credential_offer.credential_configuration_ids,
+        credentialType: credentialOffer.original_credential_offer.credential_configuration_ids[0],
       });
       expect(credResponse.successBody?.credential).toEqual(mockedVC);
     },

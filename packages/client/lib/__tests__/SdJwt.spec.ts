@@ -1,7 +1,7 @@
 import {
   AccessTokenRequest,
   CredentialConfigurationSupportedV1_0_13,
-  CredentialRequestV1_0_11,
+  CredentialRequestV1_0_13,
   CredentialSupportedSdJwtVc,
 } from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -131,7 +131,7 @@ describe('sd-jwt vc', () => {
         .post('/')
         .reply(200, async (_, body) =>
           vcIssuer.issueCredential({
-            credentialRequest: body as CredentialRequestV1_0_11,
+            credentialRequest: body as CredentialRequestV1_0_13,
             credential: {
               vct: 'Hello',
               iss: 'did:example:123',
@@ -146,7 +146,7 @@ describe('sd-jwt vc', () => {
         );
 
       const credentials = await client.acquireCredentials({
-        credentialTypes: [offered.vct],
+        credentialType: offered.vct,
         format: 'vc+sd-jwt',
         alg,
         jwk,

@@ -16,8 +16,8 @@ import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
-import { isValidURL, post } from './functions';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
+import { isValidURL, post } from './functions';
 
 const debug = Debug('sphereon:oid4vci:credential');
 
@@ -26,7 +26,7 @@ export interface CredentialRequestOpts {
   deferredCredentialIntervalInMS?: number;
   credentialEndpoint: string;
   deferredCredentialEndpoint?: string;
-  credentialTypes: string[];
+  credentialType: string;
   format?: CredentialFormat | OID4VCICredentialFormat;
   proof: ProofOfPossession;
   token: string;
@@ -78,13 +78,12 @@ export class CredentialRequestClient {
 
   public async acquireCredentialsUsingProof<DIDDoc>(opts: {
     proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
-    credentialTypes?: string | string[];
-    context?: string[];
+    credentialType: string;
     format?: CredentialFormat | OID4VCICredentialFormat;
   }): Promise<OpenIDResponse<CredentialResponse>> {
-    const { credentialTypes, proofInput, format, context } = opts;
+    const { credentialType, proofInput, format } = opts;
 
-    const request = await this.createCredentialRequest({ proofInput, credentialTypes, context, format, version: this.version() });
+    const request = await this.createCredentialRequest({ proofInput, credentialType, format, version: this.version() });
     return await this.acquireCredentialsUsingRequest(request);
   }
 
@@ -137,11 +136,10 @@ export class CredentialRequestClient {
 
   public async createCredentialRequest<DIDDoc>(opts: {
     proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
-    credentialTypes?: string | string[];
-    context?: string[];
+    credentialType: string;
     format?: CredentialFormat | OID4VCICredentialFormat;
     version: OpenId4VCIVersion;
-  }): Promise<UniformCredentialRequest> {
+  }): Promise<CredentialRequestV1_0_13> {
     const { proofInput } = opts;
     const formatSelection = opts.format ?? this.credentialRequestOpts.format;
 
@@ -149,54 +147,35 @@ export class CredentialRequestClient {
       throw Error(`Format of credential to be issued is missing`);
     }
     const format = getUniformFormat(formatSelection);
-    const typesSelection =
-      opts?.credentialTypes && (typeof opts.credentialTypes === 'string' || opts.credentialTypes.length > 0)
-        ? opts.credentialTypes
-        : this.credentialRequestOpts.credentialTypes;
-    const types = Array.isArray(typesSelection) ? typesSelection : [typesSelection];
-    if (types.length === 0) {
-      throw Error(`Credential type(s) need to be provided`);
-    }
-    // FIXME: this is mixing up the type (as id) from v8/v9 and the types (from the vc.type) from v11
-    else if (!this.isV13OrHigher() && types.length !== 1) {
-      throw Error('Only a single credential type is supported for V8/V9');
+    const typeSelection = opts.credentialType ?? this.credentialRequestOpts.credentialType;
+    if (!typeSelection) {
+      throw Error(`Credential type needs to be provided`);
     }
     const proof = await buildProof(proofInput, opts);
 
     // TODO: we should move format specific logic
     if (format === 'jwt_vc_json' || format === 'jwt_vc') {
       return {
-        types,
+        credential_identifier: typeSelection,
         format,
         proof,
       };
     } else if (format === 'jwt_vc_json-ld' || format === 'ldp_vc') {
-      if (this.version() >= OpenId4VCIVersion.VER_1_0_12 && !opts.context) {
-        throw Error('No @context value present, but it is required');
-      }
-
       return {
         format,
         proof,
-
         // Ignored because v11 does not have the context value, but it is required in v12
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        credential_definition: {
-          types,
-          ...(opts.context && { '@context': opts.context }),
-        },
+        credential_identifier: typeSelection,
       };
     } else if (format === 'vc+sd-jwt') {
-      if (types.length > 1) {
-        throw Error(`Only a single credential type is supported for ${format}`);
-      }
-
+      // fixme: this isn't up to the CredentialRequest that we see in the version v1_0_13
       return {
         format,
         proof,
-        vct: types[0],
-      };
+        vct: typeSelection,
+      } as CredentialRequestV1_0_13;
     }
 
     throw new Error(`Unsupported format: ${format}`);
@@ -204,9 +183,5 @@ export class CredentialRequestClient {
 
   private version(): OpenId4VCIVersion {
     return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_13;
-  }
-
-  private isV13OrHigher(): boolean {
-    return this.version() >= OpenId4VCIVersion.VER_1_0_13;
   }
 }

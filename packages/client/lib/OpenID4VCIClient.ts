@@ -317,7 +317,7 @@ export class OpenID4VCIClient {
   }
 
   public async acquireCredentials({
-    credentialTypes,
+    credentialType,
     context,
     proofCallbacks,
     format,
@@ -328,7 +328,7 @@ export class OpenID4VCIClient {
     deferredCredentialAwait,
     deferredCredentialIntervalInMS,
   }: {
-    credentialTypes: string | string[];
+    credentialType: string;
     context?: string[];
     proofCallbacks: ProofOfPossessionCallbacks<any>;
     format?: CredentialFormat | OID4VCICredentialFormat;
@@ -354,7 +354,7 @@ export class OpenID4VCIClient {
         })
       : CredentialRequestClientBuilder.fromCredentialIssuer({
           credentialIssuer: this.getIssuer(),
-          credentialTypes,
+          credentialType,
           metadata: this.endpointMetadata,
           version: this.version(),
         });
@@ -363,29 +363,24 @@ export class OpenID4VCIClient {
     requestBuilder.withDeferredCredentialAwait(deferredCredentialAwait ?? false, deferredCredentialIntervalInMS);
     if (this.endpointMetadata?.credentialIssuerMetadata) {
       const metadata = this.endpointMetadata.credentialIssuerMetadata;
-      const types = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
-
       if (metadata.credentials_supported && Array.isArray(metadata.credentials_supported)) {
         let typeSupported = false;
 
         metadata.credentials_supported.forEach((supportedCredential) => {
           const subTypes = getTypesFromCredentialSupported(supportedCredential);
-          if (
-            subTypes.every((t, i) => types[i] === t) ||
-            (types.length === 1 && (types[0] === supportedCredential.id || subTypes.includes(types[0])))
-          ) {
+          if (subTypes.includes(credentialType) || credentialType === supportedCredential.id) {
             typeSupported = true;
           }
         });
 
         if (!typeSupported) {
-          console.log(`Not all credential types ${JSON.stringify(credentialTypes)} are present in metadata for ${this.getIssuer()}`);
+          console.log(`Not all credential types ${JSON.stringify(credentialType)} are present in metadata for ${this.getIssuer()}`);
           // throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
         }
       } else if (metadata.credentials_supported && !Array.isArray(metadata.credentials_supported)) {
         const credentialsSupported = metadata.credentials_supported;
-        if (types.some((type) => !metadata.credentials_supported || !credentialsSupported[type])) {
-          throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
+        if (!metadata.credentials_supported || !credentialsSupported[credentialType]) {
+          throw new Error(`Credential type ${credentialType} is not supported by issuer ${this.getIssuer()}`);
         }
       }
       // todo: Format check? We might end up with some disjoint type / format combinations supported by the server
@@ -414,8 +409,7 @@ export class OpenID4VCIClient {
     }
     const response = await credentialRequestClient.acquireCredentialsUsingProof({
       proofInput: proofBuilder,
-      credentialTypes,
-      context,
+      credentialType,
       format,
     });
     if (response.errorBody) {

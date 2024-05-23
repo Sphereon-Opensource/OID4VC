@@ -2,6 +2,7 @@ import { KeyObject } from 'crypto';
 
 import {
   Alg,
+  CredentialRequestV1_0_13,
   EndpointMetadata,
   getCredentialRequestForVersion,
   getIssuerFromCredentialOfferPayload,
@@ -29,8 +30,13 @@ import { getMockData } from './data/VciDataFixtures';
 
 const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN';
 
-const jwt: Jwt = {
+const jwt1_0_08: Jwt = {
   header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'jwt' },
+  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
+};
+
+const jwt1_0_13: Jwt = {
+  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'openid4vci-proof+jwt' },
   payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
 };
 
@@ -87,20 +93,21 @@ describe('Credential Request Client ', () => {
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
-      jwt,
+      jwt: jwt1_0_13,
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_08,
+      version: OpenId4VCIVersion.VER_1_0_13,
     })
       // .withEndpointMetadata(metadata)
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build();
     const credentialRequest = await credReqClient.createCredentialRequest({
+      credentialType: 'OpenBadgeCredential',
       proofInput: proof,
       format: 'jwt',
-      version: OpenId4VCIVersion.VER_1_0_08,
+      version: OpenId4VCIVersion.VER_1_0_13,
     });
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy();
     expect(credentialRequest.format).toEqual('jwt_vc');
@@ -115,7 +122,7 @@ describe('Credential Request Client ', () => {
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
-      jwt,
+      jwt: jwt1_0_08,
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
@@ -181,7 +188,7 @@ describe('Credential Request Client with different issuers ', () => {
           proof_type: 'jwt',
           jwt: getMockData('spruce')?.credential.request.proof.jwt as string,
         },
-        credentialTypes: ['OpenBadgeCredential'],
+        credentialType: 'OpenBadgeCredential',
         format: 'jwt_vc',
         version: OpenId4VCIVersion.VER_1_0_13,
       });
@@ -228,9 +235,9 @@ describe('Credential Request Client with different issuers ', () => {
           proof_type: 'jwt',
           jwt: getMockData('uniissuer')?.credential.request.proof.jwt as string,
         },
-        credentialTypes: ['OpenBadgeCredential'],
+        credentialType: 'OpenBadgeCredential',
         format: 'jwt_vc',
-        version: OpenId4VCIVersion.VER_1_0_08,
+        version: OpenId4VCIVersion.VER_1_0_13,
       });
     expect(credentialOffer).toEqual(getMockData('uniissuer')?.credential.request);
   });
@@ -285,7 +292,7 @@ describe('Credential Request Client with different issuers ', () => {
   });
 
   // TODO: ksadjad remove the skipped test
-  it.skip('should create correct CredentialRequest for credenco', async () => {
+  it('should create correct CredentialRequest for credenco', async () => {
     const IRR_URI =
       'openid-credential-offer://mijnkvk.acc.credenco.com/?credential_offer_uri=https%3A%2F%2Fmijnkvk.acc.credenco.com%2Fopenid4vc%2FcredentialOffer%3Fid%3D32fc4ebf-9e31-4149-9877-e3c0b602d559';
     nock('https://mijnkvk.acc.credenco.com')
@@ -315,14 +322,21 @@ describe('Credential Request Client with different issuers ', () => {
           proof_type: 'jwt',
           jwt: getMockData('diwala')?.credential.request.proof.jwt as string,
         },
-        credentialTypes: ['OpenBadgeCredential'],
+        credentialType: 'OpenBadgeCredential',
         format: 'ldp_vc',
-        version: OpenId4VCIVersion.VER_1_0_08,
+        version: OpenId4VCIVersion.VER_1_0_13,
       });
 
     // createCredentialRequest returns uniform format in draft 11
-    const credentialRequest = getCredentialRequestForVersion(credentialOffer, OpenId4VCIVersion.VER_1_0_08);
+    const credentialRequest: CredentialRequestV1_0_13 = getCredentialRequestForVersion(
+      credentialOffer,
+      OpenId4VCIVersion.VER_1_0_13,
+    ) as CredentialRequestV1_0_13;
 
-    expect(credentialRequest).toEqual(getMockData('diwala')?.credential.request);
+    expect(credentialRequest.credential_identifier).toEqual('OpenBadgeCredential');
+    expect(credentialRequest.proof).toEqual({
+      jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3AxM3N6QUFMVFN0cDV1OGtMcnl5YW5vYWtrVWtFUGZXazdvOHY3dms0RW1KI3o2TWtwMTNzekFBTFRTdHA1dThrTHJ5eWFub2Fra1VrRVBmV2s3bzh2N3ZrNEVtSiJ9.eyJhdWQiOiJodHRwczovL29pZGM0dmMuZGl3YWxhLmlvIiwiaWF0IjoxNjgxOTE1MDk1LjIwMiwiZXhwIjoxNjgxOTE1NzU1LjIwMiwiaXNzIjoic3BoZXJlb246c3NpLXdhbGxldCIsImp0aSI6IjYxN2MwM2EzLTM3MTUtNGJlMy1hYjkxNzM4MTlmYzYxNTYzIn0.KA-cHjecaYp9FSaWHkz5cqtNyhBIVT_0I7cJnpHn03T4UWFvdhjhn8Hpe-BU247enFyWOWJ6v3NQZyZgle7xBA',
+      proof_type: 'jwt',
+    });
   });
 });

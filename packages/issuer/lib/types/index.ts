@@ -2,6 +2,7 @@ import {
   AssertedUniformCredentialOffer,
   CNonceState,
   CredentialDataSupplierInput,
+  CredentialRequest,
   CredentialSupplierConfig,
   JwtVerifyResult,
   OID4VCICredentialFormat,
@@ -16,7 +17,7 @@ import {
 } from '@sphereon/ssi-types'
 
 export type CredentialSignerCallback<T extends object> = (opts: {
-  credentialRequest: UniformCredentialRequest
+  credentialRequest: CredentialRequest
   credential: CredentialIssuanceInput
   format?: OID4VCICredentialFormat
   /**

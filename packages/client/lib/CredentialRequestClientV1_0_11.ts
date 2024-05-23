@@ -4,6 +4,7 @@ import {
   getCredentialRequestForVersion,
   getUniformFormat,
   isDeferredCredentialResponse,
+  JsonLdIssuerCredentialDefinition,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   OpenIDResponse,
@@ -163,7 +164,7 @@ export class CredentialRequestClientV1_0_11 {
         credential_definition: {
           types,
           ...(opts.context && { '@context': opts.context }),
-        },
+        } as JsonLdIssuerCredentialDefinition,
       };
     } else if (format === 'vc+sd-jwt') {
       if (types.length > 1) {
