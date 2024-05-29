@@ -860,33 +860,33 @@ const mockData: VciMockDataStructure = {
             cryptographic_binding_methods_supported: ['did:web', 'did:jwk', 'did:ebsi'],
             display: [
               {
-                background_color: '#e6f2f5',
+                background_color: '#21436f',
                 background_image: {
                   alt_text: 'KvK styled card Background',
                   url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
                 },
                 name: 'BevoegdheidUittreksel',
-                text_color: '#00526e',
+                text_color: '#ffffff',
               },
               {
-                background_color: '#e6f2f5',
+                background_color: '#21436f',
                 background_image: {
                   alt_text: 'KvK gestylede achtergrond',
                   url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
                 },
                 locale: 'nl-NL',
                 name: 'Bevoegdheid uittreksel',
-                text_color: '#00526e',
+                text_color: '#ffffff',
               },
               {
-                background_color: '#e6f2f5',
+                background_color: '#21436f',
                 background_image: {
                   alt_text: 'KvK styled card Background',
                   url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
                 },
                 locale: 'en-US',
                 name: 'Authorized representative',
-                text_color: '#00526e',
+                text_color: '#ffffff',
               },
             ],
             format: 'jwt_vc_json',
@@ -979,33 +979,33 @@ const mockData: VciMockDataStructure = {
             cryptographic_binding_methods_supported: ['did:web', 'did:jwk', 'did:ebsi'],
             display: [
               {
-                background_color: '#e6f2f5',
+                background_color: '#21436f',
                 background_image: {
                   alt_text: 'KvK styled card Background',
                   url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
                 },
                 name: 'KVK Registratie',
-                text_color: '#00526e',
+                text_color: '#ffffff',
               },
               {
-                background_color: '#e6f2f5',
+                background_color: '#21436f',
                 background_image: {
                   alt_text: 'KvK gestylede achtergrond',
                   url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
                 },
                 locale: 'nl-NL',
                 name: 'KVK Registratie',
-                text_color: '#00526e',
+                text_color: '#ffffff',
               },
               {
-                background_color: '#e6f2f5',
+                background_color: '#21436f',
                 background_image: {
                   alt_text: 'KvK styled card Background',
                   url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
                 },
                 locale: 'en-US',
                 name: 'Chamber of Commerce Registration',
-                text_color: '#00526e',
+                text_color: '#ffffff',
               },
             ],
             format: 'jwt_vc_json',
@@ -1050,16 +1050,16 @@ const mockData: VciMockDataStructure = {
             cryptographic_binding_methods_supported: ['did:web', 'did:jwk', 'did:ebsi'],
             display: [
               {
-                background_color: '#e6f2f5',
+                background_color: '#21436f',
                 background_image: {
                   alt_text: 'KvK styled card Background',
                   url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
                 },
                 name: 'RSIN',
-                text_color: '#00526e',
+                text_color: '#ffffff',
               },
               {
-                background_color: '#e6f2f5',
+                background_color: '#21436f',
                 background_image: {
                   alt_text: 'KvK gestylede achtergrond',
                   url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
@@ -1067,10 +1067,10 @@ const mockData: VciMockDataStructure = {
                 description: 'Rechtspersonen en Samenwerkingsverbanden Identificatienummer',
                 locale: 'nl-NL',
                 name: 'RSIN',
-                text_color: '#00526e',
+                text_color: '#ffffff',
               },
               {
-                background_color: '#e6f2f5',
+                background_color: '#21436f',
                 background_image: {
                   alt_text: 'KvK styled card Background',
                   url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
@@ -1078,7 +1078,7 @@ const mockData: VciMockDataStructure = {
                 description: 'Identification number for legal entities and associations',
                 locale: 'en-US',
                 name: 'RSIN',
-                text_color: '#00526e',
+                text_color: '#ffffff',
               },
             ],
             format: 'jwt_vc_json',
