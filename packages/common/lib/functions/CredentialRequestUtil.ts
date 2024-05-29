@@ -11,7 +11,9 @@ import { getFormatForVersion } from './FormatUtils';
 
 export function getTypesFromRequest(credentialRequest: CredentialRequest, opts?: { filterVerifiableCredential: boolean }) {
   let types: string[] = [];
-  if (credentialRequest.format === 'jwt_vc_json' || credentialRequest.format === 'jwt_vc') {
+  if('credential_identifier' in credentialRequest && credentialRequest.credential_identifier) {
+    types = [credentialRequest.credential_identifier]
+  } else if (credentialRequest.format === 'jwt_vc_json' || credentialRequest.format === 'jwt_vc') {
     types =
       'types' in credentialRequest
         ? credentialRequest.types
