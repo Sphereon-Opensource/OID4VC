@@ -22,8 +22,8 @@ import {
   CredentialRequestClientBuilder,
   CredentialRequestClientBuilderV1_0_11,
   MetadataClientV1_0_11,
-  ProofOfPossessionBuilder
-} from '..'
+  ProofOfPossessionBuilder,
+} from '..';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';
 import { getMockData } from './data/VciDataFixtures';

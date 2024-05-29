@@ -224,6 +224,7 @@ export class OpenID4VCIClient {
         authorizationRequest: this._state.authorizationRequestOpts,
         credentialOffer: this.credentialOffer,
         credentialConfigurationSupported: this.getCredentialsSupported(),
+        version: this.version(),
       });
     }
     return this._state.authorizationURL;

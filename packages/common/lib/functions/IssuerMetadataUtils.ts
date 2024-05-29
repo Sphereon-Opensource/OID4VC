@@ -53,7 +53,7 @@ export function getSupportedCredential(opts?: {
 
   return Object.entries(credentialConfigurations).reduce(
     (filteredConfigs, [id, config]) => {
-      const isTypeMatch = normalizedTypes.length === 0 || normalizedTypes.some((type) => config.credential_definition.type.includes(type));
+      const isTypeMatch = normalizedTypes.length === 0 || normalizedTypes.some((type) => config.credential_definition.type?.includes(type));
       const isFormatMatch = normalizedFormats.length === 0 || normalizedFormats.includes(config.format);
 
       if (isTypeMatch && isFormatMatch) {
@@ -77,11 +77,11 @@ export function getTypesFromCredentialSupported(
     credentialSupported.format === 'jwt_vc_json-ld' ||
     credentialSupported.format === 'ldp_vc'
   ) {
-    types = credentialSupported.types
+    types = (credentialSupported.types
       ? (credentialSupported.types as string[])
       : 'credential_definition' in credentialSupported
-        ? credentialSupported.credential_definition.type
-        : [];
+        ? credentialSupported.credential_definition?.type
+        : []) ?? [];
   } else if (credentialSupported.format === 'vc+sd-jwt') {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore

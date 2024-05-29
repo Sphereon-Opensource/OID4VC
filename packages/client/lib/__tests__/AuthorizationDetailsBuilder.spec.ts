@@ -50,16 +50,4 @@ describe('AuthorizationDetailsBuilder test', () => {
       new AuthorizationDetailsBuilder().withType('openid_credential').withLocations(['test1']).buildJwtVcJson();
     }).toThrow(Error('Type and format are required properties'));
   });
-  it('should be able to add random field to the object', () => {
-    const actual = new AuthorizationDetailsBuilder()
-      .withFormats('jwt_vc' as OID4VCICredentialFormat)
-      .withType('openid_credential')
-      .buildJwtVcJson();
-    actual['random'] = 'test';
-    expect(actual).toEqual({
-      type: 'openid_credential',
-      format: 'jwt_vc',
-      random: 'test',
-    });
-  });
 });

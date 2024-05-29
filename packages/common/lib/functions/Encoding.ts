@@ -1,11 +1,4 @@
-import {
-  BAD_PARAMS,
-  DecodeURIAsJsonOpts,
-  EncodeJsonAsURIOpts,
-  JsonURIMode,
-  OpenId4VCIVersion,
-  SearchValue
-} from '../types'
+import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, JsonURIMode, OpenId4VCIVersion, SearchValue } from '../types';
 
 /**
  * @type {(json: {[s:string]: never} | ArrayLike<never> | string | object, opts?: EncodeJsonAsURIOpts)} encodes a Json object into a URI

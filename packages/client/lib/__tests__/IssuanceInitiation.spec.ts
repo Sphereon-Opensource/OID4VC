@@ -4,7 +4,7 @@ import { OpenId4VCIVersion } from '@sphereon/oid4vci-common';
 import nock from 'nock';
 
 import { CredentialOfferClient } from '../CredentialOfferClient';
-import { CredentialOfferClientV1_0_11 } from '../CredentialOfferClientV1_0_11'
+import { CredentialOfferClientV1_0_11 } from '../CredentialOfferClientV1_0_11';
 
 import { INITIATION_TEST, INITIATION_TEST_HTTPS_URI, INITIATION_TEST_URI } from './MetadataMocks';
 

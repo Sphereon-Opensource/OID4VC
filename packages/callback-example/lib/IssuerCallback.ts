@@ -34,7 +34,6 @@ export const getIssuerCallbackV1_0_11 = (credential: CredentialIssuanceInput, ke
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getIssuerCallbackV1_0_13 = (
   credential: CredentialIssuanceInput,
   credentialRequest: CredentialRequest,

@@ -65,7 +65,7 @@ export const createAuthorizationRequestUrlV1_0_11 = async ({
           format: cred!.format,
         } satisfies AuthorizationDetails;
       });
-    if (!authorizationDetails || authorizationDetails.length === 0) {
+    if (!authorizationDetails || (Array.isArray(authorizationDetails) && authorizationDetails.length === 0)) {
       throw Error(`Could not create authorization details from credential offer. Please pass in explicit details`);
     }
   }
