@@ -50,11 +50,13 @@ describe('OID4VCI-Client should', () => {
   const INITIATE_QR =
     'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true';
   const OFFER_QR =
-    'openid-credential-offer://?credential_offer%3D%7B%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22adhjhdjajkdkhjhdj%22%2C%22user_pin_required%22%3Atrue%7D%7D%7D';
-  const HTTPS_INITIATE_QR = 'https://issuer.research.identiproof.io?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true'
+    'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22adhjhdjajkdkhjhdj%22%2C%22user_pin_required%22%3Atrue%7D%7D%7D';
+  const HTTPS_INITIATE_QR =
+    'https://issuer.research.identiproof.io?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true';
   const HTTPS_OFFER_QR_AUTHORIZATION_CODE =
-    'https://issuer.research.identiproof.io?credential_offer%3D%7B%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D%7D';
-  const HTTPS_OFFER_QR_PRE_AUTHORIZED = 'https://issuer.research.identiproof.io?credential_offer%3D%7B%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22adhjhdjajkdkhjhdj%22%2C%22user_pin_required%22%3Atrue%7D%7D%7D'
+    'https://issuer.research.identiproof.io?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D%7D';
+  const HTTPS_OFFER_QR_PRE_AUTHORIZED =
+    'https://issuer.research.identiproof.io?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22adhjhdjajkdkhjhdj%22%2C%22user_pin_required%22%3Atrue%7D%7D%7D';
 
   function succeedWithAFullFlowWithClientSetup() {
     nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
@@ -94,37 +96,37 @@ describe('OID4VCI-Client should', () => {
   });
 
   it('succeed with a full flow with the client using OpenID4VCI draft < 9 and https', async () => {
-    succeedWithAFullFlowWithClientSetup()
+    succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
       uri: HTTPS_INITIATE_QR,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
       alg: Alg.ES256,
-      clientId: 'test-clientId'
-    })
+      clientId: 'test-clientId',
+    });
     await assertionOfsucceedWithAFullFlowWithClient(client);
-  })
+  });
 
   it('should succeed with a full flow with the client using OpenID4VCI draft > 11, https and authorization_code flow', async () => {
-    succeedWithAFullFlowWithClientSetup()
+    succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
       uri: HTTPS_OFFER_QR_AUTHORIZATION_CODE,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
       alg: Alg.ES256,
-      clientId: 'test-clientId'
-    })
+      clientId: 'test-clientId',
+    });
     await assertionOfsucceedWithAFullFlowWithClient(client);
-  })
+  });
 
   it('should succeed with a full flow with the client using OpenID4VCI draft > 11, https and preauthorized_code flow', async () => {
-    succeedWithAFullFlowWithClientSetup()
+    succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
       uri: HTTPS_OFFER_QR_PRE_AUTHORIZED,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
       alg: Alg.ES256,
-      clientId: 'test-clientId'
-    })
+      clientId: 'test-clientId',
+    });
     await assertionOfsucceedWithAFullFlowWithClient(client);
-  })
+  });
 
   async function assertionOfsucceedWithAFullFlowWithClient(client: OpenID4VCIClient) {
     expect(client.credentialOffer).toBeDefined();

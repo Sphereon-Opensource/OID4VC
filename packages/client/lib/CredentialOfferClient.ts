@@ -38,8 +38,9 @@ export class CredentialOfferClient {
       };
     } else {
       credentialOffer = convertURIToJsonObject(uri, {
-        arrayTypeProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri'] : ['credential_offer'],
-        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri'] : ['credential_offer'],
+        // It must have the '=' sign after credential_offer otherwise the uri will get split at openid_credential_offer
+        arrayTypeProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['credential_offer='],
+        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['credential_offer='],
       }) as CredentialOfferV1_0_11;
       if (credentialOffer?.credential_offer_uri === undefined && !credentialOffer?.credential_offer) {
         throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri);
