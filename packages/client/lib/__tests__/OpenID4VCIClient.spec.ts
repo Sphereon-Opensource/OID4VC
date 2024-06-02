@@ -102,6 +102,7 @@ describe('OpenID4VCIClient should', () => {
           codeChallenge: 'mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs',
         },
         authorizationRequest: {
+          clientId: 'clientId',
           redirectUri: 'http://localhost:8881/cb',
         },
       }),
