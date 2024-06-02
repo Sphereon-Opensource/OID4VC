@@ -171,7 +171,7 @@ export const createAuthorizationRequestUrl = async ({
       }
     } else {
       debug(`PAR response: ${(parResponse.successBody, null, 2)}`);
-      queryObj = { client_id, request_uri: parResponse.successBody.request_uri };
+      queryObj = { response_type: ResponseType.AUTH_CODE, client_id, request_uri: parResponse.successBody.request_uri };
     }
   }
 
