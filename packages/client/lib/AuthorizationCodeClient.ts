@@ -41,6 +41,7 @@ export const createAuthorizationRequestUrl = async ({
   authorizationRequest,
   credentialOffer,
   credentialConfigurationSupported,
+  clientId,
   version,
 }: {
   pkce: PKCEOpts;
@@ -48,6 +49,7 @@ export const createAuthorizationRequestUrl = async ({
   authorizationRequest: AuthorizationRequestOpts;
   credentialOffer?: CredentialOfferRequestWithBaseUrl;
   credentialConfigurationSupported?: Record<string, CredentialConfigurationSupportedV1_0_13>;
+  clientId?: string,
   version?: OpenId4VCIVersion;
 }): Promise<string> => {
   function removeDisplayAndValueTypes(obj: any): void {
@@ -60,7 +62,8 @@ export const createAuthorizationRequestUrl = async ({
     }
   }
 
-  const { redirectUri, clientId } = authorizationRequest;
+  const { redirectUri } = authorizationRequest;
+  const client_id = clientId ?? authorizationRequest.clientId
   let { scope, authorizationDetails } = authorizationRequest;
   const parMode = endpointMetadata?.credentialIssuerMetadata?.require_pushed_authorization_requests
     ? PARMode.REQUIRE
@@ -140,7 +143,7 @@ export const createAuthorizationRequestUrl = async ({
     }),
     authorization_details: JSON.stringify(handleAuthorizationDetails(endpointMetadata, authorizationDetails)),
     ...(redirectUri && { redirect_uri: redirectUri }),
-    ...(clientId && { client_id: clientId }),
+    ...(client_id && { client_id }),
     ...(credentialOffer?.issuerState && { issuer_state: credentialOffer.issuerState }),
     scope,
   };
