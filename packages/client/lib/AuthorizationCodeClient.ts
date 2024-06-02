@@ -49,7 +49,7 @@ export const createAuthorizationRequestUrl = async ({
   authorizationRequest: AuthorizationRequestOpts;
   credentialOffer?: CredentialOfferRequestWithBaseUrl;
   credentialConfigurationSupported?: Record<string, CredentialConfigurationSupportedV1_0_13>;
-  clientId?: string,
+  clientId?: string;
   version?: OpenId4VCIVersion;
 }): Promise<string> => {
   function removeDisplayAndValueTypes(obj: any): void {
@@ -63,7 +63,10 @@ export const createAuthorizationRequestUrl = async ({
   }
 
   const { redirectUri } = authorizationRequest;
-  const client_id = clientId ?? authorizationRequest.clientId
+  const client_id = clientId ?? authorizationRequest.clientId;
+  if (!client_id) {
+    throw Error(`Cannot use PAR without a client_id value set`);
+  }
   let { scope, authorizationDetails } = authorizationRequest;
   const parMode = endpointMetadata?.credentialIssuerMetadata?.require_pushed_authorization_requests
     ? PARMode.REQUIRE
@@ -143,7 +146,7 @@ export const createAuthorizationRequestUrl = async ({
     }),
     authorization_details: JSON.stringify(handleAuthorizationDetails(endpointMetadata, authorizationDetails)),
     ...(redirectUri && { redirect_uri: redirectUri }),
-    ...(client_id && { client_id }),
+    client_id,
     ...(credentialOffer?.issuerState && { issuer_state: credentialOffer.issuerState }),
     scope,
   };
@@ -168,7 +171,7 @@ export const createAuthorizationRequestUrl = async ({
       }
     } else {
       debug(`PAR response: ${(parResponse.successBody, null, 2)}`);
-      queryObj = { request_uri: parResponse.successBody.request_uri };
+      queryObj = { client_id, request_uri: parResponse.successBody.request_uri };
     }
   }
 
