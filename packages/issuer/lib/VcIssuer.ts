@@ -32,7 +32,6 @@ import {
   toUniformCredentialOfferRequest,
   TxCode,
   TYP_ERROR,
-  UniformCredentialRequest,
   URIState,
 } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
@@ -234,14 +233,17 @@ export class VcIssuer<DIDDoc extends object> {
     credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
     responseCNonce?: string
   }): Promise<CredentialResponse> {
-    if (!('credential_identifier' in opts.credentialRequest)) {
+    /*if (!('credential_identifier' in opts.credentialRequest)) {
       throw new Error('credential request should be of spec version 1.0.13 or above')
-    }
-    const credentialRequest: CredentialRequestV1_0_13 = opts.credentialRequest
+    }*/
+    const credentialRequest = opts.credentialRequest as CredentialRequestV1_0_13
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
     try {
-      if (!this.isMetadataSupportCredentialRequestFormat(opts.credentialRequest.format)) {
+      if (!('credential_identifier' in credentialRequest) && !credentialRequest.format) {
+        throw new Error('credential request should either have a credential_identifier or format and type')
+      }
+      if (credentialRequest.format && !this.isMetadataSupportCredentialRequestFormat(credentialRequest.format)) {
         throw new Error(TokenErrorResponse.invalid_request)
       }
       const validated = await this.validateCredentialRequestProof({
@@ -267,7 +269,7 @@ export class VcIssuer<DIDDoc extends object> {
         throw Error(`Either a credential needs to be supplied or a credentialDataSupplier`)
       }
       let credential: CredentialIssuanceInput | undefined
-      let format: OID4VCICredentialFormat = credentialRequest.format
+      let format: OID4VCICredentialFormat | undefined = credentialRequest.format
       let signerCallback: CredentialSignerCallback<DIDDoc> | undefined = opts.credentialSignerCallback
       if (opts.credential) {
         credential = opts.credential
@@ -359,7 +361,7 @@ export class VcIssuer<DIDDoc extends object> {
 
       return {
         credential: verifiableCredential,
-        format: opts.credentialRequest.format,
+        // format: credentialRequest.format,
         c_nonce: newcNonce,
         c_nonce_expires_in: this._cNonceExpiresIn,
       }
@@ -429,7 +431,7 @@ export class VcIssuer<DIDDoc extends object> {
 
     const supportedIssuanceFormats = ['jwt_vc_json', 'jwt_vc_json-ld', 'vc+sd-jwt', 'ldp_vc']
     try {
-      if (!supportedIssuanceFormats.includes(credentialRequest.format)) {
+      if (credentialRequest.format && !supportedIssuanceFormats.includes(credentialRequest.format)) {
         throw Error(`Format ${credentialRequest.format} not supported yet`)
       } else if (typeof this._jwtVerifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
         throw new Error(JWT_VERIFY_CONFIG_ERROR)
@@ -557,7 +559,7 @@ export class VcIssuer<DIDDoc extends object> {
 
   private async issueCredentialImpl(
     opts: {
-      credentialRequest: UniformCredentialRequest
+      credentialRequest: CredentialRequest
       credential: CredentialIssuanceInput
       jwtVerifyResult: JwtVerifyResult<DIDDoc>
       format?: OID4VCICredentialFormat

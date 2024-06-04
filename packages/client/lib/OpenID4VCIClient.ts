@@ -318,7 +318,8 @@ export class OpenID4VCIClient {
   }
 
   public async acquireCredentials({
-    credentialType,
+    credentialIdentifier,
+    credentialTypes,
     context,
     proofCallbacks,
     format,
@@ -329,7 +330,8 @@ export class OpenID4VCIClient {
     deferredCredentialAwait,
     deferredCredentialIntervalInMS,
   }: {
-    credentialType: string;
+    credentialIdentifier?: string;
+    credentialTypes?: string | string[];
     context?: string[];
     proofCallbacks: ProofOfPossessionCallbacks<any>;
     format?: CredentialFormat | OID4VCICredentialFormat;
@@ -355,7 +357,7 @@ export class OpenID4VCIClient {
         })
       : CredentialRequestClientBuilder.fromCredentialIssuer({
           credentialIssuer: this.getIssuer(),
-          credentialType,
+          credentialIdentifier: credentialIdentifier,
           metadata: this.endpointMetadata,
           version: this.version(),
         });
@@ -364,24 +366,41 @@ export class OpenID4VCIClient {
     requestBuilder.withDeferredCredentialAwait(deferredCredentialAwait ?? false, deferredCredentialIntervalInMS);
     if (this.endpointMetadata?.credentialIssuerMetadata) {
       const metadata = this.endpointMetadata.credentialIssuerMetadata;
-      if (metadata.credentials_supported && Array.isArray(metadata.credentials_supported)) {
+      const types = credentialTypes ? (Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes]) : undefined;
+
+      if (credentialIdentifier) {
+        if (typeof metadata.credential_configurations_supported !== 'object') {
+          throw Error(
+            `Credentials_supported should be an object, current ${typeof metadata.credential_configurations_supported} when credential_identifier is used`,
+          );
+        }
+        const credentialsSupported = metadata.credential_configurations_supported;
+        if (!metadata.credential_configurations_supported || !credentialsSupported[credentialIdentifier]) {
+          throw new Error(`Credential type ${credentialIdentifier} is not supported by issuer ${this.getIssuer()}`);
+        }
+      } else if (!types) {
+        throw Error(`If no credential_identifier is used, we expect types`);
+      } else if (metadata.credentials_supported && Array.isArray(metadata.credentials_supported)) {
         let typeSupported = false;
 
         metadata.credentials_supported.forEach((supportedCredential) => {
           const subTypes = getTypesFromCredentialSupported(supportedCredential);
-          if (subTypes.includes(credentialType) || credentialType === supportedCredential.id) {
+          if (
+            subTypes.every((t, i) => types[i] === t) ||
+            (types.length === 1 && (types[0] === supportedCredential.id || subTypes.includes(types[0])))
+          ) {
             typeSupported = true;
           }
         });
 
         if (!typeSupported) {
-          console.log(`Not all credential types ${JSON.stringify(credentialType)} are present in metadata for ${this.getIssuer()}`);
+          console.log(`Not all credential types ${JSON.stringify(credentialTypes)} are present in metadata for ${this.getIssuer()}`);
           // throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
         }
-      } else if (metadata.credentials_supported && !Array.isArray(metadata.credentials_supported)) {
-        const credentialsSupported = metadata.credentials_supported;
-        if (!metadata.credentials_supported || !credentialsSupported[credentialType]) {
-          throw new Error(`Credential type ${credentialType} is not supported by issuer ${this.getIssuer()}`);
+      } else if (metadata.credential_configurations_supported && !Array.isArray(metadata.credential_configurations_supported)) {
+        const credentialsSupported = metadata.credential_configurations_supported;
+        if (types.some((type) => !metadata.credential_configurations_supported || !credentialsSupported[type])) {
+          throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
         }
       }
       // todo: Format check? We might end up with some disjoint type / format combinations supported by the server
@@ -410,8 +429,7 @@ export class OpenID4VCIClient {
     }
     const response = await credentialRequestClient.acquireCredentialsUsingProof({
       proofInput: proofBuilder,
-      credentialType,
-      format,
+      ...(credentialIdentifier ? { credentialIdentifier } : { format, context, credentialTypes }),
     });
     if (response.errorBody) {
       debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`);
@@ -453,6 +471,14 @@ export class OpenID4VCIClient {
     );
   }
 
+  isFlowTypeSupported(flowType: AuthzFlowType): boolean {
+    return this.issuerSupportedFlowTypes().includes(flowType);
+  }
+
+  public hasAuthorizationURL(): boolean {
+    return !!this._state.authorizationURL;
+  }
+
   get credentialOffer(): CredentialOfferRequestWithBaseUrl | undefined {
     return this._state.credentialOffer;
   }
@@ -491,6 +517,10 @@ export class OpenID4VCIClient {
     return this._state.clientId;
   }
 
+  public hasAccessTokenResponse(): boolean {
+    return !!this._state.accessTokenResponse;
+  }
+
   get accessTokenResponse(): AccessTokenResponse {
     this.assertAccessToken();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -502,8 +532,20 @@ export class OpenID4VCIClient {
     return this._state.credentialIssuer;
   }
 
-  get authorizationURL(): string | undefined {
-    return this._state.authorizationURL;
+  public getAccessTokenEndpoint(): string {
+    this.assertIssuerData();
+    return this.endpointMetadata
+      ? this.endpointMetadata.token_endpoint
+      : AccessTokenClient.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
+  }
+
+  public getCredentialEndpoint(): string {
+    this.assertIssuerData();
+    return this.endpointMetadata ? this.endpointMetadata.credential_endpoint : `${this.getIssuer()}/credential`;
+  }
+
+  public hasDeferredCredentialEndpoint(): boolean {
+    return !!this.getAccessTokenEndpoint();
   }
 
   public getDeferredCredentialEndpoint(): string {

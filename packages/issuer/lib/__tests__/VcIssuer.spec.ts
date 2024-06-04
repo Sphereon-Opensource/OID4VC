@@ -382,7 +382,7 @@ describe('VcIssuer', () => {
         },
         type: ['VerifiableCredential'],
       },
-      format: 'jwt_vc_json',
+      // format: 'jwt_vc_json',
     })
   })
 

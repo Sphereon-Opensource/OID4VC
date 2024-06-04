@@ -2,6 +2,9 @@ import { JWK, ProofOfPossession } from './CredentialIssuance.types';
 import {
   AlgValue,
   CredentialDataSupplierInput,
+  CredentialRequestJwtVcJson,
+  CredentialRequestJwtVcJsonLdAndLdpVc,
+  CredentialRequestSdJwtVc,
   CredentialsSupportedDisplay,
   CredentialSupplierConfig,
   EncValue,
@@ -54,20 +57,20 @@ export type CredentialConfigurationSupportedV1_0_13 = {
   [x: string]: unknown;
 };
 
-export type CredentialRequestV1_0_13 = {
-  format: OID4VCICredentialFormat;
-  proof?: ProofOfPossession;
-  credential_identifier: string;
-  credential_response_encryption?: {
-    jwk: JWK;
-    alg: AlgValue;
-    enc: EncValue;
-  };
-  /**
-   * fixme: Added this to address sd-jwt requests. probably we need to revisit this
-   */
-  vct?: string;
-};
+export type CredentialRequestV1_0_13 =
+  | {
+      // We add them here to keep existing other request versions happy. They cannot co-exists with an identifier
+      format?: OID4VCICredentialFormat /* | OID4VCICredentialFormat[];*/; // for now it seems only one is supported in the spec
+      proof?: ProofOfPossession;
+
+      credential_identifier?: string;
+      credential_response_encryption?: {
+        jwk: JWK;
+        alg: AlgValue;
+        enc: EncValue;
+      };
+    }
+  | (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc);
 
 export interface CredentialOfferV1_0_13 {
   credential_offer?: CredentialOfferPayloadV1_0_13;

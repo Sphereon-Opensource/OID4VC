@@ -5,6 +5,7 @@ import {
   getCredentialRequestForVersion,
   getUniformFormat,
   isDeferredCredentialResponse,
+  JsonLdIssuerCredentialDefinition,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   OpenIDResponse,
@@ -26,7 +27,8 @@ export interface CredentialRequestOpts {
   deferredCredentialIntervalInMS?: number;
   credentialEndpoint: string;
   deferredCredentialEndpoint?: string;
-  credentialType: string;
+  credentialTypes?: string[];
+  credentialIdentifier?: string;
   format?: CredentialFormat | OID4VCICredentialFormat;
   proof: ProofOfPossession;
   token: string;
@@ -78,12 +80,21 @@ export class CredentialRequestClient {
 
   public async acquireCredentialsUsingProof<DIDDoc>(opts: {
     proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
-    credentialType: string;
+    credentialIdentifier?: string;
+    credentialTypes?: string | string[];
+    context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
   }): Promise<OpenIDResponse<CredentialResponse>> {
-    const { credentialType, proofInput, format } = opts;
+    const { credentialIdentifier, credentialTypes, proofInput, format, context } = opts;
 
-    const request = await this.createCredentialRequest({ proofInput, credentialType, format, version: this.version() });
+    const request = await this.createCredentialRequest({
+      proofInput,
+      credentialIdentifier,
+      credentialTypes,
+      context,
+      format,
+      version: this.version(),
+    });
     return await this.acquireCredentialsUsingRequest(request);
   }
 
@@ -136,45 +147,73 @@ export class CredentialRequestClient {
 
   public async createCredentialRequest<DIDDoc>(opts: {
     proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
-    credentialType: string;
+    credentialIdentifier?: string;
+    credentialTypes?: string | string[];
+    context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
     version: OpenId4VCIVersion;
   }): Promise<CredentialRequestV1_0_13> {
-    const { proofInput } = opts;
+    const { proofInput, credentialIdentifier: credential_identifier } = opts;
+    const proof = await buildProof(proofInput, opts);
+    if (credential_identifier) {
+      if (opts.format || opts.credentialTypes || opts.context) {
+        throw Error(`You cannot mix credential_identifier with format, credential types and/or context`);
+      }
+      return {
+        credential_identifier,
+        proof,
+      };
+    }
     const formatSelection = opts.format ?? this.credentialRequestOpts.format;
 
     if (!formatSelection) {
       throw Error(`Format of credential to be issued is missing`);
     }
     const format = getUniformFormat(formatSelection);
-    const typeSelection = opts.credentialType ?? this.credentialRequestOpts.credentialType;
-    if (!typeSelection) {
-      throw Error(`Credential type needs to be provided`);
+    const typesSelection =
+      opts?.credentialTypes && (typeof opts.credentialTypes === 'string' || opts.credentialTypes.length > 0)
+        ? opts.credentialTypes
+        : this.credentialRequestOpts.credentialTypes;
+    if (!typesSelection) {
+      throw Error(`Credential type(s) need to be provided`);
     }
-    const proof = await buildProof(proofInput, opts);
+    const types = Array.isArray(typesSelection) ? typesSelection : [typesSelection];
+    if (types.length === 0) {
+      throw Error(`Credential type(s) need to be provided`);
+    }
 
     // TODO: we should move format specific logic
     if (format === 'jwt_vc_json' || format === 'jwt_vc') {
       return {
-        credential_identifier: typeSelection,
+        types,
         format,
         proof,
       };
     } else if (format === 'jwt_vc_json-ld' || format === 'ldp_vc') {
+      if (this.version() >= OpenId4VCIVersion.VER_1_0_12 && !opts.context) {
+        throw Error('No @context value present, but it is required');
+      }
+
       return {
         format,
         proof,
         // Ignored because v11 does not have the context value, but it is required in v12
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        credential_identifier: typeSelection,
+        credential_definition: {
+          types,
+          ...(opts.context && { '@context': opts.context }),
+        } as JsonLdIssuerCredentialDefinition,
       };
     } else if (format === 'vc+sd-jwt') {
+      if (types.length > 1) {
+        throw Error(`Only a single credential type is supported for ${format}`);
+      }
       // fixme: this isn't up to the CredentialRequest that we see in the version v1_0_13
       return {
         format,
         proof,
-        vct: typeSelection,
+        vct: types[0],
       } as CredentialRequestV1_0_13;
     }
 

@@ -20,7 +20,8 @@ export class CredentialRequestClientBuilder {
   deferredCredentialEndpoint?: string;
   deferredCredentialAwait = false;
   deferredCredentialIntervalInMS = 5000;
-  credentialType?: string;
+  credentialIdentifier?: string;
+  credentialTypes?: string[] = [];
   format?: CredentialFormat | OID4VCICredentialFormat;
   token?: string;
   version?: OpenId4VCIVersion;
@@ -29,12 +30,14 @@ export class CredentialRequestClientBuilder {
     credentialIssuer,
     metadata,
     version,
-    credentialType,
+    credentialIdentifier,
+    credentialTypes,
   }: {
     credentialIssuer: string;
     metadata?: EndpointMetadata;
     version?: OpenId4VCIVersion;
-    credentialType: string;
+    credentialIdentifier?: string;
+    credentialTypes?: string | string[];
   }): CredentialRequestClientBuilder {
     const issuer = credentialIssuer;
     const builder = new CredentialRequestClientBuilder();
@@ -43,7 +46,12 @@ export class CredentialRequestClientBuilder {
     if (metadata?.deferred_credential_endpoint) {
       builder.withDeferredCredentialEndpoint(metadata.deferred_credential_endpoint);
     }
-    builder.withCredentialType(credentialType);
+    if (credentialIdentifier) {
+      builder.withCredentialIdentifier(credentialIdentifier);
+    }
+    if (credentialTypes) {
+      builder.withCredentialType(credentialTypes);
+    }
     return builder;
   }
 
@@ -71,10 +79,10 @@ export class CredentialRequestClientBuilder {
     if (metadata?.deferred_credential_endpoint) {
       builder.withDeferredCredentialEndpoint(metadata.deferred_credential_endpoint);
     }
-    const types: string[] = (request.credential_offer as CredentialOfferPayloadV1_0_13).credential_configuration_ids;
+    const ids: string[] = (request.credential_offer as CredentialOfferPayloadV1_0_13).credential_configuration_ids;
     // if there's only one in the offer, we pre-select it. if not, you should provide the credentialType
-    if (types.length && types.length === 1) {
-      builder.withCredentialType(types[0]);
+    if (ids.length && ids.length === 1) {
+      builder.withCredentialIdentifier(ids[0]);
     }
     return builder;
   }
@@ -119,8 +127,13 @@ export class CredentialRequestClientBuilder {
     return this;
   }
 
-  public withCredentialType(credentialType: string): this {
-    this.credentialType = credentialType;
+  public withCredentialIdentifier(credentialIdentifier: string): this {
+    this.credentialIdentifier = credentialIdentifier;
+    return this;
+  }
+
+  public withCredentialType(credentialTypes: string | string[]): this {
+    this.credentialTypes = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
     return this;
   }
 

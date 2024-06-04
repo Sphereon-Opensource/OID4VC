@@ -104,7 +104,7 @@ describe('Credential Request Client ', () => {
       .withClientId('sphereon:wallet')
       .build();
     const credentialRequest = await credReqClient.createCredentialRequest({
-      credentialType: 'OpenBadgeCredential',
+      credentialTypes: 'OpenBadgeCredential',
       proofInput: proof,
       format: 'jwt',
       version: OpenId4VCIVersion.VER_1_0_13,
@@ -119,7 +119,7 @@ describe('Credential Request Client ', () => {
     const credReqClient = CredentialRequestClientBuilder.fromCredentialOfferRequest({ request: INITIATION_TEST })
       .withCredentialEndpoint('httpsf://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
-      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
+      .withCredentialIdentifier('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt: jwt1_0_08,
@@ -190,7 +190,7 @@ describe('Credential Request Client with different issuers ', () => {
           proof_type: 'jwt',
           jwt: getMockData('spruce')?.credential.request.proof.jwt as string,
         },
-        credentialType: 'OpenBadgeCredential',
+        credentialTypes: 'OpenBadgeCredential',
         format: 'jwt_vc',
         version: OpenId4VCIVersion.VER_1_0_13,
       });
@@ -237,7 +237,7 @@ describe('Credential Request Client with different issuers ', () => {
           proof_type: 'jwt',
           jwt: getMockData('uniissuer')?.credential.request.proof.jwt as string,
         },
-        credentialType: 'OpenBadgeCredential',
+        credentialIdentifier: 'OpenBadgeCredential',
         format: 'jwt_vc',
         version: OpenId4VCIVersion.VER_1_0_13,
       });
@@ -324,8 +324,8 @@ describe('Credential Request Client with different issuers ', () => {
           proof_type: 'jwt',
           jwt: getMockData('diwala')?.credential.request.proof.jwt as string,
         },
-        credentialType: 'OpenBadgeCredential',
-        format: 'ldp_vc',
+        credentialIdentifier: 'BevoegdheidUittreksel_jwt_vc_json',
+        // format: 'ldp_vc',
         version: OpenId4VCIVersion.VER_1_0_13,
       });
 
@@ -335,7 +335,9 @@ describe('Credential Request Client with different issuers ', () => {
       OpenId4VCIVersion.VER_1_0_13,
     ) as CredentialRequestV1_0_13;
 
-    expect(credentialRequest.credential_identifier).toEqual('OpenBadgeCredential');
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    expect(credentialRequest.credential_identifier).toEqual('BevoegdheidUittreksel_jwt_vc_json');
     expect(credentialRequest.proof).toEqual({
       jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3AxM3N6QUFMVFN0cDV1OGtMcnl5YW5vYWtrVWtFUGZXazdvOHY3dms0RW1KI3o2TWtwMTNzekFBTFRTdHA1dThrTHJ5eWFub2Fra1VrRVBmV2s3bzh2N3ZrNEVtSiJ9.eyJhdWQiOiJodHRwczovL29pZGM0dmMuZGl3YWxhLmlvIiwiaWF0IjoxNjgxOTE1MDk1LjIwMiwiZXhwIjoxNjgxOTE1NzU1LjIwMiwiaXNzIjoic3BoZXJlb246c3NpLXdhbGxldCIsImp0aSI6IjYxN2MwM2EzLTM3MTUtNGJlMy1hYjkxNzM4MTlmYzYxNTYzIn0.KA-cHjecaYp9FSaWHkz5cqtNyhBIVT_0I7cJnpHn03T4UWFvdhjhn8Hpe-BU247enFyWOWJ6v3NQZyZgle7xBA',
       proof_type: 'jwt',

@@ -12,14 +12,9 @@ import { getFormatForVersion } from './FormatUtils';
 export function getTypesFromRequest(credentialRequest: CredentialRequest, opts?: { filterVerifiableCredential: boolean }) {
   let types: string[] = [];
   if ('credential_identifier' in credentialRequest && credentialRequest.credential_identifier) {
-    types = [credentialRequest.credential_identifier];
+    throw Error(`Cannot get types from request when it contains a credential_identifier`);
   } else if (credentialRequest.format === 'jwt_vc_json' || credentialRequest.format === 'jwt_vc') {
-    types =
-      'types' in credentialRequest
-        ? credentialRequest.types
-        : 'credential_identifier' in credentialRequest
-          ? [credentialRequest.credential_identifier]
-          : [];
+    types = 'types' in credentialRequest ? credentialRequest.types : [];
   } else if (credentialRequest.format === 'jwt_vc_json-ld' || credentialRequest.format === 'ldp_vc') {
     types =
       'credential_definition' in credentialRequest && credentialRequest.credential_definition
@@ -28,9 +23,7 @@ export function getTypesFromRequest(credentialRequest: CredentialRequest, opts?:
           // @ts-ignore
           'types' in credentialRequest.types
           ? (credentialRequest['types' as keyof CredentialRequest] as unknown as string[])
-          : 'credential_identifier' in credentialRequest
-            ? [credentialRequest.credential_identifier]
-            : [];
+          : [];
   } else if (credentialRequest.format === 'vc+sd-jwt') {
     types = 'vct' in credentialRequest ? [credentialRequest.vct as string] : [];
   }
@@ -49,7 +42,8 @@ export function getCredentialRequestForVersion(
   version: OpenId4VCIVersion,
 ): UniformCredentialRequest | CredentialRequestV1_0_08 | CredentialRequestV1_0_11 | CredentialRequestV1_0_13 {
   if (version === OpenId4VCIVersion.VER_1_0_08) {
-    const draft8Format = getFormatForVersion(credentialRequest.format, version);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const draft8Format = getFormatForVersion(credentialRequest.format!, version);
     const types = getTypesFromRequest(credentialRequest, { filterVerifiableCredential: true });
 
     return {

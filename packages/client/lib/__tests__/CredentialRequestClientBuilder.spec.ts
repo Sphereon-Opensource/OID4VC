@@ -76,12 +76,12 @@ describe('Credential Request Client Builder', () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
-      .withCredentialType('credentialType')
+      .withCredentialIdentifier('credentialType')
       .withToken('token')
       .build();
     expect(credReqClient.credentialRequestOpts.credentialEndpoint).toBe('https://oidc4vci.demo.spruceid.com/credential');
     expect(credReqClient.credentialRequestOpts.format).toBe('jwt_vc');
-    expect(credReqClient.credentialRequestOpts.credentialType).toStrictEqual('credentialType');
+    expect(credReqClient.credentialRequestOpts.credentialIdentifier).toStrictEqual('credentialType');
     expect(credReqClient.credentialRequestOpts.token).toBe('token');
   });
 
@@ -89,7 +89,7 @@ describe('Credential Request Client Builder', () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
-      .withCredentialType('OpenBadgeCredential')
+      .withCredentialIdentifier('OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt: jwtv1_0_11,
@@ -105,7 +105,7 @@ describe('Credential Request Client Builder', () => {
     await proofOfPossessionVerifierCallbackFunction({ ...proof, kid });
     const credentialRequest: CredentialRequestV1_0_13 = await credReqClient.createCredentialRequest({
       proofInput: proof,
-      credentialType: 'OpenBadgeCredential',
+      credentialIdentifier: 'OpenBadgeCredential',
       version: OpenId4VCIVersion.VER_1_0_13,
     });
     expect(credentialRequest.proof?.jwt).toContain(partialJWT);

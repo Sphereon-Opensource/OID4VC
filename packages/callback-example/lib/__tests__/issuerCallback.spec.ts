@@ -223,7 +223,7 @@ describe('issuerCallback', () => {
         credential_configurations_supported: { VeriCred: { format: 'jwt_vc_json' } },
       } as unknown as CredentialIssuerMetadataV1_0_13)
       .withFormat('jwt_vc_json')
-      .withCredentialType('credentialType')
+      .withCredentialIdentifier('VeriCred')
       .withToken('token')
 
     const jwt: Jwt = {
@@ -252,14 +252,14 @@ describe('issuerCallback', () => {
 
     const credentialRequestClient = new CredentialRequestClient(credReqClient)
     const credentialRequest: CredentialRequest = await credentialRequestClient.createCredentialRequest({
-      credentialType: 'VerifiableCredential',
-      format: 'jwt_vc_json',
+      credentialIdentifier: 'VerifiableCredential',
+      // format: 'jwt_vc_json',
       proofInput: proof,
       version: OpenId4VCIVersion.VER_1_0_13,
     })
 
     expect(credentialRequest).toEqual({
-      format: 'jwt_vc_json',
+      // format: 'jwt_vc_json',
       proof: {
         jwt: expect.stringContaining('eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFj'),
         proof_type: 'jwt',
@@ -293,7 +293,7 @@ describe('issuerCallback', () => {
         },
         type: ['VerifiableCredential'],
       },
-      format: 'jwt_vc_json',
+      // format: 'jwt_vc_json',
     })
 
     await expect(

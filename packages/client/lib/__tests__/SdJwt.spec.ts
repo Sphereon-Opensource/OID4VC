@@ -18,11 +18,11 @@ const jwk = { kty: 'EC', crv: 'P-256', x: 'zQOowIC1gWJtdddB5GAt4lau6Lt8Ihy771iAf
 
 const issuerMetadata = new IssuerMetadataBuilderV1_13()
   .withCredentialIssuer('https://example.com')
-  .withCredentialEndpoint('https://credenital-endpoint.example.com')
+  .withCredentialEndpoint('https://credential-endpoint.example.com')
   .withTokenEndpoint('https://token-endpoint.example.com')
   .addCredentialConfigurationsSupported('SdJwtCredentialId', {
     format: 'vc+sd-jwt',
-    vct: 'SdJwtCredential',
+    vct: 'SdJwtCredentialId',
     id: 'SdJwtCredentialId',
   } as CredentialConfigurationSupportedV1_0_13)
   .build();
@@ -107,7 +107,7 @@ describe('sd-jwt vc', () => {
       });
 
       const supported = client.getCredentialsSupported('vc+sd-jwt');
-      expect(supported).toEqual({ SdJwtCredentialId: { format: 'vc+sd-jwt', id: 'SdJwtCredentialId', vct: 'SdJwtCredential' } });
+      expect(supported).toEqual({ SdJwtCredentialId: { format: 'vc+sd-jwt', id: 'SdJwtCredentialId', vct: 'SdJwtCredentialId' } });
 
       const offered = supported['SdJwtCredentialId'] as CredentialSupportedSdJwtVc;
 
@@ -145,8 +145,8 @@ describe('sd-jwt vc', () => {
         );
 
       const credentials = await client.acquireCredentials({
-        credentialType: offered.vct,
-        format: 'vc+sd-jwt',
+        credentialIdentifier: offered.vct,
+        // format: 'vc+sd-jwt',
         alg,
         jwk,
         proofCallbacks: {
@@ -159,7 +159,7 @@ describe('sd-jwt vc', () => {
         c_nonce: 'new-c-nonce',
         c_nonce_expires_in: 300,
         credential: 'sd-jwt',
-        format: 'vc+sd-jwt',
+        // format: 'vc+sd-jwt',
       });
     },
     UNIT_TEST_TIMEOUT,
