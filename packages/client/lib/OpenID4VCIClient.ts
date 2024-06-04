@@ -476,8 +476,12 @@ export class OpenID4VCIClient {
   }
 
   public hasAuthorizationURL(): boolean {
-    return !!this._state.authorizationURL;
+    return !!this.authorizationURL;
   }
+
+  get authorizationURL(): string | undefined {
+    return this._state.authorizationURL
+}
 
   get credentialOffer(): CredentialOfferRequestWithBaseUrl | undefined {
     return this._state.credentialOffer;
