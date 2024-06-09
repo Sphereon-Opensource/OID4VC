@@ -4,19 +4,25 @@ import {
   getCredentialRequestForVersion,
   getUniformFormat,
   isDeferredCredentialResponse,
+  isValidURL,
+  NotificationErrorResponse,
+  NotificationRequest,
+  NotificationResult,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   OpenIDResponse,
+  post,
   ProofOfPossession,
   UniformCredentialRequest,
   URL_NOT_VALID,
 } from '@sphereon/oid4vci-common';
+import { ExperimentalSubjectIssuance } from '@sphereon/oid4vci-common/dist/experimental/holder-vci';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
-import { isValidURL, post } from './functions';
+import { LOG } from './types';
 
 const debug = Debug('sphereon:oid4vci:credential');
 
@@ -24,6 +30,7 @@ export interface CredentialRequestOpts {
   deferredCredentialAwait?: boolean;
   deferredCredentialIntervalInMS?: number;
   credentialEndpoint: string;
+  notificationEndpoint?: string;
   deferredCredentialEndpoint?: string;
   credentialTypes: string[];
   format?: CredentialFormat | OID4VCICredentialFormat;
@@ -80,10 +87,11 @@ export class CredentialRequestClient {
     credentialTypes?: string | string[];
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
+    subjectIssuance?: ExperimentalSubjectIssuance;
   }): Promise<OpenIDResponse<CredentialResponse>> {
-    const { credentialTypes, proofInput, format, context } = opts;
+    const { credentialTypes, proofInput, format, context, subjectIssuance } = opts;
 
-    const request = await this.createCredentialRequest({ proofInput, credentialTypes, context, format, version: this.version() });
+    const request = await this.createCredentialRequest({ proofInput, credentialTypes, context, format, version: this.version(), subjectIssuance });
     return await this.acquireCredentialsUsingRequest(request);
   }
 
@@ -103,6 +111,11 @@ export class CredentialRequestClient {
       response = await this.acquireDeferredCredential(response.successBody, { bearerToken: this.credentialRequestOpts.token });
     }
 
+    if ((uniformRequest.credential_subject_issuance && response.successBody) || response.successBody?.credential_subject_issuance) {
+      if (uniformRequest.credential_subject_issuance !== response.successBody?.credential_subject_issuance) {
+        throw Error('Subject signing was requested, but issuer did not provide the options in its response');
+      }
+    }
     debug(`Credential endpoint ${credentialEndpoint} response:\r\n${JSON.stringify(response, null, 2)}`);
     return response;
   }
@@ -136,6 +149,7 @@ export class CredentialRequestClient {
     credentialTypes?: string | string[];
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
+    subjectIssuance?: ExperimentalSubjectIssuance;
     version: OpenId4VCIVersion;
   }): Promise<UniformCredentialRequest> {
     const { proofInput } = opts;
@@ -165,6 +179,7 @@ export class CredentialRequestClient {
         types,
         format,
         proof,
+        ...opts.subjectIssuance,
       };
     } else if (format === 'jwt_vc_json-ld' || format === 'ldp_vc') {
       if (this.version() >= OpenId4VCIVersion.VER_1_0_12 && !opts.context) {
@@ -174,6 +189,7 @@ export class CredentialRequestClient {
       return {
         format,
         proof,
+        ...opts.subjectIssuance,
 
         // Ignored because v11 does not have the context value, but it is required in v12
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -192,10 +208,34 @@ export class CredentialRequestClient {
         format,
         proof,
         vct: types[0],
+        ...opts.subjectIssuance,
       };
     }
 
     throw new Error(`Unsupported format: ${format}`);
+  }
+
+  public async sendNotification(request: NotificationRequest, accessToken: string): Promise<NotificationResult> {
+    LOG.info(`Sending status notification event '${request.event}' for id ${request.notification_id}`);
+    if (!this.credentialRequestOpts.notificationEndpoint) {
+      throw Error(`Cannot send notification when no notification endpoint is provided`);
+    }
+    const response = await post<NotificationErrorResponse>(this.credentialRequestOpts.notificationEndpoint, JSON.stringify(request), {
+      bearerToken: accessToken,
+    });
+    const error = response.errorBody?.error !== undefined;
+    const result = {
+      error,
+      response: error ? await response.errorBody?.json() : undefined,
+    };
+    if (error) {
+      LOG.warning(
+        `Notification endpoint returned an error for event '${request.event}' and id ${request.notification_id}: ${await response.errorBody?.json()}`,
+      );
+    } else {
+      LOG.debug(`Notification endpoint returned success for event '${request.event}' and id ${request.notification_id}`);
+    }
+    return result;
   }
 
   private version(): OpenId4VCIVersion {

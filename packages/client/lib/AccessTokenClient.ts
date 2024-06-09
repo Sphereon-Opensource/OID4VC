@@ -5,7 +5,9 @@ import {
   assertedUniformCredentialOffer,
   AuthorizationServerOpts,
   AuthzFlowType,
+  convertJsonToURI,
   EndpointMetadata,
+  formPost,
   getIssuerFromCredentialOfferPayload,
   GrantTypes,
   IssuerOpts,
@@ -17,12 +19,9 @@ import {
   UniformCredentialOfferPayload,
 } from '@sphereon/oid4vci-common';
 import { ObjectUtils } from '@sphereon/ssi-types';
-import Debug from 'debug';
 
 import { MetadataClient } from './MetadataClient';
-import { convertJsonToURI, formPost } from './functions';
-
-const debug = Debug('sphereon:oid4vci:token');
+import { LOG } from './types';
 
 export class AccessTokenClient {
   public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
@@ -117,7 +116,7 @@ export class AccessTokenClient {
       return request as AccessTokenRequest;
     }
 
-    throw new Error('Credential offer request does not follow neither pre-authorized code nor authorization code flow requirements.');
+    throw new Error('Credential offer request follows neither pre-authorized code nor authorization code flow requirements.');
   }
 
   private assertPreAuthorizedGrantType(grantType: GrantTypes): void {
@@ -141,39 +140,39 @@ export class AccessTokenClient {
     if (requestPayload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
       isPinRequired = requestPayload.grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.user_pin_required ?? false;
     }
-    debug(`Pin required for issuer ${issuer}: ${isPinRequired}`);
+    LOG.warning(`Pin required for issuer ${issuer}: ${isPinRequired}`);
     return isPinRequired;
   }
 
   private assertNumericPin(isPinRequired?: boolean, pin?: string): void {
     if (isPinRequired) {
       if (!pin || !/^\d{1,8}$/.test(pin)) {
-        debug(`Pin is not 1 to 8 digits long`);
+        LOG.warning(`Pin is not 1 to 8 digits long`);
         throw new Error('A valid pin consisting of maximal 8 numeric characters must be present.');
       }
     } else if (pin) {
-      debug(`Pin set, whilst not required`);
+      LOG.warning(`Pin set, whilst not required`);
       throw new Error('Cannot set a pin, when the pin is not required.');
     }
   }
 
   private assertNonEmptyPreAuthorizedCode(accessTokenRequest: AccessTokenRequest): void {
     if (!accessTokenRequest[PRE_AUTH_CODE_LITERAL]) {
-      debug(`No pre-authorized code present, whilst it is required`);
+      LOG.warning(`No pre-authorized code present, whilst it is required`, accessTokenRequest);
       throw new Error('Pre-authorization must be proven by presenting the pre-authorized code. Code must be present.');
     }
   }
 
   private assertNonEmptyCodeVerifier(accessTokenRequest: AccessTokenRequest): void {
     if (!accessTokenRequest.code_verifier) {
-      debug('No code_verifier present, whilst it is required');
+      LOG.warning('No code_verifier present, whilst it is required', accessTokenRequest);
       throw new Error('Authorization flow requires the code_verifier to be present');
     }
   }
 
   private assertNonEmptyCode(accessTokenRequest: AccessTokenRequest): void {
     if (!accessTokenRequest.code) {
-      debug('No code present, whilst it is required');
+      LOG.warning('No code present, whilst it is required');
       throw new Error('Authorization flow requires the code to be present');
     }
   }
@@ -222,7 +221,7 @@ export class AccessTokenClient {
     if (!url || !ObjectUtils.isString(url)) {
       throw new Error('No authorization server token URL present. Cannot acquire access token');
     }
-    debug(`Token endpoint determined to be ${url}`);
+    LOG.debug(`Token endpoint determined to be ${url}`);
     return url;
   }
 
@@ -239,7 +238,7 @@ export class AccessTokenClient {
   }
 
   private throwNotSupportedFlow(): void {
-    debug(`Only pre-authorized or authorization code flows supported.`);
+    LOG.warning(`Only pre-authorized or authorization code flows supported.`);
     throw new Error('Only pre-authorized-code or authorization code flows are supported');
   }
 }

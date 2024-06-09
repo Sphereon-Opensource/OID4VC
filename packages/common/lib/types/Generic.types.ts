@@ -1,5 +1,7 @@
 import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
+import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
+
 import { ProofOfPossession } from './CredentialIssuance.types';
 import { AuthorizationServerMetadata } from './ServerMetadata';
 import { CredentialOfferSession } from './StateManager.types';
@@ -53,6 +55,7 @@ export interface CredentialIssuerMetadataOpts {
   authorization_server?: string; // OPTIONAL. Identifier of the OAuth 2.0 Authorization Server (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
   // authorization_servers?: string[]; // OPTIONAL. Array of strings that identify the OAuth 2.0 Authorization Servers (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
   token_endpoint?: string;
+  notification_endpoint?: string;
   display?: MetadataDisplay[]; //  An array of objects, where each object contains display properties of a Credential Issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
   credential_supplier_config?: CredentialSupplierConfig;
 }
@@ -74,14 +77,15 @@ export interface CredentialSupportedBrief {
   cryptographic_suites_supported?: string[]; // OPTIONAL. Array of case sensitive strings that identify the cryptographic suites that are supported for the cryptographic_binding_methods_supported
 }
 
-export type CommonCredentialSupported = CredentialSupportedBrief & {
-  format: OID4VCICredentialFormat | string; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
-  id?: string; // OPTIONAL. A JSON string identifying the respective object. The value MUST be unique across all credentials_supported entries in the Credential Issuer Metadata
-  display?: CredentialsSupportedDisplay[]; // OPTIONAL. An array of objects, where each object contains the display properties of the supported credential for a certain language
-  /**
-   * following properties are non-mso_mdoc specific and we might wanna rethink them when we're going to support mso_mdoc
-   */
-};
+export type CommonCredentialSupported = CredentialSupportedBrief &
+  ExperimentalSubjectIssuance & {
+    format: OID4VCICredentialFormat | string; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
+    id?: string; // OPTIONAL. A JSON string identifying the respective object. The value MUST be unique across all credentials_supported entries in the Credential Issuer Metadata
+    display?: CredentialsSupportedDisplay[]; // OPTIONAL. An array of objects, where each object contains the display properties of the supported credential for a certain language
+    /**
+     * following properties are non-mso_mdoc specific and we might wanna rethink them when we're going to support mso_mdoc
+     */
+  };
 
 export interface CredentialSupportedJwtVcJsonLdAndLdpVc extends CommonCredentialSupported {
   types: string[]; // REQUIRED. JSON array designating the types a certain credential type supports
@@ -167,7 +171,7 @@ export interface ErrorResponse extends Response {
 
 export type UniformCredentialRequest = CredentialRequestV1_0_11;
 
-export interface CommonCredentialRequest {
+export interface CommonCredentialRequest extends ExperimentalSubjectIssuance {
   format: OID4VCICredentialFormat /* | OID4VCICredentialFormat[];*/; // for now it seems only one is supported in the spec
   proof?: ProofOfPossession;
 }
@@ -189,7 +193,7 @@ export interface CredentialRequestSdJwtVc extends CommonCredentialRequest {
   claims?: IssuerCredentialSubject;
 }
 
-export interface CommonCredentialResponse {
+export interface CommonCredentialResponse extends ExperimentalSubjectIssuance {
   format: string;
   credential?: W3CVerifiableCredential;
   acceptance_token?: string;
@@ -270,3 +274,23 @@ export interface GrantUrnIetf {
 }
 
 export const PRE_AUTH_CODE_LITERAL = 'pre-authorized_code';
+
+export type NotificationEventType = 'credential_accepted' | 'credential_failure' | 'credential_deleted';
+
+export interface NotificationRequest {
+  notification_id: string;
+  event: NotificationEventType | string;
+  event_description?: string;
+  credential?: any; // Experimental support to have a wallet sign a credential. Not part of the spec
+}
+
+export type NotificationError = 'invalid_notification_id' | 'invalid_notification_request';
+
+export type NotificationResult = {
+  error: boolean;
+  response?: NotificationErrorResponse;
+};
+
+export interface NotificationErrorResponse {
+  error: NotificationError | string;
+}

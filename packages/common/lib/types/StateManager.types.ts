@@ -13,6 +13,7 @@ export interface CredentialOfferSession extends StateType {
   status: IssueStatus;
   error?: string;
   lastUpdatedAt: number;
+  notification_id: string;
   issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
 }
