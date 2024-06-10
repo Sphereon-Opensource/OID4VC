@@ -5,9 +5,6 @@ import {
   getUniformFormat,
   isDeferredCredentialResponse,
   isValidURL,
-  NotificationErrorResponse,
-  NotificationRequest,
-  NotificationResult,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   OpenIDResponse,
@@ -22,7 +19,6 @@ import Debug from 'debug';
 
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
-import { LOG } from './types';
 
 const debug = Debug('sphereon:oid4vci:credential');
 
@@ -37,6 +33,7 @@ export interface CredentialRequestOpts {
   proof: ProofOfPossession;
   token: string;
   version: OpenId4VCIVersion;
+  subjectIssuance?: ExperimentalSubjectIssuance;
 }
 
 export async function buildProof<DIDDoc>(
@@ -88,14 +85,16 @@ export class CredentialRequestClient {
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
     subjectIssuance?: ExperimentalSubjectIssuance;
-  }): Promise<OpenIDResponse<CredentialResponse>> {
+  }): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const { credentialTypes, proofInput, format, context, subjectIssuance } = opts;
 
     const request = await this.createCredentialRequest({ proofInput, credentialTypes, context, format, version: this.version(), subjectIssuance });
     return await this.acquireCredentialsUsingRequest(request);
   }
 
-  public async acquireCredentialsUsingRequest(uniformRequest: UniformCredentialRequest): Promise<OpenIDResponse<CredentialResponse>> {
+  public async acquireCredentialsUsingRequest(
+    uniformRequest: UniformCredentialRequest,
+  ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const request = getCredentialRequestForVersion(uniformRequest, this.version());
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint;
     if (!isValidURL(credentialEndpoint)) {
@@ -105,11 +104,14 @@ export class CredentialRequestClient {
     debug(`Acquiring credential(s) from: ${credentialEndpoint}`);
     debug(`request\n: ${JSON.stringify(request, null, 2)}`);
     const requestToken: string = this.credentialRequestOpts.token;
-    let response: OpenIDResponse<CredentialResponse> = await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken });
+    let response = (await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken })) as OpenIDResponse<CredentialResponse> & {
+      access_token: string;
+    };
     this._isDeferred = isDeferredCredentialResponse(response);
     if (this.isDeferred() && this.credentialRequestOpts.deferredCredentialAwait && response.successBody) {
       response = await this.acquireDeferredCredential(response.successBody, { bearerToken: this.credentialRequestOpts.token });
     }
+    response.access_token = requestToken;
 
     if ((uniformRequest.credential_subject_issuance && response.successBody) || response.successBody?.credential_subject_issuance) {
       if (uniformRequest.credential_subject_issuance !== response.successBody?.credential_subject_issuance) {
@@ -125,7 +127,7 @@ export class CredentialRequestClient {
     opts?: {
       bearerToken?: string;
     },
-  ): Promise<OpenIDResponse<CredentialResponse>> {
+  ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const transactionId = response.transaction_id;
     const bearerToken = response.acceptance_token ?? opts?.bearerToken;
     const deferredCredentialEndpoint = this.getDeferredCredentialEndpoint();
@@ -213,29 +215,6 @@ export class CredentialRequestClient {
     }
 
     throw new Error(`Unsupported format: ${format}`);
-  }
-
-  public async sendNotification(request: NotificationRequest, accessToken: string): Promise<NotificationResult> {
-    LOG.info(`Sending status notification event '${request.event}' for id ${request.notification_id}`);
-    if (!this.credentialRequestOpts.notificationEndpoint) {
-      throw Error(`Cannot send notification when no notification endpoint is provided`);
-    }
-    const response = await post<NotificationErrorResponse>(this.credentialRequestOpts.notificationEndpoint, JSON.stringify(request), {
-      bearerToken: accessToken,
-    });
-    const error = response.errorBody?.error !== undefined;
-    const result = {
-      error,
-      response: error ? await response.errorBody?.json() : undefined,
-    };
-    if (error) {
-      LOG.warning(
-        `Notification endpoint returned an error for event '${request.event}' and id ${request.notification_id}: ${await response.errorBody?.json()}`,
-      );
-    } else {
-      LOG.debug(`Notification endpoint returned success for event '${request.event}' and id ${request.notification_id}`);
-    }
-    return result;
   }
 
   private version(): OpenId4VCIVersion {

@@ -11,12 +11,15 @@ import {
   CredentialSupported,
   DefaultURISchemes,
   EndpointMetadataResult,
+  ExperimentalSubjectIssuance,
   getClientIdFromCredentialOfferPayload,
   getIssuerFromCredentialOfferPayload,
   getSupportedCredentials,
   getTypesFromCredentialSupported,
   JWK,
   KID_JWK_X5C_ERROR,
+  NotificationRequest,
+  NotificationResult,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PKCEOpts,
@@ -29,10 +32,12 @@ import Debug from 'debug';
 import { AccessTokenClient } from './AccessTokenClient';
 import { createAuthorizationRequestUrl } from './AuthorizationCodeClient';
 import { CredentialOfferClient } from './CredentialOfferClient';
+import { CredentialRequestOpts } from './CredentialRequestClient';
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { generateMissingPKCEOpts } from './functions/AuthorizationUtil';
+import { sendNotification } from './functions/notifications';
 
 const debug = Debug('sphereon:oid4vci');
 
@@ -339,7 +344,8 @@ export class OpenID4VCIClient {
     jti?: string;
     deferredCredentialAwait?: boolean;
     deferredCredentialIntervalInMS?: number;
-  }): Promise<CredentialResponse> {
+    experimentalHolderIssuanceSupported?: boolean;
+  }): Promise<CredentialResponse & { access_token: string }> {
     if ([jwk, kid].filter((v) => v !== undefined).length > 1) {
       throw new Error(KID_JWK_X5C_ERROR + `. jwk: ${jwk !== undefined}, kid: ${kid !== undefined}`);
     }
@@ -362,6 +368,7 @@ export class OpenID4VCIClient {
 
     requestBuilder.withTokenFromResponse(this.accessTokenResponse);
     requestBuilder.withDeferredCredentialAwait(deferredCredentialAwait ?? false, deferredCredentialIntervalInMS);
+    let subjectIssuance: ExperimentalSubjectIssuance | undefined;
     if (this.endpointMetadata?.credentialIssuerMetadata) {
       const metadata = this.endpointMetadata.credentialIssuerMetadata;
       const types = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
@@ -376,6 +383,9 @@ export class OpenID4VCIClient {
             (types.length === 1 && (types[0] === supportedCredential.id || subTypes.includes(types[0])))
           ) {
             typeSupported = true;
+            if (supportedCredential.credential_subject_issuance) {
+              subjectIssuance = { credential_subject_issuance: supportedCredential.credential_subject_issuance };
+            }
           }
         });
 
@@ -391,6 +401,10 @@ export class OpenID4VCIClient {
       }
       // todo: Format check? We might end up with some disjoint type / format combinations supported by the server
     }
+    if (subjectIssuance) {
+      requestBuilder.withSubjectIssuance(subjectIssuance);
+    }
+
     const credentialRequestClient = requestBuilder.build();
     const proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse({
       accessTokenResponse: this.accessTokenResponse,
@@ -418,6 +432,7 @@ export class OpenID4VCIClient {
       credentialTypes,
       context,
       format,
+      subjectIssuance,
     });
     if (response.errorBody) {
       debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`);
@@ -434,7 +449,7 @@ export class OpenID4VCIClient {
         } for issuer ${this.getIssuer()} failed as there was no success response body`,
       );
     }
-    return response.successBody;
+    return { ...response.successBody, access_token: response.access_token };
   }
 
   public async exportState(): Promise<string> {
@@ -455,6 +470,14 @@ export class OpenID4VCIClient {
       format: format,
       types: restrictToInitiationTypes ? this.getCredentialOfferTypes() : undefined,
     });
+  }
+
+  public async sendNotification(
+    credentialRequestOpts: CredentialRequestOpts,
+    request: NotificationRequest,
+    accessToken?: string,
+  ): Promise<NotificationResult> {
+    return sendNotification(credentialRequestOpts, request, accessToken ?? this.accessTokenResponse.access_token);
   }
 
   getCredentialOfferTypes(): string[][] {
