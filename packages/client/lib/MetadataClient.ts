@@ -6,12 +6,11 @@ import {
   CredentialOfferRequestWithBaseUrl,
   EndpointMetadataResult,
   getIssuerFromCredentialOfferPayload,
+  getJson,
   OpenIDResponse,
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
-
-import { getJson } from './functions';
 
 const debug = Debug('sphereon:oid4vci:metadata');
 

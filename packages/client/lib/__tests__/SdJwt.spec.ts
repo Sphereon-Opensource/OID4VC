@@ -43,7 +43,7 @@ const vcIssuer = new VcIssuerBuilder()
         },
         payload: {
           aud: issuerMetadata.credential_issuer,
-          iat: +new Date()/1000,
+          iat: +new Date() / 1000,
           nonce: 'a-c-nonce',
         },
       },
@@ -152,6 +152,7 @@ describe('sd-jwt vc', () => {
       });
 
       expect(credentials).toEqual({
+        notification_id: expect.any(String),
         c_nonce: 'new-c-nonce',
         c_nonce_expires_in: 300,
         credential: 'sd-jwt',

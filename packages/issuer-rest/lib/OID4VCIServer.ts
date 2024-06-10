@@ -86,6 +86,7 @@ export interface IGetIssueStatusEndpointOpts extends ISingleEndpointOpts {
 export interface IOID4VCIServerOpts extends HasEndpointOpts {
   endpointOpts?: {
     tokenEndpointOpts?: ITokenEndpointOpts
+    notificationOpts?: ISingleEndpointOpts
     createCredentialOfferOpts?: ICreateCredentialOfferEndpointOpts
     getCredentialOfferOpts?: IGetCredentialOfferEndpointOpts
     getStatusOpts?: IGetIssueStatusEndpointOpts

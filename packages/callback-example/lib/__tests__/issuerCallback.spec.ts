@@ -19,6 +19,7 @@ import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/type
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
+import { v4 } from 'uuid'
 
 import { generateDid, getIssuerCallback, verifyCredential } from '../IssuerCallback'
 
@@ -37,7 +38,7 @@ async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promi
   }
   return await new jose.SignJWT({ ...args.payload })
     .setProtectedHeader({ ...args.header })
-    .setIssuedAt(args.payload.iat ?? Math.round(+new Date()/1000))
+    .setIssuedAt(args.payload.iat ?? Math.round(+new Date() / 1000))
     .setIssuer(kid)
     .setAudience(args.payload.aud)
     .setExpirationTime('2h')
@@ -113,6 +114,7 @@ describe('issuerCallback', () => {
       createdAt: +new Date(),
       lastUpdatedAt: +new Date(),
       status: IssueStatus.OFFER_CREATED,
+      notification_id: v4(),
       userPin: '123456',
       credentialOffer: {
         credential_offer: {
@@ -267,6 +269,7 @@ describe('issuerCallback', () => {
 
     expect(credentialResponse).toEqual({
       c_nonce: expect.any(String),
+      notification_id: expect.any(String),
       c_nonce_expires_in: 300,
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],

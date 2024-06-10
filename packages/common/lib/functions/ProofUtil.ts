@@ -1,3 +1,6 @@
+import Debug from 'debug';
+import jwtDecode from 'jwt-decode';
+
 import {
   BAD_PARAMS,
   BaseJWK,
@@ -6,13 +9,15 @@ import {
   Jwt,
   JWTHeader,
   JWTPayload,
+  JWTVerifyCallback,
+  JwtVerifyResult,
   ProofOfPossession,
   ProofOfPossessionCallbacks,
   Typ,
-} from '@sphereon/oid4vci-common';
-import Debug from 'debug';
+  VCI_LOG_COMMON,
+} from '../types';
 
-const debug = Debug('sphereon:openid4vci:token');
+const debug = Debug('sphereon:openid4vci:common');
 
 /**
  *
@@ -66,6 +71,42 @@ export const createProofOfPossession = async <DIDDoc>(
 const partiallyValidateJWS = (jws: string): void => {
   if (jws.split('.').length !== 3 || !jws.startsWith('ey')) {
     throw new Error(JWS_NOT_VALID);
+  }
+};
+
+export const isJWS = (token: string): boolean => {
+  try {
+    partiallyValidateJWS(token);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+export const extractBearerToken = (authorizationHeader?: string): string | undefined => {
+  return authorizationHeader ? /Bearer (.*)/i.exec(authorizationHeader)?.[1] : undefined;
+};
+
+export const validateJWT = async (
+  jwt?: string,
+  opts?: { kid?: string; accessTokenVerificationCallback?: JWTVerifyCallback<never> },
+): Promise<JwtVerifyResult<any>> => {
+  if (!jwt) {
+    throw Error('No JWT was supplied');
+  }
+
+  if (!opts?.accessTokenVerificationCallback) {
+    VCI_LOG_COMMON.warning(`No access token verification callback supplied. Access tokens will not be verified, except for a very basic check`);
+    partiallyValidateJWS(jwt);
+    const header = jwtDecode<JWTHeader>(jwt, { header: true });
+    const payload = jwtDecode<JWTPayload>(jwt, { header: false });
+    return {
+      jwt: { header, payload } satisfies Jwt,
+      ...header,
+      ...payload,
+    };
+  } else {
+    return await opts.accessTokenVerificationCallback({ jwt, kid: opts.kid });
   }
 };
 

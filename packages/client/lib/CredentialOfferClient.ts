@@ -1,4 +1,6 @@
 import {
+  convertJsonToURI,
+  convertURIToJsonObject,
   CredentialOffer,
   CredentialOfferPayload,
   CredentialOfferPayloadV1_0_09,
@@ -10,8 +12,6 @@ import {
   toUniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
-
-import { convertJsonToURI, convertURIToJsonObject } from './functions';
 
 const debug = Debug('sphereon:oid4vci:offer');
 

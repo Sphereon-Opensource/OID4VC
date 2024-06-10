@@ -34,6 +34,9 @@ export function getCredentialRequestForVersion(
     const draft8Format = getFormatForVersion(credentialRequest.format, version);
     const types = getTypesFromRequest(credentialRequest, { filterVerifiableCredential: true });
 
+    if (credentialRequest.credential_subject_issuance) {
+      throw Error('Experimental subject issuance is not supported for older versions of the spec');
+    }
     return {
       format: draft8Format,
       proof: credentialRequest.proof,
