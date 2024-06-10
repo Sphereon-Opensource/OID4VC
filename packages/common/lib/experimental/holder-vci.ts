@@ -1,7 +1,6 @@
 /**
  * Experimental support not following the VCI spec to have the holder actually (re)sign the issued credential and return it to the issuer
  */
-import * as process from 'node:process';
 
 export const EXPERIMENTAL_SUBJECT_PROOF_MODE_ENABLED = process.env.EXPERIMENTAL_SUBJECT_PROOF_MODE?.trim().toLowerCase() === 'true';
 

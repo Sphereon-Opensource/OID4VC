@@ -1,6 +1,3 @@
-import * as console from 'console'
-import process from 'process'
-
 import {
   AuthorizationRequest,
   CredentialSupported,
