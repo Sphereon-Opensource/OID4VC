@@ -69,6 +69,7 @@ console.log(client.getAccessTokenEndpoint()); // https://auth.research.identipro
 ```
 
 Using https scheme
+
 ```typescript
 import { OpenID4VCIClient } from '@sphereon/oid4vci-client';
 

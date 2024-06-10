@@ -68,7 +68,7 @@ describe('Issuance Initiation', () => {
     expect(client.scheme).toEqual('https');
     expect(client.credential_offer.credential_issuer).toEqual('https://launchpad.vii.electron.mattrlabs.io');
     expect(client.preAuthorizedCode).toEqual('UPZohaodPlLBnGsqB02n2tIupCIg8nKRRUEUHWA665X');
-  })
+  });
 
   it('Should take an http url as input and return a Credential Offer', async () => {
     const client = await CredentialOfferClient.fromURI(
@@ -79,5 +79,5 @@ describe('Issuance Initiation', () => {
     expect(client.scheme).toEqual('http');
     expect(client.credential_offer.credential_issuer).toEqual('http://launchpad.vii.electron.mattrlabs.io');
     expect(client.preAuthorizedCode).toEqual('UPZohaodPlLBnGsqB02n2tIupCIg8nKRRUEUHWA665X');
-  })
+  });
 });

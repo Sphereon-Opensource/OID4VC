@@ -473,7 +473,7 @@ export class OpenID4VCIClient {
   }
 
   public async sendNotification(
-    credentialRequestOpts: CredentialRequestOpts,
+    credentialRequestOpts: Partial<CredentialRequestOpts>,
     request: NotificationRequest,
     accessToken?: string,
   ): Promise<NotificationResult> {

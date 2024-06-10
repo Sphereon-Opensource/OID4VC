@@ -4,7 +4,7 @@ import { CredentialRequestOpts } from '../CredentialRequestClient';
 import { LOG } from '../types';
 
 export async function sendNotification(
-  credentialRequestOpts: CredentialRequestOpts,
+  credentialRequestOpts: Partial<CredentialRequestOpts>,
   request: NotificationRequest,
   accessToken?: string,
 ): Promise<NotificationResult> {

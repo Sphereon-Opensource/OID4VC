@@ -43,12 +43,17 @@ describe('CredentialOfferUtils should', () => {
       },
     } as CredentialOfferPayloadV1_0_11
 
-    expect(createCredentialOfferURI({
-      credential_issuer: credentialOffer.credential_issuer,
-      credential_endpoint: 'test_issuer',
-      issuer: 'test_issuer',
-      credentials_supported: []
-    }, { credentialOffer, state: 'eyJhbGciOiJSU0Et...FYUaBy', scheme: 'https' })).toEqual(
+    expect(
+      createCredentialOfferURI(
+        {
+          credential_issuer: credentialOffer.credential_issuer,
+          credential_endpoint: 'test_issuer',
+          issuer: 'test_issuer',
+          credentials_supported: [],
+        },
+        { credentialOffer, state: 'eyJhbGciOiJSU0Et...FYUaBy', scheme: 'https' },
+      ),
+    ).toEqual(
       `${credentialOffer.credential_issuer}?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fcredential-issuer.example.com%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D%7D`,
     )
   })
@@ -71,12 +76,17 @@ describe('CredentialOfferUtils should', () => {
       },
     } as CredentialOfferPayloadV1_0_11
 
-    expect(createCredentialOfferURI({
-      credential_issuer: credentialOffer.credential_issuer,
-      credential_endpoint: 'test_issuer',
-      issuer: 'test_issuer',
-      credentials_supported: []
-    }, { credentialOffer, state: 'eyJhbGciOiJSU0Et...FYUaBy', scheme: 'http' })).toEqual(
+    expect(
+      createCredentialOfferURI(
+        {
+          credential_issuer: credentialOffer.credential_issuer,
+          credential_endpoint: 'test_issuer',
+          issuer: 'test_issuer',
+          credentials_supported: [],
+        },
+        { credentialOffer, state: 'eyJhbGciOiJSU0Et...FYUaBy', scheme: 'http' },
+      ),
+    ).toEqual(
       `${credentialOffer.credential_issuer}?credential_offer=%7B%22credential_issuer%22%3A%22http%3A%2F%2Fcredential-issuer.example.com%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D%7D`,
     )
   })
