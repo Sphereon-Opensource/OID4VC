@@ -14,6 +14,6 @@ export type SubjectProofNotificationEventsSupported =
 export interface ExperimentalSubjectIssuance {
   credential_subject_issuance?: {
     subject_proof_mode: SubjectProofMode;
-    notifications_events_supported: Array<SubjectProofNotificationEventsSupported>;
+    notification_events_supported: Array<SubjectProofNotificationEventsSupported>;
   };
 }
