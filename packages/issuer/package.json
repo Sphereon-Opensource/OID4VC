@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@sphereon/oid4vci-common": "workspace:*",
-    "@sphereon/ssi-types": "0.24.1-unstable.112",
+    "@sphereon/ssi-types": "0.24.1-unstable.116",
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
