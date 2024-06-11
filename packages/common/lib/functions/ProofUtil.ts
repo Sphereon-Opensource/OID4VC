@@ -1,6 +1,7 @@
 import Debug from 'debug';
 import jwtDecode from 'jwt-decode';
 
+import { VCI_LOG_COMMON } from '..';
 import {
   BAD_PARAMS,
   BaseJWK,
@@ -14,7 +15,6 @@ import {
   ProofOfPossession,
   ProofOfPossessionCallbacks,
   Typ,
-  VCI_LOG_COMMON,
 } from '../types';
 
 const debug = Debug('sphereon:openid4vci:common');
