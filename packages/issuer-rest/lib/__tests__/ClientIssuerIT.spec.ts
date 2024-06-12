@@ -256,6 +256,7 @@ describe('VcIssuer', () => {
       credentialIssuerMetadata: {
         credential_endpoint: 'http://localhost:3456/test/credential-endpoint',
         credential_issuer: 'http://localhost:3456/test',
+        token_endpoint: 'http://localhost:3456/test/token',
         credentials_supported: [
           {
             credentialSubject: {
