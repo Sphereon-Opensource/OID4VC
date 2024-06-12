@@ -482,7 +482,7 @@ export class OpenID4VCIClient {
     request: NotificationRequest,
     accessToken?: string,
   ): Promise<NotificationResult> {
-    return sendNotification(credentialRequestOpts, request, accessToken ?? (this.hasAccessTokenResponse() ? this.accessTokenResponse.access_token : this._state.accessToken));
+    return sendNotification(credentialRequestOpts, request, accessToken ??  this._state.accessToken ?? this._state.accessTokenResponse?.access_token);
   }
 
   getCredentialOfferTypes(): string[][] {

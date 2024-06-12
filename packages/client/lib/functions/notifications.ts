@@ -14,7 +14,7 @@ export async function sendNotification(
   }
   const token = accessToken ?? credentialRequestOpts.token;
   const response = await post<NotificationErrorResponse>(credentialRequestOpts.notificationEndpoint, JSON.stringify(request), {
-    bearerToken: token,
+    ...(token && {bearerToken: token}),
   });
   const error = response.errorBody?.error !== undefined;
   const result = {
