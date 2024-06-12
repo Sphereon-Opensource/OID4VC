@@ -53,6 +53,7 @@ export interface OpenID4VCIClientState {
   authorizationRequestOpts?: AuthorizationRequestOpts;
   authorizationCodeResponse?: AuthorizationResponse;
   pkce: PKCEOpts;
+  accessToken?: string;
   authorizationURL?: string;
 }
 
@@ -67,6 +68,7 @@ export class OpenID4VCIClient {
     credentialIssuer,
     pkce,
     authorizationRequest,
+    accessToken,
     jwk,
     endpointMetadata,
     accessTokenResponse,
@@ -82,6 +84,7 @@ export class OpenID4VCIClient {
     pkce?: PKCEOpts;
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
     jwk?: JWK;
+    accessToken?: string;
     endpointMetadata?: EndpointMetadataResult;
     accessTokenResponse?: AccessTokenResponse;
     authorizationRequestOpts?: AuthorizationRequestOpts;
@@ -102,6 +105,7 @@ export class OpenID4VCIClient {
       pkce: { disabled: false, codeChallengeMethod: CodeChallengeMethod.S256, ...pkce },
       authorizationRequestOpts,
       authorizationCodeResponse,
+      accessToken,
       jwk,
       endpointMetadata,
       accessTokenResponse,
@@ -317,6 +321,7 @@ export class OpenID4VCIClient {
         );
       }
       this._state.accessTokenResponse = response.successBody;
+      this._state.accessToken = response.successBody.access_token
     }
 
     return this.accessTokenResponse;
@@ -477,7 +482,7 @@ export class OpenID4VCIClient {
     request: NotificationRequest,
     accessToken?: string,
   ): Promise<NotificationResult> {
-    return sendNotification(credentialRequestOpts, request, accessToken ?? this.accessTokenResponse.access_token);
+    return sendNotification(credentialRequestOpts, request, accessToken ?? (this.hasAccessTokenResponse() ? this.accessTokenResponse.access_token : this._state.accessToken));
   }
 
   getCredentialOfferTypes(): string[][] {
