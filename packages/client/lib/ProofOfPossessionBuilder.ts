@@ -1,6 +1,7 @@
 import {
   AccessTokenResponse,
   Alg,
+  createProofOfPossession,
   EndpointMetadata,
   JWK,
   Jwt,
@@ -11,8 +12,6 @@ import {
   ProofOfPossessionCallbacks,
   Typ,
 } from '@sphereon/oid4vci-common';
-
-import { createProofOfPossession } from './functions';
 
 export class ProofOfPossessionBuilder<DIDDoc> {
   private readonly proof?: ProofOfPossession;

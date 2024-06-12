@@ -7,10 +7,12 @@ import {
   JwtVerifyResult,
   OID4VCICredentialFormat,
   UniformCredentialRequest,
+  VCI_LOGGERS,
 } from '@sphereon/oid4vci-common'
 import {
   CompactSdJwtVc,
   ICredential,
+  LogMethod,
   SdJwtDecodedVerifiableCredentialPayload,
   SdJwtDisclosureFrame,
   W3CVerifiableCredential,
@@ -44,3 +46,5 @@ export interface CredentialDataSupplierResult {
 }
 
 export type CredentialDataSupplier = (args: CredentialDataSupplierArgs) => Promise<CredentialDataSupplierResult>
+
+export const LOG = VCI_LOGGERS.options('sphereon:oid4vci:issuer', { methods: [LogMethod.EVENT, LogMethod.DEBUG_PKG] }).get('sphereon:oid4vci:issuer')

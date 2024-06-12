@@ -116,6 +116,7 @@ async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promi
 
 //fixme: bring back this test
 describe('ismapolis bug report #63, https://github.com/Sphereon-Opensource/OID4VC-demo/issues/63, should', () => {
+  // Sphereon infra is not working currently
   it.skip('work as expected provided a correct JWT is supplied', async () => {
     debug.enable('*');
     const { uri } = await getCredentialOffer('jwt_vc_json');

@@ -156,6 +156,8 @@ describe('sd-jwt vc', () => {
       });
 
       expect(credentials).toEqual({
+        notification_id: expect.any(String),
+        access_token: 'ey.val.ue',
         c_nonce: 'new-c-nonce',
         c_nonce_expires_in: 300,
         credential: 'sd-jwt',

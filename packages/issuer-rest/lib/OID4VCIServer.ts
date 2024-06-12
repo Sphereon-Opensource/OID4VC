@@ -1,6 +1,3 @@
-import * as console from 'console'
-import process from 'process'
-
 import {
   AuthorizationRequest,
   CredentialConfigurationSupportedV1_0_13,
@@ -90,6 +87,7 @@ export interface IGetIssueStatusEndpointOpts extends ISingleEndpointOpts {
 export interface IOID4VCIServerOpts extends HasEndpointOpts {
   endpointOpts?: {
     tokenEndpointOpts?: ITokenEndpointOpts
+    notificationOpts?: ISingleEndpointOpts
     createCredentialOfferOpts?: ICreateCredentialOfferEndpointOpts
     getCredentialOfferOpts?: IGetCredentialOfferEndpointOpts
     getStatusOpts?: IGetIssueStatusEndpointOpts

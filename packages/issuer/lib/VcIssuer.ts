@@ -35,7 +35,8 @@ import {
   URIState,
 } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
-import { CompactSdJwtVc, CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphereon/oid4vci-common/dist/events'
+import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
@@ -181,6 +182,7 @@ export class VcIssuer<DIDDoc extends object> {
       createdAt,
       lastUpdatedAt,
       status,
+      notification_id: v4(),
       ...(userPin && { userPin }),
       ...(opts.credentialDataSupplierInput && { credentialDataSupplierInput: opts.credentialDataSupplierInput }),
       credentialOffer,
@@ -198,11 +200,19 @@ export class VcIssuer<DIDDoc extends object> {
     let qrCodeDataUri: string | undefined
     if (opts.qrCodeOpts) {
       const { AwesomeQR } = await import('awesome-qr')
-      console.log(uri)
-
       const qrCode = new AwesomeQR({ ...opts.qrCodeOpts, text: uri })
       qrCodeDataUri = `data:image/png;base64,${(await qrCode.draw())!.toString('base64')}`
     }
+    EVENTS.emit(CredentialOfferEventNames.OID4VCI_OFFER_CREATED, {
+      eventName: CredentialOfferEventNames.OID4VCI_OFFER_CREATED,
+      id: v4(),
+      data: uri,
+      initiator: '<unknown>',
+      initiatorType: InitiatorType.EXTERNAL,
+      system: System.OID4VCI,
+      // todo: Issuer
+      subsystem: SubSystem.API,
+    })
     return {
       session,
       uri,
@@ -265,6 +275,7 @@ export class VcIssuer<DIDDoc extends object> {
         ...(preAuthSession && { preAuthorizedCode: preAuthSession.preAuthorizedCode }),
       }
       await this.cNonces.set(newcNonce, newcNonceState)
+
       if (!opts.credential && this._credentialDataSupplier === undefined && opts.credentialDataSupplier === undefined) {
         throw Error(`Either a credential needs to be supplied or a credentialDataSupplier`)
       }
@@ -348,23 +359,37 @@ export class VcIssuer<DIDDoc extends object> {
       // remove the previous nonce
       await this.cNonces.delete(cNonceState.cNonce)
 
+      let notification_id: string | undefined
+
       if (preAuthorizedCode && preAuthSession) {
         preAuthSession.lastUpdatedAt = +new Date()
         preAuthSession.status = IssueStatus.CREDENTIAL_ISSUED
+        notification_id = preAuthSession.notification_id
         await this._credentialOfferSessions.set(preAuthorizedCode, preAuthSession)
       } else if (issuerState && authSession) {
         // If both were set we used the pre auth flow above as well, hence the else if
         authSession.lastUpdatedAt = +new Date()
         authSession.status = IssueStatus.CREDENTIAL_ISSUED
+        notification_id = authSession.notification_id
         await this._credentialOfferSessions.set(issuerState, authSession)
       }
 
-      return {
+      const response: CredentialResponse = {
         credential: verifiableCredential,
         // format: credentialRequest.format,
         c_nonce: newcNonce,
         c_nonce_expires_in: this._cNonceExpiresIn,
+        ...(notification_id && { notification_id }),
       }
+      const experimentalSubjectIssuance = opts.credentialRequest.credential_subject_issuance
+      if (experimentalSubjectIssuance?.subject_proof_mode) {
+        if (experimentalSubjectIssuance.subject_proof_mode !== 'proof_replace') {
+          throw Error('Only proof replace is supported currently')
+        }
+        response.transaction_id = authSession?.issuerState
+        response.credential_subject_issuance = experimentalSubjectIssuance
+      }
+      return response
     } catch (error: unknown) {
       await this.updateErrorStatus({ preAuthorizedCode, issuerState, error })
       throw error
@@ -569,7 +594,23 @@ export class VcIssuer<DIDDoc extends object> {
     if ((!opts.credential && !opts.credentialRequest) || !this._credentialSignerCallback) {
       throw new Error(ISSUER_CONFIG_ERROR)
     }
-    return issuerCallback ? await issuerCallback(opts) : this._credentialSignerCallback(opts)
+    const credential = issuerCallback ? await issuerCallback(opts) : await this._credentialSignerCallback(opts)
+    const uniform = CredentialMapper.toUniformCredential(credential)
+    const issuer = uniform.issuer ? (typeof uniform.issuer === 'string' ? uniform.issuer : uniform.issuer.id) : '<unknown>'
+
+    // TODO: Create builder
+    EVENTS.emit(CredentialEventNames.OID4VCI_CREDENTIAL_ISSUED, {
+      eventName: CredentialEventNames.OID4VCI_CREDENTIAL_ISSUED,
+      id: v4(),
+      data: credential,
+      // TODO: Format, request etc
+      initiator: issuer ?? '<unknown>',
+      initiatorType: InitiatorType.EXTERNAL,
+      system: System.OID4VCI,
+      subsystem: SubSystem.VC_ISSUER,
+    })
+
+    return credential
   }
 
   get credentialSignerCallback(): CredentialSignerCallback<DIDDoc> | undefined {

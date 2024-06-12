@@ -5,6 +5,7 @@ import {
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
   EndpointMetadata,
+  ExperimentalSubjectIssuance,
   getIssuerFromCredentialOfferPayload,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
@@ -25,6 +26,7 @@ export class CredentialRequestClientBuilder {
   format?: CredentialFormat | OID4VCICredentialFormat;
   token?: string;
   version?: OpenId4VCIVersion;
+  subjectIssuance?: ExperimentalSubjectIssuance;
 
   public static fromCredentialIssuer({
     credentialIssuer,
@@ -139,6 +141,11 @@ export class CredentialRequestClientBuilder {
 
   public withFormat(format: CredentialFormat | OID4VCICredentialFormat): this {
     this.format = format;
+    return this;
+  }
+
+  public withSubjectIssuance(subjectIssuance: ExperimentalSubjectIssuance): this {
+    this.subjectIssuance = subjectIssuance;
     return this;
   }
 

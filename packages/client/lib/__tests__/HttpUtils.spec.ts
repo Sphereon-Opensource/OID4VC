@@ -1,4 +1,4 @@
-import { isValidURL } from '../functions';
+import { isValidURL } from '@sphereon/oid4vci-common';
 
 describe('httputils.isValidURL', () => {
   it('Should return true for http://localhost', () => {

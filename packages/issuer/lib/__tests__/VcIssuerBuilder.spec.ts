@@ -132,6 +132,7 @@ describe('VcIssuer builder should', () => {
     expect(vcIssuer).toBeDefined()
     const preAuthorizedCodecreatedAt = +new Date()
     await vcIssuer.credentialOfferSessions?.set('test', {
+      notification_id: v4(),
       issuerState: v4(),
       lastUpdatedAt: preAuthorizedCodecreatedAt,
       status: IssueStatus.OFFER_CREATED,

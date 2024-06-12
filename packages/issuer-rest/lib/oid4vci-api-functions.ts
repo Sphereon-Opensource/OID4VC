@@ -1,20 +1,29 @@
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
+  adjustUrl,
   AuthorizationRequest,
   CredentialOfferRESTRequest,
   CredentialRequestV1_0_13,
   determineGrantTypes,
   determineSpecVersionFromOffer,
+  EVENTS,
+  extractBearerToken,
   getNumberOrUndefined,
   Grant,
   IssueStatusResponse,
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
   OpenId4VCIVersion,
+  NotificationRequest,
+  NotificationStatusEventNames,
   TokenErrorResponse,
+  trimBoth,
+  trimEnd,
+  trimStart,
+  validateJWT,
 } from '@sphereon/oid4vci-common'
-import { adjustUrl, trimBoth, trimEnd, trimStart } from '@sphereon/oid4vci-common/dist/functions/HttpUtils'
-import { ITokenEndpointOpts, VcIssuer } from '@sphereon/oid4vci-issuer'
+import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
+import { CredentialFormat, InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -28,9 +37,10 @@ import {
 import { validateRequestBody } from './expressUtils'
 
 const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90
+
 export function getIssueStatusEndpoint<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>, opts: IGetIssueStatusEndpointOpts) {
   const path = determinePath(opts.baseUrl, opts?.path ?? '/webapp/credential-offer-status', { stripBasePath: true })
-  console.log(`[OID4VCI] getIssueStatus endpoint enabled at ${path}`)
+  LOG.log(`[OID4VCI] getIssueStatus endpoint enabled at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
     try {
       const { id } = request.body
@@ -63,6 +73,7 @@ export function getIssueStatusEndpoint<DIDDoc extends object>(router: Router, is
     }
   })
 }
+
 export function accessTokenEndpoint<DIDDoc extends object>(
   router: Router,
   issuer: VcIssuer<DIDDoc>,
@@ -71,10 +82,10 @@ export function accessTokenEndpoint<DIDDoc extends object>(
   const tokenEndpoint = issuer.issuerMetadata.token_endpoint
   const externalAS = issuer.issuerMetadata.authorization_servers
   if (externalAS) {
-    console.log(`[OID4VCI] External Authorization Server ${tokenEndpoint} is being used. Not enabling issuer token endpoint`)
+    LOG.log(`[OID4VCI] External Authorization Server ${tokenEndpoint} is being used. Not enabling issuer token endpoint`)
     return
   } else if (opts?.enabled === false) {
-    console.log(`[OID4VCI] Token endpoint is not enabled`)
+    LOG.log(`[OID4VCI] Token endpoint is not enabled`)
     return
   }
   const accessTokenIssuer = opts?.accessTokenIssuer ?? process.env.ACCESS_TOKEN_ISSUER ?? issuer.issuerMetadata.credential_issuer
@@ -102,7 +113,7 @@ export function accessTokenEndpoint<DIDDoc extends object>(
 
   const url = new URL(`${baseUrl}${path}`)
 
-  console.log(`[OID4VCI] Token endpoint enabled at ${url.toString()}`)
+  LOG.log(`[OID4VCI] Token endpoint enabled at ${url.toString()}`)
 
   // this.issuer.issuerMetadata.token_endpoint = url.toString()
   router.post(
@@ -121,10 +132,12 @@ export function accessTokenEndpoint<DIDDoc extends object>(
     }),
   )
 }
+
 export function getCredentialEndpoint<DIDDoc extends object>(
   router: Router,
   issuer: VcIssuer<DIDDoc>,
-  opts: ITokenEndpointOpts & ISingleEndpointOpts & { baseUrl: string | URL },
+  opts: Pick<ITokenEndpointOpts, 'accessTokenVerificationCallback' | 'accessTokenSignerCallback' | 'tokenExpiresIn' | 'cNonceExpiresIn'> &
+    ISingleEndpointOpts & { baseUrl: string | URL },
 ) {
   const endpoint = issuer.issuerMetadata.credential_endpoint
   const baseUrl = getBaseUrl(opts.baseUrl)
@@ -136,10 +149,21 @@ export function getCredentialEndpoint<DIDDoc extends object>(
     path = determinePath(baseUrl, endpoint, { stripBasePath: true, skipBaseUrlCheck: false })
   }
   path = determinePath(baseUrl, path, { stripBasePath: true })
-  console.log(`[OID4VCI] getCredential endpoint enabled at ${path}`)
+  LOG.log(`[OID4VCI] getCredential endpoint enabled at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
     try {
       const credentialRequest = request.body as CredentialRequestV1_0_13
+      LOG.log(`credential request received`, credentialRequest)
+      try {
+        const jwt = extractBearerToken(request.header('Authorization'))
+        await validateJWT(jwt, { accessTokenVerificationCallback: opts.accessTokenVerificationCallback })
+      } catch (e) {
+        LOG.warning(e)
+        return sendErrorResponse(response, 400, {
+          error: 'invalid_token',
+        })
+      }
+
       const credential = await issuer.issueCredential({
         credentialRequest: credentialRequest,
         tokenExpiresIn: opts.tokenExpiresIn,
@@ -160,9 +184,72 @@ export function getCredentialEndpoint<DIDDoc extends object>(
   })
 }
 
+export function notificationEndpoint<DIDDoc extends object>(
+  router: Router,
+  issuer: VcIssuer<DIDDoc>,
+  opts: ISingleEndpointOpts & Pick<ITokenEndpointOpts, 'accessTokenVerificationCallback'> & { baseUrl: string | URL },
+) {
+  const endpoint = issuer.issuerMetadata.notification_endpoint
+  const baseUrl = getBaseUrl(opts.baseUrl)
+  if (!endpoint) {
+    LOG.warning('Notification endpoint disabled as no "notification_endpoint" has been configured in issuer metadata')
+    return
+  }
+  const path = determinePath(baseUrl, endpoint, { stripBasePath: true })
+  LOG.log(`[OID4VCI] notification endpoint enabled at ${path}`)
+  router.post(path, async (request: Request, response: Response) => {
+    try {
+      const notificationRequest = request.body as NotificationRequest
+      LOG.log(
+        `notification ${notificationRequest.event}/${notificationRequest.event_description} received for ${notificationRequest.notification_id}`,
+      )
+      const jwt = extractBearerToken(request.header('Authorization'))
+      EVENTS.emit(NotificationStatusEventNames.OID4VCI_NOTIFICATION_RECEIVED, {
+        eventName: NotificationStatusEventNames.OID4VCI_NOTIFICATION_RECEIVED,
+        id: uuidv4(),
+        data: notificationRequest,
+        initiator: jwt,
+        initiatorType: InitiatorType.EXTERNAL,
+        system: System.OID4VCI,
+        subsystem: SubSystem.API,
+      })
+      try {
+        const jwtResult = await validateJWT(jwt, { accessTokenVerificationCallback: opts.accessTokenVerificationCallback })
+        EVENTS.emit(NotificationStatusEventNames.OID4VCI_NOTIFICATION_PROCESSED, {
+          eventName: NotificationStatusEventNames.OID4VCI_NOTIFICATION_PROCESSED,
+          id: uuidv4(),
+          data: notificationRequest,
+          initiator: jwtResult.jwt,
+          initiatorType: InitiatorType.EXTERNAL,
+          system: System.OID4VCI,
+          subsystem: SubSystem.API,
+        })
+      } catch (e) {
+        LOG.warning(e)
+        return sendErrorResponse(response, 400, {
+          error: 'invalid_token',
+        })
+      }
+
+      // TODO Send event
+      return response.status(204).send()
+    } catch (e) {
+      return sendErrorResponse(
+        response,
+        400,
+        {
+          error: 'invalid_notification_request',
+          error_description: (e as Error).message,
+        },
+        e,
+      )
+    }
+  })
+}
+
 export function getCredentialOfferEndpoint<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>, opts?: IGetCredentialOfferEndpointOpts) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers/:id', { stripBasePath: true })
-  console.log(`[OID4VCI] getCredentialOffer endpoint enabled at ${path}`)
+  LOG.log(`[OID4VCI] getCredentialOffer endpoint enabled at ${path}`)
   router.get(path, async (request: Request, response: Response) => {
     try {
       const { id } = request.params
@@ -194,7 +281,7 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
   opts?: ICreateCredentialOfferEndpointOpts & { baseUrl?: string },
 ) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers', { stripBasePath: true })
-  console.log(`[OID4VCI] createCredentialOffer endpoint enabled at ${path}`)
+  LOG.log(`[OID4VCI] createCredentialOffer endpoint enabled at ${path}`)
   router.post(path, async (request: Request<CredentialOfferRESTRequest>, response: Response<ICreateCredentialOfferURIResponse>) => {
     try {
       const specVersion = determineSpecVersionFromOffer(request.body.original_credential_offer)

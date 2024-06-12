@@ -1,3 +1,6 @@
+// Walt uses a self signed cert
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 import { KeyObject } from 'crypto';
 
 import {
@@ -146,8 +149,7 @@ describe('Credential Request Client with Walt.id ', () => {
   afterEach(() => {
     nock.cleanAll();
   });
-
-  // fixme: bring back this test
+  // Walt id has cert issue
   it.skip('should have correct metadata endpoints', async function () {
     nock.cleanAll();
     const WALT_IRR_URI =

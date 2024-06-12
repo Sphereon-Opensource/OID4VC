@@ -10,6 +10,7 @@ import {
 } from '@sphereon/oid4vci-common'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
+import { v4 } from 'uuid'
 
 import { VcIssuer } from '../VcIssuer'
 import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../builder'
@@ -73,6 +74,7 @@ describe('VcIssuer', () => {
       createdAt: +new Date(),
       lastUpdatedAt: +new Date(),
       status: IssueStatus.OFFER_CREATED,
+      notification_id: v4(),
       userPin: '123456',
       credentialOffer: {
         credential_offer: {
@@ -341,6 +343,7 @@ describe('VcIssuer', () => {
     })
     await vcIssuer.credentialOfferSessions.set('test-pre-authorized-code', {
       createdAt: createdAt,
+      notification_id: '43243',
       preAuthorizedCode: 'test-pre-authorized-code',
       credentialOffer: {
         credential_offer: {
@@ -368,6 +371,7 @@ describe('VcIssuer', () => {
     ).resolves.toEqual({
       c_nonce: 'new-test-nonce',
       c_nonce_expires_in: 300,
+      notification_id: '43243',
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         credentialSubject: {},

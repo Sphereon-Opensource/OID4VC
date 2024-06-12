@@ -11,6 +11,7 @@ import {
   IStateManager,
   Jwt,
   JWTSignerCallback,
+  JWTVerifyCallback,
   PIN_NOT_MATCH_ERROR,
   PIN_VALIDATION_ERROR,
   PRE_AUTH_CODE_LITERAL,
@@ -33,6 +34,7 @@ export interface ITokenEndpointOpts {
   tokenExpiresIn?: number
   preAuthorizedCodeExpirationDuration?: number
   accessTokenSignerCallback?: JWTSignerCallback
+  accessTokenVerificationCallback?: JWTVerifyCallback<never>
   accessTokenIssuer?: string
 }
 

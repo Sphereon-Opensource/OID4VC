@@ -47,8 +47,8 @@ export async function acquireDeferredCredential({
   deferredCredentialIntervalInMS?: number;
   deferredCredentialAwait?: boolean;
   deferredCredentialEndpoint: string;
-}): Promise<OpenIDResponse<CredentialResponse>> {
-  let credentialResponse: OpenIDResponse<CredentialResponse> = await acquireDeferredCredentialImpl({
+}): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
+  let credentialResponse: OpenIDResponse<CredentialResponse> & { access_token: string } = await acquireDeferredCredentialImpl({
     bearerToken,
     transactionId,
     deferredCredentialEndpoint,
@@ -77,7 +77,7 @@ async function acquireDeferredCredentialImpl({
   bearerToken: string;
   transactionId?: string;
   deferredCredentialEndpoint: string;
-}): Promise<OpenIDResponse<CredentialResponse>> {
+}): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
   const response: OpenIDResponse<CredentialResponse> = await post(
     deferredCredentialEndpoint,
     JSON.stringify(transactionId ? { transaction_id: transactionId } : ''),
@@ -86,5 +86,5 @@ async function acquireDeferredCredentialImpl({
   console.log(JSON.stringify(response, null, 2));
   assertNonFatalError(response);
 
-  return response;
+  return { ...response, access_token: bearerToken };
 }

@@ -7,6 +7,7 @@ import {
   EndpointMetadataResultV1_0_13,
   getIssuerFromCredentialOfferPayload,
   IssuerMetadataV1_0_13,
+  getJson,
   OpenIDResponse,
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common';
