@@ -34,8 +34,8 @@ import {
   TYP_ERROR,
   URIState,
 } from '@sphereon/oid4vci-common'
-import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphereon/oid4vci-common/dist/events'
+import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
@@ -381,6 +381,8 @@ export class VcIssuer<DIDDoc extends object> {
         c_nonce_expires_in: this._cNonceExpiresIn,
         ...(notification_id && { notification_id }),
       }
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       const experimentalSubjectIssuance = opts.credentialRequest.credential_subject_issuance
       if (experimentalSubjectIssuance?.subject_proof_mode) {
         if (experimentalSubjectIssuance.subject_proof_mode !== 'proof_replace') {

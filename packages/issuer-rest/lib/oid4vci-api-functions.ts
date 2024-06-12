@@ -12,9 +12,9 @@ import {
   Grant,
   IssueStatusResponse,
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
-  OpenId4VCIVersion,
   NotificationRequest,
   NotificationStatusEventNames,
+  OpenId4VCIVersion,
   TokenErrorResponse,
   trimBoth,
   trimEnd,
@@ -23,7 +23,7 @@ import {
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
-import { CredentialFormat, InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
+import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 

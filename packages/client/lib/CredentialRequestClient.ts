@@ -92,7 +92,15 @@ export class CredentialRequestClient {
   }): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const { credentialIdentifier, credentialTypes, proofInput, format, context, subjectIssuance } = opts;
 
-    const request = await this.createCredentialRequest({ proofInput, credentialTypes, context, format, version: this.version(), credentialIdentifier, subjectIssuance });
+    const request = await this.createCredentialRequest({
+      proofInput,
+      credentialTypes,
+      context,
+      format,
+      version: this.version(),
+      credentialIdentifier,
+      subjectIssuance,
+    });
     return await this.acquireCredentialsUsingRequest(request);
   }
 

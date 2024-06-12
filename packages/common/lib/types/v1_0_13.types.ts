@@ -1,3 +1,5 @@
+import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
+
 import { JWK, ProofOfPossession } from './CredentialIssuance.types';
 import {
   AlgValue,
@@ -58,7 +60,7 @@ export type CredentialConfigurationSupportedV1_0_13 = {
 };
 
 export type CredentialRequestV1_0_13 =
-  | {
+  | (ExperimentalSubjectIssuance & {
       // We add them here to keep existing other request versions happy. They cannot co-exists with an identifier
       format?: OID4VCICredentialFormat /* | OID4VCICredentialFormat[];*/; // for now it seems only one is supported in the spec
       proof?: ProofOfPossession;
@@ -69,7 +71,7 @@ export type CredentialRequestV1_0_13 =
         alg: AlgValue;
         enc: EncValue;
       };
-    }
+    })
   | (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc);
 
 export interface CredentialOfferV1_0_13 {

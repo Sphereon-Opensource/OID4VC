@@ -13,8 +13,8 @@
   "dependencies": {
     "@sphereon/oid4vci-common": "workspace:*",
     "@sphereon/oid4vci-issuer": "workspace:*",
-    "@sphereon/ssi-express-support": "0.24.1-unstable.116",
-    "@sphereon/ssi-types": "0.24.1-unstable.116",
+    "@sphereon/ssi-express-support": "0.24.1-unstable.129",
+    "@sphereon/ssi-types": "0.24.1-unstable.129",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

@@ -1,3 +1,5 @@
+import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
+
 import { AuthorizationDetailsJwtVcJson, AuthorizationServerOpts, CommonAuthorizationRequest } from './Authorization.types';
 import { UniformCredentialOffer, UniformCredentialOfferRequest } from './CredentialIssuance.types';
 import {
@@ -80,6 +82,7 @@ export interface CredentialOfferPayloadV1_0_11 {
 }
 
 export type CredentialRequestV1_0_11 = CommonCredentialRequest &
+  ExperimentalSubjectIssuance &
   (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc);
 
 export interface CredentialIssuerMetadataV1_0_11 extends CredentialIssuerMetadataOpts, Partial<AuthorizationServerMetadata> {

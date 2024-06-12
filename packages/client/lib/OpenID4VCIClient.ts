@@ -321,7 +321,7 @@ export class OpenID4VCIClient {
         );
       }
       this._state.accessTokenResponse = response.successBody;
-      this._state.accessToken = response.successBody.access_token
+      this._state.accessToken = response.successBody.access_token;
     }
 
     return this.accessTokenResponse;
@@ -488,10 +488,10 @@ export class OpenID4VCIClient {
     request: NotificationRequest,
     accessToken?: string,
   ): Promise<NotificationResult> {
-    return sendNotification(credentialRequestOpts, request, accessToken ??  this._state.accessToken ?? this._state.accessTokenResponse?.access_token);
+    return sendNotification(credentialRequestOpts, request, accessToken ?? this._state.accessToken ?? this._state.accessTokenResponse?.access_token);
   }
 
- /* getCredentialOfferTypes(): string[][] {
+  /* getCredentialOfferTypes(): string[][] {
     if (!this.credentialOffer) {
       return [];
     } else if (this.credentialOffer.version < OpenId4VCIVersion.VER_1_0_11) {
@@ -531,8 +531,8 @@ export class OpenID4VCIClient {
   }
 
   get authorizationURL(): string | undefined {
-    return this._state.authorizationURL
-}
+    return this._state.authorizationURL;
+  }
 
   get credentialOffer(): CredentialOfferRequestWithBaseUrl | undefined {
     return this._state.credentialOffer;

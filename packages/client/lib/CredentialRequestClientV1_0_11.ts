@@ -4,10 +4,12 @@ import {
   getCredentialRequestForVersion,
   getUniformFormat,
   isDeferredCredentialResponse,
+  isValidURL,
   JsonLdIssuerCredentialDefinition,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   OpenIDResponse,
+  post,
   ProofOfPossession,
   UniformCredentialRequest,
   URL_NOT_VALID,
@@ -18,7 +20,6 @@ import Debug from 'debug';
 import { buildProof } from './CredentialRequestClient';
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
-import { isValidURL, post } from './functions';
 
 const debug = Debug('sphereon:oid4vci:credential');
 

@@ -5,11 +5,13 @@ import {
   assertedUniformCredentialOffer,
   AuthorizationServerOpts,
   AuthzFlowType,
+  convertJsonToURI,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferV1_0_11,
   CredentialOfferV1_0_13,
   determineSpecVersionFromOffer,
   EndpointMetadata,
+  formPost,
   getIssuerFromCredentialOfferPayload,
   GrantTypes,
   IssuerOpts,
@@ -26,7 +28,6 @@ import { ObjectUtils } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { MetadataClient } from './MetadataClient';
-import { convertJsonToURI, formPost } from './functions';
 
 const debug = Debug('sphereon:oid4vci:token');
 

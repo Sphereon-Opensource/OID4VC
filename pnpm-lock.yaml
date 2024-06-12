@@ -118,8 +118,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: ^0.23.0
-        version: 0.23.0
+        specifier: 0.24.1-unstable.129
+        version: 0.24.1-unstable.129
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8
@@ -206,17 +206,14 @@ importers:
   packages/common:
     dependencies:
       '@sphereon/ssi-types':
-        specifier: ^0.23.0
-        version: 0.23.0
+        specifier: 0.24.1-unstable.129
+        version: 0.24.1-unstable.129
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8
       jwt-decode:
         specifier: ^3.1.2
         version: 3.1.2
-      msrcrypto:
-        specifier: ^1.5.8
-        version: 1.5.8
       sha.js:
         specifier: ^2.4.11
         version: 2.4.11
@@ -240,8 +237,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: ^0.23.0
-        version: 0.23.0
+        specifier: 0.24.1-unstable.129
+        version: 0.24.1-unstable.129
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0
@@ -277,11 +274,11 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-express-support':
-        specifier: ^0.23.0
-        version: 0.23.0
+        specifier: 0.24.1-unstable.129
+        version: 0.24.1-unstable.129
       '@sphereon/ssi-types':
-        specifier: ^0.23.0
-        version: 0.23.0
+        specifier: 0.24.1-unstable.129
+        version: 0.24.1-unstable.129
       body-parser:
         specifier: ^1.20.2
         version: 1.20.2
@@ -3616,8 +3613,8 @@ packages:
       webcrypto-shim: 0.1.7
     dev: true
 
-  /@sphereon/ssi-express-support@0.23.0:
-    resolution: {integrity: sha512-rflaGgILqxaQdQmPueeJKDcPPyqB00+cGkDUEoUZ3PDBGfRXQYBgVbFKQfLb3CDzBGwu29S+B27359BPFTiH4A==}
+  /@sphereon/ssi-express-support@0.24.1-unstable.129:
+    resolution: {integrity: sha512-OhbJIsET9ueYZXT0+txXaiuY5QtY7w7cVaOkm2iHiGwWT7i+VFTI2vBVs7CzfKEnJNH45TXkgqpji7BV5NRW6w==}
     peerDependencies:
       '@noble/hashes': 1.2.0
       passport-azure-ad: ^4.3.5
@@ -3681,11 +3678,15 @@ packages:
       jwt-decode: 3.1.2
     dev: false
 
-  /@sphereon/ssi-types@0.23.0:
-    resolution: {integrity: sha512-CXzKHFB1eoe8f/YrTFtnrj40hxkM9MQARrt3HbfBWB+yX3IlwWJZeSefFE1ucuz1HCEXQkYWiGj9wdRMiF2IBw==}
+  /@sphereon/ssi-types@0.24.1-unstable.129:
+    resolution: {integrity: sha512-IqXcM3eLZgQC30wfS6zGEUwJD7rOnJDKGH0pHMde4E2GWV5bfoPlykEdz5spoAQN2SCj/fwuUL/8U7Q9RP4PIA==}
     dependencies:
       '@sd-jwt/decode': 0.6.1
+      debug: 4.3.5
+      events: 3.3.0
       jwt-decode: 3.1.2
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /@stablelib/aead@1.0.1:
@@ -6096,6 +6097,18 @@ packages:
     dependencies:
       ms: 2.1.2
 
+  /debug@4.3.5:
+    resolution: {integrity: sha512-pt0bNEmneDIvdL1Xsd9oDQ/wrQRkXDT4AUWlNZNPKvW5x/jyO9VFXkJUP07vQ2upmw5PlaITaPKc31jK13V+jg==}
+    engines: {node: '>=6.0'}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+    dependencies:
+      ms: 2.1.2
+    dev: false
+
   /decamelize-keys@1.1.1:
     resolution: {integrity: sha512-WiPxgEirIV0/eIOMcnFBA3/IJZAZqKnwAwWyvvdi4lsr1WCN22nhdf/3db3DoZcUjTV2SqfzIwNyp6y2xs3nmg==}
     engines: {node: '>=0.10.0'}
@@ -6819,7 +6832,6 @@ packages:
   /events@3.3.0:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
-    dev: true
 
   /exec-async@2.2.0:
     resolution: {integrity: sha512-87OpwcEiMia/DeiKFzaQNBNFeN3XkkpYIh9FyOqq5mS2oKv3CBE67PXoEKcr6nodWdXNogTiQ0jE2NGuoffXPw==}
