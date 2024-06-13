@@ -145,12 +145,6 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     return this
   }
 
-  private setDefaultTokenEndpoint(issuerMetadata: Partial<CredentialIssuerMetadata>) {
-    if (!issuerMetadata.token_endpoint) {
-      issuerMetadata.token_endpoint = `${issuerMetadata.credential_issuer}/token`
-    }
-  }
-
   public build(): VcIssuer<DIDDoc> {
     if (!this.credentialOfferStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
@@ -161,7 +155,6 @@ export class VcIssuerBuilder<DIDDoc extends object> {
 
     const builder = this.issuerMetadataBuilder?.build()
     const metadata: Partial<CredentialIssuerMetadata> = { ...this.issuerMetadata, ...builder }
-    this.setDefaultTokenEndpoint(metadata)
     // Let's make sure these get merged correctly:
     metadata.credentials_supported = [...(this.issuerMetadata.credentials_supported ?? []), ...(builder?.credentials_supported ?? [])]
     metadata.display = [...(this.issuerMetadata.display ?? []), ...(builder?.display ?? [])]
