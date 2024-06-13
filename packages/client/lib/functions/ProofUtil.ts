@@ -107,7 +107,7 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
     typ,
     alg,
     ...(kid && { kid }),
-    ...(jwk && { jwk } ),
+    ...(jwk && { jwk }),
     ...(x5c && { x5c }),
   };
   return {
@@ -116,7 +116,13 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   };
 };
 
-const getJwtProperty = <T>(propertyName: string, required: boolean, option?: string | string[] | JWK, jwtProperty?: T, defaultValue?: T): T | undefined => {
+const getJwtProperty = <T>(
+  propertyName: string,
+  required: boolean,
+  option?: string | string[] | JWK,
+  jwtProperty?: T,
+  defaultValue?: T,
+): T | undefined => {
   if ((typeof option === 'string' || Array.isArray(option)) && option && jwtProperty && option !== jwtProperty) {
     throw Error(`Cannot have a property '${propertyName}' with value '${option}' and different JWT value '${jwtProperty}' at the same time`);
   }
