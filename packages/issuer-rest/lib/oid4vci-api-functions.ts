@@ -2,7 +2,6 @@ import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   adjustUrl,
   AuthorizationRequest,
-  CredentialIssuerMetadataOpts,
   CredentialOfferRESTRequest,
   CredentialRequestV1_0_11,
   determineGrantTypes,
@@ -380,16 +379,9 @@ export function pushedAuthorizationEndpoint<DIDDoc extends object>(
   })
 }
 
-function addTokenEndpoint(issuerMetadata: CredentialIssuerMetadataOpts) {
-  if (!issuerMetadata.token_endpoint) {
-    issuerMetadata.token_endpoint = `${issuerMetadata.credential_issuer}/token`
-  }
-}
-
 export function getMetadataEndpoint<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>) {
   const path = `/.well-known/openid-credential-issuer`
   router.get(path, (request: Request, response: Response) => {
-    addTokenEndpoint(issuer.issuerMetadata)
     return response.send(issuer.issuerMetadata)
   })
 }
