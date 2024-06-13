@@ -91,7 +91,7 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   const alg = getJwtProperty<string>('alg', false, jwtProps?.alg, existingJwt?.header?.alg, 'ES256')!;
   const kid = jwtProps?.jwk ? undefined : getJwtProperty<string>('kid', false, jwtProps?.kid, existingJwt?.header?.kid);
   const jwk = getJwtProperty<BaseJWK>('jwk', false, jwtProps?.jwk, existingJwt?.header?.jwk);
-  const x5c = jwtProps?.x5c;
+  const x5c = getJwtProperty<string[]>('x5c', false, jwtProps?.x5c, existingJwt?.header.x5c);
   const jwt: Partial<Jwt> = existingJwt ? existingJwt : {};
   const now = +new Date();
   const jwtPayload: Partial<JWTPayload> = {
@@ -99,16 +99,16 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
     iat: jwt.payload?.iat ?? Math.round(now / 1000 - 60), // Let's ensure we subtract 60 seconds for potential time offsets
     exp: jwt.payload?.exp ?? Math.round(now / 1000 + 10 * 60),
     nonce,
-    ...(iss ? { iss } : {}),
-    ...(jti ? { jti } : {}),
+    ...(iss && { iss }),
+    ...(jti && { jti }),
   };
 
   const jwtHeader: JWTHeader = {
     typ,
     alg,
-    ...(kid ? { kid } : {}),
-    ...(jwk ? { jwk } : {}),
-    ...(x5c ? { x5c } : {}),
+    ...(kid && { kid }),
+    ...(jwk && { jwk } ),
+    ...(x5c && { x5c }),
   };
   return {
     payload: { ...jwt.payload, ...jwtPayload },
@@ -116,8 +116,8 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   };
 };
 
-const getJwtProperty = <T>(propertyName: string, required: boolean, option?: string | JWK, jwtProperty?: T, defaultValue?: T): T | undefined => {
-  if (typeof option === 'string' && option && jwtProperty && option !== jwtProperty) {
+const getJwtProperty = <T>(propertyName: string, required: boolean, option?: string | string[] | JWK, jwtProperty?: T, defaultValue?: T): T | undefined => {
+  if ((typeof option === 'string' || Array.isArray(option)) && option && jwtProperty && option !== jwtProperty) {
     throw Error(`Cannot have a property '${propertyName}' with value '${option}' and different JWT value '${jwtProperty}' at the same time`);
   }
   let result = (jwtProperty ? jwtProperty : option) as T | undefined;
