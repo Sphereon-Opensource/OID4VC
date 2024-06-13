@@ -5,6 +5,7 @@ import {
   CreateCredentialOfferURIResult,
   CREDENTIAL_MISSING_ERROR,
   CredentialDataSupplierInput,
+  CredentialIssuerMetadata,
   CredentialIssuerMetadataOpts,
   CredentialOfferFormat,
   CredentialOfferPayloadV1_0_11,
@@ -69,6 +70,7 @@ export class VcIssuer<DIDDoc extends object> {
       cNonceExpiresIn?: number | undefined // expiration duration in seconds
     },
   ) {
+    this.setDefaultTokenEndpoint(issuerMetadata)
     this._issuerMetadata = issuerMetadata
     this._defaultCredentialOfferBaseUri = args.defaultCredentialOfferBaseUri
     this._credentialOfferSessions = args.credentialOfferSessions
@@ -601,6 +603,12 @@ export class VcIssuer<DIDDoc extends object> {
     })
 
     return credential
+  }
+
+  private setDefaultTokenEndpoint(issuerMetadata: Partial<CredentialIssuerMetadata>) {
+    if (!issuerMetadata.token_endpoint) {
+      issuerMetadata.token_endpoint = `${issuerMetadata.credential_issuer}/token`
+    }
   }
 
   get userPinRequired(): boolean {
