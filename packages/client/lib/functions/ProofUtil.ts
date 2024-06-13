@@ -73,6 +73,7 @@ export interface JwtProps {
   typ?: Typ;
   kid?: string;
   jwk?: JWK;
+  x5c?: string[];
   issuer?: string;
   clientId?: string;
   alg?: string;
@@ -84,12 +85,13 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   const aud = getJwtProperty<string | string[]>('aud', true, jwtProps?.issuer, existingJwt?.payload?.aud);
   const iss = getJwtProperty<string>('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss);
   const jti = getJwtProperty<string>('jti', false, jwtProps?.jti, existingJwt?.payload?.jti);
-  const typ = getJwtProperty<string>('typ', true, jwtProps?.typ, existingJwt?.header?.typ, 'jwt');
+  const typ = getJwtProperty<string>('typ', true, jwtProps?.typ, existingJwt?.header?.typ, 'openid4vci-proof+jwt');
   const nonce = getJwtProperty<string>('nonce', false, jwtProps?.nonce, existingJwt?.payload?.nonce); // Officially this is required, but some implementations don't have it
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const alg = getJwtProperty<string>('alg', false, jwtProps?.alg, existingJwt?.header?.alg, 'ES256')!;
-  const kid = getJwtProperty<string>('kid', false, jwtProps?.kid, existingJwt?.header?.kid);
+  const kid = jwtProps?.jwk ? undefined : getJwtProperty<string>('kid', false, jwtProps?.kid, existingJwt?.header?.kid);
   const jwk = getJwtProperty<BaseJWK>('jwk', false, jwtProps?.jwk, existingJwt?.header?.jwk);
+  const x5c = jwtProps?.x5c;
   const jwt: Partial<Jwt> = existingJwt ? existingJwt : {};
   const now = +new Date();
   const jwtPayload: Partial<JWTPayload> = {
@@ -104,8 +106,9 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   const jwtHeader: JWTHeader = {
     typ,
     alg,
-    kid,
-    jwk,
+    ...(kid ? { kid } : {}),
+    ...(jwk ? { jwk } : {}),
+    ...(x5c ? { x5c } : {}),
   };
   return {
     payload: { ...jwt.payload, ...jwtPayload },
