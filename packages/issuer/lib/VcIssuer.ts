@@ -21,8 +21,7 @@ import {
   JsonLdIssuerCredentialDefinition,
   JWT_VERIFY_CONFIG_ERROR,
   JWTVerifyCallback,
-  JwtVerifyResult,
-  KID_DID_NO_DID_ERROR,
+  JwtVerifyResult, KID_DID_NO_DID_ERROR,
   KID_JWK_X5C_ERROR,
   NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT,
   OID4VCICredentialFormat,
@@ -33,7 +32,7 @@ import {
   TxCode,
   TYP_ERROR,
   UniformCredentialRequest,
-  URIState,
+  URIState
 } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 import { CompactSdJwtVc, CredentialMapper, W3CVerifiableCredential } from '@sphereon/ssi-types'
@@ -467,8 +466,13 @@ export class VcIssuer<DIDDoc extends object> {
         // only 1 is allowed, but need to look into whether jwk and x5c are allowed together
         throw Error(KID_JWK_X5C_ERROR)
       } else if (kid && !did) {
-        // Make sure the callback function extracts the DID from the kid
-        throw Error(KID_DID_NO_DID_ERROR)
+        if (!jwk && !x5c) {
+          // Make sure the callback function extracts the DID from the kid
+          throw Error(KID_DID_NO_DID_ERROR);
+        } else {
+          // If JWK or x5c is present, log the information and proceed
+          console.log(`KID present but no DID, using JWK or x5c`);
+        }
       } else if (did && !didDocument) {
         // Make sure the callback function does DID resolution when a did is present
         throw Error(DID_NO_DIDDOC_ERROR)
