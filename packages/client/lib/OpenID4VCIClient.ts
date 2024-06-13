@@ -321,7 +321,7 @@ export class OpenID4VCIClient {
         );
       }
       this._state.accessTokenResponse = response.successBody;
-      this._state.accessToken = response.successBody.access_token
+      this._state.accessToken = response.successBody.access_token;
     }
 
     return this.accessTokenResponse;
@@ -482,7 +482,7 @@ export class OpenID4VCIClient {
     request: NotificationRequest,
     accessToken?: string,
   ): Promise<NotificationResult> {
-    return sendNotification(credentialRequestOpts, request, accessToken ??  this._state.accessToken ?? this._state.accessTokenResponse?.access_token);
+    return sendNotification(credentialRequestOpts, request, accessToken ?? this._state.accessToken ?? this._state.accessTokenResponse?.access_token);
   }
 
   getCredentialOfferTypes(): string[][] {

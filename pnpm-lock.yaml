@@ -118,8 +118,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.24.1-unstable.116
-        version: 0.24.1-unstable.116
+        specifier: 0.25.0
+        version: 0.25.0
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8
@@ -206,8 +206,8 @@ importers:
   packages/common:
     dependencies:
       '@sphereon/ssi-types':
-        specifier: 0.24.1-unstable.116
-        version: 0.24.1-unstable.116
+        specifier: 0.25.0
+        version: 0.25.0
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8
@@ -237,8 +237,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.24.1-unstable.116
-        version: 0.24.1-unstable.116
+        specifier: 0.25.0
+        version: 0.25.0
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0
@@ -274,11 +274,11 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-express-support':
-        specifier: 0.24.1-unstable.116
-        version: 0.24.1-unstable.116
+        specifier: 0.25.0
+        version: 0.25.0
       '@sphereon/ssi-types':
-        specifier: 0.24.1-unstable.116
-        version: 0.24.1-unstable.116
+        specifier: 0.25.0
+        version: 0.25.0
       body-parser:
         specifier: ^1.20.2
         version: 1.20.2
@@ -398,7 +398,7 @@ packages:
       '@babel/traverse': 7.23.0
       '@babel/types': 7.23.0
       convert-source-map: 2.0.0
-      debug: 4.3.4
+      debug: 4.3.5
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -2207,7 +2207,7 @@ packages:
     dependencies:
       '@expo/config': 8.0.5
       chalk: 4.1.2
-      debug: 4.3.4
+      debug: 4.3.5
       find-yarn-workspace-root: 2.0.0
       getenv: 1.0.0
       resolve-from: 5.0.0
@@ -2254,7 +2254,7 @@ packages:
       '@expo/config-types': 48.0.0
       '@expo/image-utils': 0.3.22
       '@expo/json-file': 8.2.37
-      debug: 4.3.4
+      debug: 4.3.5
       expo-modules-autolinking: 1.2.0
       fs-extra: 9.1.0
       resolve-from: 5.0.0
@@ -3613,8 +3613,8 @@ packages:
       webcrypto-shim: 0.1.7
     dev: true
 
-  /@sphereon/ssi-express-support@0.24.1-unstable.116:
-    resolution: {integrity: sha512-TkOYuZDsKsBVWnIh0r4trZ9gWz5Sxt9YHbXNp4Ec789/R44PNLnb8kyLu8DoD+hWKMbNcwbIny8X/A0XtDcpMw==}
+  /@sphereon/ssi-express-support@0.25.0:
+    resolution: {integrity: sha512-9Xkpm+RuNJ3f+j456wygKLRAEfo+bG6kXonKU7T53IzOPckg2OHnHzmezMZDtbbqwQ3IxOFaLxq55lPP4j8JKQ==}
     peerDependencies:
       '@noble/hashes': 1.2.0
       passport-azure-ad: ^4.3.5
@@ -3678,8 +3678,8 @@ packages:
       jwt-decode: 3.1.2
     dev: false
 
-  /@sphereon/ssi-types@0.24.1-unstable.116:
-    resolution: {integrity: sha512-nG16QLR8M0F/Dt9qD9aysMwFqglaTYKrDMBeVW0FSob6kqsPT/VYIwn8M8aOp83PvSPjQZrJs2I1MS0jaNs2iQ==}
+  /@sphereon/ssi-types@0.25.0:
+    resolution: {integrity: sha512-MecJaXkKtrFzjRDgY+VgrJITALmTAeFW9L3VPikwSynwAfGZTtzquR7MMntCp103Oa4+zkjaE8sUxWHFCusuww==}
     dependencies:
       '@sd-jwt/decode': 0.6.1
       debug: 4.3.5
@@ -4526,7 +4526,7 @@ packages:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
     engines: {node: '>= 6.0.0'}
     dependencies:
-      debug: 4.3.4
+      debug: 4.3.5
     transitivePeerDependencies:
       - supports-color
 
@@ -4534,7 +4534,7 @@ packages:
     resolution: {integrity: sha512-H0TSyFNDMomMNJQBn8wFV5YC/2eJ+VXECwOadZJT554xP6cODZHPX3H9QMQECxvrgiSOP1pHjy1sMWQVYJOUOA==}
     engines: {node: '>= 14'}
     dependencies:
-      debug: 4.3.4
+      debug: 4.3.5
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -6107,7 +6107,6 @@ packages:
         optional: true
     dependencies:
       ms: 2.1.2
-    dev: false
 
   /decamelize-keys@1.1.1:
     resolution: {integrity: sha512-WiPxgEirIV0/eIOMcnFBA3/IJZAZqKnwAwWyvvdi4lsr1WCN22nhdf/3db3DoZcUjTV2SqfzIwNyp6y2xs3nmg==}
@@ -8004,7 +8003,7 @@ packages:
     dependencies:
       '@tootallnate/once': 2.0.0
       agent-base: 6.0.2
-      debug: 4.3.4
+      debug: 4.3.5
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8014,7 +8013,7 @@ packages:
     engines: {node: '>= 14'}
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.4
+      debug: 4.3.5
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8043,7 +8042,7 @@ packages:
     engines: {node: '>= 14'}
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.4
+      debug: 4.3.5
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8621,7 +8620,7 @@ packages:
     resolution: {integrity: sha512-n3s8EwkdFIJCG3BPKBYvskgXGoy88ARzvegkitk60NxRdwltLOTaH7CUiMRXvwYorl0Q712iEjcWB+fK/MrWVw==}
     engines: {node: '>=10'}
     dependencies:
-      debug: 4.3.4
+      debug: 4.3.5
       istanbul-lib-coverage: 3.2.0
       source-map: 0.6.1
     transitivePeerDependencies:
@@ -12584,7 +12583,7 @@ packages:
     engines: {node: '>= 10'}
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.4
+      debug: 4.3.5
       socks: 2.7.1
     transitivePeerDependencies:
       - supports-color
@@ -12595,7 +12594,7 @@ packages:
     engines: {node: '>= 14'}
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.4
+      debug: 4.3.5
       socks: 2.7.1
     transitivePeerDependencies:
       - supports-color
@@ -13405,7 +13404,7 @@ packages:
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
       '@tufjs/models': 1.0.4
-      debug: 4.3.4
+      debug: 4.3.5
       make-fetch-happen: 11.1.1
     transitivePeerDependencies:
       - supports-color
@@ -13416,7 +13415,7 @@ packages:
     engines: {node: ^16.14.0 || >=18.0.0}
     dependencies:
       '@tufjs/models': 2.0.0
-      debug: 4.3.4
+      debug: 4.3.5
       make-fetch-happen: 13.0.0
     transitivePeerDependencies:
       - supports-color
