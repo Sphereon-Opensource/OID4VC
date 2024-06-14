@@ -43,8 +43,10 @@ import { generateMissingPKCEOpts } from './functions';
 
 const debug = Debug('sphereon:oid4vci');
 
+export type OpenID4VCIClientState = OpenID4VCIClientStateV1_0_11 | OpenID4VCIClientStateV1_0_13;
+
 export class OpenID4VCIClient {
-  private readonly _state: OpenID4VCIClientStateV1_0_11 | OpenID4VCIClientStateV1_0_13;
+  private readonly _state: OpenID4VCIClientState;
 
   private constructor({
     credentialOffer,
@@ -95,7 +97,7 @@ export class OpenID4VCIClient {
         : (endpointMetadata as EndpointMetadataResultV1_0_13 | undefined),
       accessTokenResponse,
       authorizationURL,
-    } as OpenID4VCIClientStateV1_0_11 | OpenID4VCIClientStateV1_0_13;
+    } as OpenID4VCIClientState;
     // Running syncAuthorizationRequestOpts later as it is using the state
     if (!this._state.authorizationRequestOpts) {
       this._state.authorizationRequestOpts = this.syncAuthorizationRequestOpts(authorizationRequest);
