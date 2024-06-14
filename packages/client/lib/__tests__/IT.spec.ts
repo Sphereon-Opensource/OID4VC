@@ -29,11 +29,14 @@ import { IDENTIPROOF_AS_METADATA, IDENTIPROOF_AS_URL, IDENTIPROOF_ISSUER_URL, ID
 export const UNIT_TEST_TIMEOUT = 30000;
 
 const ISSUER_URL = 'https://issuer.research.identiproof.io';
-const jwt = {
+const jwtDid = {
   header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'openid4vci-proof+jwt' },
   payload: { iss: 'test-clientId', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: ISSUER_URL },
 };
-
+const jwtWithoutDid = {
+  header: { alg: Alg.ES256, kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'openid4vci-proof+jwt' },
+  payload: { iss: 'test-clientId', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: ISSUER_URL },
+};
 describe('OID4VCI-Client should', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function proofOfPossessionCallbackFunction(_args: Jwt, _kid?: string): Promise<string> {
@@ -202,7 +205,7 @@ describe('OID4VCI-Client should', () => {
       // Types of parameters 'args' and 'args' are incompatible.
       // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
       const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
-        jwt,
+        jwt: jwtDid,
         callbacks: {
           signCallback: proofOfPossessionCallbackFunction,
         },
@@ -215,6 +218,66 @@ describe('OID4VCI-Client should', () => {
         })
         .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
         .build();
+      const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof });
+      expect(credResponse.successBody?.credential).toEqual(mockedVC);
+    },
+    UNIT_TEST_TIMEOUT,
+  );
+
+  it(
+    'succeed with a full flow with a not-did-kid  without the client v1_0_11',
+    async () => {
+      /* Convert the URI into an object */
+      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClientV1_0_11.fromURI(INITIATE_QR_V1_0_08);
+
+      expect(credentialOffer.baseUrl).toEqual('openid-initiate-issuance://');
+      expect(credentialOffer.original_credential_offer).toEqual({
+        credential_type: ['OpenBadgeCredentialUrl'],
+        issuer: ISSUER_URL,
+        'pre-authorized_code':
+          '4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp',
+        user_pin_required: 'true',
+      });
+
+      nock(ISSUER_URL)
+      .post(/token.*/)
+      .reply(200, JSON.stringify(mockedAccessTokenResponse));
+
+      /* The actual access token calls */
+      const accessTokenClient: AccessTokenClientV1_0_11 = new AccessTokenClientV1_0_11();
+      const accessTokenResponse = await accessTokenClient.acquireAccessToken({ credentialOffer: credentialOffer, pin: '1234' });
+      expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
+      // Get the credential
+      nock(ISSUER_URL)
+      .post(/credential/)
+      .reply(200, {
+        format: 'jwt-vc',
+        credential: mockedVC,
+      });
+      const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({ credentialOffer: credentialOffer })
+      .withFormat('jwt_vc')
+
+      .withTokenFromResponse(accessTokenResponse.successBody!)
+      .build();
+
+      //TS2322: Type '(args: ProofOfPossessionCallbackArgs) => Promise<string>'
+      // is not assignable to type 'ProofOfPossessionCallback'.
+      // Types of parameters 'args' and 'args' are incompatible.
+      // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
+      const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+        jwt: jwtWithoutDid,
+        callbacks: {
+          signCallback: proofOfPossessionCallbackFunction,
+        },
+        version: OpenId4VCIVersion.VER_1_0_11,
+      })
+      .withEndpointMetadata({
+        issuer: 'https://issuer.research.identiproof.io',
+        credential_endpoint: 'https://issuer.research.identiproof.io/credential',
+        token_endpoint: 'https://issuer.research.identiproof.io/token',
+      })
+      .withKid('ebfeb1f712ebc6f1c276e12ec21/keys/1')
+      .build();
       const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof });
       expect(credResponse.successBody?.credential).toEqual(mockedVC);
     },
@@ -266,7 +329,7 @@ describe('OID4VCI-Client should', () => {
       // Types of parameters 'args' and 'args' are incompatible.
       // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
       const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
-        jwt,
+        jwt: jwtDid,
         callbacks: {
           signCallback: proofOfPossessionCallbackFunction,
         },
@@ -279,6 +342,73 @@ describe('OID4VCI-Client should', () => {
         })
         .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
         .build();
+      const credResponse = await credReqClient.acquireCredentialsUsingProof({
+        proofInput: proof,
+        credentialType: credentialOffer.original_credential_offer.credential_configuration_ids[0],
+      });
+      expect(credResponse.successBody?.credential).toEqual(mockedVC);
+    },
+    UNIT_TEST_TIMEOUT,
+  );
+
+  it(
+    'succeed with a full flow with a not-did-kid without the client v1_0_13',
+    async () => {
+      /* Convert the URI into an object */
+      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_13);
+      const preAuthorizedCode = 'oaKazRN8I0IbtZ0C7JuMn5';
+      expect(credentialOffer.baseUrl).toEqual('openid-credential-offer://');
+      expect((credentialOffer.credential_offer as CredentialOfferPayloadV1_0_13).credential_configuration_ids).toEqual(['OpenBadgeCredentialUrl']);
+      expect(credentialOffer.original_credential_offer.grants).toEqual({
+        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+          'pre-authorized_code': preAuthorizedCode,
+          tx_code: {
+            input_mode: 'text',
+            description: 'Please enter the serial number of your physical drivers license',
+            length: preAuthorizedCode.length,
+          },
+        },
+      });
+
+      nock(ISSUER_URL)
+      .post(/token.*/)
+      .reply(200, JSON.stringify(mockedAccessTokenResponse));
+
+      /* The actual access token calls */
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
+      const accessTokenResponse = await accessTokenClient.acquireAccessToken({ credentialOffer: credentialOffer, pin: '1234' });
+      expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
+      // Get the credential
+      nock(ISSUER_URL)
+      .post(/credential/)
+      .reply(200, {
+        format: 'jwt-vc',
+        credential: mockedVC,
+      });
+      const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: credentialOffer })
+      .withFormat('jwt_vc')
+
+      .withTokenFromResponse(accessTokenResponse.successBody!)
+      .build();
+
+      //TS2322: Type '(args: ProofOfPossessionCallbackArgs) => Promise<string>'
+      // is not assignable to type 'ProofOfPossessionCallback'.
+      // Types of parameters 'args' and 'args' are incompatible.
+      // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
+      const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+        jwt: jwtWithoutDid,
+        callbacks: {
+          signCallback: proofOfPossessionCallbackFunction,
+        },
+        version: OpenId4VCIVersion.VER_1_0_11,
+      })
+      .withEndpointMetadata({
+        issuer: 'https://issuer.research.identiproof.io',
+        credential_endpoint: 'https://issuer.research.identiproof.io/credential',
+        token_endpoint: 'https://issuer.research.identiproof.io/token',
+      })
+      .withKid('ebfeb1f712ebc6f1c276e12ec21/keys/1')
+      .build();
       const credResponse = await credReqClient.acquireCredentialsUsingProof({
         proofInput: proof,
         credentialType: credentialOffer.original_credential_offer.credential_configuration_ids[0],
