@@ -1,7 +1,7 @@
 import { KeyObject } from 'crypto'
 
 import * as didKeyDriver from '@digitalcredentials/did-method-key'
-import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
+import { OpenID4VCIClientV1_0_13 } from '@sphereon/oid4vci-client'
 import {
   AccessTokenResponse,
   Alg,
@@ -181,7 +181,7 @@ describe('VcIssuer', () => {
 
   let credOfferSession: CredentialOfferSession
   let uri: string
-  let client: OpenID4VCIClient
+  let client: OpenID4VCIClientV1_0_13
   it('should create credential offer', async () => {
     expect(server.issuer).toBeDefined()
     uri = await vcIssuer
@@ -208,7 +208,7 @@ describe('VcIssuer', () => {
   })
 
   it('should create client from credential offer URI', async () => {
-    client = await OpenID4VCIClient.fromURI({
+    client = await OpenID4VCIClientV1_0_13.fromURI({
       uri: `http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%7D`,
       kid: subjectDIDKey.didDocument.authentication[0],
       alg: 'ES256',
@@ -308,7 +308,7 @@ describe('VcIssuer', () => {
 
   // TODO: ksadjad remove the skipped test
   it.skip('should acquire access token', async () => {
-    client = await OpenID4VCIClient.fromURI({
+    client = await OpenID4VCIClientV1_0_13.fromURI({
       uri: `http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22testcode%22%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%7D`,
       kid: subjectDIDKey.didDocument.authentication[0],
       alg: 'ES256',
@@ -329,7 +329,7 @@ describe('VcIssuer', () => {
         .setExpirationTime('2h')
         .sign(subjectKeypair.privateKey)
     }
-    client = await OpenID4VCIClient.fromURI({
+    client = await OpenID4VCIClientV1_0_13.fromURI({
       uri: `http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22testcode%22%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%7D`,
       kid: subjectDIDKey.didDocument.authentication[0],
       alg: 'ES256',

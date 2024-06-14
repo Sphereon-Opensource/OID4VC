@@ -39,7 +39,7 @@ describe('CredentialOfferUtil should', () => {
     'get exception for mixed attributes in URL',
     async () => {
       expect(() => determineSpecVersionFromURI(INITIATE_QR_DATA_MIXED_V9)).toThrow(
-        Error("Invalid param. Some keys have been used from version: 1008 version while 'credentials' is used from version: 1011"),
+        Error("Invalid param. Some keys have been used from version: 1008 version while 'credentials' is used from version: [1011]"),
       );
     },
     UNIT_TEST_TIMEOUT,

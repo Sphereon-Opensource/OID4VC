@@ -200,3 +200,27 @@ describe('OpenID4VCIClientV1_0_11 should', () => {
     );
   });
 });
+
+it('should return true when calling isEbsi function', async () => {
+  nock(MOCK_URL).get(/.*/).reply(200, {});
+  nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {});
+  nock(MOCK_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
+  const client = await OpenID4VCIClientV1_0_11.fromURI({
+    clientId: 'test-client',
+    uri: 'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fserver.example.com%22%2C%20%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22VerifiableAttestation%22%2C%22CTWalletSameAuthorisedInTime%22%5D%2C%22trust_framework%22%3A%7B%22name%22%3A%22ebsi%22%2C%22type%22%3A%22Accreditation%22%2C%22uri%22%3A%22TIR%20link%20towards%20accreditation%22%7D%7D%5D%7D',
+    createAuthorizationRequestURL: false,
+  });
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  client._state.endpointMetadata?.credentialIssuerMetadata = {
+    credentials_supported: {
+      TestCredential: {
+        trust_framework: {
+          name: 'ebsi_trust',
+        },
+      },
+    },
+  };
+  expect(client.isEBSI()).toBe(true);
+});

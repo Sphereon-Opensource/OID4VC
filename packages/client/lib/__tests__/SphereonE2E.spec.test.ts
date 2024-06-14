@@ -25,7 +25,8 @@ const jwk: JWK = {
 // priv hex: 913466d1a38d1d8c0d3c0fb0fc3b633075085a31372bbd2a8022215a88d9d1e5
 const did = `did:key:z6Mki5ZwZKN1dBQprfJTikUvkDxrHijiiQngkWviMF5gw2Hv`;
 const kid = `${did}#z6Mki5ZwZKN1dBQprfJTikUvkDxrHijiiQngkWviMF5gw2Hv`;
-describe('OID4VCI-Client using Sphereon issuer should', () => {
+// Sphereon infra down rn
+describe.skip('OID4VCI-Client using Sphereon issuer should', () => {
   async function test(format: 'ldp_vc' | 'jwt_vc_json') {
     debug.enable('*');
     const offer = await getCredentialOffer(format);
@@ -59,14 +60,14 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
     expect(format.startsWith(wrappedVC.format)).toEqual(true);
   }
 
-  xit(
+  it(
     'succeed in a full flow with the client using OpenID4VCI version 11 and ldp_vc',
     async () => {
       await test('ldp_vc');
     },
     UNIT_TEST_TIMEOUT,
   );
-  xit(
+  it(
     'succeed in a full flow with the client using OpenID4VCI version 11 and jwt_vc_json',
     async () => {
       await test('jwt_vc_json');

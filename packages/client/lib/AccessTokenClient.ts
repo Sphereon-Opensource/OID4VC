@@ -25,7 +25,7 @@ import {
 } from '@sphereon/oid4vci-common';
 import { ObjectUtils } from '@sphereon/ssi-types';
 
-import { MetadataClient } from './MetadataClient';
+import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
 import { LOG } from './types';
 
 export class AccessTokenClient {
@@ -82,7 +82,7 @@ export class AccessTokenClient {
       metadata: metadata
         ? metadata
         : issuerOpts?.fetchMetadata
-          ? await MetadataClient.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
+          ? await MetadataClientV1_0_13.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
           : undefined,
     });
 

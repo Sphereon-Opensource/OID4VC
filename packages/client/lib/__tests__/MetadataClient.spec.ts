@@ -22,7 +22,7 @@ import {
 import { getMockData } from './data/VciDataFixtures';
 
 //todo: skipping this. it was written for pre v13 version and we have to do some modifications to make it work
-describe.skip('MetadataClient with IdentiProof Issuer should', () => {
+describe('MetadataClient with IdentiProof Issuer should', () => {
   beforeAll(() => {
     nock.cleanAll();
   });
@@ -99,8 +99,7 @@ describe.skip('MetadataClient with IdentiProof Issuer should', () => {
     );
   });
 
-  // skipping because this metadata is for an older version. update it with a new metadata
-  it.skip('Fail if there is no credential endpoint with errors enabled', async () => {
+  it('Fail if there is no credential endpoint with errors enabled', async () => {
     const meta = JSON.parse(JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
     delete meta.credential_endpoint;
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(meta));
@@ -112,7 +111,7 @@ describe.skip('MetadataClient with IdentiProof Issuer should', () => {
     );
   });
 
-  it.skip('Succeed with default value if there is no credential endpoint with errors disabled', async () => {
+  it('Succeed with default value if there is no credential endpoint with errors disabled', async () => {
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404);

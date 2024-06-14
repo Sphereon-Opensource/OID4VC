@@ -10,7 +10,7 @@ import {
   determineSpecVersionFromURI,
   getClientIdFromCredentialOfferPayload,
   OpenId4VCIVersion,
-  toUniformCredentialOfferRequestV1_0_11,
+  toUniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
@@ -31,7 +31,7 @@ export class CredentialOfferClientV1_0_11 {
     if (version < OpenId4VCIVersion.VER_1_0_11) {
       credentialOfferPayload = convertURIToJsonObject(uri, {
         arrayTypeProperties: ['credential_type'],
-        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri'] : ['issuer', 'credential_type'],
+        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['issuer', 'credential_type='],
       }) as CredentialOfferPayloadV1_0_09;
       credentialOffer = {
         credential_offer: credentialOfferPayload,
@@ -39,14 +39,14 @@ export class CredentialOfferClientV1_0_11 {
     } else {
       credentialOffer = convertURIToJsonObject(uri, {
         arrayTypeProperties: ['credentials'],
-        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri'] : ['credential_offer'],
+        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['credential_offer='],
       }) as CredentialOfferV1_0_11;
       if (credentialOffer?.credential_offer_uri === undefined && !credentialOffer?.credential_offer) {
         throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri);
       }
     }
 
-    const request = await toUniformCredentialOfferRequestV1_0_11(credentialOffer, {
+    const request = await toUniformCredentialOfferRequest(credentialOffer, {
       ...opts,
       version,
     });

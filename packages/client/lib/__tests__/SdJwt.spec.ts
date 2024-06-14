@@ -8,7 +8,7 @@ import {
 // @ts-ignore
 import nock from 'nock';
 
-import { OpenID4VCIClient } from '..';
+import { OpenID4VCIClientV1_0_13 } from '..';
 import { createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilder } from '../../../issuer';
 
 export const UNIT_TEST_TIMEOUT = 30000;
@@ -88,7 +88,7 @@ describe('sd-jwt vc', () => {
         'openid-credential-offer://?credential_offer=%7B%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22123%22%2C%22tx_code%22%3A%7B%22input_mode%22%3A%22text%22%2C%22length%22%3A3%7D%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredential%22%5D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%7D',
       );
 
-      const client = await OpenID4VCIClient.fromURI({
+      const client = await OpenID4VCIClientV1_0_13.fromURI({
         uri: offerUri.uri,
       });
 

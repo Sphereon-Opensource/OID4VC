@@ -6,28 +6,24 @@ import {
   AuthorizationServerOpts,
   AuthzFlowType,
   convertJsonToURI,
-  CredentialOfferPayloadV1_0_11,
   CredentialOfferV1_0_11,
   CredentialOfferV1_0_13,
-  determineSpecVersionFromOffer,
   EndpointMetadata,
   formPost,
   getIssuerFromCredentialOfferPayload,
   GrantTypes,
   IssuerOpts,
   JsonURIMode,
-  OpenId4VCIVersion,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
-  toUniformCredentialOfferRequestV1_0_11,
   UniformCredentialOfferPayload,
 } from '@sphereon/oid4vci-common';
 import { ObjectUtils } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
-import { MetadataClient } from './MetadataClient';
+import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
 
 const debug = Debug('sphereon:oid4vci:token');
 
@@ -84,7 +80,7 @@ export class AccessTokenClientV1_0_11 {
       metadata: metadata
         ? metadata
         : issuerOpts?.fetchMetadata
-          ? await MetadataClient.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
+          ? await MetadataClientV1_0_13.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
           : undefined,
     });
 
@@ -94,9 +90,7 @@ export class AccessTokenClientV1_0_11 {
   public async createAccessTokenRequest(opts: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
     const { asOpts, pin, codeVerifier, code, redirectUri } = opts;
     const credentialOfferRequest = opts.credentialOffer
-      ? determineSpecVersionFromOffer(opts.credentialOffer as CredentialOfferPayloadV1_0_11).valueOf() <= OpenId4VCIVersion.VER_1_0_11.valueOf()
-        ? await toUniformCredentialOfferRequestV1_0_11(opts.credentialOffer as CredentialOfferV1_0_11)
-        : await toUniformCredentialOfferRequest(opts.credentialOffer as CredentialOfferV1_0_13)
+      ? await toUniformCredentialOfferRequest(opts.credentialOffer as CredentialOfferV1_0_11 | CredentialOfferV1_0_13)
       : undefined;
     const request: Partial<AccessTokenRequest> = {};
 
