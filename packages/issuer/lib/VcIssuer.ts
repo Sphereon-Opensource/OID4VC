@@ -623,7 +623,6 @@ export class VcIssuer<DIDDoc extends object> {
     }
   }
 
-
   get credentialSignerCallback(): CredentialSignerCallback<DIDDoc> | undefined {
     return this._credentialSignerCallback
   }
