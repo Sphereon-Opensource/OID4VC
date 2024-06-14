@@ -118,8 +118,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.25.0
-        version: 0.25.0
+        specifier: 0.25.1-unstable.87
+        version: 0.25.1-unstable.87
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8
@@ -206,8 +206,8 @@ importers:
   packages/common:
     dependencies:
       '@sphereon/ssi-types':
-        specifier: 0.25.0
-        version: 0.25.0
+        specifier: 0.25.1-unstable.87
+        version: 0.25.1-unstable.87
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8
@@ -237,8 +237,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.25.0
-        version: 0.25.0
+        specifier: 0.25.1-unstable.87
+        version: 0.25.1-unstable.87
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0
@@ -274,11 +274,11 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-express-support':
-        specifier: 0.25.0
-        version: 0.25.0
+        specifier: 0.25.1-unstable.87
+        version: 0.25.1-unstable.87
       '@sphereon/ssi-types':
-        specifier: 0.25.0
-        version: 0.25.0
+        specifier: 0.25.1-unstable.87
+        version: 0.25.1-unstable.87
       body-parser:
         specifier: ^1.20.2
         version: 1.20.2
@@ -3613,8 +3613,8 @@ packages:
       webcrypto-shim: 0.1.7
     dev: true
 
-  /@sphereon/ssi-express-support@0.25.0:
-    resolution: {integrity: sha512-9Xkpm+RuNJ3f+j456wygKLRAEfo+bG6kXonKU7T53IzOPckg2OHnHzmezMZDtbbqwQ3IxOFaLxq55lPP4j8JKQ==}
+  /@sphereon/ssi-express-support@0.25.1-unstable.87:
+    resolution: {integrity: sha512-LS1ZDwbNc0rIYbRI032b0jUB7B9PjgvLEr1bqikjxY6MFRi2t31kb6W3b6LV2Fscd+cIYIiRR4Z7icn7LCjIXg==}
     peerDependencies:
       '@noble/hashes': 1.2.0
       passport-azure-ad: ^4.3.5
@@ -3678,8 +3678,8 @@ packages:
       jwt-decode: 3.1.2
     dev: false
 
-  /@sphereon/ssi-types@0.25.0:
-    resolution: {integrity: sha512-MecJaXkKtrFzjRDgY+VgrJITALmTAeFW9L3VPikwSynwAfGZTtzquR7MMntCp103Oa4+zkjaE8sUxWHFCusuww==}
+  /@sphereon/ssi-types@0.25.1-unstable.87:
+    resolution: {integrity: sha512-CaZO9Da/WcHylnZOT6i/o6P8eB9EVhywJpAKZYpSZVnZiUkpSD9ciTI5F1GK8snMDjlTFci5RJruEMpiFSgnuQ==}
     dependencies:
       '@sd-jwt/decode': 0.6.1
       debug: 4.3.5
