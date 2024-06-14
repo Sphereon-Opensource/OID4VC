@@ -240,8 +240,8 @@ describe('OID4VCI-Client should', () => {
       });
 
       nock(ISSUER_URL)
-      .post(/token.*/)
-      .reply(200, JSON.stringify(mockedAccessTokenResponse));
+        .post(/token.*/)
+        .reply(200, JSON.stringify(mockedAccessTokenResponse));
 
       /* The actual access token calls */
       const accessTokenClient: AccessTokenClientV1_0_11 = new AccessTokenClientV1_0_11();
@@ -249,16 +249,16 @@ describe('OID4VCI-Client should', () => {
       expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
       // Get the credential
       nock(ISSUER_URL)
-      .post(/credential/)
-      .reply(200, {
-        format: 'jwt-vc',
-        credential: mockedVC,
-      });
+        .post(/credential/)
+        .reply(200, {
+          format: 'jwt-vc',
+          credential: mockedVC,
+        });
       const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({ credentialOffer: credentialOffer })
-      .withFormat('jwt_vc')
+        .withFormat('jwt_vc')
 
-      .withTokenFromResponse(accessTokenResponse.successBody!)
-      .build();
+        .withTokenFromResponse(accessTokenResponse.successBody!)
+        .build();
 
       //TS2322: Type '(args: ProofOfPossessionCallbackArgs) => Promise<string>'
       // is not assignable to type 'ProofOfPossessionCallback'.
@@ -271,13 +271,13 @@ describe('OID4VCI-Client should', () => {
         },
         version: OpenId4VCIVersion.VER_1_0_11,
       })
-      .withEndpointMetadata({
-        issuer: 'https://issuer.research.identiproof.io',
-        credential_endpoint: 'https://issuer.research.identiproof.io/credential',
-        token_endpoint: 'https://issuer.research.identiproof.io/token',
-      })
-      .withKid('ebfeb1f712ebc6f1c276e12ec21/keys/1')
-      .build();
+        .withEndpointMetadata({
+          issuer: 'https://issuer.research.identiproof.io',
+          credential_endpoint: 'https://issuer.research.identiproof.io/credential',
+          token_endpoint: 'https://issuer.research.identiproof.io/token',
+        })
+        .withKid('ebfeb1f712ebc6f1c276e12ec21/keys/1')
+        .build();
       const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof });
       expect(credResponse.successBody?.credential).toEqual(mockedVC);
     },
@@ -371,8 +371,8 @@ describe('OID4VCI-Client should', () => {
       });
 
       nock(ISSUER_URL)
-      .post(/token.*/)
-      .reply(200, JSON.stringify(mockedAccessTokenResponse));
+        .post(/token.*/)
+        .reply(200, JSON.stringify(mockedAccessTokenResponse));
 
       /* The actual access token calls */
       const accessTokenClient: AccessTokenClient = new AccessTokenClient();
@@ -380,16 +380,16 @@ describe('OID4VCI-Client should', () => {
       expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
       // Get the credential
       nock(ISSUER_URL)
-      .post(/credential/)
-      .reply(200, {
-        format: 'jwt-vc',
-        credential: mockedVC,
-      });
+        .post(/credential/)
+        .reply(200, {
+          format: 'jwt-vc',
+          credential: mockedVC,
+        });
       const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: credentialOffer })
-      .withFormat('jwt_vc')
+        .withFormat('jwt_vc')
 
-      .withTokenFromResponse(accessTokenResponse.successBody!)
-      .build();
+        .withTokenFromResponse(accessTokenResponse.successBody!)
+        .build();
 
       //TS2322: Type '(args: ProofOfPossessionCallbackArgs) => Promise<string>'
       // is not assignable to type 'ProofOfPossessionCallback'.
@@ -402,13 +402,13 @@ describe('OID4VCI-Client should', () => {
         },
         version: OpenId4VCIVersion.VER_1_0_11,
       })
-      .withEndpointMetadata({
-        issuer: 'https://issuer.research.identiproof.io',
-        credential_endpoint: 'https://issuer.research.identiproof.io/credential',
-        token_endpoint: 'https://issuer.research.identiproof.io/token',
-      })
-      .withKid('ebfeb1f712ebc6f1c276e12ec21/keys/1')
-      .build();
+        .withEndpointMetadata({
+          issuer: 'https://issuer.research.identiproof.io',
+          credential_endpoint: 'https://issuer.research.identiproof.io/credential',
+          token_endpoint: 'https://issuer.research.identiproof.io/token',
+        })
+        .withKid('ebfeb1f712ebc6f1c276e12ec21/keys/1')
+        .build();
       const credResponse = await credReqClient.acquireCredentialsUsingProof({
         proofInput: proof,
         credentialType: credentialOffer.original_credential_offer.credential_configuration_ids[0],

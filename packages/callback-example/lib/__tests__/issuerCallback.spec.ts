@@ -216,6 +216,32 @@ describe('issuerCallback', () => {
     )
   })
 
+  it('should add a proof to a credential without did', async () => {
+    const credential: ICredential = {
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
+      type: ['VerifiableCredential'],
+      issuer: IDENTIPROOF_ISSUER_URL,
+      credentialSubject: {},
+      issuanceDate: new Date().toISOString(),
+    }
+    const vc = await getIssuerCallbackV1_0_11(credential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)({})
+    console.log('vc:', vc)
+    expect(vc).toEqual({
+      '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],
+      credentialSubject: {},
+      issuanceDate: expect.any(String),
+      issuer: expect.stringContaining('example.com'),
+      proof: {
+        created: expect.any(String),
+        proofPurpose: 'assertionMethod',
+        proofValue: expect.any(String),
+        type: 'Ed25519Signature2020',
+        verificationMethod: expect.any(String),
+      },
+      type: ['VerifiableCredential'],
+    })
+  })
+
   it('Should pass requesting a verifiable credential using the client', async () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')

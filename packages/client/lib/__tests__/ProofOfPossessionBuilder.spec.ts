@@ -12,7 +12,12 @@ const jwt: Jwt = {
   payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL, iat: Date.now() / 1000 },
 };
 
+const jwt_withoutDid: Jwt = {
+  header: { alg: Alg.ES256, kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'jwt' },
+  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL, iat: Date.now() / 1000 },
+};
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1';
+const kid_withoutDid = 'ebfeb1f712ebc6f1c276e12ec21/keys/1';
 
 let keypair: KeyPair;
 
@@ -52,13 +57,38 @@ describe('ProofOfPossession Builder ', () => {
     ).rejects.toThrow(Error(PROOF_CANT_BE_CONSTRUCTED));
   });
 
-  it('should fail wit undefined jwt supplied', async function () {
+  it('should fail without supplied proof or callbacks and with kid without did', async function () {
+    await expect(
+      ProofOfPossessionBuilder.fromProof(undefined as never, OpenId4VCIVersion.VER_1_0_11)
+        .withIssuer(IDENTIPROOF_ISSUER_URL)
+        .withClientId('sphereon:wallet')
+        .withKid(kid_withoutDid)
+        .build(),
+    ).rejects.toThrow(Error(PROOF_CANT_BE_CONSTRUCTED));
+  });
+
+  it('should fail with undefined jwt supplied', async function () {
     await expect(() =>
       ProofOfPossessionBuilder.fromJwt({ jwt, callbacks: { signCallback: proofOfPossessionCallbackFunction }, version: OpenId4VCIVersion.VER_1_0_08 })
         .withJwt(undefined as never)
         .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)
+        .build(),
+    ).toThrow(Error(NO_JWT_PROVIDED));
+  });
+
+  it('should fail with undefined jwt supplied and kid without did', async function () {
+    await expect(() =>
+      ProofOfPossessionBuilder.fromJwt({
+        jwt: jwt_withoutDid,
+        callbacks: { signCallback: proofOfPossessionCallbackFunction },
+        version: OpenId4VCIVersion.VER_1_0_08,
+      })
+        .withJwt(undefined as never)
+        .withIssuer(IDENTIPROOF_ISSUER_URL)
+        .withClientId('sphereon:wallet')
+        .withKid(kid_withoutDid)
         .build(),
     ).toThrow(Error(NO_JWT_PROVIDED));
   });
@@ -73,6 +103,21 @@ describe('ProofOfPossession Builder ', () => {
     })
       .withIssuer(IDENTIPROOF_ISSUER_URL)
       .withKid(kid)
+      .withClientId('sphereon:wallet')
+      .build();
+    expect(proof).toBeDefined();
+  });
+
+  it('should build a proof with all required params present without did', async function () {
+    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+      jwt: jwt_withoutDid,
+      callbacks: {
+        signCallback: proofOfPossessionCallbackFunction,
+      },
+      version: OpenId4VCIVersion.VER_1_0_08,
+    })
+      .withIssuer(IDENTIPROOF_ISSUER_URL)
+      .withKid(kid_withoutDid)
       .withClientId('sphereon:wallet')
       .build();
     expect(proof).toBeDefined();
@@ -93,6 +138,25 @@ describe('ProofOfPossession Builder ', () => {
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
 
+  it('should fail creating a proof of possession with simple verification and without did', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async function proofOfPossessionCallbackFunction(_args: Jwt, _kid?: string): Promise<string> {
+      throw new Error(JWS_NOT_VALID);
+    }
+
+    await expect(
+      ProofOfPossessionBuilder.fromJwt({
+        jwt: jwt_withoutDid,
+        callbacks: { signCallback: proofOfPossessionCallbackFunction },
+        version: OpenId4VCIVersion.VER_1_0_08,
+      })
+        .withIssuer(IDENTIPROOF_ISSUER_URL)
+        .withClientId('sphereon:wallet')
+        .withKid(kid_withoutDid)
+        .build(),
+    ).rejects.toThrow(Error(JWS_NOT_VALID));
+  });
+
   it('should fail creating a proof of possession without verify callback', async () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function proofOfPossessionCallbackFunction(_args: Jwt, _kid?: string): Promise<string> {
@@ -104,6 +168,25 @@ describe('ProofOfPossession Builder ', () => {
         .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid)
+        .build(),
+    ).rejects.toThrow(Error(JWS_NOT_VALID));
+  });
+
+  it('should fail creating a proof of possession without verify callback and without did', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async function proofOfPossessionCallbackFunction(_args: Jwt, _kid?: string): Promise<string> {
+      throw new Error(JWS_NOT_VALID);
+    }
+
+    await expect(
+      ProofOfPossessionBuilder.fromJwt({
+        jwt: jwt_withoutDid,
+        callbacks: { signCallback: proofOfPossessionCallbackFunction },
+        version: OpenId4VCIVersion.VER_1_0_08,
+      })
+        .withIssuer(IDENTIPROOF_ISSUER_URL)
+        .withClientId('sphereon:wallet')
+        .withKid(kid_withoutDid)
         .build(),
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });

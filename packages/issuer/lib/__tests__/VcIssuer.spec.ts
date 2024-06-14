@@ -32,6 +32,20 @@ const verifiableCredential = {
   },
 }
 
+const verifiableCredential_withoutDid = {
+  '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/jws-2020/v1'],
+  id: 'http://university.example/credentials/1872',
+  type: ['VerifiableCredential', 'ExampleAlumniCredential'],
+  issuer: 'https://university.example/issuers/565049',
+  issuanceDate: new Date().toISOString(),
+  credentialSubject: {
+    id: 'ebfeb1f712ebc6f1c276e12ec21',
+    alumniOf: {
+      id: 'c276e12ec21ebfeb1f712ebc6f1',
+      name: 'Example University',
+    },
+  },
+}
 describe('VcIssuer', () => {
   let vcIssuer: VcIssuer<DIDDocument>
   const issuerState = 'previously-created-state'
@@ -407,6 +421,275 @@ describe('VcIssuer', () => {
           typ: 'openid4vci-proof+jwt',
           alg: undefined,
           kid: 'test-kid',
+        },
+        payload: {
+          aud: IDENTIPROOF_ISSUER_URL,
+          iat: +new Date() / 1000,
+          nonce: 'test-nonce',
+        },
+      },
+    })
+
+    expect(
+      vcIssuer.issueCredential({
+        credentialRequest: {
+          credential_identifier: 'VerifiableCredential',
+          format: 'jwt_vc_json',
+          proof: {
+            proof_type: 'jwt',
+            jwt: 'ye.ye.ye',
+          },
+        },
+      }),
+    ).rejects.toThrow(Error(ALG_ERROR))
+  })
+})
+
+describe('VcIssuer without did', () => {
+  let vcIssuer: VcIssuer<DIDDocument>
+  const issuerState = 'previously-created-state'
+  const clientId = 'sphereon:wallet'
+  const preAuthorizedCode = 'test_code'
+
+  const jwtVerifyCallback: jest.Mock = jest.fn()
+
+  beforeEach(async () => {
+    jest.clearAllMocks()
+    const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+      .withCredentialSigningAlgValuesSupported('ES256K')
+      .withCryptographicBindingMethod('did')
+      .withFormat('jwt_vc_json')
+      .withCredentialName('UniversityDegree_JWT')
+      .withCredentialDefinition({
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      })
+      .withCredentialSupportedDisplay({
+        name: 'University Credential',
+        locale: 'en-US',
+        logo: {
+          url: 'https://exampleuniversity.com/public/logo.png',
+          alt_text: 'a square logo of a university',
+        },
+        background_color: '#12107c',
+        text_color: '#FFFFFF',
+      })
+      .addCredentialSubjectPropertyDisplay('given_name', {
+        name: 'given name',
+        locale: 'en-US',
+      } as IssuerCredentialSubjectDisplay)
+      .build()
+    const stateManager = new MemoryStates<CredentialOfferSession>()
+    await stateManager.set('previously-created-state', {
+      issuerState,
+      clientId,
+      preAuthorizedCode,
+      createdAt: +new Date(),
+      lastUpdatedAt: +new Date(),
+      status: IssueStatus.OFFER_CREATED,
+      userPin: '123456',
+      credentialOffer: {
+        credential_offer: {
+          credential_issuer: 'test.com',
+          credentials: [
+            {
+              format: 'ldp_vc',
+              credential_definition: {
+                types: ['VerifiableCredential'],
+                '@context': ['https://www.w3.org/2018/credentials/v1'],
+                credentialSubject: {},
+              },
+            },
+          ],
+          grants: {
+            authorization_code: { issuer_state: issuerState },
+            'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+              'pre-authorized_code': preAuthorizedCode,
+              tx_code: {
+                input_mode: 'text',
+                length: 4,
+              },
+            },
+          },
+        },
+      },
+    })
+    vcIssuer = new VcIssuerBuilder<DIDDocument>()
+      .withAuthorizationServers('https://authorization-server')
+      .withCredentialEndpoint('https://credential-endpoint')
+      .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
+      .withIssuerDisplay({
+        name: 'example issuer',
+        locale: 'en-US',
+      })
+      .withCredentialConfigurationsSupported(credentialsSupported)
+      .withCredentialOfferStateManager(stateManager)
+      .withInMemoryCNonceState()
+      .withInMemoryCredentialOfferURIState()
+      .withCredentialSignerCallback(() =>
+        Promise.resolve({
+          '@context': ['https://www.w3.org/2018/credentials/v1'],
+          type: ['VerifiableCredential'],
+          issuer: 'test.com',
+          issuanceDate: new Date().toISOString(),
+          credentialSubject: {},
+          proof: {
+            type: IProofType.JwtProof2020,
+            jwt: 'ye.ye.ye',
+            created: new Date().toISOString(),
+            proofPurpose: IProofPurpose.assertionMethod,
+            verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
+          },
+        }),
+      )
+      .withJWTVerifyCallback(jwtVerifyCallback)
+      .build()
+  })
+
+  afterAll(async () => {
+    jest.clearAllMocks()
+    // await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
+  })
+
+  it('should create credential offer uri', async () => {
+    await expect(
+      vcIssuer
+        .createCredentialOfferURI({
+          grants: {
+            authorization_code: {
+              issuer_state: issuerState,
+            },
+          },
+          scheme: 'http',
+          baseUri: 'issuer-example.com',
+          credential_configuration_ids: ['VerifiableCredential'],
+          credentialOfferUri: 'https://somehost.com/offer-id',
+        })
+        .then((response) => response.uri),
+    ).resolves.toEqual('http://issuer-example.com?credential_offer_uri=https://somehost.com/offer-id')
+  })
+
+  // Of course this doesn't work. The state is part of the proof to begin with
+  it('should fail issuing credential if an invalid state is used', async () => {
+    jwtVerifyCallback.mockResolvedValue({
+      alg: Alg.ES256K,
+      jwt: {
+        header: {
+          typ: 'openid4vci-proof+jwt',
+          alg: Alg.ES256K,
+          x5c: ['12', '34', '56'],
+        },
+        payload: {
+          aud: IDENTIPROOF_ISSUER_URL,
+          iat: +new Date() / 1000,
+          nonce: 'test-nonce',
+        },
+      },
+    })
+
+    await expect(
+      vcIssuer.issueCredential({
+        credentialRequest: {
+          credential_identifier: 'VerifiableCredential',
+          format: 'jwt_vc_json',
+          proof: {
+            proof_type: 'jwt',
+            jwt: 'ye.ye.ye',
+          },
+        },
+        // issuerState: 'invalid state',
+      }),
+    ).rejects.toThrow(Error(STATE_MISSING_ERROR + ' (test-nonce)'))
+  })
+
+  it.each([...Object.values<string>(Alg), 'CUSTOM'])('should issue %s signed credential if a valid state is passed in', async (alg: string) => {
+    jwtVerifyCallback.mockResolvedValue({
+      alg: alg,
+      jwt: {
+        header: {
+          typ: 'openid4vci-proof+jwt',
+          alg: alg,
+          x5c: ['12', '34', '56'],
+        },
+        payload: {
+          aud: IDENTIPROOF_ISSUER_URL,
+          iat: +new Date() / 1000,
+          nonce: 'test-nonce',
+        },
+      },
+    })
+
+    const createdAt = +new Date()
+    await vcIssuer.cNonces.set('test-nonce', {
+      cNonce: 'test-nonce',
+      preAuthorizedCode: 'test-pre-authorized-code',
+      createdAt: createdAt,
+    })
+    await vcIssuer.credentialOfferSessions.set('test-pre-authorized-code', {
+      createdAt: createdAt,
+      preAuthorizedCode: 'test-pre-authorized-code',
+      credentialOffer: {
+        credential_offer: {
+          credential_issuer: 'test.com',
+          credentials: [],
+        },
+      },
+      lastUpdatedAt: createdAt,
+      status: IssueStatus.ACCESS_TOKEN_CREATED,
+    })
+
+    expect(
+      vcIssuer.issueCredential({
+        credential: verifiableCredential_withoutDid,
+        credentialRequest: {
+          credential_identifier: 'VerifiableCredential',
+          format: 'jwt_vc_json',
+          proof: {
+            proof_type: 'jwt',
+            jwt: 'ye.ye.ye',
+          },
+        },
+        newCNonce: 'new-test-nonce',
+      }),
+    ).resolves.toEqual({
+      c_nonce: 'new-test-nonce',
+      c_nonce_expires_in: 300,
+      credential: {
+        '@context': ['https://www.w3.org/2018/credentials/v1'],
+        credentialSubject: {},
+        issuanceDate: expect.any(String),
+        issuer: 'test.com',
+        proof: {
+          created: expect.any(String),
+          jwt: 'ye.ye.ye',
+          proofPurpose: 'assertionMethod',
+          type: 'JwtProof2020',
+          verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
+        },
+        type: ['VerifiableCredential'],
+      },
+      format: 'jwt_vc_json',
+    })
+  })
+
+  it('should fail issuing credential if the signing algorithm is missing', async () => {
+    const createdAt = +new Date()
+    await vcIssuer.cNonces.set('test-nonce', {
+      cNonce: 'test-nonce',
+      preAuthorizedCode: 'test-pre-authorized-code',
+      createdAt: createdAt,
+    })
+
+    jwtVerifyCallback.mockResolvedValue({
+      alg: undefined,
+      didDocument: {
+        '@context': 'https://www.w3.org/ns/did/v1',
+        id: '1234',
+      },
+      jwt: {
+        header: {
+          typ: 'openid4vci-proof+jwt',
+          alg: undefined,
+          x5c: ['12', '34', '56'],
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
