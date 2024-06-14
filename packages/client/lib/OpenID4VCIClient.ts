@@ -21,6 +21,8 @@ import {
   getTypesFromCredentialSupported,
   JWK,
   KID_JWK_X5C_ERROR,
+  NotificationRequest,
+  NotificationResult,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PKCEOpts,
@@ -33,17 +35,20 @@ import Debug from 'debug';
 import { AccessTokenClientV1_0_11 } from './AccessTokenClientV1_0_11';
 import { createAuthorizationRequestUrl } from './AuthorizationCodeClient';
 import { createAuthorizationRequestUrlV1_0_11 } from './AuthorizationCodeClientV1_0_11';
-import { CredentialOfferClientV1_0_11 } from './CredentialOfferClientV1_0_11';
+import { CredentialOfferClient } from './CredentialOfferClient';
+import { CredentialRequestOpts } from './CredentialRequestClient';
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
 import { MetadataClient } from './MetadataClient';
 import { OpenID4VCIClientStateV1_0_11 } from './OpenID4VCIClientV1_0_11';
 import { OpenID4VCIClientStateV1_0_13 } from './OpenID4VCIClientV1_0_13';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
-import { generateMissingPKCEOpts } from './functions';
+import { generateMissingPKCEOpts, sendNotification } from './functions';
 
 const debug = Debug('sphereon:oid4vci');
 
 export type OpenID4VCIClientState = OpenID4VCIClientStateV1_0_11 | OpenID4VCIClientStateV1_0_13;
+
+export type EndpointMetadataResult = EndpointMetadataResultV1_0_11 | EndpointMetadataResultV1_0_13;
 
 export class OpenID4VCIClient {
   private readonly _state: OpenID4VCIClientState;
@@ -71,7 +76,7 @@ export class OpenID4VCIClient {
     pkce?: PKCEOpts;
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
     jwk?: JWK;
-    endpointMetadata?: EndpointMetadataResultV1_0_11 | EndpointMetadataResultV1_0_13;
+    endpointMetadata?: EndpointMetadataResult;
     accessTokenResponse?: AccessTokenResponse;
     authorizationRequestOpts?: AuthorizationRequestOpts;
     authorizationCodeResponse?: AuthorizationResponse;
@@ -141,7 +146,7 @@ export class OpenID4VCIClient {
     return client;
   }
 
-  public static async fromState({ state }: { state: OpenID4VCIClientStateV1_0_11 | string }): Promise<OpenID4VCIClient> {
+  public static async fromState({ state }: { state: OpenID4VCIClientState | string }): Promise<OpenID4VCIClient> {
     const clientState = typeof state === 'string' ? JSON.parse(state) : state;
 
     return new OpenID4VCIClient(clientState);
@@ -168,7 +173,7 @@ export class OpenID4VCIClient {
     clientId?: string;
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
   }): Promise<OpenID4VCIClient> {
-    const credentialOfferClient = await CredentialOfferClientV1_0_11.fromURI(uri, { resolve: resolveOfferUri });
+    const credentialOfferClient = await CredentialOfferClient.fromURI(uri, { resolve: resolveOfferUri });
     const client = new OpenID4VCIClient({
       credentialOffer: credentialOfferClient,
       kid,
@@ -235,7 +240,7 @@ export class OpenID4VCIClient {
     return this._state.authorizationURL;
   }
 
-  public async retrieveServerMetadata(): Promise<EndpointMetadataResultV1_0_11 | EndpointMetadataResultV1_0_13> {
+  public async retrieveServerMetadata(): Promise<EndpointMetadataResult> {
     this.assertIssuerData();
     if (!this._state.endpointMetadata) {
       if (this.credentialOffer) {
@@ -474,6 +479,14 @@ export class OpenID4VCIClient {
     }) as Record<string, CredentialConfigurationSupported>;
   }
 
+  public async sendNotification(
+    credentialRequestOpts: Partial<CredentialRequestOpts>,
+    request: NotificationRequest,
+    accessToken?: string,
+  ): Promise<NotificationResult> {
+    return sendNotification(credentialRequestOpts, request, accessToken ?? this._state.accessToken ?? this._state.accessTokenResponse?.access_token);
+  }
+
   getCredentialOfferTypes(): string[][] {
     if (!this.credentialOffer) {
       return [];
@@ -527,7 +540,7 @@ export class OpenID4VCIClient {
     return this.credentialOffer?.version ?? OpenId4VCIVersion.VER_1_0_11;
   }
 
-  public get endpointMetadata(): EndpointMetadataResultV1_0_11 | EndpointMetadataResultV1_0_13 {
+  public get endpointMetadata(): EndpointMetadataResult {
     this.assertServerMetadata();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this._state.endpointMetadata!;

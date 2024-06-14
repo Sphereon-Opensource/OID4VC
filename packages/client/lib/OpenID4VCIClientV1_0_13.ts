@@ -36,8 +36,8 @@ import { CredentialRequestOpts } from './CredentialRequestClient';
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
-import { generateMissingPKCEOpts } from './functions/AuthorizationUtil';
-import { sendNotification } from './functions/notifications';
+import { generateMissingPKCEOpts } from './functions';
+import { sendNotification } from './functions';
 
 const debug = Debug('sphereon:oid4vci');
 
