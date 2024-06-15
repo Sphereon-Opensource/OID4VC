@@ -18,10 +18,10 @@ export function getSupportedCredentials(opts?: {
   types?: string[][];
   format?: OID4VCICredentialFormat | string | (OID4VCICredentialFormat | string)[];
 }): Record<string, CredentialConfigurationSupportedV1_0_13> | Array<CredentialConfigurationSupported> {
-  const {version = OpenId4VCIVersion.VER_1_0_13, types} = opts ?? {}
+  const { version = OpenId4VCIVersion.VER_1_0_13, types } = opts ?? {};
   if (types && Array.isArray(types)) {
     if (version < OpenId4VCIVersion.VER_1_0_13) {
-      return types.flatMap(typeSet => getSupportedCredential({ ...opts, version, types: typeSet }) as Array<CredentialConfigurationSupported>);
+      return types.flatMap((typeSet) => getSupportedCredential({ ...opts, version, types: typeSet }) as Array<CredentialConfigurationSupported>);
     } else {
       return types
         .map((typeSet) => {
@@ -51,7 +51,7 @@ export function getSupportedCredential(opts?: {
   let credentialConfigurationsV11: Array<CredentialConfigurationSupported> | undefined = undefined;
   let credentialConfigurationsV13: Record<string, CredentialConfigurationSupportedV1_0_13> | undefined = undefined;
   if (version < OpenId4VCIVersion.VER_1_0_12 || issuerMetadata?.credentials_supported) {
-    credentialConfigurationsV11 = issuerMetadata?.credential_supported ?? [];
+    credentialConfigurationsV11 = (issuerMetadata?.credentials_supported as Array<CredentialConfigurationSupported>) ?? [];
   } else {
     credentialConfigurationsV13 =
       (issuerMetadata?.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_13>) ?? {};
