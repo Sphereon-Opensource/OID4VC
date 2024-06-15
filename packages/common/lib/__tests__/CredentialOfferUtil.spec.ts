@@ -1,4 +1,4 @@
-import { determineSpecVersionFromURI, getClientIdFromCredentialOfferPayload } from '../functions';
+import { determineSpecVersionFromOffer, determineSpecVersionFromURI, getClientIdFromCredentialOfferPayload } from '../functions';
 import { CredentialOfferPayload, CredentialOfferPayloadV1_0_11, OpenId4VCIVersion } from '../types';
 
 export const UNIT_TEST_TIMEOUT = 30000;
@@ -46,12 +46,26 @@ describe('CredentialOfferUtil should', () => {
   );
 
   it(
-    'get version 11 as default value',
+    'get version 13 as default value',
     async () => {
       expect(determineSpecVersionFromURI('test://uri')).toEqual(OpenId4VCIVersion.VER_1_0_13);
     },
     UNIT_TEST_TIMEOUT,
   );
+
+  it('determine to be version 13', async () => {
+    const offer = {
+      grants: {
+        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+          'pre-authorized_code': 'random',
+        },
+      },
+      credential_configuration_ids: ['Omzetbelasting'],
+      credential_issuer: 'https://example.com',
+    };
+
+    expect(determineSpecVersionFromOffer(offer)).toEqual(OpenId4VCIVersion.VER_1_0_13);
+  });
 
   it('get client_id from JWT pre-auth code offer', () => {
     const offer: CredentialOfferPayload = {

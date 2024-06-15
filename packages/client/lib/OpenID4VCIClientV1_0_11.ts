@@ -460,15 +460,13 @@ export class OpenID4VCIClientV1_0_11 {
     }) as Record<string, CredentialConfigurationSupported>;
   }
 
-  getCredentialsSupported(
-    format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
-  ): Record<string, CredentialConfigurationSupported> {
+  getCredentialsSupported(format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[]): CredentialConfigurationSupported[] {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),
       format: format,
       types: undefined,
-    }) as Record<string, CredentialConfigurationSupported>;
+    }) as CredentialConfigurationSupported[];
   }
 
   getCredentialOfferTypes(): string[][] {

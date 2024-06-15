@@ -480,7 +480,7 @@ export class OpenID4VCIClientV1_0_13 {
       version: this.version(),
       format: format,
       types: undefined,
-    });
+    }) as Record<string, CredentialConfigurationSupportedV1_0_13>;
   }
 
   public async sendNotification(
@@ -539,7 +539,7 @@ export class OpenID4VCIClientV1_0_13 {
   }
 
   public version(): OpenId4VCIVersion {
-    return this.credentialOffer?.version ?? OpenId4VCIVersion.VER_1_0_11;
+    return this.credentialOffer?.version ?? OpenId4VCIVersion.VER_1_0_13;
   }
 
   public get endpointMetadata(): EndpointMetadataResultV1_0_13 {

@@ -1,8 +1,16 @@
-import { CodeChallengeMethod, WellKnownEndpoints } from '@sphereon/oid4vci-common';
+import {
+  CodeChallengeMethod,
+  CredentialOfferPayloadV1_0_13,
+  determineSpecVersionFromOffer,
+  determineSpecVersionFromURI,
+  OpenId4VCIVersion,
+  WellKnownEndpoints,
+} from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
 
+import { createCredentialOfferURIFromObject } from '../../../issuer/lib';
 import { OpenID4VCIClient } from '../OpenID4VCIClient';
 
 const MOCK_URL = 'https://server.example.com/';
@@ -226,4 +234,25 @@ describe('should successfully handle isEbsi function', () => {
     };
     expect(client.isEBSI()).toBe(true);
   });
+});
+
+it('determine to be version 13', async () => {
+  const offer = {
+    grants: {
+      'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+        'pre-authorized_code': 'random',
+      },
+    },
+    credential_configuration_ids: ['Omzetbelasting'],
+    credential_issuer: 'https://example.com',
+  } satisfies CredentialOfferPayloadV1_0_13;
+  const offerUri = createCredentialOfferURIFromObject({ credential_offer: offer });
+
+  expect(determineSpecVersionFromOffer(offer)).toEqual(OpenId4VCIVersion.VER_1_0_13);
+  expect(determineSpecVersionFromURI(offerUri)).toEqual(OpenId4VCIVersion.VER_1_0_13);
+});
+it('determine to be version 11', async () => {
+  const offerUri =
+    'openid-credential-offer://?credential_offer=%7B%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22wN39X8fU4FCU2MaykNRkCr%22%2C%22user_pin_required%22%3Afalse%7D%7D%2C%22credentials%22%3A%5B%22dbc2023%22%5D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fssi.dutchblockchaincoalition.org%2Fagent%22%7D';
+  expect(determineSpecVersionFromURI(offerUri)).toEqual(OpenId4VCIVersion.VER_1_0_11);
 });

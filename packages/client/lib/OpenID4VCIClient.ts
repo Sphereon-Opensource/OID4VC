@@ -225,7 +225,7 @@ export class OpenID4VCIClient {
           endpointMetadata: this.endpointMetadata as EndpointMetadataResultV1_0_11,
           authorizationRequest: this._state.authorizationRequestOpts,
           credentialOffer: this.credentialOffer,
-          credentialsSupported: Object.values(this.getCredentialsSupported()) as CredentialsSupportedLegacy[],
+          credentialsSupported: Object.values(this.getCredentialsSupported(true)) as CredentialsSupportedLegacy[],
         });
       } else {
         this._state.authorizationURL = await createAuthorizationRequestUrl({
@@ -233,7 +233,7 @@ export class OpenID4VCIClient {
           endpointMetadata: this.endpointMetadata as EndpointMetadataResultV1_0_13,
           authorizationRequest: this._state.authorizationRequestOpts,
           credentialOffer: this.credentialOffer,
-          credentialConfigurationSupported: this.getCredentialsSupported() as Record<string, CredentialConfigurationSupportedV1_0_13>,
+          credentialConfigurationSupported: this.getCredentialsSupported(false) as Record<string, CredentialConfigurationSupportedV1_0_13>,
         });
       }
     }
@@ -452,31 +452,16 @@ export class OpenID4VCIClient {
     return JSON.stringify(this._state);
   }
 
-  // FIXME: We really should convert <v11 to v12 objects first. Right now the logic doesn't map nicely and is brittle.
-  // We should resolve IDs to objects first in case of strings.
-  // When < v11 convert into a v12 object. When v12 object retain it.
-  // Then match the object array on server metadata
-  getCredentialsSupportedV11(
-    restrictToInitiationTypes: boolean,
+  getCredentialsSupported(
+    restrictToInitiationTypes?: boolean,
     format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
-  ): Record<string, CredentialConfigurationSupported> {
+  ): Record<string, CredentialConfigurationSupportedV1_0_13> | Array<CredentialConfigurationSupported> {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),
       format: format,
       types: restrictToInitiationTypes ? this.getCredentialOfferTypes() : undefined,
-    }) as Record<string, CredentialConfigurationSupported>;
-  }
-
-  getCredentialsSupported(
-    format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
-  ): Record<string, CredentialConfigurationSupported> {
-    return getSupportedCredentials({
-      issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
-      version: this.version(),
-      format: format,
-      types: undefined,
-    }) as Record<string, CredentialConfigurationSupported>;
+    });
   }
 
   public async sendNotification(
@@ -487,7 +472,7 @@ export class OpenID4VCIClient {
     return sendNotification(credentialRequestOpts, request, accessToken ?? this._state.accessToken ?? this._state.accessTokenResponse?.access_token);
   }
 
-  getCredentialOfferTypes(): string[][] {
+  getCredentialOfferTypes(): string[][] | undefined {
     if (!this.credentialOffer) {
       return [];
     } else if (this.credentialOffer.version < OpenId4VCIVersion.VER_1_0_11) {
@@ -510,7 +495,7 @@ export class OpenID4VCIClient {
       });
     }
     // we don't have this for v13. v13 only has credential_configuration_ids which is not translatable to type
-    return [];
+    return undefined;
   }
 
   issuerSupportedFlowTypes(): AuthzFlowType[] {

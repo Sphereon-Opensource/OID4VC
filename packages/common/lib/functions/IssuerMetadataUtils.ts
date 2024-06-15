@@ -1,3 +1,4 @@
+import { VCI_LOG_COMMON } from '../index';
 import {
   AuthorizationServerMetadata,
   CredentialConfigurationSupported,
@@ -11,27 +12,32 @@ import {
   OpenId4VCIVersion,
 } from '../types';
 
-export function getSupportedCredentials(options?: {
+export function getSupportedCredentials(opts?: {
   issuerMetadata?: CredentialIssuerMetadata | IssuerMetadata;
   version: OpenId4VCIVersion;
   types?: string[][];
   format?: OID4VCICredentialFormat | string | (OID4VCICredentialFormat | string)[];
-}): Record<string, CredentialConfigurationSupportedV1_0_13> {
-  if (options?.types && Array.isArray(options.types)) {
-    return options.types
-      .map((typeSet) => {
-        return getSupportedCredential({ ...options, types: typeSet });
-      })
-      .reduce(
-        (acc, result) => {
-          Object.assign(acc, result);
-          return acc;
-        },
-        {} as Record<string, CredentialConfigurationSupportedV1_0_13>,
-      );
+}): Record<string, CredentialConfigurationSupportedV1_0_13> | Array<CredentialConfigurationSupported> {
+  const {version = OpenId4VCIVersion.VER_1_0_13, types} = opts ?? {}
+  if (types && Array.isArray(types)) {
+    if (version < OpenId4VCIVersion.VER_1_0_13) {
+      return types.flatMap(typeSet => getSupportedCredential({ ...opts, version, types: typeSet }) as Array<CredentialConfigurationSupported>);
+    } else {
+      return types
+        .map((typeSet) => {
+          return getSupportedCredential({ ...opts, version, types: typeSet });
+        })
+        .reduce(
+          (acc, result) => {
+            Object.assign(acc, result);
+            return acc;
+          },
+          {} as Record<string, CredentialConfigurationSupportedV1_0_13>,
+        );
+    }
   }
 
-  return getSupportedCredential(options ? { ...options, types: undefined } : undefined);
+  return getSupportedCredential(opts ? { ...opts, types: undefined } : undefined);
 }
 
 export function getSupportedCredential(opts?: {
@@ -39,31 +45,63 @@ export function getSupportedCredential(opts?: {
   version: OpenId4VCIVersion;
   types?: string | string[];
   format?: OID4VCICredentialFormat | string | (OID4VCICredentialFormat | string)[];
-}): Record<string, CredentialConfigurationSupportedV1_0_13> {
-  const { issuerMetadata, types, format } = opts ?? {};
+}): Record<string, CredentialConfigurationSupportedV1_0_13> | Array<CredentialConfigurationSupported> {
+  const { issuerMetadata, types, format, version = OpenId4VCIVersion.VER_1_0_13 } = opts ?? {};
 
-  if (!issuerMetadata || !issuerMetadata.credential_configurations_supported) {
-    return {};
+  let credentialConfigurationsV11: Array<CredentialConfigurationSupported> | undefined = undefined;
+  let credentialConfigurationsV13: Record<string, CredentialConfigurationSupportedV1_0_13> | undefined = undefined;
+  if (version < OpenId4VCIVersion.VER_1_0_12 || issuerMetadata?.credentials_supported) {
+    credentialConfigurationsV11 = issuerMetadata?.credential_supported ?? [];
+  } else {
+    credentialConfigurationsV13 =
+      (issuerMetadata?.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_13>) ?? {};
+  }
+  if (!issuerMetadata || (!issuerMetadata.credential_configurations_supported && !issuerMetadata.credentials_supported)) {
+    VCI_LOG_COMMON.warning(`No credential issuer metadata or supported credentials found for issuer}`);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return version < OpenId4VCIVersion.VER_1_0_13 ? credentialConfigurationsV11! : credentialConfigurationsV13!;
   }
 
-  const credentialConfigurations: Record<string, CredentialConfigurationSupportedV1_0_13> =
-    issuerMetadata.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_13>;
   const normalizedTypes: string[] = Array.isArray(types) ? types : types ? [types] : [];
   const normalizedFormats: string[] = Array.isArray(format) ? format : format ? [format] : [];
 
-  return Object.entries(credentialConfigurations).reduce(
-    (filteredConfigs, [id, config]) => {
-      const isTypeMatch = normalizedTypes.length === 0 || normalizedTypes.some((type) => config.credential_definition.type?.includes(type));
-      const isFormatMatch = normalizedFormats.length === 0 || normalizedFormats.includes(config.format);
-
-      if (isTypeMatch && isFormatMatch) {
-        filteredConfigs[id] = config;
+  function filterMatchingConfig(config: CredentialConfigurationSupported): CredentialConfigurationSupported | undefined {
+    let isTypeMatch = normalizedTypes.length === 0;
+    if (!isTypeMatch) {
+      if ('credential_definition' in config) {
+        isTypeMatch = normalizedTypes.some((type) => config.credential_definition.type?.includes(type));
+      } else if ('type' in config && Array.isArray(config.type)) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        isTypeMatch = normalizedTypes.some((type) => config.type.includes(type));
+      } else if ('types' in config) {
+        isTypeMatch = normalizedTypes.some((type) => config.types?.includes(type));
       }
+    }
 
-      return filteredConfigs;
-    },
-    {} as Record<string, CredentialConfigurationSupportedV1_0_13>,
-  );
+    const isFormatMatch = normalizedFormats.length === 0 || normalizedFormats.includes(config.format);
+
+    return isTypeMatch && isFormatMatch ? config : undefined;
+  }
+
+  if (credentialConfigurationsV13) {
+    return Object.entries(credentialConfigurationsV13).reduce(
+      (filteredConfigs, [id, config]) => {
+        if (filterMatchingConfig(config)) {
+          filteredConfigs[id] = config;
+          // Added to enable support < 13. We basically assign the
+          if (!config.id) {
+            config.id = id;
+          }
+        }
+        return filteredConfigs;
+      },
+      {} as Record<string, CredentialConfigurationSupportedV1_0_13>,
+    );
+  } else if (credentialConfigurationsV11) {
+    return credentialConfigurationsV11.filter((config) => filterMatchingConfig(config));
+  }
+  throw Error(`Either < v11 configurations or V13 configurations should have been filtered at this point`);
 }
 
 export function getTypesFromCredentialSupported(
