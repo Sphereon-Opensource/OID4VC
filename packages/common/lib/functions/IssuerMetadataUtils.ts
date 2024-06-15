@@ -51,7 +51,19 @@ export function getSupportedCredential(opts?: {
   let credentialConfigurationsV11: Array<CredentialConfigurationSupported> | undefined = undefined;
   let credentialConfigurationsV13: Record<string, CredentialConfigurationSupportedV1_0_13> | undefined = undefined;
   if (version < OpenId4VCIVersion.VER_1_0_12 || issuerMetadata?.credentials_supported) {
-    credentialConfigurationsV11 = (issuerMetadata?.credentials_supported as Array<CredentialConfigurationSupported>) ?? [];
+    if (typeof issuerMetadata?.credentials_supported === 'object') {
+     // The current code duplication and logic is such a mess, that we re-adjust the object to the proper type again
+      credentialConfigurationsV11 = []
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+     Object.entries(issuerMetadata.credentials_supported!).forEach(([id, supported]) => {
+       if (!supported.id) {
+         supported.id = id
+       }
+       credentialConfigurationsV11?.push(supported as CredentialConfigurationSupported)
+     })
+    } else {
+      credentialConfigurationsV11 = (issuerMetadata?.credentials_supported as Array<CredentialConfigurationSupported>) ?? [];
+    }
   } else {
     credentialConfigurationsV13 =
       (issuerMetadata?.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_13>) ?? {};
