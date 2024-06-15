@@ -52,15 +52,15 @@ export function getSupportedCredential(opts?: {
   let credentialConfigurationsV13: Record<string, CredentialConfigurationSupportedV1_0_13> | undefined = undefined;
   if (version < OpenId4VCIVersion.VER_1_0_12 || issuerMetadata?.credentials_supported) {
     if (typeof issuerMetadata?.credentials_supported === 'object') {
-     // The current code duplication and logic is such a mess, that we re-adjust the object to the proper type again
-      credentialConfigurationsV11 = []
+      // The current code duplication and logic is such a mess, that we re-adjust the object to the proper type again
+      credentialConfigurationsV11 = [];
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-     Object.entries(issuerMetadata.credentials_supported!).forEach(([id, supported]) => {
-       if (!supported.id) {
-         supported.id = id
-       }
-       credentialConfigurationsV11?.push(supported as CredentialConfigurationSupported)
-     })
+      Object.entries(issuerMetadata.credentials_supported!).forEach(([id, supported]) => {
+        if (!supported.id) {
+          supported.id = id;
+        }
+        credentialConfigurationsV11?.push(supported as CredentialConfigurationSupported);
+      });
     } else {
       credentialConfigurationsV11 = (issuerMetadata?.credentials_supported as Array<CredentialConfigurationSupported>) ?? [];
     }
@@ -80,7 +80,9 @@ export function getSupportedCredential(opts?: {
   function filterMatchingConfig(config: CredentialConfigurationSupported): CredentialConfigurationSupported | undefined {
     let isTypeMatch = normalizedTypes.length === 0;
     if (!isTypeMatch) {
-      if ('credential_definition' in config) {
+      if (normalizedTypes.length === 1 && config.id === normalizedTypes[0]) {
+        isTypeMatch = true;
+      } else if ('credential_definition' in config) {
         isTypeMatch = normalizedTypes.some((type) => config.credential_definition.type?.includes(type));
       } else if ('type' in config && Array.isArray(config.type)) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
