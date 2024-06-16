@@ -244,6 +244,7 @@ describe('VcIssuer', () => {
       preAuthorizedCode: 'test_code',
       scheme: 'http',
       supportedFlows: ['Authorization Code Flow', 'Pre-Authorized Code Flow'],
+      userPinRequired: false,
       version: 1013,
     })
     expect(client.getIssuer()).toEqual(ISSUER_URL)

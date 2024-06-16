@@ -64,14 +64,16 @@ export class CredentialRequestClientV1_0_11 {
     credentialTypes?: string | string[];
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
-  }): Promise<OpenIDResponse<CredentialResponse>> {
+  }): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const { credentialTypes, proofInput, format, context } = opts;
 
     const request = await this.createCredentialRequest({ proofInput, credentialTypes, context, format, version: this.version() });
     return await this.acquireCredentialsUsingRequest(request);
   }
 
-  public async acquireCredentialsUsingRequest(uniformRequest: UniformCredentialRequest): Promise<OpenIDResponse<CredentialResponse>> {
+  public async acquireCredentialsUsingRequest(
+    uniformRequest: UniformCredentialRequest,
+  ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const request = getCredentialRequestForVersion(uniformRequest, this.version());
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint;
     if (!isValidURL(credentialEndpoint)) {
@@ -81,11 +83,14 @@ export class CredentialRequestClientV1_0_11 {
     debug(`Acquiring credential(s) from: ${credentialEndpoint}`);
     debug(`request\n: ${JSON.stringify(request, null, 2)}`);
     const requestToken: string = this.credentialRequestOpts.token;
-    let response: OpenIDResponse<CredentialResponse> = await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken });
+    let response = (await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken })) as OpenIDResponse<CredentialResponse> & {
+      access_token: string;
+    };
     this._isDeferred = isDeferredCredentialResponse(response);
     if (this.isDeferred() && this.credentialRequestOpts.deferredCredentialAwait && response.successBody) {
       response = await this.acquireDeferredCredential(response.successBody, { bearerToken: this.credentialRequestOpts.token });
     }
+    response.access_token = requestToken;
 
     debug(`Credential endpoint ${credentialEndpoint} response:\r\n${JSON.stringify(response, null, 2)}`);
     return response;
@@ -96,7 +101,7 @@ export class CredentialRequestClientV1_0_11 {
     opts?: {
       bearerToken?: string;
     },
-  ): Promise<OpenIDResponse<CredentialResponse>> {
+  ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const transactionId = response.transaction_id;
     const bearerToken = response.acceptance_token ?? opts?.bearerToken;
     const deferredCredentialEndpoint = this.getDeferredCredentialEndpoint();

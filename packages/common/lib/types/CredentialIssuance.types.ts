@@ -27,6 +27,7 @@ export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOffe
   txCode?: TxCode;
   issuerState?: string;
   preAuthorizedCode?: string;
+  userPinRequired: boolean;
 }
 
 export type CredentialOffer = CredentialOfferV1_0_09 | CredentialOfferV1_0_11 | CredentialOfferV1_0_13;

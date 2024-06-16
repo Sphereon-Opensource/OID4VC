@@ -6,16 +6,12 @@ import {
   AuthorizationServerOpts,
   AuthzFlowType,
   convertJsonToURI,
-  CredentialOfferPayloadV1_0_13,
-  CredentialOfferV1_0_13,
-  determineSpecVersionFromOffer,
   EndpointMetadata,
   formPost,
   getIssuerFromCredentialOfferPayload,
   GrantTypes,
   IssuerOpts,
   JsonURIMode,
-  OpenId4VCIVersion,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
   TokenErrorResponse,
@@ -91,11 +87,9 @@ export class AccessTokenClient {
 
   public async createAccessTokenRequest(opts: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
     const { asOpts, pin, codeVerifier, code, redirectUri } = opts;
-    const credentialOfferRequest =
-      opts.credentialOffer &&
-      determineSpecVersionFromOffer(opts.credentialOffer as CredentialOfferPayloadV1_0_13).valueOf() <= OpenId4VCIVersion.VER_1_0_13.valueOf()
-        ? await toUniformCredentialOfferRequest(opts.credentialOffer as CredentialOfferV1_0_13)
-        : undefined;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const credentialOfferRequest = opts.credentialOffer ? await toUniformCredentialOfferRequest(opts.credentialOffer) : undefined;
     const request: Partial<AccessTokenRequest> = {};
 
     if (asOpts?.clientId) {

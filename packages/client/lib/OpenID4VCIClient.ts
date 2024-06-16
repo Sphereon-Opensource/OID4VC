@@ -13,8 +13,10 @@ import {
   CredentialResponse,
   CredentialsSupportedLegacy,
   DefaultURISchemes,
+  determineVersionsFromIssuerMetadata,
   EndpointMetadataResultV1_0_11,
   EndpointMetadataResultV1_0_13,
+  ExperimentalSubjectIssuance,
   getClientIdFromCredentialOfferPayload,
   getIssuerFromCredentialOfferPayload,
   getSupportedCredentials,
@@ -33,11 +35,13 @@ import {
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
+import { AccessTokenClient } from './AccessTokenClient';
 import { AccessTokenClientV1_0_11 } from './AccessTokenClientV1_0_11';
 import { createAuthorizationRequestUrl } from './AuthorizationCodeClient';
 import { createAuthorizationRequestUrlV1_0_11 } from './AuthorizationCodeClientV1_0_11';
 import { CredentialOfferClient } from './CredentialOfferClient';
 import { CredentialRequestOpts } from './CredentialRequestClient';
+import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
 import { MetadataClient } from './MetadataClient';
 import { OpenID4VCIClientStateV1_0_11 } from './OpenID4VCIClientV1_0_11';
@@ -62,6 +66,7 @@ export class OpenID4VCIClient {
     credentialIssuer,
     pkce,
     authorizationRequest,
+    accessToken,
     jwk,
     endpointMetadata,
     accessTokenResponse,
@@ -77,6 +82,7 @@ export class OpenID4VCIClient {
     pkce?: PKCEOpts;
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
     jwk?: JWK;
+    accessToken?: string;
     endpointMetadata?: EndpointMetadataResult;
     accessTokenResponse?: AccessTokenResponse;
     authorizationRequestOpts?: AuthorizationRequestOpts;
@@ -212,7 +218,7 @@ export class OpenID4VCIClient {
         throw Error(`No Authorization Request options present or provided in this call`);
       }
 
-      // todo: Probably can go with current logic in MetadataClientV1_0_13 who will always set the authorization_endpoint when found
+      // todo: Probably can go with current logic in MetadataClient who will always set the authorization_endpoint when found
       //  handling this because of the support for v1_0-08
       if (
         this._state.endpointMetadata?.credentialIssuerMetadata &&
@@ -286,7 +292,7 @@ export class OpenID4VCIClient {
       this._state.clientId = clientId;
     }
     if (!this._state.accessTokenResponse) {
-      const accessTokenClient = new AccessTokenClientV1_0_11();
+      const accessTokenClient = this.version() <= OpenId4VCIVersion.VER_1_0_12 ? new AccessTokenClientV1_0_11() : new AccessTokenClient();
 
       if (redirectUri && redirectUri !== this._state.authorizationRequestOpts?.redirectUri) {
         console.log(
@@ -324,6 +330,7 @@ export class OpenID4VCIClient {
         );
       }
       this._state.accessTokenResponse = response.successBody;
+      this._state.accessToken = response.successBody.access_token;
     }
 
     return this.accessTokenResponse;
@@ -351,7 +358,8 @@ export class OpenID4VCIClient {
     jti?: string;
     deferredCredentialAwait?: boolean;
     deferredCredentialIntervalInMS?: number;
-  }): Promise<CredentialResponse> {
+    experimentalHolderIssuanceSupported?: boolean;
+  }): Promise<CredentialResponse & { access_token: string }> {
     if ([jwk, kid].filter((v) => v !== undefined).length > 1) {
       throw new Error(KID_JWK_X5C_ERROR + `. jwk: ${jwk !== undefined}, kid: ${kid !== undefined}`);
     }
@@ -360,20 +368,36 @@ export class OpenID4VCIClient {
     if (jwk) this._state.jwk = jwk;
     if (kid) this._state.kid = kid;
 
-    const requestBuilder = this.credentialOffer
-      ? CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({
-          credentialOffer: this.credentialOffer,
-          metadata: this.endpointMetadata,
-        })
-      : CredentialRequestClientBuilderV1_0_11.fromCredentialIssuer({
-          credentialIssuer: this.getIssuer(),
-          credentialTypes,
-          metadata: this.endpointMetadata,
-          version: this.version(),
-        });
+    let requestBuilder: CredentialRequestClientBuilder | CredentialRequestClientBuilderV1_0_11;
+    if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
+      requestBuilder = this.credentialOffer
+        ? CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({
+            credentialOffer: this.credentialOffer,
+            metadata: this.endpointMetadata,
+          })
+        : CredentialRequestClientBuilderV1_0_11.fromCredentialIssuer({
+            credentialIssuer: this.getIssuer(),
+            credentialTypes,
+            metadata: this.endpointMetadata,
+            version: this.version(),
+          });
+    } else {
+      requestBuilder = this.credentialOffer
+        ? CredentialRequestClientBuilder.fromCredentialOffer({
+            credentialOffer: this.credentialOffer,
+            metadata: this.endpointMetadata,
+          })
+        : CredentialRequestClientBuilder.fromCredentialIssuer({
+            credentialIssuer: this.getIssuer(),
+            credentialTypes,
+            metadata: this.endpointMetadata,
+            version: this.version(),
+          });
+    }
 
     requestBuilder.withTokenFromResponse(this.accessTokenResponse);
     requestBuilder.withDeferredCredentialAwait(deferredCredentialAwait ?? false, deferredCredentialIntervalInMS);
+    let subjectIssuance: ExperimentalSubjectIssuance | undefined;
     if (this.endpointMetadata?.credentialIssuerMetadata) {
       const metadata = this.endpointMetadata.credentialIssuerMetadata;
       const types = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
@@ -388,6 +412,9 @@ export class OpenID4VCIClient {
             (types.length === 1 && (types[0] === supportedCredential.id || subTypes.includes(types[0])))
           ) {
             typeSupported = true;
+            if (supportedCredential.credential_subject_issuance) {
+              subjectIssuance = { credential_subject_issuance: supportedCredential.credential_subject_issuance };
+            }
           }
         });
 
@@ -403,6 +430,10 @@ export class OpenID4VCIClient {
       }
       // todo: Format check? We might end up with some disjoint type / format combinations supported by the server
     }
+    if (subjectIssuance) {
+      requestBuilder.withSubjectIssuance(subjectIssuance);
+    }
+
     const credentialRequestClient = requestBuilder.build();
     const proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse({
       accessTokenResponse: this.accessTokenResponse,
@@ -430,6 +461,7 @@ export class OpenID4VCIClient {
       credentialTypes,
       context,
       format,
+      subjectIssuance,
     });
     if (response.errorBody) {
       debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`);
@@ -446,7 +478,7 @@ export class OpenID4VCIClient {
         } for issuer ${this.getIssuer()} failed as there was no success response body`,
       );
     }
-    return response.successBody;
+    return { ...response.successBody, access_token: response.access_token };
   }
 
   public async exportState(): Promise<string> {
@@ -476,13 +508,13 @@ export class OpenID4VCIClient {
   getCredentialOfferTypes(): string[][] | undefined {
     if (!this.credentialOffer) {
       return [];
-    } else if (this.credentialOffer.version < OpenId4VCIVersion.VER_1_0_11) {
+    } else if (this.version() < OpenId4VCIVersion.VER_1_0_11) {
       const orig = this.credentialOffer.original_credential_offer as CredentialOfferPayloadV1_0_08;
       const types: string[] = typeof orig.credential_type === 'string' ? [orig.credential_type] : orig.credential_type;
       const result: string[][] = [];
       result[0] = types;
       return result;
-    } else if (this.credentialOffer.version < OpenId4VCIVersion.VER_1_0_13) {
+    } else if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
       return (this.credentialOffer.credential_offer as CredentialOfferPayloadV1_0_11).credentials.map((c) => getTypesFromObject(c) ?? []);
     }
     // we don't have this for v13. v13 only has credential_configuration_ids which is not translatable to type
@@ -513,7 +545,17 @@ export class OpenID4VCIClient {
   }
 
   public version(): OpenId4VCIVersion {
-    return this.credentialOffer?.version ?? OpenId4VCIVersion.VER_1_0_11;
+    if (this.credentialOffer?.version && this.credentialOffer.version !== OpenId4VCIVersion.VER_UNKNOWN) {
+      return this.credentialOffer.version;
+    }
+    const metadata = this._state.endpointMetadata;
+    if (metadata?.credentialIssuerMetadata) {
+      const versions = determineVersionsFromIssuerMetadata(metadata.credentialIssuerMetadata);
+      if (versions.length > 0 && !versions.includes(OpenId4VCIVersion.VER_UNKNOWN)) {
+        return versions[0];
+      }
+    }
+    return OpenId4VCIVersion.VER_1_0_13;
   }
 
   public get endpointMetadata(): EndpointMetadataResult {
@@ -563,9 +605,12 @@ export class OpenID4VCIClient {
 
   public getAccessTokenEndpoint(): string {
     this.assertIssuerData();
-    return this.endpointMetadata
-      ? this.endpointMetadata.token_endpoint
-      : AccessTokenClientV1_0_11.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
+    if (this.endpointMetadata) {
+      return this.endpointMetadata.token_endpoint;
+    }
+    return this.version() <= OpenId4VCIVersion.VER_1_0_12
+      ? AccessTokenClientV1_0_11.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } })
+      : AccessTokenClient.determineTokenURL({ issuerOpts: { issuer: this.getIssuer() } });
   }
 
   public getCredentialEndpoint(): string {
@@ -587,8 +632,7 @@ export class OpenID4VCIClient {
    */
   public isEBSI() {
     if (
-      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11)['credentials'] &&
-      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11).credentials.find(
+      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11).credentials?.find(
         (cred) =>
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore

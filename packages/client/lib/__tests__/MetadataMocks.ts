@@ -48,6 +48,7 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
   scheme: 'openid-credential-offer',
   supportedFlows: [AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW],
   version: 1013,
+  userPinRequired: true, // Determined from above tx_code
 };
 export const INITIATION_TEST_V1_0_08: CredentialOfferRequestWithBaseUrl = {
   baseUrl: 'openid-initiate-issuance://',

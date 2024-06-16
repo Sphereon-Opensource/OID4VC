@@ -40,6 +40,32 @@ export function getSupportedCredentials(opts?: {
   return getSupportedCredential(opts ? { ...opts, types: undefined } : undefined);
 }
 
+export function determineVersionsFromIssuerMetadata(issuerMetadata: CredentialIssuerMetadata | IssuerMetadata): Array<OpenId4VCIVersion> {
+  const versions = new Set<OpenId4VCIVersion>();
+  if ('authorization_server' in issuerMetadata) {
+    versions.add(OpenId4VCIVersion.VER_1_0_11);
+  } else if ('authorization_servers' in issuerMetadata) {
+    versions.add(OpenId4VCIVersion.VER_1_0_13);
+  }
+  if (versions.size === 0) {
+    // The above checks where already very specific and only applicable to single versions we support, so let's skip if we encounter them
+    if ('credential_configurations_supported' in issuerMetadata) {
+      versions.add(OpenId4VCIVersion.VER_1_0_13);
+    } else if ('credentials_supported' in issuerMetadata) {
+      if (typeof issuerMetadata.credentials_supported === 'object') {
+        versions.add(OpenId4VCIVersion.VER_1_0_08);
+      } else {
+        versions.add(OpenId4VCIVersion.VER_1_0_09).add(OpenId4VCIVersion.VER_1_0_11);
+      }
+    }
+  }
+  if (versions.size === 0) {
+    versions.add(OpenId4VCIVersion.VER_UNKNOWN);
+  }
+
+  return Array.from(versions).sort().reverse(); // highest version first
+}
+
 export function getSupportedCredential(opts?: {
   issuerMetadata?: CredentialIssuerMetadata | IssuerMetadata;
   version: OpenId4VCIVersion;
@@ -51,7 +77,7 @@ export function getSupportedCredential(opts?: {
   let credentialConfigurationsV11: Array<CredentialConfigurationSupported> | undefined = undefined;
   let credentialConfigurationsV13: Record<string, CredentialConfigurationSupportedV1_0_13> | undefined = undefined;
   if (version < OpenId4VCIVersion.VER_1_0_12 || issuerMetadata?.credentials_supported) {
-    if (typeof issuerMetadata?.credentials_supported === 'object') {
+    if (issuerMetadata?.credentials_supported && !Array.isArray(issuerMetadata?.credentials_supported)) {
       // The current code duplication and logic is such a mess, that we re-adjust the object to the proper type again
       credentialConfigurationsV11 = [];
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -84,16 +110,16 @@ export function getSupportedCredential(opts?: {
       if (normalizedTypes.length === 1 && config.id === normalizedTypes[0]) {
         isTypeMatch = true;
       } else if (types) {
-        isTypeMatch = normalizedTypes.some((type) => types.includes(type));
+        isTypeMatch = normalizedTypes.every((type) => types.includes(type));
       } else {
         if ('credential_definition' in config) {
-          isTypeMatch = normalizedTypes.some((type) => config.credential_definition.type?.includes(type));
+          isTypeMatch = normalizedTypes.every((type) => config.credential_definition.type?.includes(type));
         } else if ('type' in config && Array.isArray(config.type)) {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          isTypeMatch = normalizedTypes.some((type) => config.type.includes(type));
+          isTypeMatch = normalizedTypes.every((type) => config.type.includes(type));
         } else if ('types' in config) {
-          isTypeMatch = normalizedTypes.some((type) => config.types?.includes(type));
+          isTypeMatch = normalizedTypes.every((type) => config.types?.includes(type));
         }
       }
     }
@@ -212,7 +238,9 @@ export function getIssuerName(
 export function getTypesFromObject(
   subject: CredentialConfigurationSupported | CredentialOfferFormat | CredentialDefinitionV1_0_13 | JsonLdIssuerCredentialDefinition | string,
 ): string[] | undefined {
-  if (typeof subject === 'string') {
+  if (subject === undefined) {
+    return undefined;
+  } else if (typeof subject === 'string') {
     return [subject];
   } else if ('credential_definition' in subject && subject.credential_definition) {
     return getTypesFromObject(subject.credential_definition);

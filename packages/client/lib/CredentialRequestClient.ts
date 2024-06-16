@@ -108,7 +108,7 @@ export class CredentialRequestClient {
     uniformRequest: UniformCredentialRequest,
   ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
-      throw new Error('Versions below v1.0.13 (draft 13) are not supported.');
+      throw new Error('Versions below v1.0.13 (draft 13) are not supported by the V13 credential request client.');
     }
     const request: CredentialRequestV1_0_13 = getCredentialRequestForVersion(uniformRequest, this.version()) as CredentialRequestV1_0_13;
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint;

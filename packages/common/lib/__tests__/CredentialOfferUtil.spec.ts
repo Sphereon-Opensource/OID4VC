@@ -111,6 +111,8 @@ describe('CredentialOfferUtil should', () => {
         },
       },
     } as CredentialOfferPayloadV1_0_11;
+
+    expect(determineSpecVersionFromOffer(offer)).toEqual(OpenId4VCIVersion.VER_1_0_11);
     expect(getClientIdFromCredentialOfferPayload(offer)).toEqual(
       'did:key:z2dmzD81cgPx8Vki7JbuuMmFYrWPgYoytykUZ3eyqht1j9KbqSZZFjG4tVgKhEwKprojqLB3C2Ypj4H73StgjMkSXg2mQxuWLfzuR12QsNvgQWzrzKSf7YRBNrRXK71vfq12BbyxTLFEZBWfnHqezBVGQiNLfqeuywZHgstMCcS44TXfb2',
     );
