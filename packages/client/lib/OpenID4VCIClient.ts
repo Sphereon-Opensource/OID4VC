@@ -19,6 +19,7 @@ import {
   getIssuerFromCredentialOfferPayload,
   getSupportedCredentials,
   getTypesFromCredentialSupported,
+  getTypesFromObject,
   JWK,
   KID_JWK_X5C_ERROR,
   NotificationRequest,
@@ -482,17 +483,7 @@ export class OpenID4VCIClient {
       result[0] = types;
       return result;
     } else if (this.credentialOffer.version < OpenId4VCIVersion.VER_1_0_13) {
-      return (this.credentialOffer.credential_offer as CredentialOfferPayloadV1_0_11).credentials.map((c) => {
-        if (typeof c === 'string') {
-          return [c];
-        } else if ('types' in c) {
-          return c.types;
-        } else if ('vct' in c) {
-          return [c.vct];
-        } else {
-          return c.credential_definition.types;
-        }
-      });
+      return (this.credentialOffer.credential_offer as CredentialOfferPayloadV1_0_11).credentials.map((c) => getTypesFromObject(c) ?? []);
     }
     // we don't have this for v13. v13 only has credential_configuration_ids which is not translatable to type
     return undefined;

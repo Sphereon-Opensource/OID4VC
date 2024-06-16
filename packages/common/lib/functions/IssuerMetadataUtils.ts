@@ -1,4 +1,4 @@
-import { VCI_LOG_COMMON } from '../index';
+import { CredentialDefinitionV1_0_13, CredentialOfferFormat, JsonLdIssuerCredentialDefinition, VCI_LOG_COMMON } from '../index';
 import {
   AuthorizationServerMetadata,
   CredentialConfigurationSupported,
@@ -79,17 +79,22 @@ export function getSupportedCredential(opts?: {
 
   function filterMatchingConfig(config: CredentialConfigurationSupported): CredentialConfigurationSupported | undefined {
     let isTypeMatch = normalizedTypes.length === 0;
+    const types = getTypesFromObject(config);
     if (!isTypeMatch) {
       if (normalizedTypes.length === 1 && config.id === normalizedTypes[0]) {
         isTypeMatch = true;
-      } else if ('credential_definition' in config) {
-        isTypeMatch = normalizedTypes.some((type) => config.credential_definition.type?.includes(type));
-      } else if ('type' in config && Array.isArray(config.type)) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        isTypeMatch = normalizedTypes.some((type) => config.type.includes(type));
-      } else if ('types' in config) {
-        isTypeMatch = normalizedTypes.some((type) => config.types?.includes(type));
+      } else if (types) {
+        isTypeMatch = normalizedTypes.some((type) => types.includes(type));
+      } else {
+        if ('credential_definition' in config) {
+          isTypeMatch = normalizedTypes.some((type) => config.credential_definition.type?.includes(type));
+        } else if ('type' in config && Array.isArray(config.type)) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          isTypeMatch = normalizedTypes.some((type) => config.type.includes(type));
+        } else if ('types' in config) {
+          isTypeMatch = normalizedTypes.some((type) => config.types?.includes(type));
+        }
       }
     }
 
@@ -129,12 +134,7 @@ export function getTypesFromCredentialSupported(
     credentialSupported.format === 'jwt_vc_json-ld' ||
     credentialSupported.format === 'ldp_vc'
   ) {
-    types =
-      (credentialSupported.types
-        ? (credentialSupported.types as string[])
-        : 'credential_definition' in credentialSupported
-          ? credentialSupported.credential_definition?.type
-          : []) ?? [];
+    types = getTypesFromObject(credentialSupported) ?? [];
   } else if (credentialSupported.format === 'vc+sd-jwt') {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -203,4 +203,27 @@ export function getIssuerName(
     }
   }
   return url;
+}
+
+/**
+ * The specs had many places where types could be expressed. This method ensures we get them in any way possible
+ * @param subject
+ */
+export function getTypesFromObject(
+  subject: CredentialConfigurationSupported | CredentialOfferFormat | CredentialDefinitionV1_0_13 | JsonLdIssuerCredentialDefinition | string,
+): string[] | undefined {
+  if (typeof subject === 'string') {
+    return [subject];
+  } else if ('credential_definition' in subject && subject.credential_definition) {
+    return getTypesFromObject(subject.credential_definition);
+  } else if ('types' in subject && subject.types) {
+    return Array.isArray(subject.types) ? subject.types : [subject.types];
+  } else if ('type' in subject && subject.type) {
+    return Array.isArray(subject.type) ? subject.type : [subject.type];
+  } else if ('vct' in subject && subject.vct) {
+    return [subject.vct];
+  }
+
+  VCI_LOG_COMMON.warning('Could not deduce credential types. Probably a failure down the line will happen!');
+  return undefined;
 }
