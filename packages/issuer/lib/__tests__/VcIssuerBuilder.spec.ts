@@ -1,15 +1,15 @@
-import { CredentialSupported, IssuerCredentialSubjectDisplay, IssueStatus, TokenErrorResponse } from '@sphereon/oid4vci-common'
+import { CredentialConfigurationSupportedV1_0_13, IssuerCredentialSubjectDisplay, IssueStatus, TokenErrorResponse } from '@sphereon/oid4vci-common'
 import { v4 } from 'uuid'
 
-import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../index'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../index'
 
 describe('VcIssuer builder should', () => {
   it('generate a VcIssuer', () => {
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
-      .withCryptographicSuitesSupported('ES256K')
+    const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+      .withCredentialSigningAlgValuesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
-      .withId('UniversityDegree_JWT')
+      .withCredentialName('UniversityDegree_JWT')
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
@@ -20,14 +20,16 @@ describe('VcIssuer builder should', () => {
         background_color: '#12107c',
         text_color: '#FFFFFF',
       })
-      .withTypes('VerifiableCredential')
+      .withCredentialDefinition({
+        type: ['UniversityDegree_JWT'],
+      })
       .addCredentialSubjectPropertyDisplay('given_name', {
         name: 'given name',
         locale: 'en-US',
       } as IssuerCredentialSubjectDisplay)
       .build()
     const vcIssuer = new VcIssuerBuilder()
-      .withAuthorizationServer('https://authorization-server')
+      .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer('https://credential-issuer')
       .withIssuerDisplay({
@@ -36,21 +38,23 @@ describe('VcIssuer builder should', () => {
       })
       .withInMemoryCredentialOfferState()
       .withInMemoryCNonceState()
-      .withCredentialsSupported(credentialsSupported)
+      .withCredentialConfigurationsSupported(credentialsSupported)
       .build()
 
-    expect(vcIssuer.issuerMetadata.authorization_server).toEqual('https://authorization-server')
+    expect(vcIssuer.issuerMetadata.authorization_servers).toEqual(['https://authorization-server'])
     expect(vcIssuer.issuerMetadata.display).toBeDefined()
-    expect(vcIssuer.issuerMetadata.credentials_supported[0].id).toEqual('UniversityDegree_JWT')
+    expect(vcIssuer.issuerMetadata.credential_configurations_supported!['UniversityDegree_JWT']).toBeDefined()
   })
 
   it('fail to generate a VcIssuer', () => {
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
-      .withCryptographicSuitesSupported('ES256K')
+    const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+      .withCredentialSigningAlgValuesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
-      .withTypes('VerifiableCredential')
-      .withId('UniversityDegree_JWT')
+      .withCredentialName('UniversityDegree_JWT')
+      .withCredentialDefinition({
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
@@ -68,33 +72,35 @@ describe('VcIssuer builder should', () => {
       .build()
     expect(() =>
       new VcIssuerBuilder()
-        .withAuthorizationServer('https://authorization-server')
+        .withAuthorizationServers('https://authorization-server')
         .withCredentialEndpoint('https://credential-endpoint')
         .withIssuerDisplay({
           name: 'example issuer',
           locale: 'en-US',
         })
-        .withCredentialsSupported(credentialsSupported)
+        .withCredentialConfigurationsSupported(credentialsSupported)
         .build(),
     ).toThrowError(TokenErrorResponse.invalid_request)
   })
 
   it('fail to generate a CredentialSupportedV1_11', () => {
     expect(() =>
-      new CredentialSupportedBuilderV1_11()
-        .withCryptographicSuitesSupported('ES256K')
+      new CredentialSupportedBuilderV1_13()
+        .withCredentialSigningAlgValuesSupported('ES256K')
         .withCryptographicBindingMethod('did')
-        .withId('UniversityDegree_JWT')
+        .withCredentialName('UniversityDegree_JWT')
         .build(),
     ).toThrowError(TokenErrorResponse.invalid_request)
   })
   it('should successfully attach an instance of the ICredentialOfferStateManager to the VcIssuer instance', async () => {
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
-      .withCryptographicSuitesSupported('ES256K')
+    const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+      .withCredentialSigningAlgValuesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
-      .withTypes('VerifiableCredential')
-      .withId('UniversityDegree_JWT')
+      .withCredentialName('UniversityDegree_JWT')
+      .withCredentialDefinition({
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
@@ -111,14 +117,14 @@ describe('VcIssuer builder should', () => {
       } as IssuerCredentialSubjectDisplay)
       .build()
     const vcIssuer = new VcIssuerBuilder()
-      .withAuthorizationServer('https://authorization-server')
+      .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer('https://credential-issuer')
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',
       })
-      .withCredentialsSupported(credentialsSupported)
+      .withCredentialConfigurationsSupported(credentialsSupported)
       .withInMemoryCredentialOfferState()
       .withInMemoryCNonceState()
       .build()
@@ -126,6 +132,7 @@ describe('VcIssuer builder should', () => {
     expect(vcIssuer).toBeDefined()
     const preAuthorizedCodecreatedAt = +new Date()
     await vcIssuer.credentialOfferSessions?.set('test', {
+      notification_id: v4(),
       issuerState: v4(),
       lastUpdatedAt: preAuthorizedCodecreatedAt,
       status: IssueStatus.OFFER_CREATED,

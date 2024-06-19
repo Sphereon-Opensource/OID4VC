@@ -1,9 +1,9 @@
 import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, JsonURIMode, OpenId4VCIVersion, SearchValue } from '../types';
 
 /**
- * @function encodeJsonAsURI encodes a Json object into a URI
- * @param json object
- * @param opts:
+ * @type {(json: {[s:string]: never} | ArrayLike<never> | string | object, opts?: EncodeJsonAsURIOpts)} encodes a Json object into a URI
+ * @param { {[s:string]: never} | ArrayLike<never> | string | object } json
+ * @param {EncodeJsonAsURIOpts} [opts] Option to encode json as uri
  *          - urlTypeProperties: a list of properties of which the value is a URL
  *          - arrayTypeProperties: a list of properties which are an array
  */
@@ -81,16 +81,18 @@ export function convertJsonToURI(
 }
 
 /**
- * @function decodeUriAsJson decodes a URI into a Json object
- * @param uri string
- * @param opts:
+ * @type {(uri: string, opts?: DecodeURIAsJsonOpts): unknown} convertURIToJsonObject converts an URI into a Json object decoding its properties
+ * @param {string} uri
+ * @param {DecodeURIAsJsonOpts} [opts]
  *          - requiredProperties: the required properties
  *          - arrayTypeProperties: properties that can show up more that once
+ * @returns JSON object
  */
 export function convertURIToJsonObject(uri: string, opts?: DecodeURIAsJsonOpts): unknown {
   if (!uri || (opts?.requiredProperties && !opts.requiredProperties?.every((p) => uri.includes(p)))) {
     throw new Error(BAD_PARAMS);
   }
+
   const uriComponents = getURIComponentsAsArray(uri, opts?.arrayTypeProperties);
   return decodeJsonProperties(uriComponents);
 }
@@ -128,8 +130,8 @@ function decodeJsonProperties(parts: string[] | string[][]): unknown {
 
 /**
  * @function get URI Components as Array
- * @param uri string
- * @param arrayTypes array of string containing array like keys
+ * @param {string} uri uri
+ * @param {string[]} [arrayTypes] array of string containing array like keys
  */
 function getURIComponentsAsArray(uri: string, arrayTypes?: string[]): string[] | string[][] {
   const parts = uri.includes('?') ? uri.split('?')[1] : uri.includes('://') ? uri.split('://')[1] : uri;

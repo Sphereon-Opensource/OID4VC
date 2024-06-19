@@ -1,10 +1,11 @@
-import { CredentialOfferPayload, UniformCredentialOffer } from './CredentialIssuance.types';
+import { CredentialOfferPayload, ProofOfPossessionCallbacks, UniformCredentialOffer } from './CredentialIssuance.types';
 import {
   ErrorResponse,
   IssuerCredentialSubject,
   JsonLdIssuerCredentialDefinition,
   OID4VCICredentialFormat,
   PRE_AUTH_CODE_LITERAL,
+  TxCode,
 } from './Generic.types';
 import { EndpointMetadata } from './ServerMetadata';
 
@@ -104,21 +105,27 @@ export interface CommonAuthorizationDetails {
    * MUST be set to openid_credential for the purpose of this specification.
    */
   type: 'openid_credential' | string;
+
+  /**
+   *  REQUIRED when format parameter is not present. String specifying a unique identifier of the Credential being described in the credential_configurations_supported map in the Credential Issuer Metadata as defined in Section 11.2.3. The referenced object in the credential_configurations_supported map conveys the details, such as the format, for issuance of the requested Credential. This specification defines Credential Format specific Issuer Metadata in Appendix A. It MUST NOT be present if format parameter is present.
+   */
+  credential_configuration_id?: string; // FIXME maybe split up and make this & format required again
+
   /**
    * REQUIRED. JSON string representing the format in which the Credential is requested to be issued.
    * This Credential format identifier determines further claims in the authorization details object
    * specifically used to identify the Credential type to be issued. This specification defines
    * Credential Format Profiles in Appendix E.
    */
-  format: OID4VCICredentialFormat;
+  format?: OID4VCICredentialFormat;
   /**
    * If the Credential Issuer metadata contains an authorization_server parameter,
    * the authorization detail's locations common data field MUST be set to the Credential Issuer Identifier value.
    */
   locations?: string[];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  /* // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // [key: string]: any;*/
 }
 
 export interface AuthorizationDetailsJwtVcJson extends CommonAuthorizationDetails {
@@ -191,6 +198,9 @@ export interface IssuerOpts {
 export interface AccessTokenFromAuthorizationResponseOpts extends AccessTokenRequestOpts {
   authorizationResponse: AuthorizationResponse;
 }
+
+export type TxCodeAndPinRequired = { isPinRequired?: boolean; txCode?: TxCode };
+
 export interface AccessTokenRequestOpts {
   credentialOffer?: UniformCredentialOffer;
   credentialIssuer?: string;
@@ -200,6 +210,7 @@ export interface AccessTokenRequestOpts {
   code?: string; // only required for authorization flow
   redirectUri?: string; // only required for authorization flow
   pin?: string; // Pin-number. Only used when required
+  pinMetadata?: TxCodeAndPinRequired; // OPTIONAL. String value containing a Transaction Code. This value MUST be present if a tx_code object was present in the Credential Offer (including if the object was empty). This parameter MUST only be used if the grant_type is urn:ietf:params:oauth:grant-type:pre-authorized_code.
 }
 
 /*export interface AuthorizationRequestOpts {
@@ -249,6 +260,21 @@ export interface PKCEOpts {
   codeVerifier?: string;
 }
 
+export enum CreateRequestObjectMode {
+  NONE,
+  REQUEST_OBJECT,
+  REQUEST_URI,
+}
+
+export type RequestObjectOpts = {
+  requestObjectMode?: CreateRequestObjectMode;
+  signCallbacks?: ProofOfPossessionCallbacks<never>;
+  clientMetadata?: Record<string, any>; // TODO: Merge SIOP/OID4VP
+  iss?: string;
+  jwksUri?: string;
+  kid?: string;
+};
+
 export interface AuthorizationRequestOpts {
   clientId?: string;
   pkce?: PKCEOpts;
@@ -256,6 +282,7 @@ export interface AuthorizationRequestOpts {
   authorizationDetails?: AuthorizationDetails | AuthorizationDetails[];
   redirectUri?: string;
   scope?: string;
+  requestObjectOpts?: RequestObjectOpts;
 }
 
 export interface AuthorizationResponse {

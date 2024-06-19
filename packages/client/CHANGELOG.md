@@ -166,7 +166,7 @@ Release with support for the pre-authorized code flow only!
   - Documentation updates/fixes
 
 - Fixes:
-  - The acquireCredential in the OpenID4VCIClient was not using the access token, resulting in auth issues.
+  - The acquireCredential in the OpenID4VCIClientV1_0_13 was not using the access token, resulting in auth issues.
 
 ## v0.3.1 - 2022-11-20
 

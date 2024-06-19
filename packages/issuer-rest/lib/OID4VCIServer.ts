@@ -1,14 +1,12 @@
-import * as console from 'console'
-import process from 'process'
-
 import {
   AuthorizationRequest,
-  CredentialSupported,
+  CredentialConfigurationSupportedV1_0_13,
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
   QRCodeOpts,
+  TxCode,
 } from '@sphereon/oid4vci-common'
-import { CredentialSupportedBuilderV1_11, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { CredentialSupportedBuilderV1_13, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
 import express, { Express } from 'express'
 
@@ -24,12 +22,16 @@ import {
 } from './oid4vci-api-functions'
 
 function buildVCIFromEnvironment<DIDDoc extends object>() {
-  const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
-    .withCryptographicSuitesSupported(process.env.cryptographic_suites_supported as string)
+  const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+    .withCredentialSigningAlgValuesSupported(process.env.credential_signing_alg_values_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
     .withFormat(process.env.credential_supported_format as unknown as OID4VCICredentialFormat)
-    .withId(process.env.credential_supported_id as string)
-    .withTypes([process.env.credential_supported_types_1 as string, process.env.credential_supported_types_2 as string])
+    .withCredentialName(process.env.credential_supported_name_1 as string)
+    .withCredentialDefinition({
+      type: [process.env.credential_supported_1_definition_type_1 as string, process.env.credential_supported_1_definition_type_2 as string],
+      // TODO: setup credentialSubject here from env
+      // credentialSubject
+    })
     .withCredentialSupportedDisplay({
       name: process.env.credential_display_name as string,
       locale: process.env.credential_display_locale as string,
@@ -49,15 +51,15 @@ function buildVCIFromEnvironment<DIDDoc extends object>() {
     )
     .build()
   return new VcIssuerBuilder<DIDDoc>()
-    .withUserPinRequired(process.env.user_pin_required as unknown as boolean)
-    .withAuthorizationServer(process.env.authorization_server as string)
+    .withTXCode({ length: process.env.user_pin_length as unknown as number, input_mode: process.env.user_pin_input_mode as 'numeric' | 'text' })
+    .withAuthorizationServers(process.env.authorization_server as string)
     .withCredentialEndpoint(process.env.credential_endpoint as string)
     .withCredentialIssuer(process.env.credential_issuer as string)
     .withIssuerDisplay({
       name: process.env.issuer_name as string,
       locale: process.env.issuer_locale as string,
     })
-    .withCredentialsSupported(credentialsSupported)
+    .withCredentialConfigurationsSupported(credentialsSupported)
     .withInMemoryCredentialOfferState()
     .withInMemoryCNonceState()
     .build()
@@ -66,8 +68,7 @@ function buildVCIFromEnvironment<DIDDoc extends object>() {
 export type ICreateCredentialOfferURIResponse = {
   uri: string
   userPin?: string
-  userPinLength?: number
-  userPinRequired: boolean
+  tsCode?: TxCode
 }
 
 export interface IGetCredentialOfferEndpointOpts extends ISingleEndpointOpts {
@@ -86,6 +87,7 @@ export interface IGetIssueStatusEndpointOpts extends ISingleEndpointOpts {
 export interface IOID4VCIServerOpts extends HasEndpointOpts {
   endpointOpts?: {
     tokenEndpointOpts?: ITokenEndpointOpts
+    notificationOpts?: ISingleEndpointOpts
     createCredentialOfferOpts?: ICreateCredentialOfferEndpointOpts
     getCredentialOfferOpts?: IGetCredentialOfferEndpointOpts
     getStatusOpts?: IGetIssueStatusEndpointOpts
@@ -162,7 +164,7 @@ export class OID4VCIServer<DIDDoc extends object> {
   }
 
   private assertAccessTokenHandling(tokenEndpointOpts?: ITokenEndpointOpts) {
-    const authServer = this.issuer.issuerMetadata.authorization_server
+    const authServer = this.issuer.issuerMetadata.authorization_servers
     if (this.isTokenEndpointDisabled(tokenEndpointOpts)) {
       if (!authServer) {
         throw Error(

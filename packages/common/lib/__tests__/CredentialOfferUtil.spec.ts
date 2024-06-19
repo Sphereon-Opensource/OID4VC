@@ -1,5 +1,5 @@
-import { determineSpecVersionFromURI, getClientIdFromCredentialOfferPayload } from '../functions';
-import { CredentialOfferPayload, OpenId4VCIVersion } from '../types';
+import { determineSpecVersionFromOffer, determineSpecVersionFromURI, getClientIdFromCredentialOfferPayload } from '../functions';
+import { CredentialOfferPayload, CredentialOfferPayloadV1_0_11, OpenId4VCIVersion } from '../types';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -39,22 +39,36 @@ describe('CredentialOfferUtil should', () => {
     'get exception for mixed attributes in URL',
     async () => {
       expect(() => determineSpecVersionFromURI(INITIATE_QR_DATA_MIXED_V9)).toThrow(
-        Error("Invalid param. Some keys have been used from version: 1008 version while 'credential_issuer' is used from version: 1011"),
+        Error("Invalid param. Some keys have been used from version: 1008 version while 'credentials' is used from version: [1011]"),
       );
     },
     UNIT_TEST_TIMEOUT,
   );
 
   it(
-    'get version 11 as default value',
+    'get version 13 as default value',
     async () => {
-      expect(determineSpecVersionFromURI('test://uri')).toEqual(OpenId4VCIVersion.VER_1_0_11);
+      expect(determineSpecVersionFromURI('test://uri')).toEqual(OpenId4VCIVersion.VER_1_0_13);
     },
     UNIT_TEST_TIMEOUT,
   );
 
-  it('get client_id from JWT pre-auth code offer', () => {
+  it('determine to be version 13', async () => {
     const offer = {
+      grants: {
+        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+          'pre-authorized_code': 'random',
+        },
+      },
+      credential_configuration_ids: ['Omzetbelasting'],
+      credential_issuer: 'https://example.com',
+    };
+
+    expect(determineSpecVersionFromOffer(offer)).toEqual(OpenId4VCIVersion.VER_1_0_13);
+  });
+
+  it('get client_id from JWT pre-auth code offer', () => {
+    const offer: CredentialOfferPayload = {
       credential_issuer: 'https://conformance-test.ebsi.eu/conformance/v3/issuer-mock',
       credentials: [
         {
@@ -72,14 +86,14 @@ describe('CredentialOfferUtil should', () => {
           user_pin_required: true,
         },
       },
-    } as CredentialOfferPayload;
+    } as CredentialOfferPayloadV1_0_11;
     expect(getClientIdFromCredentialOfferPayload(offer)).toEqual(
       'did:key:z2dmzD81cgPx8Vki7JbuuMmFYrWPgYoytykUZ3eyqht1j9KbqSZZFjG4tVgKhEwKprojqLB3C2Ypj4H73StgjMkSXg2mQxuWLfzuR12QsNvgQWzrzKSf7YRBNrRXK71vfq12BbyxTLFEZBWfnHqezBVGQiNLfqeuywZHgstMCcS44TXfb2',
     );
   });
 
   it('get client_id from JWT authorization code offer', () => {
-    const offer = {
+    const offer: CredentialOfferPayload = {
       credential_issuer: 'https://conformance-test.ebsi.eu/conformance/v3/issuer-mock',
       credentials: [
         {
@@ -96,7 +110,9 @@ describe('CredentialOfferUtil should', () => {
             'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsImtpZCI6IkJFTmRqRGZhdGxLai11UW92WUpsT184U2pPY1ZIdmk2SHJYS0xLRUI3UG8ifQ.eyJjbGllbnRfaWQiOiJkaWQ6a2V5OnoyZG16RDgxY2dQeDhWa2k3SmJ1dU1tRllyV1BnWW95dHlrVVozZXlxaHQxajlLYnFTWlpGakc0dFZnS2hFd0twcm9qcUxCM0MyWXBqNEg3M1N0Z2pNa1NYZzJtUXh1V0xmenVSMTJRc052Z1FXenJ6S1NmN1lSQk5yUlhLNzF2ZnExMkJieXhUTEZFWkJXZm5IcWV6QlZHUWlOTGZxZXV5d1pIZ3N0TUNjUzQ0VFhmYjIiLCJjcmVkZW50aWFsX3R5cGVzIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiVmVyaWZpYWJsZUF0dGVzdGF0aW9uIiwiQ1RXYWxsZXRDcm9zc0F1dGhvcmlzZWRJblRpbWUiXSwiaWF0IjoxNzA2MTI1ODUwLCJleHAiOjE3MDYxMjYxNTAsImlzcyI6Imh0dHBzOi8vY29uZm9ybWFuY2UtdGVzdC5lYnNpLmV1L2NvbmZvcm1hbmNlL3YzL2lzc3Vlci1tb2NrIiwiYXVkIjoiaHR0cHM6Ly9jb25mb3JtYW5jZS10ZXN0LmVic2kuZXUvY29uZm9ybWFuY2UvdjMvYXV0aC1tb2NrIiwic3ViIjoiZGlkOmtleTp6MmRtekQ4MWNnUHg4VmtpN0pidXVNbUZZcldQZ1lveXR5a1VaM2V5cWh0MWo5S2JxU1paRmpHNHRWZ0toRXdLcHJvanFMQjNDMllwajRINzNTdGdqTWtTWGcybVF4dVdMZnp1UjEyUXNOdmdRV3pyektTZjdZUkJOclJYSzcxdmZxMTJCYnl4VExGRVpCV2ZuSHFlekJWR1FpTkxmcWV1eXdaSGdzdE1DY1M0NFRYZmIyIn0.jxzbE6OdqnJfLzSfwYcgRZQURI5UcAtuYU9gPOZYyUwjWMDtVo1k4PCYH4mnjok7pfj47ik8FnaHWE7d99u-_w',
         },
       },
-    } as CredentialOfferPayload;
+    } as CredentialOfferPayloadV1_0_11;
+
+    expect(determineSpecVersionFromOffer(offer)).toEqual(OpenId4VCIVersion.VER_1_0_11);
     expect(getClientIdFromCredentialOfferPayload(offer)).toEqual(
       'did:key:z2dmzD81cgPx8Vki7JbuuMmFYrWPgYoytykUZ3eyqht1j9KbqSZZFjG4tVgKhEwKprojqLB3C2Ypj4H73StgjMkSXg2mQxuWLfzuR12QsNvgQWzrzKSf7YRBNrRXK71vfq12BbyxTLFEZBWfnHqezBVGQiNLfqeuywZHgstMCcS44TXfb2',
     );

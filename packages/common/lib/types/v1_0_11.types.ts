@@ -1,4 +1,7 @@
-import { AuthorizationDetailsJwtVcJson, CommonAuthorizationRequest } from './Authorization.types';
+import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
+
+import { AuthorizationDetailsJwtVcJson, AuthorizationServerOpts, CommonAuthorizationRequest } from './Authorization.types';
+import { UniformCredentialOffer, UniformCredentialOfferRequest } from './CredentialIssuance.types';
 import {
   CommonCredentialRequest,
   CredentialDataSupplierInput,
@@ -10,19 +13,40 @@ import {
   Grant,
 } from './Generic.types';
 import { QRCodeOpts } from './QRCode.types';
-import { AuthorizationServerMetadata } from './ServerMetadata';
+import { AuthorizationServerMetadata, AuthorizationServerType, EndpointMetadata } from './ServerMetadata';
+import { IssuerMetadataV1_0_08 } from './v1_0_08.types';
+
+export interface AccessTokenRequestOptsV1_0_11 {
+  credentialOffer?: UniformCredentialOffer;
+  credentialIssuer?: string;
+  asOpts?: AuthorizationServerOpts;
+  metadata?: EndpointMetadata;
+  codeVerifier?: string; // only required for authorization flow
+  code?: string; // only required for authorization flow
+  redirectUri?: string; // only required for authorization flow
+  pin?: string; // Pin-number. Only used when required
+}
 
 export interface CredentialOfferV1_0_11 {
   credential_offer?: CredentialOfferPayloadV1_0_11;
   credential_offer_uri?: string;
 }
 
-export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_11 {
+export interface CredentialOfferRESTRequestV1_0_11 extends CredentialOfferV1_0_11 {
   baseUri?: string;
   scheme?: string;
   pinLength?: number;
   qrCodeOpts?: QRCodeOpts;
   credentialDataSupplierInput?: CredentialDataSupplierInput;
+}
+
+export interface CredentialOfferRequestWithBaseUrlV1_0_11 extends UniformCredentialOfferRequest {
+  scheme: string;
+  clientId?: string;
+  baseUrl: string;
+  userPinRequired: boolean;
+  issuerState?: string;
+  preAuthorizedCode?: string;
 }
 
 export interface CredentialOfferPayloadV1_0_11 {
@@ -58,11 +82,16 @@ export interface CredentialOfferPayloadV1_0_11 {
 }
 
 export type CredentialRequestV1_0_11 = CommonCredentialRequest &
+  ExperimentalSubjectIssuance &
   (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc);
 
 export interface CredentialIssuerMetadataV1_0_11 extends CredentialIssuerMetadataOpts, Partial<AuthorizationServerMetadata> {
+  authorization_servers?: string[]; // OPTIONAL. Array of strings that identify the OAuth 2.0 Authorization Servers (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
   credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
-  authorization_server?: string;
+  credential_response_encryption_alg_values_supported?: string; // OPTIONAL. Array containing a list of the JWE [RFC7516] encryption algorithms (alg values) [RFC7518] supported by the Credential and/or Batch Credential Endpoint to encode the Credential or Batch Credential Response in a JWT [RFC7519].
+  credential_response_encryption_enc_values_supported?: string; //OPTIONAL. Array containing a list of the JWE [RFC7516] encryption algorithms (enc values) [RFC7518] supported by the Credential and/or Batch Credential Endpoint to encode the Credential or Batch Credential Response in a JWT [RFC7519].
+  require_credential_response_encryption?: boolean; //OPTIONAL. Boolean value specifying whether the Credential Issuer requires additional encryption on top of TLS for the Credential Response and expects encryption parameters to be present in the Credential Request and/or Batch Credential Request, with true indicating support. When the value is true, credential_response_encryption_alg_values_supported parameter MUST also be provided. If omitted, the default value is false.
+  credential_identifiers_supported?: boolean; // OPTIONAL. Boolean value specifying whether the Credential Issuer supports returning credential_identifiers parameter in the authorization_details Token Response parameter, with true indicating support. If omitted, the default value is false.
 }
 
 export interface AuthorizationRequestV1_0_11 extends AuthorizationDetailsJwtVcJson, AuthorizationDetailsJwtVcJson {
@@ -72,4 +101,12 @@ export interface AuthorizationRequestV1_0_11 extends AuthorizationDetailsJwtVcJs
 // todo https://sphereon.atlassian.net/browse/VDX-185
 export function isAuthorizationRequestV1_0_11(request: CommonAuthorizationRequest): boolean {
   return request && 'issuer_state' in request;
+}
+
+export interface EndpointMetadataResultV1_0_11 extends EndpointMetadata {
+  // The EndpointMetadata are snake-case so they can easily be used in payloads/JSON.
+  // The values below should not end up in requests/responses directly, so they are using our normal CamelCase convention
+  authorizationServerType: AuthorizationServerType;
+  authorizationServerMetadata?: AuthorizationServerMetadata;
+  credentialIssuerMetadata?: Partial<AuthorizationServerMetadata> & IssuerMetadataV1_0_08;
 }

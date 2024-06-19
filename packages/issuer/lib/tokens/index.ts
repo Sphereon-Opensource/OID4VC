@@ -11,6 +11,7 @@ import {
   IStateManager,
   Jwt,
   JWTSignerCallback,
+  JWTVerifyCallback,
   PIN_NOT_MATCH_ERROR,
   PIN_VALIDATION_ERROR,
   PRE_AUTH_CODE_LITERAL,
@@ -33,6 +34,7 @@ export interface ITokenEndpointOpts {
   tokenExpiresIn?: number
   preAuthorizedCodeExpirationDuration?: number
   accessTokenSignerCallback?: JWTSignerCallback
+  accessTokenVerificationCallback?: JWTVerifyCallback<never>
   accessTokenIssuer?: string
 }
 
@@ -83,11 +85,11 @@ export const assertValidAccessTokenRequest = async (
   }
 
   // Pre-auth flow
-  if (!request[PRE_AUTH_CODE_LITERAL]) {
+  if (!request['pre-authorized_code']) {
     throw new TokenError(400, TokenErrorResponse.invalid_request, PRE_AUTHORIZED_CODE_REQUIRED_ERROR)
   }
 
-  const credentialOfferSession = await credentialOfferSessions.getAsserted(request[PRE_AUTH_CODE_LITERAL])
+  const credentialOfferSession = await credentialOfferSessions.getAsserted(request['pre-authorized_code'])
   credentialOfferSession.status = IssueStatus.ACCESS_TOKEN_REQUESTED
   credentialOfferSession.lastUpdatedAt = +new Date()
   await credentialOfferSessions.set(request[PRE_AUTH_CODE_LITERAL], credentialOfferSession)
@@ -98,7 +100,10 @@ export const assertValidAccessTokenRequest = async (
   invalid_request:
   the Authorization Server expects a PIN in the pre-authorized flow but the client does not provide a PIN
    */
-  if (credentialOfferSession.credentialOffer.credential_offer?.grants?.[GrantTypes.PRE_AUTHORIZED_CODE]?.user_pin_required && !request.user_pin) {
+  if (
+    credentialOfferSession.credentialOffer.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code &&
+    !request.user_pin
+  ) {
     throw new TokenError(400, TokenErrorResponse.invalid_request, USER_PIN_REQUIRED_ERROR)
   }
   /*

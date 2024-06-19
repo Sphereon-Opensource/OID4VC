@@ -1,24 +1,28 @@
 import {
   CNonceState,
-  CredentialIssuerMetadata,
+  CredentialConfigurationSupportedV1_0_13,
   CredentialOfferSession,
-  CredentialSupported,
+  IssuerMetadata,
+  IssuerMetadataV1_0_13,
   IStateManager,
   JWTVerifyCallback,
   MetadataDisplay,
   TokenErrorResponse,
+  TxCode,
   URIState,
 } from '@sphereon/oid4vci-common'
+import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 
 import { VcIssuer } from '../VcIssuer'
 import { MemoryStates } from '../state-manager'
 import { CredentialDataSupplier, CredentialSignerCallback } from '../types'
 
-import { IssuerMetadataBuilderV1_11 } from './IssuerMetadataBuilderV1_11'
+import { IssuerMetadataBuilderV1_13 } from './IssuerMetadataBuilderV1_13'
 
 export class VcIssuerBuilder<DIDDoc extends object> {
-  issuerMetadataBuilder?: IssuerMetadataBuilderV1_11
-  issuerMetadata: Partial<CredentialIssuerMetadata> = {}
+  issuerMetadataBuilder?: IssuerMetadataBuilderV1_13
+  issuerMetadata: Partial<CredentialIssuerMetadataOptsV1_0_13> = {}
+  txCode?: TxCode
   defaultCredentialOfferBaseUri?: string
   userPinRequired?: boolean
   cNonceExpiresIn?: number
@@ -29,12 +33,15 @@ export class VcIssuerBuilder<DIDDoc extends object> {
   jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
   credentialDataSupplier?: CredentialDataSupplier
 
-  public withIssuerMetadata(issuerMetadata: CredentialIssuerMetadata) {
-    this.issuerMetadata = issuerMetadata
+  public withIssuerMetadata(issuerMetadata: IssuerMetadata) {
+    if (!issuerMetadata.credential_configurations_supported) {
+      throw new Error('IssuerMetadata should be from type v1_0_13 or higher.')
+    }
+    this.issuerMetadata = issuerMetadata as IssuerMetadataV1_0_13
     return this
   }
 
-  public withIssuerMetadataBuilder(builder: IssuerMetadataBuilderV1_11) {
+  public withIssuerMetadataBuilder(builder: IssuerMetadataBuilderV1_13) {
     this.issuerMetadataBuilder = builder
     return this
   }
@@ -49,8 +56,8 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     return this
   }
 
-  public withAuthorizationServer(authorizationServer: string): this {
-    this.issuerMetadata.authorization_server = authorizationServer
+  public withAuthorizationServers(authorizationServers: string | string[]): this {
+    this.issuerMetadata.authorization_servers = typeof authorizationServers === 'string' ? [authorizationServers] : authorizationServers
     return this
   }
 
@@ -80,18 +87,21 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     return this
   }
 
-  public withCredentialsSupported(credentialSupported: CredentialSupported | CredentialSupported[]): this {
-    this.issuerMetadata.credentials_supported = Array.isArray(credentialSupported) ? credentialSupported : [credentialSupported]
+  public withCredentialConfigurationsSupported(credentialConfigurationsSupported: Record<string, CredentialConfigurationSupportedV1_0_13>) {
+    this.issuerMetadata.credential_configurations_supported = credentialConfigurationsSupported
     return this
   }
 
-  public addCredentialsSupported(credentialSupported: CredentialSupported): this {
-    this.issuerMetadata.credentials_supported = [...(this.issuerMetadata.credentials_supported ?? []), credentialSupported]
+  public addCredentialConfigurationsSupported(id: string, supportedCredential: CredentialConfigurationSupportedV1_0_13) {
+    if (!this.issuerMetadata.credential_configurations_supported) {
+      this.issuerMetadata.credential_configurations_supported = {}
+    }
+    this.issuerMetadata.credential_configurations_supported[id] = supportedCredential
     return this
   }
 
-  public withUserPinRequired(userPinRequired: boolean): this {
-    this.userPinRequired = userPinRequired
+  public withTXCode(txCode: TxCode): this {
+    this.txCode = txCode
     return this
   }
 
@@ -154,20 +164,16 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     }
 
     const builder = this.issuerMetadataBuilder?.build()
-    const metadata: Partial<CredentialIssuerMetadata> = { ...this.issuerMetadata, ...builder }
+    const metadata: Partial<IssuerMetadataV1_0_13> = { ...this.issuerMetadata, ...builder }
     // Let's make sure these get merged correctly:
-    metadata.credentials_supported = [...(this.issuerMetadata.credentials_supported ?? []), ...(builder?.credentials_supported ?? [])]
+    metadata.credential_configurations_supported = this.issuerMetadata.credential_configurations_supported
     metadata.display = [...(this.issuerMetadata.display ?? []), ...(builder?.display ?? [])]
-    if (
-      !metadata.credential_endpoint ||
-      !metadata.credential_issuer ||
-      !this.issuerMetadata.credentials_supported ||
-      this.issuerMetadata.credentials_supported.length === 0
-    ) {
+    if (!metadata.credential_endpoint || !metadata.credential_issuer || !this.issuerMetadata.credential_configurations_supported) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    return new VcIssuer(metadata as CredentialIssuerMetadata, {
-      userPinRequired: this.userPinRequired ?? false,
+    return new VcIssuer(metadata as IssuerMetadataV1_0_13, {
+      //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
+      ...(this.txCode && { txCode: this.txCode }),
       defaultCredentialOfferBaseUri: this.defaultCredentialOfferBaseUri,
       credentialSignerCallback: this.credentialSignerCallback,
       jwtVerifyCallback: this.jwtVerifyCallback,

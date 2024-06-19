@@ -3,18 +3,18 @@ import { PARMode, WellKnownEndpoints } from '@sphereon/oid4vci-common';
 // @ts-ignore
 import nock from 'nock';
 
-import { OpenID4VCIClient } from '../OpenID4VCIClient';
+import { OpenID4VCIClientV1_0_11 } from '../OpenID4VCIClientV1_0_11';
 
 const MOCK_URL = 'https://server.example.com/';
-describe('OpenID4VCIClient', () => {
-  let client: OpenID4VCIClient;
+describe('OpenID4VCIClientV1_0_11', () => {
+  let client: OpenID4VCIClientV1_0_11;
 
   beforeEach(async () => {
     nock(MOCK_URL).get(/.*/).reply(200, {});
     nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {});
     nock(MOCK_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
     nock(`${MOCK_URL}`).post('/v1/auth/par').reply(201, { request_uri: 'test_uri', expires_in: 90 });
-    client = await OpenID4VCIClient.fromURI({
+    client = await OpenID4VCIClientV1_0_11.fromURI({
       createAuthorizationRequestURL: false,
       clientId: 'test-client',
       uri: 'openid-initiate-issuance://?issuer=https://server.example.com&credential_type=TestCredential',
@@ -59,7 +59,7 @@ describe('OpenID4VCIClient', () => {
           redirectUri: 'http://localhost:8881/cb',
         },
       }),
-    ).rejects.toThrow(Error('Could not create authorization details from credential offer. Please pass in explicit details'));
+    ).rejects.toThrow('Could not create authorization details from credential offer. Please pass in explicit details');
   });
 
   it('should not fail when only authorization_details is present', async () => {

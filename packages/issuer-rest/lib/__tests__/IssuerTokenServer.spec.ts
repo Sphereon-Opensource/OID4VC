@@ -3,7 +3,7 @@ import { KeyObject } from 'crypto'
 import {
   Alg,
   CNonceState,
-  CredentialIssuerMetadataOpts,
+  CredentialIssuerMetadataOptsV1_0_13,
   CredentialOfferSession,
   IssueStatus,
   Jwt,
@@ -17,6 +17,7 @@ import { DIDDocument } from 'did-resolver'
 import { Express } from 'express'
 import * as jose from 'jose'
 import requests from 'supertest'
+import { v4 } from 'uuid'
 
 import { OID4VCIServer } from '../OID4VCIServer'
 
@@ -38,6 +39,7 @@ describe('OID4VCIServer', () => {
     const credentialOfferState1: CredentialOfferSession = {
       preAuthorizedCode: preAuthorizedCode1,
       userPin: '493536',
+      notification_id: v4(),
       createdAt: +new Date(),
       lastUpdatedAt: +new Date(),
       status: IssueStatus.OFFER_CREATED,
@@ -92,26 +94,27 @@ describe('OID4VCIServer', () => {
     const vcIssuer: VcIssuer<DIDDocument> = new VcIssuer<DIDDocument>(
       {
         // authorization_server: 'https://authorization-server',
-        // credential_endpoint: 'https://credential-endpoint',
+        credential_endpoint: 'http://localhost:9000',
         credential_issuer: 'https://credential-issuer',
         display: [{ name: 'example issuer', locale: 'en-US' }],
-        credentials_supported: [
-          {
-            format: 'jwt_vc_json',
-            types: ['VerifiableCredential', 'UniversityDegreeCredential'],
-            credentialSubject: {
-              given_name: {
-                display: [
-                  {
-                    name: 'given name',
-                    locale: 'en-US',
-                  },
-                ],
+        credential_configurations_supported: {
+          UniversityDegree_JWT: {
+            credential_definition: {
+              type: ['VerifiableCredential', 'UniversityDegreeCredential'],
+              credentialSubject: {
+                given_name: {
+                  display: [
+                    {
+                      name: 'given name',
+                      locale: 'en-US',
+                    },
+                  ],
+                },
               },
             },
-            cryptographic_suites_supported: ['ES256K'],
+            format: 'jwt_vc_json',
+            credential_signing_alg_values_supported: ['ES256K'],
             cryptographic_binding_methods_supported: ['did'],
-            id: 'UniversityDegree_JWT',
             display: [
               {
                 name: 'University Credential',
@@ -125,8 +128,8 @@ describe('OID4VCIServer', () => {
               },
             ],
           },
-        ],
-      } as CredentialIssuerMetadataOpts,
+        },
+      } as CredentialIssuerMetadataOptsV1_0_13,
       {
         cNonceExpiresIn: 300,
         credentialOfferSessions,
@@ -186,8 +189,8 @@ describe('OID4VCIServer', () => {
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
-      error: 'invalid_request',
-      error_description: 'User pin is required',
+      error: 'invalid_grant',
+      error_description: 'PIN is invalid',
     })
   })
   it('should return http code 400 with message pre-authorized_code is required', async () => {

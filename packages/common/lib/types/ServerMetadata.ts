@@ -1,6 +1,3 @@
-import { CredentialIssuerMetadata } from './Generic.types';
-import { IssuerMetadataV1_0_08 } from './v1_0_08.types';
-
 export interface AuthorizationServerMetadata {
   issuer: string;
   authorization_endpoint?: string;
@@ -70,11 +67,4 @@ export interface EndpointMetadata {
   deferred_credential_endpoint?: string;
   authorization_server?: string;
   authorization_endpoint?: string; // Can be undefined in pre-auth flow
-}
-export interface EndpointMetadataResult extends EndpointMetadata {
-  // The EndpointMetadata are snake-case so they can easily be used in payloads/JSON.
-  // The values below should not end up in requests/responses directly, so they are using our normal CamelCase convention
-  authorizationServerType: AuthorizationServerType;
-  authorizationServerMetadata?: AuthorizationServerMetadata;
-  credentialIssuerMetadata?: Partial<AuthorizationServerMetadata> & (CredentialIssuerMetadata | IssuerMetadataV1_0_08);
 }
