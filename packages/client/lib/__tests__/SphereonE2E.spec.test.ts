@@ -8,7 +8,7 @@ import debug from 'debug';
 import { importJWK, JWK, SignJWT } from 'jose';
 import { v4 } from 'uuid';
 
-import { OpenID4VCIClient } from '..';
+import { OpenID4VCIClientV1_0_11 } from '..';
 
 export const UNIT_TEST_TIMEOUT = 60000;
 
@@ -25,11 +25,12 @@ const jwk: JWK = {
 // priv hex: 913466d1a38d1d8c0d3c0fb0fc3b633075085a31372bbd2a8022215a88d9d1e5
 const did = `did:key:z6Mki5ZwZKN1dBQprfJTikUvkDxrHijiiQngkWviMF5gw2Hv`;
 const kid = `${did}#z6Mki5ZwZKN1dBQprfJTikUvkDxrHijiiQngkWviMF5gw2Hv`;
-describe('OID4VCI-Client using Sphereon issuer should', () => {
+// Sphereon infra down rn
+describe.skip('OID4VCI-Client using Sphereon issuer should', () => {
   async function test(format: 'ldp_vc' | 'jwt_vc_json') {
     debug.enable('*');
     const offer = await getCredentialOffer(format);
-    const client = await OpenID4VCIClient.fromURI({
+    const client = await OpenID4VCIClientV1_0_11.fromURI({
       uri: offer.uri,
       kid,
       alg: Alg.EdDSA,
@@ -59,14 +60,14 @@ describe('OID4VCI-Client using Sphereon issuer should', () => {
     expect(format.startsWith(wrappedVC.format)).toEqual(true);
   }
 
-  xit(
+  it(
     'succeed in a full flow with the client using OpenID4VCI version 11 and ldp_vc',
     async () => {
       await test('ldp_vc');
     },
     UNIT_TEST_TIMEOUT,
   );
-  xit(
+  it(
     'succeed in a full flow with the client using OpenID4VCI version 11 and jwt_vc_json',
     async () => {
       await test('jwt_vc_json');
@@ -114,12 +115,13 @@ async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promi
     .sign(importedJwk);
 }
 
+//fixme: bring back this test
 describe('ismapolis bug report #63, https://github.com/Sphereon-Opensource/OID4VC-demo/issues/63, should', () => {
   // Sphereon infra is not working currently
   it.skip('work as expected provided a correct JWT is supplied', async () => {
     debug.enable('*');
     const { uri } = await getCredentialOffer('jwt_vc_json');
-    const client = await OpenID4VCIClient.fromURI({ uri: uri, clientId: 'test-clientID' });
+    const client = await OpenID4VCIClientV1_0_11.fromURI({ uri: uri, clientId: 'test-clientID' });
     const metadata = await client.retrieveServerMetadata();
     console.log(JSON.stringify(metadata));
 

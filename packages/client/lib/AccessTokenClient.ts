@@ -16,11 +16,12 @@ import {
   PRE_AUTH_CODE_LITERAL,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
+  TxCodeAndPinRequired,
   UniformCredentialOfferPayload,
 } from '@sphereon/oid4vci-common';
 import { ObjectUtils } from '@sphereon/ssi-types';
 
-import { MetadataClient } from './MetadataClient';
+import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
 import { LOG } from './types';
 
 export class AccessTokenClient {
@@ -28,7 +29,7 @@ export class AccessTokenClient {
     const { asOpts, pin, codeVerifier, code, redirectUri, metadata } = opts;
 
     const credentialOffer = opts.credentialOffer ? await assertedUniformCredentialOffer(opts.credentialOffer) : undefined;
-    const isPinRequired = credentialOffer && this.isPinRequiredValue(credentialOffer.credential_offer);
+    const pinMetadata: TxCodeAndPinRequired | undefined = credentialOffer && this.getPinMetadata(credentialOffer.credential_offer);
     const issuer =
       opts.credentialIssuer ??
       (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : (metadata?.issuer as string));
@@ -47,8 +48,9 @@ export class AccessTokenClient {
         code,
         redirectUri,
         pin,
+        pinMetadata,
       }),
-      isPinRequired,
+      pinMetadata,
       metadata,
       asOpts,
       issuerOpts,
@@ -57,18 +59,18 @@ export class AccessTokenClient {
 
   public async acquireAccessTokenUsingRequest({
     accessTokenRequest,
-    isPinRequired,
+    pinMetadata,
     metadata,
     asOpts,
     issuerOpts,
   }: {
     accessTokenRequest: AccessTokenRequest;
-    isPinRequired?: boolean;
+    pinMetadata?: TxCodeAndPinRequired;
     metadata?: EndpointMetadata;
     asOpts?: AuthorizationServerOpts;
     issuerOpts?: IssuerOpts;
   }): Promise<OpenIDResponse<AccessTokenResponse>> {
-    this.validate(accessTokenRequest, isPinRequired);
+    this.validate(accessTokenRequest, pinMetadata);
 
     const requestTokenURL = AccessTokenClient.determineTokenURL({
       asOpts,
@@ -76,7 +78,7 @@ export class AccessTokenClient {
       metadata: metadata
         ? metadata
         : issuerOpts?.fetchMetadata
-          ? await MetadataClient.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
+          ? await MetadataClientV1_0_13.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
           : undefined,
     });
 
@@ -85,6 +87,8 @@ export class AccessTokenClient {
 
   public async createAccessTokenRequest(opts: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
     const { asOpts, pin, codeVerifier, code, redirectUri } = opts;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const credentialOfferRequest = opts.credentialOffer ? await toUniformCredentialOfferRequest(opts.credentialOffer) : undefined;
     const request: Partial<AccessTokenRequest> = {};
 
@@ -93,7 +97,7 @@ export class AccessTokenClient {
     }
 
     if (credentialOfferRequest?.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
-      this.assertNumericPin(this.isPinRequiredValue(credentialOfferRequest.credential_offer), pin);
+      this.assertAlphanumericPin(opts.pinMetadata, pin);
       request.user_pin = pin;
 
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
@@ -131,28 +135,50 @@ export class AccessTokenClient {
     }
   }
 
-  private isPinRequiredValue(requestPayload: UniformCredentialOfferPayload): boolean {
-    let isPinRequired = false;
+  private getPinMetadata(requestPayload: UniformCredentialOfferPayload): TxCodeAndPinRequired {
     if (!requestPayload) {
       throw new Error(TokenErrorResponse.invalid_request);
     }
     const issuer = getIssuerFromCredentialOfferPayload(requestPayload);
-    if (requestPayload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
-      isPinRequired = requestPayload.grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.user_pin_required ?? false;
-    }
+
+    const grantDetails = requestPayload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code'];
+    const isPinRequired = !!grantDetails?.tx_code ?? false;
+
     LOG.warning(`Pin required for issuer ${issuer}: ${isPinRequired}`);
-    return isPinRequired;
+    return {
+      txCode: grantDetails?.tx_code,
+      isPinRequired,
+    };
   }
 
-  private assertNumericPin(isPinRequired?: boolean, pin?: string): void {
-    if (isPinRequired) {
-      if (!pin || !/^\d{1,8}$/.test(pin)) {
-        LOG.warning(`Pin is not 1 to 8 digits long`);
-        throw new Error('A valid pin consisting of maximal 8 numeric characters must be present.');
+  private assertAlphanumericPin(pinMeta?: TxCodeAndPinRequired, pin?: string): void {
+    if (pinMeta && pinMeta.isPinRequired) {
+      let regex;
+
+      if (pinMeta.txCode) {
+        const { input_mode, length } = pinMeta.txCode;
+
+        if (input_mode === 'numeric') {
+          // Create a regex for numeric input. If no length specified, allow any length of numeric input.
+          regex = length ? new RegExp(`^\\d{1,${length}}$`) : /^\d+$/;
+        } else if (input_mode === 'text') {
+          // Create a regex for text input. If no length specified, allow any length of alphanumeric input.
+          regex = length ? new RegExp(`^[a-zA-Z0-9]{1,${length}}$`) : /^[a-zA-Z0-9]+$/;
+        }
+      }
+
+      // Default regex for alphanumeric with no specific length limit if no input_mode is specified.
+      regex = regex || /^[a-zA-Z0-9]+$|^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
+
+      if (!pin || !regex.test(pin)) {
+        LOG.warning(
+          `Pin is not valid. Expected format: ${pinMeta?.txCode?.input_mode || 'alphanumeric'}, Length: up to ${pinMeta?.txCode?.length || 'any number of'} characters`,
+        );
+        throw new Error('A valid pin must be present according to the specified transaction code requirements.');
       }
     } else if (pin) {
-      LOG.warning(`Pin set, whilst not required`);
-      throw new Error('Cannot set a pin, when the pin is not required.');
+      LOG.warning('Pin set, whilst not required');
+      throw new Error('Cannot set a pin when the pin is not required.');
     }
   }
 
@@ -176,11 +202,11 @@ export class AccessTokenClient {
       throw new Error('Authorization flow requires the code to be present');
     }
   }
-  private validate(accessTokenRequest: AccessTokenRequest, isPinRequired?: boolean): void {
+  private validate(accessTokenRequest: AccessTokenRequest, pinMeta?: TxCodeAndPinRequired): void {
     if (accessTokenRequest.grant_type === GrantTypes.PRE_AUTHORIZED_CODE) {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyPreAuthorizedCode(accessTokenRequest);
-      this.assertNumericPin(isPinRequired, accessTokenRequest.user_pin);
+      this.assertAlphanumericPin(pinMeta, accessTokenRequest.user_pin);
     } else if (accessTokenRequest.grant_type === GrantTypes.AUTHORIZATION_CODE) {
       this.assertAuthorizationGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyCodeVerifier(accessTokenRequest);

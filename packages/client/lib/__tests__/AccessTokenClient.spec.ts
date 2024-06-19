@@ -28,6 +28,7 @@ describe('AccessTokenClient should', () => {
 
       const accessTokenRequest: AccessTokenRequest = {
         grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
+        user_pin: '20221013',
         'pre-authorized_code': '20221013',
         client_id: 'sphereon',
       } as AccessTokenRequest;
@@ -44,6 +45,13 @@ describe('AccessTokenClient should', () => {
 
       const accessTokenResponse: OpenIDResponse<AccessTokenResponse> = await accessTokenClient.acquireAccessTokenUsingRequest({
         accessTokenRequest,
+        pinMetadata: {
+          isPinRequired: true,
+          txCode: {
+            length: accessTokenRequest['pre-authorized_code'].length,
+            input_mode: 'numeric',
+          },
+        },
         asOpts: { as: MOCK_URL },
       });
 
@@ -121,10 +129,16 @@ describe('AccessTokenClient should', () => {
       await expect(
         accessTokenClient.acquireAccessTokenUsingRequest({
           accessTokenRequest,
-          isPinRequired: true,
+          pinMetadata: {
+            isPinRequired: true,
+            txCode: {
+              length: 6,
+              input_mode: 'text',
+            },
+          },
           asOpts: { as: MOCK_URL },
         }),
-      ).rejects.toThrow('A valid pin consisting of maximal 8 numeric characters must be present.');
+      ).rejects.toThrow('A valid pin must be present according to the specified transaction code requirements.');
     },
     UNIT_TEST_TIMEOUT,
   );
@@ -146,10 +160,16 @@ describe('AccessTokenClient should', () => {
       await expect(
         accessTokenClient.acquireAccessTokenUsingRequest({
           accessTokenRequest,
-          isPinRequired: true,
+          pinMetadata: {
+            isPinRequired: true,
+            txCode: {
+              length: 6,
+              input_mode: 'text',
+            },
+          },
           asOpts: { as: MOCK_URL },
         }),
-      ).rejects.toThrow(Error('A valid pin consisting of maximal 8 numeric characters must be present.'));
+      ).rejects.toThrow(Error('A valid pin must be present according to the specified transaction code requirements.'));
     },
     UNIT_TEST_TIMEOUT,
   );
@@ -178,7 +198,13 @@ describe('AccessTokenClient should', () => {
 
       const response = await accessTokenClient.acquireAccessTokenUsingRequest({
         accessTokenRequest,
-        isPinRequired: true,
+        pinMetadata: {
+          isPinRequired: true,
+          txCode: {
+            length: 8,
+            input_mode: 'text',
+          },
+        },
         asOpts: { as: MOCK_URL },
       });
       expect(response.successBody).toEqual(body);
@@ -190,13 +216,15 @@ describe('AccessTokenClient should', () => {
     const accessTokenClient: AccessTokenClient = new AccessTokenClient();
 
     nock(MOCK_URL).post(/.*/).reply(200, {});
+    nock(INITIATION_TEST.credential_offer.credential_issuer + 'token')
+      .post(/.*/)
+      .reply(200, {});
 
-    await expect(() =>
-      accessTokenClient.acquireAccessToken({
-        credentialOffer: INITIATION_TEST,
-        pin: '1234',
-      }),
-    ).rejects.toThrow(Error('Cannot set a pin, when the pin is not required.'));
+    const response: OpenIDResponse<AccessTokenResponse> = await accessTokenClient.acquireAccessToken({
+      credentialOffer: INITIATION_TEST,
+      pin: '1234',
+    });
+    expect(response.successBody).toBeDefined();
   });
 
   it('get error if no as, issuer and metadata values are present', async () => {

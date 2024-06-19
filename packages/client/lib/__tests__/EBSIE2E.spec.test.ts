@@ -9,7 +9,7 @@ import debug from 'debug';
 import { base64url, importJWK, JWK, SignJWT } from 'jose';
 import * as u8a from 'uint8arrays';
 
-import { OpenID4VCIClient } from '..';
+import { OpenID4VCIClientV1_0_11 } from '..';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -58,7 +58,7 @@ describe.skip('OID4VCI-Client using Sphereon issuer should', () => {
   async function test(credentialType: 'CTWalletCrossPreAuthorisedInTime' | 'CTWalletCrossPreAuthorisedDeferred' | 'CTWalletCrossAuthorisedInTime') {
     debug.enable('*');
     const offer = await getCredentialOffer(credentialType);
-    const client = await OpenID4VCIClient.fromURI({
+    const client = await OpenID4VCIClientV1_0_11.fromURI({
       uri: offer,
       kid,
       alg: Alg.ES256,

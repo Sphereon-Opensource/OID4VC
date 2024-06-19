@@ -3,8 +3,9 @@ import { getIssuerFromCredentialOfferPayload, WellKnownEndpoints } from '@sphere
 // @ts-ignore
 import nock from 'nock';
 
-import { CredentialOfferClient } from '../CredentialOfferClient';
+import { CredentialOfferClientV1_0_11 } from '../CredentialOfferClientV1_0_11';
 import { MetadataClient } from '../MetadataClient';
+import { retrieveWellknown } from '../functions/OpenIDUtils';
 
 import {
   DANUBE_ISSUER_URL,
@@ -18,7 +19,9 @@ import {
   WALT_ISSUER_URL,
   WALT_OID4VCI_METADATA,
 } from './MetadataMocks';
+import { getMockData } from './data/VciDataFixtures';
 
+//todo: skipping this. it was written for pre v13 version and we have to do some modifications to make it work
 describe('MetadataClient with IdentiProof Issuer should', () => {
   beforeAll(() => {
     nock.cleanAll();
@@ -47,7 +50,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
 
     const INITIATE_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
-    const initiation = await CredentialOfferClient.fromURI(INITIATE_URI);
+    const initiation = await CredentialOfferClientV1_0_11.fromURI(INITIATE_URI);
     const metadata = await MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(initiation.credential_offer) as string);
     expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential');
     expect(metadata.token_endpoint).toEqual('https://auth.research.identiproof.io/oauth2/token');
@@ -131,7 +134,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {});
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
 
-    const metadata = MetadataClient.retrieveWellknown(IDENTIPROOF_ISSUER_URL, WellKnownEndpoints.OPENID4VCI_ISSUER, { errorOnNotFound: true });
+    const metadata = retrieveWellknown(IDENTIPROOF_ISSUER_URL, WellKnownEndpoints.OPENID4VCI_ISSUER, { errorOnNotFound: true });
     await expect(metadata).rejects.toThrowError('{"error": "not found"}');
   });
 });
@@ -256,5 +259,52 @@ describe.skip('Metadataclient with SpruceId should', () => {
         },
       },
     });
+  });
+
+  it('succeed without OID4VCI and with OIDC metadata of credenco', async () => {
+    /*nock(WALT_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(WALT_OID4VCI_METADATA));
+
+    nock(WALT_ISSUER_URL)
+      .get(/.well-known\/.*!/)
+      .times(2)
+      .reply(404, JSON.stringify({ error: 'does not exist' }));
+*/
+    const metadata = await MetadataClient.retrieveAllMetadata('https://mijnkvk.acc.credenco.com/');
+    expect(metadata.credential_endpoint).toEqual('https://ngi-oidc4vci-test.spruceid.xyz/credential');
+    expect(metadata.token_endpoint).toEqual('https://ngi-oidc4vci-test.spruceid.xyz/token');
+    expect(metadata.credentialIssuerMetadata).toEqual({
+      issuer: 'https://ngi-oidc4vci-test.spruceid.xyz',
+      credential_endpoint: 'https://ngi-oidc4vci-test.spruceid.xyz/credential',
+      token_endpoint: 'https://ngi-oidc4vci-test.spruceid.xyz/token',
+      jwks_uri: 'https://ngi-oidc4vci-test.spruceid.xyz/jwks',
+      grant_types_supported: ['urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+      credentials_supported: {
+        OpenBadgeCredential: {
+          formats: {
+            jwt_vc: {
+              types: ['VerifiableCredential', 'OpenBadgeCredential'],
+              cryptographic_binding_methods_supported: ['did'],
+              cryptographic_suites_supported: ['ES256', 'ES256K'],
+            },
+            ldp_vc: {
+              types: ['VerifiableCredential', 'OpenBadgeCredential'],
+              cryptographic_binding_methods_supported: ['did'],
+              cryptographic_suites_supported: ['Ed25519Signature2018'],
+            },
+          },
+        },
+      },
+    });
+  });
+});
+
+describe('Metadataclient with Credenco should', () => {
+  it('succeed without OID4VCI and with OIDC metadata', async () => {
+    const metadata = await MetadataClient.retrieveAllMetadata('https://mijnkvk.acc.credenco.com/');
+    expect(metadata.credential_endpoint).toEqual('https://mijnkvk.acc.credenco.com/credential');
+    expect(metadata.token_endpoint).toEqual('https://mijnkvk.acc.credenco.com/token');
+    expect(metadata.credentialIssuerMetadata?.credential_configurations_supported).toEqual(
+      getMockData('credenco')?.metadata.openid4vci_metadata.credential_configurations_supported,
+    );
   });
 });

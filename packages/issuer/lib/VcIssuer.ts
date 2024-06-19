@@ -4,14 +4,14 @@ import {
   CNonceState,
   CreateCredentialOfferURIResult,
   CREDENTIAL_MISSING_ERROR,
+  CredentialConfigurationSupportedV1_0_13,
   CredentialDataSupplierInput,
   CredentialIssuerMetadata,
-  CredentialIssuerMetadataOpts,
-  CredentialOfferFormat,
-  CredentialOfferPayloadV1_0_11,
+  CredentialOfferPayloadV1_0_13,
   CredentialOfferSession,
-  CredentialOfferV1_0_11,
-  CredentialRequestV1_0_11,
+  CredentialOfferV1_0_13,
+  CredentialRequest,
+  CredentialRequestV1_0_13,
   CredentialResponse,
   DID_NO_DIDDOC_ERROR,
   Grant,
@@ -31,11 +31,12 @@ import {
   QRCodeOpts,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
+  TxCode,
   TYP_ERROR,
-  UniformCredentialRequest,
   URIState,
 } from '@sphereon/oid4vci-common'
 import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphereon/oid4vci-common/dist/events'
+import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { v4 } from 'uuid'
 
@@ -44,8 +45,7 @@ import { LookupStateManager } from './state-manager'
 import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
 
 export class VcIssuer<DIDDoc extends object> {
-  private readonly _issuerMetadata: CredentialIssuerMetadataOpts
-  private readonly _userPinRequired: boolean
+  private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_13
   private readonly _defaultCredentialOfferBaseUri?: string
   private readonly _credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
   private readonly _jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
@@ -56,9 +56,9 @@ export class VcIssuer<DIDDoc extends object> {
   private readonly _cNonceExpiresIn: number
 
   constructor(
-    issuerMetadata: CredentialIssuerMetadataOpts,
+    issuerMetadata: CredentialIssuerMetadataOptsV1_0_13,
     args: {
-      userPinRequired?: boolean
+      txCode?: TxCode
       baseUri?: string
       credentialOfferSessions: IStateManager<CredentialOfferSession>
       defaultCredentialOfferBaseUri?: string
@@ -76,7 +76,6 @@ export class VcIssuer<DIDDoc extends object> {
     this._credentialOfferSessions = args.credentialOfferSessions
     this._cNonces = args.cNonces
     this._uris = args.uris
-    this._userPinRequired = args?.userPinRequired ?? false
     this._credentialSignerCallback = args?.credentialSignerCallback
     this._jwtVerifyCallback = args?.jwtVerifyCallback
     this._credentialDataSupplier = args?.credentialDataSupplier
@@ -92,7 +91,7 @@ export class VcIssuer<DIDDoc extends object> {
 
   public async createCredentialOfferURI(opts: {
     grants?: Grant
-    credentials?: (CredentialOfferFormat | string)[]
+    credential_configuration_ids?: Array<string>
     credentialDefinition?: JsonLdIssuerCredentialDefinition
     credentialOfferUri?: string
     credentialDataSupplierInput?: CredentialDataSupplierInput // Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
@@ -103,17 +102,16 @@ export class VcIssuer<DIDDoc extends object> {
   }): Promise<CreateCredentialOfferURIResult> {
     let preAuthorizedCode: string | undefined = undefined
     let issuerState: string | undefined = undefined
-    const { grants, credentials, credentialDefinition } = opts
+    const { grants, credential_configuration_ids } = opts
 
     if (!grants?.authorization_code && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
       throw Error(`No grant issuer state or pre-authorized code could be deduced`)
     }
-    const credentialOfferPayload: CredentialOfferPayloadV1_0_11 = {
+    const credentialOfferPayload: CredentialOfferPayloadV1_0_13 = {
       ...(grants && { grants }),
-      ...(credentials && { credentials }),
-      ...(credentialDefinition && { credential_definition: credentialDefinition }),
+      ...(credential_configuration_ids && { credential_configuration_ids: credential_configuration_ids ?? [] }),
       credential_issuer: this.issuerMetadata.credential_issuer,
-    } as CredentialOfferPayloadV1_0_11
+    } as CredentialOfferPayloadV1_0_13
     if (grants?.authorization_code) {
       issuerState = grants?.authorization_code.issuer_state
       if (!issuerState) {
@@ -122,13 +120,12 @@ export class VcIssuer<DIDDoc extends object> {
       }
     }
 
-    let userPinRequired: boolean | undefined
+    let txCode: TxCode | undefined
     if (grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
       preAuthorizedCode = grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
-      userPinRequired = grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.user_pin_required
-      if (userPinRequired === undefined) {
-        userPinRequired = false
-        grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'].user_pin_required = userPinRequired
+      txCode = grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code
+      if (txCode !== undefined) {
+        grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'].tx_code = txCode
       }
       if (!preAuthorizedCode) {
         preAuthorizedCode = v4()
@@ -140,16 +137,16 @@ export class VcIssuer<DIDDoc extends object> {
 
     const credentialOfferObject = createCredentialOfferObject(this._issuerMetadata, {
       ...opts,
+      txCode,
       credentialOffer: credentialOfferPayload,
       baseUri,
-      userPinRequired,
       preAuthorizedCode,
       issuerState,
     })
 
     let userPin: string | undefined
     // todo: Double check this can only happen in pre-auth flow and if so make sure to not do the below when in a state is present (authorized flow)
-    if (userPinRequired) {
+    if (txCode) {
       const pinLength = opts.pinLength ?? 4
 
       userPin = ('' + Math.round((Math.pow(10, pinLength) - 1) * Math.random())).padStart(pinLength, '0')
@@ -173,9 +170,9 @@ export class VcIssuer<DIDDoc extends object> {
       {
         credential_offer: credentialOfferObject.credential_offer,
         credential_offer_uri: credentialOfferObject.credential_offer_uri,
-      } as CredentialOfferV1_0_11,
+      } as CredentialOfferV1_0_13,
       {
-        version: OpenId4VCIVersion.VER_1_0_11,
+        version: OpenId4VCIVersion.VER_1_0_13,
         resolve: false, // We are creating the object, so do not resolve
       },
     )
@@ -222,7 +219,7 @@ export class VcIssuer<DIDDoc extends object> {
       session,
       uri,
       qrCodeDataUri,
-      userPinRequired: userPinRequired ?? false,
+      txCode,
       ...(userPin !== undefined && { userPin, pinLength: userPin?.length ?? 0 }),
     }
   }
@@ -237,7 +234,7 @@ export class VcIssuer<DIDDoc extends object> {
    *  - cNonce an existing c_nonce
    */
   public async issueCredential(opts: {
-    credentialRequest: CredentialRequestV1_0_11
+    credentialRequest: CredentialRequest
     credential?: CredentialIssuanceInput
     credentialDataSupplier?: CredentialDataSupplier
     credentialDataSupplierInput?: CredentialDataSupplierInput
@@ -248,10 +245,17 @@ export class VcIssuer<DIDDoc extends object> {
     credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
     responseCNonce?: string
   }): Promise<CredentialResponse> {
+    /*if (!('credential_identifier' in opts.credentialRequest)) {
+      throw new Error('credential request should be of spec version 1.0.13 or above')
+    }*/
+    const credentialRequest = opts.credentialRequest as CredentialRequestV1_0_13
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
     try {
-      if (!this.isMetadataSupportCredentialRequestFormat(opts.credentialRequest.format)) {
+      if (!('credential_identifier' in credentialRequest) && !credentialRequest.format) {
+        throw new Error('credential request should either have a credential_identifier or format and type')
+      }
+      if (credentialRequest.format && !this.isMetadataSupportCredentialRequestFormat(credentialRequest.format)) {
         throw new Error(TokenErrorResponse.invalid_request)
       }
       const validated = await this.validateCredentialRequestProof({
@@ -278,7 +282,7 @@ export class VcIssuer<DIDDoc extends object> {
         throw Error(`Either a credential needs to be supplied or a credentialDataSupplier`)
       }
       let credential: CredentialIssuanceInput | undefined
-      let format: OID4VCICredentialFormat = opts.credentialRequest.format
+      let format: OID4VCICredentialFormat | undefined = credentialRequest.format
       let signerCallback: CredentialSignerCallback<DIDDoc> | undefined = opts.credentialSignerCallback
       if (opts.credential) {
         credential = opts.credential
@@ -374,11 +378,13 @@ export class VcIssuer<DIDDoc extends object> {
 
       const response: CredentialResponse = {
         credential: verifiableCredential,
-        format: opts.credentialRequest.format,
+        // format: credentialRequest.format,
         c_nonce: newcNonce,
         c_nonce_expires_in: this._cNonceExpiresIn,
         ...(notification_id && { notification_id }),
       }
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       const experimentalSubjectIssuance = opts.credentialRequest.credential_subject_issuance
       if (experimentalSubjectIssuance?.subject_proof_mode) {
         if (experimentalSubjectIssuance.subject_proof_mode !== 'proof_replace') {
@@ -443,7 +449,7 @@ export class VcIssuer<DIDDoc extends object> {
     jwtVerifyCallback,
     tokenExpiresIn,
   }: {
-    credentialRequest: UniformCredentialRequest
+    credentialRequest: CredentialRequest
     tokenExpiresIn: number // expiration duration in seconds
     // grants?: Grant,
     clientId?: string
@@ -454,7 +460,7 @@ export class VcIssuer<DIDDoc extends object> {
 
     const supportedIssuanceFormats = ['jwt_vc_json', 'jwt_vc_json-ld', 'vc+sd-jwt', 'ldp_vc']
     try {
-      if (!supportedIssuanceFormats.includes(credentialRequest.format)) {
+      if (credentialRequest.format && !supportedIssuanceFormats.includes(credentialRequest.format)) {
         throw Error(`Format ${credentialRequest.format} not supported yet`)
       } else if (typeof this._jwtVerifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
         throw new Error(JWT_VERIFY_CONFIG_ERROR)
@@ -560,7 +566,12 @@ export class VcIssuer<DIDDoc extends object> {
   }
 
   private isMetadataSupportCredentialRequestFormat(requestFormat: string | string[]): boolean {
-    for (const credentialSupported of this._issuerMetadata.credentials_supported) {
+    if (!this._issuerMetadata.credential_configurations_supported) {
+      return false
+    }
+    for (const credentialSupported of Object.values(
+      this._issuerMetadata['credential_configurations_supported'] as Record<string, CredentialConfigurationSupportedV1_0_13>,
+    )) {
       if (!Array.isArray(requestFormat) && credentialSupported.format === requestFormat) {
         return true
       } else if (Array.isArray(requestFormat)) {
@@ -571,12 +582,13 @@ export class VcIssuer<DIDDoc extends object> {
         }
       }
     }
+
     return false
   }
 
   private async issueCredentialImpl(
     opts: {
-      credentialRequest: UniformCredentialRequest
+      credentialRequest: CredentialRequest
       credential: CredentialIssuanceInput
       jwtVerifyResult: JwtVerifyResult<DIDDoc>
       format?: OID4VCICredentialFormat
@@ -609,10 +621,6 @@ export class VcIssuer<DIDDoc extends object> {
     if (!issuerMetadata.token_endpoint) {
       issuerMetadata.token_endpoint = `${issuerMetadata.credential_issuer}/token`
     }
-  }
-
-  get userPinRequired(): boolean {
-    return this._userPinRequired
   }
 
   get credentialSignerCallback(): CredentialSignerCallback<DIDDoc> | undefined {

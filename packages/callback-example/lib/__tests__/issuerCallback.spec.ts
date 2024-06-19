@@ -4,7 +4,9 @@ import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossess
 import {
   Alg,
   CNonceState,
-  CredentialSupported,
+  CredentialConfigurationSupportedV1_0_13,
+  CredentialIssuerMetadataV1_0_13,
+  CredentialRequest,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
   Jwt,
@@ -13,7 +15,7 @@ import {
   ProofOfPossession,
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
-import { CredentialSupportedBuilderV1_11, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer'
 import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
@@ -21,10 +23,10 @@ import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
 import { v4 } from 'uuid'
 
-import { generateDid, getIssuerCallback, verifyCredential } from '../IssuerCallback'
+import { generateDid, getIssuerCallbackV1_0_11, getIssuerCallbackV1_0_13, verifyCredential } from '../IssuerCallback'
 
 const INITIATION_TEST_URI =
-  'openid-initiate-issuance://?credential_type=OpenBadgeCredential&issuer=https%3A%2F%2Fjff%2Ewalt%2Eid%2Fissuer-api%2Foidc%2F&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false'
+  'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credential_configuration_ids%22:%5B%22UniversityDegreeCredential%22%5D,%22grants%22:%7B%22urn:ietf:params:oauth:grant-type:pre-authorized_code%22:%7B%22pre-authorized_code%22:%22oaKazRN8I0IbtZ0C7JuMn5%22,%22tx_code%22:%7B%22input_mode%22:%22text%22,%22description%22:%22Please%20enter%20the%20serial%20number%20of%20your%20physical%20drivers%20license%22%7D%7D%7D%7D'
 const IDENTIPROOF_ISSUER_URL = 'https://example.com/credential'
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21#keys-1'
 let keypair: KeyPair // Proof of Possession JWT
@@ -86,12 +88,14 @@ describe('issuerCallback', () => {
   const clientId = 'sphereon:wallet'
 
   beforeAll(async () => {
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
-      .withCryptographicSuitesSupported('ES256K')
+    const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+      .withCredentialSigningAlgValuesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
-      .withTypes('VerifiableCredential')
-      .withId('UniversityDegree_JWT')
+      .withCredentialName('UniversityDegree_JWT')
+      .withCredentialDefinition({
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
@@ -143,14 +147,14 @@ describe('issuerCallback', () => {
     const nonces = new MemoryStates<CNonceState>()
     await nonces.set('test_value', { cNonce: 'test_value', createdAt: +new Date(), issuerState: 'existing-state' })
     vcIssuer = new VcIssuerBuilder<DIDDocument>()
-      .withAuthorizationServer('https://authorization-server')
+      .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',
       })
-      .withCredentialsSupported(credentialsSupported)
+      .withCredentialConfigurationsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
       .withCNonceStateManager(nonces)
       .withJWTVerifyCallback(verifyCallbackFunction)
@@ -194,7 +198,7 @@ describe('issuerCallback', () => {
       credentialSubject: {},
       issuanceDate: new Date().toISOString(),
     }
-    const vc = await getIssuerCallback(credential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)({})
+    const vc = await getIssuerCallbackV1_0_11(credential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)({})
     expect(vc).toEqual({
       '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],
       credentialSubject: {},
@@ -213,11 +217,15 @@ describe('issuerCallback', () => {
       expect.objectContaining({ verified: true }),
     )
   })
+
   it('Should pass requesting a verifiable credential using the client', async () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
+      .withCredentialEndpointFromMetadata({
+        credential_configurations_supported: { VeriCred: { format: 'jwt_vc_json' } },
+      } as unknown as CredentialIssuerMetadataV1_0_13)
       .withFormat('jwt_vc_json')
-      .withCredentialType('credentialType')
+      .withCredentialIdentifier('VeriCred')
       .withToken('token')
 
     const jwt: Jwt = {
@@ -238,33 +246,34 @@ describe('issuerCallback', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_11,
+      version: OpenId4VCIVersion.VER_1_0_13,
     })
       .withClientId(clientId)
       .withKid(kid)
       .build()
 
     const credentialRequestClient = new CredentialRequestClient(credReqClient)
-    const credentialRequest = await credentialRequestClient.createCredentialRequest({
-      credentialTypes: ['VerifiableCredential'],
-      format: 'jwt_vc_json',
+    const credentialRequest: CredentialRequest = await credentialRequestClient.createCredentialRequest({
+      credentialIdentifier: 'VerifiableCredential',
+      // format: 'jwt_vc_json',
       proofInput: proof,
-      version: OpenId4VCIVersion.VER_1_0_11,
+      version: OpenId4VCIVersion.VER_1_0_13,
     })
+
     expect(credentialRequest).toEqual({
-      format: 'jwt_vc_json',
+      // format: 'jwt_vc_json',
       proof: {
         jwt: expect.stringContaining('eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFj'),
         proof_type: 'jwt',
       },
-      types: ['VerifiableCredential'],
+      credential_identifier: 'VerifiableCredential',
     })
 
     const credentialResponse = await vcIssuer.issueCredential({
       credentialRequest: credentialRequest,
       credential,
       responseCNonce: state,
-      credentialSignerCallback: getIssuerCallback(credential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id),
+      credentialSignerCallback: getIssuerCallbackV1_0_13(credential, credentialRequest, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id),
     })
 
     expect(credentialResponse).toEqual({
@@ -287,7 +296,7 @@ describe('issuerCallback', () => {
         },
         type: ['VerifiableCredential'],
       },
-      format: 'jwt_vc_json',
+      // format: 'jwt_vc_json',
     })
 
     await expect(

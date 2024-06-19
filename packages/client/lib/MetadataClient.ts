@@ -1,16 +1,25 @@
 import {
   AuthorizationServerMetadata,
   AuthorizationServerType,
-  CredentialIssuerMetadata,
+  CredentialIssuerMetadataV1_0_11,
+  CredentialIssuerMetadataV1_0_13,
   CredentialOfferPayload,
+  CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
-  EndpointMetadataResult,
+  determineSpecVersionFromOffer,
+  EndpointMetadataResultV1_0_11,
+  EndpointMetadataResultV1_0_13,
   getIssuerFromCredentialOfferPayload,
-  getJson,
+  IssuerMetadataV1_0_08,
+  OpenId4VCIVersion,
   OpenIDResponse,
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
+
+import { MetadataClientV1_0_11 } from './MetadataClientV1_0_11';
+import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
+import { retrieveWellknown } from './functions/OpenIDUtils';
 
 const debug = Debug('sphereon:oid4vci:metadata');
 
@@ -20,18 +29,30 @@ export class MetadataClient {
    *
    * @param credentialOffer
    */
-  public static async retrieveAllMetadataFromCredentialOffer(credentialOffer: CredentialOfferRequestWithBaseUrl): Promise<EndpointMetadataResult> {
-    return MetadataClient.retrieveAllMetadataFromCredentialOfferRequest(credentialOffer.credential_offer);
+  public static async retrieveAllMetadataFromCredentialOffer(
+    credentialOffer: CredentialOfferRequestWithBaseUrl,
+  ): Promise<EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11> {
+    if (determineSpecVersionFromOffer(credentialOffer.credential_offer) >= OpenId4VCIVersion.VER_1_0_13) {
+      return await MetadataClientV1_0_13.retrieveAllMetadataFromCredentialOffer(credentialOffer);
+    } else {
+      return await MetadataClientV1_0_11.retrieveAllMetadataFromCredentialOffer(credentialOffer);
+    }
   }
 
   /**
    * Retrieve the metada using the initiation request obtained from a previous step
    * @param request
    */
-  public static async retrieveAllMetadataFromCredentialOfferRequest(request: CredentialOfferPayload): Promise<EndpointMetadataResult> {
+  public static async retrieveAllMetadataFromCredentialOfferRequest(
+    request: CredentialOfferPayload,
+  ): Promise<EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11> {
     const issuer = getIssuerFromCredentialOfferPayload(request);
     if (issuer) {
-      return MetadataClient.retrieveAllMetadata(issuer);
+      if (determineSpecVersionFromOffer(request) >= OpenId4VCIVersion.VER_1_0_13) {
+        return MetadataClientV1_0_13.retrieveAllMetadataFromCredentialOfferRequest(request as CredentialOfferPayloadV1_0_13);
+      } else {
+        return MetadataClientV1_0_11.retrieveAllMetadataFromCredentialOfferRequest(request);
+      }
     }
     throw new Error("can't retrieve metadata from CredentialOfferRequest. No issuer field is present");
   }
@@ -41,32 +62,39 @@ export class MetadataClient {
    * @param issuer The issuer URL
    * @param opts
    */
-  public static async retrieveAllMetadata(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadataResult> {
+  public static async retrieveAllMetadata(
+    issuer: string,
+    opts?: { errorOnNotFound: boolean },
+  ): Promise<EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11> {
     let token_endpoint: string | undefined;
     let credential_endpoint: string | undefined;
     let deferred_credential_endpoint: string | undefined;
     let authorization_endpoint: string | undefined;
     let authorizationServerType: AuthorizationServerType = 'OID4VCI';
-    let authorization_server: string = issuer;
+    let authorization_servers: string[] | undefined = [issuer];
+    let authorization_server: string | undefined = undefined;
     const oid4vciResponse = await MetadataClient.retrieveOpenID4VCIServerMetadata(issuer, { errorOnNotFound: false }); // We will handle errors later, given we will also try other metadata locations
     let credentialIssuerMetadata = oid4vciResponse?.successBody;
     if (credentialIssuerMetadata) {
       debug(`Issuer ${issuer} OID4VCI well-known server metadata\r\n${JSON.stringify(credentialIssuerMetadata)}`);
       credential_endpoint = credentialIssuerMetadata.credential_endpoint;
-      deferred_credential_endpoint = credentialIssuerMetadata.deferred_credential_endpoint;
+      deferred_credential_endpoint = credentialIssuerMetadata.deferred_credential_endpoint
+        ? (credentialIssuerMetadata.deferred_credential_endpoint as string)
+        : undefined;
       if (credentialIssuerMetadata.token_endpoint) {
         token_endpoint = credentialIssuerMetadata.token_endpoint;
       }
-      if (credentialIssuerMetadata.authorization_server) {
-        authorization_server = credentialIssuerMetadata.authorization_server;
-      }
-      if (credentialIssuerMetadata.authorization_endpoint) {
-        authorization_endpoint = credentialIssuerMetadata.authorization_endpoint;
+      if (credentialIssuerMetadata.authorization_servers) {
+        authorization_servers = credentialIssuerMetadata.authorization_servers as string[];
+      } else if (credentialIssuerMetadata.authorization_server) {
+        authorization_server = credentialIssuerMetadata.authorization_server as string;
+        authorization_servers = [authorization_server];
       }
     }
     // No specific OID4VCI endpoint. Either can be an OAuth2 AS or an OIDC IDP. Let's start with OIDC first
-    let response: OpenIDResponse<AuthorizationServerMetadata> = await MetadataClient.retrieveWellknown(
-      authorization_server,
+    // TODO: for now we're taking just the first one
+    let response: OpenIDResponse<AuthorizationServerMetadata> = await retrieveWellknown(
+      authorization_servers[0],
       WellKnownEndpoints.OPENID_CONFIGURATION,
       {
         errorOnNotFound: false,
@@ -78,13 +106,14 @@ export class MetadataClient {
       authorizationServerType = 'OIDC';
     } else {
       // Now let's do OAuth2
-      response = await MetadataClient.retrieveWellknown(authorization_server, WellKnownEndpoints.OAUTH_AS, { errorOnNotFound: false });
+      // TODO: for now we're taking just the first one
+      response = await retrieveWellknown(authorization_servers[0], WellKnownEndpoints.OAUTH_AS, { errorOnNotFound: false });
       authMetadata = response.successBody;
     }
     if (!authMetadata) {
       // We will always throw an error, no matter whether the user provided the option not to, because this is bad.
-      if (issuer !== authorization_server) {
-        throw Error(`Issuer ${issuer} provided a separate authorization server ${authorization_server}, but that server did not provide metadata`);
+      if (!authorization_servers.includes(issuer)) {
+        throw Error(`Issuer ${issuer} provided a separate authorization server ${authorization_servers}, but that server did not provide metadata`);
       }
     } else {
       if (!authorizationServerType) {
@@ -102,7 +131,7 @@ export class MetadataClient {
       }
       authorization_endpoint = authMetadata.authorization_endpoint;
       if (!authMetadata.token_endpoint) {
-        throw Error(`Authorization Sever ${authorization_server} did not provide a token_endpoint`);
+        throw Error(`Authorization Sever ${authorization_servers} did not provide a token_endpoint`);
       } else if (token_endpoint && authMetadata.token_endpoint !== token_endpoint) {
         throw Error(
           `Credential issuer has a different token_endpoint (${token_endpoint}) from the Authorization Server (${authMetadata.token_endpoint})`,
@@ -151,7 +180,9 @@ export class MetadataClient {
 
     if (!credentialIssuerMetadata && authMetadata) {
       // Apparently everything worked out and the issuer is exposing everything in oAuth2/OIDC well-knowns. Spec is vague about this situation, but we can support it
-      credentialIssuerMetadata = authMetadata as CredentialIssuerMetadata;
+      credentialIssuerMetadata = authorization_server
+        ? (authMetadata as CredentialIssuerMetadataV1_0_11)
+        : (authMetadata as CredentialIssuerMetadataV1_0_13);
     }
     debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`);
     return {
@@ -159,12 +190,14 @@ export class MetadataClient {
       token_endpoint,
       credential_endpoint,
       deferred_credential_endpoint,
-      authorization_server,
+      ...(authorization_server ? { authorization_server } : { authorization_servers: authorization_servers }),
       authorization_endpoint,
       authorizationServerType,
-      credentialIssuerMetadata: credentialIssuerMetadata,
+      credentialIssuerMetadata: authorization_server
+        ? (credentialIssuerMetadata as IssuerMetadataV1_0_08 & Partial<AuthorizationServerMetadata>)
+        : (credentialIssuerMetadata as CredentialIssuerMetadataV1_0_13),
       authorizationServerMetadata: authMetadata,
-    };
+    } as EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11;
   }
 
   /**
@@ -177,31 +210,14 @@ export class MetadataClient {
     opts?: {
       errorOnNotFound?: boolean;
     },
-  ): Promise<OpenIDResponse<CredentialIssuerMetadata> | undefined> {
-    return MetadataClient.retrieveWellknown(issuerHost, WellKnownEndpoints.OPENID4VCI_ISSUER, {
+  ): Promise<
+    | OpenIDResponse<
+        CredentialIssuerMetadataV1_0_11 | CredentialIssuerMetadataV1_0_13 | (IssuerMetadataV1_0_08 & Partial<AuthorizationServerMetadata>)
+      >
+    | undefined
+  > {
+    return retrieveWellknown(issuerHost, WellKnownEndpoints.OPENID4VCI_ISSUER, {
       errorOnNotFound: opts?.errorOnNotFound === undefined ? true : opts.errorOnNotFound,
     });
-  }
-
-  /**
-   * Allows to retrieve information from a well-known location
-   *
-   * @param host The host
-   * @param endpointType The endpoint type, currently supports OID4VCI, OIDC and OAuth2 endpoint types
-   * @param opts Options, like for instance whether an error should be thrown in case the endpoint doesn't exist
-   */
-  public static async retrieveWellknown<T>(
-    host: string,
-    endpointType: WellKnownEndpoints,
-    opts?: { errorOnNotFound?: boolean },
-  ): Promise<OpenIDResponse<T>> {
-    const result: OpenIDResponse<T> = await getJson(`${host.endsWith('/') ? host.slice(0, -1) : host}${endpointType}`, {
-      exceptionOnHttpErrorStatus: opts?.errorOnNotFound,
-    });
-    if (result.origResponse.status >= 400) {
-      // We only get here when error on not found is false
-      debug(`host ${host} with endpoint type ${endpointType} status: ${result.origResponse.status}, ${result.origResponse.statusText}`);
-    }
-    return result;
   }
 }

@@ -3,8 +3,9 @@ import {
   adjustUrl,
   AuthorizationRequest,
   CredentialOfferRESTRequest,
-  CredentialRequestV1_0_11,
+  CredentialRequestV1_0_13,
   determineGrantTypes,
+  determineSpecVersionFromOffer,
   EVENTS,
   extractBearerToken,
   getNumberOrUndefined,
@@ -13,6 +14,7 @@ import {
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
   NotificationRequest,
   NotificationStatusEventNames,
+  OpenId4VCIVersion,
   TokenErrorResponse,
   trimBoth,
   trimEnd,
@@ -21,7 +23,7 @@ import {
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
-import { CredentialFormat, InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
+import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -78,7 +80,7 @@ export function accessTokenEndpoint<DIDDoc extends object>(
   opts: ITokenEndpointOpts & ISingleEndpointOpts & { baseUrl: string | URL },
 ) {
   const tokenEndpoint = issuer.issuerMetadata.token_endpoint
-  const externalAS = issuer.issuerMetadata.authorization_server
+  const externalAS = issuer.issuerMetadata.authorization_servers
   if (externalAS) {
     LOG.log(`[OID4VCI] External Authorization Server ${tokenEndpoint} is being used. Not enabling issuer token endpoint`)
     return
@@ -150,7 +152,7 @@ export function getCredentialEndpoint<DIDDoc extends object>(
   LOG.log(`[OID4VCI] getCredential endpoint enabled at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
     try {
-      const credentialRequest = request.body as CredentialRequestV1_0_11
+      const credentialRequest = request.body as CredentialRequestV1_0_13
       LOG.log(`credential request received`, credentialRequest)
       try {
         const jwt = extractBearerToken(request.header('Authorization'))
@@ -282,17 +284,28 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
   LOG.log(`[OID4VCI] createCredentialOffer endpoint enabled at ${path}`)
   router.post(path, async (request: Request<CredentialOfferRESTRequest>, response: Response<ICreateCredentialOfferURIResponse>) => {
     try {
+      const specVersion = determineSpecVersionFromOffer(request.body.original_credential_offer)
+      if (specVersion < OpenId4VCIVersion.VER_1_0_13) {
+        return sendErrorResponse(response, 400, {
+          error: TokenErrorResponse.invalid_client,
+          error_description: 'credential offer request should be of spec version 1.0.13 or above',
+        })
+      }
+
       const grantTypes = determineGrantTypes(request.body)
       if (grantTypes.length === 0) {
         return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_grant, error_description: 'No grant type supplied' })
       }
       const grants = request.body.grants as Grant
-      const credentials = request.body.credentials as (string | CredentialFormat)[]
-      if (!credentials || credentials.length === 0) {
-        return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_request, error_description: 'No credentials supplied' })
+      const credentialConfigIds = request.body.credential_configuration_ids as string[]
+      if (!credentialConfigIds || credentialConfigIds.length === 0) {
+        return sendErrorResponse(response, 400, {
+          error: TokenErrorResponse.invalid_request,
+          error_description: 'credential_configuration_ids missing credential_configuration_ids in credential offer payload',
+        })
       }
       const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
-      const result = await issuer.createCredentialOfferURI({ ...request.body, qrCodeOpts, grants, credentials })
+      const result = await issuer.createCredentialOfferURI({ ...request.body, qrCodeOpts, grants })
       const resultResponse: ICreateCredentialOfferURIResponse = result
       if ('session' in resultResponse) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

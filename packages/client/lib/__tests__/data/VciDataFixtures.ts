@@ -1,4 +1,9 @@
-import { CredentialSupportedFormatV1_0_08, IssuerCredentialSubjectDisplay, IssuerMetadataV1_0_08 } from '@sphereon/oid4vci-common';
+import {
+  CredentialSupportedFormatV1_0_08,
+  IssuerCredentialSubjectDisplay,
+  IssuerMetadataV1_0_08,
+  IssuerMetadataV1_0_13,
+} from '@sphereon/oid4vci-common';
 import { ICredentialStatus, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
 export function getMockData(issuerName: string): IssuerMockData | null {
@@ -17,7 +22,7 @@ export interface IssuerMockData {
     issuer?: string;
     token_endpoint: string;
     credential_endpoint: string;
-    openid4vci_metadata: IssuerMetadataV1_0_08;
+    openid4vci_metadata: IssuerMetadataV1_0_08 | IssuerMetadataV1_0_13;
   };
   auth: {
     url: string;
@@ -78,12 +83,12 @@ const mockData: VciMockDataStructure = {
               jwt_vc: {
                 types: ['VerifiableCredential', 'OpenBadgeCredential'],
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K'],
               },
               ldp_vc: {
                 types: ['VerifiableCredential', 'OpenBadgeCredential'],
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['Ed25519Signature2018'],
+                credential_signing_alg_values_supported: ['Ed25519Signature2018'],
               },
             },
           },
@@ -148,7 +153,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -160,7 +165,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableId'],
               },
             },
@@ -174,7 +179,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -186,7 +191,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableDiploma'],
               },
             },
@@ -200,7 +205,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -212,7 +217,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableVaccinationCertificate'],
               },
             },
@@ -226,7 +231,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -238,7 +243,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'VerifiableAttestation', 'ProofOfResidence'],
               },
             },
@@ -252,7 +257,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -264,7 +269,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'ParticipantCredential'],
               },
             },
@@ -278,7 +283,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -290,7 +295,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'VerifiableAttestation', 'Europass'],
               },
             },
@@ -304,7 +309,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -316,7 +321,7 @@ const mockData: VciMockDataStructure = {
               },
               jwt_vc: {
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
                 types: ['VerifiableCredential', 'OpenBadgeCredential'],
               },
             },
@@ -393,7 +398,7 @@ const mockData: VciMockDataStructure = {
               ldp_vc: {
                 types: ['VerifiableCredential', 'OpenBadgeCredential'],
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -403,7 +408,7 @@ const mockData: VciMockDataStructure = {
               jwt_vc: {
                 types: ['VerifiableCredential', 'OpenBadgeCredential'],
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'EdDSA', 'ES256K', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'EdDSA', 'ES256K', 'RS256', 'PS256'],
               },
             },
             claims: {
@@ -418,7 +423,7 @@ const mockData: VciMockDataStructure = {
               ldp_vc: {
                 types: ['VerifiableCredential', 'VaccinationCertificate'],
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: [
+                credential_signing_alg_values_supported: [
                   'Ed25519Signature2018',
                   'Ed25519Signature2020',
                   'EcdsaSecp256k1Signature2019',
@@ -428,7 +433,7 @@ const mockData: VciMockDataStructure = {
               jwt_vc: {
                 types: ['VerifiableCredential', 'VaccinationCertificate'],
                 cryptographic_binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['ES256', 'EdDSA', 'ES256K', 'RS256', 'PS256'],
+                credential_signing_alg_values_supported: ['ES256', 'EdDSA', 'ES256K', 'RS256', 'PS256'],
               },
             },
           },
@@ -514,7 +519,7 @@ const mockData: VciMockDataStructure = {
                 description: 'Government of Kakapo PRC.',
                 types: ['PermanentResidentCard'],
                 binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['Ed25519Signature2018'],
+                credential_signing_alg_values_supported: ['Ed25519Signature2018'],
               } as CredentialSupportedFormatV1_0_08,
             },
           },
@@ -525,7 +530,7 @@ const mockData: VciMockDataStructure = {
                 description: 'Microcredential from the MyCreds Network.',
                 types: ['AcademicAward'],
                 binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['Ed25519Signature2018'],
+                credential_signing_alg_values_supported: ['Ed25519Signature2018'],
               } as CredentialSupportedFormatV1_0_08,
             },
           },
@@ -536,7 +541,7 @@ const mockData: VciMockDataStructure = {
                 description: 'Example',
                 types: ['LearnerProfile'],
                 binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['Ed25519Signature2018'],
+                credential_signing_alg_values_supported: ['Ed25519Signature2018'],
               } as CredentialSupportedFormatV1_0_08,
             },
           },
@@ -547,7 +552,7 @@ const mockData: VciMockDataStructure = {
                 description: "MATTR's submission for JFF Plugfest 2",
                 types: ['OpenBadgeCredential'],
                 binding_methods_supported: ['did'],
-                cryptographic_suites_supported: ['Ed25519Signature2018'],
+                credential_signing_alg_values_supported: ['Ed25519Signature2018'],
               } as CredentialSupportedFormatV1_0_08,
             },
           },
@@ -659,7 +664,7 @@ const mockData: VciMockDataStructure = {
             formats: {
               ldp_vc: {
                 types: ['VerifiableCredential', 'OpenBadgeCredential'],
-                cryptographic_suites_supported: ['Ed25519Signature2018'],
+                credential_signing_alg_values_supported: ['Ed25519Signature2018'],
                 cryptographic_binding_methods_supported: ['did'],
               },
             },
@@ -741,5 +746,685 @@ const mockData: VciMockDataStructure = {
         },
       },
     },
+  },
+  credenco: {
+    metadata: {
+      issuer: 'https://mijnkvk.acc.credenco.com',
+      token_endpoint: 'https://mijnkvk.acc.credenco.com/token',
+      credential_endpoint: 'https://mijnkvk.acc.credenco.com/credential',
+      openid4vci_metadata: {
+        authorization_endpoint: 'https://mijnkvk.acc.credenco.com/authorize',
+        authorization_server: 'https://mijnkvk.acc.credenco.com',
+        batch_credential_endpoint: 'https://mijnkvk.acc.credenco.com/batch_credential',
+        credential_configurations_supported: {
+          BevoegdheidUittreksel_jwt_vc_json: {
+            credential_definition: {
+              credentialSubject: {
+                functie: {
+                  display: [
+                    {
+                      name: 'Functie',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Functie',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Function',
+                    },
+                  ],
+                },
+                functionarisNaam: {
+                  display: [
+                    {
+                      name: 'Functionaris naam',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Functionaris naam',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Officer name',
+                    },
+                  ],
+                  mandatory: true,
+                },
+                kvkNummer: {
+                  display: [
+                    {
+                      name: 'KVK nummer',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'KVK nummer',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'CoC number',
+                    },
+                  ],
+                  mandatory: true,
+                },
+                naam: {
+                  display: [
+                    {
+                      name: 'Naam',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Naam',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Name',
+                    },
+                  ],
+                  mandatory: true,
+                },
+                persoonRechtsvorm: {
+                  display: [
+                    {
+                      name: 'Rechtsvorm',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Rechtsvorm',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Legal form',
+                    },
+                  ],
+                },
+                soortBevoegdheid: {
+                  display: [
+                    {
+                      name: 'Soort bevoegdheid',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Soort bevoegdheid',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Type of authority',
+                    },
+                  ],
+                },
+              },
+              type: ['VerifiableCredential', 'BevoegdheidUittreksel'],
+            },
+            credential_signing_alg_values_supported: ['EdDSA', 'ES256', 'ES256K', 'RSA'],
+            cryptographic_binding_methods_supported: ['did:web', 'did:jwk', 'did:ebsi'],
+            display: [
+              {
+                background_color: '#21436f',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                name: 'BevoegdheidUittreksel',
+                text_color: '#ffffff',
+              },
+              {
+                background_color: '#21436f',
+                background_image: {
+                  alt_text: 'KvK gestylede achtergrond',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                locale: 'nl-NL',
+                name: 'Bevoegdheid uittreksel',
+                text_color: '#ffffff',
+              },
+              {
+                background_color: '#21436f',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                locale: 'en-US',
+                name: 'Authorized representative',
+                text_color: '#ffffff',
+              },
+            ],
+            format: 'jwt_vc_json',
+          },
+          KVKRegistration_jwt_vc_json: {
+            credential_definition: {
+              credentialSubject: {
+                einddatum: {
+                  display: [
+                    {
+                      name: 'Einddatum',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Einddatum',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'End date',
+                    },
+                  ],
+                },
+                kvkNummer: {
+                  display: [
+                    {
+                      name: 'KVK nummer',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'KVK nummer',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'CoC number',
+                    },
+                  ],
+                  mandatory: true,
+                },
+                naam: {
+                  display: [
+                    {
+                      name: 'Naam',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Naam',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Name',
+                    },
+                  ],
+                  mandatory: true,
+                },
+                rechtsvorm: {
+                  display: [
+                    {
+                      name: 'Rechtsvorm',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Rechtsvorm',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Legal form',
+                    },
+                  ],
+                },
+                startdatum: {
+                  display: [
+                    {
+                      name: 'Startdatum',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Startdatum',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Start date',
+                    },
+                  ],
+                  mandatory: true,
+                },
+              },
+              type: ['VerifiableCredential', 'VerifiableAttestation', 'KVKRegistration'],
+            },
+            credential_signing_alg_values_supported: ['EdDSA', 'ES256', 'ES256K', 'RSA'],
+            cryptographic_binding_methods_supported: ['did:web', 'did:jwk', 'did:ebsi'],
+            display: [
+              {
+                background_color: '#21436f',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                name: 'KVK Registratie',
+                text_color: '#ffffff',
+              },
+              {
+                background_color: '#21436f',
+                background_image: {
+                  alt_text: 'KvK gestylede achtergrond',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                locale: 'nl-NL',
+                name: 'KVK Registratie',
+                text_color: '#ffffff',
+              },
+              {
+                background_color: '#21436f',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                locale: 'en-US',
+                name: 'Chamber of Commerce Registration',
+                text_color: '#ffffff',
+              },
+            ],
+            format: 'jwt_vc_json',
+          },
+          RSIN_jwt_vc_json: {
+            credential_definition: {
+              credentialSubject: {
+                naam: {
+                  display: [
+                    {
+                      name: 'Naam',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Naam',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Name',
+                    },
+                  ],
+                },
+                rsin: {
+                  display: [
+                    {
+                      name: 'RSIN',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'RSIN',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'RSIN',
+                    },
+                  ],
+                },
+              },
+              type: ['VerifiableCredential', 'VerifiableAttestation', 'RSIN'],
+            },
+            credential_signing_alg_values_supported: ['EdDSA', 'ES256', 'ES256K', 'RSA'],
+            cryptographic_binding_methods_supported: ['did:web', 'did:jwk', 'did:ebsi'],
+            display: [
+              {
+                background_color: '#21436f',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                name: 'RSIN',
+                text_color: '#ffffff',
+              },
+              {
+                background_color: '#21436f',
+                background_image: {
+                  alt_text: 'KvK gestylede achtergrond',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                description: 'Rechtspersonen en Samenwerkingsverbanden Identificatienummer',
+                locale: 'nl-NL',
+                name: 'RSIN',
+                text_color: '#ffffff',
+              },
+              {
+                background_color: '#21436f',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                description: 'Identification number for legal entities and associations',
+                locale: 'en-US',
+                name: 'RSIN',
+                text_color: '#ffffff',
+              },
+            ],
+            format: 'jwt_vc_json',
+          },
+        },
+        credential_endpoint: 'https://mijnkvk.acc.credenco.com/credential',
+        credential_issuer: 'https://mijnkvk.acc.credenco.com',
+        credentials_supported: [
+          {
+            credential_definition: {
+              type: ['VerifiableCredential', 'VerifiableAttestation', 'KVKRegistration'],
+              value_type: {
+                einddatum: {
+                  display: [
+                    {
+                      name: 'Einddatum',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Einddatum',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'End date',
+                    },
+                  ],
+                },
+                kvkNummer: {
+                  display: [
+                    {
+                      name: 'KVK nummer',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'KVK nummer',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'CoC number',
+                    },
+                  ],
+                  mandatory: true,
+                },
+                naam: {
+                  display: [
+                    {
+                      name: 'Naam',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Naam',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Name',
+                    },
+                  ],
+                  mandatory: true,
+                },
+                rechtsvorm: {
+                  display: [
+                    {
+                      name: 'Rechtsvorm',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Rechtsvorm',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Legal form',
+                    },
+                  ],
+                },
+                startdatum: {
+                  display: [
+                    {
+                      name: 'Startdatum',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Startdatum',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Start date',
+                    },
+                  ],
+                  mandatory: true,
+                },
+              },
+            },
+            credential_signing_alg_values_supported: ['EdDSA', 'ES256', 'ES256K', 'RSA'],
+            cryptographic_binding_methods_supported: ['did:web', 'did:jwk', 'did:ebsi'],
+            display: [
+              {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                name: 'KVK Registratie',
+                text_color: '#00526e',
+              },
+              {
+                locale: 'nl-NL',
+                name: 'KVK Registratie',
+              },
+              {
+                locale: 'en-US',
+                name: 'Chamber of Commerce Registration',
+              },
+            ],
+            format: 'jwt_vc_json',
+          },
+          {
+            credential_definition: {
+              type: ['VerifiableCredential', 'VerifiableAttestation', 'RSIN'],
+              value_type: {
+                naam: {
+                  display: [
+                    {
+                      name: 'Naam',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Naam',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Name',
+                    },
+                  ],
+                },
+                rsin: {
+                  display: [
+                    {
+                      name: 'RSIN',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'RSIN',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'RSIN',
+                    },
+                  ],
+                },
+              },
+            },
+            credential_signing_alg_values_supported: ['EdDSA', 'ES256', 'ES256K', 'RSA'],
+            cryptographic_binding_methods_supported: ['did:web', 'did:jwk', 'did:ebsi'],
+            display: [
+              {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                name: 'RSIN',
+                text_color: '#00526e',
+              },
+              {
+                description: 'Rechtspersonen en Samenwerkingsverbanden Identificatienummer',
+                locale: 'nl-NL',
+                name: 'RSIN',
+              },
+              {
+                description: 'Identification number for legal entities and associations',
+                locale: 'en-US',
+                name: 'RSIN',
+              },
+            ],
+            format: 'jwt_vc_json',
+          },
+          {
+            credential_definition: {
+              type: ['VerifiableCredential', 'BevoegdheidUittreksel'],
+              value_type: {
+                functie: {
+                  display: [
+                    {
+                      name: 'Functie',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Functie',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Function',
+                    },
+                  ],
+                },
+                functionarisNaam: {
+                  display: [
+                    {
+                      name: 'Functionaris naam',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Functionaris naam',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Officer name',
+                    },
+                  ],
+                  mandatory: true,
+                },
+                kvkNummer: {
+                  display: [
+                    {
+                      name: 'KVK nummer',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'KVK nummer',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'CoC number',
+                    },
+                  ],
+                  mandatory: true,
+                },
+                naam: {
+                  display: [
+                    {
+                      name: 'Naam',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Naam',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Name',
+                    },
+                  ],
+                  mandatory: true,
+                },
+                persoonRechtsvorm: {
+                  display: [
+                    {
+                      name: 'Rechtsvorm',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Rechtsvorm',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Legal form',
+                    },
+                  ],
+                },
+                soortBevoegdheid: {
+                  display: [
+                    {
+                      name: 'Soort bevoegdheid',
+                    },
+                    {
+                      locale: 'nl-NL',
+                      name: 'Soort bevoegdheid',
+                    },
+                    {
+                      locale: 'en-US',
+                      name: 'Type of authority',
+                    },
+                  ],
+                },
+              },
+            },
+            credential_signing_alg_values_supported: ['EdDSA', 'ES256', 'ES256K', 'RSA'],
+            cryptographic_binding_methods_supported: ['did:web', 'did:jwk', 'did:ebsi'],
+            display: [
+              {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                name: 'BevoegdheidUittreksel',
+                text_color: '#00526e',
+              },
+              {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK gestylede achtergrond',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                locale: 'nl-NL',
+                name: 'Bevoegdheid uittreksel',
+                text_color: '#00526e',
+              },
+              {
+                background_color: '#e6f2f5',
+                background_image: {
+                  alt_text: 'KvK styled card Background',
+                  url: 'https://mijnkvk.acc.credenco.com/kvk_card_background.png',
+                },
+                locale: 'en-US',
+                name: 'Authorized representative',
+                text_color: '#00526e',
+              },
+            ],
+            format: 'jwt_vc_json',
+          },
+        ],
+        deferred_credential_endpoint: 'https://mijnkvk.acc.credenco.com/credential_deferred',
+        display: [
+          {
+            logo: {
+              alt_text: 'KvK logo',
+              url: 'https://mijnkvk.acc.credenco.com/kvk_logo.png',
+            },
+            name: 'Kamer van Koophandel',
+          },
+          {
+            locale: 'nl-NL',
+            name: 'Kamer van Koophandel',
+          },
+          {
+            locale: 'en-US',
+            name: 'Chamber of Commerce',
+          },
+        ],
+        grant_types_supported: ['authorization_code', 'urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+        id_token_signing_alg_values_supported: ['ES256'],
+        issuer: 'https://mijnkvk.acc.credenco.com',
+        jwks_uri: 'https://mijnkvk.acc.credenco.com/jwks',
+        pushed_authorization_request_endpoint: 'https://mijnkvk.acc.credenco.com/par',
+        response_modes_supported: ['query', 'fragment'],
+        response_types_supported: ['code', 'vp_token', 'id_token'],
+        scopes_supported: ['openid'],
+        subject_types_supported: ['public'],
+        token_endpoint: 'https://mijnkvk.acc.credenco.com/token',
+      } as IssuerMetadataV1_0_13,
+    },
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    auth: {},
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    credential: {},
   },
 };

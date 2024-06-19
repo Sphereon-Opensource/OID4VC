@@ -92,6 +92,7 @@ export function convertURIToJsonObject(uri: string, opts?: DecodeURIAsJsonOpts):
   if (!uri || (opts?.requiredProperties && !opts.requiredProperties?.every((p) => uri.includes(p)))) {
     throw new Error(BAD_PARAMS);
   }
+
   const uriComponents = getURIComponentsAsArray(uri, opts?.arrayTypeProperties);
   return decodeJsonProperties(uriComponents);
 }

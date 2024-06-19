@@ -1,9 +1,9 @@
-import { OpenID4VCIClient } from '@sphereon/oid4vci-client'
+import { OpenID4VCIClientV1_0_13 } from '@sphereon/oid4vci-client'
 import {
   Alg,
   ALG_ERROR,
+  CredentialConfigurationSupportedV1_0_13,
   CredentialOfferSession,
-  CredentialSupported,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
   STATE_MISSING_ERROR,
@@ -13,7 +13,7 @@ import { DIDDocument } from 'did-resolver'
 import { v4 } from 'uuid'
 
 import { VcIssuer } from '../VcIssuer'
-import { CredentialSupportedBuilderV1_11, VcIssuerBuilder } from '../builder'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../builder'
 import { MemoryStates } from '../state-manager'
 
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
@@ -43,12 +43,14 @@ describe('VcIssuer', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
-    const credentialsSupported: CredentialSupported = new CredentialSupportedBuilderV1_11()
-      .withCryptographicSuitesSupported('ES256K')
+    const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+      .withCredentialSigningAlgValuesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
-      .withTypes('VerifiableCredential')
-      .withId('UniversityDegree_JWT')
+      .withCredentialName('UniversityDegree_JWT')
+      .withCredentialDefinition({
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
@@ -91,21 +93,24 @@ describe('VcIssuer', () => {
             authorization_code: { issuer_state: issuerState },
             'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
               'pre-authorized_code': preAuthorizedCode,
-              user_pin_required: true,
+              tx_code: {
+                input_mode: 'text',
+                length: 4,
+              },
             },
           },
         },
       },
     })
     vcIssuer = new VcIssuerBuilder<DIDDocument>()
-      .withAuthorizationServer('https://authorization-server')
+      .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',
       })
-      .withCredentialsSupported(credentialsSupported)
+      .withCredentialConfigurationsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
       .withInMemoryCNonceState()
       .withInMemoryCredentialOfferURIState()
@@ -160,7 +165,7 @@ describe('VcIssuer', () => {
       'http://issuer-example.com?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22user_pin_required%22%3Atrue%7D%7D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%5D%2C%22credentialSubject%22%3A%7B%22given_name%22%3A%7B%22name%22%3A%22given%20name%22%2C%22locale%22%3A%22en-US%22%7D%7D%2C%22cryptographic_suites_supported%22%3A%5B%22ES256K%22%5D%2C%22cryptographic_binding_methods_supported%22%3A%5B%22did%22%5D%2C%22id%22%3A%22UniversityDegree_JWT%22%2C%22display%22%3A%5B%7B%22name%22%3A%22University%20Credential%22%2C%22locale%22%3A%22en-US%22%2C%22logo%22%3A%7B%22url%22%3A%22https%3A%2F%2Fexampleuniversity.com%2Fpublic%2Flogo.png%22%2C%22alt_text%22%3A%22a%20square%20logo%20of%20a%20university%22%7D%2C%22background_color%22%3A%22%2312107c%22%2C%22text_color%22%3A%22%23FFFFFF%22%7D%5D%7D%5D%7D',
     )
 
-    const client = await OpenID4VCIClient.fromURI({ uri })
+    const client = await OpenID4VCIClientV1_0_13.fromURI({ uri })
     expect(client.credentialOffer).toEqual({
       baseUrl: 'http://issuer-example.com',
       credential_offer: {
@@ -261,7 +266,7 @@ describe('VcIssuer', () => {
           },
           scheme: 'http',
           baseUri: 'issuer-example.com',
-          credentials: [''],
+          credential_configuration_ids: ['VerifiableCredential'],
           credentialOfferUri: 'https://somehost.com/offer-id',
         })
         .then((response) => response.uri),
@@ -295,7 +300,7 @@ describe('VcIssuer', () => {
     await expect(
       vcIssuer.issueCredential({
         credentialRequest: {
-          types: ['VerifiableCredential'],
+          credential_identifier: 'VerifiableCredential',
           format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',
@@ -354,7 +359,7 @@ describe('VcIssuer', () => {
       vcIssuer.issueCredential({
         credential: verifiableCredential,
         credentialRequest: {
-          types: ['VerifiableCredential'],
+          credential_identifier: 'VerifiableCredential',
           format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',
@@ -381,7 +386,7 @@ describe('VcIssuer', () => {
         },
         type: ['VerifiableCredential'],
       },
-      format: 'jwt_vc_json',
+      // format: 'jwt_vc_json',
     })
   })
 
@@ -418,7 +423,7 @@ describe('VcIssuer', () => {
     expect(
       vcIssuer.issueCredential({
         credentialRequest: {
-          types: ['VerifiableCredential'],
+          credential_identifier: 'VerifiableCredential',
           format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',
