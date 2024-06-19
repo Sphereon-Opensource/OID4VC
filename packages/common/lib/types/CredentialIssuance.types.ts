@@ -199,6 +199,7 @@ export interface JWTPayload {
   nonce?: string; // REQUIRED (string). The value type of this claim MUST be a string, where the value is a c_nonce provided by the credential issuer. //TODO: Marked as required not present in NGI flow
   jti?: string; // A new nonce chosen by the wallet. Used to prevent replay
   exp?: number; // Not longer than 5 minutes
+  client_id?: string; // (string). The value of this claim MUST be the client_id of the client making the credential request.
   [s: string]: unknown;
 }
 

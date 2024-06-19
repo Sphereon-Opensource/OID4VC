@@ -524,7 +524,9 @@ export class OpenID4VCIClient {
   issuerSupportedFlowTypes(): AuthzFlowType[] {
     return (
       this.credentialOffer?.supportedFlows ??
-      (this._state.endpointMetadata?.credentialIssuerMetadata?.authorization_endpoint ? [AuthzFlowType.AUTHORIZATION_CODE_FLOW] : [])
+      (this._state.endpointMetadata?.credentialIssuerMetadata?.authorization_endpoint ?? this._state.endpointMetadata?.authorization_server
+        ? [AuthzFlowType.AUTHORIZATION_CODE_FLOW]
+        : [])
     );
   }
 
@@ -632,7 +634,8 @@ export class OpenID4VCIClient {
    */
   public isEBSI() {
     if (
-      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11).credentials?.find(
+      this.credentialOffer &&
+      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11)?.credentials?.find(
         (cred) =>
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
@@ -641,8 +644,11 @@ export class OpenID4VCIClient {
     ) {
       return true;
     }
-    this.assertIssuerData();
-    return this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu');
+    // this.assertIssuerData();
+    return (
+      this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu') ||
+      this.endpointMetadata.credentialIssuerMetadata?.authorization_server?.includes('ebsi.eu')
+    );
   }
 
   private assertIssuerData(): void {
@@ -666,7 +672,12 @@ export class OpenID4VCIClient {
   }
 
   private syncAuthorizationRequestOpts(opts?: AuthorizationRequestOpts): AuthorizationRequestOpts {
-    let authorizationRequestOpts = { ...this._state?.authorizationRequestOpts, ...opts } as AuthorizationRequestOpts;
+    const requestObjectOpts = { ...this._state?.authorizationRequestOpts?.requestObjectOpts, ...opts?.requestObjectOpts };
+    let authorizationRequestOpts = {
+      ...this._state?.authorizationRequestOpts,
+      ...opts,
+      ...(requestObjectOpts && { requestObjectOpts }),
+    } as AuthorizationRequestOpts;
     if (!authorizationRequestOpts) {
       // We only set a redirectUri if no options are provided.
       // Note that this only works for mobile apps, that can handle a code query param on the default openid-credential-offer deeplink.

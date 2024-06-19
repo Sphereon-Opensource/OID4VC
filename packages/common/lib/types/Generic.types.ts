@@ -17,6 +17,8 @@ import {
 export type InputCharSet = 'numeric' | 'text';
 export type KeyProofType = 'jwt' | 'cwt' | 'ldp_vp';
 
+export type PoPMode = 'pop' | 'jwt'; // Proof of posession, or regular JWT
+
 /**
  * Important Note: please be aware that these Common interfaces are based on versions v1_0.11 and v1_0.09
  */

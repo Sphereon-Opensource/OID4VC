@@ -7,6 +7,7 @@ import {
   Jwt,
   NO_JWT_PROVIDED,
   OpenId4VCIVersion,
+  PoPMode,
   PROOF_CANT_BE_CONSTRUCTED,
   ProofOfPossession,
   ProofOfPossessionCallbacks,
@@ -17,9 +18,11 @@ export class ProofOfPossessionBuilder<DIDDoc> {
   private readonly proof?: ProofOfPossession;
   private readonly callbacks?: ProofOfPossessionCallbacks<DIDDoc>;
   private readonly version: OpenId4VCIVersion;
+  private readonly mode: PoPMode = 'pop';
 
   private kid?: string;
   private jwk?: JWK;
+  private aud?: string | string[];
   private clientId?: string;
   private issuer?: string;
   private jwt?: Jwt;
@@ -34,52 +37,78 @@ export class ProofOfPossessionBuilder<DIDDoc> {
     jwt,
     accessTokenResponse,
     version,
+    mode = 'pop',
   }: {
     proof?: ProofOfPossession;
     callbacks?: ProofOfPossessionCallbacks<DIDDoc>;
     accessTokenResponse?: AccessTokenResponse;
     jwt?: Jwt;
     version: OpenId4VCIVersion;
+    mode?: PoPMode;
   }) {
+    this.mode = mode;
     this.proof = proof;
     this.callbacks = callbacks;
     this.version = version;
     if (jwt) {
       this.withJwt(jwt);
     } else {
-      this.withTyp(version < OpenId4VCIVersion.VER_1_0_11 ? 'jwt' : 'openid4vci-proof+jwt');
+      this.withTyp(version < OpenId4VCIVersion.VER_1_0_11 || mode === 'jwt' ? 'jwt' : 'openid4vci-proof+jwt');
     }
     if (accessTokenResponse) {
       this.withAccessTokenResponse(accessTokenResponse);
     }
   }
 
+  static manual<DIDDoc>({
+    jwt,
+    callbacks,
+    version,
+    mode = 'jwt',
+  }: {
+    jwt?: Jwt;
+    callbacks: ProofOfPossessionCallbacks<DIDDoc>;
+    version: OpenId4VCIVersion;
+    mode?: PoPMode;
+  }): ProofOfPossessionBuilder<DIDDoc> {
+    return new ProofOfPossessionBuilder({ callbacks, jwt, version, mode });
+  }
+
   static fromJwt<DIDDoc>({
     jwt,
     callbacks,
     version,
+    mode = 'pop',
   }: {
     jwt: Jwt;
     callbacks: ProofOfPossessionCallbacks<DIDDoc>;
     version: OpenId4VCIVersion;
+    mode?: PoPMode;
   }): ProofOfPossessionBuilder<DIDDoc> {
-    return new ProofOfPossessionBuilder({ callbacks, jwt, version });
+    return new ProofOfPossessionBuilder({ callbacks, jwt, version, mode });
   }
 
   static fromAccessTokenResponse<DIDDoc>({
     accessTokenResponse,
     callbacks,
     version,
+    mode = 'pop',
   }: {
     accessTokenResponse: AccessTokenResponse;
     callbacks: ProofOfPossessionCallbacks<DIDDoc>;
     version: OpenId4VCIVersion;
+    mode?: PoPMode;
   }): ProofOfPossessionBuilder<DIDDoc> {
-    return new ProofOfPossessionBuilder({ callbacks, accessTokenResponse, version });
+    return new ProofOfPossessionBuilder({ callbacks, accessTokenResponse, version, mode });
   }
 
   static fromProof<DIDDoc>(proof: ProofOfPossession, version: OpenId4VCIVersion): ProofOfPossessionBuilder<DIDDoc> {
     return new ProofOfPossessionBuilder({ proof, version });
+  }
+
+  withAud(aud: string | string[]): this {
+    this.aud = aud;
+    return this;
   }
 
   withClientId(clientId: string): this {
@@ -113,7 +142,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
   }
 
   withTyp(typ: Typ): this {
-    if (this.version >= OpenId4VCIVersion.VER_1_0_11) {
+    if (this.mode === 'pop' && this.version >= OpenId4VCIVersion.VER_1_0_11) {
       if (!!typ && typ !== 'openid4vci-proof+jwt') {
         throw Error('typ must be openid4vci-proof+jwt for version 1.0.11 and up');
       }
@@ -160,7 +189,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
     if (jwt.header.typ) {
       this.withTyp(jwt.header.typ as Typ);
     }
-    if (this.version >= OpenId4VCIVersion.VER_1_0_11) {
+    if (!this.typ && this.version >= OpenId4VCIVersion.VER_1_0_11) {
       this.withTyp('openid4vci-proof+jwt');
     }
     this.withAlg(jwt.header.alg);
@@ -171,8 +200,8 @@ export class ProofOfPossessionBuilder<DIDDoc> {
     }
 
     if (jwt.payload) {
-      if (jwt.payload.iss) this.withClientId(jwt.payload.iss);
-      if (jwt.payload.aud) this.withIssuer(jwt.payload.aud);
+      if (jwt.payload.iss) this.mode === 'pop' ? this.withClientId(jwt.payload.iss) : this.withIssuer(jwt.payload.iss);
+      if (jwt.payload.aud) this.mode === 'pop' ? this.withIssuer(jwt.payload.aud) : this.withAud(jwt.payload.aud);
       if (jwt.payload.jti) this.withJti(jwt.payload.jti);
       if (jwt.payload.nonce) this.withAccessTokenNonce(jwt.payload.nonce);
     }
@@ -184,16 +213,18 @@ export class ProofOfPossessionBuilder<DIDDoc> {
       return Promise.resolve(this.proof);
     } else if (this.callbacks) {
       return await createProofOfPossession(
+        this.mode,
         this.callbacks,
         {
-          typ: this.typ ?? (this.version < OpenId4VCIVersion.VER_1_0_11 ? 'jwt' : 'openid4vci-proof+jwt'),
+          typ: this.typ ?? (this.version < OpenId4VCIVersion.VER_1_0_11 || this.mode === 'jwt' ? 'jwt' : 'openid4vci-proof+jwt'),
           kid: this.kid,
           jwk: this.jwk,
           jti: this.jti,
           alg: this.alg,
+          aud: this.aud,
           issuer: this.issuer,
           clientId: this.clientId,
-          nonce: this.cNonce,
+          ...(this.cNonce && { nonce: this.cNonce }),
         },
         this.jwt,
       );

@@ -3,6 +3,7 @@ import {
   AuthorizationRequestOpts,
   CodeChallengeMethod,
   convertJsonToURI,
+  CreateRequestObjectMode,
   CredentialConfigurationSupportedV1_0_13,
   CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
@@ -10,17 +11,56 @@ import {
   EndpointMetadataResultV1_0_13,
   formPost,
   JsonURIMode,
+  Jwt,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PARMode,
   PKCEOpts,
   PushedAuthorizationResponse,
+  RequestObjectOpts,
   ResponseType,
 } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
+import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
+
 const debug = Debug('sphereon:oid4vci');
 
+export async function createSignedAuthRequestWhenNeeded(requestObject: Record<string, any>, opts: RequestObjectOpts & { aud?: string }) {
+  if (opts.requestObjectMode === CreateRequestObjectMode.REQUEST_URI) {
+    throw Error(`Request Object Mode ${opts.requestObjectMode} is not supported yet`);
+  } else if (opts.requestObjectMode === CreateRequestObjectMode.REQUEST_OBJECT) {
+    if (typeof opts.signCallbacks?.signCallback !== 'function') {
+      throw Error(`No request object sign callback found, whilst request object mode was set to ${opts.requestObjectMode}`);
+    } else if (!opts.kid) {
+      throw Error(`No kid found, whilst request object mode was set to ${opts.requestObjectMode}`);
+    }
+    let client_metadata: any
+    if (opts.clientMetadata || opts.jwksUri) {
+      client_metadata = opts.clientMetadata ?? {};
+      if (opts.jwksUri) {
+        client_metadata['jwks_uri'] = opts.jwksUri;
+      }
+    }
+    let authorization_details = requestObject['authorization_details']
+    if (typeof authorization_details === 'string') {
+      authorization_details = JSON.parse(requestObject.authorization_details);
+    }
+    if (!requestObject.aud && opts.aud) {
+      requestObject.aud = opts.aud;
+    }
+    const iss = requestObject.iss ?? opts.iss ?? requestObject.client_id
+
+    const jwt: Jwt = { header: { alg: 'ES256', kid: opts.kid, typ: 'jwt' }, payload: {...requestObject, iss, authorization_details, ...(client_metadata && {client_metadata})} };
+    const pop = await ProofOfPossessionBuilder.fromJwt({
+      jwt,
+      callbacks: opts.signCallbacks,
+      version: OpenId4VCIVersion.VER_1_0_11,
+      mode: 'jwt',
+    }).build();
+    requestObject['request'] = pop.jwt;
+  }
+}
 function filterSupportedCredentials(
   credentialOffer: CredentialOfferPayloadV1_0_13,
   credentialsSupported?: Record<string, CredentialConfigurationSupportedV1_0_13>,
@@ -62,15 +102,13 @@ export const createAuthorizationRequestUrl = async ({
     }
   }
 
-  const { redirectUri } = authorizationRequest;
+  const { redirectUri, requestObjectOpts = { requestObjectMode: CreateRequestObjectMode.NONE } } = authorizationRequest;
   const client_id = clientId ?? authorizationRequest.clientId;
-  if (!client_id) {
-    throw Error(`Cannot use PAR without a client_id value set`);
-  }
+
   let { scope, authorizationDetails } = authorizationRequest;
   const parMode = endpointMetadata?.credentialIssuerMetadata?.require_pushed_authorization_requests
     ? PARMode.REQUIRE
-    : authorizationRequest.parMode ?? PARMode.AUTO;
+    : authorizationRequest.parMode ?? (client_id ? PARMode.AUTO : PARMode.NEVER);
   // Scope and authorization_details can be used in the same authorization request
   // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
   if (!scope && !authorizationDetails) {
@@ -138,7 +176,7 @@ export const createAuthorizationRequestUrl = async ({
     scope = ['openid', scope].filter((s) => !!s).join(' ');
   }
 
-  let queryObj: { [key: string]: string } | PushedAuthorizationResponse = {
+  let queryObj: Record<string, any> | PushedAuthorizationResponse = {
     response_type: ResponseType.AUTH_CODE,
     ...(!pkce.disabled && {
       code_challenge_method: pkce.codeChallengeMethod ?? CodeChallengeMethod.S256,
@@ -146,7 +184,7 @@ export const createAuthorizationRequestUrl = async ({
     }),
     authorization_details: JSON.stringify(handleAuthorizationDetails(endpointMetadata, authorizationDetails)),
     ...(redirectUri && { redirect_uri: redirectUri }),
-    client_id,
+    ...(client_id && { client_id }),
     ...(credentialOffer?.issuerState && { issuer_state: credentialOffer.issuerState }),
     scope,
   };
@@ -170,10 +208,11 @@ export const createAuthorizationRequestUrl = async ({
         throw Error(`PAR error: ${parResponse.origResponse.statusText}`);
       }
     } else {
-      debug(`PAR response: ${(parResponse.successBody, null, 2)}`);
+      debug(`PAR response: ${JSON.stringify(parResponse.successBody, null, 2)}`);
       queryObj = { /*response_type: ResponseType.AUTH_CODE,*/ client_id, request_uri: parResponse.successBody.request_uri };
     }
   }
+  await createSignedAuthRequestWhenNeeded(queryObj, { ...requestObjectOpts, aud: endpointMetadata.authorization_server });
 
   debug(`Object that will become query params: ` + JSON.stringify(queryObj, null, 2));
   const url = convertJsonToURI(queryObj, {

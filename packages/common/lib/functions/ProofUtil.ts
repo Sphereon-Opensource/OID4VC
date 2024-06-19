@@ -1,7 +1,7 @@
 import Debug from 'debug';
 import jwtDecode from 'jwt-decode';
 
-import { VCI_LOG_COMMON } from '..';
+import { PoPMode, VCI_LOG_COMMON } from '..';
 import {
   BAD_PARAMS,
   BaseJWK,
@@ -37,6 +37,7 @@ const debug = Debug('sphereon:openid4vci:common');
  *  - Optional, clientId of the party requesting the credential
  */
 export const createProofOfPossession = async <DIDDoc>(
+  popMode: PoPMode,
   callbacks: ProofOfPossessionCallbacks<DIDDoc>,
   jwtProps?: JwtProps,
   existingJwt?: Jwt,
@@ -46,7 +47,7 @@ export const createProofOfPossession = async <DIDDoc>(
     throw new Error(BAD_PARAMS);
   }
 
-  const signerArgs = createJWT(jwtProps, existingJwt);
+  const signerArgs = createJWT(popMode, jwtProps, existingJwt);
   const jwt = await callbacks.signCallback(signerArgs, signerArgs.header.kid);
   const proof = {
     proof_type: 'jwt',
@@ -114,6 +115,7 @@ export interface JwtProps {
   typ?: Typ;
   kid?: string;
   jwk?: JWK;
+  aud?: string | string[];
   issuer?: string;
   clientId?: string;
   alg?: string;
@@ -121,9 +123,16 @@ export interface JwtProps {
   nonce?: string;
 }
 
-const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
-  const aud = getJwtProperty<string | string[]>('aud', true, jwtProps?.issuer, existingJwt?.payload?.aud);
-  const iss = getJwtProperty<string>('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss);
+const createJWT = (mode: PoPMode, jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
+  const aud =
+    mode === 'pop'
+      ? getJwtProperty<string | string[]>('aud', true, jwtProps?.issuer, existingJwt?.payload?.aud)
+      : getJwtProperty<string | string[]>('aud', false, jwtProps?.aud, existingJwt?.payload?.aud);
+  const iss =
+    // mode === 'pop'
+       getJwtProperty<string>('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss)
+      // : getJwtProperty<string>('iss', false, jwtProps?.issuer, existingJwt?.payload?.iss);
+  const client_id = mode === 'jwt' ? getJwtProperty<string>('client_id', false, jwtProps?.clientId, existingJwt?.payload?.client_id) : undefined;
   const jti = getJwtProperty<string>('jti', false, jwtProps?.jti, existingJwt?.payload?.jti);
   const typ = getJwtProperty<string>('typ', true, jwtProps?.typ, existingJwt?.header?.typ, 'jwt');
   const nonce = getJwtProperty<string>('nonce', false, jwtProps?.nonce, existingJwt?.payload?.nonce); // Officially this is required, but some implementations don't have it
@@ -134,19 +143,20 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   const jwt: Partial<Jwt> = existingJwt ? existingJwt : {};
   const now = +new Date();
   const jwtPayload: Partial<JWTPayload> = {
-    aud,
+    ...(aud && { aud }),
     iat: jwt.payload?.iat ?? Math.round(now / 1000 - 60), // Let's ensure we subtract 60 seconds for potential time offsets
     exp: jwt.payload?.exp ?? Math.round(now / 1000 + 10 * 60),
     nonce,
-    ...(iss ? { iss } : {}),
-    ...(jti ? { jti } : {}),
+    ...(client_id && { client_id }),
+    ...(iss && { iss }),
+    ...(jti && { jti }),
   };
 
   const jwtHeader: JWTHeader = {
     typ,
     alg,
-    kid,
-    jwk,
+    ...(kid && { kid }),
+    ...(jwk && { jwk }),
   };
   return {
     payload: { ...jwt.payload, ...jwtPayload },
@@ -154,7 +164,13 @@ const createJWT = (jwtProps?: JwtProps, existingJwt?: Jwt): Jwt => {
   };
 };
 
-const getJwtProperty = <T>(propertyName: string, required: boolean, option?: string | JWK, jwtProperty?: T, defaultValue?: T): T | undefined => {
+const getJwtProperty = <T>(
+  propertyName: string,
+  required: boolean,
+  option?: string | string[] | JWK,
+  jwtProperty?: T,
+  defaultValue?: T,
+): T | undefined => {
   if (typeof option === 'string' && option && jwtProperty && option !== jwtProperty) {
     throw Error(`Cannot have a property '${propertyName}' with value '${option}' and different JWT value '${jwtProperty}' at the same time`);
   }

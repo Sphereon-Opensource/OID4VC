@@ -3,7 +3,7 @@ import {
   AuthorizationRequestOpts,
   CodeChallengeMethod,
   convertJsonToURI,
-  CredentialConfigurationSupported,
+  CreateRequestObjectMode,
   CredentialOfferFormat,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferRequestWithBaseUrl,
@@ -17,6 +17,8 @@ import {
   ResponseType,
 } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
+
+import { createSignedAuthRequestWhenNeeded } from './AuthorizationCodeClient';
 
 const debug = Debug('sphereon:oid4vci');
 
@@ -33,8 +35,9 @@ export const createAuthorizationRequestUrlV1_0_11 = async ({
   credentialOffer?: CredentialOfferRequestWithBaseUrl;
   credentialsSupported?: CredentialsSupportedLegacy[];
 }): Promise<string> => {
-  const { redirectUri, clientId } = authorizationRequest;
+  const { redirectUri, clientId, requestObjectOpts = { requestObjectMode: CreateRequestObjectMode.NONE } } = authorizationRequest;
   let { scope, authorizationDetails } = authorizationRequest;
+
   const parMode = endpointMetadata?.credentialIssuerMetadata?.require_pushed_authorization_requests
     ? PARMode.REQUIRE
     : authorizationRequest.parMode ?? PARMode.AUTO;
@@ -50,9 +53,7 @@ export const createAuthorizationRequestUrlV1_0_11 = async ({
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     authorizationDetails = creds
-      .flatMap((cred) =>
-        typeof cred === 'string' && credentialsSupported ? Object.values(credentialsSupported) : (cred as CredentialConfigurationSupported),
-      )
+      .flatMap((cred) => (typeof cred === 'string' ? credentialsSupported : (cred as CredentialsSupportedLegacy)))
       .filter((cred) => !!cred)
       .map((cred) => {
         return {
@@ -111,10 +112,11 @@ export const createAuthorizationRequestUrlV1_0_11 = async ({
         throw Error(`PAR error: ${parResponse.origResponse.statusText}`);
       }
     } else {
-      debug(`PAR response: ${(parResponse.successBody, null, 2)}`);
+      debug(`PAR response: ${JSON.stringify(parResponse.successBody, null, 2)}`);
       queryObj = { request_uri: parResponse.successBody.request_uri };
     }
   }
+  await createSignedAuthRequestWhenNeeded(queryObj, { ...requestObjectOpts, aud: endpointMetadata.authorization_server });
 
   debug(`Object that will become query params: ` + JSON.stringify(queryObj, null, 2));
   const url = convertJsonToURI(queryObj, {

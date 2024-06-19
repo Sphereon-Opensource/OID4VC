@@ -1,4 +1,4 @@
-import { CredentialOfferPayload, UniformCredentialOffer } from './CredentialIssuance.types';
+import { CredentialOfferPayload, ProofOfPossessionCallbacks, UniformCredentialOffer } from './CredentialIssuance.types';
 import {
   ErrorResponse,
   IssuerCredentialSubject,
@@ -260,6 +260,21 @@ export interface PKCEOpts {
   codeVerifier?: string;
 }
 
+export enum CreateRequestObjectMode {
+  NONE,
+  REQUEST_OBJECT,
+  REQUEST_URI,
+}
+
+export type RequestObjectOpts = {
+  requestObjectMode?: CreateRequestObjectMode;
+  signCallbacks?: ProofOfPossessionCallbacks<never>;
+  clientMetadata?: Record<string, any>; // TODO: Merge SIOP/OID4VP
+  iss?: string;
+  jwksUri?: string;
+  kid?: string;
+};
+
 export interface AuthorizationRequestOpts {
   clientId?: string;
   pkce?: PKCEOpts;
@@ -267,6 +282,7 @@ export interface AuthorizationRequestOpts {
   authorizationDetails?: AuthorizationDetails | AuthorizationDetails[];
   redirectUri?: string;
   scope?: string;
+  requestObjectOpts?: RequestObjectOpts;
 }
 
 export interface AuthorizationResponse {
