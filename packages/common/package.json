@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-common",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "OpenID 4 Verifiable Credential Issuance Common Types",
   "source": "lib/index.ts",
   "main": "dist/index.js",

@@ -3,6 +3,58 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.12.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.10.3...v0.12.0) (2024-06-19)
+
+### Bug Fixes
+
+- (WIP) fixed all the build errors ([e522a3d](https://github.com/Sphereon-Opensource/OID4VCI/commit/e522a3dd5821fb710211e35c8871f89772b672a0))
+- (WIP) refactored and fixed build. still have to fix 33 test cases that are failing ([ff88a64](https://github.com/Sphereon-Opensource/OID4VCI/commit/ff88a647574baa9813939c296342cc112d00237f))
+- (WIP) refactored and fixed build. still have to fix 8 test cases that are failing ([d8c2c4f](https://github.com/Sphereon-Opensource/OID4VCI/commit/d8c2c4fa8d73ea14a0faa823a394cde23733db8f))
+- (WIP) refactored and fixed parts of the logic for v1_0_13. ([06117c0](https://github.com/Sphereon-Opensource/OID4VCI/commit/06117c0fd9a06170284ce5a89075d5b12fcd7d7b))
+- (WIP) skipped failing tests and made comment to fix them ([16f1673](https://github.com/Sphereon-Opensource/OID4VCI/commit/16f1673bd30b43ce1b9209650e7b6be5e1f2c237))
+- add back missing authz url getter ([6870fce](https://github.com/Sphereon-Opensource/OID4VCI/commit/6870fcead5921ca1cddef5fb418b8e3a2976e1e4))
+- added back optional vct to CredentialConfigurationSupportedV1_0_13 for sd-jwt ([88341ef](https://github.com/Sphereon-Opensource/OID4VCI/commit/88341ef186c5c2842bf16729ab5c02fae9f22999))
+- added back the isEbsi function to the new version's OpenID4VCIClient ([479bea7](https://github.com/Sphereon-Opensource/OID4VCI/commit/479bea791e2d82a1e564e08a569f4caf205e1cc1))
+- added generic union types for frequently used types ([72474d6](https://github.com/Sphereon-Opensource/OID4VCI/commit/72474d6b95d58914d31ee36875feace8f0432942))
+- added generic union types for frequently used types ([f10d0b2](https://github.com/Sphereon-Opensource/OID4VCI/commit/f10d0b22c4a1c4f6d57fe21d5a7d659f35a3fc27))
+- allow to set client_id ([d51bf25](https://github.com/Sphereon-Opensource/OID4VCI/commit/d51bf2530e0a352ad3a7bfd12977ae6bc8001deb))
+- changed the accepting type in VcIssuer ([125cb81](https://github.com/Sphereon-Opensource/OID4VCI/commit/125cb81b28ec153046fb7b8378e49bca43e2d96e))
+- changed the if param in the assertAlphanumericPin ([5655859](https://github.com/Sphereon-Opensource/OID4VCI/commit/5655859121ed166a7190845083b9b26a8ea485ce))
+- changed the logic for pin validation ([b8bb359](https://github.com/Sphereon-Opensource/OID4VCI/commit/b8bb3591ea704a777cfe057920edc8cd61faf3ef))
+- Comparison of request subject signing with response was not normalized for a comparison ([cd72dc6](https://github.com/Sphereon-Opensource/OID4VCI/commit/cd72dc698108cb1baca9e00c37aa4e6b519a6985))
+- Ensure we have a single client that handles both v13 and v11 and lower ([eadbba0](https://github.com/Sphereon-Opensource/OID4VCI/commit/eadbba03ddb6e9e32b69bb3a4d9eb9ca8ac2d260))
+- fixed ClientIssuerIT.spec ([c5be065](https://github.com/Sphereon-Opensource/OID4VCI/commit/c5be06583048dd8b1e80e60eb1b290c07e0e5bc9))
+- fixed createCredentialOfferURI signature ([2856644](https://github.com/Sphereon-Opensource/OID4VCI/commit/2856644324e3e65a2b6899c127f425e79599255b))
+- fixed failing test cases ([690b02b](https://github.com/Sphereon-Opensource/OID4VCI/commit/690b02b655ef021355870dd92605dc15f2d8ac06))
+- fixed sd jwt test with version 13 ([dcf7439](https://github.com/Sphereon-Opensource/OID4VCI/commit/dcf743945bcd53436e0758b1604e2a31d37a39fe))
+- fixed some issue in the IssuerMetadataUtils ([8a6c16f](https://github.com/Sphereon-Opensource/OID4VCI/commit/8a6c16f39fdee838d935edbc46c6842b628f08b7))
+- fixed some issue in the IssuerMetadataUtils plus added some unittests for it ([d348641](https://github.com/Sphereon-Opensource/OID4VCI/commit/d348641523d786d354fff3dfe75dbdda18e2d550))
+- fixed some test cases ([ccac046](https://github.com/Sphereon-Opensource/OID4VCI/commit/ccac04640a7fc950d8e2f98d932acdf2f896a791))
+- fixed test type mismatch ([215227e](https://github.com/Sphereon-Opensource/OID4VCI/commit/215227efa09088957f4d57dd47654fa1ff9ff78a))
+- fixed test type mismatch ([ca32202](https://github.com/Sphereon-Opensource/OID4VCI/commit/ca3220215a46f514f3a1b271cfd22505ee2e6ad0))
+- fixed tests plus prettier ([fc8cdf0](https://github.com/Sphereon-Opensource/OID4VCI/commit/fc8cdf08fa315419d8eaa6a51db68ad5d3fe9305))
+- fixed the failing test for the credentialOfferUri ([a8ac2e3](https://github.com/Sphereon-Opensource/OID4VCI/commit/a8ac2e3421009189580c2098c1d8f96038914447))
+- fixed the logic in creating credentialOffer uri ([53bce06](https://github.com/Sphereon-Opensource/OID4VCI/commit/53bce06da7ea9e0cec545d5da7f4585fe67be050))
+- fixed the regex for pin ([d3b2f0c](https://github.com/Sphereon-Opensource/OID4VCI/commit/d3b2f0c23b74ceb031d1e812847c9bf20ee17ae5))
+- fixed type mismatch in some files ([a2b3c22](https://github.com/Sphereon-Opensource/OID4VCI/commit/a2b3c2294331bceea8c39228b9b3da1c385d01cd))
+- fixes after merge with CWALL-199 ([af967a9](https://github.com/Sphereon-Opensource/OID4VCI/commit/af967a96370f6dce8b9afad296fc2ff1c557dd84))
+- fixes for PAR. Several things were missing, wrong. Higly likely this is a problem for non PAR flows as well ([9ed5064](https://github.com/Sphereon-Opensource/OID4VCI/commit/9ed506466413b6fdb5df7bff50accf3a7a1ad874))
+- for pin in IssuerTokenServer ([354e8ad](https://github.com/Sphereon-Opensource/OID4VCI/commit/354e8adace36ef57f684ec8f69ce7cca56632198))
+- MetadataClient for version 13 and added better type distinction. added credential_definition to credential metadata of v13 ([e39bf71](https://github.com/Sphereon-Opensource/OID4VCI/commit/e39bf71625c2a66821061ece7625f0b08f1c0ad2))
+- No response type set on authz code after using PAR ([5da243e](https://github.com/Sphereon-Opensource/OID4VCI/commit/5da243e85207919d51b4af6b364fc2250a90bb09))
+- set client_id on authorization url ([599ca9e](https://github.com/Sphereon-Opensource/OID4VCI/commit/599ca9ecec502738e227c9175663cd9814ac1d39))
+- set client_id on authorization url ([04e7cb8](https://github.com/Sphereon-Opensource/OID4VCI/commit/04e7cb8d60bddca7cea7d8ec04f3072ef989a2c3))
+
+### Features
+
+- Add wallet signing support to VCI and notification support ([c4d3483](https://github.com/Sphereon-Opensource/OID4VCI/commit/c4d34836fb4923c98e7743221978c902c8427f2a))
+- added setDefaultTokenEndpoint to VcIssuer constructor ([f16affc](https://github.com/Sphereon-Opensource/OID4VCI/commit/f16affc7a77847e24443930b0dd8f87f5533b61a))
+- added setDefaultTokenEndpoint to VcIssuerBuilder ([96608ec](https://github.com/Sphereon-Opensource/OID4VCI/commit/96608ec72dcbf1f66e30b1ead8d363836db5d7d3))
+- added token_endpoint to the metadata ([72f2988](https://github.com/Sphereon-Opensource/OID4VCI/commit/72f2988a0837e53f0a01cc40b88fdeb2f948627a))
+- created special type for CredentialRequest v1_0_13 and fixed the tests for it ([25a6051](https://github.com/Sphereon-Opensource/OID4VCI/commit/25a6051ed0bb096c2249f24cd054c1a7aec97f61))
+- expose functions for experimental subject issuer support ([c4adecc](https://github.com/Sphereon-Opensource/OID4VCI/commit/c4adeccdbde6b42a7df85dfbdcb821f2fab8b819))
+- Unify how we get types from different spec versions ([449364b](https://github.com/Sphereon-Opensource/OID4VCI/commit/449364b49db4eaf5b847d5124687f9a3cd4bbc40))
+
 ## [0.10.3](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.10.2...v0.10.3) (2024-04-25)
 
 ### Bug Fixes
