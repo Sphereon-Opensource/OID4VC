@@ -130,8 +130,8 @@ const createJWT = (mode: PoPMode, jwtProps?: JwtProps, existingJwt?: Jwt): Jwt =
       : getJwtProperty<string | string[]>('aud', false, jwtProps?.aud, existingJwt?.payload?.aud);
   const iss =
     // mode === 'pop'
-       getJwtProperty<string>('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss)
-      // : getJwtProperty<string>('iss', false, jwtProps?.issuer, existingJwt?.payload?.iss);
+    getJwtProperty<string>('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss);
+  // : getJwtProperty<string>('iss', false, jwtProps?.issuer, existingJwt?.payload?.iss);
   const client_id = mode === 'jwt' ? getJwtProperty<string>('client_id', false, jwtProps?.clientId, existingJwt?.payload?.client_id) : undefined;
   const jti = getJwtProperty<string>('jti', false, jwtProps?.jti, existingJwt?.payload?.jti);
   const typ = getJwtProperty<string>('typ', true, jwtProps?.typ, existingJwt?.header?.typ, 'jwt');

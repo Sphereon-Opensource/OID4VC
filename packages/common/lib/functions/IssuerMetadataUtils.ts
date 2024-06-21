@@ -1,4 +1,11 @@
-import { CredentialDefinitionV1_0_13, CredentialOfferFormat, JsonLdIssuerCredentialDefinition, VCI_LOG_COMMON } from '../index';
+import {
+  CredentialDefinitionV1_0_13,
+  CredentialOfferFormat,
+  CredentialOfferPayload,
+  JsonLdIssuerCredentialDefinition,
+  UniformCredentialOfferRequest,
+  VCI_LOG_COMMON,
+} from '../index';
 import {
   AuthorizationServerMetadata,
   CredentialConfigurationSupported,
@@ -236,7 +243,14 @@ export function getIssuerName(
  * @param subject
  */
 export function getTypesFromObject(
-  subject: CredentialConfigurationSupported | CredentialOfferFormat | CredentialDefinitionV1_0_13 | JsonLdIssuerCredentialDefinition | string,
+  subject:
+    | CredentialConfigurationSupported
+    | CredentialOfferFormat
+    | CredentialOfferPayload
+    | CredentialDefinitionV1_0_13
+    | JsonLdIssuerCredentialDefinition
+    | UniformCredentialOfferRequest
+    | string,
 ): string[] | undefined {
   if (subject === undefined) {
     return undefined;
@@ -250,6 +264,10 @@ export function getTypesFromObject(
     return Array.isArray(subject.type) ? subject.type : [subject.type];
   } else if ('vct' in subject && subject.vct) {
     return [subject.vct];
+  } else if ('credentials' in subject && subject.credentials) {
+    return getTypesFromObject(subject.credentials);
+  } else if ('credential_offer' in subject && subject.credential_offer) {
+    return getTypesFromObject(subject.credential_offer);
   }
 
   VCI_LOG_COMMON.warning('Could not deduce credential types. Probably a failure down the line will happen!');
