@@ -11,21 +11,17 @@ import {
 // @ts-ignore
 import nock from 'nock';
 
-import {
-  AccessTokenClient, AccessTokenClientV1_0_11, CredentialOfferClientV1_0_13,
-  CredentialRequestClientBuilder, CredentialRequestClientBuilderV1_0_11,
-  OpenID4VCIClient, OpenID4VCIClientV1_0_13,
-  ProofOfPossessionBuilder
-} from '..'
+import { AccessTokenClient, AccessTokenClientV1_0_11, OpenID4VCIClient, OpenID4VCIClientV1_0_13, ProofOfPossessionBuilder } from '..';
 import { CredentialOfferClient } from '../CredentialOfferClient';
+import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder';
 
 import {
   IDENTIPROOF_AS_METADATA,
   IDENTIPROOF_AS_URL,
   IDENTIPROOF_ISSUER_URL,
   IDENTIPROOF_OID4VCI_METADATA,
-  IDENTIPROOF_OID4VCI_METADATA_v13
-} from './MetadataMocks'
+  IDENTIPROOF_OID4VCI_METADATA_v13,
+} from './MetadataMocks';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -73,8 +69,8 @@ describe('OID4VCI-Client should', () => {
     'https://issuer.research.identiproof.io?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D%7D';
   const HTTPS_OFFER_QR_PRE_AUTHORIZED =
     'https://issuer.research.identiproof.io?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22adhjhdjajkdkhjhdj%22%2C%22user_pin_required%22%3Atrue%7D%7D%7D';
-const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
-  'https://issuer.research.identiproof.io?credential_offer=%7B%0A%20%20%20%20%22credential_issuer%22%3A%20%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%0A%20%20%20%20%22credential_configuration_ids%22%3A%20%5B%0A%20%20%20%20%20%20%20%20%22UniversityDegreeCredential%22%0A%20%20%20%20%5D%2C%0A%20%20%20%20%22grants%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%22pre-authorized_code%22%3A%20%22adhjhdjajkdkhjhdj%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%22tx_code%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22length%22%3A%204%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22input_mode%22%3A%20%22numeric%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22description%22%3A%20%22Please%20provide%20the%20one-time%20code%20that%20was%20sent%20via%20e-mail%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%7D';
+  const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
+    'https://issuer.research.identiproof.io?credential_offer=%7B%0A%20%20%20%20%22credential_issuer%22%3A%20%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%0A%20%20%20%20%22credential_configuration_ids%22%3A%20%5B%0A%20%20%20%20%20%20%20%20%22UniversityDegreeCredential%22%0A%20%20%20%20%5D%2C%0A%20%20%20%20%22grants%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%22pre-authorized_code%22%3A%20%22adhjhdjajkdkhjhdj%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%22tx_code%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22length%22%3A%204%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22input_mode%22%3A%20%22numeric%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22description%22%3A%20%22Please%20provide%20the%20one-time%20code%20that%20was%20sent%20via%20e-mail%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%7D';
 
   const INITIATE_QR_V1_0_13 =
     'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22:%22https://issuer.research.identiproof.io%22,%22credential_configuration_ids%22:%5B%22OpenBadgeCredentialUrl%22%5D,%22grants%22:%7B%22urn:ietf:params:oauth:grant-type:pre-authorized_code%22:%7B%22pre-authorized_code%22:%22oaKazRN8I0IbtZ0C7JuMn5%22,%22tx_code%22:%7B%22input_mode%22:%22text%22,%22length%22:22,%22description%22:%22Please%20enter%20the%20serial%20number%20of%20your%20physical%20drivers%20license%22%7D%7D%7D%7D';
@@ -118,7 +114,7 @@ const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
   });
 
   it('succeed with a full flow with the client using OpenID4VCI draft < 9 and https', async () => {
-    succeedWithAFullFlowWithClientSetup()
+    succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
       uri: HTTPS_INITIATE_QR,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
@@ -129,7 +125,7 @@ const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
   });
 
   it('should succeed with a full flow with the client using OpenID4VCI draft > 11, https and authorization_code flow', async () => {
-    succeedWithAFullFlowWithClientSetup()
+    succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
       uri: HTTPS_OFFER_QR_AUTHORIZATION_CODE,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
@@ -140,7 +136,7 @@ const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
   });
 
   it('should succeed with a full flow with the client using OpenID4VCI draft > 11, https and preauthorized_code flow', async () => {
-    succeedWithAFullFlowWithClientSetup()
+    succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
       uri: HTTPS_OFFER_QR_PRE_AUTHORIZED,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
@@ -151,10 +147,12 @@ const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
   });
 
   it('should succeed with a full flow with the client using OpenID4VCI draft >= 13, https and preauthorized_code flow without did', async () => {
-    nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(200, {
-      token_endpoint: `${IDENTIPROOF_ISSUER_URL}/token`,
-      authorization_endpoint: `${IDENTIPROOF_ISSUER_URL}/authorize`,
-    });
+    nock(IDENTIPROOF_ISSUER_URL)
+      .get(WellKnownEndpoints.OPENID_CONFIGURATION)
+      .reply(200, {
+        token_endpoint: `${IDENTIPROOF_ISSUER_URL}/token`,
+        authorization_endpoint: `${IDENTIPROOF_ISSUER_URL}/authorize`,
+      });
     nock(IDENTIPROOF_ISSUER_URL).post('/token').reply(200, {
       access_token: 'ey6546.546654.64565',
       authorization_pending: false,
@@ -162,14 +160,14 @@ const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
       c_nonce_expires_in: 2025101300,
       interval: 2025101300,
       token_type: 'Bearer',
-    })
+    });
     nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA_v13));
     nock(ISSUER_URL)
-    .post(/credential/)
-    .reply(200, {
-      format: 'jwt-vc',
-      credential: mockedVC,
-    });
+      .post(/credential/)
+      .reply(200, {
+        format: 'jwt-vc',
+        credential: mockedVC,
+      });
     const client = await OpenID4VCIClientV1_0_13.fromURI({
       uri: HTTPS_OFFER_QR_PRE_AUTHORIZED_v13,
       kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1',
@@ -196,7 +194,7 @@ const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
   });
 
   it('should succeed with a full flow with the client using OpenID4VCI draft > 11, https and preauthorized_code flow', async () => {
-    succeedWithAFullFlowWithClientSetup()
+    succeedWithAFullFlowWithClientSetup();
     const client = await OpenID4VCIClient.fromURI({
       uri: HTTPS_OFFER_QR_PRE_AUTHORIZED,
       kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
@@ -256,7 +254,7 @@ const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
           format: 'jwt-vc',
           credential: mockedVC,
         });
-      const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({ credentialOffer: credentialOffer })
+      const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: credentialOffer })
         .withFormat('jwt_vc')
 
         .withTokenFromResponse(accessTokenResponse.successBody!)
@@ -290,7 +288,7 @@ const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
     'succeed with a full flow without the client and without did',
     async () => {
       /* Convert the URI into an object */
-      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClientV1_0_13.fromURI(INITIATE_QR_V1_0_13);
+      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_13);
 
       expect(credentialOffer.baseUrl).toEqual('openid-credential-offer://');
       expect(credentialOffer.original_credential_offer).toEqual({
@@ -298,19 +296,19 @@ const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
         credential_issuer: ISSUER_URL,
         grants: {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-            'pre-authorized_code': "oaKazRN8I0IbtZ0C7JuMn5",
+            'pre-authorized_code': 'oaKazRN8I0IbtZ0C7JuMn5',
             tx_code: {
               description: 'Please enter the serial number of your physical drivers license',
               input_mode: 'text',
               length: 22,
             },
           },
-        }
+        },
       });
 
       nock(ISSUER_URL)
-      .post(/token.*/)
-      .reply(200, JSON.stringify(mockedAccessTokenResponse));
+        .post(/token.*/)
+        .reply(200, JSON.stringify(mockedAccessTokenResponse));
 
       /* The actual access token calls */
       const accessTokenClient: AccessTokenClient = new AccessTokenClient();
@@ -318,16 +316,16 @@ const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
       expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
       // Get the credential
       nock(ISSUER_URL)
-      .post(/credential/)
-      .reply(200, {
-        format: 'jwt-vc',
-        credential: mockedVC,
-      });
+        .post(/credential/)
+        .reply(200, {
+          format: 'jwt-vc',
+          credential: mockedVC,
+        });
       const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: credentialOffer })
-      .withFormat('jwt_vc')
+        .withFormat('jwt_vc')
 
-      .withTokenFromResponse(accessTokenResponse.successBody!)
-      .build();
+        .withTokenFromResponse(accessTokenResponse.successBody!)
+        .build();
 
       //TS2322: Type '(args: ProofOfPossessionCallbackArgs) => Promise<string>'
       // is not assignable to type 'ProofOfPossessionCallback'.
@@ -340,14 +338,14 @@ const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
         },
         version: OpenId4VCIVersion.VER_1_0_13,
       })
-      .withEndpointMetadata({
-        issuer: 'https://issuer.research.identiproof.io',
-        credential_endpoint: 'https://issuer.research.identiproof.io/credential',
-        token_endpoint: 'https://issuer.research.identiproof.io/token',
-      })
-      .withKid('ebfeb1f712ebc6f1c276e12ec21/keys/1')
-      .build();
-      const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof,  credentialIdentifier: 'OpenBadgeCredentialUrl'});
+        .withEndpointMetadata({
+          issuer: 'https://issuer.research.identiproof.io',
+          credential_endpoint: 'https://issuer.research.identiproof.io/credential',
+          token_endpoint: 'https://issuer.research.identiproof.io/token',
+        })
+        .withKid('ebfeb1f712ebc6f1c276e12ec21/keys/1')
+        .build();
+      const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof, credentialIdentifier: 'OpenBadgeCredentialUrl' });
       expect(credResponse.successBody?.credential).toEqual(mockedVC);
     },
     UNIT_TEST_TIMEOUT,

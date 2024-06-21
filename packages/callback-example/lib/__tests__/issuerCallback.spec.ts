@@ -1,6 +1,11 @@
 import { KeyObject } from 'crypto'
 
-import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '@sphereon/oid4vci-client'
+import {
+  CredentialRequestClient,
+  CredentialRequestClientBuilder,
+  CredentialRequestClientBuilderV1_0_13,
+  ProofOfPossessionBuilder,
+} from '@sphereon/oid4vci-client'
 import {
   Alg,
   CNonceState,
@@ -219,7 +224,7 @@ describe('issuerCallback', () => {
   })
 
   it('Should pass requesting a verifiable credential using the client', async () => {
-    const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
+    const credReqClient = ((await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI })) as CredentialRequestClientBuilderV1_0_13)
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialEndpointFromMetadata({
         credential_configurations_supported: { VeriCred: { format: 'jwt_vc_json' } },

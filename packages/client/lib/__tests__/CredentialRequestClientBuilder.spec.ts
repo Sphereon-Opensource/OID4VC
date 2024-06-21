@@ -11,7 +11,8 @@ import {
 } from '@sphereon/oid4vci-common';
 import * as jose from 'jose';
 
-import { CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '..';
+import { CredentialRequestClientBuilderV1_0_13, ProofOfPossessionBuilder } from '..';
+import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST_URI, WALT_ISSUER_URL, WALT_OID4VCI_METADATA } from './MetadataMocks';
 
@@ -81,7 +82,7 @@ async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; ki
 
 describe('Credential Request Client Builder', () => {
   it('should build correctly provided with correct params', async function () {
-    const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
+    const credReqClient = ((await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI })) as CredentialRequestClientBuilderV1_0_13)
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialIdentifier('credentialType')
@@ -94,7 +95,7 @@ describe('Credential Request Client Builder', () => {
   });
 
   it('should build credential request correctly', async () => {
-    const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
+    const credReqClient = ((await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI })) as CredentialRequestClientBuilderV1_0_13)
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialIdentifier('OpenBadgeCredential')
@@ -125,10 +126,10 @@ describe('Credential Request Client Builder', () => {
 
   it('should build credential request correctly without did', async () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
-    .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-    .withFormat('jwt_vc')
-    .withCredentialType('OpenBadgeCredential')
-    .build();
+      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
+      .withFormat('jwt_vc')
+      .withCredentialType('OpenBadgeCredential')
+      .build();
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt: jwtv1_0_13_withoutDid,
       callbacks: {
@@ -137,9 +138,9 @@ describe('Credential Request Client Builder', () => {
       },
       version: OpenId4VCIVersion.VER_1_0_13,
     })
-    .withClientId('sphereon:wallet')
-    .withKid(kid_withoutDid)
-    .build();
+      .withClientId('sphereon:wallet')
+      .withKid(kid_withoutDid)
+      .build();
     await proofOfPossessionVerifierCallbackFunction({ ...proof, kid: kid_withoutDid });
     const credentialRequest: CredentialRequestV1_0_13 = await credReqClient.createCredentialRequest({
       proofInput: proof,
