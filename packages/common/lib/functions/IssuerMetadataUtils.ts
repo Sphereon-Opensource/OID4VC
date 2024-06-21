@@ -3,6 +3,7 @@ import {
   CredentialOfferFormat,
   CredentialOfferPayload,
   JsonLdIssuerCredentialDefinition,
+  UniformCredentialOfferPayload,
   UniformCredentialOfferRequest,
   VCI_LOG_COMMON,
 } from '../index';
@@ -243,14 +244,7 @@ export function getIssuerName(
  * @param subject
  */
 export function getTypesFromObject(
-  subject:
-    | CredentialConfigurationSupported
-    | CredentialOfferFormat
-    | CredentialOfferPayload
-    | CredentialDefinitionV1_0_13
-    | JsonLdIssuerCredentialDefinition
-    | UniformCredentialOfferRequest
-    | string,
+  subject: CredentialConfigurationSupported | CredentialOfferFormat | CredentialDefinitionV1_0_13 | JsonLdIssuerCredentialDefinition | string,
 ): string[] | undefined {
   if (subject === undefined) {
     return undefined;
@@ -264,12 +258,27 @@ export function getTypesFromObject(
     return Array.isArray(subject.type) ? subject.type : [subject.type];
   } else if ('vct' in subject && subject.vct) {
     return [subject.vct];
-  } else if ('credentials' in subject && subject.credentials) {
-    return getTypesFromObject(subject.credentials);
-  } else if ('credential_offer' in subject && subject.credential_offer) {
-    return getTypesFromObject(subject.credential_offer);
   }
-
   VCI_LOG_COMMON.warning('Could not deduce credential types. Probably a failure down the line will happen!');
+  return undefined;
+}
+
+export function getTypesFromCredentialOffer(
+  offer: UniformCredentialOfferRequest | CredentialOfferPayload | UniformCredentialOfferPayload,
+): Array<Array<string>> | undefined {
+  if ('credentials' in offer && Array.isArray(offer.credentials)) {
+    return offer.credentials.map((cred) => getTypesFromObject(cred)).filter((cred): cred is string[] => cred !== undefined);
+  } else if ('credential_configuration_ids' in offer && Array.isArray(offer.credential_configuration_ids)) {
+    return offer.credential_configuration_ids.map((id) => [id]);
+  } else if ('credential_offer' in offer && offer.credential_offer) {
+    return getTypesFromCredentialOffer(offer.credential_offer);
+  } else if ('credential_type' in offer && offer.credential_type) {
+    if (typeof offer.credential_type === 'string') {
+      return [[offer.credential_type]];
+    } else if (Array.isArray(offer.credential_type)) {
+      return [offer.credential_type];
+    }
+  }
+  VCI_LOG_COMMON.warning('Could not deduce credential types from offer. Probably a failure down the line will happen!');
   return undefined;
 }
