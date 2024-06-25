@@ -391,21 +391,6 @@ describe('OIDVCI-Client for v1_0_13 should', () => {
     nock.cleanAll();
   });
 
-  /*function succeedWithAFullFlowWithClientSetup() {
-    nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
-    nock(IDENTIPROOF_AS_URL).get('/.well-known/oauth-authorization-server').reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
-    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
-    nock(IDENTIPROOF_AS_URL)
-    .post(/oauth2\/token.*!/)
-    .reply(200, JSON.stringify(mockedAccessTokenResponse));
-    nock(ISSUER_URL)
-    .post(/credential/)
-    .reply(200, {
-      format: 'jwt-vc',
-      credential: mockedVC,
-    });
-  }*/
-
   it('should successfully resolve the credential offer URI', async () => {
     const uri = 'https://mijnkvk.acc.credenco.com/openid4vc/credentialOffer?id=32fc4ebf-9e31-4149-9877-e3c0b602d559';
 
