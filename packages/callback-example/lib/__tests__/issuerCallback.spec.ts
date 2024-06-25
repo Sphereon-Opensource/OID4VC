@@ -1,9 +1,7 @@
 import { KeyObject } from 'crypto'
 
 import {
-  CredentialRequestClient,
   CredentialRequestClientBuilder,
-  CredentialRequestClientBuilderV1_0_13,
   ProofOfPossessionBuilder,
 } from '@sphereon/oid4vci-client'
 import {
@@ -224,7 +222,7 @@ describe('issuerCallback', () => {
   })
 
   it('Should pass requesting a verifiable credential using the client', async () => {
-    const credReqClient = ((await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI })) as CredentialRequestClientBuilderV1_0_13)
+    const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialEndpointFromMetadata({
         credential_configurations_supported: { VeriCred: { format: 'jwt_vc_json' } },
@@ -257,7 +255,7 @@ describe('issuerCallback', () => {
       .withKid(kid)
       .build()
 
-    const credentialRequestClient = new CredentialRequestClient(credReqClient)
+    const credentialRequestClient = credReqClient.build()
     const credentialRequest: CredentialRequest = await credentialRequestClient.createCredentialRequest({
       credentialIdentifier: 'VerifiableCredential',
       // format: 'jwt_vc_json',

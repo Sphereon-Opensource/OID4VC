@@ -8,17 +8,19 @@ import {
   ExperimentalSubjectIssuance,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
-  UniformCredentialOfferRequest,
-} from '@sphereon/oid4vci-common';
-import { CredentialFormat } from '@sphereon/ssi-types';
+  UniformCredentialOfferRequest
+} from '@sphereon/oid4vci-common'
+import { CredentialFormat } from '@sphereon/ssi-types'
 
 import { CredentialOfferClient } from './CredentialOfferClient';
-import { CredentialRequestClient } from './CredentialRequestClient';
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
 import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13';
-import { CredentialRequestClientV1_0_11 } from './CredentialRequestClientV1_0_11';
 
 type CredentialRequestClientBuilderVersionSpecific = CredentialRequestClientBuilderV1_0_11 | CredentialRequestClientBuilderV1_0_13;
+
+function isV1_0_13(builder: CredentialRequestClientBuilderVersionSpecific): builder is CredentialRequestClientBuilderV1_0_13 {
+  return (builder as CredentialRequestClientBuilderV1_0_13).withCredentialIdentifier !== undefined;
+}
 
 export class CredentialRequestClientBuilder {
   private _builder: CredentialRequestClientBuilderVersionSpecific;
@@ -27,17 +29,13 @@ export class CredentialRequestClientBuilder {
     this._builder = builder;
   }
 
-  private isV1_0_13(builder: CredentialRequestClientBuilderVersionSpecific): builder is CredentialRequestClientBuilderV1_0_13 {
-    return (builder as CredentialRequestClientBuilderV1_0_13).withCredentialIdentifier !== undefined;
-  }
-
   public static fromCredentialIssuer({
-    credentialIssuer,
-    metadata,
-    version,
-    credentialIdentifier,
-    credentialTypes,
-  }: {
+                                       credentialIssuer,
+                                       metadata,
+                                       version,
+                                       credentialIdentifier,
+                                       credentialTypes,
+                                     }: {
     credentialIssuer: string;
     metadata?: EndpointMetadata;
     version?: OpenId4VCIVersion;
@@ -101,9 +99,9 @@ export class CredentialRequestClientBuilder {
   }
 
   public static fromCredentialOffer({
-    credentialOffer,
-    metadata,
-  }: {
+                                      credentialOffer,
+                                      metadata,
+                                    }: {
     credentialOffer: CredentialOfferRequestWithBaseUrl;
     metadata?: EndpointMetadata;
   }): CredentialRequestClientBuilder {
@@ -129,8 +127,12 @@ export class CredentialRequestClientBuilder {
     return this._builder.version;
   }
 
-  public withCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadata): this {
-    this._builder.credentialEndpoint = metadata.credential_endpoint;
+  public withCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadata | CredentialIssuerMetadataV1_0_13): this {
+    if (isV1_0_13(this._builder)) {
+      this._builder.withCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadataV1_0_13)
+    } else {
+      this._builder.withCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadata)
+    }
     return this;
   }
 
@@ -140,12 +142,10 @@ export class CredentialRequestClientBuilder {
   }
 
   public withDeferredCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadata | CredentialIssuerMetadataV1_0_13): this {
-    if (this.isV1_0_13(this._builder)) {
-      (this._builder as CredentialRequestClientBuilderV1_0_13).withDeferredCredentialEndpointFromMetadata(
-        metadata as CredentialIssuerMetadataV1_0_13,
-      );
+    if (isV1_0_13(this._builder)) {
+      this._builder.withDeferredCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadataV1_0_13);
     } else {
-      this._builder.withDeferredCredentialEndpointFromMetadata(metadata);
+      this._builder.withDeferredCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadata);
     }
     return this;
   }
@@ -198,7 +198,7 @@ export class CredentialRequestClientBuilder {
     return this;
   }
 
-  public build(): CredentialRequestClient | CredentialRequestClientV1_0_11 {
+  public build() {
     return this._builder.build();
   }
 }

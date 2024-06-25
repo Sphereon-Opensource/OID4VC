@@ -1,12 +1,12 @@
 import {
   AccessTokenResponse,
-  Alg,
+  Alg, CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
   Jwt,
   OpenId4VCIVersion,
   ProofOfPossession,
-  WellKnownEndpoints,
-} from '@sphereon/oid4vci-common';
+  WellKnownEndpoints
+} from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
@@ -225,7 +225,7 @@ describe('OID4VCI-Client should', () => {
   }
 
   it(
-    'succeed with a full flow without the client',
+    'succeed with a full flow without the client v1_0_11',
     async () => {
       /* Convert the URI into an object */
       const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_08);
@@ -279,6 +279,73 @@ describe('OID4VCI-Client should', () => {
         .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
         .build();
       const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof });
+      expect(credResponse.successBody?.credential).toEqual(mockedVC);
+    },
+    UNIT_TEST_TIMEOUT,
+  );
+
+  it(
+    'succeed with a full flow without the client v1_0_13',
+    async () => {
+      /* Convert the URI into an object */
+      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_13);
+      const preAuthorizedCode = 'oaKazRN8I0IbtZ0C7JuMn5';
+      expect(credentialOffer.baseUrl).toEqual('openid-credential-offer://');
+      expect((credentialOffer.credential_offer as CredentialOfferPayloadV1_0_13).credential_configuration_ids).toEqual(['OpenBadgeCredentialUrl']);
+      expect(credentialOffer.original_credential_offer.grants).toEqual({
+        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+          'pre-authorized_code': preAuthorizedCode,
+          tx_code: {
+            input_mode: 'text',
+            description: 'Please enter the serial number of your physical drivers license',
+            length: preAuthorizedCode.length,
+          },
+        },
+      });
+
+      nock(ISSUER_URL)
+      .post(/token.*/)
+      .reply(200, JSON.stringify(mockedAccessTokenResponse));
+
+      /* The actual access token calls */
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient();
+      const accessTokenResponse = await accessTokenClient.acquireAccessToken({ credentialOffer: credentialOffer, pin: '1234' });
+      expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
+      // Get the credential
+      nock(ISSUER_URL)
+      .post(/credential/)
+      .reply(200, {
+        format: 'jwt-vc',
+        credential: mockedVC,
+      });
+      const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: credentialOffer })
+      .withFormat('jwt_vc')
+
+      .withTokenFromResponse(accessTokenResponse.successBody!)
+      .build();
+
+      //TS2322: Type '(args: ProofOfPossessionCallbackArgs) => Promise<string>'
+      // is not assignable to type 'ProofOfPossessionCallback'.
+      // Types of parameters 'args' and 'args' are incompatible.
+      // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
+      const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+        jwt: jwtDid,
+        callbacks: {
+          signCallback: proofOfPossessionCallbackFunction,
+        },
+        version: OpenId4VCIVersion.VER_1_0_11,
+      })
+      .withEndpointMetadata({
+        issuer: 'https://issuer.research.identiproof.io',
+        credential_endpoint: 'https://issuer.research.identiproof.io/credential',
+        token_endpoint: 'https://issuer.research.identiproof.io/token',
+      })
+      .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
+      .build();
+      const credResponse = await credReqClient.acquireCredentialsUsingProof({
+        proofInput: proof,
+        credentialTypes: credentialOffer.original_credential_offer.credential_configuration_ids[0],
+      });
       expect(credResponse.successBody?.credential).toEqual(mockedVC);
     },
     UNIT_TEST_TIMEOUT,
