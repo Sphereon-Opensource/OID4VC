@@ -11,7 +11,7 @@ import {
 } from '@sphereon/oid4vci-common';
 import * as jose from 'jose';
 
-import { CredentialRequestClientBuilderV1_0_13, ProofOfPossessionBuilder } from '..';
+import { CredentialRequestOpts, ProofOfPossessionBuilder } from '..';
 import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST_URI, WALT_ISSUER_URL, WALT_OID4VCI_METADATA } from './MetadataMocks';
@@ -82,7 +82,7 @@ async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; ki
 
 describe('Credential Request Client Builder', () => {
   it('should build correctly provided with correct params', async function () {
-    const credReqClient = ((await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI })) as CredentialRequestClientBuilderV1_0_13)
+    const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialIdentifier('credentialType')
@@ -90,12 +90,12 @@ describe('Credential Request Client Builder', () => {
       .build();
     expect(credReqClient.credentialRequestOpts.credentialEndpoint).toBe('https://oidc4vci.demo.spruceid.com/credential');
     expect(credReqClient.credentialRequestOpts.format).toBe('jwt_vc');
-    expect(credReqClient.credentialRequestOpts.credentialIdentifier).toStrictEqual('credentialType');
+    expect((credReqClient.credentialRequestOpts as CredentialRequestOpts).credentialIdentifier).toStrictEqual('credentialType');
     expect(credReqClient.credentialRequestOpts.token).toBe('token');
   });
 
   it('should build credential request correctly', async () => {
-    const credReqClient = ((await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI })) as CredentialRequestClientBuilderV1_0_13)
+    const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialIdentifier('OpenBadgeCredential')

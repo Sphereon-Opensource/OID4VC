@@ -20,7 +20,7 @@ import * as jose from 'jose';
 // @ts-ignore
 import nock from 'nock';
 
-import { CredentialOfferClient, CredentialRequestClientBuilderV1_0_13, MetadataClient, ProofOfPossessionBuilder } from '..';
+import { CredentialOfferClient, MetadataClient, ProofOfPossessionBuilder } from '..';
 import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';
@@ -114,9 +114,7 @@ describe('Credential Request Client ', () => {
   });
 
   it('should fail with invalid url', async () => {
-    const credReqClient = (
-      CredentialRequestClientBuilder.fromCredentialOfferRequest({ request: INITIATION_TEST }) as CredentialRequestClientBuilderV1_0_13
-    )
+    const credReqClient = CredentialRequestClientBuilder.fromCredentialOfferRequest({ request: INITIATION_TEST })
       .withCredentialEndpoint('httpsf://oidc4vci.demo.spruceid.com/credential')
       .withFormat('jwt_vc')
       .withCredentialIdentifier('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
