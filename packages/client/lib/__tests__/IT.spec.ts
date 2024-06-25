@@ -4,7 +4,7 @@ import {
   CredentialOfferRequestWithBaseUrl,
   Jwt,
   OpenId4VCIVersion,
-  ProofOfPossession,
+  ProofOfPossession, resolveCredentialOfferURI,
   WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -36,11 +36,27 @@ const jwtWithoutDid = {
   payload: { iss: 'test-clientId', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: ISSUER_URL },
 };
 
+const mockedVC =
+  'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL2V4YW1wbGVzL3YxIl0sImlkIjoiaHR0cDovL2V4YW1wbGUuZWR1L2NyZWRlbnRpYWxzLzM3MzIiLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiVW5pdmVyc2l0eURlZ3JlZUNyZWRlbnRpYWwiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLmVkdS9pc3N1ZXJzLzU2NTA0OSIsImlzc3VhbmNlRGF0ZSI6IjIwMTAtMDEtMDFUMDA6MDA6MDBaIiwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEiLCJkZWdyZWUiOnsidHlwZSI6IkJhY2hlbG9yRGVncmVlIiwibmFtZSI6IkJhY2hlbG9yIG9mIFNjaWVuY2UgYW5kIEFydHMifX19LCJpc3MiOiJodHRwczovL2V4YW1wbGUuZWR1L2lzc3VlcnMvNTY1MDQ5IiwibmJmIjoxMjYyMzA0MDAwLCJqdGkiOiJodHRwOi8vZXhhbXBsZS5lZHUvY3JlZGVudGlhbHMvMzczMiIsInN1YiI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMSJ9.z5vgMTK1nfizNCg5N-niCOL3WUIAL7nXy-nGhDZYO_-PNGeE-0djCpWAMH8fD8eWSID5PfkPBYkx_dfLJnQ7NA';
+
+// Access token mocks
+const mockedAccessTokenResponse: AccessTokenResponse = {
+  access_token: 'ey6546.546654.64565',
+  authorization_pending: false,
+  c_nonce: 'c_nonce2022101300',
+  c_nonce_expires_in: 2025101300,
+  interval: 2025101300,
+  token_type: 'Bearer',
+};
+
+const INITIATE_QR_V1_0_13 =
+  'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22:%22https://issuer.research.identiproof.io%22,%22credential_configuration_ids%22:%5B%22OpenBadgeCredentialUrl%22%5D,%22grants%22:%7B%22urn:ietf:params:oauth:grant-type:pre-authorized_code%22:%7B%22pre-authorized_code%22:%22oaKazRN8I0IbtZ0C7JuMn5%22,%22tx_code%22:%7B%22input_mode%22:%22text%22,%22length%22:22,%22description%22:%22Please%20enter%20the%20serial%20number%20of%20your%20physical%20drivers%20license%22%7D%7D%7D%7D';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function proofOfPossessionCallbackFunction(_args: Jwt, _kid?: string): Promise<string> {
+  return 'ey.val.ue';
+}
 describe('OID4VCI-Client should', () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function proofOfPossessionCallbackFunction(_args: Jwt, _kid?: string): Promise<string> {
-    return 'ey.val.ue';
-  }
   beforeEach(() => {
     nock.cleanAll();
   });
@@ -57,8 +73,6 @@ describe('OID4VCI-Client should', () => {
     interval: 2025101300,
     token_type: 'Bearer',
   };
-  const mockedVC =
-    'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL2V4YW1wbGVzL3YxIl0sImlkIjoiaHR0cDovL2V4YW1wbGUuZWR1L2NyZWRlbnRpYWxzLzM3MzIiLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiVW5pdmVyc2l0eURlZ3JlZUNyZWRlbnRpYWwiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLmVkdS9pc3N1ZXJzLzU2NTA0OSIsImlzc3VhbmNlRGF0ZSI6IjIwMTAtMDEtMDFUMDA6MDA6MDBaIiwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEiLCJkZWdyZWUiOnsidHlwZSI6IkJhY2hlbG9yRGVncmVlIiwibmFtZSI6IkJhY2hlbG9yIG9mIFNjaWVuY2UgYW5kIEFydHMifX19LCJpc3MiOiJodHRwczovL2V4YW1wbGUuZWR1L2lzc3VlcnMvNTY1MDQ5IiwibmJmIjoxMjYyMzA0MDAwLCJqdGkiOiJodHRwOi8vZXhhbXBsZS5lZHUvY3JlZGVudGlhbHMvMzczMiIsInN1YiI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMSJ9.z5vgMTK1nfizNCg5N-niCOL3WUIAL7nXy-nGhDZYO_-PNGeE-0djCpWAMH8fD8eWSID5PfkPBYkx_dfLJnQ7NA';
   const INITIATE_QR_V1_0_08 =
     'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredentialUrl&pre-authorized_code=4jLs9xZHEfqcoow0kHE7d1a8hUk6Sy-5bVSV2MqBUGUgiFFQi-ImL62T-FmLIo8hKA1UdMPH0lM1xAgcFkJfxIw9L-lI3mVs0hRT8YVwsEM1ma6N3wzuCdwtMU4bcwKp&user_pin_required=true';
   const OFFER_QR_V1_0_08 =
@@ -71,9 +85,6 @@ describe('OID4VCI-Client should', () => {
     'https://issuer.research.identiproof.io?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22adhjhdjajkdkhjhdj%22%2C%22user_pin_required%22%3Atrue%7D%7D%7D';
   const HTTPS_OFFER_QR_PRE_AUTHORIZED_v13 =
     'https://issuer.research.identiproof.io?credential_offer=%7B%0A%20%20%20%20%22credential_issuer%22%3A%20%22https%3A%2F%2Fissuer.research.identiproof.io%22%2C%0A%20%20%20%20%22credential_configuration_ids%22%3A%20%5B%0A%20%20%20%20%20%20%20%20%22UniversityDegreeCredential%22%0A%20%20%20%20%5D%2C%0A%20%20%20%20%22grants%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%22pre-authorized_code%22%3A%20%22adhjhdjajkdkhjhdj%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%22tx_code%22%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22length%22%3A%204%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22input_mode%22%3A%20%22numeric%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22description%22%3A%20%22Please%20provide%20the%20one-time%20code%20that%20was%20sent%20via%20e-mail%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%7D';
-
-  const INITIATE_QR_V1_0_13 =
-    'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22:%22https://issuer.research.identiproof.io%22,%22credential_configuration_ids%22:%5B%22OpenBadgeCredentialUrl%22%5D,%22grants%22:%7B%22urn:ietf:params:oauth:grant-type:pre-authorized_code%22:%7B%22pre-authorized_code%22:%22oaKazRN8I0IbtZ0C7JuMn5%22,%22tx_code%22:%7B%22input_mode%22:%22text%22,%22length%22:22,%22description%22:%22Please%20enter%20the%20serial%20number%20of%20your%20physical%20drivers%20license%22%7D%7D%7D%7D';
 
   function succeedWithAFullFlowWithClientSetup() {
     nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
@@ -350,6 +361,58 @@ describe('OID4VCI-Client should', () => {
     },
     UNIT_TEST_TIMEOUT,
   );
+});
+
+describe('OIDVCI-Client for v1_0_13 should', () => {
+  const mockedCredentialOffer = {
+    credential_issuer: 'https://mijnkvk.acc.credenco.com',
+    credential_configuration_ids: ['BevoegdheidUittreksel_jwt_vc_json'],
+    grants: {
+      authorization_code: {
+        issuer_state: '32fc4ebf-9e31-4149-9877-e3c0b602d559',
+      },
+      'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+        'pre-authorized_code':
+          'eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiIzMmZjNGViZi05ZTMxLTQxNDktOTg3Ny1lM2MwYjYwMmQ1NTkiLCJpc3MiOiJodHRwczovL21pam5rdmsuYWNjLmNyZWRlbmNvLmNvbSIsImF1ZCI6IlRPS0VOIn0.754aiQ87O0vHYSpRvPqAS9cLOgf-pewdeXbpLziRwsxEp9mENfaXpY62muYpzOaWcYmTOydkzhFul-NDYXJZCA',
+      },
+    },
+  };
+
+  beforeEach(() => {
+    // Mock the HTTP GET request to the credential offer URI
+    nock('https://mijnkvk.acc.credenco.com')
+      .get('/openid4vc/credentialOffer?id=32fc4ebf-9e31-4149-9877-e3c0b602d559')
+      .reply(200, mockedCredentialOffer)
+      .persist(); // Use .persist() if you want the mock to remain active for multiple tests
+  });
+
+  afterEach(() => {
+    // Clean up all mocks
+    nock.cleanAll();
+  });
+
+  /*function succeedWithAFullFlowWithClientSetup() {
+    nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA));
+    nock(IDENTIPROOF_AS_URL).get('/.well-known/oauth-authorization-server').reply(200, JSON.stringify(IDENTIPROOF_AS_METADATA));
+    nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
+    nock(IDENTIPROOF_AS_URL)
+    .post(/oauth2\/token.*!/)
+    .reply(200, JSON.stringify(mockedAccessTokenResponse));
+    nock(ISSUER_URL)
+    .post(/credential/)
+    .reply(200, {
+      format: 'jwt-vc',
+      credential: mockedVC,
+    });
+  }*/
+
+  it('should successfully resolve the credential offer URI', async () => {
+    const uri = 'https://mijnkvk.acc.credenco.com/openid4vc/credentialOffer?id=32fc4ebf-9e31-4149-9877-e3c0b602d559';
+
+    const credentialOffer = await resolveCredentialOfferURI(uri);
+
+    expect(credentialOffer).toEqual(mockedCredentialOffer);
+  });
 
   it(
     'succeed with a full flow without the client and without did',
