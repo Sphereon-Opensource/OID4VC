@@ -1,9 +1,6 @@
 import { KeyObject } from 'crypto'
 
-import {
-  CredentialRequestClientBuilder,
-  ProofOfPossessionBuilder,
-} from '@sphereon/oid4vci-client'
+import { CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '@sphereon/oid4vci-client'
 import {
   Alg,
   CNonceState,

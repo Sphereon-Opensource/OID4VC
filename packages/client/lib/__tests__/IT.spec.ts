@@ -1,12 +1,14 @@
 import {
   AccessTokenResponse,
-  Alg, CredentialOfferPayloadV1_0_13,
+  Alg,
+  CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
   Jwt,
   OpenId4VCIVersion,
-  ProofOfPossession, resolveCredentialOfferURI,
-  WellKnownEndpoints
-} from '@sphereon/oid4vci-common'
+  ProofOfPossession,
+  resolveCredentialOfferURI,
+  WellKnownEndpoints,
+} from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
@@ -311,8 +313,8 @@ describe('OID4VCI-Client should', () => {
       });
 
       nock(ISSUER_URL)
-      .post(/token.*/)
-      .reply(200, JSON.stringify(mockedAccessTokenResponse));
+        .post(/token.*/)
+        .reply(200, JSON.stringify(mockedAccessTokenResponse));
 
       /* The actual access token calls */
       const accessTokenClient: AccessTokenClient = new AccessTokenClient();
@@ -320,16 +322,16 @@ describe('OID4VCI-Client should', () => {
       expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse);
       // Get the credential
       nock(ISSUER_URL)
-      .post(/credential/)
-      .reply(200, {
-        format: 'jwt-vc',
-        credential: mockedVC,
-      });
+        .post(/credential/)
+        .reply(200, {
+          format: 'jwt-vc',
+          credential: mockedVC,
+        });
       const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: credentialOffer })
-      .withFormat('jwt_vc')
+        .withFormat('jwt_vc')
 
-      .withTokenFromResponse(accessTokenResponse.successBody!)
-      .build();
+        .withTokenFromResponse(accessTokenResponse.successBody!)
+        .build();
 
       const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
         jwt: jwtDid,
@@ -338,13 +340,13 @@ describe('OID4VCI-Client should', () => {
         },
         version: OpenId4VCIVersion.VER_1_0_11,
       })
-      .withEndpointMetadata({
-        issuer: 'https://issuer.research.identiproof.io',
-        credential_endpoint: 'https://issuer.research.identiproof.io/credential',
-        token_endpoint: 'https://issuer.research.identiproof.io/token',
-      })
-      .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
-      .build();
+        .withEndpointMetadata({
+          issuer: 'https://issuer.research.identiproof.io',
+          credential_endpoint: 'https://issuer.research.identiproof.io/credential',
+          token_endpoint: 'https://issuer.research.identiproof.io/token',
+        })
+        .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
+        .build();
       const credResponse = await credReqClient.acquireCredentialsUsingProof({
         proofInput: proof,
         credentialTypes: credentialOffer.original_credential_offer.credential_configuration_ids[0],

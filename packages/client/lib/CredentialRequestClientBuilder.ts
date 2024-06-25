@@ -8,9 +8,9 @@ import {
   ExperimentalSubjectIssuance,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
-  UniformCredentialOfferRequest
-} from '@sphereon/oid4vci-common'
-import { CredentialFormat } from '@sphereon/ssi-types'
+  UniformCredentialOfferRequest,
+} from '@sphereon/oid4vci-common';
+import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialOfferClient } from './CredentialOfferClient';
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
@@ -30,12 +30,12 @@ export class CredentialRequestClientBuilder {
   }
 
   public static fromCredentialIssuer({
-                                       credentialIssuer,
-                                       metadata,
-                                       version,
-                                       credentialIdentifier,
-                                       credentialTypes,
-                                     }: {
+    credentialIssuer,
+    metadata,
+    version,
+    credentialIdentifier,
+    credentialTypes,
+  }: {
     credentialIssuer: string;
     metadata?: EndpointMetadata;
     version?: OpenId4VCIVersion;
@@ -99,9 +99,9 @@ export class CredentialRequestClientBuilder {
   }
 
   public static fromCredentialOffer({
-                                      credentialOffer,
-                                      metadata,
-                                    }: {
+    credentialOffer,
+    metadata,
+  }: {
     credentialOffer: CredentialOfferRequestWithBaseUrl;
     metadata?: EndpointMetadata;
   }): CredentialRequestClientBuilder {
@@ -129,9 +129,9 @@ export class CredentialRequestClientBuilder {
 
   public withCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadata | CredentialIssuerMetadataV1_0_13): this {
     if (isV1_0_13(this._builder)) {
-      this._builder.withCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadataV1_0_13)
+      this._builder.withCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadataV1_0_13);
     } else {
-      this._builder.withCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadata)
+      this._builder.withCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadata);
     }
     return this;
   }
