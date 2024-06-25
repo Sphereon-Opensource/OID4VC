@@ -442,10 +442,6 @@ describe('OIDVCI-Client for v1_0_13 should', () => {
         .withTokenFromResponse(accessTokenResponse.successBody!)
         .build();
 
-      //TS2322: Type '(args: ProofOfPossessionCallbackArgs) => Promise<string>'
-      // is not assignable to type 'ProofOfPossessionCallback'.
-      // Types of parameters 'args' and 'args' are incompatible.
-      // Property 'kid' is missing in type '{ header: unknown; payload: unknown; }' but required in type 'ProofOfPossessionCallbackArgs'.
       const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
         jwt: jwtWithoutDid,
         callbacks: {
