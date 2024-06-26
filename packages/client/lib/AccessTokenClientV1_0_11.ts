@@ -92,7 +92,7 @@ export class AccessTokenClientV1_0_11 {
     const credentialOfferRequest = opts.credentialOffer
       ? await toUniformCredentialOfferRequest(opts.credentialOffer as CredentialOfferV1_0_11 | CredentialOfferV1_0_13)
       : undefined;
-    const request: Partial<AccessTokenRequest> = {};
+    const request: Partial<AccessTokenRequest> = { ...opts.additionalParams };
 
     if (asOpts?.clientId) {
       request.client_id = asOpts.clientId;

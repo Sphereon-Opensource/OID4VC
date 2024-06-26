@@ -90,7 +90,7 @@ export class AccessTokenClient {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const credentialOfferRequest = opts.credentialOffer ? await toUniformCredentialOfferRequest(opts.credentialOffer) : undefined;
-    const request: Partial<AccessTokenRequest> = {};
+    const request: Partial<AccessTokenRequest> = { ...opts.additionalParams };
 
     if (asOpts?.clientId) {
       request.client_id = asOpts.clientId;
