@@ -19,7 +19,8 @@ import { ExperimentalSubjectIssuance } from '@sphereon/oid4vci-common/dist/exper
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
-import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
+import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
+import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 
 const debug = Debug('sphereon:oid4vci:credential');
@@ -78,7 +79,7 @@ export class CredentialRequestClient {
     return this.credentialRequestOpts.deferredCredentialEndpoint;
   }
 
-  public constructor(builder: CredentialRequestClientBuilder) {
+  public constructor(builder: CredentialRequestClientBuilderV1_0_13 | CredentialRequestClientBuilderV1_0_11) {
     this._credentialRequestOpts = { ...builder };
   }
 

@@ -1,12 +1,11 @@
 import {
   AccessTokenResponse,
+  CredentialIssuerMetadata,
   CredentialIssuerMetadataV1_0_13,
-  CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
   EndpointMetadata,
   ExperimentalSubjectIssuance,
-  getIssuerFromCredentialOfferPayload,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   UniformCredentialOfferRequest,
@@ -14,19 +13,21 @@ import {
 import { CredentialFormat } from '@sphereon/ssi-types';
 
 import { CredentialOfferClient } from './CredentialOfferClient';
-import { CredentialRequestClient } from './CredentialRequestClient';
+import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
+import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13';
+
+type CredentialRequestClientBuilderVersionSpecific = CredentialRequestClientBuilderV1_0_11 | CredentialRequestClientBuilderV1_0_13;
+
+function isV1_0_13(builder: CredentialRequestClientBuilderVersionSpecific): builder is CredentialRequestClientBuilderV1_0_13 {
+  return (builder as CredentialRequestClientBuilderV1_0_13).withCredentialIdentifier !== undefined;
+}
 
 export class CredentialRequestClientBuilder {
-  credentialEndpoint?: string;
-  deferredCredentialEndpoint?: string;
-  deferredCredentialAwait = false;
-  deferredCredentialIntervalInMS = 5000;
-  credentialIdentifier?: string;
-  credentialTypes?: string[] = [];
-  format?: CredentialFormat | OID4VCICredentialFormat;
-  token?: string;
-  version?: OpenId4VCIVersion;
-  subjectIssuance?: ExperimentalSubjectIssuance;
+  private _builder: CredentialRequestClientBuilderVersionSpecific;
+
+  private constructor(builder: CredentialRequestClientBuilderVersionSpecific) {
+    this._builder = builder;
+  }
 
   public static fromCredentialIssuer({
     credentialIssuer,
@@ -41,25 +42,40 @@ export class CredentialRequestClientBuilder {
     credentialIdentifier?: string;
     credentialTypes?: string | string[];
   }): CredentialRequestClientBuilder {
-    const issuer = credentialIssuer;
-    const builder = new CredentialRequestClientBuilder();
-    builder.withVersion(version ?? OpenId4VCIVersion.VER_1_0_11);
-    builder.withCredentialEndpoint(metadata?.credential_endpoint ?? (issuer.endsWith('/') ? `${issuer}credential` : `${issuer}/credential`));
-    if (metadata?.deferred_credential_endpoint) {
-      builder.withDeferredCredentialEndpoint(metadata.deferred_credential_endpoint);
+    const specVersion = version ?? OpenId4VCIVersion.VER_1_0_13;
+    let builder;
+
+    if (specVersion >= OpenId4VCIVersion.VER_1_0_13) {
+      builder = CredentialRequestClientBuilderV1_0_13.fromCredentialIssuer({
+        credentialIssuer,
+        metadata,
+        version,
+        credentialIdentifier,
+        credentialTypes,
+      });
+    } else {
+      if (!credentialTypes || credentialTypes.length === 0) {
+        throw new Error('CredentialTypes must be provided for v1_0_11');
+      }
+      builder = CredentialRequestClientBuilderV1_0_11.fromCredentialIssuer({
+        credentialIssuer,
+        metadata,
+        version,
+        credentialTypes,
+      });
     }
-    if (credentialIdentifier) {
-      builder.withCredentialIdentifier(credentialIdentifier);
-    }
-    if (credentialTypes) {
-      builder.withCredentialType(credentialTypes);
-    }
-    return builder;
+
+    return new CredentialRequestClientBuilder(builder);
   }
 
   public static async fromURI({ uri, metadata }: { uri: string; metadata?: EndpointMetadata }): Promise<CredentialRequestClientBuilder> {
     const offer = await CredentialOfferClient.fromURI(uri);
-    return CredentialRequestClientBuilder.fromCredentialOfferRequest({ request: offer, ...offer, metadata, version: offer.version });
+    return CredentialRequestClientBuilder.fromCredentialOfferRequest({
+      request: offer,
+      ...offer,
+      metadata,
+      version: offer.version,
+    });
   }
 
   public static fromCredentialOfferRequest(opts: {
@@ -69,24 +85,17 @@ export class CredentialRequestClientBuilder {
     version?: OpenId4VCIVersion;
     metadata?: EndpointMetadata;
   }): CredentialRequestClientBuilder {
-    const { request, metadata } = opts;
+    const { request } = opts;
     const version = opts.version ?? request.version ?? determineSpecVersionFromOffer(request.original_credential_offer);
+    let builder;
+
     if (version < OpenId4VCIVersion.VER_1_0_13) {
-      throw new Error('Versions below v1.0.13 (draft 13) are not supported.');
+      builder = CredentialRequestClientBuilderV1_0_11.fromCredentialOfferRequest(opts);
+    } else {
+      builder = CredentialRequestClientBuilderV1_0_13.fromCredentialOfferRequest(opts);
     }
-    const builder = new CredentialRequestClientBuilder();
-    const issuer = getIssuerFromCredentialOfferPayload(request.credential_offer) ?? (metadata?.issuer as string);
-    builder.withVersion(version);
-    builder.withCredentialEndpoint(metadata?.credential_endpoint ?? (issuer.endsWith('/') ? `${issuer}credential` : `${issuer}/credential`));
-    if (metadata?.deferred_credential_endpoint) {
-      builder.withDeferredCredentialEndpoint(metadata.deferred_credential_endpoint);
-    }
-    const ids: string[] = (request.credential_offer as CredentialOfferPayloadV1_0_13).credential_configuration_ids;
-    // if there's only one in the offer, we pre-select it. if not, you should provide the credentialType
-    if (ids.length && ids.length === 1) {
-      builder.withCredentialIdentifier(ids[0]);
-    }
-    return builder;
+
+    return new CredentialRequestClientBuilder(builder);
   }
 
   public static fromCredentialOffer({
@@ -96,78 +105,100 @@ export class CredentialRequestClientBuilder {
     credentialOffer: CredentialOfferRequestWithBaseUrl;
     metadata?: EndpointMetadata;
   }): CredentialRequestClientBuilder {
-    return CredentialRequestClientBuilder.fromCredentialOfferRequest({
-      request: credentialOffer,
-      metadata,
-      version: credentialOffer.version,
-    });
+    const version = determineSpecVersionFromOffer(credentialOffer.credential_offer);
+    let builder;
+
+    if (version < OpenId4VCIVersion.VER_1_0_13) {
+      builder = CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({
+        credentialOffer,
+        metadata,
+      });
+    } else {
+      builder = CredentialRequestClientBuilderV1_0_13.fromCredentialOffer({
+        credentialOffer,
+        metadata,
+      });
+    }
+
+    return new CredentialRequestClientBuilder(builder);
   }
 
-  public withCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadataV1_0_13): this {
-    this.credentialEndpoint = metadata.credential_endpoint;
+  public getVersion(): OpenId4VCIVersion | undefined {
+    return this._builder.version;
+  }
+
+  public withCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadata | CredentialIssuerMetadataV1_0_13): this {
+    if (isV1_0_13(this._builder)) {
+      this._builder.withCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadataV1_0_13);
+    } else {
+      this._builder.withCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadata);
+    }
     return this;
   }
 
   public withCredentialEndpoint(credentialEndpoint: string): this {
-    this.credentialEndpoint = credentialEndpoint;
+    this._builder.withCredentialEndpoint(credentialEndpoint);
     return this;
   }
 
-  public withDeferredCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadataV1_0_13): this {
-    this.deferredCredentialEndpoint = metadata.deferred_credential_endpoint;
+  public withDeferredCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadata | CredentialIssuerMetadataV1_0_13): this {
+    if (isV1_0_13(this._builder)) {
+      this._builder.withDeferredCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadataV1_0_13);
+    } else {
+      this._builder.withDeferredCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadata);
+    }
     return this;
   }
 
   public withDeferredCredentialEndpoint(deferredCredentialEndpoint: string): this {
-    this.deferredCredentialEndpoint = deferredCredentialEndpoint;
+    this._builder.withDeferredCredentialEndpoint(deferredCredentialEndpoint);
     return this;
   }
 
   public withDeferredCredentialAwait(deferredCredentialAwait: boolean, deferredCredentialIntervalInMS?: number): this {
-    this.deferredCredentialAwait = deferredCredentialAwait;
-    this.deferredCredentialIntervalInMS = deferredCredentialIntervalInMS ?? 5000;
+    this._builder.withDeferredCredentialAwait(deferredCredentialAwait, deferredCredentialIntervalInMS);
     return this;
   }
 
   public withCredentialIdentifier(credentialIdentifier: string): this {
-    this.credentialIdentifier = credentialIdentifier;
+    if (this._builder.version === undefined || this._builder.version < OpenId4VCIVersion.VER_1_0_13) {
+      throw new Error('Version of spec should be equal or higher than v1_0_13');
+    }
+    (this._builder as CredentialRequestClientBuilderV1_0_13).withCredentialIdentifier(credentialIdentifier);
     return this;
   }
 
   public withCredentialType(credentialTypes: string | string[]): this {
-    this.credentialTypes = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
+    this._builder.withCredentialType(credentialTypes);
     return this;
   }
 
   public withFormat(format: CredentialFormat | OID4VCICredentialFormat): this {
-    this.format = format;
+    this._builder.withFormat(format);
     return this;
   }
 
   public withSubjectIssuance(subjectIssuance: ExperimentalSubjectIssuance): this {
-    this.subjectIssuance = subjectIssuance;
+    this._builder.withSubjectIssuance(subjectIssuance);
     return this;
   }
 
   public withToken(accessToken: string): this {
-    this.token = accessToken;
+    this._builder.withToken(accessToken);
     return this;
   }
 
   public withTokenFromResponse(response: AccessTokenResponse): this {
-    this.token = response.access_token;
+    this._builder.withTokenFromResponse(response);
     return this;
   }
 
   public withVersion(version: OpenId4VCIVersion): this {
-    this.version = version;
+    this._builder.withVersion(version);
     return this;
   }
 
-  public build(): CredentialRequestClient {
-    if (!this.version) {
-      this.withVersion(OpenId4VCIVersion.VER_1_0_11);
-    }
-    return new CredentialRequestClient(this);
+  public build() {
+    return this._builder.build();
   }
 }

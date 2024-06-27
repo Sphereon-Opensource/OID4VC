@@ -41,7 +41,7 @@ import { createAuthorizationRequestUrl } from './AuthorizationCodeClient';
 import { createAuthorizationRequestUrlV1_0_11 } from './AuthorizationCodeClientV1_0_11';
 import { CredentialOfferClient } from './CredentialOfferClient';
 import { CredentialRequestOpts } from './CredentialRequestClient';
-import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
+import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13';
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
 import { MetadataClient } from './MetadataClient';
 import { OpenID4VCIClientStateV1_0_11 } from './OpenID4VCIClientV1_0_11';
@@ -370,7 +370,7 @@ export class OpenID4VCIClient {
     if (jwk) this._state.jwk = jwk;
     if (kid) this._state.kid = kid;
 
-    let requestBuilder: CredentialRequestClientBuilder | CredentialRequestClientBuilderV1_0_11;
+    let requestBuilder: CredentialRequestClientBuilderV1_0_13 | CredentialRequestClientBuilderV1_0_11;
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
       requestBuilder = this.credentialOffer
         ? CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({
@@ -385,11 +385,11 @@ export class OpenID4VCIClient {
           });
     } else {
       requestBuilder = this.credentialOffer
-        ? CredentialRequestClientBuilder.fromCredentialOffer({
+        ? CredentialRequestClientBuilderV1_0_13.fromCredentialOffer({
             credentialOffer: this.credentialOffer,
             metadata: this.endpointMetadata,
           })
-        : CredentialRequestClientBuilder.fromCredentialIssuer({
+        : CredentialRequestClientBuilderV1_0_13.fromCredentialIssuer({
             credentialIssuer: this.getIssuer(),
             credentialTypes,
             metadata: this.endpointMetadata,

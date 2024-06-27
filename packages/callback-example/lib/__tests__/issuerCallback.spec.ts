@@ -1,6 +1,6 @@
 import { KeyObject } from 'crypto'
 
-import { CredentialRequestClient, CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '@sphereon/oid4vci-client'
+import { CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '@sphereon/oid4vci-client'
 import {
   Alg,
   CNonceState,
@@ -252,7 +252,7 @@ describe('issuerCallback', () => {
       .withKid(kid)
       .build()
 
-    const credentialRequestClient = new CredentialRequestClient(credReqClient)
+    const credentialRequestClient = credReqClient.build()
     const credentialRequest: CredentialRequest = await credentialRequestClient.createCredentialRequest({
       credentialIdentifier: 'VerifiableCredential',
       // format: 'jwt_vc_json',
