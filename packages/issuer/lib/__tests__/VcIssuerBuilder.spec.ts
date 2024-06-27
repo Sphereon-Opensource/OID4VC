@@ -150,4 +150,63 @@ describe('VcIssuer builder should', () => {
       credentialOffer: { credential_offer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' } },
     })
   })
+
+  it('should successfully attach an instance of the ICredentialOfferStateManager to the VcIssuer instance without did', async () => {
+    const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+      .withCredentialSigningAlgValuesSupported('ES256K')
+      .withCryptographicBindingMethod('jwk')
+      .withFormat('jwt_vc_json')
+      .withCredentialName('UniversityDegree_JWT')
+      .withCredentialDefinition({
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      })
+      .withCredentialSupportedDisplay({
+        name: 'University Credential',
+        locale: 'en-US',
+        logo: {
+          url: 'https://exampleuniversity.com/public/logo.png',
+          alt_text: 'a square logo of a university',
+        },
+        background_color: '#12107c',
+        text_color: '#FFFFFF',
+      })
+      .addCredentialSubjectPropertyDisplay('given_name', {
+        name: 'given name',
+        locale: 'en-US',
+      } as IssuerCredentialSubjectDisplay)
+      .build()
+    const vcIssuer = new VcIssuerBuilder()
+      .withAuthorizationServers('https://authorization-server')
+      .withCredentialEndpoint('https://credential-endpoint')
+      .withCredentialIssuer('https://credential-issuer')
+      .withIssuerDisplay({
+        name: 'example issuer',
+        locale: 'en-US',
+      })
+      .withCredentialConfigurationsSupported(credentialsSupported)
+      .withInMemoryCredentialOfferState()
+      .withInMemoryCNonceState()
+      .build()
+    expect(vcIssuer).toBeDefined()
+    const preAuthorizedCodecreatedAt = +new Date()
+    await vcIssuer.credentialOfferSessions?.set('test', {
+      notification_id: v4(),
+      issuerState: v4(),
+      lastUpdatedAt: preAuthorizedCodecreatedAt,
+      status: IssueStatus.OFFER_CREATED,
+      clientId: 'test_client',
+      createdAt: preAuthorizedCodecreatedAt,
+      userPin: '123456',
+      credentialOffer: { credential_offer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' } },
+    })
+    await expect(vcIssuer.credentialOfferSessions?.get('test')).resolves.toMatchObject({
+      clientId: 'test_client',
+      userPin: '123456',
+      status: IssueStatus.OFFER_CREATED,
+      lastUpdatedAt: preAuthorizedCodecreatedAt,
+      createdAt: preAuthorizedCodecreatedAt,
+      credentialOffer: { credential_offer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' } },
+    })
+  })
+
 })

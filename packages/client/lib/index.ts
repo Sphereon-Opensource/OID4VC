@@ -13,6 +13,7 @@ export * from './CredentialOfferClientV1_0_11';
 export * from './CredentialOfferClientV1_0_13';
 export * from './CredentialRequestClientV1_0_11';
 export * from './CredentialRequestClientBuilder';
+export * from './CredentialRequestClientBuilderV1_0_13';
 export * from './CredentialRequestClientBuilderV1_0_11';
 export * from './functions';
 export * from './MetadataClient';

@@ -498,8 +498,13 @@ export class VcIssuer<DIDDoc extends object> {
         // only 1 is allowed, but need to look into whether jwk and x5c are allowed together
         throw Error(KID_JWK_X5C_ERROR)
       } else if (kid && !did) {
-        // Make sure the callback function extracts the DID from the kid
-        throw Error(KID_DID_NO_DID_ERROR)
+        if (!jwk && !x5c) {
+          // Make sure the callback function extracts the DID from the kid
+          throw Error(KID_DID_NO_DID_ERROR)
+        } else {
+          // If JWK or x5c is present, log the information and proceed
+          console.log(`KID present but no DID, using JWK or x5c`)
+        }
       } else if (did && !didDocument) {
         // Make sure the callback function does DID resolution when a did is present
         throw Error(DID_NO_DIDDOC_ERROR)
