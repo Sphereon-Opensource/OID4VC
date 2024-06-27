@@ -1,4 +1,4 @@
-import { CredentialOfferPayload, ProofOfPossessionCallbacks, UniformCredentialOffer } from './CredentialIssuance.types';
+import { Alg, CredentialOfferPayload, ProofOfPossessionCallbacks, UniformCredentialOffer } from './CredentialIssuance.types';
 import {
   ErrorResponse,
   IssuerCredentialSubject,
@@ -186,8 +186,16 @@ export interface AuthorizationServerOpts {
   allowInsecureEndpoints?: boolean;
   as?: string; // If not provided the issuer hostname will be used!
   tokenEndpoint?: string; // Allows to override the default '/token' endpoint
-  clientId?: string;
+  clientOpts?: AuthorizationServerClientOpts;
 }
+
+export type AuthorizationServerClientOpts = {
+  clientId: string;
+  clientAssertionType?: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
+  kid?: string;
+  alg?: Alg;
+  signCallbacks?: ProofOfPossessionCallbacks<never>;
+};
 
 export interface IssuerOpts {
   issuer: string;

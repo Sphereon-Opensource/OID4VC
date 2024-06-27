@@ -3,6 +3,7 @@ import {
   Alg,
   AuthorizationRequestOpts,
   AuthorizationResponse,
+  AuthorizationServerOpts,
   AuthzFlowType,
   CodeChallengeMethod,
   CredentialConfigurationSupported,
@@ -274,8 +275,9 @@ export class OpenID4VCIClient {
     code?: string; // Directly pass in a code from an auth response
     redirectUri?: string;
     additionalRequestParams?: Record<string, any>;
+    asOpts?: AuthorizationServerOpts;
   }): Promise<AccessTokenResponse> {
-    const { pin, clientId } = opts ?? {};
+    const { pin, clientId = this._state.clientId ?? this._state.authorizationRequestOpts?.clientId } = opts ?? {};
     let { redirectUri } = opts ?? {};
     if (opts?.authorizationResponse) {
       this._state.authorizationCodeResponse = { ...toAuthorizationResponsePayload(opts.authorizationResponse) };
@@ -288,6 +290,23 @@ export class OpenID4VCIClient {
       this._state.pkce.codeVerifier = opts.codeVerifier;
     }
     this.assertIssuerData();
+
+    const asOpts: AuthorizationServerOpts = { ...opts?.asOpts };
+    const kid = asOpts.clientOpts?.kid ?? this._state.kid ?? this._state.authorizationRequestOpts?.requestObjectOpts?.kid;
+    const clientAssertionType =
+      asOpts.clientOpts?.clientAssertionType ??
+      (kid && clientId && typeof asOpts.clientOpts?.signCallbacks === 'function'
+        ? 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        : undefined);
+    if (clientId) {
+      asOpts.clientOpts = {
+        ...asOpts.clientOpts,
+        clientId,
+        ...(kid && { kid }),
+        ...(clientAssertionType && { clientAssertionType }),
+        signCallbacks: asOpts.clientOpts?.signCallbacks ?? this._state.authorizationRequestOpts?.requestObjectOpts?.signCallbacks,
+      };
+    }
 
     if (clientId) {
       this._state.clientId = clientId;
@@ -312,7 +331,7 @@ export class OpenID4VCIClient {
         ...(!this._state.pkce.disabled && { codeVerifier: this._state.pkce.codeVerifier }),
         code,
         redirectUri,
-        asOpts: { clientId: this.clientId },
+        asOpts,
         ...(opts?.additionalRequestParams && { additionalParams: opts.additionalRequestParams }),
       });
 

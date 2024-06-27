@@ -3,6 +3,7 @@ import {
   Alg,
   AuthorizationRequestOpts,
   AuthorizationResponse,
+  AuthorizationServerOpts,
   AuthzFlowType,
   CodeChallengeMethod,
   CredentialConfigurationSupportedV1_0_13,
@@ -265,6 +266,7 @@ export class OpenID4VCIClientV1_0_13 {
     authorizationResponse?: string | AuthorizationResponse; // Pass in an auth response, either as URI/redirect, or object
     code?: string; // Directly pass in a code from an auth response
     redirectUri?: string;
+    asOpts?: AuthorizationServerOpts;
   }): Promise<AccessTokenResponse> {
     const { pin, clientId } = opts ?? {};
     let { redirectUri } = opts ?? {};
@@ -279,6 +281,22 @@ export class OpenID4VCIClientV1_0_13 {
       this._state.pkce.codeVerifier = opts.codeVerifier;
     }
     this.assertIssuerData();
+    const asOpts: AuthorizationServerOpts = { ...opts?.asOpts };
+    const kid = asOpts.clientOpts?.kid ?? this._state.kid ?? this._state.authorizationRequestOpts?.requestObjectOpts?.kid;
+    const clientAssertionType =
+      asOpts.clientOpts?.clientAssertionType ??
+      (kid && clientId && typeof asOpts.clientOpts?.signCallbacks === 'function'
+        ? 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        : undefined);
+    if (clientId) {
+      asOpts.clientOpts = {
+        ...asOpts.clientOpts,
+        clientId,
+        ...(kid && { kid }),
+        ...(clientAssertionType && { clientAssertionType }),
+        signCallbacks: asOpts.clientOpts?.signCallbacks ?? this._state.authorizationRequestOpts?.requestObjectOpts?.signCallbacks,
+      };
+    }
 
     if (clientId) {
       this._state.clientId = clientId;
@@ -302,7 +320,7 @@ export class OpenID4VCIClientV1_0_13 {
         ...(!this._state.pkce.disabled && { codeVerifier: this._state.pkce.codeVerifier }),
         code,
         redirectUri,
-        asOpts: { clientId: this.clientId },
+        asOpts,
       });
 
       if (response.errorBody) {

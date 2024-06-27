@@ -22,6 +22,7 @@ import {
 import { ObjectUtils } from '@sphereon/ssi-types';
 
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
+import { createJwtBearerClientAssertion } from './functions';
 import { LOG } from './types';
 
 export class AccessTokenClient {
@@ -91,10 +92,10 @@ export class AccessTokenClient {
     // @ts-ignore
     const credentialOfferRequest = opts.credentialOffer ? await toUniformCredentialOfferRequest(opts.credentialOffer) : undefined;
     const request: Partial<AccessTokenRequest> = { ...opts.additionalParams };
-
-    if (asOpts?.clientId) {
-      request.client_id = asOpts.clientId;
+    if (asOpts?.clientOpts?.clientId) {
+      request.client_id = asOpts.clientOpts.clientId;
     }
+    await createJwtBearerClientAssertion(request, opts);
 
     if (credentialOfferRequest?.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
       this.assertAlphanumericPin(opts.pinMetadata, pin);

@@ -14,6 +14,7 @@ import {
   GrantTypes,
   IssuerOpts,
   JsonURIMode,
+  OpenId4VCIVersion,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
   TokenErrorResponse,
@@ -24,6 +25,7 @@ import { ObjectUtils } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
+import { createJwtBearerClientAssertion } from './functions';
 
 const debug = Debug('sphereon:oid4vci:token');
 
@@ -94,9 +96,10 @@ export class AccessTokenClientV1_0_11 {
       : undefined;
     const request: Partial<AccessTokenRequest> = { ...opts.additionalParams };
 
-    if (asOpts?.clientId) {
-      request.client_id = asOpts.clientId;
+    if (asOpts?.clientOpts?.clientId) {
+      request.client_id = asOpts.clientOpts.clientId;
     }
+    await createJwtBearerClientAssertion(request, { ...opts, version: OpenId4VCIVersion.VER_1_0_11 });
 
     if (credentialOfferRequest?.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
       this.assertNumericPin(this.isPinRequiredValue(credentialOfferRequest.credential_offer), pin);
