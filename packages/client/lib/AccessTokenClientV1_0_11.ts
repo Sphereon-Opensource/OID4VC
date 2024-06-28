@@ -53,6 +53,10 @@ export class AccessTokenClientV1_0_11 {
         code,
         redirectUri,
         pin,
+        credentialIssuer: issuer,
+        metadata,
+        additionalParams: opts.additionalParams,
+        pinMetadata: opts.pinMetadata,
       }),
       isPinRequired,
       metadata,
@@ -95,7 +99,7 @@ export class AccessTokenClientV1_0_11 {
       ? await toUniformCredentialOfferRequest(opts.credentialOffer as CredentialOfferV1_0_11 | CredentialOfferV1_0_13)
       : undefined;
     const request: Partial<AccessTokenRequest> = { ...opts.additionalParams };
-    const credentialIssuer = opts.credentialIssuer ?? credentialOfferRequest?.credential_offer?.credential_issuer;
+    const credentialIssuer = opts.credentialIssuer ?? credentialOfferRequest?.credential_offer?.credential_issuer ?? opts.metadata?.issuer;
 
     if (asOpts?.clientOpts?.clientId) {
       request.client_id = asOpts.clientOpts.clientId;

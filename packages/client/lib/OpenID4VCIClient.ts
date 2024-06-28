@@ -104,6 +104,7 @@ export class OpenID4VCIClient {
       pkce: { disabled: false, codeChallengeMethod: CodeChallengeMethod.S256, ...pkce },
       authorizationRequestOpts,
       authorizationCodeResponse,
+      accessToken,
       jwk,
       endpointMetadata: endpointMetadata?.credentialIssuerMetadata?.authorization_server
         ? (endpointMetadata as EndpointMetadataResultV1_0_11)
@@ -295,7 +296,7 @@ export class OpenID4VCIClient {
     const kid = asOpts.clientOpts?.kid ?? this._state.kid ?? this._state.authorizationRequestOpts?.requestObjectOpts?.kid;
     const clientAssertionType =
       asOpts.clientOpts?.clientAssertionType ??
-      (kid && clientId && typeof asOpts.clientOpts?.signCallbacks === 'function'
+      (kid && clientId && typeof asOpts.clientOpts?.signCallbacks?.signCallback === 'function'
         ? 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
         : undefined);
     if (this.isEBSI() || (clientId && kid)) {
