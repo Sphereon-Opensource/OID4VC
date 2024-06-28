@@ -184,7 +184,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'JWT',
+          proof_type: 'jwt',
           jwt: getMockData('spruce')?.credential.request.proof.jwt as string,
         },
         credentialTypes: 'OpenBadgeCredential',
@@ -208,7 +208,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'JWT',
+          proof_type: 'jwt',
           jwt: getMockData('walt')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
@@ -231,7 +231,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'JWT',
+          proof_type: 'jwt',
           jwt: getMockData('uniissuer')?.credential.request.proof.jwt as string,
         },
         credentialIdentifier: 'OpenBadgeCredential',
@@ -253,7 +253,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'JWT',
+          proof_type: 'jwt',
           jwt: getMockData('mattr')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
@@ -276,7 +276,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'JWT',
+          proof_type: 'jwt',
           jwt: getMockData('diwala')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
@@ -318,7 +318,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'JWT',
+          proof_type: 'jwt',
           jwt: getMockData('diwala')?.credential.request.proof.jwt as string,
         },
         credentialIdentifier: 'BevoegdheidUittreksel_jwt_vc_json',
@@ -337,7 +337,7 @@ describe('Credential Request Client with different issuers ', () => {
     expect(credentialRequest.credential_identifier).toEqual('BevoegdheidUittreksel_jwt_vc_json');
     expect(credentialRequest.proof).toEqual({
       jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3AxM3N6QUFMVFN0cDV1OGtMcnl5YW5vYWtrVWtFUGZXazdvOHY3dms0RW1KI3o2TWtwMTNzekFBTFRTdHA1dThrTHJ5eWFub2Fra1VrRVBmV2s3bzh2N3ZrNEVtSiJ9.eyJhdWQiOiJodHRwczovL29pZGM0dmMuZGl3YWxhLmlvIiwiaWF0IjoxNjgxOTE1MDk1LjIwMiwiZXhwIjoxNjgxOTE1NzU1LjIwMiwiaXNzIjoic3BoZXJlb246c3NpLXdhbGxldCIsImp0aSI6IjYxN2MwM2EzLTM3MTUtNGJlMy1hYjkxNzM4MTlmYzYxNTYzIn0.KA-cHjecaYp9FSaWHkz5cqtNyhBIVT_0I7cJnpHn03T4UWFvdhjhn8Hpe-BU247enFyWOWJ6v3NQZyZgle7xBA',
-      proof_type: 'JWT',
+      proof_type: 'jwt',
     });
   });
 });

@@ -305,7 +305,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'JWT',
+          proof_type: 'jwt',
           jwt: getMockData('spruce')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
@@ -329,7 +329,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'JWT',
+          proof_type: 'jwt',
           jwt: getMockData('walt')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
@@ -352,7 +352,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'JWT',
+          proof_type: 'jwt',
           jwt: getMockData('uniissuer')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
@@ -374,7 +374,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'JWT',
+          proof_type: 'jwt',
           jwt: getMockData('mattr')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
@@ -397,7 +397,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'JWT',
+          proof_type: 'jwt',
           jwt: getMockData('diwala')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],

@@ -50,7 +50,7 @@ export const createProofOfPossession = async <DIDDoc>(
   const jwtPayload = createJWT(popMode, jwtProps, existingJwt);
   const jwt = await callbacks.signCallback(jwtPayload, jwtPayload.header.kid);
   const proof = {
-    proof_type: 'JWT',
+    proof_type: 'jwt',
     jwt,
   } as ProofOfPossession;
 

@@ -318,7 +318,7 @@ describe('VcIssuer', () => {
           credential_identifier: 'VerifiableCredential',
           format: 'jwt_vc_json',
           proof: {
-            proof_type: 'JWT',
+            proof_type: 'jwt',
             jwt: 'ye.ye.ye',
           },
         },
@@ -377,7 +377,7 @@ describe('VcIssuer', () => {
           credential_identifier: 'VerifiableCredential',
           format: 'jwt_vc_json',
           proof: {
-            proof_type: 'JWT',
+            proof_type: 'jwt',
             jwt: 'ye.ye.ye',
           },
         },
@@ -441,7 +441,7 @@ describe('VcIssuer', () => {
           credential_identifier: 'VerifiableCredential',
           format: 'jwt_vc_json',
           proof: {
-            proof_type: 'JWT',
+            proof_type: 'jwt',
             jwt: 'ye.ye.ye',
           },
         },
@@ -580,7 +580,7 @@ describe('VcIssuer without did', () => {
           credential_identifier: 'VerifiableCredential',
           format: 'jwt_vc_json',
           proof: {
-            proof_type: 'JWT',
+            proof_type: 'jwt',
             jwt: 'ye.ye.ye',
           },
         },
@@ -633,7 +633,7 @@ describe('VcIssuer without did', () => {
           credential_identifier: 'VerifiableCredential',
           format: 'jwt_vc_json',
           proof: {
-            proof_type: 'JWT',
+            proof_type: 'jwt',
             jwt: 'ye.ye.ye',
           },
         },
@@ -691,7 +691,7 @@ describe('VcIssuer without did', () => {
           credential_identifier: 'VerifiableCredential',
           format: 'jwt_vc_json',
           proof: {
-            proof_type: 'JWT',
+            proof_type: 'jwt',
             jwt: 'ye.ye.ye',
           },
         },

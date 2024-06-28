@@ -64,7 +64,7 @@ export interface UniformCredentialOfferRequest extends AssertedUniformCredential
 export type UniformCredentialOfferPayload = CredentialOfferPayloadV1_0_11 | CredentialOfferPayloadV1_0_13;
 
 export interface ProofOfPossession {
-  proof_type: 'JWT';
+  proof_type: 'jwt';
   jwt: string;
 
   [x: string]: unknown;
