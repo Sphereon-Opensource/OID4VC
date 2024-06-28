@@ -208,5 +208,4 @@ describe('VcIssuer builder should', () => {
       credentialOffer: { credential_offer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' } },
     })
   })
-
 })

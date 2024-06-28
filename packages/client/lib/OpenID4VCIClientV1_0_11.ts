@@ -297,7 +297,10 @@ export class OpenID4VCIClientV1_0_11 {
         (kid && clientId && typeof asOpts.clientOpts?.signCallbacks === 'function'
           ? 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
           : undefined);
-      if (clientId) {
+      if (this.isEBSI() || (clientId && kid)) {
+        if (!clientId) {
+          throw Error(`Client id expected for EBSI`);
+        }
         asOpts.clientOpts = {
           ...asOpts.clientOpts,
           clientId,
@@ -602,8 +605,8 @@ export class OpenID4VCIClientV1_0_11 {
    */
   public isEBSI() {
     if (
-      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11)['credentials'] &&
-      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11).credentials.find(
+      this.credentialOffer &&
+      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11)?.credentials?.find(
         (cred) =>
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
@@ -612,8 +615,14 @@ export class OpenID4VCIClientV1_0_11 {
     ) {
       return true;
     }
-    this.assertIssuerData();
-    return this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu') === true;
+    // this.assertIssuerData();
+    return (
+      this.clientId?.includes('ebsi') ||
+      this._state.kid?.includes('did:ebsi:') ||
+      this.getIssuer().includes('ebsi') ||
+      this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu') ||
+      this.endpointMetadata.credentialIssuerMetadata?.authorization_server?.includes('ebsi.eu')
+    );
   }
 
   private assertIssuerData(): void {

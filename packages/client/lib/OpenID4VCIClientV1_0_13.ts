@@ -37,8 +37,7 @@ import { CredentialRequestOpts } from './CredentialRequestClient';
 import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
-import { generateMissingPKCEOpts } from './functions';
-import { sendNotification } from './functions';
+import { generateMissingPKCEOpts, sendNotification } from './functions';
 
 const debug = Debug('sphereon:oid4vci');
 
@@ -288,7 +287,10 @@ export class OpenID4VCIClientV1_0_13 {
       (kid && clientId && typeof asOpts.clientOpts?.signCallbacks === 'function'
         ? 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
         : undefined);
-    if (clientId) {
+    if (this.isEBSI() || (clientId && kid)) {
+      if (!clientId) {
+        throw Error(`Client id expected for EBSI`);
+      }
       asOpts.clientOpts = {
         ...asOpts.clientOpts,
         clientId,
@@ -654,8 +656,13 @@ export class OpenID4VCIClientV1_0_13 {
       }
     }
 
-    this.assertIssuerData();
-    return this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu') ?? false;
+    return (
+      this.clientId?.includes('ebsi') ||
+      this._state.kid?.includes('did:ebsi:') ||
+      this.getIssuer().includes('ebsi') ||
+      this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu') ||
+      this.endpointMetadata.credentialIssuerMetadata?.authorization_server?.includes('ebsi.eu')
+    );
   }
 
   private assertIssuerData(): void {

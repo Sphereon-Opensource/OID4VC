@@ -62,10 +62,10 @@ describe('ProofOfPossession Builder ', () => {
   it('should fail without supplied proof or callbacks and with kid without did', async function () {
     await expect(
       ProofOfPossessionBuilder.fromProof(undefined as never, OpenId4VCIVersion.VER_1_0_13)
-      .withIssuer(IDENTIPROOF_ISSUER_URL)
-      .withClientId('sphereon:wallet')
-      .withKid(kid_withoutDid)
-      .build(),
+        .withIssuer(IDENTIPROOF_ISSUER_URL)
+        .withClientId('sphereon:wallet')
+        .withKid(kid_withoutDid)
+        .build(),
     ).rejects.toThrow(Error(PROOF_CANT_BE_CONSTRUCTED));
   });
 
@@ -87,11 +87,11 @@ describe('ProofOfPossession Builder ', () => {
         callbacks: { signCallback: proofOfPossessionCallbackFunction },
         version: OpenId4VCIVersion.VER_1_0_08,
       })
-      .withJwt(undefined as never)
-      .withIssuer(IDENTIPROOF_ISSUER_URL)
-      .withClientId('sphereon:wallet')
-      .withKid(kid_withoutDid)
-      .build(),
+        .withJwt(undefined as never)
+        .withIssuer(IDENTIPROOF_ISSUER_URL)
+        .withClientId('sphereon:wallet')
+        .withKid(kid_withoutDid)
+        .build(),
     ).toThrow(Error(NO_JWT_PROVIDED));
   });
 
@@ -118,10 +118,10 @@ describe('ProofOfPossession Builder ', () => {
       },
       version: OpenId4VCIVersion.VER_1_0_08,
     })
-    .withIssuer(IDENTIPROOF_ISSUER_URL)
-    .withKid(kid_withoutDid)
-    .withClientId('sphereon:wallet')
-    .build();
+      .withIssuer(IDENTIPROOF_ISSUER_URL)
+      .withKid(kid_withoutDid)
+      .withClientId('sphereon:wallet')
+      .build();
     expect(proof).toBeDefined();
   });
 
@@ -152,10 +152,10 @@ describe('ProofOfPossession Builder ', () => {
         callbacks: { signCallback: proofOfPossessionCallbackFunction },
         version: OpenId4VCIVersion.VER_1_0_08,
       })
-      .withIssuer(IDENTIPROOF_ISSUER_URL)
-      .withClientId('sphereon:wallet')
-      .withKid(kid_withoutDid)
-      .build(),
+        .withIssuer(IDENTIPROOF_ISSUER_URL)
+        .withClientId('sphereon:wallet')
+        .withKid(kid_withoutDid)
+        .build(),
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
 
@@ -186,10 +186,10 @@ describe('ProofOfPossession Builder ', () => {
         callbacks: { signCallback: proofOfPossessionCallbackFunction },
         version: OpenId4VCIVersion.VER_1_0_08,
       })
-      .withIssuer(IDENTIPROOF_ISSUER_URL)
-      .withClientId('sphereon:wallet')
-      .withKid(kid_withoutDid)
-      .build(),
+        .withIssuer(IDENTIPROOF_ISSUER_URL)
+        .withClientId('sphereon:wallet')
+        .withKid(kid_withoutDid)
+        .build(),
     ).rejects.toThrow(Error(JWS_NOT_VALID));
   });
 });

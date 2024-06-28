@@ -42,8 +42,8 @@ import { createAuthorizationRequestUrl } from './AuthorizationCodeClient';
 import { createAuthorizationRequestUrlV1_0_11 } from './AuthorizationCodeClientV1_0_11';
 import { CredentialOfferClient } from './CredentialOfferClient';
 import { CredentialRequestOpts } from './CredentialRequestClient';
-import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13';
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
+import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13';
 import { MetadataClient } from './MetadataClient';
 import { OpenID4VCIClientStateV1_0_11 } from './OpenID4VCIClientV1_0_11';
 import { OpenID4VCIClientStateV1_0_13 } from './OpenID4VCIClientV1_0_13';
@@ -298,7 +298,10 @@ export class OpenID4VCIClient {
       (kid && clientId && typeof asOpts.clientOpts?.signCallbacks === 'function'
         ? 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
         : undefined);
-    if (clientId) {
+    if (this.isEBSI() || (clientId && kid)) {
+      if (!clientId) {
+        throw Error(`Client id expected for EBSI`);
+      }
       asOpts.clientOpts = {
         ...asOpts.clientOpts,
         clientId,
@@ -667,6 +670,9 @@ export class OpenID4VCIClient {
     }
     // this.assertIssuerData();
     return (
+      this.clientId?.includes('ebsi') ||
+      this._state.kid?.includes('did:ebsi:') ||
+      this.getIssuer().includes('ebsi') ||
       this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu') ||
       this.endpointMetadata.credentialIssuerMetadata?.authorization_server?.includes('ebsi.eu')
     );

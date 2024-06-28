@@ -215,37 +215,37 @@ describe('sd-jwt vc', () => {
       const offered = supported['SdJwtCredentialId'] as CredentialSupportedSdJwtVc;
 
       nock(issuerMetadata.token_endpoint as string)
-      .post('/')
-      .reply(200, async (_, body: string) => {
-        const parsedBody = Object.fromEntries(body.split('&').map((x) => x.split('=')));
-        return createAccessTokenResponse(parsedBody as AccessTokenRequest, {
-          credentialOfferSessions: vcIssuer.credentialOfferSessions,
-          accessTokenIssuer: 'https://issuer.example.com',
-          cNonces: vcIssuer.cNonces,
-          cNonce: 'a-c-nonce',
-          accessTokenSignerCallback: async () => 'ey.val.ue',
-          tokenExpiresIn: 500,
+        .post('/')
+        .reply(200, async (_, body: string) => {
+          const parsedBody = Object.fromEntries(body.split('&').map((x) => x.split('=')));
+          return createAccessTokenResponse(parsedBody as AccessTokenRequest, {
+            credentialOfferSessions: vcIssuer.credentialOfferSessions,
+            accessTokenIssuer: 'https://issuer.example.com',
+            cNonces: vcIssuer.cNonces,
+            cNonce: 'a-c-nonce',
+            accessTokenSignerCallback: async () => 'ey.val.ue',
+            tokenExpiresIn: 500,
+          });
         });
-      });
 
       await client.acquireAccessToken({ pin: '123' });
       nock(issuerMetadata.credential_endpoint as string)
-      .post('/')
-      .reply(200, async (_, body) =>
-        vcIssuer.issueCredential({
-          credentialRequest: { ...(body as CredentialRequestV1_0_13), credential_identifier: offered.vct },
-          credential: {
-            vct: 'Hello',
-            iss: 'example.com',
-            iat: 123,
-            // Defines what can be disclosed (optional)
-            __disclosureFrame: {
-              name: true,
+        .post('/')
+        .reply(200, async (_, body) =>
+          vcIssuer.issueCredential({
+            credentialRequest: { ...(body as CredentialRequestV1_0_13), credential_identifier: offered.vct },
+            credential: {
+              vct: 'Hello',
+              iss: 'example.com',
+              iat: 123,
+              // Defines what can be disclosed (optional)
+              __disclosureFrame: {
+                name: true,
+              },
             },
-          },
-          newCNonce: 'new-c-nonce',
-        }),
-      );
+            newCNonce: 'new-c-nonce',
+          }),
+        );
 
       const credentials = await client.acquireCredentials({
         credentialIdentifier: offered.vct,
