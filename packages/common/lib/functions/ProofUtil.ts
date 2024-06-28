@@ -47,8 +47,8 @@ export const createProofOfPossession = async <DIDDoc>(
     throw new Error(BAD_PARAMS);
   }
 
-  const signerArgs = createJWT(popMode, jwtProps, existingJwt);
-  const jwt = await callbacks.signCallback(signerArgs, signerArgs.header.kid);
+  const jwtPayload = createJWT(popMode, jwtProps, existingJwt);
+  const jwt = await callbacks.signCallback(jwtPayload, jwtPayload.header.kid);
   const proof = {
     proof_type: 'JWT',
     jwt,
@@ -58,7 +58,7 @@ export const createProofOfPossession = async <DIDDoc>(
     partiallyValidateJWS(jwt);
     if (callbacks.verifyCallback) {
       debug(`Calling supplied verify callback....`);
-      await callbacks.verifyCallback({ jwt, kid: signerArgs.header.kid });
+      await callbacks.verifyCallback({ jwt, kid: jwtPayload.header.kid });
       debug(`Supplied verify callback return success result`);
     }
   } catch {
@@ -130,9 +130,9 @@ const createJWT = (mode: PoPMode, jwtProps?: JwtProps, existingJwt?: Jwt): Jwt =
       ? getJwtProperty<string | string[]>('aud', true, jwtProps?.issuer, existingJwt?.payload?.aud)
       : getJwtProperty<string | string[]>('aud', false, jwtProps?.aud, existingJwt?.payload?.aud);
   const iss =
-    // mode === 'pop'
-    getJwtProperty<string>('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss);
-  // : getJwtProperty<string>('iss', false, jwtProps?.issuer, existingJwt?.payload?.iss);
+    mode === 'pop'
+      ? getJwtProperty<string>('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss)
+      : getJwtProperty<string>('iss', false, jwtProps?.issuer, existingJwt?.payload?.iss);
   const client_id = mode === 'JWT' ? getJwtProperty<string>('client_id', false, jwtProps?.clientId, existingJwt?.payload?.client_id) : undefined;
   const jti = getJwtProperty<string>('jti', false, jwtProps?.jti, existingJwt?.payload?.jti);
   const typ = getJwtProperty<string>('typ', true, jwtProps?.typ, existingJwt?.header?.typ, 'openid4vci-proof+jwt');
@@ -142,7 +142,7 @@ const createJWT = (mode: PoPMode, jwtProps?: JwtProps, existingJwt?: Jwt): Jwt =
   const kid = getJwtProperty<string>('kid', false, jwtProps?.kid, existingJwt?.header?.kid);
   const jwk = getJwtProperty<BaseJWK>('jwk', false, jwtProps?.jwk, existingJwt?.header?.jwk);
   const x5c = getJwtProperty<string[]>('x5c', false, jwtProps?.x5c, existingJwt?.header.x5c);
-  const jwt: Partial<Jwt> = existingJwt ? existingJwt : {};
+  const jwt: Partial<Jwt> = { ...existingJwt };
   const now = +new Date();
   const jwtPayload: Partial<JWTPayload> = {
     ...(aud && { aud }),

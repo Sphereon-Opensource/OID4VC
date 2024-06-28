@@ -11,7 +11,8 @@ export const createJwtBearerClientAssertion = async (
 ): Promise<void> => {
   const { asOpts, credentialIssuer } = opts;
   if (asOpts?.clientOpts?.clientAssertionType === 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer') {
-    const { kid, clientId = request.client_id, signCallbacks, alg } = asOpts.clientOpts;
+    const { clientId = request.client_id, signCallbacks, alg } = asOpts.clientOpts;
+    let { kid } = asOpts.clientOpts;
     if (!clientId) {
       return Promise.reject(Error(`Not client_id supplied, but client-assertion jwt-bearer requested.`));
     } else if (!kid) {
@@ -21,10 +22,13 @@ export const createJwtBearerClientAssertion = async (
     } else if (!credentialIssuer) {
       return Promise.reject(Error(`No credential issuer supplied, but client-assertion jwt-bearer requested.`));
     }
+    if (clientId.startsWith('http') && kid.includes('#')) {
+      kid = kid.split('#')[1];
+    }
     const jwt: Jwt = {
       header: {
         typ: 'JWT',
-        kid: kid,
+        kid,
         alg: alg ?? 'ES256',
       },
       payload: {
