@@ -9,25 +9,28 @@ export const createJwtBearerClientAssertion = async (
     version?: OpenId4VCIVersion;
   },
 ): Promise<void> => {
-  const { asOpts } = opts;
+  const { asOpts, credentialIssuer } = opts;
   if (asOpts?.clientOpts?.clientAssertionType === 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer') {
-    if (!request.client_id) {
-      throw Error(`Not client_id supplied, but client-assertion jwt-bearer requested.`);
-    } else if (!asOpts.clientOpts.kid) {
-      throw Error(`No kid supplied, but client-assertion jwt-bearer requested.`);
-    } else if (!asOpts.clientOpts.signCallbacks) {
-      throw Error(`No sign callback supplied, but client-assertion jwt-bearer requested.`);
+    const { kid, clientId = request.client_id, signCallbacks, alg } = asOpts.clientOpts;
+    if (!clientId) {
+      return Promise.reject(Error(`Not client_id supplied, but client-assertion jwt-bearer requested.`));
+    } else if (!kid) {
+      return Promise.reject(Error(`No kid supplied, but client-assertion jwt-bearer requested.`));
+    } else if (typeof signCallbacks !== 'function') {
+      return Promise.reject(Error(`No sign callback supplied, but client-assertion jwt-bearer requested.`));
+    } else if (!credentialIssuer) {
+      return Promise.reject(Error(`No credential issuer supplied, but client-assertion jwt-bearer requested.`));
     }
     const jwt: Jwt = {
       header: {
         typ: 'JWT',
-        kid: asOpts.clientOpts.kid,
-        alg: asOpts.clientOpts.alg ?? 'ES256',
+        kid: kid,
+        alg: alg ?? 'ES256',
       },
       payload: {
-        iss: request.client_id,
-        sub: request.client_id,
-        aud: opts.credentialIssuer,
+        iss: clientId,
+        sub: clientId,
+        aud: credentialIssuer,
         jti: v4(),
         exp: Date.now() / 1000 + 60,
         iat: Date.now() / 1000 - 60,
@@ -35,9 +38,9 @@ export const createJwtBearerClientAssertion = async (
     };
     const pop = await ProofOfPossessionBuilder.fromJwt({
       jwt,
-      callbacks: asOpts.clientOpts.signCallbacks,
+      callbacks: signCallbacks,
       version: opts.version ?? OpenId4VCIVersion.VER_1_0_13,
-      mode: 'jwt',
+      mode: 'JWT',
     }).build();
     request.client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
     request.client_assertion = pop.jwt;

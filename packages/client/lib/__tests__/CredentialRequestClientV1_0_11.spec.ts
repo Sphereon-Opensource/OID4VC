@@ -31,12 +31,12 @@ const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN';
 const partialJWT_withoutDid = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJlYmZlYjFmNzEyZWJjNmYxYzI3N';
 
 const jwt: Jwt = {
-  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'jwt' },
+  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'JWT' },
   payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
 };
 
 const jwt_withoutDid: Jwt = {
-  header: { alg: Alg.ES256, kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'jwt' },
+  header: { alg: Alg.ES256, kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'JWT' },
   payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
 };
 
@@ -305,7 +305,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'jwt',
+          proof_type: 'JWT',
           jwt: getMockData('spruce')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
@@ -329,7 +329,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'jwt',
+          proof_type: 'JWT',
           jwt: getMockData('walt')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
@@ -352,7 +352,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'jwt',
+          proof_type: 'JWT',
           jwt: getMockData('uniissuer')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
@@ -374,7 +374,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'jwt',
+          proof_type: 'JWT',
           jwt: getMockData('mattr')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
@@ -397,7 +397,7 @@ describe('Credential Request Client with different issuers ', () => {
       .build()
       .createCredentialRequest({
         proofInput: {
-          proof_type: 'jwt',
+          proof_type: 'JWT',
           jwt: getMockData('diwala')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],

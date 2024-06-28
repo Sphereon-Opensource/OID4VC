@@ -53,7 +53,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
     if (jwt) {
       this.withJwt(jwt);
     } else {
-      this.withTyp(version < OpenId4VCIVersion.VER_1_0_11 || mode === 'jwt' ? 'jwt' : 'openid4vci-proof+jwt');
+      this.withTyp(version < OpenId4VCIVersion.VER_1_0_11 || mode === 'JWT' ? 'JWT' : 'openid4vci-proof+jwt');
     }
     if (accessTokenResponse) {
       this.withAccessTokenResponse(accessTokenResponse);
@@ -64,7 +64,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
     jwt,
     callbacks,
     version,
-    mode = 'jwt',
+    mode = 'JWT',
   }: {
     jwt?: Jwt;
     callbacks: ProofOfPossessionCallbacks<DIDDoc>;
@@ -144,11 +144,11 @@ export class ProofOfPossessionBuilder<DIDDoc> {
   withTyp(typ: Typ): this {
     if (this.mode === 'pop' && this.version >= OpenId4VCIVersion.VER_1_0_11) {
       if (!!typ && typ !== 'openid4vci-proof+jwt') {
-        throw Error('typ must be openid4vci-proof+jwt for version 1.0.11 and up');
+        throw Error(`typ must be openid4vci-proof+jwt for version 1.0.11 and up. Provided: ${typ}`);
       }
     } else {
-      if (!!typ && typ !== 'jwt') {
-        throw Error('typ must be jwt for version 1.0.10 and below');
+      if (!!typ && typ !== 'JWT') {
+        throw Error(`typ must be jwt for version 1.0.10 and below. Provided: ${typ}`);
       }
     }
     this.typ = typ;
@@ -216,7 +216,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
         this.mode,
         this.callbacks,
         {
-          typ: this.typ ?? (this.version < OpenId4VCIVersion.VER_1_0_11 || this.mode === 'jwt' ? 'jwt' : 'openid4vci-proof+jwt'),
+          typ: this.typ ?? (this.version < OpenId4VCIVersion.VER_1_0_11 || this.mode === 'JWT' ? 'JWT' : 'openid4vci-proof+jwt'),
           kid: this.kid,
           jwk: this.jwk,
           jti: this.jti,

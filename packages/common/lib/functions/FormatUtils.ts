@@ -27,7 +27,7 @@ export function getUniformFormat(format: string | OID4VCICredentialFormat | Cred
   }
 
   // Older formats
-  if (format === 'jwt_vc' || format === 'jwt') {
+  if (format.toLocaleLowerCase() === 'jwt_vc' || format.toLocaleLowerCase() === 'jwt') {
     return 'jwt_vc';
   }
   if (format === 'ldp_vc' || format === 'ldp') {

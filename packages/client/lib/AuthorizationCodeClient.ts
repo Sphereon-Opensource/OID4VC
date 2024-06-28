@@ -52,14 +52,14 @@ export async function createSignedAuthRequestWhenNeeded(requestObject: Record<st
     const iss = requestObject.iss ?? opts.iss ?? requestObject.client_id;
 
     const jwt: Jwt = {
-      header: { alg: 'ES256', kid: opts.kid, typ: 'jwt' },
+      header: { alg: 'ES256', kid: opts.kid, typ: 'JWT' },
       payload: { ...requestObject, iss, authorization_details, ...(client_metadata && { client_metadata }) },
     };
     const pop = await ProofOfPossessionBuilder.fromJwt({
       jwt,
       callbacks: opts.signCallbacks,
       version: OpenId4VCIVersion.VER_1_0_11,
-      mode: 'jwt',
+      mode: 'JWT',
     }).build();
     requestObject['request'] = pop.jwt;
   }

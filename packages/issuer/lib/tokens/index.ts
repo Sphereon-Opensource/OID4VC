@@ -49,7 +49,7 @@ export const generateAccessToken = async (
   const iat = new Date().getTime() / 1000
   const exp = iat + tokenExpiresIn
   const jwt: Jwt = {
-    header: { typ: 'JWT', alg: alg ?? Alg.ES256K },
+    header: { typ: 'JWT', alg: alg ?? Alg.ES256 },
     payload: {
       iat,
       exp,

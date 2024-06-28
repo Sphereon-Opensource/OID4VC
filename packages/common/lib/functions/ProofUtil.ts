@@ -50,7 +50,7 @@ export const createProofOfPossession = async <DIDDoc>(
   const signerArgs = createJWT(popMode, jwtProps, existingJwt);
   const jwt = await callbacks.signCallback(signerArgs, signerArgs.header.kid);
   const proof = {
-    proof_type: 'jwt',
+    proof_type: 'JWT',
     jwt,
   } as ProofOfPossession;
 
@@ -133,7 +133,7 @@ const createJWT = (mode: PoPMode, jwtProps?: JwtProps, existingJwt?: Jwt): Jwt =
     // mode === 'pop'
     getJwtProperty<string>('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss);
   // : getJwtProperty<string>('iss', false, jwtProps?.issuer, existingJwt?.payload?.iss);
-  const client_id = mode === 'jwt' ? getJwtProperty<string>('client_id', false, jwtProps?.clientId, existingJwt?.payload?.client_id) : undefined;
+  const client_id = mode === 'JWT' ? getJwtProperty<string>('client_id', false, jwtProps?.clientId, existingJwt?.payload?.client_id) : undefined;
   const jti = getJwtProperty<string>('jti', false, jwtProps?.jti, existingJwt?.payload?.jti);
   const typ = getJwtProperty<string>('typ', true, jwtProps?.typ, existingJwt?.header?.typ, 'openid4vci-proof+jwt');
   const nonce = getJwtProperty<string>('nonce', false, jwtProps?.nonce, existingJwt?.payload?.nonce); // Officially this is required, but some implementations don't have it

@@ -264,7 +264,7 @@ describe('issuerCallback', () => {
       // format: 'jwt_vc_json',
       proof: {
         jwt: expect.stringContaining('eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFj'),
-        proof_type: 'jwt',
+        proof_type: 'JWT',
       },
       credential_identifier: 'VerifiableCredential',
     })

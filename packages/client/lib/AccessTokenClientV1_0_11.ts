@@ -95,11 +95,12 @@ export class AccessTokenClientV1_0_11 {
       ? await toUniformCredentialOfferRequest(opts.credentialOffer as CredentialOfferV1_0_11 | CredentialOfferV1_0_13)
       : undefined;
     const request: Partial<AccessTokenRequest> = { ...opts.additionalParams };
+    const credentialIssuer = opts.credentialIssuer ?? credentialOfferRequest?.credential_offer?.credential_issuer;
 
     if (asOpts?.clientOpts?.clientId) {
       request.client_id = asOpts.clientOpts.clientId;
     }
-    await createJwtBearerClientAssertion(request, { ...opts, version: OpenId4VCIVersion.VER_1_0_11 });
+    await createJwtBearerClientAssertion(request, { ...opts, version: OpenId4VCIVersion.VER_1_0_11, credentialIssuer });
 
     if (credentialOfferRequest?.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
       this.assertNumericPin(this.isPinRequiredValue(credentialOfferRequest.credential_offer), pin);

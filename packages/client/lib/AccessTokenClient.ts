@@ -50,6 +50,7 @@ export class AccessTokenClient {
         redirectUri,
         pin,
         pinMetadata,
+        credentialIssuer: issuer,
       }),
       pinMetadata,
       metadata,
@@ -95,7 +96,8 @@ export class AccessTokenClient {
     if (asOpts?.clientOpts?.clientId) {
       request.client_id = asOpts.clientOpts.clientId;
     }
-    await createJwtBearerClientAssertion(request, opts);
+    const credentialIssuer = opts.credentialIssuer ?? credentialOfferRequest?.credential_offer?.credential_issuer;
+    await createJwtBearerClientAssertion(request, { ...opts, credentialIssuer });
 
     if (credentialOfferRequest?.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
       this.assertAlphanumericPin(opts.pinMetadata, pin);
