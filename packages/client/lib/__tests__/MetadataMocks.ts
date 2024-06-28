@@ -127,6 +127,41 @@ export const IDENTIPROOF_OID4VCI_METADATA = {
     },
   },
 };
+export const IDENTIPROOF_OID4VCI_METADATA_v13 = {
+  issuer: 'https://issuer.research.identiproof.io',
+  authorization_server: 'https://auth.research.identiproof.io',
+  credential_endpoint: 'https://issuer.research.identiproof.io/credential',
+  jwks_uri: 'https://issuer.research.identiproof.io/.well-known/did.json',
+  credential_configurations_supported: {
+    'Cyber Security Certificate': {
+      formats: {
+        jwt_vc: {
+          types: ['VerifiableCredential', 'Cyber Security Certificate'],
+          cryptographic_binding_methods_supported: ['did'],
+          cryptographic_suites_supported: ['ES256'],
+        },
+      },
+    },
+    OpenBadgeCredential: {
+      formats: {
+        jwt_vc: {
+          types: ['VerifiableCredential', 'OpenBadgeCredential'],
+          cryptographic_binding_methods_supported: ['did'],
+          cryptographic_suites_supported: ['ES256'],
+        },
+      },
+    },
+    OpenBadgeExtendedCredential: {
+      formats: {
+        jwt_vc: {
+          types: ['VerifiableCredential', 'OpenBadgeExtendedCredential'],
+          cryptographic_binding_methods_supported: ['did'],
+          cryptographic_suites_supported: ['ES256'],
+        },
+      },
+    },
+  },
+};
 
 export const SPRUCE_OID4VCI_METADATA = {
   issuer: 'https://ngi-oidc4vci-test.spruceid.xyz',
