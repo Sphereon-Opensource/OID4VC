@@ -16,7 +16,7 @@ export const createJwtBearerClientAssertion = async (
       return Promise.reject(Error(`Not client_id supplied, but client-assertion jwt-bearer requested.`));
     } else if (!kid) {
       return Promise.reject(Error(`No kid supplied, but client-assertion jwt-bearer requested.`));
-    } else if (typeof signCallbacks !== 'function') {
+    } else if (typeof signCallbacks?.signCallback !== 'function') {
       return Promise.reject(Error(`No sign callback supplied, but client-assertion jwt-bearer requested.`));
     } else if (!credentialIssuer) {
       return Promise.reject(Error(`No credential issuer supplied, but client-assertion jwt-bearer requested.`));
