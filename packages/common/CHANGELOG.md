@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.13.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.12.0...v0.13.0) (2024-07-03)
+
+### Bug Fixes
+
+- Make sure we use 'JWT' as typ instead of the lower case version as suggested in the JWT RFC. ([1ff4e40](https://github.com/Sphereon-Opensource/OID4VCI/commit/1ff4e40cefb183072951e3ede3f8b3a5842d645a))
+
+### Features
+
+- add get types from offer function to get the types from multiple versions of credential offers ([b966d8c](https://github.com/Sphereon-Opensource/OID4VCI/commit/b966d8c75bb3df36e816706b961e749b86ae1586))
+- Add support for jwt-bearer client assertions in access token ([ab4905c](https://github.com/Sphereon-Opensource/OID4VCI/commit/ab4905ce7b4465b0c8adce6140209fb2c39f1469))
+- added a facade for CredentialRequestClientBuilder and adjusted the tests ([30cddd3](https://github.com/Sphereon-Opensource/OID4VCI/commit/30cddd3af544e97047d27f48d1d76ce16f80a79b))
+- added x5c support and made sure that we support request-responses without dids ([27bc1d9](https://github.com/Sphereon-Opensource/OID4VCI/commit/27bc1d9522fa74d8016dced63fa415efb6c4eebc))
+- Allow to pass in custom access token request params ([1a469f9](https://github.com/Sphereon-Opensource/OID4VCI/commit/1a469f9f1f07dc54facf831b3336eb706cb0fe7a))
+
 # [0.12.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.10.3...v0.12.0) (2024-06-19)
 
 ### Bug Fixes
