@@ -3,6 +3,7 @@ import {
   Alg,
   AuthorizationRequestOpts,
   AuthorizationResponse,
+  AuthorizationServerOpts,
   AuthzFlowType,
   CodeChallengeMethod,
   CredentialConfigurationSupported,
@@ -259,8 +260,10 @@ export class OpenID4VCIClientV1_0_11 {
     authorizationResponse?: string | AuthorizationResponse; // Pass in an auth response, either as URI/redirect, or object
     code?: string; // Directly pass in a code from an auth response
     redirectUri?: string;
+    additionalRequestParams?: Record<string, any>;
+    asOpts?: AuthorizationServerOpts;
   }): Promise<AccessTokenResponse> {
-    const { pin, clientId } = opts ?? {};
+    const { pin, clientId = this._state.clientId ?? this._state.authorizationRequestOpts?.clientId } = opts ?? {};
     let { redirectUri } = opts ?? {};
     if (opts?.authorizationResponse) {
       this._state.authorizationCodeResponse = { ...toAuthorizationResponsePayload(opts.authorizationResponse) };
@@ -288,6 +291,25 @@ export class OpenID4VCIClientV1_0_11 {
       if (this._state.authorizationRequestOpts?.redirectUri && !redirectUri) {
         redirectUri = this._state.authorizationRequestOpts.redirectUri;
       }
+      const asOpts: AuthorizationServerOpts = { ...opts?.asOpts };
+      const kid = asOpts.clientOpts?.kid ?? this._state.kid ?? this._state.authorizationRequestOpts?.requestObjectOpts?.kid;
+      const clientAssertionType =
+        asOpts.clientOpts?.clientAssertionType ??
+        (kid && clientId && typeof asOpts.clientOpts?.signCallbacks?.signCallback === 'function'
+          ? 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+          : undefined);
+      if (this.isEBSI() || (clientId && kid)) {
+        if (!clientId) {
+          throw Error(`Client id expected for EBSI`);
+        }
+        asOpts.clientOpts = {
+          ...asOpts.clientOpts,
+          clientId,
+          ...(kid && { kid }),
+          ...(clientAssertionType && { clientAssertionType }),
+          signCallbacks: asOpts.clientOpts?.signCallbacks ?? this._state.authorizationRequestOpts?.requestObjectOpts?.signCallbacks,
+        };
+      }
 
       const response = await accessTokenClient.acquireAccessToken({
         credentialOffer: this.credentialOffer,
@@ -297,7 +319,8 @@ export class OpenID4VCIClientV1_0_11 {
         ...(!this._state.pkce.disabled && { codeVerifier: this._state.pkce.codeVerifier }),
         code,
         redirectUri,
-        asOpts: { clientId: this.clientId },
+        asOpts,
+        ...(opts?.additionalRequestParams && { additionalParams: opts.additionalRequestParams }),
       });
 
       if (response.errorBody) {
@@ -584,8 +607,8 @@ export class OpenID4VCIClientV1_0_11 {
    */
   public isEBSI() {
     if (
-      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11)['credentials'] &&
-      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11).credentials.find(
+      this.credentialOffer &&
+      (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_11)?.credentials?.find(
         (cred) =>
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
@@ -594,8 +617,14 @@ export class OpenID4VCIClientV1_0_11 {
     ) {
       return true;
     }
-    this.assertIssuerData();
-    return this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu') === true;
+    // this.assertIssuerData();
+    return (
+      this.clientId?.includes('ebsi') ||
+      this._state.kid?.includes('did:ebsi:') ||
+      this.getIssuer().includes('ebsi') ||
+      this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu') ||
+      this.endpointMetadata.credentialIssuerMetadata?.authorization_server?.includes('ebsi.eu')
+    );
   }
 
   private assertIssuerData(): void {

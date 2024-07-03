@@ -158,7 +158,7 @@ export enum Alg {
 }
 
 export type Typ =
-  | 'jwt'
+  | 'JWT'
   // https://www.rfc-editor.org/rfc/rfc8725.pdf#name-use-explicit-typing
   // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1-2.1.2.1.2.1.1
   | 'openid4vci-proof+jwt';

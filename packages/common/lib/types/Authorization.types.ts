@@ -1,4 +1,4 @@
-import { CredentialOfferPayload, ProofOfPossessionCallbacks, UniformCredentialOffer } from './CredentialIssuance.types';
+import { Alg, CredentialOfferPayload, ProofOfPossessionCallbacks, UniformCredentialOffer } from './CredentialIssuance.types';
 import {
   ErrorResponse,
   IssuerCredentialSubject,
@@ -186,8 +186,16 @@ export interface AuthorizationServerOpts {
   allowInsecureEndpoints?: boolean;
   as?: string; // If not provided the issuer hostname will be used!
   tokenEndpoint?: string; // Allows to override the default '/token' endpoint
-  clientId?: string;
+  clientOpts?: AuthorizationServerClientOpts;
 }
+
+export type AuthorizationServerClientOpts = {
+  clientId: string;
+  clientAssertionType?: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
+  kid?: string;
+  alg?: Alg;
+  signCallbacks?: ProofOfPossessionCallbacks<never>;
+};
 
 export interface IssuerOpts {
   issuer: string;
@@ -211,6 +219,7 @@ export interface AccessTokenRequestOpts {
   redirectUri?: string; // only required for authorization flow
   pin?: string; // Pin-number. Only used when required
   pinMetadata?: TxCodeAndPinRequired; // OPTIONAL. String value containing a Transaction Code. This value MUST be present if a tx_code object was present in the Credential Offer (including if the object was empty). This parameter MUST only be used if the grant_type is urn:ietf:params:oauth:grant-type:pre-authorized_code.
+  additionalParams?: Record<string, any>;
 }
 
 /*export interface AuthorizationRequestOpts {
@@ -304,6 +313,7 @@ export interface AccessTokenRequest {
   redirect_uri?: string;
   scope?: string;
   user_pin?: string;
+  [s: string]: unknown;
 }
 
 export interface OpenIDResponse<T> {

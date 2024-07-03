@@ -11,14 +11,16 @@ import {
 } from '@sphereon/oid4vci-common';
 import * as jose from 'jose';
 
-import { CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '..';
+import { CredentialRequestOpts, ProofOfPossessionBuilder } from '..';
+import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST_URI, WALT_ISSUER_URL, WALT_OID4VCI_METADATA } from './MetadataMocks';
 
 const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN';
+const partialJWT_withoutDid = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJlYmZlYjFmNzEyZWJjNmYxYzI3N';
 
 /*const jwtv1_0_08: Jwt = {
-  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'jwt' },
+  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'JWT' },
   payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
 };*/
 
@@ -27,7 +29,14 @@ const jwtv1_0_11: Jwt = {
   payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
 };
 
+const jwtv1_0_13_withoutDid: Jwt = {
+  header: { alg: Alg.ES256, kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'openid4vci-proof+jwt' },
+  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
+};
+
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1';
+
+const kid_withoutDid = 'ebfeb1f712ebc6f1c276e12ec21/keys/1';
 
 let keypair: KeyPair;
 
@@ -81,7 +90,7 @@ describe('Credential Request Client Builder', () => {
       .build();
     expect(credReqClient.credentialRequestOpts.credentialEndpoint).toBe('https://oidc4vci.demo.spruceid.com/credential');
     expect(credReqClient.credentialRequestOpts.format).toBe('jwt_vc');
-    expect(credReqClient.credentialRequestOpts.credentialIdentifier).toStrictEqual('credentialType');
+    expect((credReqClient.credentialRequestOpts as CredentialRequestOpts).credentialIdentifier).toStrictEqual('credentialType');
     expect(credReqClient.credentialRequestOpts.token).toBe('token');
   });
 
@@ -112,6 +121,35 @@ describe('Credential Request Client Builder', () => {
     expect('credential_identifier' in credentialRequest).toBe(true);
     if ('types' in credentialRequest) {
       expect(credentialRequest.types).toStrictEqual(['https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential']);
+    }
+  });
+
+  it('should build credential request correctly without did', async () => {
+    const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
+      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
+      .withFormat('jwt_vc')
+      .withCredentialType('OpenBadgeCredential')
+      .build();
+    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+      jwt: jwtv1_0_13_withoutDid,
+      callbacks: {
+        signCallback: proofOfPossessionCallbackFunction,
+        verifyCallback: proofOfPossessionVerifierCallbackFunction,
+      },
+      version: OpenId4VCIVersion.VER_1_0_13,
+    })
+      .withClientId('sphereon:wallet')
+      .withKid(kid_withoutDid)
+      .build();
+    await proofOfPossessionVerifierCallbackFunction({ ...proof, kid: kid_withoutDid });
+    const credentialRequest: CredentialRequestV1_0_13 = await credReqClient.createCredentialRequest({
+      proofInput: proof,
+      credentialTypes: 'OpenBadgeCredential',
+      version: OpenId4VCIVersion.VER_1_0_13,
+    });
+    expect(credentialRequest.proof?.jwt).toContain(partialJWT_withoutDid);
+    if ('types' in credentialRequest) {
+      expect(credentialRequest.types).toStrictEqual(['OpenBadgeCredential']);
     }
   });
 

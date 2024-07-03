@@ -47,8 +47,8 @@ export const createProofOfPossession = async <DIDDoc>(
     throw new Error(BAD_PARAMS);
   }
 
-  const signerArgs = createJWT(popMode, jwtProps, existingJwt);
-  const jwt = await callbacks.signCallback(signerArgs, signerArgs.header.kid);
+  const jwtPayload = createJWT(popMode, jwtProps, existingJwt);
+  const jwt = await callbacks.signCallback(jwtPayload, jwtPayload.header.kid);
   const proof = {
     proof_type: 'jwt',
     jwt,
@@ -58,7 +58,7 @@ export const createProofOfPossession = async <DIDDoc>(
     partiallyValidateJWS(jwt);
     if (callbacks.verifyCallback) {
       debug(`Calling supplied verify callback....`);
-      await callbacks.verifyCallback({ jwt, kid: signerArgs.header.kid });
+      await callbacks.verifyCallback({ jwt, kid: jwtPayload.header.kid });
       debug(`Supplied verify callback return success result`);
     }
   } catch {
@@ -115,6 +115,7 @@ export interface JwtProps {
   typ?: Typ;
   kid?: string;
   jwk?: JWK;
+  x5c?: string[];
   aud?: string | string[];
   issuer?: string;
   clientId?: string;
@@ -129,18 +130,19 @@ const createJWT = (mode: PoPMode, jwtProps?: JwtProps, existingJwt?: Jwt): Jwt =
       ? getJwtProperty<string | string[]>('aud', true, jwtProps?.issuer, existingJwt?.payload?.aud)
       : getJwtProperty<string | string[]>('aud', false, jwtProps?.aud, existingJwt?.payload?.aud);
   const iss =
-    // mode === 'pop'
-       getJwtProperty<string>('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss)
-      // : getJwtProperty<string>('iss', false, jwtProps?.issuer, existingJwt?.payload?.iss);
-  const client_id = mode === 'jwt' ? getJwtProperty<string>('client_id', false, jwtProps?.clientId, existingJwt?.payload?.client_id) : undefined;
+    mode === 'pop'
+      ? getJwtProperty<string>('iss', false, jwtProps?.clientId, existingJwt?.payload?.iss)
+      : getJwtProperty<string>('iss', false, jwtProps?.issuer, existingJwt?.payload?.iss);
+  const client_id = mode === 'JWT' ? getJwtProperty<string>('client_id', false, jwtProps?.clientId, existingJwt?.payload?.client_id) : undefined;
   const jti = getJwtProperty<string>('jti', false, jwtProps?.jti, existingJwt?.payload?.jti);
-  const typ = getJwtProperty<string>('typ', true, jwtProps?.typ, existingJwt?.header?.typ, 'jwt');
+  const typ = getJwtProperty<string>('typ', true, jwtProps?.typ, existingJwt?.header?.typ, 'openid4vci-proof+jwt');
   const nonce = getJwtProperty<string>('nonce', false, jwtProps?.nonce, existingJwt?.payload?.nonce); // Officially this is required, but some implementations don't have it
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const alg = getJwtProperty<string>('alg', false, jwtProps?.alg, existingJwt?.header?.alg, 'ES256')!;
   const kid = getJwtProperty<string>('kid', false, jwtProps?.kid, existingJwt?.header?.kid);
   const jwk = getJwtProperty<BaseJWK>('jwk', false, jwtProps?.jwk, existingJwt?.header?.jwk);
-  const jwt: Partial<Jwt> = existingJwt ? existingJwt : {};
+  const x5c = getJwtProperty<string[]>('x5c', false, jwtProps?.x5c, existingJwt?.header.x5c);
+  const jwt: Partial<Jwt> = { ...existingJwt };
   const now = +new Date();
   const jwtPayload: Partial<JWTPayload> = {
     ...(aud && { aud }),
@@ -157,6 +159,7 @@ const createJWT = (mode: PoPMode, jwtProps?: JwtProps, existingJwt?: Jwt): Jwt =
     alg,
     ...(kid && { kid }),
     ...(jwk && { jwk }),
+    ...(x5c && { x5c }),
   };
   return {
     payload: { ...jwt.payload, ...jwtPayload },
@@ -171,7 +174,7 @@ const getJwtProperty = <T>(
   jwtProperty?: T,
   defaultValue?: T,
 ): T | undefined => {
-  if (typeof option === 'string' && option && jwtProperty && option !== jwtProperty) {
+  if ((typeof option === 'string' || Array.isArray(option)) && option && jwtProperty && option !== jwtProperty) {
     throw Error(`Cannot have a property '${propertyName}' with value '${option}' and different JWT value '${jwtProperty}' at the same time`);
   }
   let result = (jwtProperty ? jwtProperty : option) as T | undefined;

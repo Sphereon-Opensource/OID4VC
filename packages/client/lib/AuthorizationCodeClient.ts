@@ -35,28 +35,31 @@ export async function createSignedAuthRequestWhenNeeded(requestObject: Record<st
     } else if (!opts.kid) {
       throw Error(`No kid found, whilst request object mode was set to ${opts.requestObjectMode}`);
     }
-    let client_metadata: any
+    let client_metadata: any;
     if (opts.clientMetadata || opts.jwksUri) {
       client_metadata = opts.clientMetadata ?? {};
       if (opts.jwksUri) {
         client_metadata['jwks_uri'] = opts.jwksUri;
       }
     }
-    let authorization_details = requestObject['authorization_details']
+    let authorization_details = requestObject['authorization_details'];
     if (typeof authorization_details === 'string') {
       authorization_details = JSON.parse(requestObject.authorization_details);
     }
     if (!requestObject.aud && opts.aud) {
       requestObject.aud = opts.aud;
     }
-    const iss = requestObject.iss ?? opts.iss ?? requestObject.client_id
+    const iss = requestObject.iss ?? opts.iss ?? requestObject.client_id;
 
-    const jwt: Jwt = { header: { alg: 'ES256', kid: opts.kid, typ: 'jwt' }, payload: {...requestObject, iss, authorization_details, ...(client_metadata && {client_metadata})} };
+    const jwt: Jwt = {
+      header: { alg: 'ES256', kid: opts.kid, typ: 'JWT' },
+      payload: { ...requestObject, iss, authorization_details, ...(client_metadata && { client_metadata }) },
+    };
     const pop = await ProofOfPossessionBuilder.fromJwt({
       jwt,
       callbacks: opts.signCallbacks,
       version: OpenId4VCIVersion.VER_1_0_11,
-      mode: 'jwt',
+      mode: 'JWT',
     }).build();
     requestObject['request'] = pop.jwt;
   }

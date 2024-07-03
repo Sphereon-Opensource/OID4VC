@@ -1,4 +1,4 @@
-import { CredentialDefinitionV1_0_13, CredentialOfferFormat, JsonLdIssuerCredentialDefinition, VCI_LOG_COMMON } from '../index';
+import { getTypesFromObject, VCI_LOG_COMMON } from '../index';
 import {
   AuthorizationServerMetadata,
   CredentialConfigurationSupported,
@@ -149,33 +149,6 @@ export function getSupportedCredential(opts?: {
   throw Error(`Either < v11 configurations or V13 configurations should have been filtered at this point`);
 }
 
-export function getTypesFromCredentialSupported(
-  credentialSupported: CredentialConfigurationSupported,
-  opts?: { filterVerifiableCredential: boolean },
-) {
-  let types: string[] = [];
-  if (
-    credentialSupported.format === 'jwt_vc_json' ||
-    credentialSupported.format === 'jwt_vc' ||
-    credentialSupported.format === 'jwt_vc_json-ld' ||
-    credentialSupported.format === 'ldp_vc'
-  ) {
-    types = getTypesFromObject(credentialSupported) ?? [];
-  } else if (credentialSupported.format === 'vc+sd-jwt') {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    types = [credentialSupported.vct];
-  }
-
-  if (!types || types.length === 0) {
-    throw Error('Could not deduce types from credential supported');
-  }
-  if (opts?.filterVerifiableCredential) {
-    return types.filter((type) => type !== 'VerifiableCredential');
-  }
-  return types;
-}
-
 export function credentialsSupportedV8ToV13(supportedV8: CredentialSupportedTypeV1_0_08): Record<string, CredentialConfigurationSupported> {
   const credentialConfigsSupported: Record<string, CredentialConfigurationSupported> = {};
   Object.entries(supportedV8).flatMap((entry) => {
@@ -229,29 +202,4 @@ export function getIssuerName(
     }
   }
   return url;
-}
-
-/**
- * The specs had many places where types could be expressed. This method ensures we get them in any way possible
- * @param subject
- */
-export function getTypesFromObject(
-  subject: CredentialConfigurationSupported | CredentialOfferFormat | CredentialDefinitionV1_0_13 | JsonLdIssuerCredentialDefinition | string,
-): string[] | undefined {
-  if (subject === undefined) {
-    return undefined;
-  } else if (typeof subject === 'string') {
-    return [subject];
-  } else if ('credential_definition' in subject && subject.credential_definition) {
-    return getTypesFromObject(subject.credential_definition);
-  } else if ('types' in subject && subject.types) {
-    return Array.isArray(subject.types) ? subject.types : [subject.types];
-  } else if ('type' in subject && subject.type) {
-    return Array.isArray(subject.type) ? subject.type : [subject.type];
-  } else if ('vct' in subject && subject.vct) {
-    return [subject.vct];
-  }
-
-  VCI_LOG_COMMON.warning('Could not deduce credential types. Probably a failure down the line will happen!');
-  return undefined;
 }

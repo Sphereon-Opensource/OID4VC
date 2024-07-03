@@ -20,13 +20,8 @@ import * as jose from 'jose';
 // @ts-ignore
 import nock from 'nock';
 
-import {
-  CredentialOfferClientV1_0_11,
-  CredentialRequestClientBuilder,
-  CredentialRequestClientBuilderV1_0_11,
-  MetadataClientV1_0_11,
-  ProofOfPossessionBuilder,
-} from '..';
+import { CredentialOfferClient, MetadataClient, ProofOfPossessionBuilder } from '..';
+import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder';
 
 import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST, WALT_OID4VCI_METADATA } from './MetadataMocks';
 import { getMockData } from './data/VciDataFixtures';
@@ -34,7 +29,7 @@ import { getMockData } from './data/VciDataFixtures';
 const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN';
 
 const jwt1_0_08: Jwt = {
-  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'jwt' },
+  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'JWT' },
   payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
 };
 
@@ -154,14 +149,14 @@ describe('Credential Request Client with Walt.id ', () => {
     nock.cleanAll();
     const WALT_IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false';
-    const credentialOffer = await CredentialOfferClientV1_0_11.fromURI(WALT_IRR_URI);
+    const credentialOffer = await CredentialOfferClient.fromURI(WALT_IRR_URI);
 
     const request = credentialOffer.credential_offer;
-    const metadata = await MetadataClientV1_0_11.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(request) as string);
+    const metadata = await MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(request) as string);
     expect(metadata.credential_endpoint).toEqual(WALT_OID4VCI_METADATA.credential_endpoint);
     expect(metadata.token_endpoint).toEqual(WALT_OID4VCI_METADATA.token_endpoint);
 
-    const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({
+    const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({
       credentialOffer,
       metadata,
     }).build();
@@ -205,7 +200,7 @@ describe('Credential Request Client with different issuers ', () => {
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Fdefault%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA&user_pin_required=false';
     const credentialOffer = await (
-      await CredentialRequestClientBuilderV1_0_11.fromURI({
+      await CredentialRequestClientBuilder.fromURI({
         uri: IRR_URI,
         metadata: getMockData('walt')?.metadata as unknown as EndpointMetadata,
       })
@@ -250,7 +245,7 @@ describe('Credential Request Client with different issuers ', () => {
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https://launchpad.mattrlabs.com&credential_type=OpenBadgeCredential&pre-authorized_code=g0UCOj6RAN5AwHU6gczm_GzB4_lH6GW39Z0Dl2DOOiO';
     const credentialOffer = await (
-      await CredentialRequestClientBuilderV1_0_11.fromURI({
+      await CredentialRequestClientBuilder.fromURI({
         uri: IRR_URI,
         metadata: getMockData('mattr')?.metadata as unknown as EndpointMetadata,
       })
@@ -273,7 +268,7 @@ describe('Credential Request Client with different issuers ', () => {
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https://oidc4vc.diwala.io&credential_type=OpenBadgeCredential&pre-authorized_code=eyJhbGciOiJIUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOiJPcGVuQmFkZ2VDcmVkZW50aWFsIiwiZXhwIjoxNjgxOTg0NDY3fQ.fEAHKz2nuWfiYHw406iNxr-81pWkNkbi31bWsYSf6Ng';
     const credentialOffer = await (
-      await CredentialRequestClientBuilderV1_0_11.fromURI({
+      await CredentialRequestClientBuilder.fromURI({
         uri: IRR_URI,
         metadata: getMockData('diwala')?.metadata as unknown as EndpointMetadata,
       })

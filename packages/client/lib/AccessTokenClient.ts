@@ -22,6 +22,7 @@ import {
 import { ObjectUtils } from '@sphereon/ssi-types';
 
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
+import { createJwtBearerClientAssertion } from './functions';
 import { LOG } from './types';
 
 export class AccessTokenClient {
@@ -48,6 +49,9 @@ export class AccessTokenClient {
         code,
         redirectUri,
         pin,
+        credentialIssuer: issuer,
+        metadata,
+        additionalParams: opts.additionalParams,
         pinMetadata,
       }),
       pinMetadata,
@@ -90,11 +94,12 @@ export class AccessTokenClient {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const credentialOfferRequest = opts.credentialOffer ? await toUniformCredentialOfferRequest(opts.credentialOffer) : undefined;
-    const request: Partial<AccessTokenRequest> = {};
-
-    if (asOpts?.clientId) {
-      request.client_id = asOpts.clientId;
+    const request: Partial<AccessTokenRequest> = { ...opts.additionalParams };
+    if (asOpts?.clientOpts?.clientId) {
+      request.client_id = asOpts.clientOpts.clientId;
     }
+    const credentialIssuer = opts.credentialIssuer ?? credentialOfferRequest?.credential_offer?.credential_issuer ?? opts.metadata?.issuer;
+    await createJwtBearerClientAssertion(request, { ...opts, credentialIssuer });
 
     if (credentialOfferRequest?.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
       this.assertAlphanumericPin(opts.pinMetadata, pin);

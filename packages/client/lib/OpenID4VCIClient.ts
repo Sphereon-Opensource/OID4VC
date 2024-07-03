@@ -3,6 +3,7 @@ import {
   Alg,
   AuthorizationRequestOpts,
   AuthorizationResponse,
+  AuthorizationServerOpts,
   AuthzFlowType,
   CodeChallengeMethod,
   CredentialConfigurationSupported,
@@ -41,8 +42,8 @@ import { createAuthorizationRequestUrl } from './AuthorizationCodeClient';
 import { createAuthorizationRequestUrlV1_0_11 } from './AuthorizationCodeClientV1_0_11';
 import { CredentialOfferClient } from './CredentialOfferClient';
 import { CredentialRequestOpts } from './CredentialRequestClient';
-import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
+import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13';
 import { MetadataClient } from './MetadataClient';
 import { OpenID4VCIClientStateV1_0_11 } from './OpenID4VCIClientV1_0_11';
 import { OpenID4VCIClientStateV1_0_13 } from './OpenID4VCIClientV1_0_13';
@@ -103,6 +104,7 @@ export class OpenID4VCIClient {
       pkce: { disabled: false, codeChallengeMethod: CodeChallengeMethod.S256, ...pkce },
       authorizationRequestOpts,
       authorizationCodeResponse,
+      accessToken,
       jwk,
       endpointMetadata: endpointMetadata?.credentialIssuerMetadata?.authorization_server
         ? (endpointMetadata as EndpointMetadataResultV1_0_11)
@@ -273,8 +275,10 @@ export class OpenID4VCIClient {
     authorizationResponse?: string | AuthorizationResponse; // Pass in an auth response, either as URI/redirect, or object
     code?: string; // Directly pass in a code from an auth response
     redirectUri?: string;
+    additionalRequestParams?: Record<string, any>;
+    asOpts?: AuthorizationServerOpts;
   }): Promise<AccessTokenResponse> {
-    const { pin, clientId } = opts ?? {};
+    const { pin, clientId = this._state.clientId ?? this._state.authorizationRequestOpts?.clientId } = opts ?? {};
     let { redirectUri } = opts ?? {};
     if (opts?.authorizationResponse) {
       this._state.authorizationCodeResponse = { ...toAuthorizationResponsePayload(opts.authorizationResponse) };
@@ -287,6 +291,26 @@ export class OpenID4VCIClient {
       this._state.pkce.codeVerifier = opts.codeVerifier;
     }
     this.assertIssuerData();
+
+    const asOpts: AuthorizationServerOpts = { ...opts?.asOpts };
+    const kid = asOpts.clientOpts?.kid ?? this._state.kid ?? this._state.authorizationRequestOpts?.requestObjectOpts?.kid;
+    const clientAssertionType =
+      asOpts.clientOpts?.clientAssertionType ??
+      (kid && clientId && typeof asOpts.clientOpts?.signCallbacks?.signCallback === 'function'
+        ? 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        : undefined);
+    if (this.isEBSI() || (clientId && kid)) {
+      if (!clientId) {
+        throw Error(`Client id expected for EBSI`);
+      }
+      asOpts.clientOpts = {
+        ...asOpts.clientOpts,
+        clientId,
+        ...(kid && { kid }),
+        ...(clientAssertionType && { clientAssertionType }),
+        signCallbacks: asOpts.clientOpts?.signCallbacks ?? this._state.authorizationRequestOpts?.requestObjectOpts?.signCallbacks,
+      };
+    }
 
     if (clientId) {
       this._state.clientId = clientId;
@@ -311,7 +335,8 @@ export class OpenID4VCIClient {
         ...(!this._state.pkce.disabled && { codeVerifier: this._state.pkce.codeVerifier }),
         code,
         redirectUri,
-        asOpts: { clientId: this.clientId },
+        asOpts,
+        ...(opts?.additionalRequestParams && { additionalParams: opts.additionalRequestParams }),
       });
 
       if (response.errorBody) {
@@ -368,7 +393,7 @@ export class OpenID4VCIClient {
     if (jwk) this._state.jwk = jwk;
     if (kid) this._state.kid = kid;
 
-    let requestBuilder: CredentialRequestClientBuilder | CredentialRequestClientBuilderV1_0_11;
+    let requestBuilder: CredentialRequestClientBuilderV1_0_13 | CredentialRequestClientBuilderV1_0_11;
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
       requestBuilder = this.credentialOffer
         ? CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({
@@ -383,11 +408,11 @@ export class OpenID4VCIClient {
           });
     } else {
       requestBuilder = this.credentialOffer
-        ? CredentialRequestClientBuilder.fromCredentialOffer({
+        ? CredentialRequestClientBuilderV1_0_13.fromCredentialOffer({
             credentialOffer: this.credentialOffer,
             metadata: this.endpointMetadata,
           })
-        : CredentialRequestClientBuilder.fromCredentialIssuer({
+        : CredentialRequestClientBuilderV1_0_13.fromCredentialIssuer({
             credentialIssuer: this.getIssuer(),
             credentialTypes,
             metadata: this.endpointMetadata,
@@ -646,6 +671,9 @@ export class OpenID4VCIClient {
     }
     // this.assertIssuerData();
     return (
+      this.clientId?.includes('ebsi') ||
+      this._state.kid?.includes('did:ebsi:') ||
+      this.getIssuer().includes('ebsi') ||
       this.endpointMetadata.credentialIssuerMetadata?.authorization_endpoint?.includes('ebsi.eu') ||
       this.endpointMetadata.credentialIssuerMetadata?.authorization_server?.includes('ebsi.eu')
     );

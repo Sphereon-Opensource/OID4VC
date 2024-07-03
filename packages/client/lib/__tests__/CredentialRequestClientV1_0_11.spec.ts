@@ -28,13 +28,21 @@ import {
 import { getMockData } from './data/VciDataFixtures';
 
 const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN';
+const partialJWT_withoutDid = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJlYmZlYjFmNzEyZWJjNmYxYzI3N';
 
 const jwt: Jwt = {
-  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'jwt' },
+  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'JWT' },
+  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
+};
+
+const jwt_withoutDid: Jwt = {
+  header: { alg: Alg.ES256, kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'JWT' },
   payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
 };
 
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1';
+
+const kid_withoutDid = 'ebfeb1f712ebc6f1c276e12ec21/keys/1';
 
 let keypair: KeyPair;
 
@@ -102,6 +110,36 @@ describe('Credential Request Client ', () => {
     expect(result?.errorBody?.error).toBe('unsupported_format');
   });
 
+  it('should get a failed credential response with an unsupported format and without did', async function () {
+    const basePath = 'https://sphereonjunit2022101301.com/';
+    nock(basePath).post(/.*/).reply(500, {
+      error: 'unsupported_format',
+      error_description: 'This is a mock error message',
+    });
+
+    const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({ credentialOffer: INITIATION_TEST_V1_0_08 })
+      .withCredentialEndpoint(basePath + '/credential')
+      .withFormat('ldp_vc')
+      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
+      .build();
+    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+      jwt: jwt_withoutDid,
+      callbacks: {
+        signCallback: proofOfPossessionCallbackFunction,
+      },
+      version: OpenId4VCIVersion.VER_1_0_08,
+    })
+      // .withEndpointMetadata(metadata)
+      .withClientId('sphereon:wallet')
+      .withKid(kid_withoutDid)
+      .build();
+    expect(credReqClient.getCredentialEndpoint()).toEqual(basePath + '/credential');
+    const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, version: OpenId4VCIVersion.VER_1_0_08 });
+    expect(credentialRequest.proof?.jwt?.includes(partialJWT_withoutDid)).toBeTruthy();
+    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
+    expect(result?.errorBody?.error).toBe('unsupported_format');
+  });
+
   it('should get success credential response', async function () {
     const mockedVC =
       'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL2V4YW1wbGVzL3YxIl0sImlkIjoiaHR0cDovL2V4YW1wbGUuZWR1L2NyZWRlbnRpYWxzLzM3MzIiLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiVW5pdmVyc2l0eURlZ3JlZUNyZWRlbnRpYWwiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLmVkdS9pc3N1ZXJzLzU2NTA0OSIsImlzc3VhbmNlRGF0ZSI6IjIwMTAtMDEtMDFUMDA6MDA6MDBaIiwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWQiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEiLCJkZWdyZWUiOnsidHlwZSI6IkJhY2hlbG9yRGVncmVlIiwibmFtZSI6IkJhY2hlbG9yIG9mIFNjaWVuY2UgYW5kIEFydHMifX19LCJpc3MiOiJodHRwczovL2V4YW1wbGUuZWR1L2lzc3VlcnMvNTY1MDQ5IiwibmJmIjoxMjYyMzA0MDAwLCJqdGkiOiJodHRwOi8vZXhhbXBsZS5lZHUvY3JlZGVudGlhbHMvMzczMiIsInN1YiI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMSJ9.z5vgMTK1nfizNCg5N-niCOL3WUIAL7nXy-nGhDZYO_-PNGeE-0djCpWAMH8fD8eWSID5PfkPBYkx_dfLJnQ7NA';
@@ -138,6 +176,42 @@ describe('Credential Request Client ', () => {
     expect(result?.successBody?.credential).toEqual(mockedVC);
   });
 
+  it('should get success credential response without did', async function () {
+    const mockedVC =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL2V4YW1wbGVzL3YxIl0sImlkIjoiaHR0cDovL2V4YW1wbGUuZWR1L2NyZWRlbnRpYWxzLzM3MzIiLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiVW5pdmVyc2l0eURlZ3JlZUNyZWRlbnRpYWwiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLmVkdS9pc3N1ZXJzLzU2NTA0OSIsImlzc3VhbmNlRGF0ZSI6IjIwMTAtMDEtMDFUMDA6MDA6MDBaIiwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWQiOiJlYmZlYjFmNzEyZWJjNmYxYzI3NmUxMmVjMjEiLCJkZWdyZWUiOnsidHlwZSI6IkJhY2hlbG9yRGVncmVlIiwibmFtZSI6IkJhY2hlbG9yIG9mIFNjaWVuY2UgYW5kIEFydHMifX19LCJpc3MiOiJodHRwczovL2V4YW1wbGUuZWR1L2lzc3VlcnMvNTY1MDQ5IiwibmJmIjoxMjYyMzA0MDAwLCJqdGkiOiJodHRwOi8vZXhhbXBsZS5lZHUvY3JlZGVudGlhbHMvMzczMiIsInN1YiI6ImViZmViMWY3MTJlYmM2ZjFjMjc2ZTEyZWMyMSIsImlhdCI6MTcxODM1NzcxOH0.7iiOTuIjQRyrIincYyDW6m0nBYmDoYfXcTYFrywsKEY';
+    nock('https://oidc4vci.demo.spruceid.com')
+      .post(/credential/)
+      .reply(200, {
+        format: 'jwt-vc',
+        credential: mockedVC,
+      });
+    const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOfferRequest({ request: INITIATION_TEST })
+      .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
+      .withFormat('jwt_vc')
+      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
+      .build();
+    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+      jwt: jwt_withoutDid,
+      callbacks: {
+        signCallback: proofOfPossessionCallbackFunction,
+      },
+      version: OpenId4VCIVersion.VER_1_0_08,
+    })
+      // .withEndpointMetadata(metadata)
+      .withKid(kid_withoutDid)
+      .withClientId('sphereon:wallet')
+      .build();
+    const credentialRequest = await credReqClient.createCredentialRequest({
+      proofInput: proof,
+      format: 'jwt',
+      version: OpenId4VCIVersion.VER_1_0_08,
+    });
+    expect(credentialRequest.proof?.jwt?.includes(partialJWT_withoutDid)).toBeTruthy();
+    expect(credentialRequest.format).toEqual('jwt_vc');
+    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest);
+    expect(result?.successBody?.credential).toEqual(mockedVC);
+  });
+
   it('should fail with invalid url', async () => {
     const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOfferRequest({ request: INITIATION_TEST })
       .withCredentialEndpoint('httpsf://oidc4vci.demo.spruceid.com/credential')
@@ -153,6 +227,28 @@ describe('Credential Request Client ', () => {
     })
       // .withEndpointMetadata(metadata)
       .withKid(kid)
+      .withClientId('sphereon:wallet')
+      .build();
+    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json', types: ['random'], proof })).rejects.toThrow(
+      Error(URL_NOT_VALID),
+    );
+  });
+
+  it('should fail with invalid url without did', async () => {
+    const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOfferRequest({ request: INITIATION_TEST })
+      .withCredentialEndpoint('httpsf://oidc4vci.demo.spruceid.com/credential')
+      .withFormat('jwt_vc')
+      .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
+      .build();
+    const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
+      jwt: jwt_withoutDid,
+      callbacks: {
+        signCallback: proofOfPossessionCallbackFunction,
+      },
+      version: OpenId4VCIVersion.VER_1_0_08,
+    })
+      // .withEndpointMetadata(metadata)
+      .withKid(kid_withoutDid)
       .withClientId('sphereon:wallet')
       .build();
     await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json', types: ['random'], proof })).rejects.toThrow(
