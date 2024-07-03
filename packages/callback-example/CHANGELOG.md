@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.13.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.12.0...v0.13.0) (2024-07-03)
+
+### Bug Fixes
+
+- Make sure we use 'JWT' as typ instead of the lower case version as suggested in the JWT RFC. ([1ff4e40](https://github.com/Sphereon-Opensource/OID4VCI/commit/1ff4e40cefb183072951e3ede3f8b3a5842d645a))
+- test added ([19b0704](https://github.com/Sphereon-Opensource/OID4VCI/commit/19b07046aaf213c3feb4f4b8c61f4eb97f8504cc))
+
+### Features
+
+- added a facade for CredentialRequestClientBuilder and adjusted the tests ([30cddd3](https://github.com/Sphereon-Opensource/OID4VCI/commit/30cddd3af544e97047d27f48d1d76ce16f80a79b))
+
 # [0.12.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.10.3...v0.12.0) (2024-06-19)
 
 ### Bug Fixes
