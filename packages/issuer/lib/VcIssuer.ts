@@ -343,12 +343,24 @@ export class VcIssuer<DIDDoc extends object> {
         credential.credentialSubject = Array.isArray(credential.credentialSubject) ? credentialSubjects : credentialSubjects[0]
       }
 
+      let issuer: string | undefined = undefined
+      if (credential.iss) {
+        issuer = credential.iss
+      } else if (credential.issuer) {
+        if (typeof credential.issuer === 'string') {
+          issuer = credential.issuer
+        } else if (typeof credential.issuer === 'object' && 'id' in credential.issuer && typeof credential.issuer.id === 'string') {
+          issuer = credential.issuer.id
+        }
+      }
+
       const verifiableCredential = await this.issueCredentialImpl(
         {
           credentialRequest: opts.credentialRequest,
           format,
           credential,
           jwtVerifyResult,
+          issuer,
         },
         signerCallback,
       )
@@ -597,6 +609,7 @@ export class VcIssuer<DIDDoc extends object> {
       credential: CredentialIssuanceInput
       jwtVerifyResult: JwtVerifyResult<DIDDoc>
       format?: OID4VCICredentialFormat
+      issuer?: string
     },
     issuerCallback?: CredentialSignerCallback<DIDDoc>,
   ): Promise<W3CVerifiableCredential | CompactSdJwtVc> {
@@ -604,8 +617,6 @@ export class VcIssuer<DIDDoc extends object> {
       throw new Error(ISSUER_CONFIG_ERROR)
     }
     const credential = issuerCallback ? await issuerCallback(opts) : await this._credentialSignerCallback(opts)
-    const uniform = CredentialMapper.toUniformCredential(credential)
-    const issuer = uniform.issuer ? (typeof uniform.issuer === 'string' ? uniform.issuer : uniform.issuer.id) : '<unknown>'
 
     // TODO: Create builder
     EVENTS.emit(CredentialEventNames.OID4VCI_CREDENTIAL_ISSUED, {
@@ -613,7 +624,7 @@ export class VcIssuer<DIDDoc extends object> {
       id: v4(),
       data: credential,
       // TODO: Format, request etc
-      initiator: issuer ?? '<unknown>',
+      initiator: opts.issuer ?? '<unknown>',
       initiatorType: InitiatorType.EXTERNAL,
       system: System.OID4VCI,
       subsystem: SubSystem.VC_ISSUER,
