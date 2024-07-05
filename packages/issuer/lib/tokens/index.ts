@@ -100,18 +100,19 @@ export const assertValidAccessTokenRequest = async (
   invalid_request:
   the Authorization Server expects a PIN in the pre-authorized flow but the client does not provide a PIN
    */
-  const preAuthorizedGrant = credentialOfferSession.credentialOffer.credential_offer?.grants?.[GrantTypes.PRE_AUTHORIZED_CODE]
-  if ((preAuthorizedGrant?.tx_code || preAuthorizedGrant?.user_pin_required) && !request.user_pin) {
+  if (
+    credentialOfferSession.credentialOffer.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code &&
+    !request.user_pin
+  ) {
     throw new TokenError(400, TokenErrorResponse.invalid_request, USER_PIN_REQUIRED_ERROR)
   }
   /*
   invalid_request:
   the Authorization Server does not expect a PIN in the pre-authorized flow but the client provides a PIN
    */
-  if (!preAuthorizedGrant?.user_pin_required && !preAuthorizedGrant?.tx_code && request.user_pin) {
+  if (!credentialOfferSession.credentialOffer.credential_offer?.grants?.[GrantTypes.PRE_AUTHORIZED_CODE]?.user_pin_required && request.user_pin) {
     throw new TokenError(400, TokenErrorResponse.invalid_request, USER_PIN_NOT_REQUIRED_ERROR)
   }
-
   /*
   invalid_grant:
   the Authorization Server expects a PIN in the pre-authorized flow but the client provides the wrong PIN
