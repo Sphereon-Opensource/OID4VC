@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.14.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.13.0...v0.14.0) (2024-07-06)
+
+### Bug Fixes
+
+- hasher dependency and token request assert vci11/13 ([81bf769](https://github.com/Sphereon-Opensource/OID4VCI/commit/81bf7692bd7721a7542c82d60fa2c01d7ce2d7b1))
+- undo tx_code changes ([7888a14](https://github.com/Sphereon-Opensource/OID4VCI/commit/7888a148a8d1c41103fde35dd065ef84c4a17c2b))
+- update tx_code check ([3b0971d](https://github.com/Sphereon-Opensource/OID4VCI/commit/3b0971db8302a977550b403e6611ec53be34f1dd))
+
+### Features
+
+- Enable tx_code support for the issuer, and properly handle both the old userPin and tx_code on the client side. fixes [#117](https://github.com/Sphereon-Opensource/OID4VCI/issues/117) ([e54071c](https://github.com/Sphereon-Opensource/OID4VCI/commit/e54071c65b00ef921acafa2c2c73707a3bc33a44))
+
 # [0.13.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.12.0...v0.13.0) (2024-07-03)
 
 ### Bug Fixes
