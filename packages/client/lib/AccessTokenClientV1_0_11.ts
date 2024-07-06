@@ -17,6 +17,7 @@ import {
   OpenId4VCIVersion,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
+  PRE_AUTH_GRANT_LITERAL,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
   UniformCredentialOfferPayload,
@@ -112,8 +113,7 @@ export class AccessTokenClientV1_0_11 {
 
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
       // we actually know it is there because of the isPreAuthCode call
-      request[PRE_AUTH_CODE_LITERAL] =
-        credentialOfferRequest?.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.[PRE_AUTH_CODE_LITERAL];
+      request[PRE_AUTH_CODE_LITERAL] = credentialOfferRequest?.credential_offer.grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL];
 
       return request as AccessTokenRequest;
     }
@@ -135,7 +135,7 @@ export class AccessTokenClientV1_0_11 {
 
   private assertPreAuthorizedGrantType(grantType: GrantTypes): void {
     if (GrantTypes.PRE_AUTHORIZED_CODE !== grantType) {
-      throw new Error("grant type must be 'urn:ietf:params:oauth:grant-type:pre-authorized_code'");
+      throw new Error('grant type must be PRE_AUTH_GRANT_LITERAL');
     }
   }
 
@@ -151,8 +151,8 @@ export class AccessTokenClientV1_0_11 {
       throw new Error(TokenErrorResponse.invalid_request);
     }
     const issuer = getIssuerFromCredentialOfferPayload(requestPayload);
-    if (requestPayload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
-      isPinRequired = requestPayload.grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.user_pin_required ?? false;
+    if (requestPayload.grants?.[PRE_AUTH_GRANT_LITERAL]) {
+      isPinRequired = requestPayload.grants[PRE_AUTH_GRANT_LITERAL]?.user_pin_required ?? false;
     }
     debug(`Pin required for issuer ${issuer}: ${isPinRequired}`);
     return isPinRequired;

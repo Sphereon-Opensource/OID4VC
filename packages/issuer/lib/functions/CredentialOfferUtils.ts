@@ -10,7 +10,8 @@ import {
   Grant,
   GrantUrnIetf,
   IssuerMetadataV1_0_13,
-  PIN_VALIDATION_ERROR,
+  PIN_NOT_MATCH_ERROR,
+  PRE_AUTH_GRANT_LITERAL,
   TxCode,
   UniformCredentialOffer,
 } from '@sphereon/oid4vci-common'
@@ -71,9 +72,9 @@ export function createCredentialOfferObject(
     credential_offer.grants = {}
   }
   if (opts?.preAuthorizedCode) {
-    credential_offer.grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'] = {
+    credential_offer.grants[PRE_AUTH_GRANT_LITERAL] = {
       'pre-authorized_code': opts.preAuthorizedCode,
-      tx_code: ((opts.grants as Grant)?.['urn:ietf:params:oauth:grant-type:pre-authorized_code'] as GrantUrnIetf).tx_code ?? undefined,
+      tx_code: ((opts.grants as Grant)?.[PRE_AUTH_GRANT_LITERAL] as GrantUrnIetf).tx_code ?? undefined,
     }
   } else if (!credential_offer.grants?.authorization_code?.issuer_state) {
     credential_offer.grants = {
@@ -88,7 +89,7 @@ export function createCredentialOfferObject(
     credential_offer.grants = {}
   }
   if (opts?.preAuthorizedCode) {
-    credential_offer.grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'] = {
+    credential_offer.grants[PRE_AUTH_GRANT_LITERAL] = {
       'pre-authorized_code': opts.preAuthorizedCode,
       tx_code: opts.txCode,
     }
@@ -155,7 +156,7 @@ export function createCredentialOfferObjectv1_0_11(
     credential_offer.grants = {}
   }
   if (opts?.preAuthorizedCode) {
-    credential_offer.grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'] = {
+    credential_offer.grants[PRE_AUTH_GRANT_LITERAL] = {
       'pre-authorized_code': opts.preAuthorizedCode,
       user_pin_required: opts.userPinRequired ? opts.userPinRequired : false,
     }
@@ -229,8 +230,8 @@ export const isPreAuthorizedCodeExpired = (state: CredentialOfferSession, expira
   return now >= expirationTime
 }
 
-export const assertValidPinNumber = (pin?: string) => {
-  if (pin && !/[0-9{,8}]/.test(pin)) {
-    throw Error(PIN_VALIDATION_ERROR)
+export const assertValidPinNumber = (pin?: string, pinLength?: number) => {
+  if (pin && !RegExp(`[\\d\\D]{${pinLength ?? 6}}`).test(pin)) {
+    throw Error(`${PIN_NOT_MATCH_ERROR}`)
   }
 }

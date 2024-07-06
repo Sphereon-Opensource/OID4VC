@@ -14,6 +14,7 @@ import {
   JsonURIMode,
   OpenIDResponse,
   PRE_AUTH_CODE_LITERAL,
+  PRE_AUTH_GRANT_LITERAL,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
   TxCodeAndPinRequired,
@@ -107,8 +108,7 @@ export class AccessTokenClient {
 
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
       // we actually know it is there because of the isPreAuthCode call
-      request[PRE_AUTH_CODE_LITERAL] =
-        credentialOfferRequest?.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.[PRE_AUTH_CODE_LITERAL];
+      request[PRE_AUTH_CODE_LITERAL] = credentialOfferRequest?.credential_offer.grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL];
 
       return request as AccessTokenRequest;
     }
@@ -146,7 +146,7 @@ export class AccessTokenClient {
     }
     const issuer = getIssuerFromCredentialOfferPayload(requestPayload);
 
-    const grantDetails = requestPayload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code'];
+    const grantDetails = requestPayload.grants?.[PRE_AUTH_GRANT_LITERAL];
     const isPinRequired = !!grantDetails?.tx_code ?? false;
 
     LOG.warning(`Pin required for issuer ${issuer}: ${isPinRequired}`);
@@ -211,7 +211,7 @@ export class AccessTokenClient {
     if (accessTokenRequest.grant_type === GrantTypes.PRE_AUTHORIZED_CODE) {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyPreAuthorizedCode(accessTokenRequest);
-      this.assertAlphanumericPin(pinMeta, accessTokenRequest.user_pin);
+      this.assertAlphanumericPin(pinMeta, accessTokenRequest.tx_code ?? accessTokenRequest.user_pin);
     } else if (accessTokenRequest.grant_type === GrantTypes.AUTHORIZATION_CODE) {
       this.assertAuthorizationGrantType(accessTokenRequest.grant_type);
       this.assertNonEmptyCodeVerifier(accessTokenRequest);

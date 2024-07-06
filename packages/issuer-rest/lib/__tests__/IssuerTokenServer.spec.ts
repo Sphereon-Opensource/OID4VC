@@ -38,7 +38,7 @@ describe('OID4VCIServer', () => {
 
     const credentialOfferState1: CredentialOfferSession = {
       preAuthorizedCode: preAuthorizedCode1,
-      userPin: '493536',
+      txCode: '493536',
       notification_id: v4(),
       createdAt: +new Date(),
       lastUpdatedAt: +new Date(),
@@ -59,7 +59,6 @@ describe('OID4VCIServer', () => {
 
           grants: {
             'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-              user_pin_required: true,
               tx_code: {
                 length: 6,
                 input_mode: 'numeric',
@@ -78,17 +77,15 @@ describe('OID4VCIServer', () => {
         ...credentialOfferState1.credentialOffer,
         credential_offer: {
           ...credentialOfferState1.credentialOffer.credential_offer,
-
           grants: {
-            ...credentialOfferState1.credentialOffer.credential_offer!.grants!,
             'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-              ...credentialOfferState1.credentialOffer.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code'],
               'pre-authorized_code': preAuthorizedCode2,
             },
           },
         },
       },
     }
+    delete credentialOfferState2.txCode
     const credentialOfferState3: CredentialOfferSession = { ...credentialOfferState1, preAuthorizedCode: preAuthorizedCode3, createdAt: 0 }
     const credentialOfferSessions = new MemoryStates<CredentialOfferSession>()
     await credentialOfferSessions.set(preAuthorizedCode1, credentialOfferState1)
@@ -173,7 +170,7 @@ describe('OID4VCIServer', () => {
   it('should return the access token', async () => {
     const res = await requests(app)
       .post('/token')
-      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode1}&user_pin=493536`)
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode1}&tx_code=493536`)
     expect(res.statusCode).toEqual(200)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -189,7 +186,7 @@ describe('OID4VCIServer', () => {
   it('should return http code 400 with message User pin is required', async () => {
     const res = await requests(app)
       .post('/token')
-      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode1}&user_pin=12345678`)
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode1}&tx_code=12345678`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -198,7 +195,7 @@ describe('OID4VCIServer', () => {
     })
   })
   it('should return http code 400 with message pre-authorized_code is required', async () => {
-    const res = await requests(app).post('/token').send('grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&user_pin=493536')
+    const res = await requests(app).post('/token').send('grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&tx_code=493536')
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -207,7 +204,7 @@ describe('OID4VCIServer', () => {
     })
   })
   it('should return http code 400 with message unsupported grant_type', async () => {
-    const res = await requests(app).post('/token').send(`grant_type=non-existent&pre-authorized_code=${preAuthorizedCode1}&user_pin=493536`)
+    const res = await requests(app).post('/token').send(`grant_type=non-existent&pre-authorized_code=${preAuthorizedCode1}&tx_code=493536`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -218,7 +215,7 @@ describe('OID4VCIServer', () => {
   it('should return http code 400 with message PIN does not match', async () => {
     const res = await requests(app)
       .post('/token')
-      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode1}&user_pin=493537`)
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode1}&tx_code=493537`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -229,18 +226,18 @@ describe('OID4VCIServer', () => {
   it('should return http code 400 with message PIN must consist of maximum 8 numeric characters', async () => {
     const res = await requests(app)
       .post('/token')
-      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode1}&user_pin=invalid`)
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode1}&tx_code=000000`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
       error: 'invalid_grant',
-      error_description: 'PIN must consist of maximum 8 numeric characters',
+      error_description: 'PIN is invalid',
     })
   })
   it('should return http code 400 with message pre-authorized_code not found', async () => {
     const res = await requests(app)
       .post('/token')
-      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=test&user_pin=493536`)
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=test&tx_code=493536`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -251,7 +248,7 @@ describe('OID4VCIServer', () => {
   it('should return http code 400 with message User pin is not required', async () => {
     const res = await requests(app)
       .post('/token')
-      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode2}&user_pin=493536`)
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode2}&tx_code=493536`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -263,7 +260,7 @@ describe('OID4VCIServer', () => {
     await new Promise((r) => setTimeout(r, 2000))
     const res = await requests(app)
       .post('/token')
-      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode3}&user_pin=493536`)
+      .send(`grant_type=urn:ietf:params:oauth:grant-type:pre-authorized_code&pre-authorized_code=${preAuthorizedCode3}&tx_code=493536`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({

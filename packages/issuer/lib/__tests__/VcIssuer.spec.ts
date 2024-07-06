@@ -90,7 +90,7 @@ describe('VcIssuer', () => {
       lastUpdatedAt: +new Date(),
       status: IssueStatus.OFFER_CREATED,
       notification_id: v4(),
-      userPin: '123456',
+      txCode: '123456',
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'did:key:test',
@@ -492,7 +492,7 @@ describe('VcIssuer without did', () => {
       lastUpdatedAt: +new Date(),
       status: IssueStatus.OFFER_CREATED,
       notification_id: v4(),
-      userPin: '123456',
+      txCode: '123456',
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'test.com',

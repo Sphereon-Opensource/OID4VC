@@ -11,7 +11,8 @@ import {
   Jwt,
   JWTHeader,
   JWTPayload,
-  OpenId4VCIVersion,
+  OpenId4VCIVersion, PRE_AUTH_CODE_LITERAL,
+  PRE_AUTH_GRANT_LITERAL
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
 import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
@@ -297,8 +298,7 @@ describe('VcIssuer', () => {
     })
   })
   it('should get state on server side', async () => {
-    const preAuthCode =
-      client.credentialOffer!.credential_offer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
+    const preAuthCode = client.credentialOffer!.credential_offer.grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL]
     expect(preAuthCode).toBeDefined()
 
     if (preAuthCode) {

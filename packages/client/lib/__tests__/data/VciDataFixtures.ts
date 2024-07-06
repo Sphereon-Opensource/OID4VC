@@ -3,6 +3,7 @@ import {
   IssuerCredentialSubjectDisplay,
   IssuerMetadataV1_0_08,
   IssuerMetadataV1_0_13,
+  PRE_AUTH_GRANT_LITERAL,
 } from '@sphereon/oid4vci-common';
 import { ICredentialStatus, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
@@ -76,7 +77,7 @@ const mockData: VciMockDataStructure = {
         credential_endpoint: 'https://ngi-oidc4vci-test.spruceid.xyz/credential',
         token_endpoint: 'https://ngi-oidc4vci-test.spruceid.xyz/token',
         jwks_uri: 'https://ngi-oidc4vci-test.spruceid.xyz/jwks',
-        grant_types_supported: ['urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+        grant_types_supported: [PRE_AUTH_GRANT_LITERAL],
         credentials_supported: {
           OpenBadgeCredential: {
             formats: {
@@ -100,7 +101,7 @@ const mockData: VciMockDataStructure = {
       method: 'POST',
       request: {
         client_id: 'sphereon:ssi-wallet',
-        grant_type: 'urn:ietf:params:oauth:grant-type:pre-authorized_code',
+        grant_type: PRE_AUTH_GRANT_LITERAL,
         'pre-authorized_code':
           'eyJhbGciOiJFUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOlsiT3BlbkJhZGdlQ3JlZGVudGlhbCJdLCJleHAiOiIyMDIzLTA0LTE5VDExOjUzOjM4WiIsIm5vbmNlIjoiN3F4YldMcktpNTZjNjRlWjljaHJZeVUxbFVVQzMzV1YifQ.tDxAC8CsqN-DALOmY5ANEVf96fZfTzqHL4Aiq4IZzMJ-zSCrNkNBeuOK5D3RsJhSZcDMu2XvuG1RrSXJV0zHRg',
       },
@@ -141,7 +142,7 @@ const mockData: VciMockDataStructure = {
         pushed_authorization_request_endpoint: 'https://jff.walt.id/issuer-api/default/oidc/par',
         issuer: 'https://jff.walt.id/issuer-api/default',
         jwks_uri: 'https://jff.walt.id/issuer-api/default/oidc',
-        grant_types_supported: ['authorization_code', 'urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+        grant_types_supported: ['authorization_code', PRE_AUTH_GRANT_LITERAL],
         request_uri_parameter_supported: true,
         credentials_supported: {
           VerifiableId: {
@@ -343,7 +344,7 @@ const mockData: VciMockDataStructure = {
       method: 'POST',
       request: {
         client_id: 'sphereon:ssi-wallet',
-        grant_type: 'urn:ietf:params:oauth:grant-type:pre-authorized_code',
+        grant_type: PRE_AUTH_GRANT_LITERAL,
         'pre-authorized_code':
           'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1NzhkZWZjOS0wMTFlLTQ3ZTAtYmQ5YS03MWFlOGU4ZTJjYzYiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.uh1rX4qVqlp-YW-itLON8Zmov8t-xugCFDXlUSPuTSQ',
       },
@@ -450,7 +451,7 @@ const mockData: VciMockDataStructure = {
           ],
         },
         code_challenge_methods_supported: ['plain', 'S256'],
-        grant_types_supported: ['authorization_code', 'urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+        grant_types_supported: ['authorization_code', PRE_AUTH_GRANT_LITERAL],
         token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic'],
         issuer: 'https: //oidc4vc.uniissuer.io/',
         authorization_endpoint: 'https://oidc4vc.uniissuer.io/1.0/authorize',
@@ -463,7 +464,7 @@ const mockData: VciMockDataStructure = {
       method: 'POST',
       request: {
         client_id: 'sphereon:ssi-wallet',
-        grant_type: 'urn:ietf:params:oauth:grant-type:pre-authorized_code',
+        grant_type: PRE_AUTH_GRANT_LITERAL,
         'pre-authorized_code': 'rQhxqvmEQef2pFChuedmDWlp6iIifUVI',
       },
       response: {
@@ -505,7 +506,7 @@ const mockData: VciMockDataStructure = {
         jwks_uri: 'https://launchpad.vii.electron.mattrlabs.io/oidc/v1/auth/jwks',
         token_endpoint_auth_methods_supported: ['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post', 'private_key_jwt'],
         code_challenge_methods_supported: ['S256'],
-        grant_types_supported: ['authorization_code', 'urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+        grant_types_supported: ['authorization_code', PRE_AUTH_GRANT_LITERAL],
         response_modes_supported: ['form_post', 'fragment', 'query'],
         response_types_supported: ['code id_token', 'code', 'id_token', 'none'],
         scopes_supported: ['PermanentResidentCard', 'AcademicAward', 'LearnerProfile', 'OpenBadgeCredential'],
@@ -564,7 +565,7 @@ const mockData: VciMockDataStructure = {
       method: 'POST',
       request: {
         client_id: 'sphereon:ssi-wallet',
-        grant_type: 'urn:ietf:params:oauth:grant-type:pre-authorized_code',
+        grant_type: PRE_AUTH_GRANT_LITERAL,
         'pre-authorized_code': 'kI_19c0PtisCJBG-ngd9mA47UCKx4uoKglUp0gqmxKt',
       },
       response: {
@@ -658,7 +659,7 @@ const mockData: VciMockDataStructure = {
         credential_endpoint: 'https://oidc4vc.diwala.io/credential',
         token_endpoint: 'https://oidc4vc.diwala.io/token',
         jwks_uri: 'https://oidc4vc.diwala.io/jwks',
-        grant_types_supported: ['urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+        grant_types_supported: [PRE_AUTH_GRANT_LITERAL],
         credentials_supported: {
           OpenBadgeCredential: {
             formats: {
@@ -677,7 +678,7 @@ const mockData: VciMockDataStructure = {
       method: 'POST',
       request: {
         client_id: 'sphereon:ssi-wallet',
-        grant_type: 'urn:ietf:params:oauth:grant-type:pre-authorized_code',
+        grant_type: PRE_AUTH_GRANT_LITERAL,
         'pre-authorized_code':
           'eyJhbGciOiJIUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOiJPcGVuQmFkZ2VDcmVkZW50aWFsIiwiZXhwIjoxNjgxOTE1NzI5fQ.JmhU1jhMfw3f_DaIqnxurPyIW1makcwUs49Fm253z5Q',
       },
@@ -1408,7 +1409,7 @@ const mockData: VciMockDataStructure = {
             name: 'Chamber of Commerce',
           },
         ],
-        grant_types_supported: ['authorization_code', 'urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+        grant_types_supported: ['authorization_code', PRE_AUTH_GRANT_LITERAL],
         id_token_signing_alg_values_supported: ['ES256'],
         issuer: 'https://mijnkvk.acc.credenco.com',
         jwks_uri: 'https://mijnkvk.acc.credenco.com/jwks',

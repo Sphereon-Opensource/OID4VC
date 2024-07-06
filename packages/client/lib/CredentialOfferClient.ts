@@ -10,6 +10,8 @@ import {
   determineSpecVersionFromURI,
   getClientIdFromCredentialOfferPayload,
   OpenId4VCIVersion,
+  PRE_AUTH_CODE_LITERAL,
+  PRE_AUTH_GRANT_LITERAL,
   toUniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
@@ -64,17 +66,16 @@ export class CredentialOfferClient {
       ...(clientId && { clientId }),
       ...request,
       ...(grants?.authorization_code?.issuer_state && { issuerState: grants.authorization_code.issuer_state }),
-      ...(grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code'] && {
-        preAuthorizedCode: grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']['pre-authorized_code'],
+      ...(grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL] && {
+        preAuthorizedCode: grants[PRE_AUTH_GRANT_LITERAL][PRE_AUTH_CODE_LITERAL],
       }),
       userPinRequired:
-        request.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.user_pin_required ??
-        !!request.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code ??
+        request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.user_pin_required ??
+        !!request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code ??
         false,
-      ...(request.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code &&
-        {
-          // txCode: request.credential_offer?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code,
-        }),
+      ...(request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code && {
+        txCode: request.credential_offer.grants[PRE_AUTH_GRANT_LITERAL].tx_code,
+      }),
     };
   }
 
