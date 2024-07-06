@@ -326,8 +326,8 @@ export interface GrantUrnIetf {
   /**
    * REQUIRED. The code representing the Credential Issuer's authorization for the Wallet to obtain Credentials of a certain type.
    */
-  // v12, v13
   'pre-authorized_code': string;
+
   // v13
   /**
    * OPTIONAL. Object specifying whether the Authorization Server expects presentation of a Transaction Code by the
@@ -353,7 +353,7 @@ export interface GrantUrnIetf {
    */
   authorization_server?: string;
 
-  // v12 feature
+  // v12 and below feature
   /**
    * OPTIONAL. Boolean value specifying whether the AS
    * expects presentation of the End-User PIN along with the Token Request
@@ -369,6 +369,7 @@ export interface GrantUrnIetf {
 }
 
 export const PRE_AUTH_CODE_LITERAL = 'pre-authorized_code';
+export const PRE_AUTH_GRANT_LITERAL = 'urn:ietf:params:oauth:grant-type:pre-authorized_code';
 
 export type EndpointMetadataResult = EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11;
 

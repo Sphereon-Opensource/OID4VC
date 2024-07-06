@@ -28,6 +28,8 @@ import {
   NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
+  PRE_AUTH_CODE_LITERAL,
+  PRE_AUTH_GRANT_LITERAL,
   QRCodeOpts,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
@@ -104,7 +106,7 @@ export class VcIssuer<DIDDoc extends object> {
     let issuerState: string | undefined = undefined
     const { grants, credential_configuration_ids } = opts
 
-    if (!grants?.authorization_code && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
+    if (!grants?.authorization_code && !grants?.[PRE_AUTH_GRANT_LITERAL]) {
       throw Error(`No grant issuer state or pre-authorized code could be deduced`)
     }
     const credentialOfferPayload: CredentialOfferPayloadV1_0_13 = {
@@ -121,15 +123,15 @@ export class VcIssuer<DIDDoc extends object> {
     }
 
     let txCode: TxCode | undefined
-    if (grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
-      preAuthorizedCode = grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']
-      txCode = grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.tx_code
+    if (grants?.[PRE_AUTH_GRANT_LITERAL]) {
+      preAuthorizedCode = grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL]
+      txCode = grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code
       if (txCode !== undefined) {
-        grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'].tx_code = txCode
+        grants[PRE_AUTH_GRANT_LITERAL].tx_code = txCode
       }
       if (!preAuthorizedCode) {
         preAuthorizedCode = v4()
-        grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']['pre-authorized_code'] = preAuthorizedCode
+        grants[PRE_AUTH_GRANT_LITERAL][PRE_AUTH_CODE_LITERAL] = preAuthorizedCode
       }
     }
 
@@ -147,10 +149,10 @@ export class VcIssuer<DIDDoc extends object> {
     let userPin: string | undefined
     // todo: Double check this can only happen in pre-auth flow and if so make sure to not do the below when in a state is present (authorized flow)
     if (txCode) {
-      const pinLength = opts.pinLength ?? 4
+      const pinLength = txCode.length ?? opts.pinLength ?? 4
 
       userPin = ('' + Math.round((Math.pow(10, pinLength) - 1) * Math.random())).padStart(pinLength, '0')
-      assertValidPinNumber(userPin)
+      assertValidPinNumber(userPin, pinLength)
     }
     const createdAt = +new Date()
     const lastUpdatedAt = createdAt
@@ -343,12 +345,24 @@ export class VcIssuer<DIDDoc extends object> {
         credential.credentialSubject = Array.isArray(credential.credentialSubject) ? credentialSubjects : credentialSubjects[0]
       }
 
+      let issuer: string | undefined = undefined
+      if (credential.iss) {
+        issuer = credential.iss
+      } else if (credential.issuer) {
+        if (typeof credential.issuer === 'string') {
+          issuer = credential.issuer
+        } else if (typeof credential.issuer === 'object' && 'id' in credential.issuer && typeof credential.issuer.id === 'string') {
+          issuer = credential.issuer.id
+        }
+      }
+
       const verifiableCredential = await this.issueCredentialImpl(
         {
           credentialRequest: opts.credentialRequest,
           format,
           credential,
           jwtVerifyResult,
+          issuer,
         },
         signerCallback,
       )
@@ -438,7 +452,7 @@ export class VcIssuer<DIDDoc extends object> {
       const session: CredentialOfferSession | undefined = await this._credentialOfferSessions.getAsserted(id)
       const clientId = session?.clientId
       const grants = session?.credentialOffer?.credential_offer?.grants
-      if (!grants?.authorization_code?.issuer_state && !grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']) {
+      if (!grants?.authorization_code?.issuer_state && !grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL]) {
         throw new Error(GRANTS_MUST_NOT_BE_UNDEFINED)
       }
       return { session, clientId, grants }
@@ -546,7 +560,7 @@ export class VcIssuer<DIDDoc extends object> {
       // iss: OPTIONAL (string). The value of this claim MUST be the client_id of the client making the credential request.
       // This claim MUST be omitted if the Access Token authorizing the issuance call was obtained from a Pre-Authorized Code Flow through anonymous access to the Token Endpoint.
       // TODO We need to investigate further what the comment above means, because it's not clear if the client or the user may be authorized anonymously
-      // if (iss && grants && grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
+      // if (iss && grants && grants[PRE_AUTH_GRANT_LITERAL]) {
       //   throw new Error(ISS_PRESENT_IN_PRE_AUTHORIZED_CODE_CONTEXT)
       // }
       /*if (iss && iss !== clientId) {
@@ -597,6 +611,7 @@ export class VcIssuer<DIDDoc extends object> {
       credential: CredentialIssuanceInput
       jwtVerifyResult: JwtVerifyResult<DIDDoc>
       format?: OID4VCICredentialFormat
+      issuer?: string
     },
     issuerCallback?: CredentialSignerCallback<DIDDoc>,
   ): Promise<W3CVerifiableCredential | CompactSdJwtVc> {
@@ -604,8 +619,6 @@ export class VcIssuer<DIDDoc extends object> {
       throw new Error(ISSUER_CONFIG_ERROR)
     }
     const credential = issuerCallback ? await issuerCallback(opts) : await this._credentialSignerCallback(opts)
-    const uniform = CredentialMapper.toUniformCredential(credential)
-    const issuer = uniform.issuer ? (typeof uniform.issuer === 'string' ? uniform.issuer : uniform.issuer.id) : '<unknown>'
 
     // TODO: Create builder
     EVENTS.emit(CredentialEventNames.OID4VCI_CREDENTIAL_ISSUED, {
@@ -613,7 +626,7 @@ export class VcIssuer<DIDDoc extends object> {
       id: v4(),
       data: credential,
       // TODO: Format, request etc
-      initiator: issuer ?? '<unknown>',
+      initiator: opts.issuer ?? '<unknown>',
       initiatorType: InitiatorType.EXTERNAL,
       system: System.OID4VCI,
       subsystem: SubSystem.VC_ISSUER,

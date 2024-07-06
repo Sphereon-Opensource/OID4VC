@@ -1,7 +1,7 @@
 import Debug from 'debug';
-import jwtDecode, { JwtPayload } from 'jwt-decode';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 
-import { VCI_LOG_COMMON } from '../index';
+import { PRE_AUTH_CODE_LITERAL, PRE_AUTH_GRANT_LITERAL, VCI_LOG_COMMON } from '../index';
 import {
   AssertedUniformCredentialOffer,
   AuthzFlowType,
@@ -108,15 +108,15 @@ export const getStateFromCredentialOfferPayload = (credentialOffer: CredentialOf
   if ('grants' in credentialOffer) {
     if (credentialOffer.grants?.authorization_code) {
       return credentialOffer.grants.authorization_code.issuer_state;
-    } else if (credentialOffer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']) {
-      return credentialOffer.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code'];
+    } else if (credentialOffer.grants?.[PRE_AUTH_GRANT_LITERAL]) {
+      return credentialOffer.grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL];
     }
   }
   if ('op_state' in credentialOffer) {
     // older spec versions
     return credentialOffer.op_state;
-  } else if ('pre-authorized_code' in credentialOffer) {
-    return credentialOffer['pre-authorized_code'];
+  } else if (PRE_AUTH_CODE_LITERAL in credentialOffer) {
+    return credentialOffer[PRE_AUTH_CODE_LITERAL];
   }
 
   return;
@@ -274,7 +274,7 @@ export async function toUniformCredentialOfferRequest(
 
 export function isPreAuthCode(request: UniformCredentialOfferPayload | UniformCredentialOffer) {
   const payload = 'credential_offer' in request ? request.credential_offer : (request as UniformCredentialOfferPayload);
-  return payload?.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code'] !== undefined;
+  return payload?.grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL] !== undefined;
 }
 
 export async function assertedUniformCredentialOffer(
@@ -338,9 +338,9 @@ export function toUniformCredentialOfferPayload(
     } else if (offerPayloadAsV8V9.user_pin_required !== undefined) {
       user_pin_required = offerPayloadAsV8V9.user_pin_required;
     }
-    if (offerPayloadAsV8V9['pre-authorized_code']) {
-      grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'] = {
-        'pre-authorized_code': offerPayloadAsV8V9['pre-authorized_code'],
+    if (offerPayloadAsV8V9[PRE_AUTH_CODE_LITERAL]) {
+      grants[PRE_AUTH_GRANT_LITERAL] = {
+        'pre-authorized_code': offerPayloadAsV8V9[PRE_AUTH_CODE_LITERAL],
         user_pin_required,
       };
     }
@@ -375,7 +375,7 @@ export function determineFlowType(
   if (payload.grants?.authorization_code) {
     supportedFlows.push(AuthzFlowType.AUTHORIZATION_CODE_FLOW);
   }
-  if (payload.grants?.['urn:ietf:params:oauth:grant-type:pre-authorized_code']?.['pre-authorized_code']) {
+  if (payload.grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL]) {
     supportedFlows.push(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW);
   }
   if (supportedFlows.length === 0 && version < OpenId4VCIVersion.VER_1_0_09) {
@@ -415,10 +415,7 @@ export function determineGrantTypes(
     if (grants.authorization_code) {
       types.push(GrantTypes.AUTHORIZATION_CODE);
     }
-    if (
-      grants['urn:ietf:params:oauth:grant-type:pre-authorized_code'] &&
-      grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']['pre-authorized_code']
-    ) {
+    if (grants[PRE_AUTH_GRANT_LITERAL] && grants[PRE_AUTH_GRANT_LITERAL][PRE_AUTH_CODE_LITERAL]) {
       types.push(GrantTypes.PRE_AUTHORIZED_CODE);
     }
   }

@@ -1,5 +1,5 @@
 import Debug from 'debug';
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 import { PoPMode, VCI_LOG_COMMON } from '..';
 import {

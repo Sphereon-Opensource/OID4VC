@@ -1,4 +1,11 @@
-import { AccessTokenRequest, AccessTokenResponse, GrantTypes, OpenIDResponse, WellKnownEndpoints } from '@sphereon/oid4vci-common';
+import {
+  AccessTokenRequest,
+  AccessTokenResponse,
+  GrantTypes,
+  OpenIDResponse,
+  PRE_AUTH_CODE_LITERAL,
+  WellKnownEndpoints,
+} from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
@@ -48,7 +55,7 @@ describe('AccessTokenClient should', () => {
         pinMetadata: {
           isPinRequired: true,
           txCode: {
-            length: accessTokenRequest['pre-authorized_code'].length,
+            length: accessTokenRequest[PRE_AUTH_CODE_LITERAL].length,
             input_mode: 'numeric',
           },
         },
