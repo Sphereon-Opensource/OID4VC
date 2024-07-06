@@ -11,8 +11,9 @@ import {
   Jwt,
   JWTHeader,
   JWTPayload,
-  OpenId4VCIVersion, PRE_AUTH_CODE_LITERAL,
-  PRE_AUTH_GRANT_LITERAL
+  OpenId4VCIVersion,
+  PRE_AUTH_CODE_LITERAL,
+  PRE_AUTH_GRANT_LITERAL,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
 import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'

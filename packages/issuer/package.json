@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@sphereon/oid4vci-common": "workspace:*",
-    "@sphereon/ssi-types": "0.26.1-next.6",
+    "@sphereon/ssi-types": "0.26.1-next.132",
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
@@ -27,9 +27,9 @@
   },
   "devDependencies": {
     "@sphereon/oid4vci-client": "workspace:*",
-    "@types/jest": "^29.5.3",
-    "@types/node": "^18.19.31",
-    "@types/uuid": "^9.0.2",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^18.19.39",
+    "@types/uuid": "^9.0.8",
     "did-resolver": "^4.1.0",
     "typescript": "5.4.5"
   },
