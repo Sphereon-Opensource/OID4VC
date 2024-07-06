@@ -9,7 +9,7 @@ export interface CredentialOfferSession extends StateType {
   clientId?: string;
   credentialOffer: AssertedUniformCredentialOffer;
   credentialDataSupplierInput?: CredentialDataSupplierInput; // Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
-  userPin?: string;
+  txCode?: string; // in here we only store the txCode, previously < V13 this was the userPin. We map the userPin onto this value
   status: IssueStatus;
   error?: string;
   lastUpdatedAt: number;

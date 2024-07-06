@@ -1,4 +1,4 @@
-import { AuthzFlowType, CredentialOfferPayloadV1_0_13, CredentialOfferRequestWithBaseUrl } from '@sphereon/oid4vci-common';
+import { AuthzFlowType, CredentialOfferPayloadV1_0_13, CredentialOfferRequestWithBaseUrl, PRE_AUTH_GRANT_LITERAL } from '@sphereon/oid4vci-common';
 
 export const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io';
 export const IDENTIPROOF_AS_URL = 'https://auth.research.identiproof.io';
@@ -48,6 +48,11 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
   scheme: 'openid-credential-offer',
   supportedFlows: [AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW],
   version: 1013,
+  txCode: {
+    description: 'Please provide the one-time code that was sent via e-mail',
+    input_mode: 'numeric',
+    length: 4,
+  },
   userPinRequired: true, // Determined from above tx_code
 };
 export const INITIATION_TEST_V1_0_08: CredentialOfferRequestWithBaseUrl = {
@@ -84,7 +89,7 @@ export const IDENTIPROOF_AS_METADATA = {
   token_endpoint_auth_methods_supported: ['client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt'],
   jwks_uri: 'https://auth.research.identiproof.io/oauth2/jwks',
   response_types_supported: ['code'],
-  grant_types_supported: ['authorization_code', 'urn:ietf:params:oauth:grant-type:pre-authorized_code', 'client_credentials', 'refresh_token'],
+  grant_types_supported: ['authorization_code', PRE_AUTH_GRANT_LITERAL, 'client_credentials', 'refresh_token'],
   revocation_endpoint: 'https://auth.research.identiproof.io/oauth2/revoke',
   revocation_endpoint_auth_methods_supported: ['client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt'],
   introspection_endpoint: 'https://auth.research.identiproof.io/oauth2/introspect',
@@ -168,7 +173,7 @@ export const SPRUCE_OID4VCI_METADATA = {
   credential_endpoint: 'https://ngi-oidc4vci-test.spruceid.xyz/credential',
   token_endpoint: 'https://ngi-oidc4vci-test.spruceid.xyz/token',
   jwks_uri: 'https://ngi-oidc4vci-test.spruceid.xyz/jwks',
-  grant_types_supported: ['urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+  grant_types_supported: [PRE_AUTH_GRANT_LITERAL],
   credentials_supported: {
     OpenBadgeCredential: {
       formats: {
@@ -232,7 +237,7 @@ export const DANUBE_OIDC_METADATA = {
     ],
   },
   code_challenge_methods_supported: ['plain', 'S256'],
-  grant_types_supported: ['authorization_code', 'urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+  grant_types_supported: ['authorization_code', PRE_AUTH_GRANT_LITERAL],
   token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic'],
   authorization_endpoint: 'https://oidc4vc.uniissuer.io/authorize',
   token_endpoint: 'https://oidc4vc.uniissuer.io/token',
@@ -245,7 +250,7 @@ export const WALT_OID4VCI_METADATA = {
   pushed_authorization_request_endpoint: 'https://jff.walt.id/issuer-api/oidc/par',
   issuer: 'https://jff.walt.id/issuer-api',
   jwks_uri: 'https://jff.walt.id/issuer-api/oidc',
-  grant_types_supported: ['authorization_code', 'urn:ietf:params:oauth:grant-type:pre-authorized_code'],
+  grant_types_supported: ['authorization_code', PRE_AUTH_GRANT_LITERAL],
   request_uri_parameter_supported: true,
   credentials_supported: {
     VerifiableDiploma: {

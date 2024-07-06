@@ -138,12 +138,12 @@ describe('VcIssuer builder should', () => {
       status: IssueStatus.OFFER_CREATED,
       clientId: 'test_client',
       createdAt: preAuthorizedCodecreatedAt,
-      userPin: '123456',
+      txCode: '123456',
       credentialOffer: { credential_offer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' } },
     })
     await expect(vcIssuer.credentialOfferSessions?.get('test')).resolves.toMatchObject({
       clientId: 'test_client',
-      userPin: '123456',
+      txCode: '123456',
       status: IssueStatus.OFFER_CREATED,
       lastUpdatedAt: preAuthorizedCodecreatedAt,
       createdAt: preAuthorizedCodecreatedAt,
@@ -196,12 +196,12 @@ describe('VcIssuer builder should', () => {
       status: IssueStatus.OFFER_CREATED,
       clientId: 'test_client',
       createdAt: preAuthorizedCodecreatedAt,
-      userPin: '123456',
+      txCode: '123456',
       credentialOffer: { credential_offer: { credentials: ['test_credential'], credential_issuer: 'test_issuer' } },
     })
     await expect(vcIssuer.credentialOfferSessions?.get('test')).resolves.toMatchObject({
       clientId: 'test_client',
-      userPin: '123456',
+      txCode: '123456',
       status: IssueStatus.OFFER_CREATED,
       lastUpdatedAt: preAuthorizedCodecreatedAt,
       createdAt: preAuthorizedCodecreatedAt,

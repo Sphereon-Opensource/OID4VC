@@ -312,7 +312,8 @@ export interface AccessTokenRequest {
   'pre-authorized_code': string;
   redirect_uri?: string;
   scope?: string;
-  user_pin?: string;
+  user_pin?: string; //pre draft 13
+  tx_code?: string; //draft 13
   [s: string]: unknown;
 }
 
