@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["test/**/*.ts", "generator/**/*.ts"],
   "ts-node": {
     "esm": false
-  }
+  },
+  "exclude": ["**/__tests__/**/*", "**/dist/**/*", "**/coverage/**"]
 }

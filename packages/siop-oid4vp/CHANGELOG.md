@@ -1,10 +1,10 @@
 # Release Notes
 
-
 The DID Auth SIOP typescript library is still in an beta state at this point. Please note that the interfaces might
 still change a bit as the software still is in active development.
 
 ## 0.6.5
+
 - Added:
   - Initial support for OID4VP draft 20
   - Removed did-jwt and did-resolver dependencies
