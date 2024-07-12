@@ -1,7 +1,7 @@
 {
   "name": "@sphereon/oid4vci-workspace",
   "version": "0.11.0",
-  "description": "OpenID for Verifiable Credential Issuance workspace",
+  "description": "OpenID for Verifiable Credentials",
   "author": "Sphereon",
   "license": "Apache-2.0",
   "private": true,
@@ -12,8 +12,8 @@
     "fix:prettier": "prettier --write \"{packages,__tests__,!dist}/**/*.{ts,tsx,js,json,md,yml}\"",
     "build": "pnpm -r --stream build",
     "build:clean": "lerna clean -y && pnpm install && lerna run build:clean --concurrency 1",
-    "test:ci": "jest --config=jest.json",
-    "test": "jest --verbose --config=jest.json --coverage=true --detectOpenHandles",
+    "test:ci": "jest --config=jest.json && jest --config=packages/siop-oid4vp/jest.json",
+    "test": "jest --verbose --config=jest.json --coverage=true --detectOpenHandles && jest --verbose --config=packages/siop-oid4vp/jest.json --coverage=true --detectOpenHandles",
     "clean": "rimraf --glob **/dist **/coverage **/pnpm-lock.yaml packages/**/node_modules node_modules packages/**/tsconfig.tsbuildinfo",
     "publish:latest": "lerna publish --conventional-commits --include-merged-tags --create-release github --yes --dist-tag latest --registry https://registry.npmjs.org",
     "publish:next": "lerna publish --conventional-prerelease --force-publish --canary --no-git-tag-version --include-merged-tags --preid next --pre-dist-tag next --yes --registry https://registry.npmjs.org",
@@ -49,11 +49,17 @@
     "Sphereon",
     "Verifiable Credentials",
     "OpenID",
+    "SIOP",
+    "Self Issued OpenID Provider",
+    "OPenId for Verifiable Presentations",
     "OpenID for Verifiable Credential Issuance",
     "OAuth2",
     "SSI",
     "OpenID4VCI",
+    "OpenID4VP",
     "OIDC4VCI",
-    "OID4VCI"
+    "OIDC4VP",
+    "OID4VCI",
+    "OID4VP"
   ]
 }

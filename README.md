@@ -1,7 +1,7 @@
 <h1 align="center">
   <br>
   <a href="https://www.sphereon.com"><img src="https://sphereon.com/content/themes/sphereon/assets/img/logo.svg" alt="Sphereon" width="400"></a>
-    <br>OpenID for Verifiable Credential Issuance - Client and Issuer
+    <br>OpenID for Verifiable Credentials
   <br>
 </h1>
 
@@ -11,9 +11,11 @@ _IMPORTANT the packages are still in an early development stage, which means tha
 
 # Background
 
-This is a mono-repository with a client and issuer pacakge to request and receive Verifiable Credentials using
+This is a mono-repository with a client and issuer package to request and receive Verifiable Credentials using
 the [OpenID for Verifiable Credential Issuance](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) (
-OpenID4VCI) specification for receiving Verifiable Credentials as a holder/subject.
+OpenID4VCI) specification for receiving Verifiable Credentials as a holder/subject. In addition the monorepo contains a package
+for requesting the presentation of Verifiable Credentials and Verifying these presentations [OpenID for Verifiable Presentations](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html) (
+OpenID4VP)
 
 OpenID4VCI defines an API designated as Credential Endpoint that is used to issue verifiable credentials and
 corresponding OAuth 2.0 based authorization mechanisms (see [RFC6749]) that a Wallet uses to obtain authorization to
@@ -36,8 +38,11 @@ The OpenID4VCI client is typically used in wallet type of applications, where th
 The OpenID4VCI issuer is used in issuer type applications, where an organization is issuing the credential(s). More info can be found in the issuer [README](./packages/issuer/README.md). 
 Please note that the Issuer is a library. It has some examples on how to run it with REST endpoints. If you are however looking for a full solution we suggest our [SSI SDK](https://github.com/Sphereon-Opensource/ssi-sdk) or the [demo](https://github.com/Sphereon-Opensource/OID4VC-demo)
 
+## OpenID for Verifiable Presentations
 
-# Flows
+The SIOP-OpenID4VP package is used in wallet type applications and verifier type of applications. Meaning it provides both Wallet (OpenId Provider) and Verifier (Relying Party) functionality. More info can be found in the siop-oid4vp package [README](./packages/siop-oid4vp/README.md)
+
+# OpenID for VCI Flows
 
 The spec lists 2 flows:
 
@@ -53,3 +58,7 @@ authenticate first.
 The below diagram shows the steps involved in the pre-authorized code flow. Note that inner wallet functionalities (like
 saving VCs) are out of scope for this library. Also This library doesn't include any functionalities of a VC Issuer
 ![Flow diagram](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Sphereon-Opensource/OID4VCI-client/develop/docs/preauthorized-code-flow.puml)
+
+# OpenID for VP Flows
+
+Visit the [README](./packages/siop-oid4vp/README.md) for more information.
