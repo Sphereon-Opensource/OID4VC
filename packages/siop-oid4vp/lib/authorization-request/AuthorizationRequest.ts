@@ -123,7 +123,7 @@ export class AuthorizationRequest {
     if (parsedJwt) {
       requestObjectPayload = parsedJwt.payload as RequestObjectPayload
 
-      const jwtVerifier = await getRequestObjectJwtVerifier({ ...parsedJwt, payload: requestObjectPayload }, { type: 'request-object', raw: jwt })
+      const jwtVerifier = await getRequestObjectJwtVerifier({ ...parsedJwt, payload: requestObjectPayload }, { raw: jwt })
       const result = await opts.verifyJwtCallback(jwtVerifier, { ...parsedJwt, raw: jwt })
       if (!result) {
         throw Error(SIOPErrors.ERROR_VERIFYING_SIGNATURE)

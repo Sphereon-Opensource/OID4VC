@@ -158,7 +158,7 @@ export const getRequestObjectJwtVerifier = async (
   } else if (clientIdScheme === 'verifier_attestation') {
     const verifierAttestationSubtype = 'verifier-attestation+jwt'
     if (!jwt.header.jwt) {
-      throw new Error(SIOPErrors.MISSING_ATTESTATION_JWT)
+      throw new Error(SIOPErrors.MISSING_ATTESTATION_JWT_WITH_CLIENT_ID_SCHEME_ATTESTATION)
     }
     // TODO: is this correct? not 100% sure based on the spec
     if (jwt.header.typ !== verifierAttestationSubtype) {
