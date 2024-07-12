@@ -32,6 +32,15 @@ interface X5cJwtVerifier extends JwtVerifierBase {
   issuer: string
 }
 
+interface OpenIdFederationjwtVerifier extends JwtVerifierBase {
+  method: 'openid-federation'
+
+  /**
+   * The OpenId federation Entity
+   */
+  entityId: string
+}
+
 type JwkJwtVerifier =
   | (JwtVerifierBase & {
       method: 'jwk'
@@ -52,83 +61,99 @@ interface CustomJwtVerifier extends JwtVerifierBase {
   method: 'custom'
 }
 
-export type JwtVerifier = DidJwtVerifier | X5cJwtVerifier | CustomJwtVerifier | JwkJwtVerifier
+export type JwtVerifier = DidJwtVerifier | X5cJwtVerifier | CustomJwtVerifier | JwkJwtVerifier | OpenIdFederationjwtVerifier
+
+export const getDidJwtVerifier = (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): DidJwtVerifier => {
+  const { type } = options
+  if (!jwt.header.kid) throw new Error(`${SIOPErrors.INVALID_JWT} Missing kid header.`)
+
+  if (!jwt.header.kid.includes('#')) {
+    throw new Error(`${SIOPErrors.INVALID_JWT}. '${type}' contains an invalid kid header.`)
+  }
+  return { method: 'did', didUrl: jwt.header.kid, type: type }
+}
+
+export const getX5cVerifier = (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): X5cJwtVerifier => {
+  const { type } = options
+  if (!jwt.header.x5c) throw new Error(`${SIOPErrors.INVALID_JWT} Missing x5c header.`)
+
+  if (!Array.isArray(jwt.header.x5c) || jwt.header.x5c.length === 0 || !jwt.header.x5c.every((cert) => typeof cert === 'string')) {
+    throw new Error(`${SIOPErrors.INVALID_JWT}. '${type}' contains an invalid x5c header.`)
+  }
+  return { method: 'x5c', x5c: jwt.header.x5c, issuer: jwt.payload.iss, type: type }
+}
+
+export const getJwkVerifier = async (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): Promise<JwkJwtVerifier> => {
+  const { type } = options
+  if (!jwt.header.jwk) throw new Error(`${SIOPErrors.INVALID_JWT} Missing jwk header.`)
+
+  if (typeof jwt.header.jwk !== 'object') {
+    throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' contains an invalid jwk header.`)
+  }
+  if (type !== 'id-token') {
+    // Users need to check if the iss claim matches an entity they trust
+    // for type === 'verifier-attestation'
+    return { method: 'jwk', type, jwk: jwt.header.jwk }
+  }
+
+  if (typeof jwt.payload.sub_jwk !== 'string') {
+    throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' missing sub_jwk claim.`)
+  }
+
+  const jwkThumbPrintUri = jwt.payload.sub_jwk
+  const digestAlgorithm = await getDigestAlgorithmFromJwkThumbprintUri(jwkThumbPrintUri)
+  const selfComputedJwkThumbPrintUri = await calculateJwkThumbprintUri(jwt.header.jwk as JWK, digestAlgorithm)
+
+  if (selfComputedJwkThumbPrintUri !== jwkThumbPrintUri) {
+    throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' contains an invalid sub_jwk claim.`)
+  }
+
+  return { method: 'jwk', type, jwk: jwt.header.jwk, jwkThumbprint: jwt.payload.sub_jwk }
+}
 
 export const getJwtVerifierWithContext = async (
   jwt: { header: JwtHeader; payload: JwtPayload },
   options: { type: JwtType },
 ): Promise<JwtVerifier> => {
-  const type = options.type
+  const { header, payload } = jwt
 
-  if (jwt.header.kid?.startsWith('did:')) {
-    if (!jwt.header.kid.includes('#')) {
-      throw new Error(`${SIOPErrors.INVALID_JWT}. '${type}' contains an invalid kid header.`)
-    }
-    return { method: 'did', didUrl: jwt.header.kid, type }
-  } else if (jwt.header.x5c) {
-    if (!Array.isArray(jwt.header.x5c) || jwt.header.x5c.length === 0 || !jwt.header.x5c.every((cert) => typeof cert === 'string')) {
-      throw new Error(`${SIOPErrors.INVALID_JWT}. '${type}' contains an invalid x5c header.`)
-    }
-    return { method: 'x5c', x5c: jwt.header.x5c, issuer: jwt.payload.iss, type }
-  } else if (jwt.header.jwk) {
-    if (typeof jwt.header.jwk !== 'object') {
-      throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' contains an invalid jwk header.`)
-    }
-    if (type !== 'id-token') {
-      // Users need to check if the iss claim matches an entity they trust
-      // for type === 'verifier-attestation'
-      return { method: 'jwk', type, jwk: jwt.header.jwk }
-    }
+  if (header.kid?.startsWith('did:')) return getDidJwtVerifier({ header, payload }, options)
+  else if (jwt.header.x5c) return getX5cVerifier({ header, payload }, options)
+  else if (jwt.header.jwk) return getJwkVerifier({ header, payload }, options)
 
-    if (typeof jwt.payload.sub_jwk !== 'string') {
-      throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' is missing the sub_jwk claim.`)
-    }
-
-    const jwkThumbPrintUri = jwt.payload.sub_jwk
-    const digestAlgorithm = await getDigestAlgorithmFromJwkThumbprintUri(jwkThumbPrintUri)
-    const selfComputedJwkThumbPrintUri = await calculateJwkThumbprintUri(jwt.header.jwk as JWK, digestAlgorithm)
-
-    if (selfComputedJwkThumbPrintUri !== jwkThumbPrintUri) {
-      throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' contains an invalid sub_jwk claim.`)
-    }
-
-    return { method: 'jwk', type, jwk: jwt.header.jwk, jwkThumbprint: jwt.payload.sub_jwk }
-  }
-
-  return { method: 'custom', type }
+  return { method: 'custom', type: options.type }
 }
 
 export type VerifyJwtCallback = (jwtVerifier: JwtVerifier, jwt: { header: JwtHeader; payload: JwtPayload; raw: string }) => Promise<boolean>
 
 export const getRequestObjectJwtVerifier = async (
   jwt: { header: JwtHeader; payload: RequestObjectPayload },
-  options: { type: 'request-object'; raw: string },
+  options: { raw: string },
 ): Promise<JwtVerifier> => {
-  const type = options.type
+  const type = 'request-object'
 
   const clientIdScheme = jwt.payload.client_id_scheme
   const clientId = jwt.payload.client_id
 
-  if (clientIdScheme === 'did') {
-    if (!jwt.header.kid) {
-      throw new Error(SIOPErrors.INVALID_REQUEST_OBJECT_DID_SCHEME_JWT)
-    }
+  if (!clientIdScheme) {
     return getJwtVerifierWithContext(jwt, { type })
+  }
+
+  if (clientIdScheme === 'did') {
+    return getDidJwtVerifier(jwt, { type })
   } else if (clientIdScheme === 'pre-registered') {
     // All validations must be done manually
     // The Verifier metadata is obtained using [RFC7591] or through out-of-band mechanisms.
     return getJwtVerifierWithContext(jwt, { type })
   } else if (clientIdScheme === 'x509_san_dns' || clientIdScheme === 'x509_san_uri') {
-    // Make sure that the jwt is x509 protected
-    if (!jwt.header.x5c) {
-      throw new Error(SIOPErrors.INVALID_REQUEST_OBJECT_X509_SCHEME_JWT)
-    }
-    return getJwtVerifierWithContext(jwt, { type })
+    return getX5cVerifier(jwt, { type })
   } else if (clientIdScheme === 'redirect_uri') {
     if (jwt.payload.redirect_uri && jwt.payload.redirect_uri !== clientId) {
-      throw new Error(`Invalid request object payload. The redirect_uri must match the client_id with client_id_scheme 'redirect_uri'.`)
+      throw new Error(SIOPErrors.INVALID_CLIENT_ID_MUST_MATCH_REDIRECT_URI)
     }
-    if (options.raw.split('.').length > 2) throw new Error(`${SIOPErrors.INVALID_JWT} The '${type}' Jwt must not not be signed.`)
+    if (options.raw.split('.').length > 2) {
+      throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' JWT must not not be signed.`)
+    }
     return getJwtVerifierWithContext(jwt, { type })
   } else if (clientIdScheme === 'verifier_attestation') {
     const verifierAttestationSubtype = 'verifier-attestation+jwt'
@@ -163,7 +188,7 @@ export const getRequestObjectJwtVerifier = async (
         !jwt.payload.redirect_uri ||
         !attestationPayload.redirect_uris.includes(jwt.payload.redirect_uri)
       ) {
-        throw new Error(`${SIOPErrors.BAD_VERIFIER_ATTESTATION} request object redirect_uri in not included in the verifier attestation jwt.`)
+        throw new Error(SIOPErrors.BAD_VERIFIER_ATTESTATION_REDIRECT_URIS)
       }
     }
 
@@ -171,11 +196,12 @@ export const getRequestObjectJwtVerifier = async (
     // If the Wallet cannot establish trust, it MUST refuse the request.
     return { method: 'jwk', type, jwk: attestationPayload.cnf['jwk'] as JWK }
   } else if (clientIdScheme === 'entity_id') {
-    // TODO!
-    throw new Error('Not implemented yet')
-  } else if (clientIdScheme) {
-    throw new Error(SIOPErrors.INVALID_CLIENT_ID_SCHEME)
+    if (!clientId.startsWith('http')) {
+      throw new Error(SIOPErrors.INVALID_REQUEST_OBJECT_ENTITY_ID_SCHEME_CLIENT_ID)
+    }
+
+    return { method: 'openid-federation', type, entityId: clientId }
   }
 
-  return getJwtVerifierWithContext(jwt, { type })
+  throw new Error(SIOPErrors.INVALID_CLIENT_ID_SCHEME)
 }
