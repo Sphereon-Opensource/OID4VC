@@ -8,8 +8,6 @@ with OpenID4VP support</center>
 </h1>
 <br>
 
-[![CI](https://github.com/Sphereon-Opensource/SIOP-OpenID4VP/actions/workflows/main.yml/badge.svg)](https://github.com/Sphereon-Opensource/SIOP-OpenID4VP/actions/workflows/main.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/SIOP-OpenID4VP/branch/develop/graph/badge.svg?token=9P1JGUYA35)](https://codecov.io/gh/Sphereon-Opensource/SIOP-OpenID4VP) [![NPM Version](https://img.shields.io/npm/v/@sphereon/did-auth-siop.svg)](https://npm.im/@sphereon/did-auth-siop)
-
 An OpenID authentication library conforming to
 the [Self Issued OpenID Provider v2 (SIOPv2)](https://openid.net/specs/openid-connect-self-issued-v2-1_0.html)
 and [OpenID for Verifiable Presentations (OpenID4VP)](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html)
