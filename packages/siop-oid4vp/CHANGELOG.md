@@ -1,3 +1,23 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# [0.15.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.14.0...v0.15.0) (2024-07-15)
+
+### Bug Fixes
+
+- add openid federation jwtVerifier ([a5755ff](https://github.com/Sphereon-Opensource/OID4VCI/commit/a5755ffc5244f1ae72d9ad160c2271de07202ac1))
+- build ([2da9205](https://github.com/Sphereon-Opensource/OID4VCI/commit/2da92051cb6387e6c10dd0ff2767aeeddab17dd9))
+- build ([84aba5e](https://github.com/Sphereon-Opensource/OID4VCI/commit/84aba5e7cc9aca7b597f24c907dc717be45768d7))
+- remove outdated docs ([31731e7](https://github.com/Sphereon-Opensource/OID4VCI/commit/31731e7628a93a1f749600ee138d2470a5048353))
+- siop-oid4vp build order ([dacf629](https://github.com/Sphereon-Opensource/OID4VCI/commit/dacf629be63f130c0f027deea6dfdc988eaa3c1b))
+
+### Features
+
+- add siop-oid4vp package ([6bc76dd](https://github.com/Sphereon-Opensource/OID4VCI/commit/6bc76dd2e4843e0acf07fc44c4c0c247496d1973))
+- did-auth-siop-adapter ([32ec2fc](https://github.com/Sphereon-Opensource/OID4VCI/commit/32ec2fc27a22cd069dc12fe011debef7f870cf5d))
+
 # Release Notes
 
 The DID Auth SIOP typescript library is still in an beta state at this point. Please note that the interfaces might
