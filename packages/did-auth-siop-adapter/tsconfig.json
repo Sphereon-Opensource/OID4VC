@@ -13,6 +13,5 @@
     {
       "path": "../common"
     }
-  ],
-  "exclude": ["**/__tests__/**/*", "**/dist/**/*", "**/coverage/**/*"]
+  ]
 }

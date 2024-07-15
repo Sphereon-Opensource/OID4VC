@@ -21,7 +21,7 @@ describe('requestObjectJwtVerifier', () => {
           header: {},
           payload: { ...baseJwtPayload, client_id_scheme: 'wrong' as never },
         },
-        { type: 'request-object', raw: '' },
+        { raw: '' },
       ),
     ).rejects.toThrow(SIOPErrors.INVALID_CLIENT_ID_SCHEME)
   })
@@ -32,7 +32,7 @@ describe('requestObjectJwtVerifier', () => {
         header: { kid: 'did:example.com#1234' },
         payload: { ...baseJwtPayload, client_id_scheme: 'did' },
       },
-      { type: 'request-object', raw: '' },
+      { raw: '' },
     )
 
     const expectedJwtVerifier: JwtVerifier = { type: 'request-object', method: 'did', didUrl: 'did:example.com#1234' }
@@ -45,10 +45,10 @@ describe('requestObjectJwtVerifier', () => {
         header: {},
         payload: { ...baseJwtPayload, client_id_scheme: 'did' },
       },
-      { type: 'request-object', raw: '' },
+      { raw: '' },
     )
 
-    await expect(jwtVerifier).rejects.toThrow(SIOPErrors.INVALID_REQUEST_OBJECT_DID_SCHEME_JWT)
+    await expect(jwtVerifier).rejects.toThrow(SIOPErrors.INVALID_CLIENT_ID_SCHEME)
   })
 
   it('should succeed with a client_id_scheme pre-registered', async () => {
@@ -57,7 +57,7 @@ describe('requestObjectJwtVerifier', () => {
         header: {},
         payload: { ...baseJwtPayload, client_id_scheme: 'pre-registered' },
       },
-      { type: 'request-object', raw: '' },
+      { raw: '' },
     )
 
     const expectedJwtVerifier: JwtVerifier = { type: 'request-object', method: 'custom' }
@@ -70,7 +70,7 @@ describe('requestObjectJwtVerifier', () => {
         header: { x5c: [''] },
         payload: { ...baseJwtPayload, iss: 'issuer', client_id_scheme: 'x509_san_dns' },
       },
-      { type: 'request-object', raw: '' },
+      { raw: '' },
     )
 
     const expectedJwtVerifier: JwtVerifier = { type: 'request-object', method: 'x5c', x5c: [''], issuer: 'issuer' }
@@ -83,10 +83,10 @@ describe('requestObjectJwtVerifier', () => {
         header: {},
         payload: { ...baseJwtPayload, client_id_scheme: 'x509_san_dns' },
       },
-      { type: 'request-object', raw: '' },
+      { raw: '' },
     )
 
-    await expect(jwtVerifier).rejects.toThrow(SIOPErrors.INVALID_REQUEST_OBJECT_X509_SCHEME_JWT)
+    await expect(jwtVerifier).rejects.toThrow(SIOPErrors.MISSING_X5C_HEADER_WITH_CLIENT_ID_SCHEME_X509)
   })
 
   it('should error with a client_id_scheme verifier_attestation and invalid header', async () => {
@@ -95,10 +95,10 @@ describe('requestObjectJwtVerifier', () => {
         header: {},
         payload: { ...baseJwtPayload, client_id_scheme: 'verifier_attestation' },
       },
-      { type: 'request-object', raw: '' },
+      { raw: '' },
     )
 
-    await expect(jwtVerifier).rejects.toThrow(SIOPErrors.MISSING_ATTESTATION_JWT)
+    await expect(jwtVerifier).rejects.toThrow(SIOPErrors.MISSING_ATTESTATION_JWT_TYP)
   })
 
   it('should succeed with a client_id_scheme verifier_attestation', async () => {
@@ -110,7 +110,7 @@ describe('requestObjectJwtVerifier', () => {
         header: { jwt: attestationJwt, typ: 'verifier-attestation+jwt' },
         payload: { ...baseJwtPayload, client_id: 'client_id', client_id_scheme: 'verifier_attestation' },
       },
-      { type: 'request-object', raw: '' },
+      { raw: '' },
     )
 
     const expectedJwtVerifier: JwtVerifier = { type: 'request-object', method: 'jwk', jwk: {} }

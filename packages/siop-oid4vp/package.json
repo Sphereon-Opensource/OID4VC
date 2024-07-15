@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "pnpm build:schemaGenerator && pnpm build:main",
+    "build": "pnpm build:schemaGenerator && tsc",
     "build:main": "tsc -p tsconfig.build.json",
     "build:schemaGenerator": "node --loader=tsimp/loader ./lib/generator/schemaGenerator.ts",
     "clean": "rimraf dist coverage",
@@ -78,7 +78,7 @@
     "ts-jest": "^29.1.2",
     "ts-json-schema-generator": "1.5.0",
     "tsimp": "^2.0.11",
-    "typescript": "^5.4.2"
+    "typescript": "5.4.5"
   },
   "resolutions": {
     "isomorphic-webcrypto": "npm:@sphereon/isomorphic-webcrypto@^2.4.1-unstable.0",
