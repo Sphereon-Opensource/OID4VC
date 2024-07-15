@@ -1,0 +1,54 @@
+@startuml
+header SIOP flow diagram
+title
+DID OpenID SIOP Flow
+end title
+
+autonumber
+
+participant "Client\n(OP)" as CLIENT order 0
+participant "OP\nclass" as OP order 1 #White
+participant "RP\nclass" as RP order 2 #White
+participant "Web component\n(RP)" as WEB order 3
+
+activate WEB
+CLIENT -> WEB: HTTPS POST
+
+WEB -> RP: CreateAuthRequest\n(Request Opts)
+activate RP
+RP -> WEB: Return\n<Auth Request>
+deactivate RP
+WEB -> CLIENT: 302: Redirect <Auth Request> (can include VC request), optionally displays a QR
+deactivate WEB
+
+activate CLIENT
+CLIENT-> OP: create Auth Response Process\n(Auth Request,Response Opts, Verify Opts)
+activate OP
+OP -> OP: verifyAuthRequest\n(Auth Request, Verify Opts)
+OP -> OP: Presentation Exchange process (see below)
+OP -> OP: createAuthResponse\n(Auth Request, Response Opts)
+OP-> CLIENT: Return\n<Auth Response>
+deactivate OP
+CLIENT-> WEB: HTTPS POST <Auth Response> (can include Verifiable Credentials)
+deactivate CLIENT
+
+
+activate WEB
+WEB -> RP: Verify\n(Auth Response, Verify Opts)
+activate RP
+
+RP -> WEB: Return\n<VerifiedAuthResponse>
+deactivate RP
+WEB -> CLIENT: 200
+deactivate WEB
+
+
+== Protected resources ==
+
+CLIENT-> WEB: HTTPS POST <Access Token>\n/protected-resources
+
+activate WEB
+WEB-> WEB: Verify\n<Access Token>
+WEB-> CLIENT: 200: <response>
+deactivate WEB
+@enduml

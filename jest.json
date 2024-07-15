@@ -1,11 +1,6 @@
 {
   "preset": "ts-jest",
-  "moduleFileExtensions": [
-    "ts",
-    "tsx",
-    "js",
-    "jsx"
-  ],
+  "moduleFileExtensions": ["ts", "tsx", "js", "jsx"],
   "collectCoverage": true,
   "collectCoverageFrom": [
     "packages/**/src/**/*.ts",
@@ -20,23 +15,19 @@
     "!**/node_modules/**",
     "!**/packages/**/index.ts"
   ],
-  "coverageReporters": [
-    "text",
-    "lcov",
-    "json"
-  ],
+  "coverageReporters": ["text", "lcov", "json"],
   "coverageDirectory": "./coverage",
   "transform": {
     "\\.jsx?$": "babel-jest",
-    "\\.tsx?$": ["ts-jest", {
-      "tsconfig": "./packages/tsconfig-base.json"
-    }
+    "\\.tsx?$": [
+      "ts-jest",
+      {
+        "tsconfig": "./packages/tsconfig-base.json"
+      }
     ]
   },
-  "testMatch": [
-    "**/__tests__/**/*.spec.*",
-    "**/tests/**/*.spec.*"
-  ],
+  "testMatch": ["**/__tests__/**/*.spec.*", "**/tests/**/*.spec.*"],
+  "modulePathIgnorePatterns": ["<rootDir>/packages/siop-oid4vp"],
   "testEnvironment": "node",
   "automock": false,
   "verbose": true

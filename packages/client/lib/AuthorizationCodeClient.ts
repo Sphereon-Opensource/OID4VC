@@ -111,7 +111,7 @@ export const createAuthorizationRequestUrl = async ({
   let { scope, authorizationDetails } = authorizationRequest;
   const parMode = endpointMetadata?.credentialIssuerMetadata?.require_pushed_authorization_requests
     ? PARMode.REQUIRE
-    : authorizationRequest.parMode ?? (client_id ? PARMode.AUTO : PARMode.NEVER);
+    : (authorizationRequest.parMode ?? (client_id ? PARMode.AUTO : PARMode.NEVER));
   // Scope and authorization_details can be used in the same authorization request
   // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
   if (!scope && !authorizationDetails) {

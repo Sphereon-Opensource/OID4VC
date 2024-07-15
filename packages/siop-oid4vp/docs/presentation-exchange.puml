@@ -1,0 +1,38 @@
+@startuml
+header Presentation Exchange flow diagram
+title
+Presentation Exchange Flow
+end title
+
+autonumber
+
+participant "Client\n(OP)" as CLIENT order 0
+participant "OP\n<<class>>" as OP order 1 #White
+participant "Presentation Exchange\n<<class>>" as PE order 2 #Gray
+
+activate OP
+OP -> OP: verifyAuthRequest\n(Auth Request, Verify Opts)
+== START: Presentation Definition from RP is present ==
+
+OP -> CLIENT: if presentationDefinition is present
+deactivate OP
+activate CLIENT
+CLIENT -> PE: Construct PE with DID and Verifiable Credentials
+deactivate CLIENT
+
+activate PE
+PE -> PE: selectVerifiableCredentialsForSubmission(Presentation Definition)
+PE -> CLIENT: Return matching VCs or an error
+activate CLIENT
+CLIENT -> CLIENT: Show UI to confirm and optionally subselect VCs from matches\n(NOTE: Not in scope of this library)
+CLIENT -> PE: selected VCs
+deactivate CLIENT
+PE -> PE: submissionFrom(Presentation Definition, selected VCs)
+PE -> OP: Return Verifiable Presentation (VP)
+deactivate PE
+== END: Presentation Definition from RP is present ==
+activate OP
+OP -> OP: createAuthResponse(Verified Auth request, opts and VP)
+
+
+@enduml
