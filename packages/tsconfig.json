@@ -16,6 +16,12 @@
     },
     {
       "path": "callback-example"
+    },
+    {
+      "path": "siop-oid4vp"
+    },
+    {
+      "path": "did-auth-siop-adapter"
     }
   ]
 }
