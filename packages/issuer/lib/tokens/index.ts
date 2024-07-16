@@ -163,13 +163,13 @@ export const assertValidAccessTokenRequest = async (
         throw new TokenError(400, TokenErrorResponse.invalid_grant, `${PIN_VALIDATION_ERROR} ${txCodeOffer.length}`)
       }
     }
-    if (request.tx_code !== credentialOfferSession.txCode) {
+    if (request.tx_code !== credentialOfferSession.userPin) {
       throw new TokenError(400, TokenErrorResponse.invalid_grant, PIN_NOT_MATCH_ERROR)
     }
   } else if (request.user_pin) {
     if (!/[\\d]{1,8}/.test(request.user_pin)) {
       throw new TokenError(400, TokenErrorResponse.invalid_grant, `${PIN_VALIDATION_ERROR} 1-8`)
-    } else if (request.user_pin !== credentialOfferSession.txCode) {
+    } else if (request.user_pin !== credentialOfferSession.userPin) {
       throw new TokenError(400, TokenErrorResponse.invalid_grant, PIN_NOT_MATCH_ERROR)
     }
   }
