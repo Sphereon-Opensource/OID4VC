@@ -11,7 +11,6 @@ import { getFormatForVersion } from './FormatUtils';
 
 export function getTypesFromRequest(credentialRequest: CredentialRequest, opts?: { filterVerifiableCredential: boolean }) {
   let types: string[] = [];
-  console.log(credentialRequest);
   if ('credential_identifier' in credentialRequest && credentialRequest.credential_identifier) {
     throw Error(`Cannot get types from request when it contains a credential_identifier`);
   } else if (
