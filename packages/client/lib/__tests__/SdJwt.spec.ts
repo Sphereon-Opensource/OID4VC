@@ -1,7 +1,7 @@
 import {
   AccessTokenRequest,
+  CredentialConfigurationSupportedSdJwtVcV1_0_13,
   CredentialConfigurationSupportedV1_0_13,
-  CredentialRequestV1_0_13,
   CredentialSupportedSdJwtVc,
 } from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -109,7 +109,7 @@ describe('sd-jwt vc', () => {
       const supported = client.getCredentialsSupported('vc+sd-jwt');
       expect(supported).toEqual({ SdJwtCredentialId: { format: 'vc+sd-jwt', id: 'SdJwtCredentialId', vct: 'SdJwtCredentialId' } });
 
-      const offered = supported['SdJwtCredentialId'] as CredentialSupportedSdJwtVc;
+      const offered = supported['SdJwtCredentialId'] as CredentialConfigurationSupportedSdJwtVcV1_0_13;
 
       nock(issuerMetadata.token_endpoint as string)
         .post('/')
@@ -130,7 +130,7 @@ describe('sd-jwt vc', () => {
         .post('/')
         .reply(200, async (_, body) =>
           vcIssuer.issueCredential({
-            credentialRequest: { ...(body as CredentialRequestV1_0_13), credential_identifier: offered.vct },
+            credentialRequest: { ...(body as any), credential_identifier: 'SdJwtCredentialId' },
             credential: {
               vct: 'Hello',
               iss: 'did:example:123',
@@ -233,7 +233,7 @@ describe('sd-jwt vc', () => {
         .post('/')
         .reply(200, async (_, body) =>
           vcIssuer.issueCredential({
-            credentialRequest: { ...(body as CredentialRequestV1_0_13), credential_identifier: offered.vct },
+            credentialRequest: { ...(body as any), credential_identifier: offered.vct },
             credential: {
               vct: 'Hello',
               iss: 'example.com',

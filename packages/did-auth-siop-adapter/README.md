@@ -8,6 +8,5 @@ with OpenID4VP support DID-JWT adapter</center>
 </h1>
 <br>
 
-
 A simple utility library for creating and veryfing did-jwt's with.
 [@spheren/did-auth-siop](https://img.shields.io/npm/v/@sphereon/did-auth-siop.svg)

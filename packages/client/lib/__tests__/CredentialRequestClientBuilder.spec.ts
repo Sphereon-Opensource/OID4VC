@@ -1,14 +1,6 @@
 import { KeyObject } from 'crypto';
 
-import {
-  Alg,
-  CredentialIssuerMetadataV1_0_13,
-  CredentialRequestV1_0_13,
-  Jwt,
-  JwtVerifyResult,
-  OpenId4VCIVersion,
-  ProofOfPossession,
-} from '@sphereon/oid4vci-common';
+import { Alg, CredentialIssuerMetadataV1_0_13, Jwt, JwtVerifyResult, OpenId4VCIVersion, ProofOfPossession } from '@sphereon/oid4vci-common';
 import * as jose from 'jose';
 
 import { CredentialRequestOpts, ProofOfPossessionBuilder } from '..';
@@ -112,7 +104,7 @@ describe('Credential Request Client Builder', () => {
       .withKid(kid)
       .build();
     await proofOfPossessionVerifierCallbackFunction({ ...proof, kid });
-    const credentialRequest: CredentialRequestV1_0_13 = await credReqClient.createCredentialRequest({
+    const credentialRequest = await credReqClient.createCredentialRequest({
       proofInput: proof,
       credentialIdentifier: 'OpenBadgeCredential',
       version: OpenId4VCIVersion.VER_1_0_13,
@@ -142,7 +134,7 @@ describe('Credential Request Client Builder', () => {
       .withKid(kid_withoutDid)
       .build();
     await proofOfPossessionVerifierCallbackFunction({ ...proof, kid: kid_withoutDid });
-    const credentialRequest: CredentialRequestV1_0_13 = await credReqClient.createCredentialRequest({
+    const credentialRequest = await credReqClient.createCredentialRequest({
       proofInput: proof,
       credentialTypes: 'OpenBadgeCredential',
       version: OpenId4VCIVersion.VER_1_0_13,

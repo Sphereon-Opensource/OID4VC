@@ -1,5 +1,20 @@
 import { AuthorizationDetails, CredentialOfferPayload, UniformCredentialOfferPayload, UniformCredentialOfferRequest, VCI_LOG_COMMON } from '../index';
-import { CredentialConfigurationSupported, CredentialDefinitionV1_0_13, CredentialOfferFormat, JsonLdIssuerCredentialDefinition } from '../types';
+import {
+  CredentialConfigurationSupported,
+  CredentialConfigurationSupportedSdJwtVcV1_0_13,
+  CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13,
+  CredentialDefinitionJwtVcJsonV1_0_13,
+  CredentialOfferFormat,
+  CredentialsSupportedLegacy,
+  CredentialSupportedSdJwtVc,
+  JsonLdIssuerCredentialDefinition,
+} from '../types';
+
+export function isW3cCredentialSupported(
+  supported: CredentialConfigurationSupported | CredentialsSupportedLegacy,
+): supported is Exclude<CredentialConfigurationSupported, CredentialConfigurationSupportedSdJwtVcV1_0_13 | CredentialSupportedSdJwtVc> {
+  return ['jwt_vc_json', 'jwt_vc_json-ld', 'ldp_vc', 'jwt_vc'].includes(supported.format);
+}
 
 export const getNumberOrUndefined = (input?: string): number | undefined => {
   return input && !isNaN(+input) ? +input : undefined;
@@ -10,14 +25,20 @@ export const getNumberOrUndefined = (input?: string): number | undefined => {
  * @param subject
  */
 export function getTypesFromObject(
-  subject: CredentialConfigurationSupported | CredentialOfferFormat | CredentialDefinitionV1_0_13 | JsonLdIssuerCredentialDefinition | string,
+  subject:
+    | CredentialConfigurationSupported
+    | CredentialOfferFormat
+    | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13
+    | CredentialDefinitionJwtVcJsonV1_0_13
+    | JsonLdIssuerCredentialDefinition
+    | string,
 ): string[] | undefined {
   if (subject === undefined) {
     return undefined;
   } else if (typeof subject === 'string') {
     return [subject];
-  } else if ('credential_definition' in subject && subject.credential_definition) {
-    return getTypesFromObject(subject.credential_definition);
+  } else if ('credential_definition' in subject) {
+    return getTypesFromObject(subject.credential_definition as CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13 | CredentialDefinitionJwtVcJsonV1_0_13 | JsonLdIssuerCredentialDefinition);
   } else if ('types' in subject && subject.types) {
     return Array.isArray(subject.types) ? subject.types : [subject.types];
   } else if ('type' in subject && subject.type) {
@@ -77,8 +98,6 @@ export function getTypesFromCredentialSupported(
   ) {
     types = getTypesFromObject(credentialSupported) ?? [];
   } else if (credentialSupported.format === 'vc+sd-jwt') {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     types = [credentialSupported.vct];
   }
 

@@ -549,7 +549,7 @@ export class OpenID4VCIClient {
   issuerSupportedFlowTypes(): AuthzFlowType[] {
     return (
       this.credentialOffer?.supportedFlows ??
-      ((this._state.endpointMetadata?.credentialIssuerMetadata?.authorization_endpoint ?? this._state.endpointMetadata?.authorization_server)
+      (this._state.endpointMetadata?.credentialIssuerMetadata?.authorization_endpoint ?? this._state.endpointMetadata?.authorization_server
         ? [AuthzFlowType.AUTHORIZATION_CODE_FLOW]
         : [])
     );
