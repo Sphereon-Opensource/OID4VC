@@ -6,7 +6,6 @@ import {
   getUniformFormat,
   isDeferredCredentialResponse,
   isValidURL,
-  JsonLdIssuerCredentialDefinition,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   OpenIDResponse,
@@ -203,7 +202,9 @@ export class CredentialRequestClient {
     // TODO: we should move format specific logic
     if (format === 'jwt_vc_json' || format === 'jwt_vc') {
       return {
-        types,
+        credential_definition: {
+          type: types,
+        },
         format,
         proof,
         ...opts.subjectIssuance,
@@ -218,13 +219,10 @@ export class CredentialRequestClient {
         proof,
         ...opts.subjectIssuance,
 
-        // Ignored because v11 does not have the context value, but it is required in v12
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         credential_definition: {
-          types,
-          ...(opts.context && { '@context': opts.context }),
-        } as JsonLdIssuerCredentialDefinition,
+          type: types,
+          '@context': opts.context as string[],
+        },
       };
     } else if (format === 'vc+sd-jwt') {
       if (types.length > 1) {
@@ -236,7 +234,7 @@ export class CredentialRequestClient {
         proof,
         vct: types[0],
         ...opts.subjectIssuance,
-      } as CredentialRequestV1_0_13;
+      };
     }
 
     throw new Error(`Unsupported format: ${format}`);

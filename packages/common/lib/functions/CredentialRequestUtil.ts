@@ -11,21 +11,31 @@ import { getFormatForVersion } from './FormatUtils';
 
 export function getTypesFromRequest(credentialRequest: CredentialRequest, opts?: { filterVerifiableCredential: boolean }) {
   let types: string[] = [];
+  console.log(credentialRequest);
   if ('credential_identifier' in credentialRequest && credentialRequest.credential_identifier) {
     throw Error(`Cannot get types from request when it contains a credential_identifier`);
-  } else if (credentialRequest.format === 'jwt_vc_json' || credentialRequest.format === 'jwt_vc') {
-    types = 'types' in credentialRequest ? credentialRequest.types : [];
-  } else if (credentialRequest.format === 'jwt_vc_json-ld' || credentialRequest.format === 'ldp_vc') {
-    types =
-      'credential_definition' in credentialRequest && credentialRequest.credential_definition
-        ? credentialRequest.credential_definition.types
-        : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          'types' in credentialRequest.types
-          ? (credentialRequest['types' as keyof CredentialRequest] as unknown as string[])
-          : [];
-  } else if (credentialRequest.format === 'vc+sd-jwt') {
-    types = 'vct' in credentialRequest ? [credentialRequest.vct as string] : [];
+  } else if (
+    credentialRequest.format === 'jwt_vc_json-ld' ||
+    credentialRequest.format === 'ldp_vc' ||
+    credentialRequest.format === 'jwt_vc' ||
+    credentialRequest.format === 'jwt_vc_json'
+  ) {
+    if ('credential_definition' in credentialRequest && credentialRequest.credential_definition) {
+      types =
+        'types' in credentialRequest.credential_definition
+          ? credentialRequest.credential_definition.types
+          : credentialRequest.credential_definition.type;
+    }
+
+    if ('type' in credentialRequest && Array.isArray(credentialRequest.type)) {
+      types = credentialRequest.type;
+    }
+
+    if ('types' in credentialRequest && Array.isArray(credentialRequest.types)) {
+      types = credentialRequest.types;
+    }
+  } else if (credentialRequest.format === 'vc+sd-jwt' && 'vct' in credentialRequest) {
+    types = [credentialRequest.vct];
   }
 
   if (!types || types.length === 0) {
