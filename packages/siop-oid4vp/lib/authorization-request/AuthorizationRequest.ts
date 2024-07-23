@@ -1,8 +1,9 @@
+import { parseJWT } from '@sphereon/oid4vci-common'
+
 import { PresentationDefinitionWithLocation } from '../authorization-response'
 import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
-import { parseJWT } from '../helpers/jwtUtils'
 import { RequestObject } from '../request-object'
 import {
   AuthorizationRequestPayload,

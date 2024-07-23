@@ -36,11 +36,11 @@ import {
   TxCode,
   TYP_ERROR,
   URIState,
+  uuidv4,
 } from '@sphereon/oid4vci-common'
 import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphereon/oid4vci-common/dist/events'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
-import { v4 } from 'uuid'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
 import { LookupStateManager } from './state-manager'
@@ -117,7 +117,7 @@ export class VcIssuer<DIDDoc extends object> {
     if (grants?.authorization_code) {
       issuerState = grants?.authorization_code.issuer_state
       if (!issuerState) {
-        issuerState = v4()
+        issuerState = uuidv4()
         grants.authorization_code.issuer_state = issuerState
       }
     }
@@ -130,7 +130,7 @@ export class VcIssuer<DIDDoc extends object> {
         grants[PRE_AUTH_GRANT_LITERAL].tx_code = txCode
       }
       if (!preAuthorizedCode) {
-        preAuthorizedCode = v4()
+        preAuthorizedCode = uuidv4()
         grants[PRE_AUTH_GRANT_LITERAL][PRE_AUTH_CODE_LITERAL] = preAuthorizedCode
       }
     }
@@ -186,7 +186,7 @@ export class VcIssuer<DIDDoc extends object> {
       createdAt,
       lastUpdatedAt,
       status,
-      notification_id: v4(),
+      notification_id: uuidv4(),
       ...(userPin && { userPin }),
       ...(opts.credentialDataSupplierInput && { credentialDataSupplierInput: opts.credentialDataSupplierInput }),
       credentialOffer,
@@ -209,7 +209,7 @@ export class VcIssuer<DIDDoc extends object> {
     }
     EVENTS.emit(CredentialOfferEventNames.OID4VCI_OFFER_CREATED, {
       eventName: CredentialOfferEventNames.OID4VCI_OFFER_CREATED,
-      id: v4(),
+      id: uuidv4(),
       data: uri,
       initiator: '<unknown>',
       initiatorType: InitiatorType.EXTERNAL,
@@ -271,7 +271,7 @@ export class VcIssuer<DIDDoc extends object> {
       const did = jwtVerifyResult.did
       const jwk = jwtVerifyResult.jwk
       const kid = jwtVerifyResult.kid
-      const newcNonce = opts.newCNonce ? opts.newCNonce : v4()
+      const newcNonce = opts.newCNonce ? opts.newCNonce : uuidv4()
       const newcNonceState = {
         cNonce: newcNonce,
         createdAt: +new Date(),
@@ -623,7 +623,7 @@ export class VcIssuer<DIDDoc extends object> {
     // TODO: Create builder
     EVENTS.emit(CredentialEventNames.OID4VCI_CREDENTIAL_ISSUED, {
       eventName: CredentialEventNames.OID4VCI_CREDENTIAL_ISSUED,
-      id: v4(),
+      id: uuidv4(),
       data: credential,
       // TODO: Format, request etc
       initiator: opts.issuer ?? '<unknown>',

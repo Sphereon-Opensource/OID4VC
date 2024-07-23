@@ -26,7 +26,6 @@
     "@babel/preset-env": "^7.21.4",
     "@types/jest": "^29.5.0",
     "@types/node": "^18.15.3",
-    "@types/uuid": "^9.0.1",
     "did-resolver": "^4.1.0",
     "expo": "^48.0.11",
     "react": "^18.2.0",

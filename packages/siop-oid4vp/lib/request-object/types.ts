@@ -1,6 +1,8 @@
+import { JwtIssuer } from '@sphereon/oid4vci-common'
+
 import { ClaimPayloadCommonOpts, RequestObjectPayloadOpts } from '../authorization-request'
 import { ObjectBy } from '../types'
-import { CreateJwtCallback, JwtIssuer } from '../types/JwtIssuer'
+import { CreateJwtCallback } from '../types/VpJwtIssuer'
 
 export interface RequestObjectOpts<CT extends ClaimPayloadCommonOpts> extends ObjectBy {
   payload?: RequestObjectPayloadOpts<CT> // for pass by value

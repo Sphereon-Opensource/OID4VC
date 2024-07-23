@@ -1,12 +1,11 @@
 import * as crypto from 'crypto';
 
-import { Alg, Jwt, ProofOfPossessionCallbacks } from '@sphereon/oid4vci-common';
+import { Alg, Jwt, ProofOfPossessionCallbacks, uuidv4 } from '@sphereon/oid4vci-common';
 import { CredentialMapper } from '@sphereon/ssi-types';
 import * as didts from '@transmute/did-key.js';
 import { fetch } from 'cross-fetch';
 import debug from 'debug';
 import { importJWK, JWK, SignJWT } from 'jose';
-import { v4 } from 'uuid';
 
 import { OpenID4VCIClientV1_0_11 } from '..';
 
@@ -94,7 +93,7 @@ async function getCredentialOffer(format: 'ldp_vc' | 'jwt_vc_json'): Promise<Cre
       credentials: ['GuestCredential'],
       grants: {
         'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-          'pre-authorized_code': v4().substring(0, 10),
+          'pre-authorized_code': uuidv4().substring(0, 10),
           user_pin_required: false,
         },
       },
@@ -165,7 +164,7 @@ describe('ismapolis bug report #63, https://github.com/Sphereon-Opensource/OID4V
       format: 'jwt_vc_json',
       alg: Alg.ES256K,
       kid: didDocument.verificationMethod[0].id,
-      jti: v4(),
+      jti: uuidv4(),
     });
     console.log(JSON.stringify(credentialResponse.credential));
   });

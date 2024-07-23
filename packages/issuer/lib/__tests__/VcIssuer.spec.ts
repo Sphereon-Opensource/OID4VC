@@ -7,10 +7,10 @@ import {
   IssuerCredentialSubjectDisplay,
   IssueStatus,
   STATE_MISSING_ERROR,
+  uuidv4,
 } from '@sphereon/oid4vci-common'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
-import { v4 } from 'uuid'
 
 import { VcIssuer } from '../VcIssuer'
 import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../builder'
@@ -89,7 +89,7 @@ describe('VcIssuer', () => {
       createdAt: +new Date(),
       lastUpdatedAt: +new Date(),
       status: IssueStatus.OFFER_CREATED,
-      notification_id: v4(),
+      notification_id: uuidv4(),
       txCode: '123456',
       credentialOffer: {
         credential_offer: {

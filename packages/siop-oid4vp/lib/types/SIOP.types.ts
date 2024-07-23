@@ -1,5 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 
+import { SigningAlgo } from '@sphereon/oid4vci-common'
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import {
   AdditionalClaims,
@@ -585,14 +586,6 @@ export enum TokenEndpointAuthMethod {
   CLIENT_SECRET_BASIC = 'client_secret_basic',
   CLIENT_SECRET_JWT = 'client_secret_jwt',
   PRIVATE_KEY_JWT = 'private_key_jwt',
-}
-
-export enum SigningAlgo {
-  EDDSA = 'EdDSA',
-  RS256 = 'RS256',
-  PS256 = 'PS256',
-  ES256 = 'ES256',
-  ES256K = 'ES256K',
 }
 
 export enum Scope {

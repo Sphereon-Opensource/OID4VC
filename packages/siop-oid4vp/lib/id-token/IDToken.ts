@@ -1,21 +1,20 @@
+import { calculateJwkThumbprintUri, JwtHeader, JwtIssuer, parseJWT } from '@sphereon/oid4vci-common'
+
 import { AuthorizationResponseOpts, VerifyAuthorizationResponseOpts } from '../authorization-response'
 import { assertValidVerifyOpts } from '../authorization-response/Opts'
-import { parseJWT } from '../helpers/jwtUtils'
 import {
   getJwtVerifierWithContext,
   IDTokenJwt,
   IDTokenPayload,
   JWK,
-  JwtHeader,
   JWTPayload,
   ResponseIss,
   SIOPErrors,
   VerifiedAuthorizationRequest,
   VerifiedIDToken,
 } from '../types'
-import { JwtIssuer, JwtIssuerWithContext } from '../types/JwtIssuer'
+import { JwtIssuerWithContext } from '../types/VpJwtIssuer'
 
-import { calculateJwkThumbprintUri } from './../helpers/Keys'
 import { createIDTokenPayload } from './Payload'
 
 export class IDToken {

@@ -1,5 +1,5 @@
 import { CNonceState, IStateManager, STATE_MISSING_ERROR } from '@sphereon/oid4vci-common'
-import { v4 } from 'uuid'
+import { uuidv4 } from '@sphereon/oid4vci-common'
 
 import { MemoryStates } from '../state-manager'
 
@@ -14,7 +14,7 @@ describe('MemoryIssuerStateManager', () => {
     const day = 86400000
     for (const i of Array.from(Array(3).keys())) {
       const timestamp = +new Date(+new Date() + day * (i - 1))
-      const cNonce: CNonceState = { cNonce: v4(), createdAt: timestamp }
+      const cNonce: CNonceState = { cNonce: uuidv4(), createdAt: timestamp }
       await memoryCNonceStateManager.set(String(i), cNonce)
     }
   })

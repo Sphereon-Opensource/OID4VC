@@ -1,103 +1,51 @@
-import { calculateJwkThumbprintUri, getDigestAlgorithmFromJwkThumbprintUri } from '../helpers'
-import { JwtProtectionMethod, JwtType, parseJWT } from '../helpers/jwtUtils'
+import {
+  calculateJwkThumbprintUri,
+  CustomJwtVerifier,
+  DidJwtVerifier,
+  getDidJwtVerifier,
+  getDigestAlgorithmFromJwkThumbprintUri,
+  getX5cVerifier,
+  JWK,
+  JwkJwtVerifier as JwkJwtVerifierBase,
+  JwtHeader,
+  JwtPayload,
+  OpenIdFederationJwtVerifier,
+  SigningAlgo,
+  VerifyJwtCallbackBase,
+  X5cJwtVerifier,
+} from '@sphereon/oid4vci-common'
+import { getJwtVerifierWithContext as getJwtVerifierWithContextCommon } from '@sphereon/oid4vci-common'
+import { JwtType, parseJWT } from '@sphereon/oid4vci-common'
 
 import SIOPErrors from './Errors'
-import { JWK, JwtHeader, JwtPayload } from './JWT.types'
 import { RequestObjectPayload } from './SIOP.types'
 
-interface JwtVerifierBase {
-  type: JwtType
-  method: JwtProtectionMethod
-}
-
-interface DidJwtVerifier extends JwtVerifierBase {
-  method: 'did'
-  didUrl: string
-}
-
-interface X5cJwtVerifier extends JwtVerifierBase {
-  method: 'x5c'
-
-  /**
-   *
-   * Array of base64-encoded certificate strings in the DER-format.
-   *
-   * The certificate containing the public key corresponding to the key used to digitally sign the JWS MUST be the first certificate.
-   */
-  x5c: Array<string>
-
-  /**
-   * The jwt issuer
-   */
-  issuer: string
-}
-
-interface OpenIdFederationjwtVerifier extends JwtVerifierBase {
-  method: 'openid-federation'
-
-  /**
-   * The OpenId federation Entity
-   */
-  entityId: string
-}
-
 type JwkJwtVerifier =
-  | (JwtVerifierBase & {
-      method: 'jwk'
+  | (JwkJwtVerifierBase & {
       type: 'id-token'
-
-      jwk: JsonWebKey
       jwkThumbprint: string
     })
-  | (JwtVerifierBase & {
-      method: 'jwk'
-      type: 'request-object' | 'verifier-attestation'
-
-      jwk: JsonWebKey
+  | (JwkJwtVerifierBase & {
+      type: 'request-object' | 'verifier-attestation' | 'dpop'
       jwkThumbprint?: never
     })
 
-interface CustomJwtVerifier extends JwtVerifierBase {
-  method: 'custom'
-}
+export type JwtVerifier = DidJwtVerifier | X5cJwtVerifier | CustomJwtVerifier | JwkJwtVerifier | OpenIdFederationJwtVerifier
 
-export type JwtVerifier = DidJwtVerifier | X5cJwtVerifier | CustomJwtVerifier | JwkJwtVerifier | OpenIdFederationjwtVerifier
-
-export const getDidJwtVerifier = (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): DidJwtVerifier => {
-  const { type } = options
-  if (!jwt.header.kid) throw new Error(`${SIOPErrors.INVALID_JWT} Missing kid header.`)
-
-  if (!jwt.header.kid.includes('#')) {
-    throw new Error(`${SIOPErrors.INVALID_JWT}. '${type}' contains an invalid kid header.`)
-  }
-  return { method: 'did', didUrl: jwt.header.kid, type: type }
-}
-
-export const getX5cVerifier = (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): X5cJwtVerifier => {
-  const { type } = options
-  if (!jwt.header.x5c) throw new Error(`${SIOPErrors.INVALID_JWT} Missing x5c header.`)
-
-  if (!Array.isArray(jwt.header.x5c) || jwt.header.x5c.length === 0 || !jwt.header.x5c.every((cert) => typeof cert === 'string')) {
-    throw new Error(`${SIOPErrors.INVALID_JWT}. '${type}' contains an invalid x5c header.`)
-  }
-  return { method: 'x5c', x5c: jwt.header.x5c, issuer: jwt.payload.iss, type: type }
-}
-
-export const getJwkVerifier = async (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): Promise<JwkJwtVerifier> => {
-  const { type } = options
-  if (!jwt.header.jwk) throw new Error(`${SIOPErrors.INVALID_JWT} Missing jwk header.`)
-
-  if (typeof jwt.header.jwk !== 'object') {
-    throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' contains an invalid jwk header.`)
-  }
-  if (type !== 'id-token') {
-    // Users need to check if the iss claim matches an entity they trust
-    // for type === 'verifier-attestation'
-    return { method: 'jwk', type, jwk: jwt.header.jwk }
+export const getJwkVerifier = async (
+  jwt: { header: JwtHeader; payload: JwtPayload },
+  jwkJwtVerifier: JwkJwtVerifierBase,
+): Promise<JwkJwtVerifier> => {
+  if (jwkJwtVerifier.type !== 'id-token') {
+    // TODO: check why ts is complaining if we return the jwkJwtVerifier directly
+    return {
+      ...jwkJwtVerifier,
+      type: jwkJwtVerifier.type,
+    }
   }
 
   if (typeof jwt.payload.sub_jwk !== 'string') {
-    throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' missing sub_jwk claim.`)
+    throw new Error(`${SIOPErrors.INVALID_JWT} '${jwkJwtVerifier.type}' missing sub_jwk claim.`)
   }
 
   const jwkThumbPrintUri = jwt.payload.sub_jwk
@@ -105,26 +53,24 @@ export const getJwkVerifier = async (jwt: { header: JwtHeader; payload: JwtPaylo
   const selfComputedJwkThumbPrintUri = await calculateJwkThumbprintUri(jwt.header.jwk as JWK, digestAlgorithm)
 
   if (selfComputedJwkThumbPrintUri !== jwkThumbPrintUri) {
-    throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' contains an invalid sub_jwk claim.`)
+    throw new Error(`${SIOPErrors.INVALID_JWT} '${jwkJwtVerifier.type}' contains an invalid sub_jwk claim.`)
   }
 
-  return { method: 'jwk', type, jwk: jwt.header.jwk, jwkThumbprint: jwt.payload.sub_jwk }
+  return { ...jwkJwtVerifier, type: jwkJwtVerifier.type, jwkThumbprint: jwt.payload.sub_jwk }
 }
 
 export const getJwtVerifierWithContext = async (
   jwt: { header: JwtHeader; payload: JwtPayload },
   options: { type: JwtType },
 ): Promise<JwtVerifier> => {
-  const { header, payload } = jwt
+  const verifierWithContext = await getJwtVerifierWithContextCommon(jwt, options)
 
-  if (header.kid?.startsWith('did:')) return getDidJwtVerifier({ header, payload }, options)
-  else if (jwt.header.x5c) return getX5cVerifier({ header, payload }, options)
-  else if (jwt.header.jwk) return getJwkVerifier({ header, payload }, options)
+  if (verifierWithContext.method === 'jwk') {
+    return getJwkVerifier(jwt, verifierWithContext)
+  }
 
-  return { method: 'custom', type: options.type }
+  return verifierWithContext
 }
-
-export type VerifyJwtCallback = (jwtVerifier: JwtVerifier, jwt: { header: JwtHeader; payload: JwtPayload; raw: string }) => Promise<boolean>
 
 export const getRequestObjectJwtVerifier = async (
   jwt: { header: JwtHeader; payload: RequestObjectPayload },
@@ -192,9 +138,14 @@ export const getRequestObjectJwtVerifier = async (
       }
     }
 
+    const jwk = attestationPayload.cnf['jwk'] as JWK
+    const alg = jwk.alg ?? attestationHeader.alg
+    if (!alg) {
+      throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' JWT header is missing alg.`)
+    }
     // The iss claim value of the Verifier Attestation JWT MUST identify a party the Wallet trusts for issuing Verifier Attestation JWTs.
     // If the Wallet cannot establish trust, it MUST refuse the request.
-    return { method: 'jwk', type, jwk: attestationPayload.cnf['jwk'] as JWK }
+    return { method: 'jwk', type, jwk: attestationPayload.cnf['jwk'] as JWK, alg: (jwk.alg ?? attestationHeader.alg) as SigningAlgo }
   } else if (clientIdScheme === 'entity_id') {
     if (!clientId.startsWith('http')) {
       throw new Error(SIOPErrors.INVALID_REQUEST_OBJECT_ENTITY_ID_SCHEME_CLIENT_ID)
@@ -205,3 +156,5 @@ export const getRequestObjectJwtVerifier = async (
 
   throw new Error(SIOPErrors.INVALID_CLIENT_ID_SCHEME)
 }
+
+export type VerifyJwtCallback = VerifyJwtCallbackBase<JwtVerifier>

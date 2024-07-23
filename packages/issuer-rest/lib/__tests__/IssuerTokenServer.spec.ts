@@ -9,6 +9,7 @@ import {
   Jwt,
   STATE_MISSING_ERROR,
   URIState,
+  uuid4v,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
@@ -17,7 +18,6 @@ import { DIDDocument } from 'did-resolver'
 import { Express } from 'express'
 import * as jose from 'jose'
 import requests from 'supertest'
-import { v4 } from 'uuid'
 
 import { OID4VCIServer } from '../OID4VCIServer'
 

@@ -13,6 +13,7 @@
     "uninstall": "rimraf dist coverage node_modules"
   },
   "dependencies": {
+    "@sphereon/oid4vci-common": "workspace:*",
     "@astronautlabs/jsonpath": "^1.1.2",
     "@sphereon/did-uni-client": "^0.6.2",
     "@sphereon/pex": "^3.3.2",
@@ -26,8 +27,7 @@
     "multiformats": "^12.1.3",
     "qs": "^6.11.2",
     "sha.js": "^2.4.11",
-    "uint8arrays": "^3.1.1",
-    "uuid": "^9.0.0"
+    "uint8arrays": "^3.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.23.9",
@@ -51,7 +51,6 @@
     "@types/language-tags": "^1.0.4",
     "@types/qs": "^6.9.11",
     "@types/sha.js": "^2.4.4",
-    "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
     "@typescript-eslint/parser": "^5.52.0",
     "ajv": "^8.12.0",

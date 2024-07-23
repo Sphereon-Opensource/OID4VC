@@ -14,6 +14,7 @@ import {
   OpenId4VCIVersion,
   ProofOfPossession,
 } from '@sphereon/oid4vci-common'
+import { uuidv4 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
 import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer'
@@ -21,7 +22,6 @@ import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/type
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
-import { v4 } from 'uuid'
 
 import { generateDid, getIssuerCallbackV1_0_11, getIssuerCallbackV1_0_13, verifyCredential } from '../IssuerCallback'
 
@@ -118,7 +118,7 @@ describe('issuerCallback', () => {
       createdAt: +new Date(),
       lastUpdatedAt: +new Date(),
       status: IssueStatus.OFFER_CREATED,
-      notification_id: v4(),
+      notification_id: uuidv4(),
       txCode: '123456',
       credentialOffer: {
         credential_offer: {

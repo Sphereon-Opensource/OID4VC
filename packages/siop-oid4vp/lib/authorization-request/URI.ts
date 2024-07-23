@@ -1,6 +1,7 @@
+import { parseJWT } from '@sphereon/oid4vci-common'
+
 import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { decodeUriAsJson, encodeJsonAsURI, fetchByReferenceOrUseByValue } from '../helpers'
-import { parseJWT } from '../helpers/jwtUtils'
 import { assertValidRequestObjectPayload, RequestObject } from '../request-object'
 import {
   AuthorizationRequestPayload,

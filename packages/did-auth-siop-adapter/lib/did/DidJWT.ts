@@ -5,11 +5,11 @@ import {
   RequestObjectPayload,
   ResponseIss,
   SignatureResponse,
-  SigningAlgo,
   SIOPErrors,
   SIOPResonse,
   VerifiedJWT,
 } from '@sphereon/did-auth-siop'
+import { SigningAlgo } from '@sphereon/oid4vci-common'
 import {
   createJWT,
   decodeJWT,

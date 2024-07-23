@@ -1514,6 +1514,9 @@ export const AuthorizationResponseOptsSchemaObj = {
       ]
     },
     "CreateJwtCallback": {
+      "$ref": "#/definitions/CreateJwtCallback%3CJwtIssuerWithContext%3E"
+    },
+    "CreateJwtCallback<JwtIssuerWithContext>": {
       "properties": {
         "isFunction": {
           "type": "boolean",
@@ -1524,186 +1527,206 @@ export const AuthorizationResponseOptsSchemaObj = {
     "JwtIssuer": {
       "anyOf": [
         {
-          "type": "object",
-          "properties": {
-            "method": {
-              "type": "string",
-              "const": "did"
-            },
-            "options": {
-              "type": "object",
-              "additionalProperties": {},
-              "description": "Additional options for the issuance context"
-            },
-            "didUrl": {
-              "type": "string"
-            },
-            "alg": {
-              "$ref": "#/definitions/SigningAlgo"
-            }
-          },
-          "required": [
-            "alg",
-            "didUrl",
-            "method"
-          ],
-          "additionalProperties": false
+          "$ref": "#/definitions/JwtIssuerDid"
         },
         {
+          "$ref": "#/definitions/JwtIssuerX5c"
+        },
+        {
+          "$ref": "#/definitions/JwtIssuerJwk"
+        },
+        {
+          "$ref": "#/definitions/JwtIssuerCustom"
+        }
+      ]
+    },
+    "JwtIssuerDid": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "const": "did"
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": {},
+          "description": "Additional options for the issuance context"
+        },
+        "didUrl": {
+          "type": "string"
+        },
+        "alg": {
+          "$ref": "#/definitions/SigningAlgo"
+        }
+      },
+      "required": [
+        "alg",
+        "didUrl",
+        "method"
+      ],
+      "additionalProperties": false
+    },
+    "JwtIssuerX5c": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "const": "x5c"
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": {},
+          "description": "Additional options for the issuance context"
+        },
+        "alg": {
+          "$ref": "#/definitions/SigningAlgo"
+        },
+        "x5c": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of base64-encoded certificate strings in the DER-format.\n\nThe certificate containing the public key corresponding to the key used to digitally sign the JWS MUST be the first certificate."
+        },
+        "issuer": {
+          "type": "string",
+          "description": "The issuer jwt\n\nThis value will be used as the iss value of the issue jwt. It is also used as the client_id. And will also be set as the redirect_uri\n\nIt must match an entry in the x5c certificate leaf entry dnsName / uriName"
+        },
+        "clientIdScheme": {
+          "type": "string",
+          "enum": [
+            "x509_san_dns",
+            "x509_san_uri"
+          ]
+        }
+      },
+      "required": [
+        "alg",
+        "clientIdScheme",
+        "issuer",
+        "method",
+        "x5c"
+      ],
+      "additionalProperties": false
+    },
+    "JwtIssuerJwk": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "const": "jwk"
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": {},
+          "description": "Additional options for the issuance context"
+        },
+        "alg": {
+          "$ref": "#/definitions/SigningAlgo"
+        },
+        "jwk": {
           "type": "object",
           "properties": {
-            "method": {
-              "type": "string",
-              "const": "x5c"
+            "alg": {
+              "type": "string"
             },
-            "options": {
-              "type": "object",
-              "additionalProperties": {},
-              "description": "Additional options for the issuance context"
+            "crv": {
+              "type": "string"
             },
-            "x5c": {
+            "d": {
+              "type": "string"
+            },
+            "dp": {
+              "type": "string"
+            },
+            "dq": {
+              "type": "string"
+            },
+            "e": {
+              "type": "string"
+            },
+            "ext": {
+              "type": "boolean"
+            },
+            "k": {
+              "type": "string"
+            },
+            "key_ops": {
               "type": "array",
               "items": {
                 "type": "string"
-              },
-              "description": "Array of base64-encoded certificate strings in the DER-format.\n\nThe certificate containing the public key corresponding to the key used to digitally sign the JWS MUST be the first certificate."
+              }
             },
-            "issuer": {
-              "type": "string",
-              "description": "The issuer jwt\n\nThis value will be used as the iss value of the issue jwt. It is also used as the client_id. And will also be set as the redirect_uri\n\nIt must match an entry in the x5c certificate leaf entry dnsName / uriName"
+            "kty": {
+              "type": "string"
             },
-            "clientIdScheme": {
-              "type": "string",
-              "enum": [
-                "x509_san_dns",
-                "x509_san_uri"
-              ]
-            }
-          },
-          "required": [
-            "clientIdScheme",
-            "issuer",
-            "method",
-            "x5c"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "method": {
-              "type": "string",
-              "const": "jwk"
+            "n": {
+              "type": "string"
             },
-            "options": {
-              "type": "object",
-              "additionalProperties": {},
-              "description": "Additional options for the issuance context"
-            },
-            "jwk": {
-              "type": "object",
-              "properties": {
-                "alg": {
-                  "type": "string"
-                },
-                "crv": {
-                  "type": "string"
-                },
-                "d": {
-                  "type": "string"
-                },
-                "dp": {
-                  "type": "string"
-                },
-                "dq": {
-                  "type": "string"
-                },
-                "e": {
-                  "type": "string"
-                },
-                "ext": {
-                  "type": "boolean"
-                },
-                "k": {
-                  "type": "string"
-                },
-                "key_ops": {
-                  "type": "array",
-                  "items": {
+            "oth": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "d": {
+                    "type": "string"
+                  },
+                  "r": {
+                    "type": "string"
+                  },
+                  "t": {
                     "type": "string"
                   }
                 },
-                "kty": {
-                  "type": "string"
-                },
-                "n": {
-                  "type": "string"
-                },
-                "oth": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "d": {
-                        "type": "string"
-                      },
-                      "r": {
-                        "type": "string"
-                      },
-                      "t": {
-                        "type": "string"
-                      }
-                    },
-                    "additionalProperties": false
-                  }
-                },
-                "p": {
-                  "type": "string"
-                },
-                "q": {
-                  "type": "string"
-                },
-                "qi": {
-                  "type": "string"
-                },
-                "use": {
-                  "type": "string"
-                },
-                "x": {
-                  "type": "string"
-                },
-                "y": {
-                  "type": "string"
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "jwk",
-            "method"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "method": {
-              "type": "string",
-              "const": "custom"
+                "additionalProperties": false
+              }
             },
-            "options": {
-              "type": "object",
-              "additionalProperties": {},
-              "description": "Additional options for the issuance context"
+            "p": {
+              "type": "string"
+            },
+            "q": {
+              "type": "string"
+            },
+            "qi": {
+              "type": "string"
+            },
+            "use": {
+              "type": "string"
+            },
+            "x": {
+              "type": "string"
+            },
+            "y": {
+              "type": "string"
             }
           },
-          "required": [
-            "method"
-          ],
           "additionalProperties": false
         }
-      ]
+      },
+      "required": [
+        "alg",
+        "jwk",
+        "method"
+      ],
+      "additionalProperties": false
+    },
+    "JwtIssuerCustom": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "const": "custom"
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": {},
+          "description": "Additional options for the issuance context"
+        }
+      },
+      "required": [
+        "method"
+      ],
+      "additionalProperties": false
     },
     "PresentationExchangeResponseOpts": {
       "type": "object",

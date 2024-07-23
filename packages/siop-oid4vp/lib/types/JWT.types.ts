@@ -1,24 +1,8 @@
-import { JwtHeader as jwtDecodeJwtHeader, JwtPayload as jwtDecodePayload } from 'jwt-decode'
 export interface EcdsaSignature {
   r: string
   s: string
   recoveryParam?: number | null
 }
-
-export type JwtHeader = jwtDecodeJwtHeader & {
-  alg?: string
-  x5c?: string[]
-  kid?: string
-  jwk?: JsonWebKey
-  jwt?: string
-} & Record<string, unknown>
-
-export type JwtPayload = jwtDecodePayload & {
-  client_id?: string
-  nonce?: string
-  request_uri?: string
-  client_id_scheme?: string
-} & Record<string, unknown>
 
 export interface JWTPayload {
   iss?: string

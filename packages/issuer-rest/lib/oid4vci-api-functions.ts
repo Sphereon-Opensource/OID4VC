@@ -19,13 +19,13 @@ import {
   trimBoth,
   trimEnd,
   trimStart,
+  uuidv4,
   validateJWT,
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
-import { v4 as uuidv4 } from 'uuid'
 
 import { handleTokenRequest, verifyTokenRequest } from './IssuerTokenEndpoint'
 import {

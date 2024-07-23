@@ -1,3 +1,4 @@
+import { parseJWT } from '@sphereon/oid4vci-common'
 import { IPresentationDefinition, PEX } from '@sphereon/pex'
 import { Format } from '@sphereon/pex-models'
 import {
@@ -11,7 +12,6 @@ import {
 
 import { AuthorizationRequest } from '../authorization-request'
 import { verifyRevocation } from '../helpers'
-import { parseJWT } from '../helpers/jwtUtils'
 import {
   AuthorizationResponsePayload,
   IDTokenPayload,

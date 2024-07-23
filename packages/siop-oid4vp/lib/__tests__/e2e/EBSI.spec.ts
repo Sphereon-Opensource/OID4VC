@@ -1,11 +1,11 @@
 import { getResolver as getKeyResolver } from '@cef-ebsi/key-did-resolver'
 // import { EbsiWallet } from '@cef-ebsi/wallet-lib';
 import EbsiWallet from '@cef-ebsi/wallet-lib'
+import { uuidv4 } from '@sphereon/oid4vci-common'
 import { PresentationSignCallBackParams } from '@sphereon/pex'
 import { parseDid, W3CVerifiablePresentation } from '@sphereon/ssi-types'
 import { Resolver } from 'did-resolver'
 import { importJWK, JWK, SignJWT } from 'jose'
-import { v4 as uuidv4 } from 'uuid'
 
 import { OP, SigningAlgo } from '../../'
 import { getCreateJwtCallback, getVerifyJwtCallback } from '../DidJwtTestUtils'
