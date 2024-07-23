@@ -38,7 +38,12 @@ export function getTypesFromObject(
   } else if (typeof subject === 'string') {
     return [subject];
   } else if ('credential_definition' in subject) {
-    return getTypesFromObject(subject.credential_definition as CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13 | CredentialDefinitionJwtVcJsonV1_0_13 | JsonLdIssuerCredentialDefinition);
+    return getTypesFromObject(
+      subject.credential_definition as
+        | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13
+        | CredentialDefinitionJwtVcJsonV1_0_13
+        | JsonLdIssuerCredentialDefinition,
+    );
   } else if ('types' in subject && subject.types) {
     return Array.isArray(subject.types) ? subject.types : [subject.types];
   } else if ('type' in subject && subject.type) {
