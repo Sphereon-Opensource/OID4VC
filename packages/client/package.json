@@ -16,12 +16,12 @@
   },
   "dependencies": {
     "@sphereon/oid4vci-common": "workspace:*",
-    "@sphereon/ssi-types": "0.26.1-next.132",
+    "@sphereon/ssi-types": "0.28.0",
     "cross-fetch": "^3.1.8",
     "debug": "^4.3.5"
   },
   "devDependencies": {
-    "@sphereon/ssi-sdk-ext.key-utils": "^0.22.0",
+    "@sphereon/ssi-sdk-ext.key-utils": "^0.23.0",
     "@transmute/did-key.js": "^0.3.0-unstable.10",
     "@trust/keyto": "^2.0.0-alpha1",
     "@types/jest": "^29.5.12",

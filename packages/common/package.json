@@ -10,7 +10,7 @@
     "build:clean": "tsc --build --clean && tsc --build"
   },
   "dependencies": {
-    "@sphereon/ssi-types": "0.26.1-next.132",
+    "@sphereon/ssi-types": "0.28.0",
     "cross-fetch": "^3.1.8",
     "jwt-decode": "^4.0.0",
     "sha.js": "^2.4.11",
