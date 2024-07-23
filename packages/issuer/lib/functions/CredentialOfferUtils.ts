@@ -158,7 +158,7 @@ export function createCredentialOfferObjectv1_0_11(
   if (opts?.preAuthorizedCode) {
     credential_offer.grants[PRE_AUTH_GRANT_LITERAL] = {
       'pre-authorized_code': opts.preAuthorizedCode,
-      user_pin_required: opts.userPinRequired ? opts.userPinRequired : false,
+      user_pin_required: opts.userPinRequired ?? false,
     }
   } else if (!credential_offer.grants?.authorization_code?.issuer_state) {
     credential_offer.grants = {

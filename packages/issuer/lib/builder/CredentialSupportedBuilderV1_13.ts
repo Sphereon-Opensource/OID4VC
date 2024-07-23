@@ -1,12 +1,14 @@
 import {
   CredentialConfigurationSupportedV1_0_13,
-  CredentialDefinitionV1_0_13,
+  CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13,
+  CredentialDefinitionJwtVcJsonV1_0_13,
   CredentialsSupportedDisplay,
   IssuerCredentialSubject,
   IssuerCredentialSubjectDisplay,
   KeyProofType,
   OID4VCICredentialFormat,
   ProofType,
+  ProofTypesSupported,
   TokenErrorResponse,
 } from '@sphereon/oid4vci-common'
 
@@ -14,10 +16,10 @@ export class CredentialSupportedBuilderV1_13 {
   format?: OID4VCICredentialFormat
   scope?: string
   credentialName?: string
-  credentialDefinition?: CredentialDefinitionV1_0_13
+  credentialDefinition?: CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13 | CredentialDefinitionJwtVcJsonV1_0_13
   cryptographicBindingMethodsSupported?: ('jwk' | 'cose_key' | 'did' | string)[]
   credentialSigningAlgValuesSupported?: string[]
-  proofTypesSupported?: Record<KeyProofType, ProofType>
+  proofTypesSupported?: ProofTypesSupported
   display?: CredentialsSupportedDisplay[]
   credentialSubject?: IssuerCredentialSubject
 
@@ -31,7 +33,9 @@ export class CredentialSupportedBuilderV1_13 {
     return this
   }
 
-  withCredentialDefinition(credentialDefinition: CredentialDefinitionV1_0_13): CredentialSupportedBuilderV1_13 {
+  withCredentialDefinition(
+    credentialDefinition: CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13 | CredentialDefinitionJwtVcJsonV1_0_13,
+  ): CredentialSupportedBuilderV1_13 {
     if (!credentialDefinition.type) {
       throw new Error('credentialDefinition should contain a type array')
     }
@@ -81,13 +85,13 @@ export class CredentialSupportedBuilderV1_13 {
 
   addProofTypesSupported(keyProofType: KeyProofType, proofType: ProofType): CredentialSupportedBuilderV1_13 {
     if (!this.proofTypesSupported) {
-      this.proofTypesSupported = {} as Record<KeyProofType, ProofType>
+      this.proofTypesSupported = {}
     }
     this.proofTypesSupported[keyProofType] = proofType
     return this
   }
 
-  withProofTypesSupported(proofTypesSupported: Record<KeyProofType, ProofType>): CredentialSupportedBuilderV1_13 {
+  withProofTypesSupported(proofTypesSupported: ProofTypesSupported): CredentialSupportedBuilderV1_13 {
     this.proofTypesSupported = proofTypesSupported
     return this
   }

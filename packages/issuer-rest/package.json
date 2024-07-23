@@ -13,8 +13,8 @@
   "dependencies": {
     "@sphereon/oid4vci-common": "workspace:*",
     "@sphereon/oid4vci-issuer": "workspace:*",
-    "@sphereon/ssi-express-support": "0.26.1-next.6",
-    "@sphereon/ssi-types": "0.26.1-next.6",
+    "@sphereon/ssi-express-support": "0.28.0",
+    "@sphereon/ssi-types": "0.28.0",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -41,6 +41,17 @@
     "jose": "^4.10.0",
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.0"
+  },
+  "peerDependencies": {
+    "awesome-qr": "^2.1.5-rc.0"
+  },
+  "peerDependenciesMeta": {
+    "awesome-qr": {
+      "optional": true
+    }
+  },
+  "react-native": {
+    "awesome-qr": false
   },
   "engines": {
     "node": ">=18"
