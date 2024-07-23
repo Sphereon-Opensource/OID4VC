@@ -126,7 +126,11 @@ export class VcIssuer<DIDDoc extends object> {
     if (grants?.[PRE_AUTH_GRANT_LITERAL]) {
       preAuthorizedCode = grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL]
       txCode = grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code
+
       if (txCode !== undefined) {
+        if (!txCode?.length) {
+          txCode.length = opts.pinLength ?? 4
+        }
         grants[PRE_AUTH_GRANT_LITERAL].tx_code = txCode
       }
       if (!preAuthorizedCode) {
@@ -187,7 +191,8 @@ export class VcIssuer<DIDDoc extends object> {
       lastUpdatedAt,
       status,
       notification_id: v4(),
-      ...(userPin && { userPin }),
+      ...(userPin && { txCode: userPin }), // We used to use userPin according to older specs. We map these onto txCode now. If both are used, txCode in the end wins, even if they are different
+      ...(txCode && { txCode }),
       ...(opts.credentialDataSupplierInput && { credentialDataSupplierInput: opts.credentialDataSupplierInput }),
       credentialOffer,
     }
