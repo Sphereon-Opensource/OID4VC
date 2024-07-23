@@ -1,4 +1,4 @@
-import { getTypesFromObject, VCI_LOG_COMMON } from '../index';
+import { getTypesFromObject, isW3cCredentialSupported, VCI_LOG_COMMON } from '../index';
 import {
   AuthorizationServerMetadata,
   CredentialConfigurationSupported,
@@ -112,13 +112,11 @@ export function getSupportedCredential(opts?: {
       } else if (types) {
         isTypeMatch = normalizedTypes.every((type) => types.includes(type));
       } else {
-        if ('credential_definition' in config) {
-          isTypeMatch = normalizedTypes.every((type) => config.credential_definition.type?.includes(type));
-        } else if ('type' in config && Array.isArray(config.type)) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          isTypeMatch = normalizedTypes.every((type) => config.type.includes(type));
-        } else if ('types' in config) {
+        if (isW3cCredentialSupported(config) && 'credential_definition' in config) {
+          isTypeMatch = normalizedTypes.every((type) => config.credential_definition.type.includes(type));
+        } else if (isW3cCredentialSupported(config) && 'type' in config && Array.isArray(config.type)) {
+          isTypeMatch = normalizedTypes.every((type) => (config.type as string[]).includes(type));
+        } else if (isW3cCredentialSupported(config) && 'types' in config) {
           isTypeMatch = normalizedTypes.every((type) => config.types?.includes(type));
         }
       }

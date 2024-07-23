@@ -5,14 +5,16 @@ import {
   convertJsonToURI,
   CreateRequestObjectMode,
   CredentialConfigurationSupportedV1_0_13,
+  CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13,
+  CredentialDefinitionJwtVcJsonV1_0_13,
   CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
   EndpointMetadataResultV1_0_13,
   formPost,
+  isW3cCredentialSupported,
   JsonURIMode,
   Jwt,
-  OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PARMode,
   PKCEOpts,
@@ -95,14 +97,17 @@ export const createAuthorizationRequestUrl = async ({
   clientId?: string;
   version?: OpenId4VCIVersion;
 }): Promise<string> => {
-  function removeDisplayAndValueTypes(obj: any): void {
-    for (const prop in obj) {
+  function removeDisplayAndValueTypes(obj: any) {
+    const newObj = { ...obj };
+    for (const prop in newObj) {
       if (['display', 'value_type'].includes(prop)) {
-        delete obj[prop];
-      } else if (typeof obj[prop] === 'object') {
-        removeDisplayAndValueTypes(obj[prop]);
+        delete newObj[prop];
+      } else if (typeof newObj[prop] === 'object') {
+        newObj[prop] = removeDisplayAndValueTypes(newObj[prop]);
       }
     }
+
+    return newObj;
   }
 
   const { redirectUri, requestObjectOpts = { requestObjectMode: CreateRequestObjectMode.NONE } } = authorizationRequest;
@@ -127,42 +132,42 @@ export const createAuthorizationRequestUrl = async ({
         ? filterSupportedCredentials(credentialOffer.credential_offer as CredentialOfferPayloadV1_0_13, credentialConfigurationSupported)
         : [];
 
-    // FIXME: complains about VCT for sd-jwt
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     authorizationDetails = creds.flatMap((cred) => {
       const locations = [credentialOffer?.credential_offer.credential_issuer ?? endpointMetadata.issuer];
-      const credential_configuration_id: string | undefined = cred.configuration_id;
-      const vct: string | undefined = cred.vct;
-      let format: OID4VCICredentialFormat | undefined;
 
-      if (!credential_configuration_id) {
-        format = cred.format;
-      }
+      // TODO: credential_configuration_id seems to always be defined?
+      const credential_configuration_id: string | undefined = cred.configuration_id;
+      const format = credential_configuration_id ? undefined : cred.format;
+
       if (!credential_configuration_id && !cred.format) {
         throw Error('format is required in authorization details');
       }
 
-      const meta: any = {};
-      const credential_definition = cred.credential_definition;
-      if (credential_definition?.type && !format) {
-        // ype: OPTIONAL. Array as defined in Appendix A.1.1.2. This claim contains the type values the Wallet requests authorization for at the Credential Issuer. It MUST be present if the claim format is present in the root of the authorization details object. It MUST not be present otherwise.
-        // It meens we have a config_id, already mapping it to an explicit format and types
-        delete credential_definition.type;
-      }
-      if (credential_definition.credentialSubject) {
-        removeDisplayAndValueTypes(credential_definition.credentialSubject);
+      // SD-JWT VC
+      const vct = cred.format === 'vc+sd-jwt' ? cred.vct : undefined;
+
+      // W3C credentials
+      let credential_definition: undefined | Partial<CredentialDefinitionJwtVcJsonV1_0_13 | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13> =
+        undefined;
+      if (isW3cCredentialSupported(cred)) {
+        credential_definition = {
+          ...cred.credential_definition,
+          // type: OPTIONAL. Array as defined in Appendix A.1.1.2. This claim contains the type values the Wallet requests authorization for at the Credential Issuer. It MUST be present if the claim format is present in the root of the authorization details object. It MUST not be present otherwise.
+          // It meens we have a config_id, already mapping it to an explicit format and types
+          type: format ? cred.credential_definition.type : undefined,
+          credentialSubject: cred.credential_definition.credentialSubject
+            ? removeDisplayAndValueTypes(cred.credential_definition.credentialSubject)
+            : undefined,
+        };
       }
 
       return {
         type: 'openid_credential',
-        ...meta,
         locations,
         ...(credential_definition && { credential_definition }),
         ...(credential_configuration_id && { credential_configuration_id }),
         ...(format && { format }),
-        ...(vct && { vct }),
-        ...(cred.claims && { claims: removeDisplayAndValueTypes(JSON.parse(JSON.stringify(cred.claims))) }),
+        ...(vct && { vct, claims: cred.claims ? removeDisplayAndValueTypes(cred.claims) : undefined }),
       } as AuthorizationDetails;
     });
     if (!authorizationDetails || authorizationDetails.length === 0) {
