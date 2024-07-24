@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-callback-example",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "description": "OpenID 4 Verifiable Credential Issuance issuer callback example",
   "source": "lib/index.ts",
   "main": "dist/index.js",
@@ -18,7 +18,7 @@
     "@sphereon/oid4vci-client": "workspace:*",
     "@sphereon/oid4vci-common": "workspace:*",
     "@sphereon/oid4vci-issuer": "workspace:*",
-    "@sphereon/ssi-types": "0.26.1-next.6",
+    "@sphereon/ssi-types": "0.28.0",
     "jose": "^4.10.0"
   },
   "devDependencies": {

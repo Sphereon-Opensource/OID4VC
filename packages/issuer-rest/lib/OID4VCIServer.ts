@@ -68,7 +68,7 @@ function buildVCIFromEnvironment<DIDDoc extends object>() {
 export type ICreateCredentialOfferURIResponse = {
   uri: string
   userPin?: string
-  tsCode?: TxCode
+  txCode?: TxCode
 }
 
 export interface IGetCredentialOfferEndpointOpts extends ISingleEndpointOpts {

@@ -9,7 +9,7 @@ import {
   Jwt,
   STATE_MISSING_ERROR,
   URIState,
-  uuid4v,
+  uuidv4,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
@@ -39,7 +39,7 @@ describe('OID4VCIServer', () => {
     const credentialOfferState1: CredentialOfferSession = {
       preAuthorizedCode: preAuthorizedCode1,
       txCode: '493536',
-      notification_id: v4(),
+      notification_id: uuidv4(),
       createdAt: +new Date(),
       lastUpdatedAt: +new Date(),
       status: IssueStatus.OFFER_CREATED,

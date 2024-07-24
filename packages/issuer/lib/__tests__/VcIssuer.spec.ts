@@ -316,7 +316,6 @@ describe('VcIssuer', () => {
       vcIssuer.issueCredential({
         credentialRequest: {
           credential_identifier: 'VerifiableCredential',
-          format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',
             jwt: 'ye.ye.ye',
@@ -375,7 +374,6 @@ describe('VcIssuer', () => {
         credential: verifiableCredential,
         credentialRequest: {
           credential_identifier: 'VerifiableCredential',
-          format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',
             jwt: 'ye.ye.ye',
@@ -439,7 +437,6 @@ describe('VcIssuer', () => {
       vcIssuer.issueCredential({
         credentialRequest: {
           credential_identifier: 'VerifiableCredential',
-          format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',
             jwt: 'ye.ye.ye',
@@ -491,7 +488,7 @@ describe('VcIssuer without did', () => {
       createdAt: +new Date(),
       lastUpdatedAt: +new Date(),
       status: IssueStatus.OFFER_CREATED,
-      notification_id: v4(),
+      notification_id: uuidv4(),
       txCode: '123456',
       credentialOffer: {
         credential_offer: {
@@ -578,7 +575,6 @@ describe('VcIssuer without did', () => {
       vcIssuer.issueCredential({
         credentialRequest: {
           credential_identifier: 'VerifiableCredential',
-          format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',
             jwt: 'ye.ye.ye',
@@ -631,7 +627,6 @@ describe('VcIssuer without did', () => {
         credential: verifiableCredential_withoutDid,
         credentialRequest: {
           credential_identifier: 'VerifiableCredential',
-          format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',
             jwt: 'ye.ye.ye',
@@ -689,7 +684,6 @@ describe('VcIssuer without did', () => {
       vcIssuer.issueCredential({
         credentialRequest: {
           credential_identifier: 'VerifiableCredential',
-          format: 'jwt_vc_json',
           proof: {
             proof_type: 'jwt',
             jwt: 'ye.ye.ye',

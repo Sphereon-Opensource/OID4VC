@@ -3,19 +3,17 @@ import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
 import { JWK, ProofOfPossession } from './CredentialIssuance.types';
 import {
   AlgValue,
+  CommonCredentialRequest,
   CredentialDataSupplierInput,
-  CredentialRequestJwtVcJson,
-  CredentialRequestJwtVcJsonLdAndLdpVc,
   CredentialRequestSdJwtVc,
   CredentialsSupportedDisplay,
   CredentialSupplierConfig,
   EncValue,
   Grant,
   IssuerCredentialSubject,
-  KeyProofType,
   MetadataDisplay,
   OID4VCICredentialFormat,
-  ProofType,
+  ProofTypesSupported,
   ResponseEncryption,
 } from './Generic.types';
 import { QRCodeOpts } from './QRCode.types';
@@ -37,42 +35,90 @@ export interface IssuerMetadataV1_0_13 {
   [x: string]: unknown;
 }
 
-export type CredentialDefinitionV1_0_13 = {
-  type?: string[];
+export type CredentialDefinitionJwtVcJsonV1_0_13 = {
+  type: string[];
   credentialSubject?: IssuerCredentialSubject;
 };
 
-export type CredentialConfigurationSupportedV1_0_13 = {
-  credential_definition: CredentialDefinitionV1_0_13;
-  /**
-   * TODO: These two (vct and id) are solely added because of backward compatibility with sd-jwt. as soons as we have a clear understanding of the new sd-jwt issuer protocol we can remove this
-   */
-  vct?: string;
-  id?: string;
-  claims?: IssuerCredentialSubject;
-  format: OID4VCICredentialFormat; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
+export type CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13 = {
+  '@context': string[];
+  type: string[];
+  credentialSubject?: IssuerCredentialSubject;
+};
+
+export type CredentialConfigurationSupportedV1_0_13 = CredentialConfigurationSupportedCommonV1_0_13 &
+  (
+    | CredentialConfigurationSupportedSdJwtVcV1_0_13
+    | CredentialConfigurationSupportedJwtVcJsonV1_0_13
+    | CredentialConfigurationSupportedJwtVcJsonLdAndLdpVcV1_0_13
+  );
+
+// Base type covering credential configurations supported
+export type CredentialConfigurationSupportedCommonV1_0_13 = {
+  format: OID4VCICredentialFormat | 'string'; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
   scope?: string; // OPTIONAL. A JSON string identifying the scope value that this Credential Issuer supports for this particular Credential. The value can be the same across multiple credential_configurations_supported objects. The Authorization Server MUST be able to uniquely identify the Credential Issuer based on the scope value. The Wallet can use this value in the Authorization Request as defined in Section 5.1.2. Scope values in this Credential Issuer metadata MAY duplicate those in the scopes_supported parameter of the Authorization Server.
   cryptographic_binding_methods_supported?: string[];
   credential_signing_alg_values_supported?: string[];
-  proof_types_supported?: Record<KeyProofType, ProofType>;
+  proof_types_supported?: ProofTypesSupported;
   display?: CredentialsSupportedDisplay[]; // OPTIONAL. An array of objects, where each object contains the display properties of the supported credential for a certain language
   [x: string]: unknown;
 };
 
-export type CredentialRequestV1_0_13 =
-  | (ExperimentalSubjectIssuance & {
-      // We add them here to keep existing other request versions happy. They cannot co-exists with an identifier
-      format?: OID4VCICredentialFormat /* | OID4VCICredentialFormat[];*/; // for now it seems only one is supported in the spec
-      proof?: ProofOfPossession;
+export interface CredentialConfigurationSupportedSdJwtVcV1_0_13 extends CredentialConfigurationSupportedCommonV1_0_13 {
+  format: 'vc+sd-jwt';
 
-      credential_identifier?: string;
-      credential_response_encryption?: {
-        jwk: JWK;
-        alg: AlgValue;
-        enc: EncValue;
-      };
-    })
-  | (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc);
+  vct: string;
+  claims?: IssuerCredentialSubject;
+
+  order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
+}
+
+export interface CredentialConfigurationSupportedJwtVcJsonV1_0_13 extends CredentialConfigurationSupportedCommonV1_0_13 {
+  format: 'jwt_vc_json' | 'jwt_vc';
+  credential_definition: CredentialDefinitionJwtVcJsonV1_0_13;
+  order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
+}
+
+export interface CredentialConfigurationSupportedJwtVcJsonLdAndLdpVcV1_0_13 extends CredentialConfigurationSupportedCommonV1_0_13 {
+  format: 'ldp_vc' | 'jwt_vc_json-ld';
+  credential_definition: CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13;
+  order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
+}
+
+export type CredentialRequestV1_0_13ResponseEncryption = {
+  jwk: JWK;
+  alg: AlgValue;
+  enc: EncValue;
+};
+
+export interface CredentialRequestV1_0_13Common extends ExperimentalSubjectIssuance {
+  credential_response_encryption?: CredentialRequestV1_0_13ResponseEncryption;
+  proof?: ProofOfPossession;
+}
+
+export type CredentialRequestV1_0_13 = CredentialRequestV1_0_13Common &
+  (
+    | CredentialRequestJwtVcJsonV1_0_13
+    | CredentialRequestJwtVcJsonLdAndLdpVcV1_0_13
+    | CredentialRequestSdJwtVc
+    | CredentialRequestV1_0_13CredentialIdentifier
+  );
+
+export interface CredentialRequestV1_0_13CredentialIdentifier extends CredentialRequestV1_0_13Common {
+  // Format cannot be defined when credential_identifier is used
+  format?: undefined;
+  credential_identifier: string;
+}
+
+export interface CredentialRequestJwtVcJsonV1_0_13 extends CommonCredentialRequest {
+  format: 'jwt_vc_json' | 'jwt_vc'; // jwt_vc for backwards compat
+  credential_definition: CredentialDefinitionJwtVcJsonV1_0_13;
+}
+
+export interface CredentialRequestJwtVcJsonLdAndLdpVcV1_0_13 extends CommonCredentialRequest {
+  format: 'ldp_vc' | 'jwt_vc_json-ld';
+  credential_definition: CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13;
+}
 
 export interface CredentialOfferV1_0_13 {
   credential_offer?: CredentialOfferPayloadV1_0_13;

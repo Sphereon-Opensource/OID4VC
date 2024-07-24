@@ -123,13 +123,17 @@ export interface ProofType {
   proof_signing_alg_values_supported: string[];
 }
 
+export type ProofTypesSupported = {
+  [key in KeyProofType]?: ProofType;
+};
+
 export type CommonCredentialSupported = CredentialSupportedBrief &
   ExperimentalSubjectIssuance & {
     format: OID4VCICredentialFormat | string; //REQUIRED. A JSON string identifying the format of this credential, e.g. jwt_vc_json or ldp_vc.
     id?: string; // OPTIONAL. A JSON string identifying the respective object. The value MUST be unique across all credentials_supported entries in the Credential Issuer Metadata
     display?: CredentialsSupportedDisplay[]; // OPTIONAL. An array of objects, where each object contains the display properties of the supported credential for a certain language
     scope?: string; // OPTIONAL. A JSON string identifying the scope value that this Credential Issuer supports for this particular Credential. The value can be the same across multiple credential_configurations_supported objects. The Authorization Server MUST be able to uniquely identify the Credential Issuer based on the scope value. The Wallet can use this value in the Authorization Request as defined in Section 5.1.2. Scope values in this Credential Issuer metadata MAY duplicate those in the scopes_supported parameter of the Authorization Server.
-    proof_types_supported?: Record<KeyProofType, ProofType>;
+    proof_types_supported?: ProofTypesSupported;
 
     /**
      * following properties are non-mso_mdoc specific and we might wanna rethink them when we're going to support mso_mdoc

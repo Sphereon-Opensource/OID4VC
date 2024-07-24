@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/did-auth-siop",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "description": "Self Issued OpenID V2 (SIOPv2) and OpenID 4 Verifiable Presentations (OID4VP)",
   "source": "lib/index.ts",
   "main": "dist/index.js",

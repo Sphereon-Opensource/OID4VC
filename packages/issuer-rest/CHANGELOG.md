@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.1](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.15.0...v0.15.1) (2024-07-23)
+
+### Bug Fixes
+
+- txCode fixes [#117](https://github.com/Sphereon-Opensource/OID4VCI/issues/117) ([7d17d13](https://github.com/Sphereon-Opensource/OID4VCI/commit/7d17d13d3485c5b6b55ef876eba8f09c9f7a788b))
+
 # [0.15.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.14.0...v0.15.0) (2024-07-15)
 
 **Note:** Version bump only for package @sphereon/oid4vci-issuer-server
