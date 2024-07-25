@@ -1,5 +1,7 @@
 import {
   acquireDeferredCredential,
+  createDPoP,
+  CreateDPoPClientOptions,
   CredentialResponse,
   getCredentialRequestForVersion,
   getUniformFormat,
@@ -64,15 +66,17 @@ export class CredentialRequestClientV1_0_11 {
     credentialTypes?: string | string[];
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
+    createDPoPOptions?: CreateDPoPClientOptions;
   }): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const { credentialTypes, proofInput, format, context } = opts;
 
     const request = await this.createCredentialRequest({ proofInput, credentialTypes, context, format, version: this.version() });
-    return await this.acquireCredentialsUsingRequest(request);
+    return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOptions);
   }
 
   public async acquireCredentialsUsingRequest(
     uniformRequest: UniformCredentialRequest,
+    createDPoPOptions?: CreateDPoPClientOptions,
   ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const request = getCredentialRequestForVersion(uniformRequest, this.version());
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint;
@@ -83,7 +87,22 @@ export class CredentialRequestClientV1_0_11 {
     debug(`Acquiring credential(s) from: ${credentialEndpoint}`);
     debug(`request\n: ${JSON.stringify(request, null, 2)}`);
     const requestToken: string = this.credentialRequestOpts.token;
-    let response = (await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken })) as OpenIDResponse<CredentialResponse> & {
+
+    let dPoP: string | undefined;
+    if (createDPoPOptions) {
+      const htu = credentialEndpoint.split('?')[0].split('#')[0];
+      dPoP = createDPoPOptions
+        ? await createDPoP({
+            ...createDPoPOptions,
+            jwtPayloadProps: { ...createDPoPOptions.jwtPayloadProps, htu, htm: 'POST', accessToken: requestToken },
+          })
+        : undefined;
+    }
+
+    let response = (await post(credentialEndpoint, JSON.stringify(request), {
+      bearerToken: requestToken,
+      customHeaders: { ...(createDPoPOptions && { dpop: dPoP }) },
+    })) as OpenIDResponse<CredentialResponse> & {
       access_token: string;
     };
     this._isDeferred = isDeferredCredentialResponse(response);

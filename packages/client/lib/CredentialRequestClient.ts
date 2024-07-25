@@ -1,5 +1,7 @@
 import {
   acquireDeferredCredential,
+  createDPoP,
+  CreateDPoPClientOptions,
   CredentialRequestV1_0_13,
   CredentialResponse,
   getCredentialRequestForVersion,
@@ -89,6 +91,7 @@ export class CredentialRequestClient {
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
     subjectIssuance?: ExperimentalSubjectIssuance;
+    createDPoPOptions?: CreateDPoPClientOptions;
   }): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const { credentialIdentifier, credentialTypes, proofInput, format, context, subjectIssuance } = opts;
 
@@ -101,11 +104,12 @@ export class CredentialRequestClient {
       credentialIdentifier,
       subjectIssuance,
     });
-    return await this.acquireCredentialsUsingRequest(request);
+    return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOptions);
   }
 
   public async acquireCredentialsUsingRequest(
     uniformRequest: UniformCredentialRequest,
+    createDPoPOptions?: CreateDPoPClientOptions,
   ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
       throw new Error('Versions below v1.0.13 (draft 13) are not supported by the V13 credential request client.');
@@ -119,7 +123,22 @@ export class CredentialRequestClient {
     debug(`Acquiring credential(s) from: ${credentialEndpoint}`);
     debug(`request\n: ${JSON.stringify(request, null, 2)}`);
     const requestToken: string = this.credentialRequestOpts.token;
-    let response = (await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken })) as OpenIDResponse<CredentialResponse> & {
+
+    let dPoP: string | undefined;
+    if (createDPoPOptions) {
+      const htu = credentialEndpoint.split('?')[0].split('#')[0];
+      dPoP = createDPoPOptions
+        ? await createDPoP({
+            ...createDPoPOptions,
+            jwtPayloadProps: { ...createDPoPOptions.jwtPayloadProps, htu, htm: 'POST', accessToken: requestToken },
+          })
+        : undefined;
+    }
+
+    let response = (await post(credentialEndpoint, JSON.stringify(request), {
+      bearerToken: requestToken,
+      customHeaders: { ...(createDPoPOptions && { dpop: dPoP }) },
+    })) as OpenIDResponse<CredentialResponse> & {
       access_token: string;
     };
     this._isDeferred = isDeferredCredentialResponse(response);
