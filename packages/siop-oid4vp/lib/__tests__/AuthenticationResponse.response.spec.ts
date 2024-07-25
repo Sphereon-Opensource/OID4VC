@@ -1,3 +1,4 @@
+import { SigningAlgo } from '@sphereon/oid4vci-common'
 import { IPresentationDefinition } from '@sphereon/pex'
 import {
   ICredential,
@@ -20,7 +21,6 @@ import {
   ResponseMode,
   ResponseType,
   Scope,
-  SigningAlgo,
   SubjectIdentifierType,
   SubjectType,
   SupportedVersion,

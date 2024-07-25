@@ -1,3 +1,4 @@
+import { SigningAlgo } from '@sphereon/oid4vci-common'
 import { PresentationSignCallBackParams } from '@sphereon/pex'
 import { IProofType } from '@sphereon/ssi-types'
 import * as jose from 'jose'
@@ -20,7 +21,6 @@ import {
   ResponseType,
   RevocationVerification,
   RP,
-  SigningAlgo,
   SupportedVersion,
   VPTokenLocation,
 } from '../..'

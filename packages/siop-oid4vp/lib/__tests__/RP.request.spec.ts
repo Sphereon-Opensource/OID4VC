@@ -1,3 +1,4 @@
+import { SigningAlgo } from '@sphereon/oid4vci-common'
 import { IProofType } from '@sphereon/ssi-types'
 
 import {
@@ -8,7 +9,6 @@ import {
   ResponseType,
   RP,
   Scope,
-  SigningAlgo,
   SubjectIdentifierType,
   SubjectType,
   SupportedVersion,

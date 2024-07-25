@@ -1,13 +1,13 @@
 import { getResolver as getKeyResolver } from '@cef-ebsi/key-did-resolver'
 // import { EbsiWallet } from '@cef-ebsi/wallet-lib';
 import EbsiWallet from '@cef-ebsi/wallet-lib'
-import { uuidv4 } from '@sphereon/oid4vci-common'
+import { SigningAlgo, uuidv4 } from '@sphereon/oid4vci-common'
 import { PresentationSignCallBackParams } from '@sphereon/pex'
 import { parseDid, W3CVerifiablePresentation } from '@sphereon/ssi-types'
 import { Resolver } from 'did-resolver'
 import { importJWK, JWK, SignJWT } from 'jose'
 
-import { OP, SigningAlgo } from '../../'
+import { OP } from '../../'
 import { getCreateJwtCallback, getVerifyJwtCallback } from '../DidJwtTestUtils'
 
 const ID_TOKEN_REQUEST_URL = 'https://api-conformance.ebsi.eu/conformance/v3/auth-mock/id_token_request'

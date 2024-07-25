@@ -1,5 +1,6 @@
-import { PassBy, ResponseType, RevocationVerification, RP, Scope, SigningAlgo, SubjectType, SupportedVersion } from '../..'
-import { parseJWT } from '../../helpers/jwtUtils'
+import { parseJWT, SigningAlgo } from '@sphereon/oid4vci-common'
+
+import { PassBy, ResponseType, RevocationVerification, RP, Scope, SubjectType, SupportedVersion } from '../..'
 import { internalSignature } from '../DidJwtTestUtils'
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'

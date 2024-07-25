@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events'
 
+import { SigningAlgo } from '@sphereon/oid4vci-common'
 import { IPresentationDefinition } from '@sphereon/pex'
 import { CredentialMapper, IPresentation, IProofType, IVerifiableCredential, W3CVerifiablePresentation } from '@sphereon/ssi-types'
 import nock from 'nock'
@@ -19,7 +20,6 @@ import {
   RevocationVerification,
   RP,
   Scope,
-  SigningAlgo,
   SubjectType,
   SupportedVersion,
   verifyRevocation,

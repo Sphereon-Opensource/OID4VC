@@ -1,3 +1,4 @@
+import { SigningAlgo } from '@sphereon/oid4vci-common'
 import { PresentationSignCallBackParams, PresentationSubmissionLocation } from '@sphereon/pex'
 import { W3CVerifiablePresentation } from '@sphereon/ssi-types'
 import * as ed25519 from '@transmute/did-key-ed25519'
@@ -6,15 +7,7 @@ import { DIDDocument, DIDResolutionResult } from 'did-resolver'
 import { importJWK, JWK, SignJWT } from 'jose'
 import * as u8a from 'uint8arrays'
 
-import {
-  AuthorizationRequest,
-  AuthorizationResponse,
-  OP,
-  PresentationDefinitionWithLocation,
-  PresentationExchange,
-  SigningAlgo,
-  SupportedVersion,
-} from '../..'
+import { AuthorizationRequest, AuthorizationResponse, OP, PresentationDefinitionWithLocation, PresentationExchange, SupportedVersion } from '../..'
 import { getCreateJwtCallback, getVerifyJwtCallback } from '../DidJwtTestUtils'
 
 export interface InitiateOfferRequest {

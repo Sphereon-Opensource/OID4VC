@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 
+import { SigningAlgo } from '@sphereon/oid4vci-common'
 import { IPresentationDefinition, SdJwtDecodedVerifiableCredentialWithKbJwtInput } from '@sphereon/pex'
 import { OriginalVerifiableCredential } from '@sphereon/ssi-types'
 
@@ -16,7 +17,6 @@ import {
   RevocationVerification,
   RP,
   Scope,
-  SigningAlgo,
   SubjectType,
   SupportedVersion,
   VPTokenLocation,
