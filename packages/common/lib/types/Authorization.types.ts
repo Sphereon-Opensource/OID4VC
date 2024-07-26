@@ -312,7 +312,7 @@ export interface AccessTokenRequest {
   'pre-authorized_code': string;
   redirect_uri?: string;
   scope?: string;
-  user_pin?: string; //pre draft 13
+  user_pin?: string; //this is for v11, not required in v13 anymore
   tx_code?: string; //draft 13
   [s: string]: unknown;
 }
