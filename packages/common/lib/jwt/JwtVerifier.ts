@@ -63,7 +63,7 @@ export const getDidJwtVerifier = (jwt: { header: JwtHeader; payload: JwtPayload 
   if (!jwt.header.kid.includes('#')) {
     throw new Error(`Received an invalid JWT.. '${type}' contains an invalid kid header.`);
   }
-  return { method: 'did', didUrl: jwt.header.kid, type: type, alg: jwt.header.alg as SigningAlgo };
+  return { method: 'did', didUrl: jwt.header.kid, type: type, alg: jwt.header.alg };
 };
 
 export const getX5cVerifier = (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): X5cJwtVerifier => {
@@ -79,7 +79,7 @@ export const getX5cVerifier = (jwt: { header: JwtHeader; payload: JwtPayload }, 
     throw new Error(`Received an invalid JWT. '${type}' contains an invalid iss claim.`);
   }
 
-  return { method: 'x5c', x5c: jwt.header.x5c, issuer: jwt.payload.iss, type: type, alg: jwt.header.alg as SigningAlgo };
+  return { method: 'x5c', x5c: jwt.header.x5c, issuer: jwt.payload.iss, type: type, alg: jwt.header.alg };
 };
 
 export const getJwkVerifier = async (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): Promise<JwkJwtVerifier> => {
@@ -91,7 +91,7 @@ export const getJwkVerifier = async (jwt: { header: JwtHeader; payload: JwtPaylo
     throw new Error(`Received an invalid JWT. '${type}' contains an invalid jwk header.`);
   }
 
-  return { method: 'jwk', type, jwk: jwt.header.jwk, alg: jwt.header.alg as SigningAlgo };
+  return { method: 'jwk', type, jwk: jwt.header.jwk, alg: jwt.header.alg };
 };
 
 export const getJwtVerifierWithContext = async (

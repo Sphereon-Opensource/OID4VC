@@ -145,7 +145,7 @@ export const getRequestObjectJwtVerifier = async (
     }
     // The iss claim value of the Verifier Attestation JWT MUST identify a party the Wallet trusts for issuing Verifier Attestation JWTs.
     // If the Wallet cannot establish trust, it MUST refuse the request.
-    return { method: 'jwk', type, jwk: attestationPayload.cnf['jwk'] as JWK, alg: (jwk.alg ?? attestationHeader.alg) as SigningAlgo }
+    return { method: 'jwk', type, jwk: attestationPayload.cnf['jwk'] as JWK, alg: jwk.alg ?? attestationHeader.alg }
   } else if (clientIdScheme === 'entity_id') {
     if (!clientId.startsWith('http')) {
       throw new Error(SIOPErrors.INVALID_REQUEST_OBJECT_ENTITY_ID_SCHEME_CLIENT_ID)
