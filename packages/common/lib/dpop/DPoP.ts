@@ -6,6 +6,8 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   calculateJwkThumbprint,
   CreateJwtCallback,
+  epochTime,
+  getNowSkewed,
   JWK,
   JwtHeader,
   JwtIssuerJwk,
@@ -18,32 +20,6 @@ import {
 export interface DPoPJwtIssuerWithContext extends JwtIssuerJwk {
   type: 'dpop';
   dPoPSigningAlgValuesSupported?: string[];
-}
-
-/**
- * The maximum allowed clock skew time in seconds. If an time based validation
- * is performed against current time (`now`), the validation can be of by the skew
- * time.
- *
- * See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.5
- */
-const DEFAULT_SKEW_TIME = 300;
-
-function getNowSkewed(now?: number, skewTime?: number) {
-  const _now = now ? now : epochTime();
-  const _skewTime = skewTime ? skewTime : DEFAULT_SKEW_TIME;
-
-  return {
-    nowSkewedPast: _now - _skewTime,
-    nowSkewedFuture: _now + _skewTime,
-  };
-}
-
-/**
- * Returns the current unix timestamp in seconds.
- */
-function epochTime() {
-  return Math.floor(Date.now() / 1000);
 }
 
 export type DPoPJwtPayloadProps = {
