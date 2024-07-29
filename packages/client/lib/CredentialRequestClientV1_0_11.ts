@@ -1,7 +1,7 @@
 import {
   acquireDeferredCredential,
   createDPoP,
-  CreateDPoPClientOptions,
+  CreateDPoPClientOpts,
   CredentialResponse,
   getCredentialRequestForVersion,
   getUniformFormat,
@@ -66,7 +66,7 @@ export class CredentialRequestClientV1_0_11 {
     credentialTypes?: string | string[];
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
-    createDPoPOptions?: CreateDPoPClientOptions;
+    createDPoPOptions?: CreateDPoPClientOpts;
   }): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const { credentialTypes, proofInput, format, context } = opts;
 
@@ -76,7 +76,7 @@ export class CredentialRequestClientV1_0_11 {
 
   public async acquireCredentialsUsingRequest(
     uniformRequest: UniformCredentialRequest,
-    createDPoPOptions?: CreateDPoPClientOptions,
+    createDPoPOptions?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const request = getCredentialRequestForVersion(uniformRequest, this.version());
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint;

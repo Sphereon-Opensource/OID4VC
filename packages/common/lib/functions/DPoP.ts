@@ -9,11 +9,30 @@ import { JWK } from '../types/CredentialIssuance.types';
 import { calculateJwkThumbprint } from './JwkThumbprint';
 import { CreateJwtCallback, JwtIssuerJwk } from './JwtIssuer';
 import { VerifyJwtCallbackBase } from './JwtVerifier';
-
+import { parseJWT } from './jwtUtils';
 
 export interface DPoPJwtIssuerWithContext extends JwtIssuerJwk {
   type: 'dpop';
   dPoPSigningAlgValuesSupported?: string[];
+}
+
+/**
+ * The maximum allowed clock skew time in seconds. If an time based validation
+ * is performed against current time (`now`), the validation can be of by the skew
+ * time.
+ *
+ * See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.5
+ */
+const DEFAULT_SKEW_TIME = 300;
+
+function getNowSkewed(now?: number, skewTime?: number) {
+  const _now = now ? now : epochTime();
+  const _skewTime = skewTime ? skewTime : DEFAULT_SKEW_TIME;
+
+  return {
+    nowSkewedPast: _now - _skewTime,
+    nowSkewedFuture: _now + _skewTime,
+  };
 }
 
 /**
@@ -34,27 +53,27 @@ export type DPoPJwtPayloadProps = {
 export type DPoPJwtHeaderProps = { typ: 'dpop+jwt'; alg: SigningAlgo; jwk: JWK };
 export type CreateDPoPJwtPayloadProps = Omit<DPoPJwtPayloadProps, 'iat' | 'jti' | 'ath'> & { accessToken?: string };
 
-export interface CreateDPoPOptions<JwtPayloadProps = CreateDPoPJwtPayloadProps> {
+export interface CreateDPoPOpts<JwtPayloadProps = CreateDPoPJwtPayloadProps> {
   createJwtCallback: CreateJwtCallback<DPoPJwtIssuerWithContext>;
   jwtIssuer: Omit<JwtIssuerJwk, 'method' | 'type'>;
   jwtPayloadProps: Record<string, unknown> & JwtPayloadProps;
-  dPoPSigningAlgValuesSupported?: string[];
+  dPoPSigningAlgValuesSupported?: (string | SigningAlgo)[];
 }
 
-export type CreateDPoPClientOptions = CreateDPoPOptions<Omit<CreateDPoPJwtPayloadProps, 'htm' | 'htu'>>;
+export type CreateDPoPClientOpts = CreateDPoPOpts<Omit<CreateDPoPJwtPayloadProps, 'htm' | 'htu'>>;
 
-export async function createDPoP(options: CreateDPoPOptions): Promise<string> {
+export async function createDPoP(options: CreateDPoPOpts): Promise<string> {
   const { createJwtCallback, jwtIssuer, jwtPayloadProps, dPoPSigningAlgValuesSupported } = options;
 
   if (jwtPayloadProps.accessToken && (jwtPayloadProps.accessToken?.startsWith('DPoP ') || jwtPayloadProps.accessToken?.startsWith('Bearer '))) {
-    throw new Error('expected accessToken without scheme');
+    throw new Error('expected access token without scheme');
   }
 
   const ath = jwtPayloadProps.accessToken ? u8a.toString(SHA('sha256').update(jwtPayloadProps.accessToken).digest(), 'base64url') : undefined;
   return createJwtCallback(
     { method: 'jwk', type: 'dpop', alg: jwtIssuer.alg, jwk: jwtIssuer.jwk, dPoPSigningAlgValuesSupported },
     {
-      header: { ...jwtIssuer, typ: 'dpop+jwt', alg: jwtIssuer.alg, jwk: jwtIssuer.jwk, },
+      header: { ...jwtIssuer, typ: 'dpop+jwt', alg: jwtIssuer.alg, jwk: jwtIssuer.jwk },
       payload: {
         ...jwtPayloadProps,
         iat: epochTime(),
@@ -68,7 +87,7 @@ export async function createDPoP(options: CreateDPoPOptions): Promise<string> {
 export type DPoPVerifyJwtCallback = VerifyJwtCallbackBase<JwtIssuerJwk & { type: 'dpop' }>;
 export interface DPoPVerifyOptions {
   expectedNonce?: string;
-  acceptedAlgorithms?: SigningAlgo[];
+  acceptedAlgorithms?: (string | SigningAlgo)[];
   // defaults to 300 seconds (5 minutes)
   maxIatAgeInSeconds?: number;
   expectAccessToken?: boolean;
@@ -86,8 +105,7 @@ export async function verifyDPoP(
   }
 
   // The DPoP HTTP request header field value is a single and well-formed JWT.
-  const dPoPHeader = jwtDecode<JwtHeader & Partial<DPoPJwtHeaderProps>>(dpop, { header: true });
-  const dPoPPayload = jwtDecode<JwtPayload & Partial<DPoPJwtPayloadProps>>(dpop, { header: false });
+  const { header: dPoPHeader, payload: dPoPPayload } = parseJWT<JwtHeader, JwtPayload & Partial<DPoPJwtPayloadProps>>(dpop);
 
   // Ensure all required header claims are present
   if (dPoPHeader.typ !== 'dpop+jwt' || !dPoPHeader.alg || !dPoPHeader.jwk || typeof dPoPHeader.jwk !== 'object' || dPoPHeader.jwk.d) {
@@ -149,8 +167,11 @@ export async function verifyDPoP(
   }
 
   // Validate iat claim
-  const now = epochTime();
-  if (dPoPPayload.iat > now + (options.maxIatAgeInSeconds ?? 300) || dPoPPayload.iat < now - (options.maxIatAgeInSeconds ?? 300)) {
+  const { nowSkewedPast, nowSkewedFuture } = getNowSkewed();
+  if (
+    dPoPPayload.iat > nowSkewedFuture + (options.maxIatAgeInSeconds ?? 300) ||
+    dPoPPayload.iat < nowSkewedPast - (options.maxIatAgeInSeconds ?? 300)
+  ) {
     // 5 minute window
     throw new Error('invalid_dpop_proof. Invalid iat claim');
   }

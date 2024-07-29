@@ -7,7 +7,7 @@ import {
   AuthzFlowType,
   convertJsonToURI,
   createDPoP,
-  CreateDPoPClientOptions,
+  CreateDPoPClientOpts,
   EndpointMetadata,
   formPost,
   getIssuerFromCredentialOfferPayload,
@@ -30,7 +30,7 @@ import { LOG } from './types';
 
 export class AccessTokenClient {
   public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
-    const { asOpts, pin, codeVerifier, code, redirectUri, metadata, createDPoPOptions } = opts;
+    const { asOpts, pin, codeVerifier, code, redirectUri, metadata, createDPoPOpts } = opts;
 
     const credentialOffer = opts.credentialOffer ? await assertedUniformCredentialOffer(opts.credentialOffer) : undefined;
     const pinMetadata: TxCodeAndPinRequired | undefined = credentialOffer && this.getPinMetadata(credentialOffer.credential_offer);
@@ -61,7 +61,7 @@ export class AccessTokenClient {
       metadata,
       asOpts,
       issuerOpts,
-      createDPoPOptions,
+      createDPoPOpts: createDPoPOpts,
     });
   }
 
@@ -71,14 +71,14 @@ export class AccessTokenClient {
     metadata,
     asOpts,
     issuerOpts,
-    createDPoPOptions,
+    createDPoPOpts,
   }: {
     accessTokenRequest: AccessTokenRequest;
     pinMetadata?: TxCodeAndPinRequired;
     metadata?: EndpointMetadata;
     asOpts?: AuthorizationServerOpts;
     issuerOpts?: IssuerOpts;
-    createDPoPOptions?: CreateDPoPClientOptions;
+    createDPoPOpts?: CreateDPoPClientOpts;
   }): Promise<OpenIDResponse<AccessTokenResponse>> {
     this.validate(accessTokenRequest, pinMetadata);
 
@@ -93,16 +93,16 @@ export class AccessTokenClient {
     });
 
     let dPoP: string | undefined;
-    if (createDPoPOptions?.dPoPSigningAlgValuesSupported && createDPoPOptions?.dPoPSigningAlgValuesSupported.length > 0) {
+    if (createDPoPOpts?.dPoPSigningAlgValuesSupported && createDPoPOpts.dPoPSigningAlgValuesSupported.length > 0) {
       const htu = requestTokenURL.split('?')[0].split('#')[0];
-      dPoP = createDPoPOptions
-        ? await createDPoP({ ...createDPoPOptions, jwtPayloadProps: { ...createDPoPOptions.jwtPayloadProps, htu, htm: 'POST' } })
+      dPoP = createDPoPOpts
+        ? await createDPoP({ ...createDPoPOpts, jwtPayloadProps: { ...createDPoPOpts.jwtPayloadProps, htu, htm: 'POST' } })
         : undefined;
     }
     return this.sendAuthCode(requestTokenURL, accessTokenRequest, { dPoP });
   }
 
-  public async createAccessTokenRequest(opts: Omit<AccessTokenRequestOpts, 'createDPoPOptions'>): Promise<AccessTokenRequest> {
+  public async createAccessTokenRequest(opts: Omit<AccessTokenRequestOpts, 'createDPoPOpts'>): Promise<AccessTokenRequest> {
     const { asOpts, pin, codeVerifier, code, redirectUri } = opts;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -236,10 +236,10 @@ export class AccessTokenClient {
   private async sendAuthCode(
     requestTokenURL: string,
     accessTokenRequest: AccessTokenRequest,
-    options?: { dPoP?: string },
+    opts?: { dPoP?: string },
   ): Promise<OpenIDResponse<AccessTokenResponse>> {
     return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }), {
-      customHeaders: { ...(options?.dPoP && { dpop: options.dPoP }) },
+      customHeaders: { ...(opts?.dPoP && { dpop: opts.dPoP }) },
     });
   }
 

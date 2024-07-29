@@ -1556,7 +1556,14 @@ export const AuthorizationResponseOptsSchemaObj = {
           "type": "string"
         },
         "alg": {
-          "$ref": "#/definitions/SigningAlgo"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/SigningAlgo"
+            },
+            {
+              "type": "string"
+            }
+          ]
         }
       },
       "required": [
@@ -1579,7 +1586,14 @@ export const AuthorizationResponseOptsSchemaObj = {
           "description": "Additional options for the issuance context"
         },
         "alg": {
-          "$ref": "#/definitions/SigningAlgo"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/SigningAlgo"
+            },
+            {
+              "type": "string"
+            }
+          ]
         },
         "x5c": {
           "type": "array",
@@ -1622,85 +1636,17 @@ export const AuthorizationResponseOptsSchemaObj = {
           "description": "Additional options for the issuance context"
         },
         "alg": {
-          "$ref": "#/definitions/SigningAlgo"
-        },
-        "jwk": {
-          "type": "object",
-          "properties": {
-            "alg": {
-              "type": "string"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/SigningAlgo"
             },
-            "crv": {
-              "type": "string"
-            },
-            "d": {
-              "type": "string"
-            },
-            "dp": {
-              "type": "string"
-            },
-            "dq": {
-              "type": "string"
-            },
-            "e": {
-              "type": "string"
-            },
-            "ext": {
-              "type": "boolean"
-            },
-            "k": {
-              "type": "string"
-            },
-            "key_ops": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "kty": {
-              "type": "string"
-            },
-            "n": {
-              "type": "string"
-            },
-            "oth": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "d": {
-                    "type": "string"
-                  },
-                  "r": {
-                    "type": "string"
-                  },
-                  "t": {
-                    "type": "string"
-                  }
-                },
-                "additionalProperties": false
-              }
-            },
-            "p": {
-              "type": "string"
-            },
-            "q": {
-              "type": "string"
-            },
-            "qi": {
-              "type": "string"
-            },
-            "use": {
-              "type": "string"
-            },
-            "x": {
-              "type": "string"
-            },
-            "y": {
+            {
               "type": "string"
             }
-          },
-          "additionalProperties": false
+          ]
+        },
+        "jwk": {
+          "$ref": "#/definitions/JWK"
         }
       },
       "required": [
@@ -1709,6 +1655,102 @@ export const AuthorizationResponseOptsSchemaObj = {
         "method"
       ],
       "additionalProperties": false
+    },
+    "JWK": {
+      "type": "object",
+      "properties": {
+        "kty": {
+          "type": "string"
+        },
+        "crv": {
+          "type": "string"
+        },
+        "x": {
+          "type": "string"
+        },
+        "y": {
+          "type": "string"
+        },
+        "e": {
+          "type": "string"
+        },
+        "n": {
+          "type": "string"
+        },
+        "alg": {
+          "type": "string"
+        },
+        "d": {
+          "type": "string"
+        },
+        "dp": {
+          "type": "string"
+        },
+        "dq": {
+          "type": "string"
+        },
+        "ext": {
+          "type": "boolean"
+        },
+        "k": {
+          "type": "string"
+        },
+        "key_ops": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "kid": {
+          "type": "string"
+        },
+        "oth": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "d": {
+                "type": "string"
+              },
+              "r": {
+                "type": "string"
+              },
+              "t": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "p": {
+          "type": "string"
+        },
+        "q": {
+          "type": "string"
+        },
+        "qi": {
+          "type": "string"
+        },
+        "use": {
+          "type": "string"
+        },
+        "x5c": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "x5t": {
+          "type": "string"
+        },
+        "x5t#S256": {
+          "type": "string"
+        },
+        "x5u": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
     },
     "JwtIssuerCustom": {
       "type": "object",

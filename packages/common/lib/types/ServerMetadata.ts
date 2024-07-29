@@ -1,3 +1,5 @@
+import { SigningAlgo } from './Jwt.types';
+
 export interface AuthorizationServerMetadata {
   issuer: string;
   authorization_endpoint?: string;
@@ -28,7 +30,7 @@ export interface AuthorizationServerMetadata {
   require_pushed_authorization_requests?: boolean; // Boolean parameter indicating whether Indicates whether the client is required to use PAR to initiate authorization. If omitted, the default value is false.
   'pre-authorized_grant_anonymous_access_supported': boolean; // OPTIONAL. A JSON Boolean indicating whether the issuer accepts a Token Request with a Pre-Authorized Code but without a client id. The default is false
   // A JSON array containing a list of the JWS alg values (from the [IANA.JOSE.ALGS] registry) supported by the authorization server for DPoP proof JWTs.
-  dpop_signing_alg_values_supported?: string[];
+  dpop_signing_alg_values_supported?: (string | SigningAlgo)[];
   // OIDC values
   frontchannel_logout_supported?: boolean;
   frontchannel_logout_session_supported?: boolean;

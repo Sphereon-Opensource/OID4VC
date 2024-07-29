@@ -7,7 +7,7 @@ import {
   AuthzFlowType,
   convertJsonToURI,
   createDPoP,
-  CreateDPoPClientOptions,
+  CreateDPoPClientOpts,
   CredentialOfferV1_0_11,
   CredentialOfferV1_0_13,
   EndpointMetadata,
@@ -34,7 +34,7 @@ const debug = Debug('sphereon:oid4vci:token');
 
 export class AccessTokenClientV1_0_11 {
   public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
-    const { asOpts, pin, codeVerifier, code, redirectUri, metadata, createDPoPOptions } = opts;
+    const { asOpts, pin, codeVerifier, code, redirectUri, metadata, createDPoPOpts } = opts;
 
     const credentialOffer = opts.credentialOffer ? await assertedUniformCredentialOffer(opts.credentialOffer) : undefined;
     const isPinRequired = credentialOffer && this.isPinRequiredValue(credentialOffer.credential_offer);
@@ -65,7 +65,7 @@ export class AccessTokenClientV1_0_11 {
       metadata,
       asOpts,
       issuerOpts,
-      createDPoPOptions,
+      createDPoPOpts,
     });
   }
 
@@ -74,7 +74,7 @@ export class AccessTokenClientV1_0_11 {
     isPinRequired,
     metadata,
     asOpts,
-    createDPoPOptions,
+    createDPoPOpts,
     issuerOpts,
   }: {
     accessTokenRequest: AccessTokenRequest;
@@ -82,7 +82,7 @@ export class AccessTokenClientV1_0_11 {
     metadata?: EndpointMetadata;
     asOpts?: AuthorizationServerOpts;
     issuerOpts?: IssuerOpts;
-    createDPoPOptions?: CreateDPoPClientOptions;
+    createDPoPOpts?: CreateDPoPClientOpts;
   }): Promise<OpenIDResponse<AccessTokenResponse>> {
     this.validate(accessTokenRequest, isPinRequired);
 
@@ -97,17 +97,17 @@ export class AccessTokenClientV1_0_11 {
     });
 
     let dPoP: string | undefined;
-    if (createDPoPOptions?.dPoPSigningAlgValuesSupported && createDPoPOptions.dPoPSigningAlgValuesSupported.length > 0) {
+    if (createDPoPOpts?.dPoPSigningAlgValuesSupported && createDPoPOpts.dPoPSigningAlgValuesSupported.length > 0) {
       const htu = requestTokenURL.split('?')[0].split('#')[0];
-      dPoP = createDPoPOptions
-        ? await createDPoP({ ...createDPoPOptions, jwtPayloadProps: { ...createDPoPOptions.jwtPayloadProps, htu, htm: 'POST' } })
+      dPoP = createDPoPOpts
+        ? await createDPoP({ ...createDPoPOpts, jwtPayloadProps: { ...createDPoPOpts.jwtPayloadProps, htu, htm: 'POST' } })
         : undefined;
     }
 
     return this.sendAuthCode(requestTokenURL, accessTokenRequest, { dPoP });
   }
 
-  public async createAccessTokenRequest(opts: Omit<AccessTokenRequestOpts, 'createDPoPOptions'>): Promise<AccessTokenRequest> {
+  public async createAccessTokenRequest(opts: Omit<AccessTokenRequestOpts, 'createDPoPOpts'>): Promise<AccessTokenRequest> {
     const { asOpts, pin, codeVerifier, code, redirectUri } = opts;
     const credentialOfferRequest = opts.credentialOffer
       ? await toUniformCredentialOfferRequest(opts.credentialOffer as CredentialOfferV1_0_11 | CredentialOfferV1_0_13)
@@ -220,10 +220,10 @@ export class AccessTokenClientV1_0_11 {
   private async sendAuthCode(
     requestTokenURL: string,
     accessTokenRequest: AccessTokenRequest,
-    options?: { dPoP?: string },
+    opts?: { dPoP?: string },
   ): Promise<OpenIDResponse<AccessTokenResponse>> {
     return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }), {
-      customHeaders: { ...(options?.dPoP && { dpop: options.dPoP }) },
+      customHeaders: { ...(opts?.dPoP && { dpop: opts.dPoP }) },
     });
   }
 

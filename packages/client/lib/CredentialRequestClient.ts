@@ -1,7 +1,7 @@
 import {
   acquireDeferredCredential,
   createDPoP,
-  CreateDPoPClientOptions,
+  CreateDPoPClientOpts,
   CredentialRequestV1_0_13,
   CredentialResponse,
   getCredentialRequestForVersion,
@@ -91,7 +91,7 @@ export class CredentialRequestClient {
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
     subjectIssuance?: ExperimentalSubjectIssuance;
-    createDPoPOptions?: CreateDPoPClientOptions;
+    createDPoPOps?: CreateDPoPClientOpts;
   }): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const { credentialIdentifier, credentialTypes, proofInput, format, context, subjectIssuance } = opts;
 
@@ -104,12 +104,12 @@ export class CredentialRequestClient {
       credentialIdentifier,
       subjectIssuance,
     });
-    return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOptions);
+    return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOps);
   }
 
   public async acquireCredentialsUsingRequest(
     uniformRequest: UniformCredentialRequest,
-    createDPoPOptions?: CreateDPoPClientOptions,
+    createDPoPOps?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
       throw new Error('Versions below v1.0.13 (draft 13) are not supported by the V13 credential request client.');
@@ -125,19 +125,19 @@ export class CredentialRequestClient {
     const requestToken: string = this.credentialRequestOpts.token;
 
     let dPoP: string | undefined;
-    if (createDPoPOptions) {
+    if (createDPoPOps) {
       const htu = credentialEndpoint.split('?')[0].split('#')[0];
-      dPoP = createDPoPOptions
+      dPoP = createDPoPOps
         ? await createDPoP({
-            ...createDPoPOptions,
-            jwtPayloadProps: { ...createDPoPOptions.jwtPayloadProps, htu, htm: 'POST', accessToken: requestToken },
+            ...createDPoPOps,
+            jwtPayloadProps: { ...createDPoPOps.jwtPayloadProps, htu, htm: 'POST', accessToken: requestToken },
           })
         : undefined;
     }
 
     let response = (await post(credentialEndpoint, JSON.stringify(request), {
       bearerToken: requestToken,
-      customHeaders: { ...(createDPoPOptions && { dpop: dPoP }) },
+      customHeaders: { ...(createDPoPOps && { dpop: dPoP }) },
     })) as OpenIDResponse<CredentialResponse> & {
       access_token: string;
     };

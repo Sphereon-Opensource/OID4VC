@@ -1,4 +1,4 @@
-import { JwtHeader, JwtPayload, JwtProtectionMethod, SigningAlgo } from '..';
+import { JWK, JwtHeader, JwtPayload, JwtProtectionMethod, SigningAlgo } from '..';
 
 export interface JwtIssuerBase {
   method: JwtProtectionMethod;
@@ -11,12 +11,12 @@ export interface JwtIssuerBase {
 export interface JwtIssuerDid extends JwtIssuerBase {
   method: 'did';
   didUrl: string;
-  alg: SigningAlgo;
+  alg: SigningAlgo | string;
 }
 
 export interface JwtIssuerX5c extends JwtIssuerBase {
   method: 'x5c';
-  alg: SigningAlgo;
+  alg: SigningAlgo | string;
 
   /**
    *
@@ -42,8 +42,8 @@ export interface JwtIssuerX5c extends JwtIssuerBase {
 
 export interface JwtIssuerJwk extends JwtIssuerBase {
   method: 'jwk';
-  alg: SigningAlgo;
-  jwk: JsonWebKey;
+  alg: SigningAlgo | string;
+  jwk: JWK;
 }
 
 export interface JwtIssuerCustom extends JwtIssuerBase {

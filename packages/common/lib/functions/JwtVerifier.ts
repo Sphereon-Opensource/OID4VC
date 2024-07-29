@@ -1,4 +1,4 @@
-import { JwtHeader, JwtPayload, SigningAlgo } from '..';
+import { JWK, JwtHeader, JwtPayload, SigningAlgo } from '..';
 
 import { JwtProtectionMethod, JwtType } from './jwtUtils';
 
@@ -10,14 +10,14 @@ export interface JwtVerifierBase {
 export interface DidJwtVerifier extends JwtVerifierBase {
   method: 'did';
 
-  alg: SigningAlgo;
+  alg: SigningAlgo | string;
   didUrl: string;
 }
 
 export interface X5cJwtVerifier extends JwtVerifierBase {
   method: 'x5c';
 
-  alg: SigningAlgo;
+  alg: SigningAlgo | string;
 
   /**
    *
@@ -44,9 +44,9 @@ export interface OpenIdFederationJwtVerifier extends JwtVerifierBase {
 
 export interface JwkJwtVerifier extends JwtVerifierBase {
   method: 'jwk';
-  alg: SigningAlgo;
+  alg: SigningAlgo | string;
 
-  jwk: JsonWebKey;
+  jwk: JWK;
 }
 
 export interface CustomJwtVerifier extends JwtVerifierBase {
