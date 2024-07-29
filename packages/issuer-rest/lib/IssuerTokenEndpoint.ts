@@ -15,15 +15,20 @@ import { NextFunction, Request, Response } from 'express'
  */
 export const handleTokenRequest = <T extends object>({
   tokenExpiresIn, // expiration in seconds
+  accessTokenEndpoint,
   accessTokenSignerCallback,
   accessTokenIssuer,
   cNonceExpiresIn, // expiration in seconds
   issuer,
   interval,
   dPoPVerifyJwtCallback,
+  requireDPoP,
 }: Required<Pick<ITokenEndpointOpts, 'accessTokenIssuer' | 'cNonceExpiresIn' | 'interval' | 'accessTokenSignerCallback' | 'tokenExpiresIn'>> & {
   issuer: VcIssuer<T>
   dPoPVerifyJwtCallback?: DPoPVerifyJwtCallback
+  requireDPoP?: boolean
+  // The full URL of the access token endpoint
+  accessTokenEndpoint?: string
 }) => {
   return async (request: Request, response: Response) => {
     response.set({
@@ -47,6 +52,13 @@ export const handleTokenRequest = <T extends object>({
     }
 
     let dPoPJwk: JWK | undefined
+    if (requireDPoP && !request.headers.dpop) {
+      return sendErrorResponse(response, 400, {
+        error: TokenErrorResponse.invalid_request,
+        error_description: 'DPoP is required for requesting access tokens',
+      })
+    }
+
     if (request.headers.dpop) {
       if (!dPoPVerifyJwtCallback) {
         return sendErrorResponse(response, 400, {
@@ -56,7 +68,7 @@ export const handleTokenRequest = <T extends object>({
       }
 
       try {
-        const fullUrl = request.protocol + '://' + request.get('host') + request.originalUrl
+        const fullUrl = accessTokenEndpoint ?? request.protocol + '://' + request.get('host') + request.originalUrl
         dPoPJwk = await verifyDPoP(
           { method: request.method, headers: request.headers, fullUrl },
           {

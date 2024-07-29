@@ -66,6 +66,23 @@ export interface CreateDPoPOpts<JwtPayloadProps = CreateDPoPJwtPayloadProps> {
 
 export type CreateDPoPClientOpts = CreateDPoPOpts<Omit<CreateDPoPJwtPayloadProps, 'htm' | 'htu'>>;
 
+export function getCreateDPoPOptions(
+  createDPoPClientOpts: CreateDPoPClientOpts,
+  endPointUrl: string,
+  resourceRequestOpts?: { accessToken: string },
+): CreateDPoPOpts {
+  const htu = endPointUrl.split('?')[0].split('#')[0];
+  return {
+    ...createDPoPClientOpts,
+    jwtPayloadProps: {
+      ...createDPoPClientOpts.jwtPayloadProps,
+      htu,
+      htm: 'POST',
+      ...(resourceRequestOpts && { accessToken: resourceRequestOpts.accessToken }),
+    },
+  };
+}
+
 export async function createDPoP(options: CreateDPoPOpts): Promise<string> {
   const { createJwtCallback, jwtIssuer, jwtPayloadProps, dPoPSigningAlgValuesSupported } = options;
 

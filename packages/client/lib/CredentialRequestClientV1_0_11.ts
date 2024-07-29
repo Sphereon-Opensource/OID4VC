@@ -1,4 +1,4 @@
-import { createDPoP, CreateDPoPClientOpts } from '@sphereon/common';
+import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereon/common';
 import {
   acquireDeferredCredential,
   CredentialResponse,
@@ -65,17 +65,17 @@ export class CredentialRequestClientV1_0_11 {
     credentialTypes?: string | string[];
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
-    createDPoPOptions?: CreateDPoPClientOpts;
+    createDPoPOpts?: CreateDPoPClientOpts;
   }): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const { credentialTypes, proofInput, format, context } = opts;
 
     const request = await this.createCredentialRequest({ proofInput, credentialTypes, context, format, version: this.version() });
-    return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOptions);
+    return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOpts);
   }
 
   public async acquireCredentialsUsingRequest(
     uniformRequest: UniformCredentialRequest,
-    createDPoPOptions?: CreateDPoPClientOpts,
+    createDPoPOpts?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const request = getCredentialRequestForVersion(uniformRequest, this.version());
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint;
@@ -88,19 +88,13 @@ export class CredentialRequestClientV1_0_11 {
     const requestToken: string = this.credentialRequestOpts.token;
 
     let dPoP: string | undefined;
-    if (createDPoPOptions) {
-      const htu = credentialEndpoint.split('?')[0].split('#')[0];
-      dPoP = createDPoPOptions
-        ? await createDPoP({
-            ...createDPoPOptions,
-            jwtPayloadProps: { ...createDPoPOptions.jwtPayloadProps, htu, htm: 'POST', accessToken: requestToken },
-          })
-        : undefined;
+    if (createDPoPOpts) {
+      dPoP = createDPoPOpts ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, credentialEndpoint, { accessToken: requestToken })) : undefined;
     }
 
     let response = (await post(credentialEndpoint, JSON.stringify(request), {
       bearerToken: requestToken,
-      customHeaders: { ...(createDPoPOptions && { dpop: dPoP }) },
+      customHeaders: { ...(createDPoPOpts && { dpop: dPoP }) },
     })) as OpenIDResponse<CredentialResponse> & {
       access_token: string;
     };

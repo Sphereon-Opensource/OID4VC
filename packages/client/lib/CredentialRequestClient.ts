@@ -1,4 +1,4 @@
-import { createDPoP, CreateDPoPClientOpts } from '@sphereon/common';
+import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereon/common';
 import {
   acquireDeferredCredential,
   CredentialRequestV1_0_13,
@@ -108,7 +108,7 @@ export class CredentialRequestClient {
 
   public async acquireCredentialsUsingRequest(
     uniformRequest: UniformCredentialRequest,
-    createDPoPOps?: CreateDPoPClientOpts,
+    createDPoPOpts?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
       throw new Error('Versions below v1.0.13 (draft 13) are not supported by the V13 credential request client.');
@@ -124,19 +124,13 @@ export class CredentialRequestClient {
     const requestToken: string = this.credentialRequestOpts.token;
 
     let dPoP: string | undefined;
-    if (createDPoPOps) {
-      const htu = credentialEndpoint.split('?')[0].split('#')[0];
-      dPoP = createDPoPOps
-        ? await createDPoP({
-            ...createDPoPOps,
-            jwtPayloadProps: { ...createDPoPOps.jwtPayloadProps, htu, htm: 'POST', accessToken: requestToken },
-          })
-        : undefined;
+    if (createDPoPOpts) {
+      dPoP = createDPoPOpts ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, credentialEndpoint, { accessToken: requestToken })) : undefined;
     }
 
     let response = (await post(credentialEndpoint, JSON.stringify(request), {
       bearerToken: requestToken,
-      customHeaders: { ...(createDPoPOps && { dpop: dPoP }) },
+      customHeaders: { ...(createDPoPOpts && { dpop: dPoP }) },
     })) as OpenIDResponse<CredentialResponse> & {
       access_token: string;
     };

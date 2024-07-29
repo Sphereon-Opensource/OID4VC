@@ -1,4 +1,4 @@
-import { createDPoP, CreateDPoPClientOpts } from '@sphereon/common';
+import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereon/common';
 import {
   AccessTokenRequest,
   AccessTokenRequestOpts,
@@ -97,13 +97,10 @@ export class AccessTokenClientV1_0_11 {
 
     let dPoP: string | undefined;
     if (createDPoPOpts?.dPoPSigningAlgValuesSupported && createDPoPOpts.dPoPSigningAlgValuesSupported.length > 0) {
-      const htu = requestTokenURL.split('?')[0].split('#')[0];
-      dPoP = createDPoPOpts
-        ? await createDPoP({ ...createDPoPOpts, jwtPayloadProps: { ...createDPoPOpts.jwtPayloadProps, htu, htm: 'POST' } })
-        : undefined;
+      dPoP = createDPoPOpts ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, requestTokenURL)) : undefined;
     }
 
-    return this.sendAuthCode(requestTokenURL, accessTokenRequest, { dPoP });
+    return this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dPoP } } : undefined);
   }
 
   public async createAccessTokenRequest(opts: Omit<AccessTokenRequestOpts, 'createDPoPOpts'>): Promise<AccessTokenRequest> {
@@ -219,10 +216,10 @@ export class AccessTokenClientV1_0_11 {
   private async sendAuthCode(
     requestTokenURL: string,
     accessTokenRequest: AccessTokenRequest,
-    opts?: { dPoP?: string },
+    opts?: { headers?: Record<string, string> },
   ): Promise<OpenIDResponse<AccessTokenResponse>> {
     return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }), {
-      customHeaders: { ...(opts?.dPoP && { dpop: opts.dPoP }) },
+      customHeaders: opts?.headers ? opts.headers : undefined,
     });
   }
 
