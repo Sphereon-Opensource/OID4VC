@@ -1,4 +1,4 @@
-import { JwtPayload, parseJWT, SigningAlgo } from '@sphereon/oid4vci-common'
+import { JwtPayload, parseJWT, SigningAlgo } from '@sphereon/common'
 import { VerifyCallback } from '@sphereon/wellknown-dids-client'
 import { createJWT, EdDSASigner, ES256KSigner, ES256Signer, hexToBytes, JWTOptions, JWTVerifyOptions, Signer, verifyJWT } from 'did-jwt'
 import { Resolvable } from 'did-resolver'

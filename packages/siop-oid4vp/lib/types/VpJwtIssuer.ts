@@ -1,4 +1,4 @@
-import { CreateJwtCallback as CreateJwtCallbackBase, JwtIssuanceContextBase, JwtIssuer } from '@sphereon/oid4vci-common'
+import { CreateJwtCallback as CreateJwtCallbackBase, JwtIssuanceContextBase, JwtIssuer } from '@sphereon/common'
 
 import { AuthorizationResponseOpts } from '../authorization-response'
 

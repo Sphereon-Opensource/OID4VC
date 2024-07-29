@@ -1,5 +1,6 @@
 import { KeyObject } from 'crypto'
 
+import { uuidv4 } from '@sphereon/common'
 import { CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '@sphereon/oid4vci-client'
 import {
   Alg,
@@ -14,7 +15,6 @@ import {
   OpenId4VCIVersion,
   ProofOfPossession,
 } from '@sphereon/oid4vci-common'
-import { uuidv4 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
 import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer'

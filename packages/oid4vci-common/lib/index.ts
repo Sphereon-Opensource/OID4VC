@@ -7,4 +7,3 @@ export * from './functions';
 export * from './types';
 export * from './experimental/holder-vci';
 export * from './events';
-export { v4 as uuidv4 } from 'uuid';

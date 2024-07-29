@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 
-import { JwtIssuer, uuidv4 } from '@sphereon/oid4vci-common'
+import { JwtIssuer, uuidv4 } from '@sphereon/common'
 import { Hasher } from '@sphereon/ssi-types'
 
 import {

@@ -398,5 +398,3 @@ export type NotificationResult = {
 export interface NotificationErrorResponse {
   error: NotificationError | string;
 }
-
-export type DigestAlgorithm = 'sha256' | 'sha384' | 'sha512';

@@ -13,9 +13,9 @@ import {
   SigningAlgo,
   VerifyJwtCallbackBase,
   X5cJwtVerifier,
-} from '@sphereon/oid4vci-common'
-import { getJwtVerifierWithContext as getJwtVerifierWithContextCommon } from '@sphereon/oid4vci-common'
-import { JwtType, parseJWT } from '@sphereon/oid4vci-common'
+} from '@sphereon/common'
+import { getJwtVerifierWithContext as getJwtVerifierWithContextCommon } from '@sphereon/common'
+import { JwtType, parseJWT } from '@sphereon/common'
 
 import SIOPErrors from './Errors'
 import { RequestObjectPayload } from './SIOP.types'

@@ -1,4 +1,4 @@
-import { parseJWT } from '@sphereon/oid4vci-common'
+import { parseJWT } from '@sphereon/common'
 
 import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { decodeUriAsJson, encodeJsonAsURI, fetchByReferenceOrUseByValue } from '../helpers'

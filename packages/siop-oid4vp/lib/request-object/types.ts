@@ -1,4 +1,4 @@
-import { JwtIssuer } from '@sphereon/oid4vci-common'
+import { JwtIssuer } from '@sphereon/common'
 
 import { ClaimPayloadCommonOpts, RequestObjectPayloadOpts } from '../authorization-request'
 import { ObjectBy } from '../types'

@@ -1,3 +1,4 @@
+import { JWK } from '@sphereon/common';
 import {
   AccessTokenResponse,
   Alg,
@@ -23,7 +24,6 @@ import {
   getSupportedCredentials,
   getTypesFromCredentialSupported,
   getTypesFromObject,
-  JWK,
   KID_JWK_X5C_ERROR,
   NotificationRequest,
   NotificationResult,

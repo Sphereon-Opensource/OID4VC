@@ -1,3 +1,4 @@
+import { uuidv4 } from '@sphereon/common'
 import {
   CredentialIssuerMetadataOpts,
   CredentialIssuerMetadataOptsV1_0_13,
@@ -14,7 +15,6 @@ import {
   PRE_AUTH_GRANT_LITERAL,
   TxCode,
   UniformCredentialOffer,
-  uuidv4,
 } from '@sphereon/oid4vci-common'
 
 export function createCredentialOfferObject(

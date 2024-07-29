@@ -1,6 +1,7 @@
 import * as crypto from 'crypto';
 
-import { Alg, Jwt, ProofOfPossessionCallbacks, uuidv4 } from '@sphereon/oid4vci-common';
+import { uuidv4 } from '@sphereon/common';
+import { Alg, Jwt, ProofOfPossessionCallbacks } from '@sphereon/oid4vci-common';
 import { CredentialMapper } from '@sphereon/ssi-types';
 import * as didts from '@transmute/did-key.js';
 import { fetch } from 'cross-fetch';

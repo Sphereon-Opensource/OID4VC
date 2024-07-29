@@ -13,7 +13,7 @@
     "uninstall": "rimraf dist coverage node_modules"
   },
   "dependencies": {
-    "@sphereon/oid4vci-common": "workspace:*",
+    "@sphereon/common": "workspace:*",
     "@astronautlabs/jsonpath": "^1.1.2",
     "@sphereon/did-uni-client": "^0.6.2",
     "@sphereon/pex": "^3.3.2",

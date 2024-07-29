@@ -3,13 +3,17 @@ import SHA from 'sha.js';
 import * as u8a from 'uint8arrays';
 import { v4 as uuidv4 } from 'uuid';
 
-import { JwtHeader, JwtPayload, SigningAlgo } from '../types';
-import { JWK } from '../types/CredentialIssuance.types';
-
-import { calculateJwkThumbprint } from './JwkThumbprint';
-import { CreateJwtCallback, JwtIssuerJwk } from './JwtIssuer';
-import { VerifyJwtCallbackBase } from './JwtVerifier';
-import { parseJWT } from './jwtUtils';
+import {
+  calculateJwkThumbprint,
+  CreateJwtCallback,
+  JWK,
+  JwtHeader,
+  JwtIssuerJwk,
+  JwtPayload,
+  parseJWT,
+  SigningAlgo,
+  VerifyJwtCallbackBase,
+} from './../jwt';
 
 export interface DPoPJwtIssuerWithContext extends JwtIssuerJwk {
   type: 'dpop';

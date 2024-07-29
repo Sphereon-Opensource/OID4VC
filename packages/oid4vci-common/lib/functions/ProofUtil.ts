@@ -1,11 +1,10 @@
+import { BaseJWK, JWK } from '@sphereon/common';
 import Debug from 'debug';
 import { jwtDecode } from 'jwt-decode';
 
 import { PoPMode, VCI_LOG_COMMON } from '..';
 import {
   BAD_PARAMS,
-  BaseJWK,
-  JWK,
   JWS_NOT_VALID,
   Jwt,
   JWTHeader,

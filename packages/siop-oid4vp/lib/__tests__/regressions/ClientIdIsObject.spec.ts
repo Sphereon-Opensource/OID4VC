@@ -1,4 +1,4 @@
-import { parseJWT, SigningAlgo } from '@sphereon/oid4vci-common'
+import { parseJWT, SigningAlgo } from '@sphereon/common'
 
 import { PassBy, ResponseType, RevocationVerification, RP, Scope, SubjectType, SupportedVersion } from '../..'
 import { internalSignature } from '../DidJwtTestUtils'

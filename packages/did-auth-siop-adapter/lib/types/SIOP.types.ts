@@ -1,4 +1,4 @@
-import { SigningAlgo } from '@sphereon/oid4vci-common'
+import { SigningAlgo } from '@sphereon/common'
 import { VerifyCallback as WellknownDIDVerifyCallback } from '@sphereon/wellknown-dids-client'
 import { JWTVerifyOptions } from 'did-jwt'
 import { Resolvable } from 'did-resolver'

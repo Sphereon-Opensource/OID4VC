@@ -1,4 +1,4 @@
-import { CreateDPoPClientOpts as CreateDPoPClientOpts } from '../functions/DPoP';
+import { CreateDPoPClientOpts } from '@sphereon/common';
 
 import { Alg, CredentialOfferPayload, ProofOfPossessionCallbacks, UniformCredentialOffer } from './CredentialIssuance.types';
 import {

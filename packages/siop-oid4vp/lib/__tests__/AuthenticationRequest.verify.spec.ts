@@ -1,4 +1,4 @@
-import { SigningAlgo } from '@sphereon/oid4vci-common'
+import { SigningAlgo } from '@sphereon/common'
 import { IProofType } from '@sphereon/ssi-types'
 import Ajv from 'ajv'
 import * as dotenv from 'dotenv'

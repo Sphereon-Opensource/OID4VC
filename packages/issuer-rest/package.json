@@ -11,6 +11,7 @@
     "build:clean": "tsc --build --clean && tsc --build"
   },
   "dependencies": {
+    "@sphereon/common": "workspace:*",
     "@sphereon/oid4vci-common": "workspace:*",
     "@sphereon/oid4vci-issuer": "workspace:*",
     "@sphereon/ssi-express-support": "0.28.0",

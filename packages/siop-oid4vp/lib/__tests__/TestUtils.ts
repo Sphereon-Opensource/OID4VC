@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import { JwtPayload, parseJWT, SigningAlgo, uuidv4 } from '@sphereon/oid4vci-common'
+import { JwtPayload, parseJWT, SigningAlgo, uuidv4 } from '@sphereon/common'
 import { IProofType } from '@sphereon/ssi-types'
 import base58 from 'bs58'
 import { ethers } from 'ethers'

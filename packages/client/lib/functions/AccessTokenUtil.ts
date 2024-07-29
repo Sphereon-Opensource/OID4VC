@@ -1,4 +1,5 @@
-import { AccessTokenRequest, AccessTokenRequestOpts, Jwt, OpenId4VCIVersion, uuidv4 } from '@sphereon/oid4vci-common';
+import { uuidv4 } from '@sphereon/common';
+import { AccessTokenRequest, AccessTokenRequestOpts, Jwt, OpenId4VCIVersion } from '@sphereon/oid4vci-common';
 
 import { ProofOfPossessionBuilder } from '../ProofOfPossessionBuilder';
 

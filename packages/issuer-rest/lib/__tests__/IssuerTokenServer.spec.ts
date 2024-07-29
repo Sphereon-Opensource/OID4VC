@@ -1,5 +1,6 @@
 import { KeyObject } from 'crypto'
 
+import { uuidv4 } from '@sphereon/common'
 import {
   Alg,
   CNonceState,
@@ -9,7 +10,6 @@ import {
   Jwt,
   STATE_MISSING_ERROR,
   URIState,
-  uuidv4,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'

@@ -1,8 +1,8 @@
+import { calculateJwkThumbprint, JWK, uuidv4 } from '@sphereon/common'
 import {
   AccessTokenRequest,
   AccessTokenResponse,
   Alg,
-  calculateJwkThumbprint,
   CNonceState,
   CredentialOfferSession,
   EXPIRED_PRE_AUTHORIZED_CODE,
@@ -10,7 +10,6 @@ import {
   INVALID_PRE_AUTHORIZED_CODE,
   IssueStatus,
   IStateManager,
-  JWK,
   Jwt,
   JWTSignerCallback,
   JWTVerifyCallback,
@@ -24,7 +23,6 @@ import {
   USER_PIN_NOT_REQUIRED_ERROR,
   USER_PIN_REQUIRED_ERROR,
   USER_PIN_TX_CODE_SPEC_ERROR,
-  uuidv4,
 } from '@sphereon/oid4vci-common'
 
 import { isPreAuthorizedCodeExpired } from '../functions'

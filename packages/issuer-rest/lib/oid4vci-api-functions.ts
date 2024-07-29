@@ -1,3 +1,4 @@
+import { uuidv4 } from '@sphereon/common'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   adjustUrl,
@@ -19,7 +20,6 @@ import {
   trimBoth,
   trimEnd,
   trimStart,
-  uuidv4,
   validateJWT,
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'

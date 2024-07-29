@@ -1,3 +1,4 @@
+import { uuidv4 } from '@sphereon/common'
 import {
   ALG_ERROR,
   AUD_ERROR,
@@ -36,7 +37,6 @@ import {
   TxCode,
   TYP_ERROR,
   URIState,
-  uuidv4,
 } from '@sphereon/oid4vci-common'
 import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphereon/oid4vci-common/dist/events'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'

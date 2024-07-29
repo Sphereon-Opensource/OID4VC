@@ -1,3 +1,4 @@
+import { createDPoP, CreateDPoPClientOpts } from '@sphereon/common';
 import {
   AccessTokenRequest,
   AccessTokenRequestOpts,
@@ -6,8 +7,6 @@ import {
   AuthorizationServerOpts,
   AuthzFlowType,
   convertJsonToURI,
-  createDPoP,
-  CreateDPoPClientOpts,
   CredentialOfferV1_0_11,
   CredentialOfferV1_0_13,
   EndpointMetadata,

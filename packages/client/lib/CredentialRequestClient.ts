@@ -1,7 +1,6 @@
+import { createDPoP, CreateDPoPClientOpts } from '@sphereon/common';
 import {
   acquireDeferredCredential,
-  createDPoP,
-  CreateDPoPClientOpts,
   CredentialRequestV1_0_13,
   CredentialResponse,
   getCredentialRequestForVersion,

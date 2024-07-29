@@ -1,6 +1,6 @@
 import { parse } from 'querystring'
 
-import { SigningAlgo } from '@sphereon/oid4vci-common'
+import { SigningAlgo } from '@sphereon/common'
 import { IPresentationDefinition } from '@sphereon/pex'
 import { IProofType } from '@sphereon/ssi-types'
 

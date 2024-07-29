@@ -1,4 +1,4 @@
-import { SigningAlgo } from './Jwt.types';
+import { SigningAlgo } from '@sphereon/common';
 
 export interface AuthorizationServerMetadata {
   issuer: string;
