@@ -100,7 +100,13 @@ export class AccessTokenClientV1_0_11 {
       dPoP = createDPoPOpts ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, requestTokenURL)) : undefined;
     }
 
-    return this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dPoP } } : undefined);
+    const response = await this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dPoP } } : undefined);
+
+    if (response.successBody && createDPoPOpts && createDPoPOpts && response.successBody.token_type !== 'DPoP') {
+      throw new Error('Invalid token type returned. Expected DPoP. Received: ' + response.successBody.token_type);
+    }
+
+    return response;
   }
 
   public async createAccessTokenRequest(opts: Omit<AccessTokenRequestOpts, 'createDPoPOpts'>): Promise<AccessTokenRequest> {
