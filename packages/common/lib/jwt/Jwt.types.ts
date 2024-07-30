@@ -5,7 +5,7 @@ export type JwtHeader = jwtDecodeJwtHeader & {
   alg?: string;
   x5c?: string[];
   kid?: string;
-  jwk?: JWK & { kty: string };
+  jwk?: JWK;
   jwt?: string;
 } & Record<string, unknown>;
 

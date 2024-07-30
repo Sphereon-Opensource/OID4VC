@@ -89,6 +89,7 @@ export interface DPoPVerifyOptions {
   maxIatAgeInSeconds?: number;
   expectAccessToken?: boolean;
   jwtVerifyCallback: DPoPVerifyJwtCallback;
+  now?: number;
 }
 
 export async function verifyDPoP(
@@ -164,10 +165,12 @@ export async function verifyDPoP(
   }
 
   // Validate iat claim
-  const { nowSkewedPast, nowSkewedFuture } = getNowSkewed();
+  const { nowSkewedPast, nowSkewedFuture } = getNowSkewed(options.now);
   if (
-    dPoPPayload.iat > nowSkewedFuture + (options.maxIatAgeInSeconds ?? 300) ||
-    dPoPPayload.iat < nowSkewedPast - (options.maxIatAgeInSeconds ?? 300)
+    // iat claim is to far in the future
+    nowSkewedPast - (options.maxIatAgeInSeconds ?? 300) > dPoPPayload.iat ||
+    // iat claim is too old
+    nowSkewedFuture + (options.maxIatAgeInSeconds ?? 300) < dPoPPayload.iat
   ) {
     // 5 minute window
     throw new Error('invalid_dpop_proof. Invalid iat claim');
