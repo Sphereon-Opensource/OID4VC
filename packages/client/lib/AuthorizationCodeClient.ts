@@ -113,13 +113,16 @@ export const createAuthorizationRequestUrl = async ({
   const { redirectUri, requestObjectOpts = { requestObjectMode: CreateRequestObjectMode.NONE } } = authorizationRequest;
   const client_id = clientId ?? authorizationRequest.clientId;
 
-  let { scope, authorizationDetails } = authorizationRequest;
-  const parMode = endpointMetadata?.credentialIssuerMetadata?.require_pushed_authorization_requests
+  // Authorization server metadata takes precedence
+  const authorizationMetadata = endpointMetadata.authorizationServerMetadata ?? endpointMetadata.credentialIssuerMetadata
+
+  let { authorizationDetails } = authorizationRequest;
+  const parMode = authorizationMetadata?.require_pushed_authorization_requests
     ? PARMode.REQUIRE
-    : authorizationRequest.parMode ?? (client_id ? PARMode.AUTO : PARMode.NEVER);
+    : (authorizationRequest.parMode ?? (client_id ? PARMode.AUTO : PARMode.NEVER));
   // Scope and authorization_details can be used in the same authorization request
   // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rar-23#name-relationship-to-scope-param
-  if (!scope && !authorizationDetails) {
+  if (!authorizationRequest.scope && !authorizationDetails) {
     if (!credentialOffer) {
       throw Error('Please provide a scope or authorization_details if no credential offer is present');
     }
@@ -177,12 +180,8 @@ export const createAuthorizationRequestUrl = async ({
   if (!endpointMetadata?.authorization_endpoint) {
     throw Error('Server metadata does not contain authorization endpoint');
   }
-  const parEndpoint = endpointMetadata.credentialIssuerMetadata?.pushed_authorization_request_endpoint;
+  const parEndpoint = authorizationMetadata?.pushed_authorization_request_endpoint;
 
-  // add 'openid' scope if not present
-  if (!scope?.includes('openid')) {
-    scope = ['openid', scope].filter((s) => !!s).join(' ');
-  }
 
   let queryObj: Record<string, any> | PushedAuthorizationResponse = {
     response_type: ResponseType.AUTH_CODE,
@@ -194,7 +193,7 @@ export const createAuthorizationRequestUrl = async ({
     ...(redirectUri && { redirect_uri: redirectUri }),
     ...(client_id && { client_id }),
     ...(credentialOffer?.issuerState && { issuer_state: credentialOffer.issuerState }),
-    scope,
+    scope: authorizationRequest.scope,
   };
 
   if (!parEndpoint && parMode === PARMode.REQUIRE) {
@@ -210,11 +209,11 @@ export const createAuthorizationRequestUrl = async ({
       { contentType: 'application/x-www-form-urlencoded', accept: 'application/json' },
     );
     if (parResponse.errorBody || !parResponse.successBody) {
-      console.log(JSON.stringify(parResponse.errorBody));
-      console.log('Falling back to regular request URI, since PAR failed');
       if (parMode === PARMode.REQUIRE) {
         throw Error(`PAR error: ${parResponse.origResponse.statusText}`);
       }
+
+      debug('Falling back to regular request URI, since PAR failed', JSON.stringify(parResponse.errorBody));
     } else {
       debug(`PAR response: ${JSON.stringify(parResponse.successBody, null, 2)}`);
       queryObj = { /*response_type: ResponseType.AUTH_CODE,*/ client_id, request_uri: parResponse.successBody.request_uri };
