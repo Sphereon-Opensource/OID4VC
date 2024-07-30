@@ -90,7 +90,7 @@ export class CredentialRequestClient {
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
     subjectIssuance?: ExperimentalSubjectIssuance;
-    createDPoPOps?: CreateDPoPClientOpts;
+    createDPoPOpts?: CreateDPoPClientOpts;
   }): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const { credentialIdentifier, credentialTypes, proofInput, format, context, subjectIssuance } = opts;
 
@@ -103,7 +103,7 @@ export class CredentialRequestClient {
       credentialIdentifier,
       subjectIssuance,
     });
-    return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOps);
+    return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOpts);
   }
 
   public async acquireCredentialsUsingRequest(
