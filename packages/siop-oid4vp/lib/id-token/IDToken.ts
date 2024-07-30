@@ -1,4 +1,4 @@
-import { calculateJwkThumbprintUri, JwtHeader, JwtIssuer, parseJWT } from '@sphereon/common'
+import { calculateJwkThumbprintUri, JwtHeader, JwtIssuer, parseJWT } from '@sphereon/oid4vc-common'
 
 import { AuthorizationResponseOpts, VerifyAuthorizationResponseOpts } from '../authorization-response'
 import { assertValidVerifyOpts } from '../authorization-response/Opts'

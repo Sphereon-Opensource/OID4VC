@@ -1,4 +1,4 @@
-import { uuidv4 } from '@sphereon/common'
+import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   adjustUrl,

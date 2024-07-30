@@ -1,4 +1,4 @@
-import { DPoPVerifyJwtCallback, JWK, uuidv4, verifyDPoP } from '@sphereon/common'
+import { DPoPVerifyJwtCallback, JWK, uuidv4, verifyDPoP } from '@sphereon/oid4vc-common'
 import { GrantTypes, PRE_AUTHORIZED_CODE_REQUIRED_ERROR, TokenError, TokenErrorResponse } from '@sphereon/oid4vci-common'
 import { assertValidAccessTokenRequest, createAccessTokenResponse, ITokenEndpointOpts, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { sendErrorResponse } from '@sphereon/ssi-express-support'

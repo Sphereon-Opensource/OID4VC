@@ -1,4 +1,4 @@
-import { JWK } from '@sphereon/common';
+import { JWK } from '@sphereon/oid4vc-common';
 import {
   AccessTokenResponse,
   Alg,

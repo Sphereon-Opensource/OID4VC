@@ -119,6 +119,6 @@ describe('dpop', () => {
       },
     );
     expect(dpop).toStrictEqual(jwk);
-    expect.assertions(6);
+    expect.assertions(8);
   });
 });

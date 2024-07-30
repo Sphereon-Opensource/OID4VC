@@ -1,4 +1,4 @@
-import { SigningAlgo } from '@sphereon/common'
+import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { post } from '@sphereon/did-auth-siop'
 import {
   DEFAULT_EXPIRATION_TIME,

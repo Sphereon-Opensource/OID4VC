@@ -1,4 +1,4 @@
-import { SigningAlgo } from '@sphereon/common'
+import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition } from '@sphereon/pex'
 import {
   ICredential,

@@ -10,12 +10,11 @@ import {
   JwtHeader,
   JwtPayload,
   OpenIdFederationJwtVerifier,
-  SigningAlgo,
   VerifyJwtCallbackBase,
   X5cJwtVerifier,
-} from '@sphereon/common'
-import { getJwtVerifierWithContext as getJwtVerifierWithContextCommon } from '@sphereon/common'
-import { JwtType, parseJWT } from '@sphereon/common'
+} from '@sphereon/oid4vc-common'
+import { getJwtVerifierWithContext as getJwtVerifierWithContextCommon } from '@sphereon/oid4vc-common'
+import { JwtType, parseJWT } from '@sphereon/oid4vc-common'
 
 import SIOPErrors from './Errors'
 import { RequestObjectPayload } from './SIOP.types'

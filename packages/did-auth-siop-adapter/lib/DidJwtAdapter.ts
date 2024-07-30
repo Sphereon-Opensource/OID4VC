@@ -1,4 +1,4 @@
-import { JwtHeader, JwtPayload } from '@sphereon/common'
+import { JwtHeader, JwtPayload } from '@sphereon/oid4vc-common'
 import { AuthorizationRequestPayload, IDTokenPayload, JwtIssuerWithContext, RequestObjectPayload } from '@sphereon/did-auth-siop'
 import { JwtVerifier } from '@sphereon/did-auth-siop'
 import { Resolvable } from 'did-resolver'

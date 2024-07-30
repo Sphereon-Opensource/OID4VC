@@ -1,4 +1,4 @@
-import { SigningAlgo } from '@sphereon/common'
+import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { Format } from '@sphereon/pex-models'
 import { IProofType } from '@sphereon/ssi-types'
 

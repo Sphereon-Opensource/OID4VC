@@ -1,4 +1,4 @@
-import { uuidv4 } from '@sphereon/common'
+import { uuidv4 } from '@sphereon/oid4vc-common'
 import { OpenID4VCIClientV1_0_13 } from '@sphereon/oid4vci-client'
 import {
   Alg,

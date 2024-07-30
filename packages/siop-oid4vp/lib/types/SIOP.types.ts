@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 
-import { SigningAlgo } from '@sphereon/common'
+import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import {
   AdditionalClaims,

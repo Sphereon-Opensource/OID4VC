@@ -1,4 +1,4 @@
-import { parseJWT } from '@sphereon/common'
+import { parseJWT } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition, PEX } from '@sphereon/pex'
 import { Format } from '@sphereon/pex-models'
 import {

@@ -1,5 +1,5 @@
 {
-  "name": "@sphereon/common",
+  "name": "@sphereon/oid4vc-common",
   "version": "0.15.1",
   "description": "OpenID 4 Verifiable Credentials Common",
   "source": "lib/index.ts",

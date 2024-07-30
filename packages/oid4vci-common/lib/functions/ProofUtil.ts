@@ -1,4 +1,4 @@
-import { BaseJWK, JWK } from '@sphereon/common';
+import { BaseJWK, JWK } from '@sphereon/oid4vc-common';
 import Debug from 'debug';
 import { jwtDecode } from 'jwt-decode';
 

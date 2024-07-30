@@ -1,4 +1,4 @@
-import { uuidv4 } from '@sphereon/common'
+import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   ALG_ERROR,
   AUD_ERROR,

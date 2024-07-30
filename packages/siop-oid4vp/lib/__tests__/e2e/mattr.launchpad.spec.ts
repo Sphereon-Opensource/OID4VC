@@ -1,4 +1,4 @@
-import { SigningAlgo } from '@sphereon/common'
+import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { PresentationSignCallBackParams, PresentationSubmissionLocation } from '@sphereon/pex'
 import { W3CVerifiablePresentation } from '@sphereon/ssi-types'
 import * as ed25519 from '@transmute/did-key-ed25519'

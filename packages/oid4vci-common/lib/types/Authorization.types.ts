@@ -1,4 +1,4 @@
-import { CreateDPoPClientOpts } from '@sphereon/common';
+import { CreateDPoPClientOpts } from '@sphereon/oid4vc-common';
 
 import { Alg, CredentialOfferPayload, ProofOfPossessionCallbacks, UniformCredentialOffer } from './CredentialIssuance.types';
 import {

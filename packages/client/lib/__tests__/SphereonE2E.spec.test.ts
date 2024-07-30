@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 
-import { uuidv4 } from '@sphereon/common';
+import { uuidv4 } from '@sphereon/oid4vc-common';
 import { Alg, Jwt, ProofOfPossessionCallbacks } from '@sphereon/oid4vci-common';
 import { CredentialMapper } from '@sphereon/ssi-types';
 import * as didts from '@transmute/did-key.js';

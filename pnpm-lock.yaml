@@ -65,7 +65,7 @@ importers:
       '@digitalcredentials/vc':
         specifier: ^5.0.0
         version: 5.0.0(encoding@0.1.13)(expo@48.0.21(@babel/core@7.24.9)(encoding@0.1.13))(react-native@0.71.19(@babel/core@7.24.9)(@babel/preset-env@7.24.8(@babel/core@7.24.9))(encoding@0.1.13)(react@18.3.1))(web-streams-polyfill@3.3.3)
-      '@sphereon/common':
+      '@sphereon/oid4vc-common':
         specifier: workspace:*
         version: link:../common
       '@sphereon/oid4vci-client':
@@ -114,7 +114,7 @@ importers:
 
   packages/client:
     dependencies:
-      '@sphereon/common':
+      '@sphereon/oid4vc-common':
         specifier: workspace:*
         version: link:../common
       '@sphereon/oid4vci-common':
@@ -239,15 +239,15 @@ importers:
 
   packages/did-auth-siop-adapter:
     dependencies:
-      '@sphereon/common':
-        specifier: workspace:*
-        version: link:../common
       '@sphereon/did-auth-siop':
         specifier: workspace:*
         version: link:../siop-oid4vp
       '@sphereon/did-uni-client':
         specifier: ^0.6.2
         version: 0.6.3(encoding@0.1.13)
+      '@sphereon/oid4vc-common':
+        specifier: workspace:*
+        version: link:../common
       '@sphereon/wellknown-dids-client':
         specifier: ^0.1.3
         version: 0.1.3(encoding@0.1.13)
@@ -270,7 +270,7 @@ importers:
 
   packages/issuer:
     dependencies:
-      '@sphereon/common':
+      '@sphereon/oid4vc-common':
         specifier: workspace:*
         version: link:../common
       '@sphereon/oid4vci-common':
@@ -307,7 +307,7 @@ importers:
 
   packages/issuer-rest:
     dependencies:
-      '@sphereon/common':
+      '@sphereon/oid4vc-common':
         specifier: workspace:*
         version: link:../common
       '@sphereon/oid4vci-common':
@@ -395,7 +395,7 @@ importers:
 
   packages/oid4vci-common:
     dependencies:
-      '@sphereon/common':
+      '@sphereon/oid4vc-common':
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
@@ -435,12 +435,12 @@ importers:
       '@astronautlabs/jsonpath':
         specifier: ^1.1.2
         version: 1.1.2
-      '@sphereon/common':
-        specifier: workspace:*
-        version: link:../common
       '@sphereon/did-uni-client':
         specifier: ^0.6.2
         version: 0.6.3(encoding@0.1.13)
+      '@sphereon/oid4vc-common':
+        specifier: workspace:*
+        version: link:../common
       '@sphereon/pex':
         specifier: ^3.3.2
         version: 3.3.3

@@ -1,4 +1,4 @@
-import { JwtIssuer } from '@sphereon/common'
+import { JwtIssuer } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition, PresentationSignCallBackParams } from '@sphereon/pex'
 import { Format } from '@sphereon/pex-models'
 import { CompactSdJwtVc, Hasher, PresentationSubmission, W3CVerifiablePresentation } from '@sphereon/ssi-types'

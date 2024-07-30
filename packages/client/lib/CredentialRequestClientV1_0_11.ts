@@ -1,4 +1,4 @@
-import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereon/common';
+import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereon/oid4vc-common';
 import {
   acquireDeferredCredential,
   CredentialResponse,

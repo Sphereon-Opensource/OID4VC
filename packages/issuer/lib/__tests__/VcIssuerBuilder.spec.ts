@@ -1,4 +1,4 @@
-import { uuidv4 } from '@sphereon/common'
+import { uuidv4 } from '@sphereon/oid4vc-common'
 import { CredentialConfigurationSupportedV1_0_13, IssuerCredentialSubjectDisplay, IssueStatus, TokenErrorResponse } from '@sphereon/oid4vci-common'
 
 import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../index'

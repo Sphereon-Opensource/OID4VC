@@ -1,4 +1,4 @@
-import { SigningAlgo } from '@sphereon/common';
+import { SigningAlgo } from '@sphereon/oid4vc-common';
 
 export interface AuthorizationServerMetadata {
   issuer: string;

@@ -1,4 +1,4 @@
-import { uuidv4 } from '@sphereon/common'
+import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   CredentialIssuerMetadataOpts,
   CredentialIssuerMetadataOptsV1_0_13,

@@ -1,6 +1,6 @@
 import { KeyObject } from 'crypto'
 
-import { uuidv4 } from '@sphereon/common'
+import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   Alg,
   CNonceState,
