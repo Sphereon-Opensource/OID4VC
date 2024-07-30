@@ -17,6 +17,9 @@ import {
   VerifyJwtCallbackBase,
 } from './../jwt';
 
+export const dpopTokenRequestNonceError = 'use_dpop_nonce';
+export const dpopResourceAuthenticateError = 'DPoP error="use_dpop_nonce", error_description="Resource server requires nonce in DPoP proof"';
+
 export interface DPoPJwtIssuerWithContext extends JwtIssuerJwk {
   type: 'dpop';
   dPoPSigningAlgValuesSupported?: string[];

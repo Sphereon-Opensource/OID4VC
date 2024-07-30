@@ -1,4 +1,3 @@
-import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { post } from '@sphereon/did-auth-siop'
 import {
   DEFAULT_EXPIRATION_TIME,
@@ -10,6 +9,7 @@ import {
   SIOPResonse,
   VerifiedJWT,
 } from '@sphereon/did-auth-siop'
+import { SigningAlgo } from '@sphereon/oid4vc-common'
 import {
   createJWT,
   decodeJWT,

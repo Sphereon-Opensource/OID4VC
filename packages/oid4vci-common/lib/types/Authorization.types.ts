@@ -324,10 +324,15 @@ export interface AccessTokenRequest {
   [s: string]: unknown;
 }
 
-export interface OpenIDResponse<T> {
+export interface OpenIDResponse<T, P = never> {
   origResponse: Response;
   successBody?: T;
   errorBody?: ErrorResponse;
+  params?: P;
+}
+
+export interface DPoPResponseParams {
+  dpop?: { dpopNonce: string };
 }
 
 export interface AccessTokenResponse {

@@ -7,6 +7,7 @@ import {
   AuthorizationServerOpts,
   AuthzFlowType,
   convertJsonToURI,
+  DPoPResponseParams,
   EndpointMetadata,
   formPost,
   getIssuerFromCredentialOfferPayload,
@@ -25,10 +26,11 @@ import { ObjectUtils } from '@sphereon/ssi-types';
 
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
 import { createJwtBearerClientAssertion } from './functions';
+import { dPoPShouldRetryRequestWithNonce } from './functions/dpopUtil';
 import { LOG } from './types';
 
 export class AccessTokenClient {
-  public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
+  public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse, DPoPResponseParams>> {
     const { asOpts, pin, codeVerifier, code, redirectUri, metadata, createDPoPOpts } = opts;
 
     const credentialOffer = opts.credentialOffer ? await assertedUniformCredentialOffer(opts.credentialOffer) : undefined;
@@ -78,7 +80,7 @@ export class AccessTokenClient {
     asOpts?: AuthorizationServerOpts;
     issuerOpts?: IssuerOpts;
     createDPoPOpts?: CreateDPoPClientOpts;
-  }): Promise<OpenIDResponse<AccessTokenResponse>> {
+  }): Promise<OpenIDResponse<AccessTokenResponse, DPoPResponseParams>> {
     this.validate(accessTokenRequest, pinMetadata);
 
     const requestTokenURL = AccessTokenClient.determineTokenURL({
@@ -91,17 +93,31 @@ export class AccessTokenClient {
           : undefined,
     });
 
-    let dPoP: string | undefined;
-    if (createDPoPOpts?.dPoPSigningAlgValuesSupported && createDPoPOpts.dPoPSigningAlgValuesSupported.length > 0) {
-      dPoP = createDPoPOpts ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, requestTokenURL)) : undefined;
+    const useDpop = createDPoPOpts?.dPoPSigningAlgValuesSupported && createDPoPOpts.dPoPSigningAlgValuesSupported.length > 0;
+    let dPoP = useDpop ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, requestTokenURL)) : undefined;
+
+    let response = await this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dPoP } } : undefined);
+
+    let nextDPoPNonce = createDPoPOpts?.jwtPayloadProps.nonce;
+    const retryWithNonce = dPoPShouldRetryRequestWithNonce(response);
+    if (retryWithNonce.ok && createDPoPOpts) {
+      createDPoPOpts.jwtPayloadProps.nonce = retryWithNonce.dpopNonce;
+
+      dPoP = await createDPoP(getCreateDPoPOptions(createDPoPOpts, requestTokenURL));
+      response = await this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dPoP } } : undefined);
+      const successDPoPNonce = response.origResponse.headers.get('DPoP-Nonce');
+
+      nextDPoPNonce = successDPoPNonce ?? retryWithNonce.dpopNonce;
     }
-    const response = await this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dPoP } } : undefined);
 
     if (response.successBody && createDPoPOpts && createDPoPOpts && response.successBody.token_type !== 'DPoP') {
       throw new Error('Invalid token type returned. Expected DPoP. Received: ' + response.successBody.token_type);
     }
 
-    return response;
+    return {
+      ...response,
+      params: { ...(nextDPoPNonce && { dpop: { dpopNonce: nextDPoPNonce } }) },
+    };
   }
 
   public async createAccessTokenRequest(opts: Omit<AccessTokenRequestOpts, 'createDPoPOpts'>): Promise<AccessTokenRequest> {
@@ -239,7 +255,7 @@ export class AccessTokenClient {
     requestTokenURL: string,
     accessTokenRequest: AccessTokenRequest,
     opts?: { headers?: Record<string, string> },
-  ): Promise<OpenIDResponse<AccessTokenResponse>> {
+  ): Promise<OpenIDResponse<AccessTokenResponse, DPoPResponseParams>> {
     return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }), {
       customHeaders: opts?.headers ? opts.headers : undefined,
     });
