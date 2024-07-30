@@ -16,7 +16,7 @@ export function dPoPShouldRetryRequestWithNonce(response: OpenIDResponse<unknown
 
 export function dPoPShouldRetryResourceRequestWithNonce(response: OpenIDResponse<unknown, unknown>) {
   if (response.errorBody && response.origResponse.status === 401) {
-    const wwwAuthenticateHeader = response.errorBody.headers.get('WWW-Authenticate');
+    const wwwAuthenticateHeader = response.errorBody.headers?.get('WWW-Authenticate');
     if (!wwwAuthenticateHeader?.includes(dpopResourceAuthenticateError)) {
       return { ok: false } as const;
     }

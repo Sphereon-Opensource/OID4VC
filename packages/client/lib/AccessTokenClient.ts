@@ -96,7 +96,7 @@ export class AccessTokenClient {
     const useDpop = createDPoPOpts?.dPoPSigningAlgValuesSupported && createDPoPOpts.dPoPSigningAlgValuesSupported.length > 0;
     let dPoP = useDpop ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, requestTokenURL)) : undefined;
 
-    let response = await this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dPoP } } : undefined);
+    let response = await this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dpop: dPoP } } : undefined);
 
     let nextDPoPNonce = createDPoPOpts?.jwtPayloadProps.nonce;
     const retryWithNonce = dPoPShouldRetryRequestWithNonce(response);
@@ -104,7 +104,7 @@ export class AccessTokenClient {
       createDPoPOpts.jwtPayloadProps.nonce = retryWithNonce.dpopNonce;
 
       dPoP = await createDPoP(getCreateDPoPOptions(createDPoPOpts, requestTokenURL));
-      response = await this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dPoP } } : undefined);
+      response = await this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dpop: dPoP } } : undefined);
       const successDPoPNonce = response.origResponse.headers.get('DPoP-Nonce');
 
       nextDPoPNonce = successDPoPNonce ?? retryWithNonce.dpopNonce;

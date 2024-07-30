@@ -106,7 +106,7 @@ export class CredentialRequestClientV1_0_11 {
 
       response = (await post(credentialEndpoint, JSON.stringify(request), {
         bearerToken: requestToken,
-        customHeaders: { ...(createDPoPOpts && { dPoP }) },
+        customHeaders: { ...(createDPoPOpts && { dpop: dPoP }) },
       })) as OpenIDResponse<CredentialResponse> & {
         access_token: string;
       };
