@@ -59,27 +59,6 @@ describe('OpenID4VCIClient should', () => {
       }),
     ).rejects.toThrow(Error('Server metadata does not contain authorization endpoint'));
   });
-  it("injects 'openid' as the first scope if not provided", async () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    client._state.endpointMetadata?.credentialIssuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
-
-    const url = await client.createAuthorizationRequestUrl({
-      pkce: {
-        codeChallengeMethod: CodeChallengeMethod.S256,
-        codeChallenge: 'mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs',
-      },
-      authorizationRequest: {
-        scope: 'TestCredential',
-        redirectUri: 'http://localhost:8881/cb',
-      },
-    });
-
-    const urlSearchParams = new URLSearchParams(url.split('?')[1]);
-    const scope = urlSearchParams.get('scope')?.split(' ');
-
-    expect(scope?.[0]).toBe('openid');
-  });
   it('throw an error if no scope and no authorization_details is provided', async () => {
     nock(MOCK_URL).get(/.*/).reply(200, {});
     nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, {});
@@ -149,7 +128,7 @@ describe('OpenID4VCIClient should', () => {
         },
       }),
     ).resolves.toEqual(
-      'https://server.example.com/v1/auth/authorize?response_type=code&code_challenge_method=S256&code_challenge=mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs&authorization_details=%5B%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22ldp_vc%22%2C%22credential_definition%22%3A%7B%22%40context%22%3A%5B%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fv1%22%2C%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fexamples%2Fv1%22%5D%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%2C%22locations%22%3A%5B%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%5D%7D%2C%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22mso_mdoc%22%2C%22doctype%22%3A%22org%2Eiso%2E18013%2E5%2E1%2EmDL%22%2C%22locations%22%3A%5B%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%5D%7D%5D&redirect_uri=http%3A%2F%2Flocalhost%3A8881%2Fcb&client_id=test-client&scope=openid',
+      'https://server.example.com/v1/auth/authorize?response_type=code&code_challenge_method=S256&code_challenge=mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs&authorization_details=%5B%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22ldp_vc%22%2C%22credential_definition%22%3A%7B%22%40context%22%3A%5B%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fv1%22%2C%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fexamples%2Fv1%22%5D%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%2C%22locations%22%3A%5B%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%5D%7D%2C%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22mso_mdoc%22%2C%22doctype%22%3A%22org%2Eiso%2E18013%2E5%2E1%2EmDL%22%2C%22locations%22%3A%5B%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%5D%7D%5D&redirect_uri=http%3A%2F%2Flocalhost%3A8881%2Fcb&client_id=test-client',
     );
   });
   it('create an authorization request url with authorization_details object property', async () => {
@@ -176,7 +155,7 @@ describe('OpenID4VCIClient should', () => {
         },
       }),
     ).resolves.toEqual(
-      'https://server.example.com/v1/auth/authorize?response_type=code&code_challenge_method=S256&code_challenge=mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs&authorization_details=%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22ldp_vc%22%2C%22credential_definition%22%3A%7B%22%40context%22%3A%5B%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fv1%22%2C%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fexamples%2Fv1%22%5D%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%2C%22locations%22%3A%5B%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%5D%7D&redirect_uri=http%3A%2F%2Flocalhost%3A8881%2Fcb&client_id=test-client&scope=openid',
+      'https://server.example.com/v1/auth/authorize?response_type=code&code_challenge_method=S256&code_challenge=mE2kPHmIprOqtkaYmESWj35yz-PB5vzdiSu0tAZ8sqs&authorization_details=%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22ldp_vc%22%2C%22credential_definition%22%3A%7B%22%40context%22%3A%5B%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fv1%22%2C%22https%3A%2F%2Fwww%2Ew3%2Eorg%2F2018%2Fcredentials%2Fexamples%2Fv1%22%5D%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%2C%22locations%22%3A%5B%22https%3A%2F%2Fserver%2Eexample%2Ecom%22%5D%7D&redirect_uri=http%3A%2F%2Flocalhost%3A8881%2Fcb&client_id=test-client',
     );
   });
 

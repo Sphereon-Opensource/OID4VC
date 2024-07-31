@@ -192,7 +192,6 @@ export class VcIssuer<DIDDoc extends object> {
       status,
       notification_id: uuidv4(),
       ...(userPin && { txCode: userPin }), // We used to use userPin according to older specs. We map these onto txCode now. If both are used, txCode in the end wins, even if they are different
-      ...(txCode && { txCode }),
       ...(opts.credentialDataSupplierInput && { credentialDataSupplierInput: opts.credentialDataSupplierInput }),
       credentialOffer,
     }

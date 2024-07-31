@@ -135,6 +135,7 @@ export class AccessTokenClient {
     if (credentialOfferRequest?.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
       this.assertAlphanumericPin(opts.pinMetadata, pin);
       request.user_pin = pin;
+      request.tx_code = pin;
 
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
       // we actually know it is there because of the isPreAuthCode call
