@@ -18,7 +18,6 @@ import {
 } from './../jwt';
 
 export const dpopTokenRequestNonceError = 'use_dpop_nonce';
-export const dpopResourceAuthenticateError = 'DPoP error="use_dpop_nonce", error_description="Resource server requires nonce in DPoP proof"';
 
 export interface DPoPJwtIssuerWithContext extends JwtIssuerJwk {
   type: 'dpop';
@@ -170,10 +169,10 @@ export async function verifyDPoP(
   // Validate iat claim
   const { nowSkewedPast, nowSkewedFuture } = getNowSkewed(options.now);
   if (
-    // iat claim is to far in the future
-    nowSkewedPast - (options.maxIatAgeInSeconds ?? 300) > dPoPPayload.iat ||
+    // iat claim is too far in the future
+    nowSkewedPast - (options.maxIatAgeInSeconds ?? 60) > dPoPPayload.iat ||
     // iat claim is too old
-    nowSkewedFuture + (options.maxIatAgeInSeconds ?? 300) < dPoPPayload.iat
+    nowSkewedFuture + (options.maxIatAgeInSeconds ?? 60) < dPoPPayload.iat
   ) {
     // 5 minute window
     throw new Error('invalid_dpop_proof. Invalid iat claim');

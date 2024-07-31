@@ -29,7 +29,7 @@ import Debug from 'debug';
 
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
 import { createJwtBearerClientAssertion } from './functions';
-import { dPoPShouldRetryRequestWithNonce } from './functions/dpopUtil';
+import { shouldRetryTokenRequestWithDPoPNonce } from './functions/dpopUtil';
 
 const debug = Debug('sphereon:oid4vci:token');
 
@@ -103,7 +103,7 @@ export class AccessTokenClientV1_0_11 {
     let response = await this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dpop: dPoP } } : undefined);
 
     let nextDPoPNonce = createDPoPOpts?.jwtPayloadProps.nonce;
-    const retryWithNonce = dPoPShouldRetryRequestWithNonce(response);
+    const retryWithNonce = shouldRetryTokenRequestWithDPoPNonce(response);
     if (retryWithNonce.ok && createDPoPOpts) {
       createDPoPOpts.jwtPayloadProps.nonce = retryWithNonce.dpopNonce;
 
@@ -114,9 +114,10 @@ export class AccessTokenClientV1_0_11 {
       nextDPoPNonce = successDPoPNonce ?? retryWithNonce.dpopNonce;
     }
 
-    if (response.successBody && createDPoPOpts && createDPoPOpts && response.successBody.token_type !== 'DPoP') {
+    if (response.successBody && createDPoPOpts && response.successBody.token_type !== 'DPoP') {
       throw new Error('Invalid token type returned. Expected DPoP. Received: ' + response.successBody.token_type);
     }
+
     return {
       ...response,
       params: { ...(nextDPoPNonce && { dpop: { dpopNonce: nextDPoPNonce } }) },

@@ -21,12 +21,13 @@ export const handleTokenRequest = <T extends object>({
   cNonceExpiresIn, // expiration in seconds
   issuer,
   interval,
-  dPoPVerifyJwtCallback,
-  requireDPoP,
+  dpop,
 }: Required<Pick<ITokenEndpointOpts, 'accessTokenIssuer' | 'cNonceExpiresIn' | 'interval' | 'accessTokenSignerCallback' | 'tokenExpiresIn'>> & {
   issuer: VcIssuer<T>
-  dPoPVerifyJwtCallback?: DPoPVerifyJwtCallback
-  requireDPoP?: boolean
+  dpop?: {
+    requireDPoP?: boolean
+    dPoPVerifyJwtCallback: DPoPVerifyJwtCallback
+  }
   // The full URL of the access token endpoint
   accessTokenEndpoint?: string
 }) => {
@@ -52,18 +53,20 @@ export const handleTokenRequest = <T extends object>({
     }
 
     let dPoPJwk: JWK | undefined
-    if (requireDPoP && !request.headers.dpop) {
+    if (dpop?.requireDPoP && !request.headers.dpop) {
       return sendErrorResponse(response, 400, {
         error: TokenErrorResponse.invalid_request,
-        error_description: 'DPoP is required for requesting access tokens',
+        error_description: 'DPoP is required for requesting access tokens.',
       })
     }
 
     if (request.headers.dpop) {
-      if (!dPoPVerifyJwtCallback) {
+      if (!dpop) {
+        console.error('Received unsupported DPoP header. The issuer is not configured to work with DPoP. Provide DPoP options for it to work.')
+
         return sendErrorResponse(response, 400, {
           error: TokenErrorResponse.invalid_request,
-          error_description: 'DPOP is not supported',
+          error_description: 'Received unsupported DPoP header.',
         })
       }
 
@@ -72,7 +75,7 @@ export const handleTokenRequest = <T extends object>({
         dPoPJwk = await verifyDPoP(
           { method: request.method, headers: request.headers, fullUrl },
           {
-            jwtVerifyCallback: dPoPVerifyJwtCallback,
+            jwtVerifyCallback: dpop.dPoPVerifyJwtCallback,
             expectAccessToken: false,
             maxIatAgeInSeconds: undefined,
           },

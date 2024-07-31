@@ -23,7 +23,7 @@ export function parseJWT<Header = JwtHeader, Payload = JwtPayload>(jwt: string) 
  *
  * See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.5
  */
-const DEFAULT_SKEW_TIME = 300;
+const DEFAULT_SKEW_TIME = 60;
 
 export function getNowSkewed(now?: number, skewTime?: number) {
   const _now = now ? now : epochTime();

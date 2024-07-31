@@ -26,7 +26,7 @@ import { ObjectUtils } from '@sphereon/ssi-types';
 
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
 import { createJwtBearerClientAssertion } from './functions';
-import { dPoPShouldRetryRequestWithNonce } from './functions/dpopUtil';
+import { shouldRetryTokenRequestWithDPoPNonce } from './functions/dpopUtil';
 import { LOG } from './types';
 
 export class AccessTokenClient {
@@ -99,7 +99,7 @@ export class AccessTokenClient {
     let response = await this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dpop: dPoP } } : undefined);
 
     let nextDPoPNonce = createDPoPOpts?.jwtPayloadProps.nonce;
-    const retryWithNonce = dPoPShouldRetryRequestWithNonce(response);
+    const retryWithNonce = shouldRetryTokenRequestWithDPoPNonce(response);
     if (retryWithNonce.ok && createDPoPOpts) {
       createDPoPOpts.jwtPayloadProps.nonce = retryWithNonce.dpopNonce;
 
@@ -110,7 +110,7 @@ export class AccessTokenClient {
       nextDPoPNonce = successDPoPNonce ?? retryWithNonce.dpopNonce;
     }
 
-    if (response.successBody && createDPoPOpts && createDPoPOpts && response.successBody.token_type !== 'DPoP') {
+    if (response.successBody && createDPoPOpts && response.successBody.token_type !== 'DPoP') {
       throw new Error('Invalid token type returned. Expected DPoP. Received: ' + response.successBody.token_type);
     }
 

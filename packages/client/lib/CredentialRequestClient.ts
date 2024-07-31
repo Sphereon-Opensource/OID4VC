@@ -23,7 +23,7 @@ import Debug from 'debug';
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
 import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
-import { dPoPShouldRetryResourceRequestWithNonce } from './functions/dpopUtil';
+import { shouldRetryResourceRequestWithDPoPNonce } from './functions/dpopUtil';
 
 const debug = Debug('sphereon:oid4vci:credential');
 
@@ -135,7 +135,7 @@ export class CredentialRequestClient {
     };
 
     let nextDPoPNonce = createDPoPOpts?.jwtPayloadProps.nonce;
-    const retryWithNonce = dPoPShouldRetryResourceRequestWithNonce(response);
+    const retryWithNonce = shouldRetryResourceRequestWithDPoPNonce(response);
     if (retryWithNonce.ok && createDPoPOpts) {
       createDPoPOpts.jwtPayloadProps.nonce = retryWithNonce.dpopNonce;
       dPoP = await createDPoP(getCreateDPoPOptions(createDPoPOpts, credentialEndpoint, { accessToken: requestToken }));

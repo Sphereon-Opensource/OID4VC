@@ -1,33 +1,35 @@
-import { dpopResourceAuthenticateError, dpopTokenRequestNonceError } from '@sphereon/oid4vc-common';
+import { dpopTokenRequestNonceError } from '@sphereon/oid4vc-common';
 import { OpenIDResponse } from 'oid4vci-common';
 
-export function dPoPShouldRetryRequestWithNonce(response: OpenIDResponse<unknown, unknown>) {
-  if (response.errorBody && response.errorBody.error === dpopTokenRequestNonceError) {
-    const dPoPNonce = response.errorBody.headers.get('DPoP-Nonce');
-    if (!dPoPNonce) {
-      throw new Error('The DPoP nonce was not returned');
-    }
+export type RetryRequestWithDPoPNonce = { ok: true; dpopNonce: string } | { ok: false };
 
-    return { ok: true, dpopNonce: dPoPNonce } as const;
+export function shouldRetryTokenRequestWithDPoPNonce(response: OpenIDResponse<unknown, unknown>): RetryRequestWithDPoPNonce {
+  if (!response.errorBody || response.errorBody.error !== dpopTokenRequestNonceError) {
+    return { ok: false };
   }
 
-  return { ok: false } as const;
+  const dPoPNonce = response.errorBody.headers.get('DPoP-Nonce');
+  if (!dPoPNonce) {
+    throw new Error('Missing required DPoP-Nonce header.');
+  }
+
+  return { ok: true, dpopNonce: dPoPNonce };
 }
 
-export function dPoPShouldRetryResourceRequestWithNonce(response: OpenIDResponse<unknown, unknown>) {
-  if (response.errorBody && response.origResponse.status === 401) {
-    const wwwAuthenticateHeader = response.errorBody.headers?.get('WWW-Authenticate');
-    if (!wwwAuthenticateHeader?.includes(dpopResourceAuthenticateError)) {
-      return { ok: false } as const;
-    }
-
-    const dPoPNonce = response.errorBody.headers.get('DPoP-Nonce');
-    if (!dPoPNonce) {
-      throw new Error('The DPoP nonce was not returned');
-    }
-
-    return { ok: true, dpopNonce: dPoPNonce } as const;
+export function shouldRetryResourceRequestWithDPoPNonce(response: OpenIDResponse<unknown, unknown>): RetryRequestWithDPoPNonce {
+  if (!response.errorBody || response.origResponse.status !== 401) {
+    return { ok: false };
   }
 
-  return { ok: false } as const;
+  const wwwAuthenticateHeader = response.errorBody.headers?.get('WWW-Authenticate');
+  if (!wwwAuthenticateHeader?.includes(dpopTokenRequestNonceError)) {
+    return { ok: false };
+  }
+
+  const dPoPNonce = response.errorBody.headers.get('DPoP-Nonce');
+  if (!dPoPNonce) {
+    throw new Error('Missing required DPoP-Nonce header.');
+  }
+
+  return { ok: true, dpopNonce: dPoPNonce };
 }
