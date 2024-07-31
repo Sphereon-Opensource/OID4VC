@@ -1,7 +1,8 @@
 import { jwtDecode } from 'jwt-decode';
-import SHA from 'sha.js';
 import * as u8a from 'uint8arrays';
 import { v4 as uuidv4 } from 'uuid';
+
+import { defaultHasher } from '../hasher';
 
 import {
   calculateJwkThumbprint,
@@ -68,7 +69,7 @@ export async function createDPoP(options: CreateDPoPOpts): Promise<string> {
     throw new Error('expected access token without scheme');
   }
 
-  const ath = jwtPayloadProps.accessToken ? u8a.toString(SHA('sha256').update(jwtPayloadProps.accessToken).digest(), 'base64url') : undefined;
+  const ath = jwtPayloadProps.accessToken ? u8a.toString(defaultHasher(jwtPayloadProps.accessToken, 'sha256'), 'base64url') : undefined;
   return createJwtCallback(
     { method: 'jwk', type: 'dpop', alg: jwtIssuer.alg, jwk: jwtIssuer.jwk, dPoPSigningAlgValuesSupported },
     {
@@ -195,7 +196,7 @@ export async function verifyDPoP(
     }
 
     const accessToken = authorizationHeader.replace('DPoP ', '');
-    const expectedAth = u8a.toString(SHA('sha256').update(accessToken).digest(), 'base64url');
+    const expectedAth = u8a.toString(defaultHasher(accessToken, 'sha256'), 'base64url');
     if (dPoPPayload.ath !== expectedAth) {
       throw new Error('invalid_dpop_proof. Invalid ath claim');
     }
