@@ -12,6 +12,7 @@ import {
   URIState,
 } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
+import { AsyncHasher, Hasher } from '@sphereon/ssi-types'
 
 import { VcIssuer } from '../VcIssuer'
 import { MemoryStates } from '../state-manager'
@@ -32,6 +33,7 @@ export class VcIssuerBuilder<DIDDoc extends object> {
   credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
   jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
   credentialDataSupplier?: CredentialDataSupplier
+  hasher?: AsyncHasher
 
   public withIssuerMetadata(issuerMetadata: IssuerMetadata) {
     if (!issuerMetadata.credential_configurations_supported) {
@@ -43,6 +45,11 @@ export class VcIssuerBuilder<DIDDoc extends object> {
 
   public withIssuerMetadataBuilder(builder: IssuerMetadataBuilderV1_13) {
     this.issuerMetadataBuilder = builder
+    return this
+  }
+
+  public withHasher(hasher: Hasher | AsyncHasher) {
+    this.hasher = hasher as AsyncHasher
     return this
   }
 
@@ -182,6 +189,7 @@ export class VcIssuerBuilder<DIDDoc extends object> {
       cNonces: this.cNonceStateManager,
       cNonceExpiresIn: this.cNonceExpiresIn,
       uris: this.credentialOfferURIManager,
+      hasher: this.hasher,
     })
   }
 }

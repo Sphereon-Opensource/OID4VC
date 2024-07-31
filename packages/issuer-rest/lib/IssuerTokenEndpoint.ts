@@ -72,12 +72,24 @@ export const handleTokenRequest = <T extends object>({
 
       try {
         const fullUrl = accessTokenEndpoint ?? request.protocol + '://' + request.get('host') + request.originalUrl
+        if (!issuer.hasher) {
+          console.error(
+            'Unable to handle token request with dpop header. Missing hasher for calculating jwk thumbprint in handleTokenRequest method. You can provide the hasher in the VcIssuer or VcIssuerBuilder',
+          )
+          // Server needs to be reconfigured to work properly
+          return sendErrorResponse(response, 500, {
+            error: 'server_error',
+            error_description: 'Internal server error',
+          })
+        }
+
         dPoPJwk = await verifyDPoP(
           { method: request.method, headers: request.headers, fullUrl },
           {
             jwtVerifyCallback: dpop.dPoPVerifyJwtCallback,
             expectAccessToken: false,
             maxIatAgeInSeconds: undefined,
+            hasher: issuer.hasher,
           },
         )
       } catch (error) {
@@ -99,6 +111,7 @@ export const handleTokenRequest = <T extends object>({
         interval,
         tokenExpiresIn,
         dPoPJwk,
+        hasher: issuer.hasher,
       })
       return response.status(200).json(responseBody)
     } catch (error) {

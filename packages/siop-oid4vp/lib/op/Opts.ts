@@ -21,6 +21,7 @@ export const createResponseOptsFromBuilderOrExistingOpts = (opts: {
       jwtIssuer: responseOpts?.jwtIssuer,
       createJwtCallback: opts.builder.createJwtCallback,
       responseMode: opts.builder.responseMode,
+      hasher: opts.builder.hasher,
       ...(responseOpts?.version
         ? { version: responseOpts.version }
         : Array.isArray(opts.builder.supportedVersions) && opts.builder.supportedVersions.length > 0

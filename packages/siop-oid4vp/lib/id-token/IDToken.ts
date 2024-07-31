@@ -99,7 +99,7 @@ export class IDToken {
         const did = jwtIssuer.didUrl.split('#')[0]
         this._payload.sub = did
 
-        const issuer = this._responseOpts.registration.issuer || this._payload.iss
+        const issuer = this.responseOpts.registration.issuer || this._payload.iss
         if (!issuer || !(issuer.includes(ResponseIss.SELF_ISSUED_V2) || issuer === this._payload.sub)) {
           throw new Error(SIOPErrors.NO_SELF_ISSUED_ISS)
         }
@@ -114,15 +114,18 @@ export class IDToken {
         this._payload.sub = jwtIssuer.issuer
 
         const header = { x5c: jwtIssuer.x5c, typ: 'JWT' }
-        this._jwt = await this._responseOpts.createJwtCallback(jwtIssuer, { header, payload: this._payload })
+        this._jwt = await this.responseOpts.createJwtCallback(jwtIssuer, { header, payload: this._payload })
       } else if (jwtIssuer.method === 'jwk') {
-        const jwkThumbprintUri = await calculateJwkThumbprintUri(jwtIssuer.jwk as JWK)
+        if (!this.responseOpts.hasher) {
+          throw new Error('Missing hasher in jwt opts. You can provide the hasher in the OP/OPBuilder or RP/RPBuilder')
+        }
+        const jwkThumbprintUri = await calculateJwkThumbprintUri(this.responseOpts.hasher, jwtIssuer.jwk as JWK)
         this._payload.sub = jwkThumbprintUri
         this._payload.iss = jwkThumbprintUri
         this._payload.sub_jwk = jwtIssuer.jwk
 
         const header = { jwk: jwtIssuer.jwk, alg: jwtIssuer.jwk.alg, typ: 'JWT' }
-        this._jwt = await this._responseOpts.createJwtCallback(jwtIssuer, { header, payload: this._payload })
+        this._jwt = await this.responseOpts.createJwtCallback(jwtIssuer, { header, payload: this._payload })
       } else {
         throw new Error(`JwtIssuer method '${(jwtIssuer as JwtIssuer).method}' not implemented`)
       }
@@ -158,7 +161,7 @@ export class IDToken {
     this.assertValidResponseJWT(parsedJwt)
     const idTokenPayload = parsedJwt.payload as IDTokenPayload
 
-    const jwtVerifier = await getJwtVerifierWithContext(parsedJwt, { type: 'id-token' })
+    const jwtVerifier = await getJwtVerifierWithContext(parsedJwt, { type: 'id-token', hasher: verifyOpts.hasher })
     const verificationResult = await verifyOpts.verifyJwtCallback(jwtVerifier, { ...parsedJwt, raw: this._jwt })
     if (!verificationResult) {
       throw Error(SIOPErrors.ERROR_VERIFYING_SIGNATURE)

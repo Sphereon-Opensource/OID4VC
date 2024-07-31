@@ -44,6 +44,9 @@ export const AuthorizationResponseOptsSchemaObj = {
         },
         "presentationExchange": {
           "$ref": "#/definitions/PresentationExchangeResponseOpts"
+        },
+        "hasher": {
+          "$ref": "#/definitions/Hasher"
         }
       },
       "required": [
@@ -2235,6 +2238,14 @@ export const AuthorizationResponseOptsSchemaObj = {
         "id_token",
         "token_response"
       ]
+    },
+    "Hasher": {
+      "properties": {
+        "isFunction": {
+          "type": "boolean",
+          "const": true
+        }
+      }
     }
   }
 };

@@ -1,3 +1,4 @@
+import { AsyncHasher, Hasher } from '@sphereon/ssi-types';
 import * as u8a from 'uint8arrays';
 
 import { DigestAlgorithm } from '../types';
@@ -10,12 +11,7 @@ const check = (value: unknown, description: string) => {
   }
 };
 
-const digest = async (algorithm: DigestAlgorithm, data: Uint8Array) => {
-  const subtleDigest = `SHA-${algorithm.slice(-3)}`;
-  return new Uint8Array(await crypto.subtle.digest(subtleDigest, data));
-};
-
-export async function calculateJwkThumbprint(jwk: JWK, digestAlgorithm?: DigestAlgorithm): Promise<string> {
+export async function calculateJwkThumbprint(hasher: Hasher | AsyncHasher, jwk: JWK, digestAlgorithm?: DigestAlgorithm): Promise<string> {
   if (!jwk || typeof jwk !== 'object') {
     throw new TypeError('JWK must be an object');
   }
@@ -48,8 +44,8 @@ export async function calculateJwkThumbprint(jwk: JWK, digestAlgorithm?: DigestA
     default:
       throw Error('"kty" (Key Type) Parameter missing or unsupported');
   }
-  const data = u8a.fromString(JSON.stringify(components), 'utf-8');
-  return u8a.toString(await digest(algorithm, data), 'base64url');
+  const digest = await hasher(JSON.stringify(components), algorithm);
+  return u8a.toString(digest, 'base64url');
 }
 
 export async function getDigestAlgorithmFromJwkThumbprintUri(uri: string): Promise<DigestAlgorithm> {
@@ -64,7 +60,11 @@ export async function getDigestAlgorithmFromJwkThumbprintUri(uri: string): Promi
   return algorithm;
 }
 
-export async function calculateJwkThumbprintUri(jwk: JWK, digestAlgorithm: DigestAlgorithm = 'sha256'): Promise<string> {
-  const thumbprint = await calculateJwkThumbprint(jwk, digestAlgorithm);
+export async function calculateJwkThumbprintUri(
+  hasher: AsyncHasher | Hasher,
+  jwk: JWK,
+  digestAlgorithm: DigestAlgorithm = 'sha256',
+): Promise<string> {
+  const thumbprint = await calculateJwkThumbprint(hasher, jwk, digestAlgorithm);
   return `urn:ietf:params:oauth:jwk-thumbprint:sha-${digestAlgorithm.slice(-3)}:${thumbprint}`;
 }

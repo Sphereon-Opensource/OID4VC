@@ -1,3 +1,4 @@
+import { AsyncHasher } from '@sphereon/ssi-types';
 import { jwtDecode } from 'jwt-decode';
 import SHA from 'sha.js';
 import * as u8a from 'uint8arrays';
@@ -92,6 +93,7 @@ export interface DPoPVerifyOptions {
   expectAccessToken?: boolean;
   jwtVerifyCallback: DPoPVerifyJwtCallback;
   now?: number;
+  hasher: AsyncHasher;
 }
 
 export async function verifyDPoP(
@@ -206,7 +208,7 @@ export async function verifyDPoP(
       throw new Error('invalid_dpop_proof. Access token is missing the jkt claim');
     }
 
-    const thumprint = await calculateJwkThumbprint(dPoPHeader.jwk, 'sha256');
+    const thumprint = await calculateJwkThumbprint(options.hasher, dPoPHeader.jwk, 'sha256');
     if (accessTokenPayload.cnf?.jkt !== thumprint) {
       throw new Error('invalid_dpop_proof. JwkThumbprint mismatch');
     }

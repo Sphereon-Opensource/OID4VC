@@ -15,6 +15,7 @@ import {
 } from '@sphereon/oid4vc-common'
 import { getJwtVerifierWithContext as getJwtVerifierWithContextCommon } from '@sphereon/oid4vc-common'
 import { JwtType, parseJWT } from '@sphereon/oid4vc-common'
+import { AsyncHasher, Hasher } from '@sphereon/ssi-types'
 
 import SIOPErrors from './Errors'
 import { RequestObjectPayload } from './SIOP.types'
@@ -34,6 +35,7 @@ export type JwtVerifier = DidJwtVerifier | X5cJwtVerifier | CustomJwtVerifier | 
 export const getJwkVerifier = async (
   jwt: { header: JwtHeader; payload: JwtPayload },
   jwkJwtVerifier: JwkJwtVerifierBase,
+  opts: { hasher?: AsyncHasher | Hasher } = {},
 ): Promise<JwkJwtVerifier> => {
   if (jwkJwtVerifier.type !== 'id-token') {
     // TODO: check why ts is complaining if we return the jwkJwtVerifier directly
@@ -46,10 +48,13 @@ export const getJwkVerifier = async (
   if (typeof jwt.payload.sub_jwk !== 'string') {
     throw new Error(`${SIOPErrors.INVALID_JWT} '${jwkJwtVerifier.type}' missing sub_jwk claim.`)
   }
+  if (!opts.hasher) {
+    throw new Error('Hasher is required for jwk bound id-token to verify jwk thumprint')
+  }
 
   const jwkThumbPrintUri = jwt.payload.sub_jwk
   const digestAlgorithm = await getDigestAlgorithmFromJwkThumbprintUri(jwkThumbPrintUri)
-  const selfComputedJwkThumbPrintUri = await calculateJwkThumbprintUri(jwt.header.jwk as JWK, digestAlgorithm)
+  const selfComputedJwkThumbPrintUri = await calculateJwkThumbprintUri(opts.hasher, jwt.header.jwk as JWK, digestAlgorithm)
 
   if (selfComputedJwkThumbPrintUri !== jwkThumbPrintUri) {
     throw new Error(`${SIOPErrors.INVALID_JWT} '${jwkJwtVerifier.type}' contains an invalid sub_jwk claim.`)
@@ -60,12 +65,12 @@ export const getJwkVerifier = async (
 
 export const getJwtVerifierWithContext = async (
   jwt: { header: JwtHeader; payload: JwtPayload },
-  options: { type: JwtType },
+  opts: { type: JwtType; hasher?: AsyncHasher | Hasher },
 ): Promise<JwtVerifier> => {
-  const verifierWithContext = await getJwtVerifierWithContextCommon(jwt, options)
+  const verifierWithContext = await getJwtVerifierWithContextCommon(jwt, opts)
 
   if (verifierWithContext.method === 'jwk') {
-    return getJwkVerifier(jwt, verifierWithContext)
+    return getJwkVerifier(jwt, verifierWithContext, { hasher: opts.hasher })
   }
 
   return verifierWithContext

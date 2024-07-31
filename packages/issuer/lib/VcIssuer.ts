@@ -40,7 +40,7 @@ import {
 } from '@sphereon/oid4vci-common'
 import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphereon/oid4vci-common/dist/events'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
-import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import { AsyncHasher, CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
 import { LookupStateManager } from './state-manager'
@@ -56,6 +56,7 @@ export class VcIssuer<DIDDoc extends object> {
   private readonly _cNonces: IStateManager<CNonceState>
   private readonly _uris?: IStateManager<URIState>
   private readonly _cNonceExpiresIn: number
+  private readonly _hasher?: AsyncHasher
 
   constructor(
     issuerMetadata: CredentialIssuerMetadataOptsV1_0_13,
@@ -70,6 +71,7 @@ export class VcIssuer<DIDDoc extends object> {
       jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
       credentialDataSupplier?: CredentialDataSupplier
       cNonceExpiresIn?: number | undefined // expiration duration in seconds
+      hasher?: AsyncHasher
     },
   ) {
     this.setDefaultTokenEndpoint(issuerMetadata)
@@ -82,6 +84,7 @@ export class VcIssuer<DIDDoc extends object> {
     this._jwtVerifyCallback = args?.jwtVerifyCallback
     this._credentialDataSupplier = args?.credentialDataSupplier
     this._cNonceExpiresIn = (args?.cNonceExpiresIn ?? (process.env.C_NONCE_EXPIRES_IN ? parseInt(process.env.C_NONCE_EXPIRES_IN) : 300)) as number
+    this._hasher = args.hasher
   }
 
   public getCredentialOfferSessionById(id: string): Promise<CredentialOfferSession> {
@@ -679,5 +682,9 @@ export class VcIssuer<DIDDoc extends object> {
 
   public get issuerMetadata() {
     return this._issuerMetadata
+  }
+
+  public get hasher() {
+    return this._hasher
   }
 }

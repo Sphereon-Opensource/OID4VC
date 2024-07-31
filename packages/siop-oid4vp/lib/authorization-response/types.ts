@@ -25,6 +25,7 @@ export interface AuthorizationResponseOpts {
   tokenType?: string
   refreshToken?: string
   presentationExchange?: PresentationExchangeResponseOpts
+  hasher?: Hasher
 }
 
 export interface PresentationExchangeResponseOpts {

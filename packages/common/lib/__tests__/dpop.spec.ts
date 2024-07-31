@@ -1,4 +1,8 @@
+import { createHash } from 'node:crypto';
+
 import { createDPoP, getCreateDPoPOptions, verifyDPoP } from '../dpop';
+
+const hasher = async (data: string) => createHash('sha256').update(data).digest();
 
 describe('dpop', () => {
   const alg = 'HS256';
@@ -84,6 +88,7 @@ describe('dpop', () => {
           expectedNonce: 'nonce',
           expectAccessToken: false,
           now: 1722327194,
+          hasher,
         },
       ),
     ).rejects.toThrow();
@@ -113,6 +118,7 @@ describe('dpop', () => {
 
           return true;
         },
+        hasher,
         expectAccessToken: false,
         expectedNonce: 'nonce',
         now: 1722327194,

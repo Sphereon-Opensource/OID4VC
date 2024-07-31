@@ -24,6 +24,7 @@ import {
   USER_PIN_REQUIRED_ERROR,
   USER_PIN_TX_CODE_SPEC_ERROR,
 } from '@sphereon/oid4vci-common'
+import { AsyncHasher } from '@sphereon/ssi-types'
 
 import { isPreAuthorizedCodeExpired } from '../functions'
 
@@ -44,13 +45,22 @@ export const generateAccessToken = async (
     preAuthorizedCode?: string
     alg?: Alg
     dPoPJwk?: JWK
+    hasher?: AsyncHasher
   },
 ): Promise<string> => {
   const { dPoPJwk, accessTokenIssuer, alg, accessTokenSignerCallback, tokenExpiresIn, preAuthorizedCode } = opts
   // JWT uses seconds for iat and exp
   const iat = new Date().getTime() / 1000
   const exp = iat + tokenExpiresIn
-  const cnf = dPoPJwk ? { cnf: { jkt: await calculateJwkThumbprint(dPoPJwk, 'sha256') } } : undefined
+
+  let cnf: { cnf: { jkt: string } } | undefined = undefined
+  if (dPoPJwk) {
+    if (!opts.hasher) {
+      throw new Error('Missing hasher in generateAccessToken method. You can provide the hasher in the VcIssuer or VcIssuerBuilder')
+    }
+    cnf = { cnf: { jkt: await calculateJwkThumbprint(opts.hasher, dPoPJwk, 'sha256') } }
+  }
+
   const jwt: Jwt = {
     header: { typ: 'JWT', alg: alg ?? Alg.ES256 },
     payload: {
@@ -202,9 +212,20 @@ export const createAccessTokenResponse = async (
     accessTokenIssuer: string
     interval?: number
     dPoPJwk?: JWK
+    hasher?: AsyncHasher
   },
 ) => {
-  const { dPoPJwk, credentialOfferSessions, cNonces, cNonceExpiresIn, tokenExpiresIn, accessTokenIssuer, accessTokenSignerCallback, interval } = opts
+  const {
+    dPoPJwk,
+    credentialOfferSessions,
+    cNonces,
+    cNonceExpiresIn,
+    tokenExpiresIn,
+    accessTokenIssuer,
+    accessTokenSignerCallback,
+    interval,
+    hasher,
+  } = opts
   // Pre-auth flow
   const preAuthorizedCode = request[PRE_AUTH_CODE_LITERAL] as string
 
@@ -217,6 +238,7 @@ export const createAccessTokenResponse = async (
     preAuthorizedCode,
     accessTokenIssuer,
     dPoPJwk,
+    hasher,
   })
 
   const response: AccessTokenResponse = {
