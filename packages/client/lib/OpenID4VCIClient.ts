@@ -22,7 +22,7 @@ import {
   getIssuerFromCredentialOfferPayload,
   getSupportedCredentials,
   getTypesFromCredentialSupported,
-  getTypesFromObject,
+  getTypesFromObject, IssuerSessionResponse,
   JWK,
   KID_JWK_X5C_ERROR,
   NotificationRequest,
@@ -31,7 +31,7 @@ import {
   OpenId4VCIVersion,
   PKCEOpts,
   ProofOfPossessionCallbacks,
-  toAuthorizationResponsePayload,
+  toAuthorizationResponsePayload
 } from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
@@ -49,6 +49,7 @@ import { OpenID4VCIClientStateV1_0_11 } from './OpenID4VCIClientV1_0_11';
 import { OpenID4VCIClientStateV1_0_13 } from './OpenID4VCIClientV1_0_13';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { generateMissingPKCEOpts, sendNotification } from './functions';
+import { acquireIssuerSessionId } from './IssuerSessionClient';
 
 const debug = Debug('sphereon:oid4vci');
 
@@ -359,6 +360,16 @@ export class OpenID4VCIClient {
     }
 
     return this.accessTokenResponse;
+  }
+
+  public async acquireIssuerSessionId() : Promise<IssuerSessionResponse | undefined> {
+    if(!this._state.endpointMetadata) {
+      return Promise.reject('endpointMetadata no loaded, retrieveServerMetadata()')
+    }
+    if(!('session_endpoint' in this._state.endpointMetadata) || !this._state.endpointMetadata.session_endpoint) {
+      return undefined
+    }
+    return acquireIssuerSessionId({sessionEndpoint: this._state.endpointMetadata.session_endpoint})
   }
 
   public async acquireCredentials({
