@@ -27,7 +27,7 @@ import {
 } from '../'
 import { checkSIOPSpecVersionSupported } from '../helpers/SIOPSpecVersion'
 
-import { getVerifyJwtCallback, internalSignature, publicJwkFromPrivateKeyHex } from './DidJwtTestUtils'
+import { getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
 import { mockedGetEnterpriseAuthToken, WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
 import {
