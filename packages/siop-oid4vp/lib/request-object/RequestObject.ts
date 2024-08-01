@@ -2,7 +2,15 @@ import { ClaimPayloadCommonOpts, ClaimPayloadOptsVID1, CreateAuthorizationReques
 import { assertValidAuthorizationRequestOpts } from '../authorization-request/Opts'
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
 import { parseJWT } from '../helpers/jwtUtils'
-import { AuthorizationRequestPayload, JwtIssuer, JwtIssuerWithContext, RequestObjectJwt, RequestObjectPayload, SIOPErrors } from '../types'
+import {
+  AuthorizationRequestPayload,
+  JwtIssuer,
+  JwtIssuerWithContext,
+  RequestObjectJwt,
+  RequestObjectPayload,
+  ResponseMode,
+  SIOPErrors,
+} from '../types'
 
 import { assertValidRequestObjectOpts } from './Opts'
 import { assertValidRequestObjectPayload, createRequestObjectPayload } from './Payload'
@@ -92,7 +100,11 @@ export class RequestObject {
       } else if (jwtIssuer.method === 'x5c') {
         this.payload.iss = jwtIssuer.issuer
         this.payload.client_id = jwtIssuer.issuer
-        this.payload.redirect_uri = jwtIssuer.issuer
+
+        if (this.opts.payload.response_mode !== ResponseMode.DIRECT_POST) {
+          this.payload.redirect_uri = jwtIssuer.issuer
+        }
+
         this.payload.client_id_scheme = jwtIssuer.clientIdScheme
 
         const header = { x5c: jwtIssuer.x5c, typ: 'JWT' }
