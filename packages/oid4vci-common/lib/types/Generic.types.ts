@@ -218,7 +218,7 @@ export interface JsonLdIssuerCredentialDefinition {
   credentialSubject?: IssuerCredentialSubject;
 }
 
-export interface ErrorResponse extends Response {
+export interface ErrorResponse {
   error: string;
   error_description?: string;
   error_uri?: string;

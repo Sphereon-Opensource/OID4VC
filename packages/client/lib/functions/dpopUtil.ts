@@ -8,7 +8,7 @@ export function shouldRetryTokenRequestWithDPoPNonce(response: OpenIDResponse<un
     return { ok: false };
   }
 
-  const dPoPNonce = response.errorBody.headers.get('DPoP-Nonce');
+  const dPoPNonce = response.origResponse.headers.get('DPoP-Nonce');
   if (!dPoPNonce) {
     throw new Error('Missing required DPoP-Nonce header.');
   }
@@ -21,12 +21,12 @@ export function shouldRetryResourceRequestWithDPoPNonce(response: OpenIDResponse
     return { ok: false };
   }
 
-  const wwwAuthenticateHeader = response.errorBody.headers?.get('WWW-Authenticate');
+  const wwwAuthenticateHeader = response.origResponse.headers.get('WWW-Authenticate');
   if (!wwwAuthenticateHeader?.includes(dpopTokenRequestNonceError)) {
     return { ok: false };
   }
 
-  const dPoPNonce = response.errorBody.headers.get('DPoP-Nonce');
+  const dPoPNonce = response.origResponse.headers.get('DPoP-Nonce');
   if (!dPoPNonce) {
     throw new Error('Missing required DPoP-Nonce header.');
   }
