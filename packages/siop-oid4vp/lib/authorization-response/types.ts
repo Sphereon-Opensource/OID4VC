@@ -1,10 +1,11 @@
+import { JwtIssuer } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition, PresentationSignCallBackParams } from '@sphereon/pex'
 import { Format } from '@sphereon/pex-models'
 import { CompactSdJwtVc, Hasher, PresentationSubmission, W3CVerifiablePresentation } from '@sphereon/ssi-types'
 
 import { ResponseMode, ResponseRegistrationOpts, ResponseURIType, SupportedVersion, VerifiablePresentationWithFormat, Verification } from '../types'
-import { CreateJwtCallback, JwtIssuer } from '../types/JwtIssuer'
-import { VerifyJwtCallback } from '../types/JwtVerifier'
+import { CreateJwtCallback } from '../types/VpJwtIssuer'
+import { VerifyJwtCallback } from '../types/VpJwtVerifier'
 
 import { AuthorizationResponse } from './AuthorizationResponse'
 

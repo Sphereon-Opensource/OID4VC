@@ -1,3 +1,4 @@
+import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { IProofType } from '@sphereon/ssi-types'
 import Ajv from 'ajv'
 import * as dotenv from 'dotenv'
@@ -9,7 +10,6 @@ import {
   RequestObject,
   ResponseType,
   Scope,
-  SigningAlgo,
   SubjectType,
   SupportedVersion,
   VerifyAuthorizationRequestOpts,

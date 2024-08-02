@@ -1,3 +1,5 @@
+import { SigningAlgo } from '@sphereon/oid4vc-common';
+
 export interface AuthorizationServerMetadata {
   issuer: string;
   authorization_endpoint?: string;
@@ -27,7 +29,8 @@ export interface AuthorizationServerMetadata {
   // Note that the presence of pushed_authorization_request_endpoint is sufficient for a client to determine that it may use the PAR flow. A request_uri value obtained from the PAR endpoint is usable at the authorization endpoint regardless of other authorization server metadata such as request_uri_parameter_supported or require_request_uri_registration
   require_pushed_authorization_requests?: boolean; // Boolean parameter indicating whether Indicates whether the client is required to use PAR to initiate authorization. If omitted, the default value is false.
   'pre-authorized_grant_anonymous_access_supported': boolean; // OPTIONAL. A JSON Boolean indicating whether the issuer accepts a Token Request with a Pre-Authorized Code but without a client id. The default is false
-
+  // A JSON array containing a list of the JWS alg values (from the [IANA.JOSE.ALGS] registry) supported by the authorization server for DPoP proof JWTs.
+  dpop_signing_alg_values_supported?: (string | SigningAlgo)[];
   // OIDC values
   frontchannel_logout_supported?: boolean;
   frontchannel_logout_session_supported?: boolean;

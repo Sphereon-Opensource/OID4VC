@@ -1,3 +1,5 @@
+import { CreateDPoPClientOpts } from '@sphereon/oid4vc-common';
+
 import { Alg, CredentialOfferPayload, ProofOfPossessionCallbacks, UniformCredentialOffer } from './CredentialIssuance.types';
 import {
   ErrorResponse,
@@ -219,6 +221,10 @@ export interface AccessTokenRequestOpts {
   redirectUri?: string; // only required for authorization flow
   pin?: string; // Pin-number. Only used when required
   pinMetadata?: TxCodeAndPinRequired; // OPTIONAL. String value containing a Transaction Code. This value MUST be present if a tx_code object was present in the Credential Offer (including if the object was empty). This parameter MUST only be used if the grant_type is urn:ietf:params:oauth:grant-type:pre-authorized_code.
+  // if the CreateDPoPOpts are provided, a dPoP will be created using the provided callback,
+  // if the authorization server indicates that it supports dPoP via the dpop_signing_alg_values_supported parameter.
+  createDPoPOpts?: CreateDPoPClientOpts;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   additionalParams?: Record<string, any>;
 }
 
@@ -278,6 +284,7 @@ export enum CreateRequestObjectMode {
 export type RequestObjectOpts = {
   requestObjectMode?: CreateRequestObjectMode;
   signCallbacks?: ProofOfPossessionCallbacks<never>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clientMetadata?: Record<string, any>; // TODO: Merge SIOP/OID4VP
   iss?: string;
   jwksUri?: string;
@@ -317,10 +324,15 @@ export interface AccessTokenRequest {
   [s: string]: unknown;
 }
 
-export interface OpenIDResponse<T> {
+export interface OpenIDResponse<T, P = never> {
   origResponse: Response;
   successBody?: T;
   errorBody?: ErrorResponse;
+  params?: P;
+}
+
+export interface DPoPResponseParams {
+  dpop?: { dpopNonce: string };
 }
 
 export interface AccessTokenResponse {

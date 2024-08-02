@@ -1,3 +1,5 @@
+import { defaultHasher } from '@sphereon/oid4vc-common'
+
 import { VerifyAuthorizationRequestOpts } from '../authorization-request'
 import { AuthorizationResponseOpts } from '../authorization-response'
 import { LanguageTagUtils } from '../helpers'
@@ -63,7 +65,7 @@ export const createVerifyRequestOptsFromBuilderOrExistingOpts = (opts: {
   return opts.builder
     ? {
         verifyJwtCallback: opts.builder.verifyJwtCallback,
-        hasher: opts.builder.hasher,
+        hasher: opts.builder.hasher ?? defaultHasher,
         verification: {},
         supportedVersions: opts.builder.supportedVersions,
         correlationId: undefined,

@@ -1,3 +1,4 @@
+import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereon/oid4vc-common';
 import {
   AccessTokenRequest,
   AccessTokenRequestOpts,
@@ -6,6 +7,7 @@ import {
   AuthorizationServerOpts,
   AuthzFlowType,
   convertJsonToURI,
+  DPoPResponseParams,
   EndpointMetadata,
   formPost,
   getIssuerFromCredentialOfferPayload,
@@ -24,11 +26,12 @@ import { ObjectUtils } from '@sphereon/ssi-types';
 
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
 import { createJwtBearerClientAssertion } from './functions';
+import { shouldRetryTokenRequestWithDPoPNonce } from './functions/dpopUtil';
 import { LOG } from './types';
 
 export class AccessTokenClient {
-  public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse>> {
-    const { asOpts, pin, codeVerifier, code, redirectUri, metadata } = opts;
+  public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse, DPoPResponseParams>> {
+    const { asOpts, pin, codeVerifier, code, redirectUri, metadata, createDPoPOpts } = opts;
 
     const credentialOffer = opts.credentialOffer ? await assertedUniformCredentialOffer(opts.credentialOffer) : undefined;
     const pinMetadata: TxCodeAndPinRequired | undefined = credentialOffer && this.getPinMetadata(credentialOffer.credential_offer);
@@ -59,6 +62,7 @@ export class AccessTokenClient {
       metadata,
       asOpts,
       issuerOpts,
+      createDPoPOpts: createDPoPOpts,
     });
   }
 
@@ -68,13 +72,15 @@ export class AccessTokenClient {
     metadata,
     asOpts,
     issuerOpts,
+    createDPoPOpts,
   }: {
     accessTokenRequest: AccessTokenRequest;
     pinMetadata?: TxCodeAndPinRequired;
     metadata?: EndpointMetadata;
     asOpts?: AuthorizationServerOpts;
     issuerOpts?: IssuerOpts;
-  }): Promise<OpenIDResponse<AccessTokenResponse>> {
+    createDPoPOpts?: CreateDPoPClientOpts;
+  }): Promise<OpenIDResponse<AccessTokenResponse, DPoPResponseParams>> {
     this.validate(accessTokenRequest, pinMetadata);
 
     const requestTokenURL = AccessTokenClient.determineTokenURL({
@@ -87,10 +93,34 @@ export class AccessTokenClient {
           : undefined,
     });
 
-    return this.sendAuthCode(requestTokenURL, accessTokenRequest);
+    const useDpop = createDPoPOpts?.dPoPSigningAlgValuesSupported && createDPoPOpts.dPoPSigningAlgValuesSupported.length > 0;
+    let dPoP = useDpop ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, requestTokenURL)) : undefined;
+
+    let response = await this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dpop: dPoP } } : undefined);
+
+    let nextDPoPNonce = createDPoPOpts?.jwtPayloadProps.nonce;
+    const retryWithNonce = shouldRetryTokenRequestWithDPoPNonce(response);
+    if (retryWithNonce.ok && createDPoPOpts) {
+      createDPoPOpts.jwtPayloadProps.nonce = retryWithNonce.dpopNonce;
+
+      dPoP = await createDPoP(getCreateDPoPOptions(createDPoPOpts, requestTokenURL));
+      response = await this.sendAuthCode(requestTokenURL, accessTokenRequest, dPoP ? { headers: { dpop: dPoP } } : undefined);
+      const successDPoPNonce = response.origResponse.headers.get('DPoP-Nonce');
+
+      nextDPoPNonce = successDPoPNonce ?? retryWithNonce.dpopNonce;
+    }
+
+    if (response.successBody && createDPoPOpts && response.successBody.token_type !== 'DPoP') {
+      throw new Error('Invalid token type returned. Expected DPoP. Received: ' + response.successBody.token_type);
+    }
+
+    return {
+      ...response,
+      params: { ...(nextDPoPNonce && { dpop: { dpopNonce: nextDPoPNonce } }) },
+    };
   }
 
-  public async createAccessTokenRequest(opts: AccessTokenRequestOpts): Promise<AccessTokenRequest> {
+  public async createAccessTokenRequest(opts: Omit<AccessTokenRequestOpts, 'createDPoPOpts'>): Promise<AccessTokenRequest> {
     const { asOpts, pin, codeVerifier, code, redirectUri } = opts;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -222,8 +252,14 @@ export class AccessTokenClient {
     }
   }
 
-  private async sendAuthCode(requestTokenURL: string, accessTokenRequest: AccessTokenRequest): Promise<OpenIDResponse<AccessTokenResponse>> {
-    return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }));
+  private async sendAuthCode(
+    requestTokenURL: string,
+    accessTokenRequest: AccessTokenRequest,
+    opts?: { headers?: Record<string, string> },
+  ): Promise<OpenIDResponse<AccessTokenResponse, DPoPResponseParams>> {
+    return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }), {
+      customHeaders: opts?.headers ? opts.headers : undefined,
+    });
   }
 
   public static determineTokenURL({

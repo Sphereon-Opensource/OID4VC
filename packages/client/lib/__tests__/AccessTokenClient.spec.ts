@@ -1,11 +1,4 @@
-import {
-  AccessTokenRequest,
-  AccessTokenResponse,
-  GrantTypes,
-  OpenIDResponse,
-  PRE_AUTH_CODE_LITERAL,
-  WellKnownEndpoints,
-} from '@sphereon/oid4vci-common';
+import { AccessTokenRequest, AccessTokenResponse, GrantTypes, PRE_AUTH_CODE_LITERAL, WellKnownEndpoints } from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
@@ -50,7 +43,7 @@ describe('AccessTokenClient should', () => {
       };
       nock(MOCK_URL).post(/.*/).reply(200, JSON.stringify(body));
 
-      const accessTokenResponse: OpenIDResponse<AccessTokenResponse> = await accessTokenClient.acquireAccessTokenUsingRequest({
+      const accessTokenResponse = await accessTokenClient.acquireAccessTokenUsingRequest({
         accessTokenRequest,
         pinMetadata: {
           isPinRequired: true,
@@ -88,7 +81,7 @@ describe('AccessTokenClient should', () => {
       };
       nock(MOCK_URL).post(/.*/).reply(200, JSON.stringify(body));
 
-      const accessTokenResponse: OpenIDResponse<AccessTokenResponse> = await accessTokenClient.acquireAccessTokenUsingRequest({
+      const accessTokenResponse = await accessTokenClient.acquireAccessTokenUsingRequest({
         accessTokenRequest,
         asOpts: { as: MOCK_URL },
       });
@@ -227,7 +220,7 @@ describe('AccessTokenClient should', () => {
       .post(/.*/)
       .reply(200, {});
 
-    const response: OpenIDResponse<AccessTokenResponse> = await accessTokenClient.acquireAccessToken({
+    const response = await accessTokenClient.acquireAccessToken({
       credentialOffer: INITIATION_TEST,
       pin: '1234',
     });

@@ -1,5 +1,5 @@
+import { uuidv4 } from '@sphereon/oid4vc-common';
 import { AccessTokenRequest, AccessTokenRequestOpts, Jwt, OpenId4VCIVersion } from '@sphereon/oid4vci-common';
-import { v4 } from 'uuid';
 
 import { ProofOfPossessionBuilder } from '../ProofOfPossessionBuilder';
 
@@ -35,7 +35,7 @@ export const createJwtBearerClientAssertion = async (
         iss: clientId,
         sub: clientId,
         aud: credentialIssuer,
-        jti: v4(),
+        jti: uuidv4(),
         exp: Date.now() / 1000 + 60,
         iat: Date.now() / 1000 - 60,
       },

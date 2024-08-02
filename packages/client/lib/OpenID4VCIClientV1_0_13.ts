@@ -1,3 +1,4 @@
+import { JWK } from '@sphereon/oid4vc-common';
 import {
   AccessTokenResponse,
   Alg,
@@ -17,7 +18,6 @@ import {
   getIssuerFromCredentialOfferPayload,
   getSupportedCredentials,
   getTypesFromCredentialSupported,
-  JWK,
   KID_JWK_X5C_ERROR,
   NotificationRequest,
   NotificationResult,

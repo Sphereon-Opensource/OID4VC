@@ -1,6 +1,8 @@
+import { JWK } from 'common/dist';
+
 import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
 
-import { JWK, ProofOfPossession } from './CredentialIssuance.types';
+import { ProofOfPossession } from './CredentialIssuance.types';
 import {
   AlgValue,
   CommonCredentialRequest,
