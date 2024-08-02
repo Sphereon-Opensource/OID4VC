@@ -1,3 +1,4 @@
+import { calculateJwkThumbprint, JWK, uuidv4 } from '@sphereon/oid4vc-common'
 import {
   AccessTokenRequest,
   AccessTokenResponse,
@@ -23,7 +24,6 @@ import {
   USER_PIN_REQUIRED_ERROR,
   USER_PIN_TX_CODE_SPEC_ERROR,
 } from '@sphereon/oid4vci-common'
-import { v4 } from 'uuid'
 
 import { isPreAuthorizedCodeExpired } from '../functions'
 
@@ -43,19 +43,26 @@ export const generateAccessToken = async (
   opts: Required<Pick<ITokenEndpointOpts, 'accessTokenSignerCallback' | 'tokenExpiresIn' | 'accessTokenIssuer'>> & {
     preAuthorizedCode?: string
     alg?: Alg
+    dPoPJwk?: JWK
   },
 ): Promise<string> => {
-  const { accessTokenIssuer, alg, accessTokenSignerCallback, tokenExpiresIn, preAuthorizedCode } = opts
+  const { dPoPJwk, accessTokenIssuer, alg, accessTokenSignerCallback, tokenExpiresIn, preAuthorizedCode } = opts
   // JWT uses seconds for iat and exp
   const iat = new Date().getTime() / 1000
   const exp = iat + tokenExpiresIn
+  const cnf = dPoPJwk ? { cnf: { jkt: await calculateJwkThumbprint(dPoPJwk, 'sha256') } } : undefined
   const jwt: Jwt = {
     header: { typ: 'JWT', alg: alg ?? Alg.ES256 },
     payload: {
       iat,
       exp,
       iss: accessTokenIssuer,
+      ...cnf,
       ...(preAuthorizedCode && { preAuthorizedCode }),
+      // Protected resources simultaneously supporting both the DPoP and Bearer schemes need to update how the
+      // evaluation process is performed for bearer tokens to prevent downgraded usage of a DPoP-bound access token.
+      // Specifically, such a protected resource MUST reject a DPoP-bound access token received as a bearer token per [RFC6750].
+      token_type: dPoPJwk ? 'DPoP' : 'Bearer',
     },
   }
   return await accessTokenSignerCallback(jwt)
@@ -102,12 +109,17 @@ export const assertValidAccessTokenRequest = async (
  invalid_request:
  the Authorization Server does not expect a PIN in the pre-authorized flow but the client provides a PIN
   */
-  if (!credentialOfferSession.credentialOffer.credential_offer?.grants?.[GrantTypes.PRE_AUTHORIZED_CODE]?.tx_code && request.tx_code) {
+  if (
+    !credentialOfferSession.credentialOffer.credential_offer?.grants?.[GrantTypes.PRE_AUTHORIZED_CODE]?.tx_code &&
+    request.tx_code &&
+    !request.user_pin
+  ) {
     // >= v13
     throw new TokenError(400, TokenErrorResponse.invalid_request, USER_PIN_NOT_REQUIRED_ERROR)
   } else if (
     !credentialOfferSession.credentialOffer.credential_offer?.grants?.[GrantTypes.PRE_AUTHORIZED_CODE]?.user_pin_required &&
-    request.user_pin
+    request.user_pin &&
+    !request.tx_code
   ) {
     // <= v12
     throw new TokenError(400, TokenErrorResponse.invalid_request, USER_PIN_NOT_REQUIRED_ERROR)
@@ -189,13 +201,14 @@ export const createAccessTokenResponse = async (
     accessTokenSignerCallback: JWTSignerCallback
     accessTokenIssuer: string
     interval?: number
+    dPoPJwk?: JWK
   },
 ) => {
-  const { credentialOfferSessions, cNonces, cNonceExpiresIn, tokenExpiresIn, accessTokenIssuer, accessTokenSignerCallback, interval } = opts
+  const { dPoPJwk, credentialOfferSessions, cNonces, cNonceExpiresIn, tokenExpiresIn, accessTokenIssuer, accessTokenSignerCallback, interval } = opts
   // Pre-auth flow
   const preAuthorizedCode = request[PRE_AUTH_CODE_LITERAL] as string
 
-  const cNonce = opts.cNonce ?? v4()
+  const cNonce = opts.cNonce ?? uuidv4()
   await cNonces.set(cNonce, { cNonce, createdAt: +new Date(), preAuthorizedCode })
 
   const access_token = await generateAccessToken({
@@ -203,10 +216,12 @@ export const createAccessTokenResponse = async (
     accessTokenSignerCallback,
     preAuthorizedCode,
     accessTokenIssuer,
+    dPoPJwk,
   })
+
   const response: AccessTokenResponse = {
     access_token,
-    token_type: 'bearer',
+    token_type: dPoPJwk ? 'DPoP' : 'bearer',
     expires_in: tokenExpiresIn,
     c_nonce: cNonce,
     c_nonce_expires_in: cNonceExpiresIn,

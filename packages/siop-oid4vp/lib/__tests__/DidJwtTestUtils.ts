@@ -1,10 +1,9 @@
+import { JwtPayload, parseJWT, SigningAlgo } from '@sphereon/oid4vc-common'
 import { VerifyCallback } from '@sphereon/wellknown-dids-client'
 import { createJWT, EdDSASigner, ES256KSigner, ES256Signer, hexToBytes, JWTOptions, JWTVerifyOptions, Signer, verifyJWT } from 'did-jwt'
 import { Resolvable } from 'did-resolver'
 
-import { parseJWT } from '../helpers/jwtUtils'
-import { DEFAULT_EXPIRATION_TIME, JwtPayload, ResponseIss, SigningAlgo, SIOPErrors, VerifiedJWT, VerifyJwtCallback } from '../types'
-import { CreateJwtCallback } from '../types/JwtIssuer'
+import { DEFAULT_EXPIRATION_TIME, ResponseIss, SIOPErrors, VerifiedJWT, VerifyJwtCallback } from '../types'
 
 import { getResolver } from './ResolverTestUtils'
 
@@ -68,7 +67,7 @@ export const internalSignature = (hexPrivateKey: string, did: string, didUrl: st
   })
 }
 
-export function getCreateJwtCallback(signature: InternalSignature): CreateJwtCallback {
+export function getCreateJwtCallback(signature: InternalSignature) {
   return (jwtIssuer, jwt) => {
     if (jwtIssuer.method === 'did') {
       const issuer = jwtIssuer.didUrl.split('#')[0]
@@ -113,9 +112,9 @@ export function getVerifyJwtCallback(
     resolver = resolver ?? getResolver(['ethr', 'ion'])
     const audience =
       jwtVerifier.type === 'request-object'
-        ? verifyOpts?.audience ?? getAudience(jwt.raw)
+        ? (verifyOpts?.audience ?? getAudience(jwt.raw))
         : jwtVerifier.type === 'id-token'
-          ? verifyOpts?.audience ?? getAudience(jwt.raw)
+          ? (verifyOpts?.audience ?? getAudience(jwt.raw))
           : undefined
 
     await verifyDidJWT(jwt.raw, resolver, { audience, ...verifyOpts })
