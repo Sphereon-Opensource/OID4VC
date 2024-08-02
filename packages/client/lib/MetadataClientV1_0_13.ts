@@ -159,8 +159,8 @@ export class MetadataClientV1_0_13 {
     }
     debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`);
 
-    if(credentialIssuerMetadata?.session_endpoint !== undefined) {
-      session_endpoint = credentialIssuerMetadata.session_endpoint
+    if (credentialIssuerMetadata?.session_endpoint !== undefined) {
+      session_endpoint = credentialIssuerMetadata.session_endpoint;
     }
     return {
       issuer,

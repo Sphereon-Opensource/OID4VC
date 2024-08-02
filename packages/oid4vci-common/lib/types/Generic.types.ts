@@ -400,5 +400,5 @@ export interface NotificationErrorResponse {
 }
 
 export interface IssuerSessionIdRequestOpts {
-  sessionEndpoint: string
+  sessionEndpoint: string;
 }

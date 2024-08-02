@@ -22,7 +22,7 @@ export interface CredentialResponse extends ExperimentalSubjectIssuance {
 }
 
 export interface IssuerSessionResponse {
-  session_id: string
+  session_id: string;
 }
 
 export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOfferRequest {
