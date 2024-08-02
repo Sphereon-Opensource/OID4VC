@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/did-auth-siop",
-  "version": "0.15.1",
+  "version": "0.16.0",
   "description": "Self Issued OpenID V2 (SIOPv2) and OpenID 4 Verifiable Presentations (OID4VP)",
   "source": "lib/index.ts",
   "main": "dist/index.js",
@@ -13,9 +13,9 @@
     "uninstall": "rimraf dist coverage node_modules"
   },
   "dependencies": {
-    "@sphereon/oid4vc-common": "workspace:*",
     "@astronautlabs/jsonpath": "^1.1.2",
     "@sphereon/did-uni-client": "^0.6.2",
+    "@sphereon/oid4vc-common": "workspace:*",
     "@sphereon/pex": "^3.3.2",
     "@sphereon/pex-models": "^2.2.4",
     "@sphereon/ssi-types": "0.22.0",
