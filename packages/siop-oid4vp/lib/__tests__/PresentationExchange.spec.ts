@@ -1,3 +1,4 @@
+import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { PresentationDefinitionV1 } from '@sphereon/pex-models'
 import { CredentialMapper, IPresentation, IProofType, IVerifiableCredential } from '@sphereon/ssi-types'
 import { W3CVerifiablePresentation } from '@sphereon/ssi-types/src/types/w3c-vc'
@@ -14,7 +15,6 @@ import {
   PresentationSignCallback,
   ResponseType,
   Scope,
-  SigningAlgo,
   SubjectIdentifierType,
   SubjectType,
 } from '..'

@@ -10,6 +10,7 @@
     "build:clean": "tsc --build --clean && tsc --build"
   },
   "dependencies": {
+    "@sphereon/oid4vc-common": "workspace:*",
     "@sphereon/oid4vci-common": "workspace:*",
     "@sphereon/ssi-types": "0.28.0",
     "uuid": "^9.0.0"

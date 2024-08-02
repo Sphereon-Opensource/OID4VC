@@ -181,7 +181,7 @@ export function getIssuerDisplays(metadata: CredentialIssuerMetadata | IssuerMet
     metadata.display?.filter(
       (item) => !opts?.prefLocales || opts.prefLocales.length === 0 || (item.locale && opts.prefLocales.includes(item.locale)) || !item.locale,
     ) ?? [];
-  return matchedDisplays.sort((item) => (item.locale ? opts?.prefLocales.indexOf(item.locale) ?? 1 : Number.MAX_VALUE));
+  return matchedDisplays.sort((item) => (item.locale ? (opts?.prefLocales.indexOf(item.locale) ?? 1) : Number.MAX_VALUE));
 }
 
 /**

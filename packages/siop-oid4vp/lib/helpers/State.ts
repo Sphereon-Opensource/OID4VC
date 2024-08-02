@@ -1,5 +1,5 @@
+import { uuidv4 } from '@sphereon/oid4vc-common'
 import SHA from 'sha.js'
-import { v4 as uuidv4 } from 'uuid'
 
 import { base64urlEncodeBuffer } from './Encodings'
 

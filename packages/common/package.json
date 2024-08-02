@@ -1,7 +1,7 @@
 {
-  "name": "@sphereon/oid4vci-common",
+  "name": "@sphereon/oid4vc-common",
   "version": "0.15.1",
-  "description": "OpenID 4 Verifiable Credential Issuance Common Types",
+  "description": "OpenID 4 Verifiable Credentials Common",
   "source": "lib/index.ts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,13 +11,14 @@
   },
   "dependencies": {
     "@sphereon/ssi-types": "0.28.0",
-    "cross-fetch": "^3.1.8",
     "jwt-decode": "^4.0.0",
-    "sha.js": "^2.4.11",
-    "uint8arrays": "3.1.1"
+    "uint8arrays": "3.1.1",
+    "uuid": "^9.0.0",
+    "sha.js": "^2.4.11"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
+    "@types/uuid": "^9.0.1",
     "@types/sha.js": "^2.4.4",
     "typescript": "5.4.5"
   },
@@ -41,7 +42,9 @@
     "SSI",
     "OpenID4VCI",
     "OIDC4VCI",
-    "OID4VCI"
+    "OID4VCI",
+    "Common",
+    "OpenId for Verifiable Presentations"
   ],
   "author": "Sphereon",
   "license": "Apache-2.0",

@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 
+import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { IIssuerId } from '@sphereon/ssi-types'
-import { v4 as uuidv4 } from 'uuid'
 
 import { AuthorizationRequest, URI, VerifyAuthorizationRequestOpts } from '../authorization-request'
 import { mergeVerificationOpts } from '../authorization-request/Opts'
@@ -17,7 +17,6 @@ import {
   AuthorizationEvent,
   AuthorizationEvents,
   ContentType,
-  JwtIssuer,
   ParsedAuthorizationRequestURI,
   RegisterEventListener,
   ResponseIss,

@@ -114,7 +114,7 @@ export const createAuthorizationRequestUrl = async ({
   const client_id = clientId ?? authorizationRequest.clientId;
 
   // Authorization server metadata takes precedence
-  const authorizationMetadata = endpointMetadata.authorizationServerMetadata ?? endpointMetadata.credentialIssuerMetadata
+  const authorizationMetadata = endpointMetadata.authorizationServerMetadata ?? endpointMetadata.credentialIssuerMetadata;
 
   let { authorizationDetails } = authorizationRequest;
   const parMode = authorizationMetadata?.require_pushed_authorization_requests
@@ -181,7 +181,6 @@ export const createAuthorizationRequestUrl = async ({
     throw Error('Server metadata does not contain authorization endpoint');
   }
   const parEndpoint = authorizationMetadata?.pushed_authorization_request_endpoint;
-
 
   let queryObj: Record<string, any> | PushedAuthorizationResponse = {
     response_type: ResponseType.AUTH_CODE,

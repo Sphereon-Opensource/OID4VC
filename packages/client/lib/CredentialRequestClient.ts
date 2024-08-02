@@ -1,7 +1,9 @@
+import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereon/oid4vc-common';
 import {
   acquireDeferredCredential,
   CredentialRequestV1_0_13,
   CredentialResponse,
+  DPoPResponseParams,
   getCredentialRequestForVersion,
   getUniformFormat,
   isDeferredCredentialResponse,
@@ -21,6 +23,7 @@ import Debug from 'debug';
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
 import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
+import { shouldRetryResourceRequestWithDPoPNonce } from './functions/dpopUtil';
 
 const debug = Debug('sphereon:oid4vci:credential');
 
@@ -89,7 +92,8 @@ export class CredentialRequestClient {
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
     subjectIssuance?: ExperimentalSubjectIssuance;
-  }): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
+    createDPoPOpts?: CreateDPoPClientOpts;
+  }): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     const { credentialIdentifier, credentialTypes, proofInput, format, context, subjectIssuance } = opts;
 
     const request = await this.createCredentialRequest({
@@ -101,12 +105,13 @@ export class CredentialRequestClient {
       credentialIdentifier,
       subjectIssuance,
     });
-    return await this.acquireCredentialsUsingRequest(request);
+    return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOpts);
   }
 
   public async acquireCredentialsUsingRequest(
     uniformRequest: UniformCredentialRequest,
-  ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
+    createDPoPOpts?: CreateDPoPClientOpts,
+  ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
       throw new Error('Versions below v1.0.13 (draft 13) are not supported by the V13 credential request client.');
     }
@@ -119,9 +124,33 @@ export class CredentialRequestClient {
     debug(`Acquiring credential(s) from: ${credentialEndpoint}`);
     debug(`request\n: ${JSON.stringify(request, null, 2)}`);
     const requestToken: string = this.credentialRequestOpts.token;
-    let response = (await post(credentialEndpoint, JSON.stringify(request), { bearerToken: requestToken })) as OpenIDResponse<CredentialResponse> & {
+
+    let dPoP = createDPoPOpts ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, credentialEndpoint, { accessToken: requestToken })) : undefined;
+
+    let response = (await post(credentialEndpoint, JSON.stringify(request), {
+      bearerToken: requestToken,
+      customHeaders: { ...(dPoP && { dpop: dPoP }) },
+    })) as OpenIDResponse<CredentialResponse> & {
       access_token: string;
     };
+
+    let nextDPoPNonce = createDPoPOpts?.jwtPayloadProps.nonce;
+    const retryWithNonce = shouldRetryResourceRequestWithDPoPNonce(response);
+    if (retryWithNonce.ok && createDPoPOpts) {
+      createDPoPOpts.jwtPayloadProps.nonce = retryWithNonce.dpopNonce;
+      dPoP = await createDPoP(getCreateDPoPOptions(createDPoPOpts, credentialEndpoint, { accessToken: requestToken }));
+
+      response = (await post(credentialEndpoint, JSON.stringify(request), {
+        bearerToken: requestToken,
+        customHeaders: { ...(createDPoPOpts && { dpop: dPoP }) },
+      })) as OpenIDResponse<CredentialResponse> & {
+        access_token: string;
+      };
+
+      const successDPoPNonce = response.origResponse.headers.get('DPoP-Nonce');
+      nextDPoPNonce = successDPoPNonce ?? retryWithNonce.dpopNonce;
+    }
+
     this._isDeferred = isDeferredCredentialResponse(response);
     if (this.isDeferred() && this.credentialRequestOpts.deferredCredentialAwait && response.successBody) {
       response = await this.acquireDeferredCredential(response.successBody, { bearerToken: this.credentialRequestOpts.token });
@@ -134,7 +163,11 @@ export class CredentialRequestClient {
       }
     }
     debug(`Credential endpoint ${credentialEndpoint} response:\r\n${JSON.stringify(response, null, 2)}`);
-    return response;
+
+    return {
+      ...response,
+      params: { ...(nextDPoPNonce && { dpop: { dpopNonce: nextDPoPNonce } }) },
+    };
   }
 
   public async acquireDeferredCredential(

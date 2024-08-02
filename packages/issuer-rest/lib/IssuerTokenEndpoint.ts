@@ -1,8 +1,8 @@
+import { DPoPVerifyJwtCallback, JWK, uuidv4, verifyDPoP } from '@sphereon/oid4vc-common'
 import { GrantTypes, PRE_AUTHORIZED_CODE_REQUIRED_ERROR, TokenError, TokenErrorResponse } from '@sphereon/oid4vci-common'
 import { assertValidAccessTokenRequest, createAccessTokenResponse, ITokenEndpointOpts, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { sendErrorResponse } from '@sphereon/ssi-express-support'
 import { NextFunction, Request, Response } from 'express'
-import { v4 } from 'uuid'
 
 /**
  *
@@ -15,13 +15,21 @@ import { v4 } from 'uuid'
  */
 export const handleTokenRequest = <T extends object>({
   tokenExpiresIn, // expiration in seconds
+  accessTokenEndpoint,
   accessTokenSignerCallback,
   accessTokenIssuer,
   cNonceExpiresIn, // expiration in seconds
   issuer,
   interval,
+  dpop,
 }: Required<Pick<ITokenEndpointOpts, 'accessTokenIssuer' | 'cNonceExpiresIn' | 'interval' | 'accessTokenSignerCallback' | 'tokenExpiresIn'>> & {
   issuer: VcIssuer<T>
+  dpop?: {
+    requireDPoP?: boolean
+    dPoPVerifyJwtCallback: DPoPVerifyJwtCallback
+  }
+  // The full URL of the access token endpoint
+  accessTokenEndpoint?: string
 }) => {
   return async (request: Request, response: Response) => {
     response.set({
@@ -37,16 +45,60 @@ export const handleTokenRequest = <T extends object>({
       })
     }
 
+    if (request.headers.authorization && request.headers.authorization.startsWith('DPoP ') && !request.headers.DPoP) {
+      return sendErrorResponse(response, 400, {
+        error: TokenErrorResponse.invalid_request,
+        error_description: 'DPoP header is required',
+      })
+    }
+
+    let dPoPJwk: JWK | undefined
+    if (dpop?.requireDPoP && !request.headers.dpop) {
+      return sendErrorResponse(response, 400, {
+        error: TokenErrorResponse.invalid_request,
+        error_description: 'DPoP is required for requesting access tokens.',
+      })
+    }
+
+    if (request.headers.dpop) {
+      if (!dpop) {
+        console.error('Received unsupported DPoP header. The issuer is not configured to work with DPoP. Provide DPoP options for it to work.')
+
+        return sendErrorResponse(response, 400, {
+          error: TokenErrorResponse.invalid_request,
+          error_description: 'Received unsupported DPoP header.',
+        })
+      }
+
+      try {
+        const fullUrl = accessTokenEndpoint ?? request.protocol + '://' + request.get('host') + request.originalUrl
+        dPoPJwk = await verifyDPoP(
+          { method: request.method, headers: request.headers, fullUrl },
+          {
+            jwtVerifyCallback: dpop.dPoPVerifyJwtCallback,
+            expectAccessToken: false,
+            maxIatAgeInSeconds: undefined,
+          },
+        )
+      } catch (error) {
+        return sendErrorResponse(response, 400, {
+          error: TokenErrorResponse.invalid_dpop_proof,
+          error_description: error instanceof Error ? error.message : 'Unknown error',
+        })
+      }
+    }
+
     try {
       const responseBody = await createAccessTokenResponse(request.body, {
         credentialOfferSessions: issuer.credentialOfferSessions,
         accessTokenIssuer,
         cNonces: issuer.cNonces,
-        cNonce: v4(),
+        cNonce: uuidv4(),
         accessTokenSignerCallback,
         cNonceExpiresIn,
         interval,
         tokenExpiresIn,
+        dPoPJwk,
       })
       return response.status(200).json(responseBody)
     } catch (error) {
