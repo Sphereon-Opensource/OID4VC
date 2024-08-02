@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.16.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.15.1...v0.16.0) (2024-08-02)
+
+### Bug Fixes
+
+- ensure correct token_type in response ([668c53f](https://github.com/Sphereon-Opensource/OID4VCI/commit/668c53f012710c72c586343adb054da562a84d46))
+- header casing ([b696dba](https://github.com/Sphereon-Opensource/OID4VCI/commit/b696dba42be0c8b69c3c2425149b54ecbf222cae))
+- headers for error response ([4c8319e](https://github.com/Sphereon-Opensource/OID4VCI/commit/4c8319e894ee7602a5a84840526b18c1c323959f))
+- incorrect usage of errorBody ([f25b7d6](https://github.com/Sphereon-Opensource/OID4VCI/commit/f25b7d67e238fcaa0ecf8c8eab49bea0720f7d5e))
+- rename common to oid4vc-common ([d89ac4f](https://github.com/Sphereon-Opensource/OID4VCI/commit/d89ac4f4956e69dad5274b197912485665aeb97c))
+- scope and par fixes ([71e72aa](https://github.com/Sphereon-Opensource/OID4VCI/commit/71e72aa24b208e5d9597351c45da312cddc04e0a))
+- varname ([f92b2b9](https://github.com/Sphereon-Opensource/OID4VCI/commit/f92b2b938b4d497970b4a2a07e9d0764dbb98528))
+
+### Features
+
+- add additional dpop retry mechanisms ([a102854](https://github.com/Sphereon-Opensource/OID4VCI/commit/a1028540432115f26677a860bf6bac10e630a1d9))
+- address feedback part 2 ([01f6d4d](https://github.com/Sphereon-Opensource/OID4VCI/commit/01f6d4d7884c7f49f4395f7ec9ba12ee9b0a8668))
+- create common package ([d5b4b75](https://github.com/Sphereon-Opensource/OID4VCI/commit/d5b4b75f036edcf8082e062214c036c9be934071))
+- dpop support ([9202667](https://github.com/Sphereon-Opensource/OID4VCI/commit/92026678c745b770957f5bae290ae7b456601fd2))
+- incorporate feedback and fix tests ([c7c6af4](https://github.com/Sphereon-Opensource/OID4VCI/commit/c7c6af464d9fda53b86c3095feca5705df9e92cc))
+- incorporate feedback part1 ([f30475a](https://github.com/Sphereon-Opensource/OID4VCI/commit/f30475a8c98f869ffe82e67f59231a4faf182a98))
+
 ## [0.15.1](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.15.0...v0.15.1) (2024-07-23)
 
 ### Bug Fixes
