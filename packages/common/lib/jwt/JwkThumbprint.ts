@@ -1,5 +1,6 @@
 import * as u8a from 'uint8arrays';
 
+import { defaultHasher } from '../hasher';
 import { DigestAlgorithm } from '../types';
 
 import { JWK } from '.';
@@ -8,11 +9,6 @@ const check = (value: unknown, description: string) => {
   if (typeof value !== 'string' || !value) {
     throw Error(`${description} missing or invalid`);
   }
-};
-
-const digest = async (algorithm: DigestAlgorithm, data: Uint8Array) => {
-  const subtleDigest = `SHA-${algorithm.slice(-3)}`;
-  return new Uint8Array(await crypto.subtle.digest(subtleDigest, data));
 };
 
 export async function calculateJwkThumbprint(jwk: JWK, digestAlgorithm?: DigestAlgorithm): Promise<string> {
@@ -48,8 +44,7 @@ export async function calculateJwkThumbprint(jwk: JWK, digestAlgorithm?: DigestA
     default:
       throw Error('"kty" (Key Type) Parameter missing or unsupported');
   }
-  const data = u8a.fromString(JSON.stringify(components), 'utf-8');
-  return u8a.toString(await digest(algorithm, data), 'base64url');
+  return u8a.toString(defaultHasher(algorithm, JSON.stringify(components)), 'base64url');
 }
 
 export async function getDigestAlgorithmFromJwkThumbprintUri(uri: string): Promise<DigestAlgorithm> {
