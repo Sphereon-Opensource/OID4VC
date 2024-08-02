@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.16.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.15.1...v0.16.0) (2024-08-02)
+
+### Bug Fixes
+
+- jwk thumprint using crypto.subtle ([56a291c](https://github.com/Sphereon-Opensource/OID4VCI/commit/56a291c2a59c2966fdf428d7cf7e2e69389fd38b))
+- nits ([1a54e69](https://github.com/Sphereon-Opensource/OID4VCI/commit/1a54e6966da62e4796640dd73393fd0fdc5c76b4))
+- redirect uri should not be set with direct_post ([42c8ddd](https://github.com/Sphereon-Opensource/OID4VCI/commit/42c8dddf8c0ec76de98052198a27fe4409903918))
+- rename common to oid4vc-common ([d89ac4f](https://github.com/Sphereon-Opensource/OID4VCI/commit/d89ac4f4956e69dad5274b197912485665aeb97c))
+- some imports ([5034468](https://github.com/Sphereon-Opensource/OID4VCI/commit/5034468ab464f39e0c82cf09af8605d23d1f81f6))
+
+### Features
+
+- create common package ([d5b4b75](https://github.com/Sphereon-Opensource/OID4VCI/commit/d5b4b75f036edcf8082e062214c036c9be934071))
+- incorporate feedback part1 ([f30475a](https://github.com/Sphereon-Opensource/OID4VCI/commit/f30475a8c98f869ffe82e67f59231a4faf182a98))
+
 ## [0.15.1](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.15.0...v0.15.1) (2024-07-23)
 
 ### Bug Fixes

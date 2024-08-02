@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-callback-example",
-  "version": "0.15.1",
+  "version": "0.16.0",
   "description": "OpenID 4 Verifiable Credential Issuance issuer callback example",
   "source": "lib/index.ts",
   "main": "dist/index.js",
@@ -10,12 +10,12 @@
     "build:clean": "tsc --build --clean && tsc --build"
   },
   "dependencies": {
-    "@sphereon/oid4vc-common": "workspace:*",
     "@digitalcredentials/did-method-key": "^2.0.3",
     "@digitalcredentials/ed25519-signature-2020": "^3.0.2",
     "@digitalcredentials/ed25519-verification-key-2020": "^4.0.0",
     "@digitalcredentials/security-document-loader": "^1.0.0",
     "@digitalcredentials/vc": "^5.0.0",
+    "@sphereon/oid4vc-common": "workspace:*",
     "@sphereon/oid4vci-client": "workspace:*",
     "@sphereon/oid4vci-common": "workspace:*",
     "@sphereon/oid4vci-issuer": "workspace:*",
