@@ -1,4 +1,4 @@
-import SHA from 'sha.js';
+import { defaultHasher } from '@sphereon/oid4vc-common';
 import * as u8a from 'uint8arrays';
 import { SupportedEncodings } from 'uint8arrays/to-string';
 
@@ -26,7 +26,7 @@ export const createCodeChallenge = (codeVerifier: string, codeChallengeMethod?: 
   if (codeChallengeMethod === CodeChallengeMethod.plain) {
     return codeVerifier;
   } else if (!codeChallengeMethod || codeChallengeMethod === CodeChallengeMethod.S256) {
-    return u8a.toString(SHA('sha256').update(codeVerifier).digest(), 'base64url');
+    return u8a.toString(defaultHasher(codeVerifier, 'sha256'), 'base64url');
   } else {
     // Just a precaution if a new method would be introduced
     throw Error(`code challenge method ${codeChallengeMethod} not implemented`);

@@ -60,7 +60,8 @@ const openIdFetch = async <T>(
 ): Promise<OpenIDResponse<T>> => {
   const headers: Record<string, string> = opts?.customHeaders ?? {};
   if (opts?.bearerToken) {
-    headers['Authorization'] = `Bearer ${typeof opts.bearerToken === 'function' ? await opts.bearerToken() : opts.bearerToken}`;
+    headers['Authorization'] =
+      `${headers.dpop ? 'DPoP' : 'Bearer'} ${typeof opts.bearerToken === 'function' ? await opts.bearerToken() : opts.bearerToken}`;
   }
   const method = opts?.method ? opts.method : body ? 'POST' : 'GET';
   const accept = opts?.accept ? opts.accept : 'application/json';

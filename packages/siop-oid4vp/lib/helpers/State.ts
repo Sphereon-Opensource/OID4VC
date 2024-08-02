@@ -1,5 +1,4 @@
-import SHA from 'sha.js'
-import { v4 as uuidv4 } from 'uuid'
+import { defaultHasher, uuidv4 } from '@sphereon/oid4vc-common'
 
 import { base64urlEncodeBuffer } from './Encodings'
 
@@ -8,7 +7,7 @@ export function getNonce(state: string, nonce?: string) {
 }
 
 export function toNonce(input: string): string {
-  const buff = SHA('sha256').update(input).digest()
+  const buff = defaultHasher(input, 'sha256')
   return base64urlEncodeBuffer(buff)
 }
 

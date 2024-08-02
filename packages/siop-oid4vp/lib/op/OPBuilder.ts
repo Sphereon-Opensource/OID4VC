@@ -5,7 +5,7 @@ import { Hasher, IIssuerId } from '@sphereon/ssi-types'
 import { PropertyTargets } from '../authorization-request'
 import { PresentationSignCallback } from '../authorization-response'
 import { ResponseIss, ResponseMode, ResponseRegistrationOpts, SupportedVersion, VerifyJwtCallback } from '../types'
-import { CreateJwtCallback } from '../types/JwtIssuer'
+import { CreateJwtCallback } from '../types/VpJwtIssuer'
 
 import { OP } from './OP'
 

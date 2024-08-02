@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid'
+import { uuidv4 } from '@sphereon/oid4vc-common'
 
 import { CreateAuthorizationRequestOpts, createPresentationDefinitionClaimsProperties } from '../authorization-request'
 import { createRequestRegistration } from '../authorization-request/RequestRegistration'

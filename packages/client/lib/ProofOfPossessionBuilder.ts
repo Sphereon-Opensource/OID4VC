@@ -1,9 +1,9 @@
+import { JWK } from '@sphereon/oid4vc-common';
 import {
   AccessTokenResponse,
   Alg,
   createProofOfPossession,
   EndpointMetadata,
-  JWK,
   Jwt,
   NO_JWT_PROVIDED,
   OpenId4VCIVersion,

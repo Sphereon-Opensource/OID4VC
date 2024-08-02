@@ -1,28 +1,25 @@
 import crypto from 'crypto'
 
+import { JwtPayload, parseJWT, SigningAlgo, uuidv4 } from '@sphereon/oid4vc-common'
 import { IProofType } from '@sphereon/ssi-types'
 import base58 from 'bs58'
 import { ethers } from 'ethers'
 import { exportJWK, importJWK, JWK, SignJWT } from 'jose'
 import moment from 'moment'
-import { v4 as uuidv4 } from 'uuid'
 
 import {
   assertValidMetadata,
   base64ToHexString,
   DiscoveryMetadataPayload,
-  JwtPayload,
   KeyCurve,
   KeyType,
   ResponseIss,
   ResponseType,
   RPRegistrationMetadataPayload,
   Scope,
-  SigningAlgo,
   SubjectSyntaxTypesSupportedValues,
   SubjectType,
 } from '../'
-import { parseJWT } from '../helpers/jwtUtils'
 import SIOPErrors from '../types/Errors'
 
 import { DIDDocument } from './ResolverTestUtils'

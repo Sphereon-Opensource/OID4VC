@@ -1,3 +1,4 @@
+import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { Hasher } from '@sphereon/ssi-types'
 
 import { PresentationDefinitionPayloadOpts } from '../authorization-response'
@@ -10,12 +11,11 @@ import {
   ResponseType,
   Schema,
   Scope,
-  SigningAlgo,
   SubjectType,
   SupportedVersion,
   Verification,
 } from '../types'
-import { VerifyJwtCallback } from '../types/JwtVerifier'
+import { VerifyJwtCallback } from '../types/VpJwtVerifier'
 
 export interface ClaimPayloadOptsVID1 extends ClaimPayloadCommonOpts {
   id_token?: IdTokenClaimPayload

@@ -1,3 +1,4 @@
+import { JWK } from '@sphereon/oid4vc-common';
 import {
   AccessTokenResponse,
   Alg,
@@ -19,7 +20,6 @@ import {
   getSupportedCredentials,
   getTypesFromCredentialSupported,
   getTypesFromObject,
-  JWK,
   KID_JWK_X5C_ERROR,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,

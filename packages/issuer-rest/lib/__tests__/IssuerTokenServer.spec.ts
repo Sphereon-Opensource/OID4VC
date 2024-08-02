@@ -1,5 +1,6 @@
 import { KeyObject } from 'crypto'
 
+import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   Alg,
   CNonceState,
@@ -17,7 +18,6 @@ import { DIDDocument } from 'did-resolver'
 import { Express } from 'express'
 import * as jose from 'jose'
 import requests from 'supertest'
-import { v4 } from 'uuid'
 
 import { OID4VCIServer } from '../OID4VCIServer'
 
@@ -39,7 +39,7 @@ describe('OID4VCIServer', () => {
     const credentialOfferState1: CredentialOfferSession = {
       preAuthorizedCode: preAuthorizedCode1,
       txCode: '493536',
-      notification_id: v4(),
+      notification_id: uuidv4(),
       createdAt: +new Date(),
       lastUpdatedAt: +new Date(),
       status: IssueStatus.OFFER_CREATED,

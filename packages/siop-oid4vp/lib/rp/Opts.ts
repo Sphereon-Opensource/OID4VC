@@ -1,3 +1,5 @@
+import { defaultHasher } from '@sphereon/oid4vc-common'
+
 import { CreateAuthorizationRequestOpts, PropertyTarget, PropertyTargets, RequestPropertyWithTargets } from '../authorization-request'
 import { VerifyAuthorizationResponseOpts } from '../authorization-response'
 // import { CreateAuthorizationRequestOptsSchema } from '../schemas';
@@ -49,7 +51,7 @@ export const createRequestOptsFromBuilderOrExistingOpts = (opts: { builder?: RPB
 export const createVerifyResponseOptsFromBuilderOrExistingOpts = (opts: { builder?: RPBuilder; verifyOpts?: VerifyAuthorizationResponseOpts }) => {
   return opts.builder
     ? {
-        hasher: opts.builder.hasher,
+        hasher: opts.builder.hasher ?? defaultHasher,
         verifyJwtCallback: opts.builder.verifyJwtCallback,
         verification: {
           presentationVerificationCallback: opts.builder.presentationVerificationCallback,
