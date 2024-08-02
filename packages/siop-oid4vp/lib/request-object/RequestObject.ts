@@ -3,16 +3,7 @@ import { JwtIssuer, parseJWT } from '@sphereon/oid4vc-common'
 import { ClaimPayloadCommonOpts, ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts } from '../authorization-request'
 import { assertValidAuthorizationRequestOpts } from '../authorization-request/Opts'
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
-import { parseJWT } from '../helpers/jwtUtils'
-import {
-  AuthorizationRequestPayload,
-  JwtIssuer,
-  JwtIssuerWithContext,
-  RequestObjectJwt,
-  RequestObjectPayload,
-  ResponseMode,
-  SIOPErrors,
-} from '../types'
+import { AuthorizationRequestPayload, JwtIssuerWithContext, RequestObjectJwt, RequestObjectPayload, ResponseMode, SIOPErrors } from '../types'
 
 import { assertValidRequestObjectOpts } from './Opts'
 import { assertValidRequestObjectPayload, createRequestObjectPayload } from './Payload'
