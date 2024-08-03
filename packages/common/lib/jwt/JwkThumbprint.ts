@@ -44,7 +44,7 @@ export async function calculateJwkThumbprint(jwk: JWK, digestAlgorithm?: DigestA
     default:
       throw Error('"kty" (Key Type) Parameter missing or unsupported');
   }
-  return u8a.toString(defaultHasher(algorithm, JSON.stringify(components)), 'base64url');
+  return u8a.toString(defaultHasher(JSON.stringify(components), algorithm), 'base64url');
 }
 
 export async function getDigestAlgorithmFromJwkThumbprintUri(uri: string): Promise<DigestAlgorithm> {
