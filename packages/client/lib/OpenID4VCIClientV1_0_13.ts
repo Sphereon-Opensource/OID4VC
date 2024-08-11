@@ -1,5 +1,6 @@
-import { JWK } from '@sphereon/oid4vc-common';
+import { CreateDPoPClientOpts, JWK } from '@sphereon/oid4vc-common';
 import {
+  AccessTokenRequestOpts,
   AccessTokenResponse,
   Alg,
   AuthorizationRequestOpts,
@@ -12,6 +13,7 @@ import {
   CredentialOfferRequestWithBaseUrl,
   CredentialResponse,
   DefaultURISchemes,
+  DPoPResponseParams,
   EndpointMetadataResultV1_0_13,
   ExperimentalSubjectIssuance,
   getClientIdFromCredentialOfferPayload,
@@ -50,6 +52,7 @@ export interface OpenID4VCIClientStateV1_0_13 {
   alg?: Alg | string;
   endpointMetadata?: EndpointMetadataResultV1_0_13;
   accessTokenResponse?: AccessTokenResponse;
+  dpopResponseParams?: DPoPResponseParams;
   authorizationRequestOpts?: AuthorizationRequestOpts;
   authorizationCodeResponse?: AuthorizationResponse;
   pkce: PKCEOpts;
@@ -258,16 +261,13 @@ export class OpenID4VCIClientV1_0_13 {
     this._state.pkce = generateMissingPKCEOpts({ ...this._state.pkce, ...pkce });
   }
 
-  public async acquireAccessToken(opts?: {
-    pin?: string;
-    clientId?: string;
-    codeVerifier?: string;
-    authorizationResponse?: string | AuthorizationResponse; // Pass in an auth response, either as URI/redirect, or object
-    code?: string; // Directly pass in a code from an auth response
-    redirectUri?: string;
-    additionalRequestParams?: Record<string, any>;
-    asOpts?: AuthorizationServerOpts;
-  }): Promise<AccessTokenResponse> {
+  public async acquireAccessToken(
+    opts?: Omit<AccessTokenRequestOpts, 'credentialOffer' | 'credentialIssuer' | 'metadata' | 'additionalParams'> & {
+      clientId?: string;
+      authorizationResponse?: string | AuthorizationResponse; // Pass in an auth response, either as URI/redirect, or object
+      additionalRequestParams?: Record<string, any>;
+    },
+  ): Promise<AccessTokenResponse> {
     const { pin, clientId = this._state.clientId ?? this._state.authorizationRequestOpts?.clientId } = opts ?? {};
     let { redirectUri } = opts ?? {};
     if (opts?.authorizationResponse) {
@@ -324,6 +324,7 @@ export class OpenID4VCIClientV1_0_13 {
         code,
         redirectUri,
         asOpts,
+        ...(opts?.createDPoPOpts && { createDPoPOpts: opts.createDPoPOpts }),
         ...(opts?.additionalRequestParams && { additionalParams: opts.additionalRequestParams }),
       });
 
@@ -343,10 +344,11 @@ export class OpenID4VCIClientV1_0_13 {
         );
       }
       this._state.accessTokenResponse = response.successBody;
+      this._state.dpopResponseParams = response.params;
       this._state.accessToken = response.successBody.access_token;
     }
 
-    return this.accessTokenResponse;
+    return { ...this.accessTokenResponse, ...(this.dpopResponseParams && { params: this.dpopResponseParams }) };
   }
 
   public async acquireCredentials({
@@ -361,6 +363,7 @@ export class OpenID4VCIClientV1_0_13 {
     jti,
     deferredCredentialAwait,
     deferredCredentialIntervalInMS,
+    createDPoPOpts,
   }: {
     credentialIdentifier?: string;
     credentialTypes?: string | string[];
@@ -374,6 +377,7 @@ export class OpenID4VCIClientV1_0_13 {
     deferredCredentialAwait?: boolean;
     deferredCredentialIntervalInMS?: number;
     experimentalHolderIssuanceSupported?: boolean;
+    createDPoPOpts?: CreateDPoPClientOpts;
   }): Promise<CredentialResponse & { access_token: string }> {
     if ([jwk, kid].filter((v) => v !== undefined).length > 1) {
       throw new Error(KID_JWK_X5C_ERROR + `. jwk: ${jwk !== undefined}, kid: ${kid !== undefined}`);
@@ -471,7 +475,9 @@ export class OpenID4VCIClientV1_0_13 {
     const response = await credentialRequestClient.acquireCredentialsUsingProof({
       proofInput: proofBuilder,
       ...(credentialIdentifier ? { credentialIdentifier, subjectIssuance } : { format, context, credentialTypes, subjectIssuance }),
+      createDPoPOpts,
     });
+    this._state.dpopResponseParams = response.params;
     if (response.errorBody) {
       debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`);
       throw Error(
@@ -487,7 +493,7 @@ export class OpenID4VCIClientV1_0_13 {
         } for issuer ${this.getIssuer()} failed as there was no success response body`,
       );
     }
-    return { ...response.successBody, access_token: response.access_token };
+    return { ...response.successBody, ...(this.dpopResponseParams && { params: this.dpopResponseParams }), access_token: response.access_token };
   }
 
   public async exportState(): Promise<string> {
@@ -602,6 +608,10 @@ export class OpenID4VCIClientV1_0_13 {
     this.assertAccessToken();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this._state.accessTokenResponse!;
+  }
+
+  get dpopResponseParams(): DPoPResponseParams | undefined {
+    return this._state.dpopResponseParams;
   }
 
   public getIssuer(): string {

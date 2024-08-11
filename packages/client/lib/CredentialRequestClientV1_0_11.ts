@@ -125,7 +125,7 @@ export class CredentialRequestClientV1_0_11 {
 
     return {
       ...response,
-      params: { ...(nextDPoPNonce && { dpop: { dpopNonce: nextDPoPNonce } }) },
+      ...(nextDPoPNonce && { params: { dpop: { dpopNonce: nextDPoPNonce } } }),
     };
   }
 

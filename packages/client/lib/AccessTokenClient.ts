@@ -116,7 +116,7 @@ export class AccessTokenClient {
 
     return {
       ...response,
-      params: { ...(nextDPoPNonce && { dpop: { dpopNonce: nextDPoPNonce } }) },
+      ...(nextDPoPNonce && { params: { dpop: { dpopNonce: nextDPoPNonce } } }),
     };
   }
 
@@ -238,6 +238,7 @@ export class AccessTokenClient {
       throw new Error('Authorization flow requires the code to be present');
     }
   }
+
   private validate(accessTokenRequest: AccessTokenRequest, pinMeta?: TxCodeAndPinRequired): void {
     if (accessTokenRequest.grant_type === GrantTypes.PRE_AUTHORIZED_CODE) {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);

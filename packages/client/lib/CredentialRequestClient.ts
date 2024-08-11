@@ -129,7 +129,7 @@ export class CredentialRequestClient {
 
     let response = (await post(credentialEndpoint, JSON.stringify(request), {
       bearerToken: requestToken,
-      customHeaders: { ...(dPoP && { dpop: dPoP }) },
+      ...(dPoP && { customHeaders: { dpop: dPoP } }),
     })) as OpenIDResponse<CredentialResponse> & {
       access_token: string;
     };
@@ -142,7 +142,7 @@ export class CredentialRequestClient {
 
       response = (await post(credentialEndpoint, JSON.stringify(request), {
         bearerToken: requestToken,
-        customHeaders: { ...(createDPoPOpts && { dpop: dPoP }) },
+        ...(createDPoPOpts && { customHeaders: { dpop: dPoP } }),
       })) as OpenIDResponse<CredentialResponse> & {
         access_token: string;
       };
@@ -166,7 +166,7 @@ export class CredentialRequestClient {
 
     return {
       ...response,
-      params: { ...(nextDPoPNonce && { dpop: { dpopNonce: nextDPoPNonce } }) },
+      ...(nextDPoPNonce && { params: { dpop: { dpopNonce: nextDPoPNonce } } }),
     };
   }
 

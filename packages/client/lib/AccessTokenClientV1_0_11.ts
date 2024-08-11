@@ -120,7 +120,7 @@ export class AccessTokenClientV1_0_11 {
 
     return {
       ...response,
-      params: { ...(nextDPoPNonce && { dpop: { dpopNonce: nextDPoPNonce } }) },
+      ...(nextDPoPNonce && { params: { dpop: { dpopNonce: nextDPoPNonce } } }),
     };
   }
 
@@ -220,6 +220,7 @@ export class AccessTokenClientV1_0_11 {
       throw new Error('Authorization flow requires the code to be present');
     }
   }
+
   private validate(accessTokenRequest: AccessTokenRequest, isPinRequired?: boolean): void {
     if (accessTokenRequest.grant_type === GrantTypes.PRE_AUTHORIZED_CODE) {
       this.assertPreAuthorizedGrantType(accessTokenRequest.grant_type);
