@@ -1,4 +1,4 @@
-import { JWK } from 'common';
+import { JWK } from '@sphereon/oid4vc-common';
 
 import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
 

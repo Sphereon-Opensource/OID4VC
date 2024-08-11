@@ -6,5 +6,10 @@
     "declarationDir": "./dist",
     "esModuleInterop": true,
     "moduleResolution": "Node"
-  }
+  },
+  "references": [
+    {
+      "path": "../common"
+    }
+  ]
 }
