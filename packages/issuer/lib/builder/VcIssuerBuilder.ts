@@ -11,7 +11,7 @@ import {
   TxCode,
   URIState,
 } from '@sphereon/oid4vci-common'
-import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
+import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
 import { MemoryStates } from '../state-manager'

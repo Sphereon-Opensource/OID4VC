@@ -38,8 +38,8 @@ import {
   TYP_ERROR,
   URIState,
 } from '@sphereon/oid4vci-common'
-import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphereon/oid4vci-common/dist/events'
-import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
+import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphereon/oid4vci-common'
+import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common'
 import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'

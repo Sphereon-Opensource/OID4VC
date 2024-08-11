@@ -1,7 +1,7 @@
 // noinspection ES6MissingAwait
 
 import { IStateManager } from '@sphereon/oid4vci-common'
-import { StateType } from '@sphereon/oid4vci-common/dist/types/StateManager.types'
+import { StateType } from '@sphereon/oid4vci-common'
 
 export class LookupStateManager<K extends StateType, V extends StateType> implements IStateManager<V> {
   constructor(

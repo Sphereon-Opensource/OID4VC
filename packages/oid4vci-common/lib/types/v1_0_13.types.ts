@@ -1,4 +1,4 @@
-import { JWK } from 'common/dist';
+import { JWK } from 'common';
 
 import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
 

@@ -15,7 +15,7 @@ import {
   OpenId4VCIVersion,
   ProofOfPossession,
 } from '@sphereon/oid4vci-common'
-import { CredentialOfferSession } from '@sphereon/oid4vci-common/dist'
+import { CredentialOfferSession } from '@sphereon/oid4vci-common'
 import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer'
 import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'

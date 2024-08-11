@@ -1,5 +1,5 @@
 import { W3CVerifiableCredential } from '@sphereon/ssi-types';
-import { BaseJWK } from 'common/dist';
+import { BaseJWK } from 'common';
 
 import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
 
