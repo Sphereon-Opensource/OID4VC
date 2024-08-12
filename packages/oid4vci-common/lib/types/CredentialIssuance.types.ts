@@ -1,18 +1,18 @@
-import { BaseJWK } from '@sphereon/oid4vc-common';
-import { W3CVerifiableCredential } from '@sphereon/ssi-types';
+import { BaseJWK } from '@sphereon/oid4vc-common'
+import { IVerifiableCredential } from '@sphereon/ssi-types'
 
-import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
+import { ExperimentalSubjectIssuance } from '../experimental/holder-vci'
 
-import { AuthzFlowType } from './Authorization.types';
-import { OID4VCICredentialFormat, TxCode, UniformCredentialRequest } from './Generic.types';
-import { OpenId4VCIVersion } from './OpenID4VCIVersions.types';
-import { CredentialOfferPayloadV1_0_08, CredentialRequestV1_0_08 } from './v1_0_08.types';
-import { CredentialOfferPayloadV1_0_09, CredentialOfferV1_0_09 } from './v1_0_09.types';
-import { CredentialOfferPayloadV1_0_11, CredentialOfferV1_0_11, CredentialRequestV1_0_11 } from './v1_0_11.types';
-import { CredentialOfferPayloadV1_0_13, CredentialOfferV1_0_13, CredentialRequestV1_0_13 } from './v1_0_13.types';
+import { AuthzFlowType } from './Authorization.types'
+import { OID4VCICredentialFormat, TxCode, UniformCredentialRequest } from './Generic.types'
+import { OpenId4VCIVersion } from './OpenID4VCIVersions.types'
+import { CredentialOfferPayloadV1_0_08, CredentialRequestV1_0_08 } from './v1_0_08.types'
+import { CredentialOfferPayloadV1_0_09, CredentialOfferV1_0_09 } from './v1_0_09.types'
+import { CredentialOfferPayloadV1_0_11, CredentialOfferV1_0_11, CredentialRequestV1_0_11 } from './v1_0_11.types'
+import { CredentialOfferPayloadV1_0_13, CredentialOfferV1_0_13, CredentialRequestV1_0_13 } from './v1_0_13.types'
 
 export interface CredentialResponse extends ExperimentalSubjectIssuance {
-  credential?: W3CVerifiableCredential; // OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
+  credential?: IVerifiableCredential | string; // OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
   format?: OID4VCICredentialFormat /* | OID4VCICredentialFormat[]*/; // REQUIRED. JSON string denoting the format of the issued Credential  TODO: remove when cleaning <v13
   transaction_id?: string; //OPTIONAL. A string identifying a Deferred Issuance transaction. This claim is contained in the response if the Credential Issuer was unable to immediately issue the credential. The value is subsequently used to obtain the respective Credential with the Deferred Credential Endpoint (see Section 9). It MUST be present when the credential parameter is not returned. It MUST be invalidated after the credential for which it was meant has been obtained by the Wallet.
   acceptance_token?: string; //deprecated // OPTIONAL. A JSON string containing a security token subsequently used to obtain a Credential. MUST be present when credential is not returned

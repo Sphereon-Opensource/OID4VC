@@ -74,10 +74,15 @@ export interface CommonAuthorizationRequest {
  * string type added for conformity with our previous code in the client
  */
 export type AuthorizationDetails =
-  | (CommonAuthorizationDetails & (AuthorizationDetailsJwtVcJson | AuthorizationDetailsJwtVcJsonLdAndLdpVc | AuthorizationDetailsSdJwtVc))
+  | (CommonAuthorizationDetails &
+      (AuthorizationDetailsJwtVcJson | AuthorizationDetailsJwtVcJsonLdAndLdpVc | AuthorizationDetailsSdJwtVc | AuthorizationDetailsMsoMdoc))
   | string;
 
-export type AuthorizationRequest = AuthorizationRequestJwtVcJson | AuthorizationRequestJwtVcJsonLdAndLdpVc | AuthorizationRequestSdJwtVc;
+export type AuthorizationRequest =
+  | AuthorizationRequestJwtVcJson
+  | AuthorizationRequestJwtVcJsonLdAndLdpVc
+  | AuthorizationRequestSdJwtVc
+  | AuthorizationRequestMsoMdoc;
 
 export interface AuthorizationRequestJwtVcJson extends CommonAuthorizationRequest {
   authorization_details?: AuthorizationDetailsJwtVcJson[];
@@ -89,6 +94,10 @@ export interface AuthorizationRequestJwtVcJsonLdAndLdpVc extends CommonAuthoriza
 
 export interface AuthorizationRequestSdJwtVc extends CommonAuthorizationRequest {
   authorization_details?: AuthorizationDetailsSdJwtVc[];
+}
+
+export interface AuthorizationRequestMsoMdoc extends CommonAuthorizationRequest {
+  authorization_details?: AuthorizationDetailsMsoMdoc[];
 }
 
 /*
@@ -161,6 +170,13 @@ export interface AuthorizationDetailsSdJwtVc extends CommonAuthorizationDetails 
   format: 'vc+sd-jwt';
 
   vct: string;
+  claims?: IssuerCredentialSubject;
+}
+
+export interface AuthorizationDetailsMsoMdoc extends CommonAuthorizationDetails {
+  format: 'mso_mdoc';
+
+  doctype: string;
   claims?: IssuerCredentialSubject;
 }
 

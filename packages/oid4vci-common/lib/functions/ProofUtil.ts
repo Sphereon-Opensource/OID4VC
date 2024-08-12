@@ -26,11 +26,12 @@ const debug = Debug('sphereon:openid4vci:common');
  *    If exists, verifies the ProofOfPossession
  *  - proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs
  *    arguments needed for signing ProofOfPossession
- * @param callbacks:
  *    - proofOfPossessionCallback: JWTSignerCallback
  *      Mandatory to create (sign) ProofOfPossession
  *    - proofOfPossessionVerifierCallback?: JWTVerifyCallback
  *      If exists, verifies the ProofOfPossession
+ * @param popMode
+ * @param callbacks
  * @param jwtProps
  * @param existingJwt
  *  - Optional, clientId of the party requesting the credential

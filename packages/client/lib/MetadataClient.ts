@@ -19,7 +19,7 @@ import Debug from 'debug';
 
 import { MetadataClientV1_0_11 } from './MetadataClientV1_0_11';
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
-import { retrieveWellknown } from './functions/OpenIDUtils';
+import { retrieveWellknown } from './functions';
 
 const debug = Debug('sphereon:oid4vci:metadata');
 
@@ -204,6 +204,7 @@ export class MetadataClient {
    * Retrieve only the OID4VCI metadata for the issuer. So no OIDC/OAuth2 metadata
    *
    * @param issuerHost The issuer hostname
+   * @param opts
    */
   public static async retrieveOpenID4VCIServerMetadata(
     issuerHost: string,

@@ -267,7 +267,7 @@ export class OpenID4VCIClientV1_0_13 {
       authorizationResponse?: string | AuthorizationResponse; // Pass in an auth response, either as URI/redirect, or object
       additionalRequestParams?: Record<string, any>;
     },
-  ): Promise<AccessTokenResponse & {params?: DPoPResponseParams}> {
+  ): Promise<AccessTokenResponse & { params?: DPoPResponseParams }> {
     const { pin, clientId = this._state.clientId ?? this._state.authorizationRequestOpts?.clientId } = opts ?? {};
     let { redirectUri } = opts ?? {};
     if (opts?.authorizationResponse) {

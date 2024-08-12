@@ -261,11 +261,20 @@ export class CredentialRequestClient {
       if (types.length > 1) {
         throw Error(`Only a single credential type is supported for ${format}`);
       }
-      // fixme: this isn't up to the CredentialRequest that we see in the version v1_0_13
       return {
         format,
         proof,
         vct: types[0],
+        ...opts.subjectIssuance,
+      };
+    } else if (format === 'mso_mdoc') {
+      if (types.length > 1) {
+        throw Error(`Only a single credential type is supported for ${format}`);
+      }
+      return {
+        format,
+        proof,
+        doctype: types[0],
         ...opts.subjectIssuance,
       };
     }

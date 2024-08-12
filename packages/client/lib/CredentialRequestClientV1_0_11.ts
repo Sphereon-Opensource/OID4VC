@@ -215,6 +215,16 @@ export class CredentialRequestClientV1_0_11 {
         proof,
         vct: types[0],
       };
+    } else if (format === 'mso_mdoc') {
+      if (types.length > 1) {
+        throw Error(`Only a single credential type is supported for ${format}`);
+      }
+
+      return {
+        format,
+        proof,
+        doctype: types[0],
+      };
     }
 
     throw new Error(`Unsupported format: ${format}`);

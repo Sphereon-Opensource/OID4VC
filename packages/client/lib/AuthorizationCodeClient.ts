@@ -148,8 +148,9 @@ export const createAuthorizationRequestUrl = async ({
 
       // SD-JWT VC
       const vct = cred.format === 'vc+sd-jwt' ? cred.vct : undefined;
+      const doctype = cred.format === 'mso_mdoc' ? cred.doctype : undefined;
 
-      // W3C credentials
+      // W3C credentials have a credential definition, the rest does not
       let credential_definition: undefined | Partial<CredentialDefinitionJwtVcJsonV1_0_13 | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13> =
         undefined;
       if (isW3cCredentialSupported(cred)) {
@@ -171,6 +172,7 @@ export const createAuthorizationRequestUrl = async ({
         ...(credential_configuration_id && { credential_configuration_id }),
         ...(format && { format }),
         ...(vct && { vct, claims: cred.claims ? removeDisplayAndValueTypes(cred.claims) : undefined }),
+        ...(doctype && { doctype, claims: cred.claims ? removeDisplayAndValueTypes(cred.claims) : undefined }),
       } as AuthorizationDetails;
     });
     if (!authorizationDetails || authorizationDetails.length === 0) {

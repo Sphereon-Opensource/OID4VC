@@ -7,6 +7,7 @@ import {
   AlgValue,
   CommonCredentialRequest,
   CredentialDataSupplierInput,
+  CredentialRequestMsoMdoc,
   CredentialRequestSdJwtVc,
   CredentialsSupportedDisplay,
   CredentialSupplierConfig,
@@ -53,6 +54,7 @@ export type CredentialConfigurationSupportedV1_0_13 = CredentialConfigurationSup
     | CredentialConfigurationSupportedSdJwtVcV1_0_13
     | CredentialConfigurationSupportedJwtVcJsonV1_0_13
     | CredentialConfigurationSupportedJwtVcJsonLdAndLdpVcV1_0_13
+    | CredentialConfigurationSupportedMsoMdocV1_0_13
   );
 
 // Base type covering credential configurations supported
@@ -70,6 +72,15 @@ export interface CredentialConfigurationSupportedSdJwtVcV1_0_13 extends Credenti
   format: 'vc+sd-jwt';
 
   vct: string;
+  claims?: IssuerCredentialSubject;
+
+  order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
+}
+
+export interface CredentialConfigurationSupportedMsoMdocV1_0_13 extends CredentialConfigurationSupportedCommonV1_0_13 {
+  format: 'mso_mdoc';
+
+  doctype: string;
   claims?: IssuerCredentialSubject;
 
   order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
@@ -103,6 +114,7 @@ export type CredentialRequestV1_0_13 = CredentialRequestV1_0_13Common &
     | CredentialRequestJwtVcJsonV1_0_13
     | CredentialRequestJwtVcJsonLdAndLdpVcV1_0_13
     | CredentialRequestSdJwtVc
+    | CredentialRequestMsoMdoc
     | CredentialRequestV1_0_13CredentialIdentifier
   );
 

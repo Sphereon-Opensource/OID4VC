@@ -4,7 +4,7 @@ import {
   CommonCredentialRequest,
   CredentialDataSupplierInput,
   CredentialIssuerMetadataOpts,
-  CredentialOfferFormat,
+  CredentialOfferFormatV1_0_11,
   CredentialRequestJwtVcJson,
   CredentialRequestJwtVcJsonLdAndLdpVc,
   CredentialRequestSdJwtVc,
@@ -62,7 +62,7 @@ export interface CredentialOfferPayloadV1_0_11 {
    * credentials_supported Credential Issuer metadata parameter.
    * When processing, the Wallet MUST resolve this string value to the respective object.
    */
-  credentials: (CredentialOfferFormat | string)[];
+  credentials: (CredentialOfferFormatV1_0_11 | string)[];
   /**
    * OPTIONAL. A JSON object indicating to the Wallet the Grant Types the Credential Issuer's AS is prepared
    * to process for this credential offer. Every grant is represented by a key and an object.
