@@ -28,6 +28,7 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
   const iat = payload.iat ?? now
   const nbf = payload.nbf ?? iat
   const exp = payload.exp ?? iat + validInSec
+  const aud = payload.aud
   const jti = payload.jti ?? uuidv4()
 
   return removeNullUndefined({
@@ -51,6 +52,7 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
     nbf,
     exp,
     jti,
+    aud,
   })
 }
 

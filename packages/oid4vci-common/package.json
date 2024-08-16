@@ -13,11 +13,13 @@
     "@sphereon/oid4vc-common": "workspace:*",
     "@sphereon/ssi-types": "0.29.0",
     "cross-fetch": "^3.1.8",
+    "debug": "^4.3.5",
     "jwt-decode": "^4.0.0",
     "uint8arrays": "3.1.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.12",
     "@types/jest": "^29.5.12",
     "@types/uuid": "^9.0.1",
     "typescript": "5.4.5"
