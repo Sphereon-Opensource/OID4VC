@@ -5,7 +5,7 @@ import { Hasher } from '@sphereon/ssi-types'
 
 import { PropertyTarget, PropertyTargets } from '../authorization-request'
 import { PresentationVerificationCallback } from '../authorization-response'
-import { CreateJwtCallback, VerifyJwtCallback } from '../types'
+import { CreateJwtCallback, RequestAud, VerifyJwtCallback } from '../types'
 import {
   AuthorizationRequestPayload,
   ClientMetadataOpts,
@@ -80,6 +80,12 @@ export class RPBuilder {
     return this
   }
 
+  withAudience(issuer: RequestAud, targets?: PropertyTargets): RPBuilder {
+    this._authorizationRequestPayload.aud = assignIfAuth({ propertyValue: issuer, targets }, false)
+    this._requestObjectPayload.aud = assignIfRequestObject({ propertyValue: issuer, targets }, true)
+    return this
+  }
+
   withPresentationVerification(presentationVerificationCallback: PresentationVerificationCallback): RPBuilder {
     this.presentationVerificationCallback = presentationVerificationCallback
     return this
@@ -116,6 +122,12 @@ export class RPBuilder {
   withRedirectUri(redirectUri: string, targets?: PropertyTargets): RPBuilder {
     this._authorizationRequestPayload.redirect_uri = assignIfAuth({ propertyValue: redirectUri, targets }, false)
     this._requestObjectPayload.redirect_uri = assignIfRequestObject({ propertyValue: redirectUri, targets }, true)
+    return this
+  }
+
+  withResponsetUri(redirectUri: string, targets?: PropertyTargets): RPBuilder {
+    this._authorizationRequestPayload.response_uri = assignIfAuth({ propertyValue: redirectUri, targets }, false)
+    this._requestObjectPayload.response_uri = assignIfRequestObject({ propertyValue: redirectUri, targets }, true)
     return this
   }
 

@@ -634,6 +634,10 @@ export enum ResponseIss {
   JWT_VC_PRESENTATION_V1 = 'https://self-issued.me/v2/openid-vc',
 }
 
+export enum RequestAud {
+  SELF_ISSUED_V2 = 'https://self-issued.me/v2',
+}
+
 export const isRequestOpts = (object: CreateAuthorizationRequestOpts | AuthorizationResponseOpts): object is CreateAuthorizationRequestOpts =>
   'requestBy' in object
 

@@ -45,7 +45,7 @@ export const createAuthorizationRequestPayload = async (
   const state = payload?.state ?? undefined
   const nonce = payload?.nonce ? getNonce(state, payload.nonce) : undefined
   // TODO: if opts['registration] throw Error to get rid of test code using that key
-  const clientMetadata = opts['registration'] ? opts['registration'] : (opts.clientMetadata as ClientMetadataOpts)
+  const clientMetadata = opts['registration'] ?? (opts.clientMetadata as ClientMetadataOpts)
   const registration = await createRequestRegistration(clientMetadata, opts)
   const claims = opts.version >= SupportedVersion.SIOPv2_ID1 ? opts.payload.claims : createPresentationDefinitionClaimsProperties(opts.payload.claims)
   const isRequestTarget = isTargetOrNoTargets(PropertyTarget.AUTHORIZATION_REQUEST, opts.requestObject.targets)
@@ -59,6 +59,7 @@ export const createAuthorizationRequestPayload = async (
   const authRequestPayload = {
     ...payload,
     //TODO implement /.well-known/openid-federation support in the OP side to resolve the client_id (URL) and retrieve the metadata
+    ...(clientMetadata.client_id && { client_id: clientMetadata.client_id }),
     ...(isRequestTarget && opts.requestObject.passBy === PassBy.REFERENCE ? { request_uri: opts.requestObject.reference_uri } : {}),
     ...(isRequestTarget && isRequestByValue && { request }),
     ...(nonce && { nonce }),
