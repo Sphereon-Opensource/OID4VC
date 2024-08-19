@@ -88,12 +88,12 @@ export class RequestObject {
         this.payload.iss = this.payload.iss ?? did
         this.payload.sub = this.payload.sub ?? did
         this.payload.client_id = this.payload.client_id ?? did
+        this.payload.client_id_scheme = 'did'
 
         const header = { kid: jwtIssuer.didUrl, alg: jwtIssuer.alg, typ: 'JWT' }
         this.jwt = await this.opts.createJwtCallback(jwtIssuer, { header, payload: this.payload })
       } else if (jwtIssuer.method === 'x5c') {
         this.payload.iss = jwtIssuer.issuer
-        this.payload.client_id_scheme = jwtIssuer.clientIdScheme
 
         const header = { x5c: jwtIssuer.x5c, typ: 'JWT' }
         this.jwt = await this.opts.createJwtCallback(jwtIssuer, { header, payload: this.payload })

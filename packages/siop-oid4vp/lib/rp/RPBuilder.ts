@@ -5,7 +5,7 @@ import { Hasher } from '@sphereon/ssi-types'
 
 import { PropertyTarget, PropertyTargets } from '../authorization-request'
 import { PresentationVerificationCallback } from '../authorization-response'
-import { CreateJwtCallback, RequestAud, VerifyJwtCallback } from '../types'
+import { ClientIdScheme, CreateJwtCallback, RequestAud, VerifyJwtCallback } from '../types'
 import {
   AuthorizationRequestPayload,
   ClientMetadataOpts,
@@ -39,6 +39,7 @@ export class RPBuilder {
 
   clientMetadata?: ClientMetadataOpts = undefined
   clientId: string
+  clientIdScheme: string
 
   hasher: Hasher
 
@@ -71,6 +72,13 @@ export class RPBuilder {
     this._authorizationRequestPayload.client_id = assignIfAuth({ propertyValue: clientId, targets }, false)
     this._requestObjectPayload.client_id = assignIfRequestObject({ propertyValue: clientId, targets }, true)
     this.clientId = clientId
+    return this
+  }
+
+  withClientIdScheme(clientIdScheme: ClientIdScheme, targets?: PropertyTargets): RPBuilder {
+    this._authorizationRequestPayload.client_id_scheme = assignIfAuth({ propertyValue: clientIdScheme, targets }, false)
+    this._requestObjectPayload.client_id_scheme = assignIfRequestObject({ propertyValue: clientIdScheme, targets }, true)
+    this.clientIdScheme = clientIdScheme
     return this
   }
 
