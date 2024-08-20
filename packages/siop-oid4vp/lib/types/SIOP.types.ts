@@ -395,7 +395,6 @@ export type RPRegistrationMetadataOpts = Partial<
     | 'clientPurpose'
   >
 > & {
-  client_id_scheme?: ClientIdScheme
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }

@@ -3,7 +3,7 @@ import { uuidv4 } from '@sphereon/oid4vc-common'
 import { CreateAuthorizationRequestOpts, createPresentationDefinitionClaimsProperties } from '../authorization-request'
 import { createRequestRegistration } from '../authorization-request/RequestRegistration'
 import { getNonce, getState, removeNullUndefined } from '../helpers'
-import { RequestObjectPayload, ResponseMode, ResponseType, Scope, SIOPErrors, SupportedVersion } from '../types'
+import { RequestObjectPayload, ResponseMode, ResponseType, SIOPErrors, SupportedVersion } from '../types'
 
 import { assertValidRequestObjectOpts } from './Opts'
 
@@ -33,10 +33,10 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
 
   return removeNullUndefined({
     response_type: payload.response_type ?? ResponseType.ID_TOKEN,
-    scope: payload.scope ?? Scope.OPENID,
+    scope: payload.scope,
     //TODO implement /.well-known/openid-federation support in the OP side to resolve the client_id (URL) and retrieve the metadata
     client_id: clientId,
-    client_id_scheme: opts.requestObject.payload.client_id_scheme,
+    client_id_scheme: payload.client_id_scheme,
     ...(payload.redirect_uri && { redirect_uri: payload.redirect_uri }),
     ...(payload.response_uri && { response_uri: payload.response_uri }),
     response_mode: payload.response_mode ?? ResponseMode.DIRECT_POST,
