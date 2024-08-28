@@ -69,9 +69,8 @@ export const getDidJwtVerifier = (jwt: { header: JwtHeader; payload: JwtPayload 
 export const getX5cVerifier = (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): X5cJwtVerifier => {
   const { type } = options;
   if (!jwt.header.x5c) throw new Error(`Received an invalid JWT. Missing x5c header.`);
-  if (!jwt.header.alg) throw new Error(`Received an invalid JWT. Missing alg header.`);
 
-  if (!Array.isArray(jwt.header.x5c) || jwt.header.x5c.length === 0 || !jwt.header.x5c.every((cert) => typeof cert === 'string')) {
+  if (!Array.isArray(jwt.header.x5c) || jwt.header.x5c.length === 0 || !jwt.header.x5c.every((cert:any) => typeof cert === 'string')) {
     throw new Error(`Received an invalid JWT.. '${type}' contains an invalid x5c header.`);
   }
 
