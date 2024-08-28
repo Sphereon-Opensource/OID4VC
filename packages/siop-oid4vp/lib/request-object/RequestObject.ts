@@ -95,7 +95,7 @@ export class RequestObject {
       } else if (jwtIssuer.method === 'x5c') {
         this.payload.iss = jwtIssuer.issuer
 
-        const header = { x5c: jwtIssuer.x5c, typ: 'JWT' }
+        const header = { x5c: jwtIssuer.x5c, typ: 'JWT', alg: jwtIssuer.alg }
         this.jwt = await this.opts.createJwtCallback(jwtIssuer, { header, payload: this.payload })
       } else if (jwtIssuer.method === 'jwk') {
         if (!this.payload.client_id) {
