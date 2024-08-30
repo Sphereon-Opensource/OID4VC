@@ -867,6 +867,9 @@ export const AuthorizationRequestPayloadVD12OID4VPD20SchemaObj = {
         "predicate": {
           "$ref": "#/definitions/Optionality"
         },
+        "intent_to_retain": {
+          "type": "boolean"
+        },
         "name": {
           "type": "string"
         },
