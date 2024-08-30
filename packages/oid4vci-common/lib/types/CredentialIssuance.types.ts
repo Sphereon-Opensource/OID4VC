@@ -100,7 +100,7 @@ export interface Jwt {
   payload: JWTPayload;
 }
 
-export interface ProofOfPossessionCallbacks<DIDDoc> {
+export interface ProofOfPossessionCallbacks<DIDDoc = never> {
   signCallback: JWTSignerCallback;
   verifyCallback?: JWTVerifyCallback<DIDDoc>;
 }
@@ -170,9 +170,9 @@ export interface JWTPayload {
 }
 
 export type JWTSignerCallback = (jwt: Jwt, kid?: string) => Promise<string>;
-export type JWTVerifyCallback<DIDDoc> = (args: { jwt: string; kid?: string }) => Promise<JwtVerifyResult<DIDDoc>>;
+export type JWTVerifyCallback<DIDDoc = never> = (args: { jwt: string; kid?: string }) => Promise<JwtVerifyResult<DIDDoc>>;
 
-export interface JwtVerifyResult<DIDDoc> {
+export interface JwtVerifyResult<DIDDoc = never> {
   jwt: Jwt;
   kid?: string;
   alg: string;

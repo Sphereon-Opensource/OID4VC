@@ -7,13 +7,9 @@ import {
   Status,
   VerifiablePresentationFromOpts,
   VerifiablePresentationResult
-} from '@sphereon/pex';
-import {
-  Format,
-  PresentationDefinitionV1,
-  PresentationDefinitionV2,
-  PresentationSubmission
-} from '@sphereon/pex-models';
+} from '@sphereon/pex'
+import { Format, PresentationDefinitionV1, PresentationDefinitionV2, PresentationSubmission } from '@sphereon/pex-models'
+import { PresentationEvaluationResults } from '@sphereon/pex/dist/main/lib/evaluation/core'
 import {
   CredentialMapper,
   Hasher,
@@ -23,18 +19,17 @@ import {
   OriginalVerifiablePresentation,
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation
-} from '@sphereon/ssi-types';
+} from '@sphereon/ssi-types'
 
-import { extractDataFromPath, getWithUrl } from '../helpers';
-import { AuthorizationRequestPayload, SIOPErrors, SupportedVersion } from '../types';
+import { extractDataFromPath, getWithUrl } from '../helpers'
+import { AuthorizationRequestPayload, SIOPErrors, SupportedVersion } from '../types'
 
 import {
   PresentationDefinitionLocation,
   PresentationDefinitionWithLocation,
   PresentationSignCallback,
   PresentationVerificationCallback
-} from './types';
-import { PresentationEvaluationResults } from '@sphereon/pex/dist/main/lib/evaluation/core/evaluationResults';
+} from './types'
 
 export class PresentationExchange {
   readonly pex: PEX
@@ -154,7 +149,11 @@ export class PresentationExchange {
       throw new Error(SIOPErrors.NO_VERIFIABLE_PRESENTATION_NO_CREDENTIALS)
     }
     // console.log(`Presentation (validate): ${JSON.stringify(verifiablePresentation)}`);
-    const evaluationResults: PresentationEvaluationResults = new PEX({ hasher: opts?.hasher }).evaluatePresentation(presentationDefinition, wvp.original, opts)
+    const evaluationResults: PresentationEvaluationResults = new PEX({ hasher: opts?.hasher }).evaluatePresentation(
+      presentationDefinition,
+      wvp.original,
+      opts,
+    )
     if (evaluationResults.errors.length) {
       throw new Error(`message: ${SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD}, details: ${JSON.stringify(evaluationResults.errors)}`)
     }

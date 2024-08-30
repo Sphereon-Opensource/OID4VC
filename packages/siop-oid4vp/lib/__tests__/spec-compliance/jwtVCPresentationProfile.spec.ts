@@ -3,6 +3,8 @@ import { PresentationSignCallBackParams } from '@sphereon/pex'
 import { IProofType } from '@sphereon/ssi-types'
 import * as jose from 'jose'
 import { KeyLike } from 'jose'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import nock from 'nock'
 import * as u8a from 'uint8arrays'
 
@@ -193,7 +195,8 @@ describe('RP using test vectors', () => {
     const authRequest = await createAuthRequest()
     const presentationDefinitions = await authRequest.getPresentationDefinitions()
 
-    const verified = await authorizationResponse.verify({
+    // Will throw an error because the path_nested is actually wrong. Should be $.vp.verifiableCredential[0], but is $.verifiableCredential[0]
+    await expect (authorizationResponse.verify({
       correlationId: '1234',
       verifyJwtCallback: verifyJwtCallback,
       audience:
@@ -205,8 +208,8 @@ describe('RP using test vectors', () => {
         },
       },
       presentationDefinitions,
-    })
-    expect(verified).toBeDefined()
+    })).rejects.toThrowError()
+
   })
 })
 
@@ -220,7 +223,8 @@ describe('OP using test vectors', () => {
     expect(result).toBeDefined()
   })
 
-  it('should use test vector auth response', async () => {
+  // Disabled for now as the value for the path_nested in the id token is actually invalid
+  xit('should use test vector auth response', async () => {
     const authorizationResponse = await AuthorizationResponse.fromPayload(TestVectors.authorizationResponsePayload)
 
     expect(authorizationResponse.payload.vp_token).toBeDefined()
@@ -237,7 +241,7 @@ describe('OP using test vectors', () => {
               path_nested: {
                 format: 'jwt_vc',
                 id: 'VerifiedEmployeeVC',
-                path: '$.verifiableCredential[0]',
+                path: '$.verifiableCredential[0]', // <-- This is actually incorrect in older versions of the lib. Should be $.vp.verifiableCredential[0]
               },
             },
           ],
@@ -352,10 +356,10 @@ class TestVectors {
     kid: 'key-1',
     x: 'GgZGTg8eCa7lV28ML9JTmBUvk7DYBbfRKWLhw65Jo1s',
   }
-  public static issuerKey
-  public static issuerPrivateKey
-  public static issuerPublicKey
-  public static issuerHexPrivateKey
+  public static issuerKey: KeyLike
+  public static issuerPrivateKey: string
+  public static issuerPublicKey: string
+  public static issuerHexPrivateKey : string
 
   public static holderJwk = {
     kty: 'OKP',
@@ -367,10 +371,10 @@ class TestVectors {
   public static holderDID =
     'did:ion:EiAeM6No9kdpos6_ehBUDh4RINY4USDMh-QdWksmsI3WkA:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJrZXktMSIsInB1YmxpY0tleUp3ayI6eyJjcnYiOiJFZDI1NTE5Iiwia3R5IjoiT0tQIiwieCI6IncwNk9WN2U2blR1cnQ2RzlWcFZYeEl3WW55amZ1cHhlR3lLQlMtYmxxdmciLCJraWQiOiJrZXktMSJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiJdLCJ0eXBlIjoiSnNvbldlYktleTIwMjAifV19fV0sInVwZGF0ZUNvbW1pdG1lbnQiOiJFaUFSNGRVQmxqNWNGa3dMdkpTWUYzVExjLV81MWhDX2xZaGxXZkxWZ29seTRRIn0sInN1ZmZpeERhdGEiOnsiZGVsdGFIYXNoIjoiRWlEcVJyWU5fV3JTakFQdnlFYlJQRVk4WVhPRmNvT0RTZExUTWItM2FKVElGQSIsInJlY292ZXJ5Q29tbWl0bWVudCI6IkVpQUwyMFdYakpQQW54WWdQY1U5RV9POE1OdHNpQk00QktpaVNwT3ZFTWpVOUEifX0'
   public static holderKID = `${TestVectors.holderDID}#key-1`
-  public static holderKey
-  public static holderPrivateKey
-  public static holderPublicKey
-  public static holderHexPrivateKey
+  public static holderKey: KeyLike
+  public static holderPrivateKey: string
+  public static holderPublicKey: string
+  public static holderHexPrivateKey: string
 
   public static verifierJwk = {
     kty: 'OKP',

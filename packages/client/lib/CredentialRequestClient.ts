@@ -2,6 +2,7 @@ import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereo
 import {
   acquireDeferredCredential,
   CredentialRequestV1_0_13,
+  CredentialRequestWithoutProofV1_0_13,
   CredentialResponse,
   DPoPResponseParams,
   getCredentialRequestForVersion,
@@ -17,7 +18,7 @@ import {
   URL_NOT_VALID,
 } from '@sphereon/oid4vci-common';
 import { ExperimentalSubjectIssuance } from '@sphereon/oid4vci-common';
-import { CredentialFormat } from '@sphereon/ssi-types';
+import { CredentialFormat, DIDDocument } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
@@ -42,7 +43,16 @@ export interface CredentialRequestOpts {
   subjectIssuance?: ExperimentalSubjectIssuance;
 }
 
-export async function buildProof<DIDDoc>(
+export type CreateCredentialRequestOpts<DIDDoc = DIDDocument> = {
+  credentialIdentifier?: string;
+  credentialTypes?: string | string[];
+  context?: string[];
+  format?: CredentialFormat | OID4VCICredentialFormat;
+  subjectIssuance?: ExperimentalSubjectIssuance;
+  version: OpenId4VCIVersion;
+};
+
+export async function buildProof<DIDDoc = DIDDocument>(
   proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession,
   opts: {
     version: OpenId4VCIVersion;
@@ -85,7 +95,34 @@ export class CredentialRequestClient {
     this._credentialRequestOpts = { ...builder };
   }
 
-  public async acquireCredentialsUsingProof<DIDDoc>(opts: {
+  /**
+   * Typically you should not use this method, as it omits a proof from the request.
+   * There are certain issuers that in specific circumstances can do without this proof, because they have other means of user binding
+   * like using DPoP together with an authorization code flow. These are however rare, so you should be using the acquireCredentialsUsingProof normally
+   * @param opts
+   */
+  public async acquireCredentialsWithoutProof<DIDDoc = DIDDocument>(opts: {
+    credentialIdentifier?: string;
+    credentialTypes?: string | string[];
+    context?: string[];
+    format?: CredentialFormat | OID4VCICredentialFormat;
+    subjectIssuance?: ExperimentalSubjectIssuance;
+    createDPoPOpts?: CreateDPoPClientOpts;
+  }): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
+    const { credentialIdentifier, credentialTypes, format, context, subjectIssuance } = opts;
+
+    const request = await this.createCredentialRequestWithoutProof<DIDDoc>({
+      credentialTypes,
+      context,
+      format,
+      version: this.version(),
+      credentialIdentifier,
+      subjectIssuance,
+    });
+    return await this.acquireCredentialsUsingRequestWithoutProof(request, opts.createDPoPOpts);
+  }
+
+  public async acquireCredentialsUsingProof<DIDDoc = DIDDocument>(opts: {
     proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
     credentialIdentifier?: string;
     credentialTypes?: string | string[];
@@ -96,7 +133,7 @@ export class CredentialRequestClient {
   }): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     const { credentialIdentifier, credentialTypes, proofInput, format, context, subjectIssuance } = opts;
 
-    const request = await this.createCredentialRequest({
+    const request = await this.createCredentialRequest<DIDDoc>({
       proofInput,
       credentialTypes,
       context,
@@ -108,8 +145,22 @@ export class CredentialRequestClient {
     return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOpts);
   }
 
+  public async acquireCredentialsUsingRequestWithoutProof(
+    uniformRequest: UniformCredentialRequest,
+    createDPoPOpts?: CreateDPoPClientOpts,
+  ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
+    return await this.acquireCredentialsUsingRequestImpl(uniformRequest, createDPoPOpts);
+  }
+
   public async acquireCredentialsUsingRequest(
     uniformRequest: UniformCredentialRequest,
+    createDPoPOpts?: CreateDPoPClientOpts,
+  ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
+    return await this.acquireCredentialsUsingRequestImpl(uniformRequest, createDPoPOpts);
+  }
+
+  private async acquireCredentialsUsingRequestImpl(
+    uniformRequest: UniformCredentialRequest & { proof?: ProofOfPossession },
     createDPoPOpts?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
@@ -194,24 +245,37 @@ export class CredentialRequestClient {
     });
   }
 
-  public async createCredentialRequest<DIDDoc>(opts: {
-    proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
-    credentialIdentifier?: string;
-    credentialTypes?: string | string[];
-    context?: string[];
-    format?: CredentialFormat | OID4VCICredentialFormat;
-    subjectIssuance?: ExperimentalSubjectIssuance;
-    version: OpenId4VCIVersion;
-  }): Promise<CredentialRequestV1_0_13> {
+  public async createCredentialRequestWithoutProof<DIDDoc = DIDDocument>(
+    opts: CreateCredentialRequestOpts<DIDDoc>,
+  ): Promise<CredentialRequestWithoutProofV1_0_13> {
+    return await this.createCredentialRequestImpl(opts);
+  }
+
+  public async createCredentialRequest<DIDDoc = DIDDocument>(
+    opts: CreateCredentialRequestOpts<DIDDoc> & {
+      proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
+    },
+  ): Promise<CredentialRequestV1_0_13> {
+    return await this.createCredentialRequestImpl(opts);
+  }
+
+  private async createCredentialRequestImpl<DIDDoc = DIDDocument>(
+    opts: CreateCredentialRequestOpts<DIDDoc> & {
+      proofInput?: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
+    },
+  ): Promise<CredentialRequestV1_0_13> {
     const { proofInput, credentialIdentifier: credential_identifier } = opts;
-    const proof = await buildProof(proofInput, opts);
+    let proof: ProofOfPossession | undefined = undefined;
+    if (proofInput) {
+      proof = await buildProof(proofInput, opts);
+    }
     if (credential_identifier) {
       if (opts.format || opts.credentialTypes || opts.context) {
         throw Error(`You cannot mix credential_identifier with format, credential types and/or context`);
       }
       return {
         credential_identifier,
-        proof,
+        ...(proof && { proof }),
       };
     }
     const formatSelection = opts.format ?? this.credentialRequestOpts.format;
@@ -239,7 +303,7 @@ export class CredentialRequestClient {
           type: types,
         },
         format,
-        proof,
+        ...(proof && { proof }),
         ...opts.subjectIssuance,
       };
     } else if (format === 'jwt_vc_json-ld' || format === 'ldp_vc') {
@@ -249,7 +313,7 @@ export class CredentialRequestClient {
 
       return {
         format,
-        proof,
+        ...(proof && { proof }),
         ...opts.subjectIssuance,
 
         credential_definition: {
@@ -263,7 +327,7 @@ export class CredentialRequestClient {
       }
       return {
         format,
-        proof,
+        ...(proof && { proof }),
         vct: types[0],
         ...opts.subjectIssuance,
       };
@@ -273,13 +337,13 @@ export class CredentialRequestClient {
       }
       return {
         format,
-        proof,
+        ...(proof && { proof }),
         doctype: types[0],
         ...opts.subjectIssuance,
       };
     }
 
-    throw new Error(`Unsupported format: ${format}`);
+    throw new Error(`Unsupported credential format: ${format}`);
   }
 
   private version(): OpenId4VCIVersion {

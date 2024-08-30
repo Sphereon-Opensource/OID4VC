@@ -81,14 +81,14 @@ export async function createDidJWT(
 
 export async function signIDTokenPayload(payload: IDTokenPayload, signature: InternalSignature | ExternalSignature | SuppliedSignature) {
   if (isInternalSignature(signature)) {
-    if(!signature.kid) {
+    if (!signature.kid) {
       return Promise.reject(Error('missing kid from signature'))
     }
     return signDidJwtInternal(payload, payload.issuer, signature.hexPrivateKey, signature.alg, signature.kid, signature.customJwtSigner)
   } else if (isExternalSignature(signature)) {
     return signDidJwtExternal(payload, signature.signatureUri, signature.authZToken, signature.alg, signature.kid)
   } else if (isSuppliedSignature(signature)) {
-    if(!signature.kid) {
+    if (!signature.kid) {
       return Promise.reject(Error('missing kid from signature'))
     }
     return signDidJwtSupplied(payload, payload.issuer, signature.signature, signature.alg, signature.kid)
@@ -114,14 +114,14 @@ export async function signRequestObjectPayload(payload: RequestObjectPayload, si
     payload.sub = signature.did
   }
   if (isInternalSignature(signature)) {
-    if(!signature.kid) {
+    if (!signature.kid) {
       return Promise.reject(Error('missing kid from signature'))
     }
     return signDidJwtInternal(payload, issuer, signature.hexPrivateKey, signature.alg, signature.kid, signature.customJwtSigner)
   } else if (isExternalSignature(signature)) {
     return signDidJwtExternal(payload, signature.signatureUri, signature.authZToken, signature.alg, signature.kid)
   } else if (isSuppliedSignature(signature)) {
-    if(!signature.kid) {
+    if (!signature.kid) {
       return Promise.reject(Error('missing kid from signature'))
     }
     return signDidJwtSupplied(payload, issuer, signature.signature, signature.alg, signature.kid)
@@ -171,7 +171,7 @@ async function signDidJwtExternal(
   }
 
   const response: SIOPResonse<SignatureResponse> = await post(signatureUri, JSON.stringify(body), { bearerToken: authZToken })
-  if(!response.successBody) {
+  if (!response.successBody) {
     return Promise.reject(Error('the siop SignatureResponse does not have a successBody'))
   }
   return response.successBody.jws
@@ -257,7 +257,11 @@ export function getSubDidFromPayload(payload: JWTPayload, header?: JWTHeader): s
 }
 
 export function isIssSelfIssued(payload: JWTPayload): boolean {
-  return payload.iss && payload.iss.includes(ResponseIss.SELF_ISSUED_V1) || payload.iss.includes(ResponseIss.SELF_ISSUED_V2) || payload.iss === payload.sub
+  return (
+    (payload.iss && payload.iss.includes(ResponseIss.SELF_ISSUED_V1)) ||
+    payload.iss.includes(ResponseIss.SELF_ISSUED_V2) ||
+    payload.iss === payload.sub
+  )
 }
 
 export function getMethodFromDid(did: string): string {

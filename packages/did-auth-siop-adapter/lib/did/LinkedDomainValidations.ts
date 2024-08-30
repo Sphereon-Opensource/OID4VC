@@ -51,7 +51,7 @@ function checkInvalidMessages(validationErrorMessages: string[]): { status: bool
   return { status: true }
 }
 
-export async function validateLinkedDomainWithDid(did: string, verification: InternalVerification | ExternalVerification) : Promise<void>{
+export async function validateLinkedDomainWithDid(did: string, verification: InternalVerification | ExternalVerification): Promise<void> {
   const { checkLinkedDomain, resolveOpts, wellknownDIDVerifyCallback } = verification
   if (checkLinkedDomain === CheckLinkedDomain.NEVER) {
     return
@@ -68,7 +68,7 @@ export async function validateLinkedDomainWithDid(did: string, verification: Int
     return
   }
   try {
-    if(!wellknownDIDVerifyCallback) {
+    if (!wellknownDIDVerifyCallback) {
       return Promise.reject(Error('wellknownDIDVerifyCallback is required for checkWellKnownDid'))
     }
     const validationResult = await checkWellKnownDid({ didDocument, verifyCallback: wellknownDIDVerifyCallback })
@@ -79,7 +79,7 @@ export async function validateLinkedDomainWithDid(did: string, verification: Int
         throw new Error(messageCondition.message ? messageCondition.message : validationErrorMessages[0])
       }
     }
-  } catch (err) {
+  } catch (err: any) {
     const messageCondition: { status: boolean; message?: string } = checkInvalidMessages([err.message])
     if (checkLinkedDomain === CheckLinkedDomain.ALWAYS || (checkLinkedDomain === CheckLinkedDomain.IF_PRESENT && !messageCondition.status)) {
       throw new Error(err.message)

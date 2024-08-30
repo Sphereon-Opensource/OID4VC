@@ -53,7 +53,7 @@ const presentationSignCallback: PresentationSignCallback = async (_args) => {
       typ: 'kb+jwt',
     },
     payload: {
-      _sd_hash: expect.any(String),
+      sd_hash: expect.any(String),
       iat: expect.any(Number),
       nonce: expect.any(String),
     },
