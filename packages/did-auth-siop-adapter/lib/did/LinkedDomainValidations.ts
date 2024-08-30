@@ -11,7 +11,7 @@ function getValidationErrorMessages(validationResult: IDomainLinkageValidation):
   if (validationResult.message) {
     messages.push(validationResult.message)
   }
-  if (validationResult?.endpointDescriptors.length) {
+  if (validationResult?.endpointDescriptors?.length) {
     for (const endpointDescriptor of validationResult.endpointDescriptors) {
       if (endpointDescriptor.message) {
         messages.push(endpointDescriptor.message)
@@ -51,7 +51,7 @@ function checkInvalidMessages(validationErrorMessages: string[]): { status: bool
   return { status: true }
 }
 
-export async function validateLinkedDomainWithDid(did: string, verification: InternalVerification | ExternalVerification) {
+export async function validateLinkedDomainWithDid(did: string, verification: InternalVerification | ExternalVerification) : Promise<void>{
   const { checkLinkedDomain, resolveOpts, wellknownDIDVerifyCallback } = verification
   if (checkLinkedDomain === CheckLinkedDomain.NEVER) {
     return
@@ -68,6 +68,9 @@ export async function validateLinkedDomainWithDid(did: string, verification: Int
     return
   }
   try {
+    if(!wellknownDIDVerifyCallback) {
+      return Promise.reject(Error('wellknownDIDVerifyCallback is required for checkWellKnownDid'))
+    }
     const validationResult = await checkWellKnownDid({ didDocument, verifyCallback: wellknownDIDVerifyCallback })
     if (validationResult.status === ValidationStatusEnum.INVALID) {
       const validationErrorMessages = getValidationErrorMessages(validationResult)

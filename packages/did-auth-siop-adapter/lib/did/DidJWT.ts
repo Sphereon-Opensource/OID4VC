@@ -171,6 +171,9 @@ async function signDidJwtExternal(
   }
 
   const response: SIOPResonse<SignatureResponse> = await post(signatureUri, JSON.stringify(body), { bearerToken: authZToken })
+  if(!response.successBody) {
+    return Promise.reject(Error('the siop SignatureResponse does not have a successBody'))
+  }
   return response.successBody.jws
 }
 
@@ -254,7 +257,7 @@ export function getSubDidFromPayload(payload: JWTPayload, header?: JWTHeader): s
 }
 
 export function isIssSelfIssued(payload: JWTPayload): boolean {
-  return payload.iss.includes(ResponseIss.SELF_ISSUED_V1) || payload.iss.includes(ResponseIss.SELF_ISSUED_V2) || payload.iss === payload.sub
+  return payload.iss && payload.iss.includes(ResponseIss.SELF_ISSUED_V1) || payload.iss.includes(ResponseIss.SELF_ISSUED_V2) || payload.iss === payload.sub
 }
 
 export function getMethodFromDid(did: string): string {
