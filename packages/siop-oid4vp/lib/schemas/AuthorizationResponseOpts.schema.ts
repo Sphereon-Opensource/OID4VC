@@ -1422,6 +1422,9 @@ export const AuthorizationResponseOptsSchemaObj = {
         },
         "vc+sd-jwt": {
           "$ref": "#/definitions/SdJwtObject"
+        },
+        "mso_mdoc": {
+          "$ref": "#/definitions/MsoMdocObject"
         }
       },
       "additionalProperties": false
@@ -1494,6 +1497,21 @@ export const AuthorizationResponseOptsSchemaObj = {
           }
         }
       },
+      "additionalProperties": false
+    },
+    "MsoMdocObject": {
+      "type": "object",
+      "properties": {
+        "alg": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "alg"
+      ],
       "additionalProperties": false
     },
     "IdTokenType": {

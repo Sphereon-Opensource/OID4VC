@@ -442,11 +442,11 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/pex':
-        specifier: ^3.3.2
-        version: 3.3.3
+        specifier: ^4.1.0
+        version: 4.1.0
       '@sphereon/pex-models':
-        specifier: ^2.2.4
-        version: 2.2.4
+        specifier: ^2.3.1
+        version: 2.3.1
       '@sphereon/ssi-types':
         specifier: 0.22.0
         version: 0.22.0
@@ -4981,12 +4981,12 @@ packages:
       webcrypto-shim: 0.1.7
     dev: true
 
-  /@sphereon/pex-models@2.2.4:
-    resolution: {integrity: sha512-pGlp+wplneE1+Lk3U48/2htYKTbONMeG5/x7vhO6AnPUOsnOXeJdftPrBYWVSzz/JH5GJptAc6+pAyYE1zMu4Q==}
+  /@sphereon/pex-models@2.3.1:
+    resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
     dev: false
 
-  /@sphereon/pex@3.3.3:
-    resolution: {integrity: sha512-CXwdEcMTUh2z/5AriBn3OuShEG06l2tgiIr7qDJthnkez8DQ3sZo2vr4NEQWKKAL+DeAWAI4FryQGO4KuK7yfg==}
+  /@sphereon/pex@4.1.0:
+    resolution: {integrity: sha512-FVaaStVW8ewiAVfbpLmjRuAmEA/7xwifY5m1r6RaignMpPLK3uBt+Urae/Y78lcuJttj7WvRMzddgNO3RtsO+Q==}
     engines: {node: '>=18'}
     requiresBuild: true
     dependencies:
@@ -4994,7 +4994,7 @@ packages:
       '@sd-jwt/decode': 0.6.1
       '@sd-jwt/present': 0.6.1
       '@sd-jwt/types': 0.6.1
-      '@sphereon/pex-models': 2.2.4
+      '@sphereon/pex-models': 2.3.1
       '@sphereon/ssi-types': 0.22.0
       ajv: 8.17.1
       ajv-formats: 2.1.1(ajv@8.17.1)
