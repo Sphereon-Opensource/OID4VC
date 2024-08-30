@@ -1,5 +1,4 @@
 import {
-  EvaluationResults,
   IPresentationDefinition,
   KeyEncoding,
   PEX,
@@ -7,9 +6,14 @@ import {
   SelectResults,
   Status,
   VerifiablePresentationFromOpts,
-  VerifiablePresentationResult,
-} from '@sphereon/pex'
-import { Format, PresentationDefinitionV1, PresentationDefinitionV2, PresentationSubmission } from '@sphereon/pex-models'
+  VerifiablePresentationResult
+} from '@sphereon/pex';
+import {
+  Format,
+  PresentationDefinitionV1,
+  PresentationDefinitionV2,
+  PresentationSubmission
+} from '@sphereon/pex-models';
 import {
   CredentialMapper,
   Hasher,
@@ -18,18 +22,19 @@ import {
   OriginalVerifiableCredential,
   OriginalVerifiablePresentation,
   W3CVerifiablePresentation,
-  WrappedVerifiablePresentation,
-} from '@sphereon/ssi-types'
+  WrappedVerifiablePresentation
+} from '@sphereon/ssi-types';
 
-import { extractDataFromPath, getWithUrl } from '../helpers'
-import { AuthorizationRequestPayload, SIOPErrors, SupportedVersion } from '../types'
+import { extractDataFromPath, getWithUrl } from '../helpers';
+import { AuthorizationRequestPayload, SIOPErrors, SupportedVersion } from '../types';
 
 import {
   PresentationDefinitionLocation,
   PresentationDefinitionWithLocation,
   PresentationSignCallback,
-  PresentationVerificationCallback,
-} from './types'
+  PresentationVerificationCallback
+} from './types';
+import { PresentationEvaluationResults } from '@sphereon/pex/dist/main/lib/evaluation/core/evaluationResults';
 
 export class PresentationExchange {
   readonly pex: PEX
@@ -133,7 +138,7 @@ export class PresentationExchange {
       presentationSubmission?: PresentationSubmission
       hasher?: Hasher
     },
-  ): Promise<EvaluationResults> {
+  ): Promise<PresentationEvaluationResults> {
     const wvp: WrappedVerifiablePresentation =
       typeof verifiablePresentation === 'object' && 'original' in verifiablePresentation
         ? (verifiablePresentation as WrappedVerifiablePresentation)
@@ -149,7 +154,7 @@ export class PresentationExchange {
       throw new Error(SIOPErrors.NO_VERIFIABLE_PRESENTATION_NO_CREDENTIALS)
     }
     // console.log(`Presentation (validate): ${JSON.stringify(verifiablePresentation)}`);
-    const evaluationResults: EvaluationResults = new PEX({ hasher: opts?.hasher }).evaluatePresentation(presentationDefinition, wvp.original, opts)
+    const evaluationResults: PresentationEvaluationResults = new PEX({ hasher: opts?.hasher }).evaluatePresentation(presentationDefinition, wvp.original, opts)
     if (evaluationResults.errors.length) {
       throw new Error(`message: ${SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD}, details: ${JSON.stringify(evaluationResults.errors)}`)
     }

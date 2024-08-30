@@ -7,6 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "pnpm build:schemaGenerator && tsc",
+    "build:clean": "pnpm build:schemaGenerator && tsc --build --clean && tsc --build",
     "build:main": "tsc -p tsconfig.build.json",
     "build:schemaGenerator": "node --loader=tsimp/loader ./lib/generator/schemaGenerator.ts",
     "clean": "rimraf dist coverage",

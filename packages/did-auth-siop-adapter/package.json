@@ -7,6 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "build:clean": "tsc --build --clean && tsc --build",
     "clean": "rimraf dist coverage"
   },
   "dependencies": {
