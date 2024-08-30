@@ -221,7 +221,7 @@ describe('presentation exchange manager tests', () => {
     const vcs = getVCs()
     vcs[0].issuer = { id: 'did:example:totallyDifferentIssuer' }
     await expect(
-      PresentationExchange.validatePresentationAgainstDefinition(
+      PresentationExchange.validatePresentationsAgainstDefinition(
         pd[0].definition,
         CredentialMapper.toWrappedVerifiablePresentation({
           '@context': ['https://www.w3.org/2018/credentials/v1'],
@@ -272,15 +272,14 @@ describe('presentation exchange manager tests', () => {
     const vcs = getVCs()
     vcs[0].issuer = { id: 'did:example:totallyDifferentIssuer' }
     await expect(
-      PresentationExchange.validatePresentationAgainstDefinition(
-        pd[0].definition,
+      PresentationExchange.validatePresentationsAgainstDefinition(pd[0].definition, [
         CredentialMapper.toWrappedVerifiablePresentation({
           '@context': ['https://www.w3.org/2018/credentials/v1'],
           type: ['VerifiablePresentation', 'PresentationSubmission'],
           presentation_submission,
           verifiableCredential: vcs,
         } as W3CVerifiablePresentation),
-      ),
+      ]),
     ).rejects.toThrow(SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD)
   })
 
@@ -297,7 +296,22 @@ describe('presentation exchange manager tests', () => {
     const payload = await getPayloadVID1Val()
     const vcs = getVCs()
     const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(payload)
-    const result = await PresentationExchange.validatePresentationAgainstDefinition(
+    console.log(
+      JSON.stringify(
+        {
+          pd,
+          vp: {
+            '@context': ['https://www.w3.org/2018/credentials/v1'],
+            type: ['VerifiablePresentation', 'PresentationSubmission'],
+            presentation_submission,
+            verifiableCredential: vcs,
+          },
+        },
+        null,
+        2,
+      ),
+    )
+    const result = await PresentationExchange.validatePresentationsAgainstDefinition(
       pd[0].definition,
       CredentialMapper.toWrappedVerifiablePresentation({
         '@context': ['https://www.w3.org/2018/credentials/v1'],
@@ -315,15 +329,14 @@ describe('presentation exchange manager tests', () => {
     const pex = new PresentationExchange({ allDIDs: [HOLDER_DID], allVerifiableCredentials: vcs })
     const payload: AuthorizationRequestPayload = await getPayloadVID1Val()
     const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(payload)
-    await PresentationExchange.validatePresentationAgainstDefinition(
-      pd[0].definition,
+    await PresentationExchange.validatePresentationsAgainstDefinition(pd[0].definition, [
       CredentialMapper.toWrappedVerifiablePresentation({
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         type: ['VerifiablePresentation', 'PresentationSubmission'],
         presentation_submission,
         verifiableCredential: vcs,
       } as W3CVerifiablePresentation),
-    )
+    ])
     await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
     const presentationSignCallback: PresentationSignCallback = async (_args) => ({
       ...(_args.presentation as IPresentation),
@@ -373,8 +386,8 @@ describe('presentation exchange manager tests', () => {
     const result = await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
     expect(result.errors?.length).toBe(0)
     expect(result.matches?.length).toBe(1)
-    expect(result.matches[0].vc_path.length).toBe(1)
-    expect(result.matches[0].vc_path[0]).toBe('$.verifiableCredential[0]')
+    expect(result.matches?.[0].vc_path.length).toBe(1)
+    expect(result.matches?.[0].vc_path[0]).toBe('$.verifiableCredential[0]')
   })
 
   it('pass if no PresentationDefinition is found', async () => {
@@ -446,11 +459,13 @@ describe('presentation exchange manager tests', () => {
     await expect(
       PresentationExchange.validatePresentationsAgainstDefinitions(
         pd,
-        [CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentationResult.verifiablePresentation)],
+        CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentationResult.verifiablePresentation),
         () => {
           throw new Error('Verification failed')
         },
-        {},
+        {
+          presentationSubmission: verifiablePresentationResult.presentationSubmission,
+        },
       ),
     ).rejects.toThrow(SIOPErrors.VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID)
   })

@@ -95,13 +95,15 @@ export const verifyPresentations = async (
 
   // If there are no presentations, and the `assertValidVerifiablePresentations` did not fail
   // it means there's no oid4vp response and also not requested
-  if (presentations.length === 0) {
+  if (Array.isArray(presentations) && presentations.length === 0) {
     return null
   }
 
-  const nonces = new Set(presentations.map(extractNonceFromWrappedVerifiablePresentation))
-  if (presentations.length > 0 && nonces.size !== 1) {
-    throw Error(`${nonces.size} nonce values found for ${presentations.length}. Should be 1`)
+  const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
+
+  const nonces = new Set(presentationsArray.map(extractNonceFromWrappedVerifiablePresentation))
+  if (presentationsArray.length > 0 && nonces.size !== 1) {
+    throw Error(`${nonces.size} nonce values found for ${presentationsArray.length}. Should be 1`)
   }
 
   // Nonce may be undefined
@@ -117,25 +119,24 @@ export const verifyPresentations = async (
     if (!verifyOpts.verification.revocationOpts?.revocationVerificationCallback) {
       throw Error(`Please provide a revocation callback as revocation checking of credentials and presentations is not disabled`)
     }
-    for (const vp of presentations) {
+    for (const vp of presentationsArray) {
       await verifyRevocation(vp, verifyOpts.verification.revocationOpts.revocationVerificationCallback, revocationVerification)
     }
   }
-  return { nonce, presentations, presentationDefinitions, submissionData: presentationSubmission }
+  return { nonce, presentations: presentationsArray, presentationDefinitions, submissionData: presentationSubmission }
 }
 
 export const extractPresentationsFromAuthorizationResponse = async (
   response: AuthorizationResponse,
   opts?: { hasher?: Hasher },
-): Promise<WrappedVerifiablePresentation[]> => {
-  const wrappedVerifiablePresentations: WrappedVerifiablePresentation[] = []
-  if (response.payload.vp_token) {
-    const presentations = Array.isArray(response.payload.vp_token) ? response.payload.vp_token : [response.payload.vp_token]
-    for (const presentation of presentations) {
-      wrappedVerifiablePresentations.push(CredentialMapper.toWrappedVerifiablePresentation(presentation, { hasher: opts?.hasher }))
-    }
+): Promise<WrappedVerifiablePresentation[] | WrappedVerifiablePresentation> => {
+  if (!response.payload.vp_token) return []
+
+  if (Array.isArray(response.payload.vp_token)) {
+    return response.payload.vp_token.map((vp) => CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: opts?.hasher }))
   }
-  return wrappedVerifiablePresentations
+
+  return CredentialMapper.toWrappedVerifiablePresentation(response.payload.vp_token, { hasher: opts?.hasher })
 }
 
 export const createPresentationSubmission = async (
@@ -264,7 +265,7 @@ export const putPresentationSubmissionInLocation = async (
 
 export const assertValidVerifiablePresentations = async (args: {
   presentationDefinitions: PresentationDefinitionWithLocation[]
-  presentations: WrappedVerifiablePresentation[]
+  presentations: Array<WrappedVerifiablePresentation> | WrappedVerifiablePresentation
   verificationCallback: PresentationVerificationCallback
   opts?: {
     limitDisclosureSignatureSuites?: string[]
@@ -283,16 +284,18 @@ export const assertValidVerifiablePresentations = async (args: {
   PresentationExchange.assertValidPresentationDefinitionWithLocations(args.presentationDefinitions)
   const presentationsWithFormat = args.presentations
 
-  if (args.presentationDefinitions && args.presentationDefinitions.length && (!presentationsWithFormat || presentationsWithFormat.length === 0)) {
+  if (
+    args.presentationDefinitions &&
+    args.presentationDefinitions.length &&
+    (!presentationsWithFormat || (Array.isArray(presentationsWithFormat) && presentationsWithFormat.length === 0))
+  ) {
     throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)
   } else if (
     (!args.presentationDefinitions || args.presentationDefinitions.length === 0) &&
     presentationsWithFormat &&
-    presentationsWithFormat.length > 0
+    ((Array.isArray(presentationsWithFormat) && presentationsWithFormat.length > 0) || !Array.isArray(presentationsWithFormat))
   ) {
     throw new Error(SIOPErrors.AUTH_REQUEST_DOESNT_EXPECT_VP)
-  } else if (args.presentationDefinitions && presentationsWithFormat && args.presentationDefinitions.length != presentationsWithFormat.length) {
-    throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)
   } else if (args.presentationDefinitions && !args.opts.presentationSubmission) {
     throw new Error(`No presentation submission present. Please use presentationSubmission opt argument!`)
   } else if (args.presentationDefinitions && presentationsWithFormat) {
