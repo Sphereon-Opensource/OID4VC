@@ -196,20 +196,21 @@ describe('RP using test vectors', () => {
     const presentationDefinitions = await authRequest.getPresentationDefinitions()
 
     // Will throw an error because the path_nested is actually wrong. Should be $.vp.verifiableCredential[0], but is $.verifiableCredential[0]
-    await expect (authorizationResponse.verify({
-      correlationId: '1234',
-      verifyJwtCallback: verifyJwtCallback,
-      audience:
-        'did:ion:EiBWe9RtHT7VZ-Juff8OnnJAyFJtCokcYHx1CQkFtpl7pw:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJrZXktMSIsInB1YmxpY0tleUp3ayI6eyJjcnYiOiJFZDI1NTE5Iiwia3R5IjoiT0tQIiwieCI6IkNfT1VKeEg2aUljQzZYZE5oN0ptQy1USFhBVmFYbnZ1OU9FRVo4dHE5TkkiLCJraWQiOiJrZXktMSJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiJdLCJ0eXBlIjoiSnNvbldlYktleTIwMjAifV19fV0sInVwZGF0ZUNvbW1pdG1lbnQiOiJFaUNYTkJqSWZMVGZOV0NHMFQ2M2VaYmJEZFZoSmJUTjgtSmZlaUx4dW1oZW53In0sInN1ZmZpeERhdGEiOnsiZGVsdGFIYXNoIjoiRWlCZVZ5RXBDb0NPeXJ6VDhDSHlvQW1acU1CT1o0VTZqcm1sdUt1SjlxS0pkZyIsInJlY292ZXJ5Q29tbWl0bWVudCI6IkVpQnhkcHlyamlVSFZ1akNRWTBKMkhBUFFYZnNwWFBKYWluV21mV3RNcFhneFEifX0',
-      verification: {
-        presentationVerificationCallback,
-        revocationOpts: {
-          revocationVerification: RevocationVerification.NEVER,
+    await expect(
+      authorizationResponse.verify({
+        correlationId: '1234',
+        verifyJwtCallback: verifyJwtCallback,
+        audience:
+          'did:ion:EiBWe9RtHT7VZ-Juff8OnnJAyFJtCokcYHx1CQkFtpl7pw:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJrZXktMSIsInB1YmxpY0tleUp3ayI6eyJjcnYiOiJFZDI1NTE5Iiwia3R5IjoiT0tQIiwieCI6IkNfT1VKeEg2aUljQzZYZE5oN0ptQy1USFhBVmFYbnZ1OU9FRVo4dHE5TkkiLCJraWQiOiJrZXktMSJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiJdLCJ0eXBlIjoiSnNvbldlYktleTIwMjAifV19fV0sInVwZGF0ZUNvbW1pdG1lbnQiOiJFaUNYTkJqSWZMVGZOV0NHMFQ2M2VaYmJEZFZoSmJUTjgtSmZlaUx4dW1oZW53In0sInN1ZmZpeERhdGEiOnsiZGVsdGFIYXNoIjoiRWlCZVZ5RXBDb0NPeXJ6VDhDSHlvQW1acU1CT1o0VTZqcm1sdUt1SjlxS0pkZyIsInJlY292ZXJ5Q29tbWl0bWVudCI6IkVpQnhkcHlyamlVSFZ1akNRWTBKMkhBUFFYZnNwWFBKYWluV21mV3RNcFhneFEifX0',
+        verification: {
+          presentationVerificationCallback,
+          revocationOpts: {
+            revocationVerification: RevocationVerification.NEVER,
+          },
         },
-      },
-      presentationDefinitions,
-    })).rejects.toThrowError()
-
+        presentationDefinitions,
+      }),
+    ).rejects.toThrowError()
   })
 })
 
@@ -359,7 +360,7 @@ class TestVectors {
   public static issuerKey: KeyLike
   public static issuerPrivateKey: string
   public static issuerPublicKey: string
-  public static issuerHexPrivateKey : string
+  public static issuerHexPrivateKey: string
 
   public static holderJwk = {
     kty: 'OKP',

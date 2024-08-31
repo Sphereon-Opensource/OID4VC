@@ -6,10 +6,10 @@ import {
   SelectResults,
   Status,
   VerifiablePresentationFromOpts,
-  VerifiablePresentationResult
+  VerifiablePresentationResult,
 } from '@sphereon/pex'
-import { Format, PresentationDefinitionV1, PresentationDefinitionV2, PresentationSubmission } from '@sphereon/pex-models'
 import { PresentationEvaluationResults } from '@sphereon/pex/dist/main/lib/evaluation/core'
+import { Format, PresentationDefinitionV1, PresentationDefinitionV2, PresentationSubmission } from '@sphereon/pex-models'
 import {
   CredentialMapper,
   Hasher,
@@ -18,7 +18,7 @@ import {
   OriginalVerifiableCredential,
   OriginalVerifiablePresentation,
   W3CVerifiablePresentation,
-  WrappedVerifiablePresentation
+  WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
 
 import { extractDataFromPath, getWithUrl } from '../helpers'
@@ -28,7 +28,7 @@ import {
   PresentationDefinitionLocation,
   PresentationDefinitionWithLocation,
   PresentationSignCallback,
-  PresentationVerificationCallback
+  PresentationVerificationCallback,
 } from './types'
 
 export class PresentationExchange {

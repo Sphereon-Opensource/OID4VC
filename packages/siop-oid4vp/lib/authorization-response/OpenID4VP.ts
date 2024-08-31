@@ -7,7 +7,7 @@ import {
   IVerifiablePresentation,
   PresentationSubmission,
   W3CVerifiablePresentation,
-  WrappedVerifiablePresentation
+  WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
 
 import { AuthorizationRequest } from '../authorization-request'
@@ -19,7 +19,7 @@ import {
   RevocationVerification,
   SIOPErrors,
   SupportedVersion,
-  VerifiedOpenID4VPSubmission
+  VerifiedOpenID4VPSubmission,
 } from '../types'
 
 import { AuthorizationResponse } from './AuthorizationResponse'
@@ -29,7 +29,7 @@ import {
   PresentationDefinitionWithLocation,
   PresentationVerificationCallback,
   VerifyAuthorizationResponseOpts,
-  VPTokenLocation
+  VPTokenLocation,
 } from './types'
 
 function extractNonceFromWrappedVerifiablePresentation(wrappedVp: WrappedVerifiablePresentation): string | undefined {
@@ -158,7 +158,10 @@ export const createPresentationSubmission = async (
       console.log(`No submission_data in VPs and not provided. Will try to deduce, but it is better to create the submission data beforehand`)
       for (const definitionOpt of opts.presentationDefinitions) {
         const definition = 'definition' in definitionOpt ? definitionOpt.definition : definitionOpt
-        const result = new PEX().evaluatePresentation(definition, wrappedPresentation.original, { generatePresentationSubmission: true, presentationSubmissionLocation: PresentationSubmissionLocation.EXTERNAL })
+        const result = new PEX().evaluatePresentation(definition, wrappedPresentation.original, {
+          generatePresentationSubmission: true,
+          presentationSubmissionLocation: PresentationSubmissionLocation.EXTERNAL,
+        })
         if (result.areRequiredCredentialsPresent) {
           submission = result.value
           break

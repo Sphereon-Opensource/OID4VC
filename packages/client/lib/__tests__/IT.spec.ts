@@ -198,7 +198,7 @@ describe('OID4VCI-Client should', () => {
 
     const credentialResponse = await client.acquireCredentials({
       credentialIdentifier: 'OpenBadgeCredential',
-      format: 'jwt_vc_json-ld',
+      // format: 'jwt_vc_json-ld',
       proofCallbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
