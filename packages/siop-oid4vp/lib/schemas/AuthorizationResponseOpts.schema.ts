@@ -1422,6 +1422,9 @@ export const AuthorizationResponseOptsSchemaObj = {
         },
         "vc+sd-jwt": {
           "$ref": "#/definitions/SdJwtObject"
+        },
+        "mso_mdoc": {
+          "$ref": "#/definitions/MsoMdocObject"
         }
       },
       "additionalProperties": false
@@ -1494,6 +1497,21 @@ export const AuthorizationResponseOptsSchemaObj = {
           }
         }
       },
+      "additionalProperties": false
+    },
+    "MsoMdocObject": {
+      "type": "object",
+      "properties": {
+        "alg": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "alg"
+      ],
       "additionalProperties": false
     },
     "IdTokenType": {
@@ -1605,18 +1623,10 @@ export const AuthorizationResponseOptsSchemaObj = {
         "issuer": {
           "type": "string",
           "description": "The issuer jwt\n\nThis value will be used as the iss value of the issue jwt. It is also used as the client_id. And will also be set as the redirect_uri\n\nIt must match an entry in the x5c certificate leaf entry dnsName / uriName"
-        },
-        "clientIdScheme": {
-          "type": "string",
-          "enum": [
-            "x509_san_dns",
-            "x509_san_uri"
-          ]
         }
       },
       "required": [
         "alg",
-        "clientIdScheme",
         "issuer",
         "method",
         "x5c"

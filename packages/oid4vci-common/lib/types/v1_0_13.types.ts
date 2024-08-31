@@ -118,6 +118,18 @@ export type CredentialRequestV1_0_13 = CredentialRequestV1_0_13Common &
     | CredentialRequestV1_0_13CredentialIdentifier
   );
 
+/**
+ * Normally a proof always needs to be present. There are exceptions for certain issuers doing strong user binding part of presentation flows
+ */
+export type CredentialRequestWithoutProofV1_0_13 = Omit<CredentialRequestV1_0_13Common, 'proof'> &
+  (
+    | CredentialRequestJwtVcJsonV1_0_13
+    | CredentialRequestJwtVcJsonLdAndLdpVcV1_0_13
+    | CredentialRequestSdJwtVc
+    | CredentialRequestMsoMdoc
+    | CredentialRequestV1_0_13CredentialIdentifier
+  );
+
 export interface CredentialRequestV1_0_13CredentialIdentifier extends CredentialRequestV1_0_13Common {
   // Format cannot be defined when credential_identifier is used
   format?: undefined;

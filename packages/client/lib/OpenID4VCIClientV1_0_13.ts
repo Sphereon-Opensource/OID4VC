@@ -29,14 +29,14 @@ import {
   ProofOfPossessionCallbacks,
   toAuthorizationResponsePayload,
 } from '@sphereon/oid4vci-common';
-import { CredentialFormat } from '@sphereon/ssi-types';
+import { CredentialFormat, DIDDocument } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';
 import { createAuthorizationRequestUrl } from './AuthorizationCodeClient';
 import { CredentialOfferClient } from './CredentialOfferClient';
 import { CredentialRequestOpts } from './CredentialRequestClient';
-import { CredentialRequestClientBuilder } from './CredentialRequestClientBuilder';
+import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13';
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { generateMissingPKCEOpts, sendNotification } from './functions';
@@ -351,7 +351,41 @@ export class OpenID4VCIClientV1_0_13 {
     return { ...this.accessTokenResponse, ...(this.dpopResponseParams && { params: this.dpopResponseParams }) };
   }
 
-  public async acquireCredentials({
+  public async acquireCredentialsWithoutProof(args: {
+    credentialIdentifier?: string;
+    credentialTypes?: string | string[];
+    context?: string[];
+    format?: CredentialFormat | OID4VCICredentialFormat;
+    kid?: string;
+    jwk?: JWK;
+    alg?: Alg | string;
+    jti?: string;
+    deferredCredentialAwait?: boolean;
+    deferredCredentialIntervalInMS?: number;
+    experimentalHolderIssuanceSupported?: boolean;
+    createDPoPOpts?: CreateDPoPClientOpts;
+  }): Promise<CredentialResponse & { access_token: string }> {
+    return await this.acquireCredentialsImpl(args);
+  }
+  public async acquireCredentials(args: {
+    credentialIdentifier?: string;
+    credentialTypes?: string | string[];
+    context?: string[];
+    proofCallbacks: ProofOfPossessionCallbacks<any>;
+    format?: CredentialFormat | OID4VCICredentialFormat;
+    kid?: string;
+    jwk?: JWK;
+    alg?: Alg | string;
+    jti?: string;
+    deferredCredentialAwait?: boolean;
+    deferredCredentialIntervalInMS?: number;
+    experimentalHolderIssuanceSupported?: boolean;
+    createDPoPOpts?: CreateDPoPClientOpts;
+  }): Promise<CredentialResponse & { access_token: string }> {
+    return await this.acquireCredentialsImpl(args);
+  }
+
+  private async acquireCredentialsImpl({
     credentialIdentifier,
     credentialTypes,
     context,
@@ -368,7 +402,7 @@ export class OpenID4VCIClientV1_0_13 {
     credentialIdentifier?: string;
     credentialTypes?: string | string[];
     context?: string[];
-    proofCallbacks: ProofOfPossessionCallbacks<any>;
+    proofCallbacks?: ProofOfPossessionCallbacks<any>;
     format?: CredentialFormat | OID4VCICredentialFormat;
     kid?: string;
     jwk?: JWK;
@@ -388,11 +422,11 @@ export class OpenID4VCIClientV1_0_13 {
     if (kid) this._state.kid = kid;
 
     const requestBuilder = this.credentialOffer
-      ? CredentialRequestClientBuilder.fromCredentialOffer({
+      ? CredentialRequestClientBuilderV1_0_13.fromCredentialOffer({
           credentialOffer: this.credentialOffer,
           metadata: this.endpointMetadata,
         })
-      : CredentialRequestClientBuilder.fromCredentialIssuer({
+      : CredentialRequestClientBuilderV1_0_13.fromCredentialIssuer({
           credentialIssuer: this.getIssuer(),
           credentialIdentifier: credentialIdentifier,
           metadata: this.endpointMetadata,
@@ -451,32 +485,50 @@ export class OpenID4VCIClientV1_0_13 {
     }
 
     const credentialRequestClient = requestBuilder.build();
-    const proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse({
-      accessTokenResponse: this.accessTokenResponse,
-      callbacks: proofCallbacks,
-      version: this.version(),
-    })
-      .withIssuer(this.getIssuer())
-      .withAlg(this.alg);
 
-    if (this._state.jwk) {
-      proofBuilder.withJWK(this._state.jwk);
-    }
-    if (this._state.kid) {
-      proofBuilder.withKid(this._state.kid);
-    }
+    let proofBuilder: ProofOfPossessionBuilder<any> | undefined;
+    if (proofCallbacks) {
+      proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse({
+        accessTokenResponse: this.accessTokenResponse,
+        callbacks: proofCallbacks,
+        version: this.version(),
+      })
+        .withIssuer(this.getIssuer())
+        .withAlg(this.alg);
 
-    if (this.clientId) {
-      proofBuilder.withClientId(this.clientId);
+      if (this._state.jwk) {
+        proofBuilder.withJWK(this._state.jwk);
+      }
+      if (this._state.kid) {
+        proofBuilder.withKid(this._state.kid);
+      }
+
+      if (this.clientId) {
+        proofBuilder.withClientId(this.clientId);
+      }
+      if (jti) {
+        proofBuilder.withJti(jti);
+      }
     }
-    if (jti) {
-      proofBuilder.withJti(jti);
-    }
-    const response = await credentialRequestClient.acquireCredentialsUsingProof({
-      proofInput: proofBuilder,
-      ...(credentialIdentifier ? { credentialIdentifier, subjectIssuance } : { format, context, credentialTypes, subjectIssuance }),
-      createDPoPOpts,
-    });
+    const request = proofBuilder
+      ? await credentialRequestClient.createCredentialRequest<DIDDocument>({
+          proofInput: proofBuilder,
+          credentialTypes,
+          context,
+          format,
+          version: this.version(),
+          credentialIdentifier,
+          subjectIssuance,
+        })
+      : await credentialRequestClient.createCredentialRequestWithoutProof<DIDDocument>({
+          credentialTypes,
+          context,
+          format,
+          version: this.version(),
+          credentialIdentifier,
+          subjectIssuance,
+        });
+    const response = await credentialRequestClient.acquireCredentialsUsingRequest(request, createDPoPOpts);
     this._state.dpopResponseParams = response.params;
     if (response.errorBody) {
       debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`);

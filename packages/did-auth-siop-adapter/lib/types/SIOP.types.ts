@@ -36,7 +36,7 @@ export interface NoSignature {
 export interface ExternalSignature {
   signatureUri: string // url to call to generate a withSignature
   did: string
-  authZToken?: string // Optional: bearer token to use to the call
+  authZToken: string // Optional: bearer token to use to the call
   hexPublicKey?: string // Optional: hex encoded public key to compute JWK key, if not possible from DIDres Document
 
   alg: SigningAlgo

@@ -1,5 +1,5 @@
 import { parseJWT } from '@sphereon/oid4vc-common'
-import { IPresentationDefinition, PEX } from '@sphereon/pex'
+import { IPresentationDefinition, PEX, PresentationSubmissionLocation } from '@sphereon/pex'
 import { Format } from '@sphereon/pex-models'
 import {
   CredentialMapper,
@@ -159,7 +159,10 @@ export const createPresentationSubmission = async (
       console.log(`No submission_data in VPs and not provided. Will try to deduce, but it is better to create the submission data beforehand`)
       for (const definitionOpt of opts.presentationDefinitions) {
         const definition = 'definition' in definitionOpt ? definitionOpt.definition : definitionOpt
-        const result = new PEX().evaluatePresentation(definition, wrappedPresentation.original, { generatePresentationSubmission: true })
+        const result = new PEX().evaluatePresentation(definition, wrappedPresentation.original, {
+          generatePresentationSubmission: true,
+          presentationSubmissionLocation: PresentationSubmissionLocation.EXTERNAL,
+        })
         if (result.areRequiredCredentialsPresent) {
           submission = result.value
           break

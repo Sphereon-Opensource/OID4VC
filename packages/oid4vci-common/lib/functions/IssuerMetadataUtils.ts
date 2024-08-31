@@ -76,7 +76,10 @@ export function getSupportedCredential(opts?: {
 
   let credentialConfigurationsV11: Array<CredentialConfigurationSupported> | undefined = undefined;
   let credentialConfigurationsV13: Record<string, CredentialConfigurationSupportedV1_0_13> | undefined = undefined;
-  if (version < OpenId4VCIVersion.VER_1_0_12 || issuerMetadata?.credentials_supported) {
+  if (
+    version < OpenId4VCIVersion.VER_1_0_12 ||
+    (issuerMetadata?.credential_configurations_supported === undefined && issuerMetadata?.credentials_supported)
+  ) {
     if (issuerMetadata?.credentials_supported && !Array.isArray(issuerMetadata?.credentials_supported)) {
       // The current code duplication and logic is such a mess, that we re-adjust the object to the proper type again
       credentialConfigurationsV11 = [];

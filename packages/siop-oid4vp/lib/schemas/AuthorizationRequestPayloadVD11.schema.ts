@@ -308,6 +308,9 @@ export const AuthorizationRequestPayloadVD11SchemaObj = {
         },
         "vc+sd-jwt": {
           "$ref": "#/definitions/SdJwtObject"
+        },
+        "mso_mdoc": {
+          "$ref": "#/definitions/MsoMdocObject"
         }
       },
       "additionalProperties": false
@@ -380,6 +383,21 @@ export const AuthorizationRequestPayloadVD11SchemaObj = {
           }
         }
       },
+      "additionalProperties": false
+    },
+    "MsoMdocObject": {
+      "type": "object",
+      "properties": {
+        "alg": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "alg"
+      ],
       "additionalProperties": false
     },
     "ResponseMode": {
@@ -842,6 +860,9 @@ export const AuthorizationRequestPayloadVD11SchemaObj = {
         },
         "predicate": {
           "$ref": "#/definitions/Optionality"
+        },
+        "intent_to_retain": {
+          "type": "boolean"
         },
         "name": {
           "type": "string"

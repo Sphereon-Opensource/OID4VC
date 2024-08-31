@@ -9,7 +9,7 @@ import {
 } from '../types'
 
 export function assertValidMetadata(opMetadata: DiscoveryMetadataPayload, rpMetadata: RPRegistrationMetadataPayload): CommonSupportedMetadata {
-  let subjectSyntaxTypesSupported = []
+  let subjectSyntaxTypesSupported: string[] = []
   const credentials = supportedCredentialsFormats(rpMetadata.vp_formats, opMetadata.vp_formats)
   const isValidSubjectSyntax = verifySubjectSyntaxes(rpMetadata.subject_syntax_types_supported)
   if (isValidSubjectSyntax && rpMetadata.subject_syntax_types_supported) {
@@ -37,8 +37,8 @@ function getIntersection<T>(rpMetadata: Array<T> | T, opMetadata: Array<T> | T):
   return arrayA.filter((value) => arrayB.includes(value))
 }
 
-function verifySubjectSyntaxes(subjectSyntaxTypesSupported: string[]): boolean {
-  if (subjectSyntaxTypesSupported.length) {
+function verifySubjectSyntaxes(subjectSyntaxTypesSupported: string[] | undefined): boolean {
+  if (subjectSyntaxTypesSupported?.length) {
     if (Array.isArray(subjectSyntaxTypesSupported)) {
       if (
         subjectSyntaxTypesSupported.length ===

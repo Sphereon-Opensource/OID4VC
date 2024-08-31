@@ -21,7 +21,7 @@ export function getResolver(opts: ResolveOpts): Resolvable {
   }
 
   const uniResolvers: {
-    [p: string]: (did: string, _parsed: ParsedDID, _didResolver: Resolver, _options: DIDResolutionOptions) => Promise<DIDResolutionResult>
+    [p: string]: (did: string, _parsed: ParsedDID, _didResolver: Resolvable, _options: DIDResolutionOptions) => Promise<DIDResolutionResult>
   }[] = []
   if (opts.subjectSyntaxTypesSupported.indexOf(SubjectIdentifierType.DID) === -1) {
     const specificDidMethods = opts.subjectSyntaxTypesSupported.filter((sst) => sst.includes('did:'))
@@ -65,7 +65,7 @@ export function getResolverUnion(
   }
   const fallbackResolver: Resolvable = customResolver ? customResolver : new UniResolver()
   const uniResolvers: {
-    [p: string]: (did: string, _parsed: ParsedDID, _didResolver: Resolver, _options: DIDResolutionOptions) => Promise<DIDResolutionResult>
+    [p: string]: (did: string, _parsed: ParsedDID, _didResolver: Resolvable, _options: DIDResolutionOptions) => Promise<DIDResolutionResult>
   }[] = []
   const subjectTypes: string[] = []
   if (subjectSyntaxTypesSupported) {

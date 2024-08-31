@@ -14,7 +14,7 @@ import {
   Typ,
 } from '@sphereon/oid4vci-common';
 
-export class ProofOfPossessionBuilder<DIDDoc> {
+export class ProofOfPossessionBuilder<DIDDoc = never> {
   private readonly proof?: ProofOfPossession;
   private readonly callbacks?: ProofOfPossessionCallbacks<DIDDoc>;
   private readonly version: OpenId4VCIVersion;

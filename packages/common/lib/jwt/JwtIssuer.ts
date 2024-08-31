@@ -36,8 +36,6 @@ export interface JwtIssuerX5c extends JwtIssuerBase {
    * It must match an entry in the x5c certificate leaf entry dnsName / uriName
    */
   issuer: string;
-
-  clientIdScheme: 'x509_san_dns' | 'x509_san_uri';
 }
 
 export interface JwtIssuerJwk extends JwtIssuerBase {

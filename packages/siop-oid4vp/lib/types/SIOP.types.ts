@@ -395,7 +395,6 @@ export type RPRegistrationMetadataOpts = Partial<
     | 'clientPurpose'
   >
 > & {
-  client_id_scheme?: ClientIdScheme
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }
@@ -455,12 +454,14 @@ export enum VerifiablePresentationTypeFormat {
   JWT_VP = 'jwt_vp',
   LDP_VP = 'ldp_vp',
   SD_JWT_VC = 'vc+sd-jwt',
+  MSO_MDOC = 'mso_mdoc',
 }
 
 export enum VerifiableCredentialTypeFormat {
   LDP_VC = 'ldp_vc',
   JWT_VC = 'jwt_vc',
   SD_JWT_VC = 'vc+sd-jwt',
+  MSO_MDOC = 'mso_mdoc',
 }
 
 export enum EncSymmetricAlgorithmCode {
