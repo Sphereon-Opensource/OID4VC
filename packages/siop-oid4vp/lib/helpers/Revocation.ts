@@ -1,6 +1,16 @@
-import { CredentialMapper, W3CVerifiableCredential, WrappedVerifiableCredential, WrappedVerifiablePresentation } from '@sphereon/ssi-types'
+import {
+  CredentialMapper,
+  W3CVerifiableCredential,
+  WrappedVerifiableCredential,
+  WrappedVerifiablePresentation
+} from '@sphereon/ssi-types';
 
-import { RevocationStatus, RevocationVerification, RevocationVerificationCallback, VerifiableCredentialTypeFormat } from '../types'
+import {
+  RevocationStatus,
+  RevocationVerification,
+  RevocationVerificationCallback,
+  VerifiableCredentialTypeFormat
+} from '../types';
 
 export const verifyRevocation = async (
   vpToken: WrappedVerifiablePresentation,
@@ -14,7 +24,9 @@ export const verifyRevocation = async (
     throw new Error(`Revocation callback not provided`)
   }
 
-  const vcs = CredentialMapper.isWrappedSdJwtVerifiablePresentation(vpToken) ? [vpToken.vcs[0]] : vpToken.presentation.verifiableCredential
+  const vcs = CredentialMapper.isWrappedSdJwtVerifiablePresentation(vpToken) ? [vpToken.vcs[0]]
+    // @ts-expect-error FIXME Funke remove  
+    : vpToken.presentation.verifiableCredential
   for (const vc of vcs) {
     if (
       revocationVerification === RevocationVerification.ALWAYS ||
@@ -38,6 +50,7 @@ function originalTypeToVerifiableCredentialTypeFormat(original: WrappedVerifiabl
     jwt_vc: VerifiableCredentialTypeFormat.JWT_VC,
     ldp: VerifiableCredentialTypeFormat.LDP_VC,
     ldp_vc: VerifiableCredentialTypeFormat.LDP_VC,
+    mso_mdoc: VerifiableCredentialTypeFormat.MSO_MDOC
   }
 
   return mapping[original]

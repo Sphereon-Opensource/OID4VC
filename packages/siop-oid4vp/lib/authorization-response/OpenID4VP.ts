@@ -158,7 +158,10 @@ export const createPresentationSubmission = async (
       console.log(`No submission_data in VPs and not provided. Will try to deduce, but it is better to create the submission data beforehand`)
       for (const definitionOpt of opts.presentationDefinitions) {
         const definition = 'definition' in definitionOpt ? definitionOpt.definition : definitionOpt
-        const result = new PEX().evaluatePresentation(definition, wrappedPresentation.original, {
+        
+        const result = new PEX().evaluatePresentation(definition,
+          // @ts-expect-error FIXME Funke remove
+          wrappedPresentation.original, {
           generatePresentationSubmission: true,
           presentationSubmissionLocation: PresentationSubmissionLocation.EXTERNAL,
         })

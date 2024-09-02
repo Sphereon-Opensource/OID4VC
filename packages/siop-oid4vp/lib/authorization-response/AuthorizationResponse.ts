@@ -209,6 +209,7 @@ export class AuthorizationResponse {
       const presentations = await extractPresentationsFromAuthorizationResponse(this, opts)
       // We do not verify them, as that is done elsewhere. So we simply can take the first nonce
       if (!nonce) {
+        // @ts-expect-error FIXME Funke remove
         nonce = presentations[0].decoded.nonce
       }
     }

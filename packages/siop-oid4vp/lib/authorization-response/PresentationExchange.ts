@@ -77,7 +77,9 @@ export class PresentationExchange {
       },
     }
 
-    return await this.pex.verifiablePresentationFrom(presentationDefinition, selectedCredentials, presentationSignCallback, signOptions)
+    return await this.pex.verifiablePresentationFrom(presentationDefinition,
+      // @ts-expect-error FIXME Funke remove
+      selectedCredentials, presentationSignCallback, signOptions)
   }
 
   /**
@@ -104,7 +106,9 @@ export class PresentationExchange {
     } else if (!this.allVerifiableCredentials || this.allVerifiableCredentials.length == 0) {
       throw new Error(`${SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD}, no VCs were provided`)
     }
-    const selectResults: SelectResults = this.pex.selectFrom(presentationDefinition, this.allVerifiableCredentials, {
+    const selectResults: SelectResults = this.pex.selectFrom(presentationDefinition,
+      // @ts-expect-error FIXME Funke remove
+      this.allVerifiableCredentials, {
       ...opts,
       holderDIDs: opts?.holderDIDs ?? this.allDIDs,
       // fixme limited disclosure
@@ -151,6 +155,7 @@ export class PresentationExchange {
     // console.log(`Presentation (validate): ${JSON.stringify(verifiablePresentation)}`);
     const evaluationResults: PresentationEvaluationResults = new PEX({ hasher: opts?.hasher }).evaluatePresentation(
       presentationDefinition,
+      // @ts-expect-error FIXME Funke remove
       wvp.original,
       opts,
     )
@@ -360,7 +365,9 @@ export class PresentationExchange {
         }
         // console.log(`Presentation (filter): ${JSON.stringify(presentation)}`);
 
-        const evaluationResults = pex.evaluatePresentation(definition, vpw.original, {
+        const evaluationResults = pex.evaluatePresentation(definition,
+          // @ts-expect-error FIXME Funke remove
+          vpw.original, {
           ...opts,
           presentationSubmission,
         })
@@ -397,8 +404,12 @@ export class PresentationExchange {
       throw new Error(SIOPErrors.NO_VERIFIABLE_PRESENTATION_NO_CREDENTIALS)
     }
     const presentationSubmission =
-      opts?.presentationSubmission ?? (CredentialMapper.isW3cPresentation(presentation) ? presentation.presentation_submission : undefined)
-    const evaluationResults = pex.evaluatePresentation(definition, checkedPresentation.original, {
+      opts?.presentationSubmission ??
+      // @ts-expect-error FIXME Funke remove
+      (CredentialMapper.isW3cPresentation(presentation) ? presentation.presentation_submission : undefined)
+    const evaluationResults = pex.evaluatePresentation(definition,
+      // @ts-expect-error FIXME Funke remove
+      checkedPresentation.original, {
       ...opts,
       presentationSubmission,
     })
