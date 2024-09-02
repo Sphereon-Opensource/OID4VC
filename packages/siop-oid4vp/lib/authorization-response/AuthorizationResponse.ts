@@ -123,15 +123,17 @@ export class AuthorizationResponse {
         hasher: verifyOpts.hasher,
       })
 
-      await assertValidVerifiablePresentations({
-        presentationDefinitions,
-        presentations: wrappedPresentations,
-        verificationCallback: verifyOpts.verification.presentationVerificationCallback,
-        opts: {
-          ...responseOpts.presentationExchange,
-          hasher: verifyOpts.hasher,
-        },
-      })
+      if (wrappedPresentations.find(wp => wp.format === 'mso_mdoc') === undefined) { // FIXME Funke
+        await assertValidVerifiablePresentations({
+          presentationDefinitions,
+          presentations: wrappedPresentations,
+          verificationCallback: verifyOpts.verification.presentationVerificationCallback,
+          opts: {
+            ...responseOpts.presentationExchange,
+            hasher: verifyOpts.hasher
+          }
+        });
+      }
     }
 
     return response

@@ -1938,6 +1938,9 @@ export const AuthorizationResponseOptsSchemaObj = {
         "jwt": {
           "type": "string"
         },
+        "mso_mdoc": {
+          "type": "string"
+        },
         "nonce": {
           "type": "string"
         },
@@ -1968,7 +1971,9 @@ export const AuthorizationResponseOptsSchemaObj = {
         "JcsEd25519Signature2020",
         "BbsBlsSignatureProof2020",
         "BbsBlsBoundSignatureProof2020",
-        "JwtProof2020"
+        "JwtProof2020",
+        "SdJwtProof2024",
+        "MsoMdocProof2024"
       ]
     },
     "IProofPurpose": {

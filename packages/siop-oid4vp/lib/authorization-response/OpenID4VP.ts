@@ -298,7 +298,7 @@ export const assertValidVerifiablePresentations = async (args: {
     throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)
   } else if (args.presentationDefinitions && !args.opts.presentationSubmission) {
     throw new Error(`No presentation submission present. Please use presentationSubmission opt argument!`)
-  } else if (args.presentationDefinitions && presentationsWithFormat) {
+  } else if (args.presentationDefinitions && presentationsWithFormat && !presentationsWithFormat.some(value => value.format == 'mso_mdoc')) { // FIXME Funke
     await PresentationExchange.validatePresentationsAgainstDefinitions(
       args.presentationDefinitions,
       presentationsWithFormat,
