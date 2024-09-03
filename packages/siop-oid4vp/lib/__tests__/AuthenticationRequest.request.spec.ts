@@ -152,7 +152,7 @@ describe('create Request Uri should', () => {
     expect(uriRequest.authorizationRequestPayload).toBeDefined()
 
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
-    expect(uriDecoded).toContain(`openid://`)
+    expect(uriDecoded).toContain(`openid4vp://`)
     expect(uriDecoded).toContain(`response_type=${ResponseType.ID_TOKEN}`)
     expect(uriDecoded).toContain(`&redirect_uri=${opts.payload?.redirect_uri}`)
     expect(uriDecoded).toContain(`&scope=${Scope.OPENID}`)
@@ -268,10 +268,10 @@ describe('create Request Uri should', () => {
     const uriRequest = await URI.fromOpts(opts)
 
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
-    expect(uriDecoded).toContain(`openid://?request=eyJhbGciOi`)
+    expect(uriDecoded).toContain(`openid4vp://?request=eyJhbGciOi`)
 
     const data = URI.parse(uriDecoded)
-    expect(data.scheme).toEqual('openid://')
+    expect(data.scheme).toEqual('openid4vp://')
     expect(data.authorizationRequestPayload.request).toContain(`eyJhbGciOi`)
   })
 })
@@ -598,7 +598,7 @@ describe('create Request JWT should', () => {
     const uriRequest = await URI.fromOpts(opts)
 
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
-    expect(uriDecoded).toEqual(`openid://?request_uri=https://rp.acme.com/siop/jwts`)
+    expect(uriDecoded).toEqual(`openid4vp://?request_uri=https://rp.acme.com/siop/jwts`)
     expect((await (await uriRequest.toAuthorizationRequest())?.requestObject?.getPayload())?.claims.vp_token).toBeDefined()
   })
 
