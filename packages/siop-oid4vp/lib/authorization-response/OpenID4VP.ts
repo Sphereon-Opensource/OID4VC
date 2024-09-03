@@ -98,15 +98,20 @@ export const verifyPresentations = async (
   if (presentations.length === 0) {
     return null
   }
-
+  
   const nonces = new Set(presentations.map(extractNonceFromWrappedVerifiablePresentation))
   if (presentations.length > 0 && nonces.size !== 1) {
     throw Error(`${nonces.size} nonce values found for ${presentations.length}. Should be 1`)
   }
 
   // Nonce may be undefined
-  const nonce = Array.from(nonces)[0]
-  if (typeof nonce !== 'string') {
+  let nonce = Array.from(nonces)[0]
+  if(presentations.some(presentation => presentation.format === 'mso_mdoc')) {  // FIXME Funke
+    verifyOpts.nonce = 'mdoc' // FIXME Funke
+    nonce = "mdoc" // FIXME Funke
+  }
+  
+  if (typeof nonce !== 'string') { 
     throw new Error('Expected all presentations to contain a nonce value')
   }
 
