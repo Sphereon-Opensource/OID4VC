@@ -152,7 +152,7 @@ describe('create Request Uri should', () => {
     expect(uriRequest.authorizationRequestPayload).toBeDefined()
 
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
-    expect(uriDecoded).toContain(`openid://`)
+    expect(uriDecoded).toContain(`openid4vp://`)
     expect(uriDecoded).toContain(`response_type=${ResponseType.ID_TOKEN}`)
     expect(uriDecoded).toContain(`&redirect_uri=${opts.payload?.redirect_uri}`)
     expect(uriDecoded).toContain(`&scope=${Scope.OPENID}`)
