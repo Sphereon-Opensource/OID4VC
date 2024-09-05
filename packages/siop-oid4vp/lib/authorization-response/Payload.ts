@@ -21,10 +21,9 @@ export const createResponsePayload = async (
   const state: string | undefined = await authorizationRequest.getMergedProperty('state')
 
   const responsePayload: AuthorizationResponsePayload = {
-    ...(responseOpts.accessToken && { access_token: responseOpts.accessToken }),
+    ...(responseOpts.accessToken && { access_token: responseOpts.accessToken, expires_in: responseOpts.expiresIn || 3600 }),
     ...(responseOpts.tokenType && { token_type: responseOpts.tokenType }),
     ...(responseOpts.refreshToken && { refresh_token: responseOpts.refreshToken }),
-    expires_in: responseOpts.expiresIn || 3600,
     state,
   }
 

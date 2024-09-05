@@ -75,11 +75,22 @@ export const getX5cVerifier = (jwt: { header: JwtHeader; payload: JwtPayload }, 
     throw new Error(`Received an invalid JWT.. '${type}' contains an invalid x5c header.`);
   }
 
-  if (typeof jwt.payload.iss !== 'string') {
-    throw new Error(`Received an invalid JWT. '${type}' contains an invalid iss claim.`);
+  let issuer: string;
+
+  // For 'request-object' the `iss` value is not required
+  if (type !== 'request-object') {
+    if (typeof jwt.payload.iss !== 'string') {
+      throw new Error(`Received an invalid JWT. '${type}' contains an invalid iss claim.`);
+    }
+
+    issuer = jwt.payload.iss;
+  } else {
+    if (!jwt.payload.client_id) throw new Error('Missing required field client_id in request object JWT');
+
+    issuer = jwt.payload.client_id;
   }
 
-  return { method: 'x5c', x5c: jwt.header.x5c, issuer: jwt.payload.iss, type: type, alg: jwt.header.alg };
+  return { method: 'x5c', x5c: jwt.header.x5c, issuer, type: type, alg: jwt.header.alg };
 };
 
 export const getJwkVerifier = async (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): Promise<JwkJwtVerifier> => {
