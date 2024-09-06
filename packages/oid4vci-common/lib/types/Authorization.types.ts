@@ -315,6 +315,7 @@ export interface AuthorizationRequestOpts {
   redirectUri?: string;
   scope?: string;
   requestObjectOpts?: RequestObjectOpts;
+  holderPreferredAuthzFlowTypeOrder?: AuthzFlowType[]
 }
 
 export interface AuthorizationResponse {
