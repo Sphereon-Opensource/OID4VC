@@ -37,6 +37,7 @@ export const authorizationRequestVersionDiscovery = (authorizationRequest: Autho
   const versions = []
   const authorizationRequestCopy: AuthorizationRequestPayload = JSON.parse(JSON.stringify(authorizationRequest))
   const vd13Validation = AuthorizationRequestPayloadVD12OID4VPD20Schema(authorizationRequestCopy)
+
   if (vd13Validation) {
     if (
       !authorizationRequestCopy.registration_uri &&

@@ -32,9 +32,30 @@ import {
   VPTokenLocation,
 } from './types'
 
-function extractNonceFromWrappedVerifiablePresentation(wrappedVp: WrappedVerifiablePresentation): string | undefined {
-  // SD-JWT uses kb-jwt for the nonce
-  if (CredentialMapper.isWrappedSdJwtVerifiablePresentation(wrappedVp)) {
+export class MdocVerifiablePresentation {
+  constructor(private _deviceSignedBase64Url: string) {}
+
+  public deviceSignedBase64Url = this._deviceSignedBase64Url
+
+  public format = 'mso_mdoc'
+  public claimFormat = 'mso_mdoc'
+
+  get nonce(): string {
+    return JSON.parse(this.deviceSignedBase64Url).nonce as string
+  }
+
+  set nonce(nonce: string) {
+    const obj = JSON.parse(this.deviceSignedBase64Url)
+    obj.nonce = nonce
+    this.deviceSignedBase64Url = JSON.stringify(obj)
+  }
+}
+
+function extractNonceFromWrappedVerifiablePresentation(wrappedVp: WrappedVerifiablePresentation | MdocVerifiablePresentation): string | undefined {
+  if (wrappedVp instanceof MdocVerifiablePresentation) {
+    return wrappedVp.nonce
+  } else if (CredentialMapper.isWrappedSdJwtVerifiablePresentation(wrappedVp)) {
+    // SD-JWT uses kb-jwt for the nonce
     // TODO: replace this once `kbJwt.payload` is available on the decoded sd-jwt (pr in ssi-sdk)
     // If it doesn't end with ~, it contains a kbJwt
     if (!wrappedVp.presentation.compactSdJwtVc.endsWith('~')) {
@@ -127,12 +148,17 @@ export const verifyPresentations = async (
 export const extractPresentationsFromAuthorizationResponse = async (
   response: AuthorizationResponse,
   opts?: { hasher?: Hasher },
-): Promise<WrappedVerifiablePresentation[]> => {
-  const wrappedVerifiablePresentations: WrappedVerifiablePresentation[] = []
+): Promise<(WrappedVerifiablePresentation | MdocVerifiablePresentation)[]> => {
+  const wrappedVerifiablePresentations: (WrappedVerifiablePresentation | MdocVerifiablePresentation)[] = []
   if (response.payload.vp_token) {
     const presentations = Array.isArray(response.payload.vp_token) ? response.payload.vp_token : [response.payload.vp_token]
     for (const presentation of presentations) {
-      wrappedVerifiablePresentations.push(CredentialMapper.toWrappedVerifiablePresentation(presentation, { hasher: opts?.hasher }))
+      if (typeof presentation === 'string' && !presentation.includes('~')) {
+        const mdocVerifiablePresentation = new MdocVerifiablePresentation(presentation)
+        wrappedVerifiablePresentations.push(mdocVerifiablePresentation)
+      } else {
+        wrappedVerifiablePresentations.push(CredentialMapper.toWrappedVerifiablePresentation(presentation, { hasher: opts?.hasher }))
+      }
     }
   }
   return wrappedVerifiablePresentations
@@ -267,7 +293,7 @@ export const putPresentationSubmissionInLocation = async (
 
 export const assertValidVerifiablePresentations = async (args: {
   presentationDefinitions: PresentationDefinitionWithLocation[]
-  presentations: WrappedVerifiablePresentation[]
+  presentations: (WrappedVerifiablePresentation | MdocVerifiablePresentation)[]
   verificationCallback: PresentationVerificationCallback
   opts?: {
     limitDisclosureSignatureSuites?: string[]
@@ -277,14 +303,31 @@ export const assertValidVerifiablePresentations = async (args: {
     hasher?: Hasher
   }
 }) => {
+  const mdocVerifiablePresentations = args.presentations.filter(
+    (p) => p instanceof MdocVerifiablePresentation === true,
+  ) as MdocVerifiablePresentation[]
+  if (mdocVerifiablePresentations.length > 0) {
+    if (args.verificationCallback) {
+      for (const mdocVerifiablePresentation of mdocVerifiablePresentations) {
+        await args.verificationCallback(mdocVerifiablePresentation, args.opts?.presentationSubmission)
+      }
+    }
+
+    // TODO: PEX DOES NOT YET SUPPORT THIS with mdoc
+    return
+  }
+
+  const presentations = args.presentations as WrappedVerifiablePresentation[]
+
   if (
     (!args.presentationDefinitions || args.presentationDefinitions.filter((a) => a.definition).length === 0) &&
-    (!args.presentations || (Array.isArray(args.presentations) && args.presentations.filter((vp) => vp.presentation).length === 0))
+    (!args.presentations || (Array.isArray(args.presentations) && presentations.filter((vp) => vp.presentation).length === 0))
   ) {
     return
   }
+
   PresentationExchange.assertValidPresentationDefinitionWithLocations(args.presentationDefinitions)
-  const presentationsWithFormat = args.presentations
+  const presentationsWithFormat = presentations
 
   if (args.presentationDefinitions && args.presentationDefinitions.length && (!presentationsWithFormat || presentationsWithFormat.length === 0)) {
     throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)

@@ -1,9 +1,10 @@
 import { CredentialMapper, W3CVerifiableCredential, WrappedVerifiableCredential, WrappedVerifiablePresentation } from '@sphereon/ssi-types'
 
+import { MdocVerifiablePresentation } from '../authorization-response/OpenID4VP'
 import { RevocationStatus, RevocationVerification, RevocationVerificationCallback, VerifiableCredentialTypeFormat } from '../types'
 
 export const verifyRevocation = async (
-  vpToken: WrappedVerifiablePresentation,
+  vpToken: WrappedVerifiablePresentation | MdocVerifiablePresentation,
   revocationVerificationCallback: RevocationVerificationCallback,
   revocationVerification: RevocationVerification,
 ): Promise<void> => {
@@ -12,6 +13,10 @@ export const verifyRevocation = async (
   }
   if (!revocationVerificationCallback) {
     throw new Error(`Revocation callback not provided`)
+  }
+
+  if (vpToken instanceof MdocVerifiablePresentation) {
+    return
   }
 
   const vcs = CredentialMapper.isWrappedSdJwtVerifiablePresentation(vpToken) ? [vpToken.vcs[0]] : vpToken.presentation.verifiableCredential

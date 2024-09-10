@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events'
 
+import { JarmClientMetadataParams, sendJarmAuthResponse } from '@protokoll/jarm'
 import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { IIssuerId } from '@sphereon/ssi-types'
 
@@ -17,6 +18,7 @@ import {
   AuthorizationEvent,
   AuthorizationEvents,
   ContentType,
+  JWK,
   ParsedAuthorizationRequestURI,
   RegisterEventListener,
   ResponseIss,
@@ -155,18 +157,32 @@ export class OP {
   }
 
   // TODO SK Can you please put some documentation on it?
-  public async submitAuthorizationResponse(authorizationResponse: AuthorizationResponseWithCorrelationId): Promise<Response> {
+  public async submitAuthorizationResponse(
+    authorizationResponse: AuthorizationResponseWithCorrelationId,
+    clientMetadata?: {
+      jwks?: { keys: JWK[] }
+      jwks_uri?: string
+    } & JarmClientMetadataParams,
+  ): Promise<Response> {
     const { correlationId, response } = authorizationResponse
     if (!correlationId) {
       throw Error('No correlation Id provided')
     }
+
+    const isJarmResponseMode = (responseMode: string): responseMode is 'direct_post.jwt' | 'query.jwt' | 'fragment.jwt' => {
+      return responseMode === ResponseMode.DIRECT_POST_JWT || responseMode === ResponseMode.QUERY_JWT || responseMode === ResponseMode.FRAGMENT_JWT
+    }
+
+    const responseMode = response.options.responseMode
+
     if (
       !response ||
       (response.options?.responseMode &&
         !(
-          response.options.responseMode === ResponseMode.POST ||
-          response.options.responseMode === ResponseMode.FORM_POST ||
-          response.options.responseMode === ResponseMode.DIRECT_POST
+          responseMode === ResponseMode.POST ||
+          responseMode === ResponseMode.FORM_POST ||
+          responseMode === ResponseMode.DIRECT_POST ||
+          isJarmResponseMode(responseMode)
         ))
     ) {
       throw new Error(SIOPErrors.BAD_PARAMS)
@@ -178,6 +194,49 @@ export class OP {
     if (!responseUri) {
       throw Error('No response URI present')
     }
+
+    if (isJarmResponseMode(responseMode)) {
+      if (!clientMetadata) {
+        throw new Error(`Sending an authorization response with response_mode '${responseMode}' requires providing client_metadata`)
+      }
+
+      if (!this._createResponseOptions.encryptJwtCallback) {
+        throw new Error(`Sending an authorization response with response_mode '${responseMode}' requires providing an encryptJwtCallback`)
+      }
+
+      if (!clientMetadata.jwks) {
+        throw new Error('Currently the jarm response decryption key can only be extracted from the jwks client_metadata parameter')
+      }
+
+      const decJwk = clientMetadata.jwks.keys.find((key) => key.use === 'enc')
+      if (!decJwk) {
+        throw new Error('No decyption key found in the jwks client_metadata parameter')
+      }
+
+      const { jwe } = await this.createResponseOptions.encryptJwtCallback({
+        jwk: decJwk,
+        plaintext: JSON.stringify(response.payload),
+      })
+
+      let responseType: 'id_token' | 'id_token vp_token' | 'vp_token'
+      if (idToken && payload.vp_token) {
+        responseType = 'id_token vp_token'
+      } else if (idToken) {
+        responseType = 'id_token'
+      } else if (payload.vp_token) {
+        responseType = 'vp_token'
+      }
+
+      return sendJarmAuthResponse({
+        authRequestParams: {
+          response_uri: responseUri,
+          response_mode: responseMode,
+          response_type: responseType,
+        },
+        authResponseParams: { response: jwe },
+      })
+    }
+
     const authResponseAsURI = encodeJsonAsURI(payload, { arraysWithIndex: ['presentation_submission', 'vp_token'] })
     return post(responseUri, authResponseAsURI, { contentType: ContentType.FORM_URL_ENCODED, exceptionOnHttpErrorStatus: true })
       .then((result: SIOPResonse<unknown>) => {

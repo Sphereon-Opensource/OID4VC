@@ -1,5 +1,5 @@
 // noinspection JSUnusedGlobalSymbols
-
+import { JarmClientMetadataParams } from '@protokoll/jarm'
 import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import {
@@ -21,6 +21,7 @@ import {
   PresentationVerificationCallback,
   VerifyAuthorizationResponseOpts,
 } from '../authorization-response'
+import { MdocVerifiablePresentation } from '../authorization-response/OpenID4VP'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 
@@ -374,7 +375,7 @@ export type DiscoveryMetadataPayload = DiscoveryMetadataPayloadVID1 | JWT_VCDisc
 export type DiscoveryMetadataOpts = (JWT_VCDiscoveryMetadataOpts | DiscoveryMetadataOptsVID1 | DiscoveryMetadataOptsVD11) &
   DiscoveryMetadataCommonOpts
 
-export type ClientMetadataOpts = RPRegistrationMetadataOpts & ClientMetadataProperties
+export type ClientMetadataOpts = RPRegistrationMetadataOpts & ClientMetadataProperties & JarmClientMetadataParams
 
 export type ResponseRegistrationOpts = DiscoveryMetadataOpts & ClientMetadataProperties
 
@@ -503,7 +504,7 @@ export interface VerifiedIDToken {
 export interface VerifiedOpenID4VPSubmission {
   submissionData: PresentationSubmission
   presentationDefinitions: PresentationDefinitionWithLocation[]
-  presentations: WrappedVerifiablePresentation[]
+  presentations: (WrappedVerifiablePresentation | MdocVerifiablePresentation)[]
   nonce: string
 }
 
@@ -534,6 +535,10 @@ export enum ResponseMode {
   // See https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-response-mode-direct_post
   DIRECT_POST = 'direct_post',
   QUERY = 'query',
+
+  DIRECT_POST_JWT = 'direct_post.jwt',
+  QUERY_JWT = 'query.jwt',
+  FRAGMENT_JWT = 'fragment.jwt',
 }
 
 export enum ProtocolFlow {

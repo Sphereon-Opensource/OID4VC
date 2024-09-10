@@ -24,11 +24,22 @@ export const AuthorizationResponseOptsSchemaObj = {
         "createJwtCallback": {
           "$ref": "#/definitions/CreateJwtCallback"
         },
+        "encryptJwtCallback": {
+          "$ref": "#/definitions/EncryptJwtCallback"
+        },
         "jwtIssuer": {
           "$ref": "#/definitions/JwtIssuer"
         },
         "responseMode": {
           "$ref": "#/definitions/ResponseMode"
+        },
+        "responseType": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResponseType"
+          },
+          "minItems": 1,
+          "maxItems": 1
         },
         "expiresIn": {
           "type": "number"
@@ -1350,7 +1361,10 @@ export const AuthorizationResponseOptsSchemaObj = {
         "form_post",
         "post",
         "direct_post",
-        "query"
+        "query",
+        "direct_post.jwt",
+        "query.jwt",
+        "fragment.jwt"
       ]
     },
     "GrantType": {
@@ -1535,6 +1549,17 @@ export const AuthorizationResponseOptsSchemaObj = {
       "$ref": "#/definitions/CreateJwtCallback%3CJwtIssuerWithContext%3E"
     },
     "CreateJwtCallback<JwtIssuerWithContext>": {
+      "properties": {
+        "isFunction": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "EncryptJwtCallback": {
+      "$ref": "#/definitions/JoseJweEncrypt"
+    },
+    "JoseJweEncrypt": {
       "properties": {
         "isFunction": {
           "type": "boolean",

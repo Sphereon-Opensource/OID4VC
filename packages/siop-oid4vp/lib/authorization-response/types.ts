@@ -3,11 +3,21 @@ import { IPresentationDefinition, PresentationSignCallBackParams } from '@sphere
 import { Format } from '@sphereon/pex-models'
 import { CompactSdJwtVc, Hasher, PresentationSubmission, W3CVerifiablePresentation } from '@sphereon/ssi-types'
 
-import { ResponseMode, ResponseRegistrationOpts, ResponseURIType, SupportedVersion, VerifiablePresentationWithFormat, Verification } from '../types'
+import { EncryptJwtCallback } from '../helpers/Jwe'
+import {
+  ResponseMode,
+  ResponseRegistrationOpts,
+  ResponseType,
+  ResponseURIType,
+  SupportedVersion,
+  VerifiablePresentationWithFormat,
+  Verification,
+} from '../types'
 import { CreateJwtCallback } from '../types/VpJwtIssuer'
 import { VerifyJwtCallback } from '../types/VpJwtVerifier'
 
 import { AuthorizationResponse } from './AuthorizationResponse'
+import { MdocVerifiablePresentation as MdocVerifiablePresentation } from './OpenID4VP'
 
 export interface AuthorizationResponseOpts {
   // redirectUri?: string; // It's typically comes from the request opts as a measure to prevent hijacking.
@@ -17,8 +27,10 @@ export interface AuthorizationResponseOpts {
   version?: SupportedVersion
   audience?: string
   createJwtCallback: CreateJwtCallback
+  encryptJwtCallback?: EncryptJwtCallback
   jwtIssuer?: JwtIssuer
   responseMode?: ResponseMode
+  responseType?: [ResponseType]
   // did: string;
   expiresIn?: number
   accessToken?: string
@@ -78,7 +90,7 @@ export enum VPTokenLocation {
 export type PresentationVerificationResult = { verified: boolean; reason?: string }
 
 export type PresentationVerificationCallback = (
-  args: W3CVerifiablePresentation | CompactSdJwtVc,
+  args: W3CVerifiablePresentation | CompactSdJwtVc | MdocVerifiablePresentation,
   presentationSubmission: PresentationSubmission,
 ) => Promise<PresentationVerificationResult>
 

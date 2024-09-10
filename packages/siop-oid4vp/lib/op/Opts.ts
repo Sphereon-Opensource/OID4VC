@@ -22,6 +22,7 @@ export const createResponseOptsFromBuilderOrExistingOpts = (opts: {
       expiresIn: opts.builder.expiresIn,
       jwtIssuer: responseOpts?.jwtIssuer,
       createJwtCallback: opts.builder.createJwtCallback,
+      encryptJwtCallback: opts.builder.encryptJwtCallback,
       responseMode: opts.builder.responseMode,
       ...(responseOpts?.version
         ? { version: responseOpts.version }
