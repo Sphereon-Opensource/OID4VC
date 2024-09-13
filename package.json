@@ -23,7 +23,8 @@
     "node": ">=18"
   },
   "resolutions": {
-    "node-fetch": "2.6.12"
+    "node-fetch": "2.6.12",
+    "@sphereon/ssi-types": "0.29.1-unstable.237"
   },
   "prettier": {
     "endOfLine": "auto",

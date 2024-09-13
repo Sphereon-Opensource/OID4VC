@@ -32,7 +32,7 @@ import {
   VPTokenLocation,
 } from './types'
 
-function extractNonceFromWrappedVerifiablePresentation(wrappedVp: WrappedVerifiablePresentation): string | undefined {
+export function extractNonceFromWrappedVerifiablePresentation(wrappedVp: WrappedVerifiablePresentation): string | undefined {
   // SD-JWT uses kb-jwt for the nonce
   if (CredentialMapper.isWrappedSdJwtVerifiablePresentation(wrappedVp)) {
     // TODO: replace this once `kbJwt.payload` is available on the decoded sd-jwt (pr in ssi-sdk)
@@ -154,7 +154,7 @@ export const createPresentationSubmission = async (
     if (typeof submission === 'string') {
       submission = JSON.parse(submission)
     }
-    if (!submission && opts?.presentationDefinitions) {
+    if (!submission && opts?.presentationDefinitions && !CredentialMapper.isWrappedMdocPresentation(wrappedPresentation)) {
       console.log(`No submission_data in VPs and not provided. Will try to deduce, but it is better to create the submission data beforehand`)
       for (const definitionOpt of opts.presentationDefinitions) {
         const definition = 'definition' in definitionOpt ? definitionOpt.definition : definitionOpt
