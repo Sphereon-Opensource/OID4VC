@@ -289,13 +289,22 @@ export class PresentationExchange {
       evaluationResults = pex.evaluatePresentation(
         definition,
         Array.isArray(vpPayloads) ? vpPayloads.map((wvp) => wvp.original) : vpPayloads.original,
-        opts,
+        {
+          ...opts,
+          // We always have external presentation submissions here. Some older versions of OID4VP allow for submission in presentation,
+          // but in that case the submission will not be provided
+          presentationSubmissionLocation: PresentationSubmissionLocation.EXTERNAL,
+        },
       )
     } else {
       for (const wvp of vpPayloadsArray) {
         if (CredentialMapper.isWrappedW3CVerifiablePresentation(wvp) && wvp.presentation.presentation_submission) {
           const presentationSubmission = wvp.presentation.presentation_submission
-          evaluationResults = pex.evaluatePresentation(definition, wvp.original, { ...opts, presentationSubmission })
+          evaluationResults = pex.evaluatePresentation(definition, wvp.original, {
+            ...opts,
+            presentationSubmission,
+            presentationSubmissionLocation: PresentationSubmissionLocation.PRESENTATION,
+          })
           const submission = evaluationResults.value
 
           // Found valid submission

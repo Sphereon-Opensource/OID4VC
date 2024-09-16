@@ -445,8 +445,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/pex':
-        specifier: ^4.1.0
-        version: 4.1.0
+        specifier: 4.1.1-unstable.0
+        version: 4.1.1-unstable.0
       '@sphereon/pex-models':
         specifier: ^2.3.1
         version: 2.3.1
@@ -2525,8 +2525,8 @@ packages:
   '@sphereon/pex-models@2.3.1':
     resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
 
-  '@sphereon/pex@4.1.0':
-    resolution: {integrity: sha512-FVaaStVW8ewiAVfbpLmjRuAmEA/7xwifY5m1r6RaignMpPLK3uBt+Urae/Y78lcuJttj7WvRMzddgNO3RtsO+Q==}
+  '@sphereon/pex@4.1.1-unstable.0':
+    resolution: {integrity: sha512-new7Eem41l7/HY3yvTOXrSxJLRer4hBRzIb6WCDNz7RfrzhuuQzW6UqudNABoEGpIW34E9UHkz0q8gclJrxprQ==}
     engines: {node: '>=18'}
 
   '@sphereon/ssi-express-support@0.29.1-unstable.208':
@@ -11808,7 +11808,7 @@ snapshots:
 
   '@sphereon/pex-models@2.3.1': {}
 
-  '@sphereon/pex@4.1.0':
+  '@sphereon/pex@4.1.1-unstable.0':
     dependencies:
       '@astronautlabs/jsonpath': 1.1.2
       '@sd-jwt/decode': 0.6.1
