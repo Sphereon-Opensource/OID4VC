@@ -32,7 +32,7 @@ import {
   VPTokenLocation,
 } from './types'
 
-export function extractNonceFromWrappedVerifiablePresentation(wrappedVp: WrappedVerifiablePresentation): string | undefined {
+export const extractNonceFromWrappedVerifiablePresentation = (wrappedVp: WrappedVerifiablePresentation): string | undefined => {
   // SD-JWT uses kb-jwt for the nonce
   if (CredentialMapper.isWrappedSdJwtVerifiablePresentation(wrappedVp)) {
     // TODO: replace this once `kbJwt.payload` is available on the decoded sd-jwt (pr in ssi-sdk)
@@ -105,7 +105,12 @@ export const verifyPresentations = async (
   }
 
   // Nonce may be undefined
-  const nonce = Array.from(nonces)[0]
+  let nonce = Array.from(nonces)[0]
+  if(presentations.some(presentation => presentation.format === 'mso_mdoc')) {  // FIXME Funke
+    verifyOpts.nonce = 'mdoc'
+    nonce = "mdoc" // TODO extract nonce from mdoc session
+  }
+  
   if (typeof nonce !== 'string') {
     throw new Error('Expected all presentations to contain a nonce value')
   }
@@ -277,14 +282,14 @@ export const assertValidVerifiablePresentations = async (args: {
     hasher?: Hasher
   }
 }) => {
+  const presentationsWithFormat = args.presentations.filter(presentation => presentation.format !== 'mso_mdoc')
   if (
     (!args.presentationDefinitions || args.presentationDefinitions.filter((a) => a.definition).length === 0) &&
-    (!args.presentations || (Array.isArray(args.presentations) && args.presentations.filter((vp) => vp.presentation).length === 0))
+    (!presentationsWithFormat || (Array.isArray(presentationsWithFormat) && presentationsWithFormat.filter((vp) => vp.presentation).length === 0))
   ) {
     return
   }
   PresentationExchange.assertValidPresentationDefinitionWithLocations(args.presentationDefinitions)
-  const presentationsWithFormat = args.presentations
 
   if (args.presentationDefinitions && args.presentationDefinitions.length && (!presentationsWithFormat || presentationsWithFormat.length === 0)) {
     throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)

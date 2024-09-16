@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@sphereon/oid4vc-common": "workspace:*",
-    "@sphereon/ssi-types": "0.29.1-unstable.237",
+    "@sphereon/ssi-types": "0.29.1-unstable.112",
     "cross-fetch": "^3.1.8",
     "debug": "^4.3.5",
     "jwt-decode": "^4.0.0",

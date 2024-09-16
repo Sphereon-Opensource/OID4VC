@@ -83,7 +83,7 @@ export class PresentationExchange {
     }
     return await this.pex.verifiablePresentationFrom(presentationDefinition, this.removeMDocCredentials(selectedCredentials), presentationSignCallback, signOptions)
   }
-
+  
   private removeMDocCredentials(selectedCredentials: OriginalVerifiableCredential[]) {
     return selectedCredentials.filter(vc => !CredentialMapper.isMsoMdocDecodedCredential(vc) && !CredentialMapper.isMsoMdocDecodedCredential(vc));
   }

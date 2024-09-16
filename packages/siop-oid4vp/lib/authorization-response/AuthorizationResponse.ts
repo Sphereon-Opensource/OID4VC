@@ -144,9 +144,9 @@ export class AuthorizationResponse {
         verificationCallback: verifyOpts.verification.presentationVerificationCallback,
         opts: {
           ...responseOpts.presentationExchange,
-          hasher: verifyOpts.hasher,
-        },
-      })
+          hasher: verifyOpts.hasher
+        }
+      });
     }
 
     return response
