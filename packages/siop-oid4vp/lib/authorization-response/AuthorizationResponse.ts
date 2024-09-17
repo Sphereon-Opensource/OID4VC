@@ -5,7 +5,7 @@ import { assertValidVerifyAuthorizationRequestOpts } from '../authorization-requ
 import { IDToken } from '../id-token'
 import { AuthorizationResponsePayload, ResponseType, SIOPErrors, VerifiedAuthorizationRequest, VerifiedAuthorizationResponse } from '../types'
 
-import { assertValidVerifiablePresentations, extractPresentationsFromAuthorizationResponse, verifyPresentations } from './OpenID4VP'
+import { assertValidVerifiablePresentations, extractNonceFromWrappedVerifiablePresentation, extractPresentationsFromAuthorizationResponse, verifyPresentations } from './OpenID4VP'
 import { assertValidResponseOpts } from './Opts'
 import { createResponsePayload } from './Payload'
 import { AuthorizationResponseOpts, PresentationDefinitionWithLocation, VerifyAuthorizationResponseOpts } from './types'
@@ -207,7 +207,7 @@ export class AuthorizationResponse {
       const presentations = await extractPresentationsFromAuthorizationResponse(this, opts)
       // We do not verify them, as that is done elsewhere. So we simply can take the first nonce
       if (!nonce) {
-        nonce = presentations[0].decoded.nonce
+        nonce = extractNonceFromWrappedVerifiablePresentation(Array.isArray(presentations) ? presentations[0] : presentations)
       }
     }
     const idTokenPayload = await this.idToken?.payload()

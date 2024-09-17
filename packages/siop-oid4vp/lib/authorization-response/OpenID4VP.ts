@@ -32,7 +32,7 @@ import {
   VPTokenLocation,
 } from './types'
 
-function extractNonceFromWrappedVerifiablePresentation(wrappedVp: WrappedVerifiablePresentation): string | undefined {
+export function extractNonceFromWrappedVerifiablePresentation(wrappedVp: WrappedVerifiablePresentation): string | undefined {
   // SD-JWT uses kb-jwt for the nonce
   if (CredentialMapper.isWrappedSdJwtVerifiablePresentation(wrappedVp)) {
     // TODO: replace this once `kbJwt.payload` is available on the decoded sd-jwt (pr in ssi-sdk)
