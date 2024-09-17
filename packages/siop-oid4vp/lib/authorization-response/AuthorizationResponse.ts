@@ -5,7 +5,12 @@ import { assertValidVerifyAuthorizationRequestOpts } from '../authorization-requ
 import { IDToken } from '../id-token'
 import { AuthorizationResponsePayload, ResponseType, SIOPErrors, VerifiedAuthorizationRequest, VerifiedAuthorizationResponse } from '../types'
 
-import { assertValidVerifiablePresentations, extractNonceFromWrappedVerifiablePresentation, extractPresentationsFromAuthorizationResponse, verifyPresentations } from './OpenID4VP'
+import {
+  assertValidVerifiablePresentations,
+  extractNonceFromWrappedVerifiablePresentation,
+  extractPresentationsFromAuthorizationResponse,
+  verifyPresentations,
+} from './OpenID4VP'
 import { assertValidResponseOpts } from './Opts'
 import { createResponsePayload } from './Payload'
 import { AuthorizationResponseOpts, PresentationDefinitionWithLocation, VerifyAuthorizationResponseOpts } from './types'
