@@ -3,7 +3,6 @@
 import crypto, { createHash } from 'crypto'
 
 import { JwtPayload, parseJWT, SigningAlgo, uuidv4 } from '@sphereon/oid4vc-common'
-import { SdJwtDecodedVerifiableCredentialWithKbJwtInput } from '@sphereon/pex'
 import { IProofType } from '@sphereon/ssi-types'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -40,6 +39,7 @@ import {
   VERIFIERZ_PURPOSE_TO_VERIFY,
   VERIFIERZ_PURPOSE_TO_VERIFY_NL,
 } from './data/mockedData'
+import { PartialSdJwtDecodedVerifiableCredential } from '@sphereon/pex/dist/main/lib'
 
 export interface TESTKEY {
   key: JWK
@@ -287,7 +287,7 @@ export const metadata: {
 export const pexHasher = (data: string) => createHash('sha256').update(data).digest()
 
 export const sdJwtVcPresentationSignCallback: PresentationSignCallback = async (_args) => {
-  const presentation = _args.presentation as SdJwtDecodedVerifiableCredentialWithKbJwtInput
+  const presentation = _args.presentation as PartialSdJwtDecodedVerifiableCredential
 
   // In real life scenario, the KB-JWT must be signed
   // As the KB-JWT is a normal JWT, the user does not need an sd-jwt implementation in the presentation sign callback
