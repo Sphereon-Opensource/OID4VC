@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import crypto from 'crypto'
+import crypto, { createHash } from 'crypto'
 
 import { JwtPayload, parseJWT, SigningAlgo, uuidv4 } from '@sphereon/oid4vc-common'
 import { IProofType } from '@sphereon/ssi-types'
@@ -19,6 +19,7 @@ import {
   DiscoveryMetadataPayload,
   KeyCurve,
   KeyType,
+  PresentationSignCallback,
   ResponseIss,
   ResponseType,
   RPRegistrationMetadataPayload,
@@ -38,6 +39,7 @@ import {
   VERIFIERZ_PURPOSE_TO_VERIFY,
   VERIFIERZ_PURPOSE_TO_VERIFY_NL,
 } from './data/mockedData'
+import { PartialSdJwtDecodedVerifiableCredential } from '@sphereon/pex/dist/main/lib'
 
 export interface TESTKEY {
   key: JWK
@@ -280,4 +282,36 @@ export const metadata: {
   verify() {
     return assertValidMetadata(this.opMetadata, this.rpMetadata)
   },
+}
+
+export const pexHasher = (data: string) => createHash('sha256').update(data).digest()
+
+export const sdJwtVcPresentationSignCallback: PresentationSignCallback = async (_args) => {
+  const presentation = _args.presentation as PartialSdJwtDecodedVerifiableCredential
+
+  // In real life scenario, the KB-JWT must be signed
+  // As the KB-JWT is a normal JWT, the user does not need an sd-jwt implementation in the presentation sign callback
+  // NOTE: should the presentation just be the KB-JWT header + payload instead of the whole decoded SD JWT?
+  expect(presentation.kbJwt).toEqual({
+    header: {
+      typ: 'kb+jwt',
+    },
+    payload: {
+      sd_hash: expect.any(String),
+      iat: expect.any(Number),
+      nonce: expect.any(String),
+    },
+  })
+
+  const header = {
+    ...presentation.kbJwt.header,
+    alg: 'ES256K',
+  }
+  const payload = {
+    ...presentation.kbJwt.payload,
+    aud: '123',
+  }
+
+  const kbJwtCompact = `${Buffer.from(JSON.stringify(header)).toString('base64url')}.${Buffer.from(JSON.stringify(payload)).toString('base64url')}.signature`
+  return presentation.compactSdJwtVc + kbJwtCompact
 }
