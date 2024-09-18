@@ -8,7 +8,7 @@ import {
   VerifiablePresentationFromOpts,
   VerifiablePresentationResult
 } from '@sphereon/pex';
-import { PresentationEvaluationResults } from '@sphereon/pex/dist/main/lib/evaluation/core';
+import { PresentationEvaluationResults } from '@sphereon/pex/dist/main/lib/evaluation';
 import {
   Format,
   PresentationDefinitionV1,
@@ -21,7 +21,6 @@ import {
   IProofPurpose,
   IProofType,
   OriginalVerifiableCredential,
-  OriginalVerifiablePresentation,
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation
 } from '@sphereon/ssi-types';
@@ -305,8 +304,8 @@ export class PresentationExchange {
 
   static async validatePresentationsAgainstDefinitions(
     definitions: PresentationDefinitionWithLocation[],
-    vpPayloads: WrappedVerifiablePresentation[],
-    verifyPresentationCallback: PresentationVerificationCallback | undefined,
+    vpPayloads: Array<WrappedVerifiablePresentation> | WrappedVerifiablePresentation,
+    verifyPresentationCallback?: PresentationVerificationCallback | undefined,
     opts?: {
       limitDisclosureSignatureSuites?: string[]
       restrictToFormats?: Format
@@ -315,7 +314,7 @@ export class PresentationExchange {
       hasher?: Hasher
     },
   ) {
-    if (!definitions || !vpPayloads || !definitions.length || definitions.length !== vpPayloads.length) {
+    if (!definitions || !vpPayloads || (Array.isArray(vpPayloads) && vpPayloads.length === 0) || !definitions.length) {
       throw new Error(SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD)
     }
     await Promise.all(
@@ -325,10 +324,10 @@ export class PresentationExchange {
     )
   }
 
-  private static async validatePresentationsAgainstDefinition(
+  static async validatePresentationsAgainstDefinition(
     definition: IPresentationDefinition,
-    vpPayloads: WrappedVerifiablePresentation[],
-    verifyPresentationCallback: PresentationVerificationCallback | undefined,
+    vpPayloads: Array<WrappedVerifiablePresentation> | WrappedVerifiablePresentation,
+    verifyPresentationCallback?: PresentationVerificationCallback | undefined,
     opts?: {
       limitDisclosureSignatureSuites?: string[]
       restrictToFormats?: Format
@@ -338,6 +337,30 @@ export class PresentationExchange {
     },
   ) {
     const pex = new PEX({ hasher: opts?.hasher })
+    const vpPayloadsArray = Array.isArray(vpPayloads) ? vpPayloads : [vpPayloads]
+
+    let evaluationResults: PresentationEvaluationResults | undefined = undefined
+    if (opts?.presentationSubmission) {
+      evaluationResults = pex.evaluatePresentation(
+        definition,
+        Array.isArray(vpPayloads) ? vpPayloads.map((wvp) => wvp.original) : vpPayloads.original,
+        {
+          ...opts,
+          // We always have external presentation submissions here. Some older versions of OID4VP allow for submission in presentation,
+          // but in that case the submission will not be provided
+          presentationSubmissionLocation: PresentationSubmissionLocation.EXTERNAL,
+        },
+      )
+    } else {
+      for (const wvp of vpPayloadsArray) {
+        if (CredentialMapper.isWrappedW3CVerifiablePresentation(wvp) && wvp.presentation.presentation_submission) {
+          const presentationSubmission = wvp.presentation.presentation_submission
+          evaluationResults = pex.evaluatePresentation(definition, wvp.original, {
+            ...opts,
+            presentationSubmission,
+            presentationSubmissionLocation: PresentationSubmissionLocation.PRESENTATION,
+          })
+          const submission = evaluationResults.value
 
     async function filterOutCorrectPresentation() {
       //TODO: add support for multiple VPs here
@@ -347,22 +370,25 @@ export class PresentationExchange {
           (CredentialMapper.isWrappedW3CVerifiablePresentation(wvp) ? wvp.presentation.presentation_submission : undefined)
         const presentation = wvp.presentation
         if (!definition) {
-          throw new Error(SIOPErrors.NO_PRESENTATION_SUBMISSION)
+      throw new Error(SIOPErrors.NO_PRESENTATION_SUBMISSION)
         } else if (
           !wvp.presentation ||
           (CredentialMapper.isWrappedW3CVerifiablePresentation(wvp) &&
             (!wvp.presentation.verifiableCredential || wvp.presentation.verifiableCredential.length === 0))
         ) {
           throw new Error(SIOPErrors.NO_VERIFIABLE_PRESENTATION_NO_CREDENTIALS)
-        }
+    }
 
         if(CredentialMapper.isWrappedMdocPresentation(wvp)) {
           throw new Error('MDoc credentials are not supported by PEX') // TODO to SIOPErrors?
         }
         
-        // The verifyPresentationCallback function is mandatory for RP only,
-        // So the behavior here is to bypass it if not present
-        if (verifyPresentationCallback) {
+    // The verifyPresentationCallback function is mandatory for RP only,
+    // So the behavior here is to bypass it if not present
+    if (verifyPresentationCallback) {
+      // Verify the signature of all VPs
+      await Promise.all(
+        presentationsToVerify.map(async (presentation) => {
           try {
             const verificationResult = await verifyPresentationCallback(wvp.original as W3CVerifiablePresentation, presentationSubmission)
             if (!verificationResult.verified) {
@@ -419,10 +445,7 @@ export class PresentationExchange {
       presentationSubmission,
     })
     PresentationExchange.assertValidPresentationSubmission(evaluationResults.value)
-    await PresentationExchange.validatePresentationAgainstDefinition(definition, checkedPresentation, {
-      ...opts,
-      presentationSubmission,
-      hasher: opts?.hasher,
-    })
+
+    return evaluationResults
   }
 }

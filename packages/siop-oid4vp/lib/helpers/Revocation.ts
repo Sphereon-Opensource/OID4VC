@@ -21,7 +21,8 @@ export const verifyRevocation = async (
       throw new Error(`Revocation callback not provided`)
     }
 
-    const vcs = CredentialMapper.isWrappedSdJwtVerifiablePresentation(vpToken) ? [vpToken.vcs[0]] : vpToken.presentation.verifiableCredential
+  const vcs = (CredentialMapper.isWrappedSdJwtVerifiablePresentation(vpToken) || CredentialMapper.isWrappedMdocPresentation(vpToken))
+    ? [vpToken.vcs[0]] : vpToken.presentation.verifiableCredential
     for (const vc of vcs) {
       if (
         revocationVerification === RevocationVerification.ALWAYS ||

@@ -1,7 +1,5 @@
-import { createHash } from 'node:crypto'
-
 import { SigningAlgo } from '@sphereon/oid4vc-common'
-import { IPresentationDefinition, SdJwtDecodedVerifiableCredentialWithKbJwtInput } from '@sphereon/pex'
+import { IPresentationDefinition } from '@sphereon/pex'
 import { OriginalVerifiableCredential } from '@sphereon/ssi-types'
 
 import {
@@ -9,7 +7,6 @@ import {
   PassBy,
   PresentationDefinitionWithLocation,
   PresentationExchange,
-  PresentationSignCallback,
   PresentationVerificationCallback,
   PropertyTarget,
   ResponseIss,
@@ -24,7 +21,7 @@ import {
 
 import { getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
-import { mockedGetEnterpriseAuthToken, WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
+import { mockedGetEnterpriseAuthToken, pexHasher, sdJwtVcPresentationSignCallback, WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
 import {
   VERIFIER_LOGO_FOR_CLIENT,
   VERIFIER_NAME_FOR_CLIENT,
@@ -33,7 +30,6 @@ import {
   VERIFIERZ_PURPOSE_TO_VERIFY_NL,
 } from './data/mockedData'
 
-const hasher = (data: string) => createHash('sha256').update(data).digest()
 jest.setTimeout(30000)
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
@@ -41,36 +37,6 @@ const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 const HOLDER_DID = 'did:example:ebfeb1f712ebc6f1c276e12ec21'
 const SD_JWT_VC =
   'eyJhbGciOiJFZERTQSIsInR5cCI6InZjK3NkLWp3dCJ9.eyJpYXQiOjE3MDA0NjQ3MzYwNzYsImlzcyI6ImRpZDprZXk6c29tZS1yYW5kb20tZGlkLWtleSIsIm5iZiI6MTcwMDQ2NDczNjE3NiwidmN0IjoiaHR0cHM6Ly9oaWdoLWFzc3VyYW5jZS5jb20vU3RhdGVCdXNpbmVzc0xpY2Vuc2UiLCJ1c2VyIjp7Il9zZCI6WyI5QmhOVDVsSG5QVmpqQUp3TnR0NDIzM216MFVVMUd3RmFmLWVNWkFQV0JNIiwiSVl5d1FQZl8tNE9hY2Z2S2l1cjRlSnFMa1ZleWRxcnQ1Y2UwMGJReWNNZyIsIlNoZWM2TUNLakIxeHlCVl91QUtvLURlS3ZvQllYbUdBd2VGTWFsd05xbUEiLCJXTXpiR3BZYmhZMkdoNU9pWTRHc2hRU1dQREtSeGVPZndaNEhaQW5YS1RZIiwiajZ6ZFg1OUJYZHlTNFFaTGJITWJ0MzJpenRzWXdkZzRjNkpzWUxNc3ZaMCIsInhKR3Radm41cFM4VEhqVFlJZ3MwS1N5VC1uR3BSR3hDVnp6c1ZEbmMyWkUiXX0sImxpY2Vuc2UiOnsibnVtYmVyIjoxMH0sImNuZiI6eyJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJUQ0FFUjE5WnZ1M09IRjRqNFc0dmZTVm9ISVAxSUxpbERsczd2Q2VHZW1jIiwieSI6Ilp4amlXV2JaTVFHSFZXS1ZRNGhiU0lpcnNWZnVlY0NFNnQ0alQ5RjJIWlEifX0sIl9zZF9hbGciOiJzaGEtMjU2IiwiX3NkIjpbIl90YnpMeHBaeDBQVHVzV2hPOHRUZlVYU2ZzQjVlLUtrbzl3dmZaaFJrYVkiLCJ1WmNQaHdUTmN4LXpNQU1zemlYMkFfOXlJTGpQSEhobDhEd2pvVXJLVVdZIl19.HAcudVInhNpXkTPQGNosjKTFRJWgKj90NpfloRaDQchGd4zxc1ChWTCCPXzUXTBypASKrzgjZCiXlTr0bzmLAg~WyJHeDZHRUZvR2t6WUpWLVNRMWlDREdBIiwiZGF0ZU9mQmlydGgiLCIyMDAwMDEwMSJd~WyJ1LUt3cmJvMkZfTExQekdSZE1XLUtBIiwibmFtZSIsIkpvaG4iXQ~WyJNV1ZieGJqVFZxUXdLS3h2UGVZdWlnIiwibGFzdE5hbWUiLCJEb2UiXQ~'
-
-const presentationSignCallback: PresentationSignCallback = async (_args) => {
-  const kbJwt = (_args.presentation as SdJwtDecodedVerifiableCredentialWithKbJwtInput).kbJwt
-
-  // In real life scenario, the KB-JWT must be signed
-  // As the KB-JWT is a normal JWT, the user does not need an sd-jwt implementation in the presentation sign callback
-  // NOTE: should the presentation just be the KB-JWT header + payload instead of the whole decoded SD JWT?
-  expect(kbJwt).toEqual({
-    header: {
-      typ: 'kb+jwt',
-    },
-    payload: {
-      sd_hash: expect.any(String),
-      iat: expect.any(Number),
-      nonce: expect.any(String),
-    },
-  })
-
-  const header = {
-    ...kbJwt.header,
-    alg: 'ES256K',
-  }
-  const payload = {
-    ...kbJwt.payload,
-    aud: '123',
-  }
-
-  const kbJwtCompact = `${Buffer.from(JSON.stringify(header)).toString('base64url')}.${Buffer.from(JSON.stringify(payload)).toString('base64url')}.signature`
-  return SD_JWT_VC + kbJwtCompact
-}
 
 function getPresentationDefinition(): IPresentationDefinition {
   return {
@@ -140,7 +106,7 @@ describe('RP and OP interaction should', () => {
     const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
       .withClientId(rpMockEntity.did)
       .withScope('test')
-      .withHasher(hasher)
+      .withHasher(pexHasher)
       .withResponseType([ResponseType.ID_TOKEN, ResponseType.VP_TOKEN])
       .withRedirectUri(EXAMPLE_REDIRECT_URL)
       .withPresentationDefinition({ definition: getPresentationDefinition() }, [PropertyTarget.REQUEST_OBJECT, PropertyTarget.AUTHORIZATION_REQUEST])
@@ -170,9 +136,9 @@ describe('RP and OP interaction should', () => {
       .build()
 
     const op = OP.builder()
-      .withPresentationSignCallback(presentationSignCallback)
+      .withPresentationSignCallback(sdJwtVcPresentationSignCallback)
       .withExpiresIn(1000)
-      .withHasher(hasher)
+      .withHasher(pexHasher)
       .withCreateJwtCallback(internalSignature(opMockEntity.hexPrivateKey, opMockEntity.did, `${opMockEntity.did}#controller`, SigningAlgo.ES256K))
       .withVerifyJwtCallback(getVerifyJwtCallback(resolver))
       .withRegistration({
@@ -212,13 +178,13 @@ describe('RP and OP interaction should', () => {
     const pex = new PresentationExchange({
       allDIDs: [HOLDER_DID],
       allVerifiableCredentials: getVCs(),
-      hasher,
+      hasher: pexHasher,
     })
     const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(
       parsedAuthReqURI.authorizationRequestPayload,
     )
     await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
-    const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {
+    const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), sdJwtVcPresentationSignCallback, {
       proofOptions: {
         nonce: 'qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg',
       },
@@ -255,7 +221,7 @@ describe('RP and OP interaction should', () => {
       requestVersion: SupportedVersion.SIOPv2_D12_OID4VP_D18,
     })
       .withClientId(rpMockEntity.did)
-      .withHasher(hasher)
+      .withHasher(pexHasher)
       .withResponseType([ResponseType.VP_TOKEN])
       .withRedirectUri(EXAMPLE_REDIRECT_URL)
       .withPresentationDefinition({ definition: getPresentationDefinition() }, [PropertyTarget.REQUEST_OBJECT, PropertyTarget.AUTHORIZATION_REQUEST])
@@ -283,9 +249,9 @@ describe('RP and OP interaction should', () => {
       .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
       .build()
     const op = OP.builder()
-      .withPresentationSignCallback(presentationSignCallback)
+      .withPresentationSignCallback(sdJwtVcPresentationSignCallback)
       .withExpiresIn(1000)
-      .withHasher(hasher)
+      .withHasher(pexHasher)
       .withCreateJwtCallback(internalSignature(opMockEntity.hexPrivateKey, opMockEntity.did, `${opMockEntity.did}#controller`, SigningAlgo.ES256K))
       .withVerifyJwtCallback(getVerifyJwtCallback(resolver))
       .withRegistration({
@@ -326,13 +292,13 @@ describe('RP and OP interaction should', () => {
     const pex = new PresentationExchange({
       allDIDs: [HOLDER_DID],
       allVerifiableCredentials: getVCs(),
-      hasher,
+      hasher: pexHasher,
     })
     const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(
       parsedAuthReqURI.authorizationRequestPayload,
     )
     await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
-    const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {
+    const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), sdJwtVcPresentationSignCallback, {
       proofOptions: {
         nonce: 'qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg',
       },

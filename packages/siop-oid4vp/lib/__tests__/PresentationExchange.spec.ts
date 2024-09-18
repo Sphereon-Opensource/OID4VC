@@ -1,5 +1,6 @@
 import { SigningAlgo } from '@sphereon/oid4vc-common'
-import { PresentationDefinitionV1 } from '@sphereon/pex-models'
+import { PEX } from '@sphereon/pex'
+import { PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import { CredentialMapper, IPresentation, IProofType, IVerifiableCredential } from '@sphereon/ssi-types'
 import { W3CVerifiablePresentation } from '@sphereon/ssi-types/src/types/w3c-vc'
 import nock from 'nock'
@@ -20,7 +21,7 @@ import {
 } from '..'
 import { SIOPErrors } from '../types'
 
-import { mockedGetEnterpriseAuthToken } from './TestUtils'
+import { mockedGetEnterpriseAuthToken, pexHasher } from './TestUtils'
 import {
   VERIFIER_LOGO_FOR_CLIENT,
   VERIFIER_NAME_FOR_CLIENT,
@@ -32,7 +33,56 @@ import {
 const HOLDER_DID = 'did:example:ebfeb1f712ebc6f1c276e12ec21'
 const EXAMPLE_PD_URL = 'http://my_own_pd.com/pd/'
 
-async function getPayloadVID1Val(): Promise<AuthorizationRequestPayloadVID1> {
+const KB_JWT = `${Buffer.from(JSON.stringify({ typ: 'kb+jwt' })).toString('base64url')}.${Buffer.from(JSON.stringify({ sd_hash: 'real_hash', iat: 900, nonce: 'nonce' })).toString('base64url')}.signature`
+const SD_JWT_VC_CALIFORNIA_DRIVERS_LICENSE =
+  'eyJhbGciOiJFZERTQSIsInR5cCI6InZjK3NkLWp3dCJ9.eyJpYXQiOjE3MDA0NjQ3MzYwNzYsImlzcyI6ImRpZDprZXk6c29tZS1yYW5kb20tZGlkLWtleSIsIm5iZiI6MTcwMDQ2NDczNjE3NiwidmN0IjoiaHR0cHM6Ly9kcml2ZXJzLWxpY2Vuc2UuZ292L2NhbGlmb3JuaWEiLCJ1c2VyIjp7Il9zZCI6WyI5QmhOVDVsSG5QVmpqQUp3TnR0NDIzM216MFVVMUd3RmFmLWVNWkFQV0JNIiwiSVl5d1FQZl8tNE9hY2Z2S2l1cjRlSnFMa1ZleWRxcnQ1Y2UwMGJReWNNZyIsIlNoZWM2TUNLakIxeHlCVl91QUtvLURlS3ZvQllYbUdBd2VGTWFsd05xbUEiLCJXTXpiR3BZYmhZMkdoNU9pWTRHc2hRU1dQREtSeGVPZndaNEhaQW5YS1RZIiwiajZ6ZFg1OUJYZHlTNFFaTGJITWJ0MzJpenRzWXdkZzRjNkpzWUxNc3ZaMCIsInhKR3Radm41cFM4VEhqVFlJZ3MwS1N5VC1uR3BSR3hDVnp6c1ZEbmMyWkUiXX0sImxpY2Vuc2UiOnsibnVtYmVyIjoxMH0sImNuZiI6eyJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJUQ0FFUjE5WnZ1M09IRjRqNFc0dmZTVm9ISVAxSUxpbERsczd2Q2VHZW1jIiwieSI6Ilp4amlXV2JaTVFHSFZXS1ZRNGhiU0lpcnNWZnVlY0NFNnQ0alQ5RjJIWlEifX0sIl9zZF9hbGciOiJzaGEtMjU2IiwiX3NkIjpbIl90YnpMeHBaeDBQVHVzV2hPOHRUZlVYU2ZzQjVlLUtrbzl3dmZaaFJrYVkiLCJ1WmNQaHdUTmN4LXpNQU1zemlYMkFfOXlJTGpQSEhobDhEd2pvVXJLVVdZIl19.signature~WyJHeDZHRUZvR2t6WUpWLVNRMWlDREdBIiwiZGF0ZU9mQmlydGgiLCIyMDAwMDEwMSJd~WyJ1LUt3cmJvMkZfTExQekdSZE1XLUtBIiwibmFtZSIsIkpvaG4iXQ~WyJNV1ZieGJqVFZxUXdLS3h2UGVZdWlnIiwibGFzdE5hbWUiLCJEb2UiXQ~' +
+  KB_JWT
+const SD_JWT_VC_WASHINGTON_DRIVERS_LICENSE =
+  'eyJhbGciOiJFZERTQSIsInR5cCI6InZjK3NkLWp3dCJ9.eyJpYXQiOjE3MDA0NjQ3MzYwNzYsImlzcyI6ImRpZDprZXk6c29tZS1yYW5kb20tZGlkLWtleSIsIm5iZiI6MTcwMDQ2NDczNjE3NiwidmN0IjoiaHR0cHM6Ly9kcml2ZXJzLWxpY2Vuc2UuZ292L3dhc2hpbmd0b24iLCJ1c2VyIjp7Il9zZCI6WyI5QmhOVDVsSG5QVmpqQUp3TnR0NDIzM216MFVVMUd3RmFmLWVNWkFQV0JNIiwiSVl5d1FQZl8tNE9hY2Z2S2l1cjRlSnFMa1ZleWRxcnQ1Y2UwMGJReWNNZyIsIlNoZWM2TUNLakIxeHlCVl91QUtvLURlS3ZvQllYbUdBd2VGTWFsd05xbUEiLCJXTXpiR3BZYmhZMkdoNU9pWTRHc2hRU1dQREtSeGVPZndaNEhaQW5YS1RZIiwiajZ6ZFg1OUJYZHlTNFFaTGJITWJ0MzJpenRzWXdkZzRjNkpzWUxNc3ZaMCIsInhKR3Radm41cFM4VEhqVFlJZ3MwS1N5VC1uR3BSR3hDVnp6c1ZEbmMyWkUiXX0sImxpY2Vuc2UiOnsibnVtYmVyIjoxMH0sImNuZiI6eyJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJUQ0FFUjE5WnZ1M09IRjRqNFc0dmZTVm9ISVAxSUxpbERsczd2Q2VHZW1jIiwieSI6Ilp4amlXV2JaTVFHSFZXS1ZRNGhiU0lpcnNWZnVlY0NFNnQ0alQ5RjJIWlEifX0sIl9zZF9hbGciOiJzaGEtMjU2IiwiX3NkIjpbIl90YnpMeHBaeDBQVHVzV2hPOHRUZlVYU2ZzQjVlLUtrbzl3dmZaaFJrYVkiLCJ1WmNQaHdUTmN4LXpNQU1zemlYMkFfOXlJTGpQSEhobDhEd2pvVXJLVVdZIl19.signature~WyJHeDZHRUZvR2t6WUpWLVNRMWlDREdBIiwiZGF0ZU9mQmlydGgiLCIyMDAwMDEwMSJd~WyJ1LUt3cmJvMkZfTExQekdSZE1XLUtBIiwibmFtZSIsIkpvaG4iXQ~WyJNV1ZieGJqVFZxUXdLS3h2UGVZdWlnIiwibGFzdE5hbWUiLCJEb2UiXQ~' +
+  KB_JWT
+
+const PRESENTATION_DEFINITION_SD_JWT_DRIVERS_LICENSES = {
+  id: '32f54163-7166-48f1-93d8-ff217bdb0653',
+  name: 'Conference Entry Requirements',
+  purpose: 'We can only allow people associated with Washington State business representatives into conference areas',
+  format: {
+    'vc+sd-jwt': {},
+  },
+  input_descriptors: [
+    {
+      id: 'wa_driver_license',
+      constraints: {
+        limit_disclosure: 'required',
+        fields: [
+          {
+            path: ['$.vct'],
+            filter: {
+              type: 'string',
+              const: 'https://drivers-license.gov/washington',
+            },
+          },
+        ],
+      },
+    },
+    {
+      id: 'ca_driver_license',
+      constraints: {
+        limit_disclosure: 'required',
+        fields: [
+          {
+            path: ['$.vct'],
+            filter: {
+              type: 'string',
+              const: 'https://drivers-license.gov/california',
+            },
+          },
+        ],
+      },
+    },
+  ],
+} satisfies PresentationDefinitionV2
+
+async function getPayloadVID1Val({ pd }: { pd?: PresentationDefinitionV2 } = {}): Promise<AuthorizationRequestPayloadVID1> {
   const mockEntity = await mockedGetEnterpriseAuthToken('ACME Corp')
   const state = getState()
   return {
@@ -70,7 +120,7 @@ async function getPayloadVID1Val(): Promise<AuthorizationRequestPayloadVID1> {
         acr: null,
       },
       vp_token: {
-        presentation_definition: {
+        presentation_definition: pd ?? {
           id: 'Insurance Plans',
           input_descriptors: [
             {
@@ -221,7 +271,7 @@ describe('presentation exchange manager tests', () => {
     const vcs = getVCs()
     vcs[0].issuer = { id: 'did:example:totallyDifferentIssuer' }
     await expect(
-      PresentationExchange.validatePresentationAgainstDefinition(
+      PresentationExchange.validatePresentationsAgainstDefinition(
         pd[0].definition,
         CredentialMapper.toWrappedVerifiablePresentation({
           '@context': ['https://www.w3.org/2018/credentials/v1'],
@@ -272,15 +322,14 @@ describe('presentation exchange manager tests', () => {
     const vcs = getVCs()
     vcs[0].issuer = { id: 'did:example:totallyDifferentIssuer' }
     await expect(
-      PresentationExchange.validatePresentationAgainstDefinition(
-        pd[0].definition,
+      PresentationExchange.validatePresentationsAgainstDefinition(pd[0].definition, [
         CredentialMapper.toWrappedVerifiablePresentation({
           '@context': ['https://www.w3.org/2018/credentials/v1'],
           type: ['VerifiablePresentation', 'PresentationSubmission'],
           presentation_submission,
           verifiableCredential: vcs,
         } as W3CVerifiablePresentation),
-      ),
+      ]),
     ).rejects.toThrow(SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD)
   })
 
@@ -297,7 +346,7 @@ describe('presentation exchange manager tests', () => {
     const payload = await getPayloadVID1Val()
     const vcs = getVCs()
     const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(payload)
-    const result = await PresentationExchange.validatePresentationAgainstDefinition(
+    const result = await PresentationExchange.validatePresentationsAgainstDefinition(
       pd[0].definition,
       CredentialMapper.toWrappedVerifiablePresentation({
         '@context': ['https://www.w3.org/2018/credentials/v1'],
@@ -315,15 +364,14 @@ describe('presentation exchange manager tests', () => {
     const pex = new PresentationExchange({ allDIDs: [HOLDER_DID], allVerifiableCredentials: vcs })
     const payload: AuthorizationRequestPayload = await getPayloadVID1Val()
     const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(payload)
-    await PresentationExchange.validatePresentationAgainstDefinition(
-      pd[0].definition,
+    await PresentationExchange.validatePresentationsAgainstDefinition(pd[0].definition, [
       CredentialMapper.toWrappedVerifiablePresentation({
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         type: ['VerifiablePresentation', 'PresentationSubmission'],
         presentation_submission,
         verifiableCredential: vcs,
       } as W3CVerifiablePresentation),
-    )
+    ])
     await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
     const presentationSignCallback: PresentationSignCallback = async (_args) => ({
       ...(_args.presentation as IPresentation),
@@ -373,8 +421,8 @@ describe('presentation exchange manager tests', () => {
     const result = await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
     expect(result.errors?.length).toBe(0)
     expect(result.matches?.length).toBe(1)
-    expect(result.matches[0].vc_path.length).toBe(1)
-    expect(result.matches[0].vc_path[0]).toBe('$.verifiableCredential[0]')
+    expect(result.matches?.[0].vc_path.length).toBe(1)
+    expect(result.matches?.[0].vc_path[0]).toBe('$.verifiableCredential[0]')
   })
 
   it('pass if no PresentationDefinition is found', async () => {
@@ -392,7 +440,7 @@ describe('presentation exchange manager tests', () => {
     expect(definition['input_descriptors'][0].schema.length).toBe(2)
   })
 
-  it('should validate a list of VerifiablePresentations against a list of PresentationDefinitions', async () => {
+  it('should validate a single VerifiablePresentations against a list of PresentationDefinitions', async () => {
     const payload: AuthorizationRequestPayload = await getPayloadVID1Val()
     const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(payload)
     const vcs = getVCs()
@@ -411,16 +459,73 @@ describe('presentation exchange manager tests', () => {
       },
     })
     const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, vcs, presentationSignCallback, {})
-    try {
-      await PresentationExchange.validatePresentationsAgainstDefinitions(
-        pd,
-        [CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentationResult.verifiablePresentation)],
-        undefined,
-        {},
-      )
-    } catch (e) {
-      console.log(e)
+    await PresentationExchange.validatePresentationsAgainstDefinitions(
+      pd,
+      CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentationResult.verifiablePresentation),
+      undefined,
+      {
+        presentationSubmission: verifiablePresentationResult.presentationSubmission,
+      },
+    )
+  })
+
+  it('should validate a list of VerifiablePresentations against a list of PresentationDefinitions', async () => {
+    const payload: AuthorizationRequestPayload = await getPayloadVID1Val({
+      pd: PRESENTATION_DEFINITION_SD_JWT_DRIVERS_LICENSES,
+    })
+    const pd = await PresentationExchange.findValidPresentationDefinitions(payload)
+
+    // PEX/OID4VP doesn't have all functionality yet to create multi-vp submissions
+    // but it can make a submission based on already created presentations
+    const vps = [SD_JWT_VC_CALIFORNIA_DRIVERS_LICENSE, SD_JWT_VC_WASHINGTON_DRIVERS_LICENSE]
+
+    const pex = new PEX({ hasher: pexHasher })
+    const evaluated = pex.evaluatePresentation(pd[0].definition, vps, { generatePresentationSubmission: true })
+    if (!evaluated.value) throw new Error('No presentation submission was generated')
+
+    await PresentationExchange.validatePresentationsAgainstDefinitions(
+      pd,
+      vps.map((vp) => CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: pexHasher })),
+      undefined,
+      {
+        presentationSubmission: evaluated.value,
+        hasher: pexHasher,
+      },
+    )
+  })
+
+  it("'validatePresentationsAgainstDefinitions' should fail if not all presentations required for a presentation definition are present", async () => {
+    const payload: AuthorizationRequestPayload = await getPayloadVID1Val({
+      pd: PRESENTATION_DEFINITION_SD_JWT_DRIVERS_LICENSES,
+    })
+    const pd = await PresentationExchange.findValidPresentationDefinitions(payload)
+
+    const vps = [
+      SD_JWT_VC_CALIFORNIA_DRIVERS_LICENSE,
+      // Do not include required washington drivers license
+      // SD_JWT_VC_WASHINGTON_DRIVERS_LICENSE
+    ]
+
+    // Manually created submission as we can't generate an invalid submission with PEX
+    const presentationSubmission = {
+      id: 'Z4JeKevZqmGFAfKmghwdf',
+      definition_id: '32f54163-7166-48f1-93d8-ff217bdb0653',
+      descriptor_map: [{ id: 'ca_driver_license', format: 'vc+sd-jwt', path: '$[0]' }],
     }
+
+    await expect(
+      PresentationExchange.validatePresentationsAgainstDefinitions(
+        pd,
+        vps.map((vp) => CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: pexHasher })),
+        undefined,
+        {
+          presentationSubmission,
+          hasher: pexHasher,
+        },
+      ),
+    ).rejects.toThrow(
+      'Could not find VerifiableCredentials matching presentationDefinition object in the provided VC list, details: [{"status":"error","tag":"SubmissionDoesNotSatisfyDefinition","message":"Expected all input descriptors (2) to be satisfifed in submission, but found 1. Missing wa_driver_license"}]',
+    )
   })
 
   it("'validatePresentationsAgainstDefinitions' should fail if provided VP verification callback fails", async () => {
@@ -446,11 +551,13 @@ describe('presentation exchange manager tests', () => {
     await expect(
       PresentationExchange.validatePresentationsAgainstDefinitions(
         pd,
-        [CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentationResult.verifiablePresentation)],
+        CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentationResult.verifiablePresentation),
         () => {
           throw new Error('Verification failed')
         },
-        {},
+        {
+          presentationSubmission: verifiablePresentationResult.presentationSubmission,
+        },
       ),
     ).rejects.toThrow(SIOPErrors.VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID)
   })
