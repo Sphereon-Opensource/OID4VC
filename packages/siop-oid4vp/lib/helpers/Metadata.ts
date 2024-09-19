@@ -86,18 +86,14 @@ function supportedSubjectSyntaxTypes(rpMethods: string[] | string, opMethods: st
 
 export function collectAlgValues(o: any): string[] {
   const algValues: string[] = [];
-  for (const value of Object.values(o)) {
-    if (value) {
+  for (const key of Object.keys(o)) {
       // Check if the object has an 'alg' property that's an array of strings
-      if (Array.isArray((value as any).alg)) {
-        algValues.push(...(value as any).alg);
+      if (key === 'alg' && Array.isArray(o.alg)) {
+        algValues.push(...o.alg);
       }
-
-      // Check for the special case 'sd-jwt_alg_values'
-      if (Array.isArray((value as any)['sd-jwt_alg_values'])) {
-        algValues.push(...(value as any)['sd-jwt_alg_values']);
+      else if (key === 'sd-jwt_alg_values'  && Array.isArray(o['sd-jwt_alg_values'])) {
+        algValues.push(...o['sd-jwt_alg_values']);
       }
-    }
   }
 
   return algValues;

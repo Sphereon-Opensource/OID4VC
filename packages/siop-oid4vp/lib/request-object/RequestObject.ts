@@ -37,11 +37,11 @@ export class RequestObject {
    * part of the URI and which become part of the Request Object. If you generate a URI based upon the result of this class,
    * the URI will be constructed based on the Request Object only!
    */
-  public static async fromOpts(authorizationRequestOpts: CreateAuthorizationRequestOpts) {
+  public static async fromOpts(authorizationRequestOpts: CreateAuthorizationRequestOpts): Promise<RequestObject> {
     assertValidAuthorizationRequestOpts(authorizationRequestOpts)
     const createJwtCallback = authorizationRequestOpts.requestObject.createJwtCallback // We copy the signature separately as it can contain a function, which would be removed in the merge function below
-    const jwtIssuer = authorizationRequestOpts.requestObject.jwtIssuer // We copy the signature separately as it can contain a function, which would be removed in the merge function below
-    const requestObjectOpts = RequestObject.mergeOAuth2AndOpenIdProperties(authorizationRequestOpts)
+    const jwtIssuer: JwtIssuer = authorizationRequestOpts.requestObject.jwtIssuer // We copy the signature separately as it can contain a function, which would be removed in the merge function below
+    const requestObjectOpts: RequestObjectOpts<ClaimPayloadCommonOpts> = RequestObject.mergeOAuth2AndOpenIdProperties(authorizationRequestOpts)
     const mergedOpts = {
       ...authorizationRequestOpts,
       requestObject: { ...authorizationRequestOpts.requestObject, ...requestObjectOpts, createJwtCallback, jwtIssuer },
@@ -49,17 +49,17 @@ export class RequestObject {
     return new RequestObject(mergedOpts, await createRequestObjectPayload(mergedOpts))
   }
 
-  public static async fromJwt(requestObjectJwt: RequestObjectJwt) {
+  public static async fromJwt(requestObjectJwt: RequestObjectJwt): Promise<RequestObject | undefined> {
     return requestObjectJwt ? new RequestObject(undefined, undefined, requestObjectJwt) : undefined
   }
 
-  public static async fromPayload(requestObjectPayload: RequestObjectPayload, authorizationRequestOpts: CreateAuthorizationRequestOpts) {
+  public static async fromPayload(requestObjectPayload: RequestObjectPayload, authorizationRequestOpts: CreateAuthorizationRequestOpts): Promise<RequestObject> {
     return new RequestObject(authorizationRequestOpts, requestObjectPayload)
   }
 
   public static async fromAuthorizationRequestPayload(payload: AuthorizationRequestPayload): Promise<RequestObject | undefined> {
     const requestObjectJwt =
-      payload.request || payload.request_uri ? await fetchByReferenceOrUseByValue(payload.request_uri, payload.request, true) : undefined
+      payload.request ?? payload.request_uri ? await fetchByReferenceOrUseByValue(payload.request_uri as string, payload.request, true) : undefined
     return requestObjectJwt ? await RequestObject.fromJwt(requestObjectJwt) : undefined
   }
 

@@ -192,7 +192,7 @@ export class AuthorizationRequest {
     // TODO: we need to verify somewhere that if response_mode is direct_post, that the response_uri may be present,
     // BUT not both redirect_uri and response_uri. What is the best place to do this?
 
-    const presentationDefinitions = await PresentationExchange.findValidPresentationDefinitions(mergedPayload, await this.getSupportedVersion())
+    const presentationDefinitions: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(mergedPayload, await this.getSupportedVersion())
     return {
       jwt,
       payload: parsedJwt?.payload,
@@ -211,7 +211,7 @@ export class AuthorizationRequest {
     }
   }
 
-  static async verify(requestOrUri: string, verifyOpts: VerifyAuthorizationRequestOpts) {
+  static async verify(requestOrUri: string, verifyOpts: VerifyAuthorizationRequestOpts): Promise<VerifiedAuthorizationRequest> {
     assertValidVerifyAuthorizationRequestOpts(verifyOpts)
     const authorizationRequest = await AuthorizationRequest.fromUriOrJwt(requestOrUri)
     return await authorizationRequest.verify(verifyOpts)
@@ -263,10 +263,14 @@ export class AuthorizationRequest {
   }
 
   public async mergedPayloads(): Promise<RequestObjectPayload> {
-    return { ...this.payload, ...(this.requestObject && (await this.requestObject.getPayload())) }
+    const  requestObjectPayload = { ...this.payload, ...(this.requestObject && (await this.requestObject.getPayload())) }
+    if (typeof requestObjectPayload.scope !== 'string') {
+      throw new Error('Invalid scope value')
+    }
+    return requestObjectPayload as RequestObjectPayload
   }
 
-  public async getPresentationDefinitions(version?: SupportedVersion): Promise<PresentationDefinitionWithLocation[] | undefined> {
+  public async getPresentationDefinitions(version?: SupportedVersion): Promise<PresentationDefinitionWithLocation[]> {
     return await PresentationExchange.findValidPresentationDefinitions(await this.mergedPayloads(), version)
   }
 }
