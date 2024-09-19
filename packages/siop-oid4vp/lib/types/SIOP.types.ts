@@ -208,9 +208,9 @@ export interface RequestStateInfo {
   client_id: string // RP ID
 
   // sub: string
-  nonce: string
-  state: string
-  iat: number
+  nonce?: string
+  state?: string
+  iat?: number
 }
 
 interface DiscoveryMetadataCommonOpts {
