@@ -4,7 +4,7 @@
   "npmClient": "pnpm",
   "command": {
     "publish": {
-      "allowBranch": ["main", "master"],
+      "allowBranch": ["main", "master", "feature/from-funke"],
       "conventionalCommits": true,
       "gitRemote": "origin",
       "message": "chore(release): %s"
