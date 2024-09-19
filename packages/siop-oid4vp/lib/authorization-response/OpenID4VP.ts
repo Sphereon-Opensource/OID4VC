@@ -108,7 +108,7 @@ export const verifyPresentations = async (
 
   // Nonce may be undefined
   let nonce = Array.from(nonces)[0]
-  if(presentations.some(presentation => presentation.format === 'mso_mdoc')) {  // FIXME Funke
+  if(presentationsArray.some(presentation => presentation.format === 'mso_mdoc')) {  // FIXME Funke
     verifyOpts.nonce = 'mdoc'
     nonce = "mdoc" // TODO extract nonce from mdoc session
   }
@@ -283,7 +283,8 @@ export const assertValidVerifiablePresentations = async (args: {
     hasher?: Hasher
   }
 }) => {
-  const presentationsWithFormat = args.presentations.filter(presentation => presentation.format !== 'mso_mdoc')
+  const presentationsArray = Array.isArray(args.presentations) ? args.presentations : [args.presentations]
+  const presentationsWithFormat = presentationsArray.filter(presentation => presentation.format !== 'mso_mdoc')
   if (
     (!args.presentationDefinitions || args.presentationDefinitions.filter((a) => a.definition).length === 0) &&
     (!presentationsWithFormat || (Array.isArray(presentationsWithFormat) && presentationsWithFormat.filter((vp) => vp.presentation).length === 0))
