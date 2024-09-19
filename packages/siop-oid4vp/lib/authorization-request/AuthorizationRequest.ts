@@ -30,8 +30,8 @@ import { CreateAuthorizationRequestOpts, VerifyAuthorizationRequestOpts } from '
 export class AuthorizationRequest {
   private readonly _requestObject?: RequestObject
   private readonly _payload: AuthorizationRequestPayload
-  private readonly _options: CreateAuthorizationRequestOpts | undefined
-  private _uri: URI | undefined
+  private readonly _options: CreateAuthorizationRequestOpts
+  private _uri: URI
 
   private constructor(payload: AuthorizationRequestPayload, requestObject?: RequestObject, opts?: CreateAuthorizationRequestOpts, uri?: URI) {
     this._options = opts
@@ -66,7 +66,7 @@ export class AuthorizationRequest {
 
     const requestObjectArg =
       opts.requestObject.passBy !== PassBy.NONE ? (requestObject ? requestObject : await RequestObject.fromOpts(opts)) : undefined
-    const requestPayload = await createAuthorizationRequestPayload(opts, requestObjectArg) 
+    const requestPayload = opts?.payload ? await createAuthorizationRequestPayload(opts, requestObjectArg) : undefined
     return new AuthorizationRequest(requestPayload, requestObjectArg, opts)
   }
 
@@ -116,13 +116,10 @@ export class AuthorizationRequest {
   async verify(opts: VerifyAuthorizationRequestOpts): Promise<VerifiedAuthorizationRequest> {
     assertValidVerifyAuthorizationRequestOpts(opts)
 
-    let requestObjectPayload: RequestObjectPayload | undefined 
+    let requestObjectPayload: RequestObjectPayload | undefined = undefined
 
     const jwt = await this.requestObjectJwt()
-    if(jwt === undefined) {
-      return Promise.reject(Error('jwt could be fetched, request object unavailable'))
-    }
-    const parsedJwt = parseJWT(jwt)
+    const parsedJwt = jwt ? parseJWT(jwt) : undefined
 
     if (parsedJwt) {
       requestObjectPayload = parsedJwt.payload as RequestObjectPayload
@@ -167,10 +164,7 @@ export class AuthorizationRequest {
       )
       assertValidRPRegistrationMedataPayload(registrationMetadataPayload)
       // TODO: We need to do something with the metadata probably
-    } else {
-      return Promise.reject(Error(`could not fetch registrationMetadataPayload due to missing payload key ${registrationPropertyKey}`))
     }
-    
     // When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
     let responseURIType: ResponseURIType
     let responseURI: string
@@ -192,7 +186,7 @@ export class AuthorizationRequest {
     // TODO: we need to verify somewhere that if response_mode is direct_post, that the response_uri may be present,
     // BUT not both redirect_uri and response_uri. What is the best place to do this?
 
-    const presentationDefinitions: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(mergedPayload, await this.getSupportedVersion())
+    const presentationDefinitions = await PresentationExchange.findValidPresentationDefinitions(mergedPayload, await this.getSupportedVersion())
     return {
       jwt,
       payload: parsedJwt?.payload,
@@ -211,7 +205,7 @@ export class AuthorizationRequest {
     }
   }
 
-  static async verify(requestOrUri: string, verifyOpts: VerifyAuthorizationRequestOpts): Promise<VerifiedAuthorizationRequest> {
+  static async verify(requestOrUri: string, verifyOpts: VerifyAuthorizationRequestOpts) {
     assertValidVerifyAuthorizationRequestOpts(verifyOpts)
     const authorizationRequest = await AuthorizationRequest.fromUriOrJwt(requestOrUri)
     return await authorizationRequest.verify(verifyOpts)
@@ -226,7 +220,7 @@ export class AuthorizationRequest {
       throw Error(SIOPErrors.BAD_PARAMS)
     }
     const requestObject = await RequestObject.fromJwt(jwt)
-    const payload: AuthorizationRequestPayload = { ...(requestObject && await requestObject.getPayload()) } as AuthorizationRequestPayload
+    const payload: AuthorizationRequestPayload = { ...(await requestObject.getPayload()) } as AuthorizationRequestPayload
     // Although this was a RequestObject we instantiate it as AuthzRequest and then copy in the JWT as the request Object
     payload.request = jwt
     return new AuthorizationRequest({ ...payload }, requestObject)
@@ -237,23 +231,22 @@ export class AuthorizationRequest {
       throw Error(SIOPErrors.BAD_PARAMS)
     }
     const uriObject = typeof uri === 'string' ? await URI.fromUri(uri) : uri
-    const requestObject = uriObject.requestObjectJwt ? await RequestObject.fromJwt(uriObject.requestObjectJwt) : undefined
+    const requestObject = await RequestObject.fromJwt(uriObject.requestObjectJwt)
     return new AuthorizationRequest(uriObject.authorizationRequestPayload, requestObject, undefined, uriObject)
   }
 
   public async toStateInfo(): Promise<RequestStateInfo> {
-    
-    const requestObjectPayload = this.requestObject !== undefined ? await this.requestObject.getPayload() : undefined
+    const requestObject = await this.requestObject.getPayload()
     return {
-      client_id: this.options?.clientMetadata?.client_id ?? this.payload.client_id,
-      iat: requestObjectPayload?.iat ?? this.payload.iat,
-      nonce: requestObjectPayload?.nonce ?? this.payload.nonce,
+      client_id: this.options.clientMetadata.client_id,
+      iat: requestObject.iat ?? this.payload.iat,
+      nonce: requestObject.nonce ?? this.payload.nonce,
       state: this.payload.state,
     }
   }
 
   public async containsResponseType(singleType: ResponseType | string): Promise<boolean> {
-    const responseType: string | undefined = await this.getMergedProperty('response_type')
+    const responseType: string = await this.getMergedProperty('response_type')
     return responseType?.includes(singleType) === true
   }
 
@@ -263,14 +256,10 @@ export class AuthorizationRequest {
   }
 
   public async mergedPayloads(): Promise<RequestObjectPayload> {
-    const  requestObjectPayload = { ...this.payload, ...(this.requestObject && (await this.requestObject.getPayload())) }
-    if (typeof requestObjectPayload.scope !== 'string') {
-      throw new Error('Invalid scope value')
-    }
-    return requestObjectPayload as RequestObjectPayload
+    return { ...this.payload, ...(this.requestObject && (await this.requestObject.getPayload())) }
   }
 
-  public async getPresentationDefinitions(version?: SupportedVersion): Promise<PresentationDefinitionWithLocation[]> {
+  public async getPresentationDefinitions(version?: SupportedVersion): Promise<PresentationDefinitionWithLocation[] | undefined> {
     return await PresentationExchange.findValidPresentationDefinitions(await this.mergedPayloads(), version)
   }
 }
