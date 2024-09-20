@@ -113,5 +113,5 @@ export async function resolveDidDocument(did: string, opts?: ResolveOpts): Promi
     // todo: This looks like a bug. It seems that sometimes we get back a DID document directly instead of a did resolution results
     return result as unknown as DIDDocument
   }
-  return result.didDocument
+  return result.didDocument as DIDDocument
 }
