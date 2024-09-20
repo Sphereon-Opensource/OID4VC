@@ -103,16 +103,12 @@ export class LanguageTagUtils {
   }
 
   private static assertValidTargetFieldNames(languageTagEnabledFieldsNamesMapping: Map<string, string>): void {
-    if (languageTagEnabledFieldsNamesMapping) {
-      if (!languageTagEnabledFieldsNamesMapping.size) {
-        throw new Error(SIOPErrors.BAD_PARAMS + ' LanguageTagEnabledFieldsNamesMapping must be non-null or non-empty')
-      } else {
-        for (const entry of languageTagEnabledFieldsNamesMapping.entries()) {
-          const key = entry[0]
-          const value = entry[1]
-          if (isStringNullOrEmpty(key) || isStringNullOrEmpty(value)) {
-            throw new Error(SIOPErrors.BAD_PARAMS + '. languageTagEnabledFieldsName must be non-null or non-empty')
-          }
+    if (languageTagEnabledFieldsNamesMapping && languageTagEnabledFieldsNamesMapping.size) {
+      for (const entry of languageTagEnabledFieldsNamesMapping.entries()) {
+        const key = entry[0]
+        const value = entry[1]
+        if (isStringNullOrEmpty(key) || isStringNullOrEmpty(value)) {
+          throw new Error(SIOPErrors.BAD_PARAMS + '. languageTagEnabledFieldsName must be non-null or non-empty')
         }
       }
     }
