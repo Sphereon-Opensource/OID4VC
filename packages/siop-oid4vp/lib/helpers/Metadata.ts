@@ -13,9 +13,9 @@ export function assertValidMetadata(opMetadata: DiscoveryMetadataPayload, rpMeta
   const credentials = supportedCredentialsFormats(rpMetadata.vp_formats, opMetadata.vp_formats)
   const isValidSubjectSyntax = verifySubjectSyntaxes(rpMetadata.subject_syntax_types_supported)
   if (isValidSubjectSyntax && rpMetadata.subject_syntax_types_supported) {
-    subjectSyntaxTypesSupported = supportedSubjectSyntaxTypes(rpMetadata.subject_syntax_types_supported, opMetadata.subject_syntax_types_supported)
+    subjectSyntaxTypesSupported = supportedSubjectSyntaxTypes(rpMetadata.subject_syntax_types_supported, opMetadata.subject_syntax_types_supported as string[])
   } else if (isValidSubjectSyntax && (!rpMetadata.subject_syntax_types_supported || !rpMetadata.subject_syntax_types_supported.length)) {
-    if (opMetadata.subject_syntax_types_supported || opMetadata.subject_syntax_types_supported.length) {
+    if (opMetadata.subject_syntax_types_supported) {
       subjectSyntaxTypesSupported = [...opMetadata.subject_syntax_types_supported]
     }
   }
@@ -84,21 +84,40 @@ function supportedSubjectSyntaxTypes(rpMethods: string[] | string, opMethods: st
   return supportedSubjectSyntaxTypes
 }
 
+export function collectAlgValues(o: any): string[] {
+  const algValues: string[] = [];
+  for (const key of Object.keys(o)) {
+      // Check if the object has an 'alg' property that's an array of strings
+      if (key === 'alg' && Array.isArray(o.alg)) {
+        algValues.push(...o.alg);
+      }
+      else if (key === 'sd-jwt_alg_values'  && Array.isArray(o['sd-jwt_alg_values'])) {
+        algValues.push(...o['sd-jwt_alg_values']);
+      }
+  }
+
+  return algValues;
+}
+
 function getFormatIntersection(rpFormat: Format, opFormat: Format): Format {
-  const intersectionFormat: Format = {}
+  const intersectionFormat: Record<string, any> = {}
   const supportedCredentials = getIntersection(Object.keys(rpFormat), Object.keys(opFormat))
   if (!supportedCredentials.length) {
     throw new Error(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)
   }
   supportedCredentials.forEach(function (crFormat: string) {
-    const rpAlgs = []
-    const opAlgs = []
-    Object.keys(rpFormat[crFormat]).forEach((k) => rpAlgs.push(...rpFormat[crFormat][k]))
-    Object.keys(opFormat[crFormat]).forEach((k) => opAlgs.push(...opFormat[crFormat][k]))
-    let methodKeyRP = undefined
-    let methodKeyOP = undefined
-    Object.keys(rpFormat[crFormat]).forEach((k) => (methodKeyRP = k))
-    Object.keys(opFormat[crFormat]).forEach((k) => (methodKeyOP = k))
+    const rpFormatElement = rpFormat[crFormat as keyof Format];
+    const opFormatElement = opFormat[crFormat as keyof Format];
+    const rpAlgs = collectAlgValues(rpFormatElement);
+    const opAlgs = collectAlgValues(opFormatElement);
+    let methodKeyRP = undefined;
+    let methodKeyOP = undefined;
+    if (rpFormatElement !== undefined) {
+      Object.keys(rpFormatElement).forEach((k) => (methodKeyRP = k));
+    }
+    if (opFormatElement !== undefined) {
+      Object.keys(opFormatElement).forEach((k) => (methodKeyOP = k));
+    }
     if (methodKeyRP !== methodKeyOP) {
       throw new Error(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)
     }
@@ -107,7 +126,9 @@ function getFormatIntersection(rpFormat: Format, opFormat: Format): Format {
       throw new Error(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)
     }
     intersectionFormat[crFormat] = {}
-    intersectionFormat[crFormat][methodKeyOP] = algs
+    if(methodKeyOP !== undefined) {
+      intersectionFormat[crFormat][methodKeyOP] = algs
+    }
   })
   return intersectionFormat
 }

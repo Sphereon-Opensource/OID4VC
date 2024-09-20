@@ -5,6 +5,7 @@ import {
   PresentationSubmissionLocation,
   SelectResults,
   Status,
+  Validated,
   VerifiablePresentationFromOpts,
   VerifiablePresentationResult
 } from '@sphereon/pex';
@@ -20,7 +21,8 @@ import {
   Hasher,
   IProofPurpose,
   IProofType,
-  OriginalVerifiableCredential, OriginalVerifiablePresentation,
+  OriginalVerifiableCredential,
+  OriginalVerifiablePresentation,
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation
 } from '@sphereon/ssi-types';
@@ -68,14 +70,14 @@ export class PresentationExchange {
       ...options,
       presentationSubmissionLocation: PresentationSubmissionLocation.EXTERNAL,
       proofOptions: {
-        ...options.proofOptions,
+        ...options?.proofOptions,
         proofPurpose: options?.proofOptions?.proofPurpose ?? IProofPurpose.authentication,
         type: options?.proofOptions?.type ?? IProofType.EcdsaSecp256k1Signature2019,
         /* challenge: options?.proofOptions?.challenge,
         domain: options?.proofOptions?.domain,*/
       },
       signatureOptions: {
-        ...options.signatureOptions,
+        ...options?.signatureOptions,
         // verificationMethod: options?.signatureOptions?.verificationMethod,
         keyEncoding: options?.signatureOptions?.keyEncoding ?? KeyEncoding.Hex,
       },
@@ -171,9 +173,10 @@ export class PresentationExchange {
   }
 
   public static assertValidPresentationSubmission(presentationSubmission: PresentationSubmission) {
-    const validationResult = PEX.validateSubmission(presentationSubmission)
-    if (validationResult[0].message != 'ok') {
-      throw new Error(`${SIOPErrors.RESPONSE_OPTS_PRESENTATIONS_SUBMISSION_IS_NOT_VALID}, details ${JSON.stringify(validationResult[0])}`)
+    const validationResult:Validated = PEX.validateSubmission(presentationSubmission)
+    if (Array.isArray(validationResult) && validationResult[0].message != 'ok'
+    || !Array.isArray(validationResult) && validationResult.message != 'ok') {
+      throw new Error(`${SIOPErrors.RESPONSE_OPTS_PRESENTATIONS_SUBMISSION_IS_NOT_VALID}, details ${JSON.stringify(validationResult)}`)
     }
   }
 
@@ -297,7 +300,8 @@ export class PresentationExchange {
 
   private static assertValidPresentationDefinition(presentationDefinition: IPresentationDefinition) {
     const validationResult = PEX.validateDefinition(presentationDefinition)
-    if (validationResult[0].message != 'ok') {
+    if (Array.isArray(validationResult) && validationResult[0].message != 'ok'
+      || !Array.isArray(validationResult) && validationResult.message != 'ok') {
       throw new Error(`${SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID}`)
     }
   }
@@ -375,7 +379,7 @@ export class PresentationExchange {
       throw new Error(SIOPErrors.NO_PRESENTATION_SUBMISSION)
     }
 
-    if (!evaluationResults.areRequiredCredentialsPresent || evaluationResults.errors.length || !evaluationResults.value) {
+    if (!evaluationResults.areRequiredCredentialsPresent || evaluationResults.errors || !evaluationResults.value) {
       throw new Error(`message: ${SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD}, details: ${JSON.stringify(evaluationResults.errors)}`)
     }
 
@@ -388,12 +392,12 @@ export class PresentationExchange {
     const presentationsToVerify = Array.isArray(evaluationResults.presentation) ? evaluationResults.presentation : [evaluationResults.presentation]
     // The verifyPresentationCallback function is mandatory for RP only,
     // So the behavior here is to bypass it if not present
-    if (verifyPresentationCallback) {
+    if (verifyPresentationCallback && evaluationResults.value !== undefined) {
       // Verify the signature of all VPs
       await Promise.all(
         presentationsToVerify.map(async (presentation) => {
           try {
-            const verificationResult = await verifyPresentationCallback(presentation as W3CVerifiablePresentation, evaluationResults.value)
+            const verificationResult = await verifyPresentationCallback(presentation as W3CVerifiablePresentation, evaluationResults.value!)
             if (!verificationResult.verified) {
               throw new Error(
                 SIOPErrors.VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID +

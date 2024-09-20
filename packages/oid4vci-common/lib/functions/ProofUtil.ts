@@ -146,8 +146,8 @@ const createJWT = (mode: PoPMode, jwtProps?: JwtProps, existingJwt?: Jwt): Jwt =
   const now = +new Date();
   const jwtPayload: Partial<JWTPayload> = {
     ...(aud && { aud }),
-    iat: jwt.payload?.iat ?? Math.round(now / 1000 - 60), // Let's ensure we subtract 60 seconds for potential time offsets
-    exp: jwt.payload?.exp ?? Math.round(now / 1000 + 10 * 60),
+    iat: jwt.payload?.iat ?? Math.floor(now / 1000) - 60, // Let's ensure we subtract 60 seconds for potential time offsets
+    exp: jwt.payload?.exp ?? (Math.floor(now / 1000) + 10) * 60,
     nonce,
     ...(client_id && { client_id }),
     ...(iss && { iss }),
