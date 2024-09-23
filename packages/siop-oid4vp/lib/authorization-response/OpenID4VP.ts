@@ -284,6 +284,7 @@ export const assertValidVerifiablePresentations = async (args: {
   }
 }) => {
   const presentationsArray = Array.isArray(args.presentations) ? args.presentations : [args.presentations]
+  const nrOfMdocsPresentations = presentationsArray.filter(presentation => presentation.format === 'mso_mdoc').length
   const presentationsWithFormat = presentationsArray.filter(presentation => presentation.format !== 'mso_mdoc')
   if (
     (!args.presentationDefinitions || args.presentationDefinitions.filter((a) => a.definition).length === 0) &&
@@ -298,7 +299,9 @@ export const assertValidVerifiablePresentations = async (args: {
     args.presentationDefinitions.length &&
     (!presentationsWithFormat || (Array.isArray(presentationsWithFormat) && presentationsWithFormat.length === 0))
   ) {
-    throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)
+    if(nrOfMdocsPresentations === 0) {
+      throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)
+    }
   } else if (
     (!args.presentationDefinitions || args.presentationDefinitions.length === 0) &&
     presentationsWithFormat &&
