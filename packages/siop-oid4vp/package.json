@@ -17,7 +17,7 @@
     "@astronautlabs/jsonpath": "^1.1.2",
     "@sphereon/did-uni-client": "^0.6.2",
     "@sphereon/oid4vc-common": "workspace:*",
-    "@sphereon/pex": "5.0.0-unstable.3",
+    "@sphereon/pex": "5.0.0-unstable.4",
     "@sphereon/pex-models": "^2.3.1",
     "@sphereon/kmp-mdl-mdoc": "0.2.0-SNAPSHOT.22",
     "@sphereon/ssi-types": "0.29.1-unstable.121",
