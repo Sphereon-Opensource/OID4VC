@@ -7,7 +7,7 @@ settings:
 overrides:
   node-fetch: 2.6.12
   '@sphereon/ssi-types': 0.29.1-unstable.121
-  '@sphereon/pex': 5.0.0-unstable.6
+  '@sphereon/pex': 5.0.0-unstable.7
 
 importers:
 
@@ -447,8 +447,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/pex':
-        specifier: 5.0.0-unstable.6
-        version: 5.0.0-unstable.6
+        specifier: 5.0.0-unstable.7
+        version: 5.0.0-unstable.7
       '@sphereon/pex-models':
         specifier: ^2.3.1
         version: 2.3.1
@@ -4991,8 +4991,8 @@ packages:
     resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
     dev: false
 
-  /@sphereon/pex@5.0.0-unstable.6:
-    resolution: {integrity: sha512-/1h8P3rp7iMq981FryGY0qnVuxDnO4FWRkEf2M5OVdN6Bv9lhmybWWVgkaz3i3V1VD7WWxe7efovFxA2zz7I0g==}
+  /@sphereon/pex@5.0.0-unstable.7:
+    resolution: {integrity: sha512-E+pehf6E6JN/vSELZbnIvnNQqXEKjbijCCzov2mXqFWb3WyBn7B5RY7I3v9cCFnN+8r3W3E/Hb9jAJej1DIRCg==}
     engines: {node: '>=18'}
     requiresBuild: true
     dependencies:
