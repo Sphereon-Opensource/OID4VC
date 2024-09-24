@@ -9,6 +9,7 @@ import {
   getIssuerFromCredentialOfferPayload,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
+  SchemaValidation,
   UniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
@@ -23,6 +24,7 @@ export class CredentialRequestClientBuilderV1_0_13 {
   deferredCredentialIntervalInMS = 5000;
   credentialIdentifier?: string;
   credentialTypes?: string[] = [];
+  schemaValidation: SchemaValidation = SchemaValidation.WHEN_PRESENT;
   format?: CredentialFormat | OID4VCICredentialFormat;
   token?: string;
   version?: OpenId4VCIVersion;
@@ -136,6 +138,11 @@ export class CredentialRequestClientBuilderV1_0_13 {
 
   public withCredentialType(credentialTypes: string | string[]): this {
     this.credentialTypes = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes];
+    return this;
+  }
+
+  public withSchemaValidation(schemaValidation: SchemaValidation): this {
+    this.schemaValidation = schemaValidation;
     return this;
   }
 

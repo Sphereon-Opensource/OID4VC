@@ -424,3 +424,9 @@ export type NotificationResult = {
 export interface NotificationErrorResponse {
   error: NotificationError | string;
 }
+
+export enum SchemaValidation {
+  ALWAYS = 'ALWAYS',
+  NEVER = 'NEVER',
+  WHEN_PRESENT = 'WHEN_PRESENT',
+}

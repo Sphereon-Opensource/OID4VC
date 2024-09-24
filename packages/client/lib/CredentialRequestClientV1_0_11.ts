@@ -13,6 +13,7 @@ import {
   OpenIDResponse,
   post,
   ProofOfPossession,
+  SchemaValidation,
   UniformCredentialRequest,
   URL_NOT_VALID,
 } from '@sphereon/oid4vci-common';
@@ -35,6 +36,7 @@ export interface CredentialRequestOptsV1_0_11 {
   format?: CredentialFormat | OID4VCICredentialFormat;
   proof: ProofOfPossession;
   token: string;
+  schemaValidation: SchemaValidation;
   version: OpenId4VCIVersion;
 }
 
@@ -54,6 +56,9 @@ export class CredentialRequestClientV1_0_11 {
     return this.credentialRequestOpts.credentialEndpoint;
   }
 
+  public getSchemaValidation(): SchemaValidation {
+    return this.credentialRequestOpts.schemaValidation;
+  }
   public getDeferredCredentialEndpoint(): string | undefined {
     return this.credentialRequestOpts.deferredCredentialEndpoint;
   }

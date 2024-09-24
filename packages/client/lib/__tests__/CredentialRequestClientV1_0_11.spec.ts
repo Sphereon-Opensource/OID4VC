@@ -8,6 +8,7 @@ import {
   Jwt,
   OpenId4VCIVersion,
   ProofOfPossession,
+  SchemaValidation,
   URL_NOT_VALID,
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common';
@@ -90,6 +91,7 @@ describe('Credential Request Client ', () => {
     const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({ credentialOffer: INITIATION_TEST_V1_0_08 })
       .withCredentialEndpoint(basePath + '/credential')
       .withFormat('ldp_vc')
+      .withSchemaValidation(SchemaValidation.NEVER)
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
@@ -103,6 +105,7 @@ describe('Credential Request Client ', () => {
       .withClientId('sphereon:wallet')
       .withKid(kid)
       .build();
+    expect(credReqClient.getSchemaValidation()).toEqual(SchemaValidation.NEVER);
     expect(credReqClient.getCredentialEndpoint()).toEqual(basePath + '/credential');
     const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, version: OpenId4VCIVersion.VER_1_0_08 });
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy();
@@ -120,6 +123,7 @@ describe('Credential Request Client ', () => {
     const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({ credentialOffer: INITIATION_TEST_V1_0_08 })
       .withCredentialEndpoint(basePath + '/credential')
       .withFormat('ldp_vc')
+      .withSchemaValidation(SchemaValidation.ALWAYS)
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build();
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
@@ -133,6 +137,7 @@ describe('Credential Request Client ', () => {
       .withClientId('sphereon:wallet')
       .withKid(kid_withoutDid)
       .build();
+    expect(credReqClient.getSchemaValidation()).toEqual(SchemaValidation.ALWAYS);
     expect(credReqClient.getCredentialEndpoint()).toEqual(basePath + '/credential');
     const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, version: OpenId4VCIVersion.VER_1_0_08 });
     expect(credentialRequest.proof?.jwt?.includes(partialJWT_withoutDid)).toBeTruthy();

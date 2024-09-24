@@ -8,6 +8,7 @@ import {
   ExperimentalSubjectIssuance,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
+  SchemaValidation,
   UniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
@@ -170,6 +171,11 @@ export class CredentialRequestClientBuilder {
 
   public withCredentialType(credentialTypes: string | string[]): this {
     this._builder.withCredentialType(credentialTypes);
+    return this;
+  }
+
+  public withSchemaValidation(schemaValidation: SchemaValidation): this {
+    this._builder.withSchemaValidation(schemaValidation);
     return this;
   }
 
