@@ -1556,7 +1556,14 @@ export const AuthorizationResponseOptsSchemaObj = {
         }
       }
     },
-    "EncryptJwtCallback": {},
+    "EncryptJwtCallback": {
+      "properties": {
+        "isFunction": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
     "JwtIssuer": {
       "anyOf": [
         {

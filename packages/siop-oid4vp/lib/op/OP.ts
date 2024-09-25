@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 
-import { JarmClientMetadataParams, sendJarmAuthResponse } from '@protokoll/jarm'
+import { joseExtractJWKS } from '@protokoll/core'
+import { JarmClientMetadataParams, sendJarmAuthRequest } from '@protokoll/jarm'
 import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { IIssuerId } from '@sphereon/ssi-types'
 
@@ -169,7 +170,7 @@ export class OP {
       throw Error('No correlation Id provided')
     }
 
-    const isJarmResponseMode = (responseMode: string): responseMode is 'direct_post.jwt' | 'query.jwt' | 'fragment.jwt' => {
+    const isJarmResponseMode = (responseMode: string): responseMode is 'jwt' | 'direct_post.jwt' | 'query.jwt' | 'fragment.jwt' => {
       return responseMode === ResponseMode.DIRECT_POST_JWT || responseMode === ResponseMode.QUERY_JWT || responseMode === ResponseMode.FRAGMENT_JWT
     }
 
@@ -204,17 +205,16 @@ export class OP {
         throw new Error(`Sending an authorization response with response_mode '${responseMode}' requires providing an encryptJwtCallback`)
       }
 
-      if (!clientMetadata.jwks) {
-        throw new Error('Currently the jarm response decryption key can only be extracted from the jwks client_metadata parameter')
-      }
-
-      const decJwk = clientMetadata.jwks.keys.find((key) => key.use === 'enc')
-      if (!decJwk) {
-        throw new Error('No decyption key found in the jwks client_metadata parameter')
+      // The client metadata will be parsed in the joseExtractJWKS function
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const jwks = await joseExtractJWKS(clientMetadata as any)
+      const dectyptionJwk = jwks.keys.find((key) => key.use === 'enc')
+      if (!dectyptionJwk) {
+        throw new Error('No decryption could be extracted from the client metadata')
       }
 
       const { jwe } = await this.createResponseOptions.encryptJwtCallback({
-        jwk: decJwk,
+        jwk: dectyptionJwk,
         plaintext: JSON.stringify(response.payload),
       })
 
@@ -227,7 +227,7 @@ export class OP {
         responseType = 'vp_token'
       }
 
-      return sendJarmAuthResponse({
+      return sendJarmAuthRequest({
         authRequestParams: {
           response_uri: responseUri,
           response_mode: responseMode,

@@ -435,9 +435,12 @@ importers:
       '@astronautlabs/jsonpath':
         specifier: ^1.1.2
         version: 1.1.2
+      '@protokoll/core':
+        specifier: ^0.2.10
+        version: 0.2.10(typescript@5.4.5)
       '@protokoll/jarm':
-        specifier: ^0.2.7
-        version: 0.2.7(typescript@5.4.5)
+        specifier: ^0.2.10
+        version: 0.2.10(typescript@5.4.5)
       '@sphereon/did-uni-client':
         specifier: ^0.6.2
         version: 0.6.3(encoding@0.1.13)
@@ -2385,11 +2388,11 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@protokoll/core@0.2.7':
-    resolution: {integrity: sha512-7nxEVyM5k1l+jOHuBCr3QyQ8cXQLFYe/sDvzq56TCz+bSSJY2hAmwE5p2is0WTEfidsuOBlHL6t3BjSofolIBw==}
+  '@protokoll/core@0.2.10':
+    resolution: {integrity: sha512-TPKSa2f0Uo3AJiHJPAr/UxJQF0DE8uXNQ5YZ3JP5OJAodE/0RP9Cd7yGuC4T/j8fJygP7ln9nvYH7fcOP/irDw==}
 
-  '@protokoll/jarm@0.2.7':
-    resolution: {integrity: sha512-o4J0yDD51WgmCzPZsAmV7LoAu8TWjZWpyTcWhFUYK5HSzm6d68B5vLsCr7WDiFADeA4mgR1YcEyi1BKbf6lnCQ==}
+  '@protokoll/jarm@0.2.10':
+    resolution: {integrity: sha512-OafKkwEpO7ZfapqOZni2K+LVVlOnupsrP2wofn9KjuTi5QLz4rtc7ALg+/NAzVBSByc/qxH5QALs5bJNwW5TNw==}
 
   '@react-native-community/cli-clean@10.1.1':
     resolution: {integrity: sha512-iNsrjzjIRv9yb5y309SWJ8NDHdwYtnCpmxZouQDyOljUdC9MwdZ4ChbtA4rwQyAwgOVfS9F/j56ML3Cslmvrxg==}
@@ -11736,16 +11739,16 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@protokoll/core@0.2.7(typescript@5.4.5)':
+  '@protokoll/core@0.2.10(typescript@5.4.5)':
     dependencies:
       jwt-decode: 4.0.0
       valibot: 0.37.0(typescript@5.4.5)
     transitivePeerDependencies:
       - typescript
 
-  '@protokoll/jarm@0.2.7(typescript@5.4.5)':
+  '@protokoll/jarm@0.2.10(typescript@5.4.5)':
     dependencies:
-      '@protokoll/core': 0.2.7(typescript@5.4.5)
+      '@protokoll/core': 0.2.10(typescript@5.4.5)
       valibot: 0.37.0(typescript@5.4.5)
     transitivePeerDependencies:
       - typescript
