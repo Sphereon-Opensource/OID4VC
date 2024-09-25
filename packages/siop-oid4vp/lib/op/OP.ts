@@ -1,18 +1,18 @@
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'events';
 
-import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
-import { IIssuerId } from '@sphereon/ssi-types'
+import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common';
+import { IIssuerId } from '@sphereon/ssi-types';
 
-import { AuthorizationRequest, URI, VerifyAuthorizationRequestOpts } from '../authorization-request'
-import { mergeVerificationOpts } from '../authorization-request/Opts'
+import { AuthorizationRequest, URI, VerifyAuthorizationRequestOpts } from '../authorization-request';
+import { mergeVerificationOpts } from '../authorization-request/Opts';
 import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   AuthorizationResponseWithCorrelationId,
-  PresentationExchangeResponseOpts,
-} from '../authorization-response'
-import { encodeJsonAsURI, post } from '../helpers'
-import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
+  PresentationExchangeResponseOpts
+} from '../authorization-response';
+import { encodeJsonAsURI, post } from '../helpers';
+import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion';
 import {
   AuthorizationEvent,
   AuthorizationEvents,
@@ -22,15 +22,14 @@ import {
   ResponseIss,
   ResponseMode,
   SIOPErrors,
-  SIOPResonse,
   SupportedVersion,
   UrlEncodingFormat,
   Verification,
-  VerifiedAuthorizationRequest,
-} from '../types'
+  VerifiedAuthorizationRequest
+} from '../types';
 
-import { OPBuilder } from './OPBuilder'
-import { createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFromBuilderOrExistingOpts } from './Opts'
+import { OPBuilder } from './OPBuilder';
+import { createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFromBuilderOrExistingOpts } from './Opts';
 
 // The OP publishes the formats it supports using the vp_formats_supported metadata parameter as defined above in its "openid-configuration".
 export class OP {
@@ -57,37 +56,40 @@ export class OP {
     requestOpts?: { correlationId?: string; verification?: Verification },
   ): Promise<VerifiedAuthorizationRequest> {
     const correlationId = requestOpts?.correlationId || uuidv4()
-    const authorizationRequest = await AuthorizationRequest.fromUriOrJwt(requestJwtOrUri)
-      .then((result: AuthorizationRequest) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_RECEIVED_SUCCESS, { correlationId, subject: result })
-        return result
-      })
-      .catch((error: Error) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_RECEIVED_FAILED, {
+    
+    let authorizationRequest: AuthorizationRequest
+    try {
+      authorizationRequest = await AuthorizationRequest.fromUriOrJwt(requestJwtOrUri)
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_RECEIVED_SUCCESS, { correlationId, subject: authorizationRequest })
+    } catch (error) {
+      if (error instanceof Error) {
+        await this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_RECEIVED_FAILED, {
           correlationId,
           subject: requestJwtOrUri,
           error,
         })
-        throw error
-      })
+      }
+      throw error
+    }
 
-    return authorizationRequest
-      .verify(this.newVerifyAuthorizationRequestOpts({ ...requestOpts, correlationId }))
-      .then((verifiedAuthorizationRequest: VerifiedAuthorizationRequest) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_VERIFIED_SUCCESS, {
-          correlationId,
-          subject: verifiedAuthorizationRequest.authorizationRequest,
-        })
-        return verifiedAuthorizationRequest
+    try {
+      const verifiedAuthorizationRequest = await authorizationRequest.verify(
+        this.newVerifyAuthorizationRequestOpts({ ...requestOpts, correlationId })
+      )
+
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_VERIFIED_SUCCESS, {
+        correlationId,
+        subject: verifiedAuthorizationRequest.authorizationRequest,
       })
-      .catch((error) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_VERIFIED_FAILED, {
-          correlationId,
-          subject: authorizationRequest,
-          error,
-        })
-        throw error
+      return verifiedAuthorizationRequest
+    } catch (error) {
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_VERIFIED_FAILED, {
+        correlationId,
+        subject: authorizationRequest,
+        error,
       })
+      throw error
+    }
   }
 
   public async createAuthorizationResponse(
@@ -179,15 +181,15 @@ export class OP {
       throw Error('No response URI present')
     }
     const authResponseAsURI = encodeJsonAsURI(payload, { arraysWithIndex: ['presentation_submission'] })
-    return post(responseUri, authResponseAsURI, { contentType: ContentType.FORM_URL_ENCODED, exceptionOnHttpErrorStatus: true })
-      .then((result: SIOPResonse<unknown>) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
-        return result.origResponse
-      })
-      .catch((error: Error) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_FAILED, { correlationId, subject: response, error })
-        throw error
-      })
+    try {
+      const result = await post(responseUri, authResponseAsURI, { contentType: ContentType.FORM_URL_ENCODED, exceptionOnHttpErrorStatus: true })
+      const redirectUri = result.successBody?.['redirect_uri'];
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response, redirectUri: redirectUri })
+      return result.origResponse
+    } catch (error) {
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_FAILED, { correlationId, subject: response, error: error as Error })
+      throw error
+    }
   }
 
   /**
@@ -257,6 +259,7 @@ export class OP {
     payload: {
       correlationId: string
       subject: AuthorizationRequest | AuthorizationResponse | string | URI
+      redirectUri?: string
       error?: Error
     },
   ): Promise<void> {

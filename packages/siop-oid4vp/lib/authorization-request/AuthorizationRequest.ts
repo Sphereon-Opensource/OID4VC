@@ -189,6 +189,13 @@ export class AuthorizationRequest {
       throw new Error(`${SIOPErrors.INVALID_REQUEST}, redirect_uri or response_uri is needed`)
     }
 
+    // TODO see if this is too naive. The OpenID conformance test explicitly tests for this
+    // But the spec says: The client_id and client_id_scheme MUST be omitted in unsigned requests defined in Appendix A.3.1.
+    // So I would expect client_id_scheme and client_id to be undefined when the JWT header has alg: none
+    if(mergedPayload.client_id && mergedPayload.client_id_scheme === 'redirect_uri' && mergedPayload.client_id !== responseURI) {
+      throw Error(`${SIOPErrors.INVALID_REQUEST}, response_uri does not match the client_id provided by the verifier which is required for client_id_scheme redirect_uri`)
+    }
+    
     // TODO: we need to verify somewhere that if response_mode is direct_post, that the response_uri may be present,
     // BUT not both redirect_uri and response_uri. What is the best place to do this?
 
