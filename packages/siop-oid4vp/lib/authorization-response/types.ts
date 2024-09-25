@@ -17,7 +17,6 @@ import { CreateJwtCallback } from '../types/VpJwtIssuer'
 import { VerifyJwtCallback } from '../types/VpJwtVerifier'
 
 import { AuthorizationResponse } from './AuthorizationResponse'
-import { MdocVerifiablePresentation as MdocVerifiablePresentation } from './OpenID4VP'
 
 export interface AuthorizationResponseOpts {
   // redirectUri?: string; // It's typically comes from the request opts as a measure to prevent hijacking.
@@ -90,7 +89,7 @@ export enum VPTokenLocation {
 export type PresentationVerificationResult = { verified: boolean; reason?: string }
 
 export type PresentationVerificationCallback = (
-  args: W3CVerifiablePresentation | CompactSdJwtVc | MdocVerifiablePresentation,
+  args: W3CVerifiablePresentation | CompactSdJwtVc,
   presentationSubmission: PresentationSubmission,
 ) => Promise<PresentationVerificationResult>
 

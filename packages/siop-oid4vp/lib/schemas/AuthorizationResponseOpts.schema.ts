@@ -1556,17 +1556,7 @@ export const AuthorizationResponseOptsSchemaObj = {
         }
       }
     },
-    "EncryptJwtCallback": {
-      "$ref": "#/definitions/JoseJweEncrypt"
-    },
-    "JoseJweEncrypt": {
-      "properties": {
-        "isFunction": {
-          "type": "boolean",
-          "const": true
-        }
-      }
-    },
+    "EncryptJwtCallback": {},
     "JwtIssuer": {
       "anyOf": [
         {

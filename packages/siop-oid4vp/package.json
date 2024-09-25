@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@astronautlabs/jsonpath": "^1.1.2",
-    "@protokoll/jarm": "link:../../../protokoll/packages/jarm",
+    "@protokoll/jarm": "^0.2.7",
     "@sphereon/did-uni-client": "^0.6.2",
     "@sphereon/oid4vc-common": "workspace:*",
     "@sphereon/pex": "^4.1.0",

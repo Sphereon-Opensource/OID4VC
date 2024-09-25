@@ -436,8 +436,8 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
       '@protokoll/jarm':
-        specifier: link:../../../protokoll/packages/jarm
-        version: link:../../../protokoll/packages/jarm
+        specifier: ^0.2.7
+        version: 0.2.7(typescript@5.4.5)
       '@sphereon/did-uni-client':
         specifier: ^0.6.2
         version: 0.6.3(encoding@0.1.13)
@@ -2384,6 +2384,12 @@ packages:
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
+
+  '@protokoll/core@0.2.7':
+    resolution: {integrity: sha512-7nxEVyM5k1l+jOHuBCr3QyQ8cXQLFYe/sDvzq56TCz+bSSJY2hAmwE5p2is0WTEfidsuOBlHL6t3BjSofolIBw==}
+
+  '@protokoll/jarm@0.2.7':
+    resolution: {integrity: sha512-o4J0yDD51WgmCzPZsAmV7LoAu8TWjZWpyTcWhFUYK5HSzm6d68B5vLsCr7WDiFADeA4mgR1YcEyi1BKbf6lnCQ==}
 
   '@react-native-community/cli-clean@10.1.1':
     resolution: {integrity: sha512-iNsrjzjIRv9yb5y309SWJ8NDHdwYtnCpmxZouQDyOljUdC9MwdZ4ChbtA4rwQyAwgOVfS9F/j56ML3Cslmvrxg==}
@@ -8341,6 +8347,14 @@ packages:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
 
+  valibot@0.37.0:
+    resolution: {integrity: sha512-FQz52I8RXgFgOHym3XHYSREbNtkgSjF9prvMFH1nBsRyfL6SfCzoT1GuSDTlbsuPubM7/6Kbw0ZMQb8A+V+VsQ==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   valid-url@1.0.9:
     resolution: {integrity: sha512-QQDsV8OnSf5Uc30CKSwG9lnhMPe6exHtTXLRYX8uMwKENy640pU+2BgBL0LRbDh/eYRahNCS7aewCx0wf3NYVA==}
 
@@ -10606,7 +10620,7 @@ snapshots:
       '@expo/bunyan': 4.0.0
       '@expo/metro-config': 0.7.1
       '@expo/osascript': 2.0.33
-      '@expo/spawn-async': 1.5.0
+      '@expo/spawn-async': 1.7.2
       body-parser: 1.20.3
       chalk: 4.1.2
       connect: 3.7.0
@@ -10682,7 +10696,7 @@ snapshots:
 
   '@expo/osascript@2.0.33':
     dependencies:
-      '@expo/spawn-async': 1.5.0
+      '@expo/spawn-async': 1.7.2
       exec-async: 2.2.0
 
   '@expo/osascript@2.1.3':
@@ -10693,7 +10707,7 @@ snapshots:
   '@expo/package-manager@1.0.3':
     dependencies:
       '@expo/json-file': 8.3.3
-      '@expo/spawn-async': 1.5.0
+      '@expo/spawn-async': 1.7.2
       ansi-regex: 5.0.1
       chalk: 4.1.2
       find-up: 5.0.0
@@ -11541,6 +11555,20 @@ snapshots:
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
+
+  '@protokoll/core@0.2.7(typescript@5.4.5)':
+    dependencies:
+      jwt-decode: 4.0.0
+      valibot: 0.37.0(typescript@5.4.5)
+    transitivePeerDependencies:
+      - typescript
+
+  '@protokoll/jarm@0.2.7(typescript@5.4.5)':
+    dependencies:
+      '@protokoll/core': 0.2.7(typescript@5.4.5)
+      valibot: 0.37.0(typescript@5.4.5)
+    transitivePeerDependencies:
+      - typescript
 
   '@react-native-community/cli-clean@10.1.1(encoding@0.1.13)':
     dependencies:
@@ -14485,9 +14513,9 @@ snapshots:
   execa@5.0.0:
     dependencies:
       cross-spawn: 7.0.3
-      get-stream: 6.0.0
+      get-stream: 6.0.1
       human-signals: 2.1.0
-      is-stream: 2.0.0
+      is-stream: 2.0.1
       merge-stream: 2.0.0
       npm-run-path: 4.0.1
       onetime: 5.1.2
@@ -15834,7 +15862,7 @@ snapshots:
 
   jest-diff@29.7.0:
     dependencies:
-      chalk: 4.1.0
+      chalk: 4.1.2
       diff-sequences: 29.6.3
       jest-get-type: 29.6.3
       pretty-format: 29.7.0
@@ -17168,7 +17196,7 @@ snapshots:
       array-differ: 3.0.0
       array-union: 2.1.0
       arrify: 2.0.1
-      minimatch: 3.0.5
+      minimatch: 3.1.2
 
   mute-stream@0.0.8: {}
 
@@ -17399,7 +17427,7 @@ snapshots:
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.7
       axios: 1.7.7(debug@4.3.7)
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       cliui: 8.0.1
@@ -17583,9 +17611,9 @@ snapshots:
   ora@5.3.0:
     dependencies:
       bl: 4.1.0
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
-      cli-spinners: 2.6.1
+      cli-spinners: 2.9.2
       is-interactive: 1.0.0
       log-symbols: 4.1.0
       strip-ansi: 6.0.1
@@ -19359,6 +19387,10 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.25
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
+
+  valibot@0.37.0(typescript@5.4.5):
+    optionalDependencies:
+      typescript: 5.4.5
 
   valid-url@1.0.9: {}
 

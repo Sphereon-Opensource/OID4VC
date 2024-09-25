@@ -21,7 +21,6 @@ import {
   PresentationVerificationCallback,
   VerifyAuthorizationResponseOpts,
 } from '../authorization-response'
-import { MdocVerifiablePresentation } from '../authorization-response/OpenID4VP'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 
@@ -504,7 +503,7 @@ export interface VerifiedIDToken {
 export interface VerifiedOpenID4VPSubmission {
   submissionData: PresentationSubmission
   presentationDefinitions: PresentationDefinitionWithLocation[]
-  presentations: (WrappedVerifiablePresentation | MdocVerifiablePresentation)[]
+  presentations: WrappedVerifiablePresentation[]
   nonce: string
 }
 
