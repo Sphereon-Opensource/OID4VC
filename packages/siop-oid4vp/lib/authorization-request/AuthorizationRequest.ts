@@ -116,7 +116,7 @@ export class AuthorizationRequest {
   async verify(opts: VerifyAuthorizationRequestOpts): Promise<VerifiedAuthorizationRequest> {
     assertValidVerifyAuthorizationRequestOpts(opts)
 
-    let requestObjectPayload: RequestObjectPayload
+    let requestObjectPayload: RequestObjectPayload | undefined = undefined
 
     const jwt = await this.requestObjectJwt()
     const parsedJwt = jwt ? parseJWT(jwt) : undefined
@@ -148,7 +148,7 @@ export class AuthorizationRequest {
     // AuthorizationRequest.assertValidRequestObject(origAuthenticationRequest);
 
     // We use the orig request for default values, but the JWT payload contains signed request object properties
-    const mergedPayload = { ...this.payload, ...requestObjectPayload }
+    const mergedPayload = { ...this.payload, ...(requestObjectPayload ? requestObjectPayload : {}) }
     if (opts.state && mergedPayload.state !== opts.state) {
       throw new Error(`${SIOPErrors.BAD_STATE} payload: ${mergedPayload.state}, supplied: ${opts.state}`)
     } else if (opts.nonce && mergedPayload.nonce !== opts.nonce) {

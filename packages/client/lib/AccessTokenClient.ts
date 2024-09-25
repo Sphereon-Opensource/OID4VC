@@ -132,18 +132,7 @@ export class AccessTokenClient {
     const credentialIssuer = opts.credentialIssuer ?? credentialOfferRequest?.credential_offer?.credential_issuer ?? opts.metadata?.issuer;
     await createJwtBearerClientAssertion(request, { ...opts, credentialIssuer });
 
-    if (credentialOfferRequest?.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
-      this.assertAlphanumericPin(opts.pinMetadata, pin);
-      request.user_pin = pin;
-      request.tx_code = pin;
-
-      request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
-      // we actually know it is there because of the isPreAuthCode call
-      request[PRE_AUTH_CODE_LITERAL] = credentialOfferRequest?.credential_offer.grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL];
-
-      return request as AccessTokenRequest;
-    }
-
+    // Prefer AUTHORIZATION_CODE over PRE_AUTHORIZED_CODE_FLOW
     if (!credentialOfferRequest || credentialOfferRequest.supportedFlows.includes(AuthzFlowType.AUTHORIZATION_CODE_FLOW)) {
       request.grant_type = GrantTypes.AUTHORIZATION_CODE;
       request.code = code;
@@ -156,6 +145,18 @@ export class AccessTokenClient {
       return request as AccessTokenRequest;
     }
 
+    if (credentialOfferRequest?.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
+      this.assertAlphanumericPin(opts.pinMetadata, pin);
+      request.user_pin = pin;
+      request.tx_code = pin;
+
+      request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE;
+      // we actually know it is there because of the isPreAuthCode call
+      request[PRE_AUTH_CODE_LITERAL] = credentialOfferRequest?.credential_offer.grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL];
+
+      return request as AccessTokenRequest;
+    }
+    
     throw new Error('Credential offer request follows neither pre-authorized code nor authorization code flow requirements.');
   }
 

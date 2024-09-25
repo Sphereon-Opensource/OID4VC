@@ -237,7 +237,7 @@ export class OP {
       })
     }
 
-    const authResponseAsURI = encodeJsonAsURI(payload, { arraysWithIndex: ['presentation_submission', 'vp_token'] })
+    const authResponseAsURI = encodeJsonAsURI(payload, { arraysWithIndex: ['presentation_submission'] })
     return post(responseUri, authResponseAsURI, { contentType: ContentType.FORM_URL_ENCODED, exceptionOnHttpErrorStatus: true })
       .then((result: SIOPResonse<unknown>) => {
         void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })

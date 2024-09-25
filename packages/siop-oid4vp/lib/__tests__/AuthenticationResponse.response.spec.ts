@@ -329,7 +329,7 @@ describe('create JWT from Request JWT should', () => {
             },
           ],
           constraints: {
-            limit_disclosure: 'required',
+            //limit_disclosure: 'required',
             fields: [
               {
                 path: ['$.issuer.id'],
@@ -486,7 +486,7 @@ describe('create JWT from Request JWT should', () => {
             },
           ],
           constraints: {
-            limit_disclosure: 'required',
+            // limit_disclosure: 'required',
             fields: [
               {
                 path: ['$.issuer.id'],

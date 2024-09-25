@@ -48,7 +48,7 @@ export const createRequestOptsFromBuilderOrExistingOpts = (opts: { builder?: RPB
   return createRequestOpts
 }
 
-export const createVerifyResponseOptsFromBuilderOrExistingOpts = (opts: { builder?: RPBuilder; verifyOpts?: VerifyAuthorizationResponseOpts }) => {
+export const createVerifyResponseOptsFromBuilderOrExistingOpts = (opts: { builder?: RPBuilder; verifyOpts?: VerifyAuthorizationResponseOpts }): Partial<VerifyAuthorizationResponseOpts> => {
   return opts.builder
     ? {
         hasher: opts.builder.hasher ?? defaultHasher,

@@ -38,7 +38,7 @@ export class AuthorizationEvent<T> {
     this._error = args.error
   }
 
-  get subject(): T {
+  get subject(): T | undefined {
     return this._subject
   }
 
@@ -46,7 +46,7 @@ export class AuthorizationEvent<T> {
     return this._timestamp
   }
 
-  get error(): Error {
+  get error(): Error | undefined {
     return this._error
   }
 

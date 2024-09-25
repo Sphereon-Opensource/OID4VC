@@ -13,8 +13,8 @@ export class LanguageTagUtils {
    *
    * @param source is the object from which the language enabled fields and their values will be extracted.
    */
-  static getAllLanguageTaggedProperties(source: unknown): Map<string, string> {
-    return this.getLanguageTaggedPropertiesMapped(source, undefined)
+  static getAllLanguageTaggedProperties(source: object): Map<string, string> {
+    return this.getLanguageTaggedPropertiesMapped(source, new Map() )
   }
 
   /**
@@ -23,7 +23,7 @@ export class LanguageTagUtils {
    * @param source is the object from which the language enabled fields and their values will be extracted.
    * @param requiredFieldNames the fields which are supposed to be language enabled. These are the only fields which should be returned.
    */
-  static getLanguageTaggedProperties(source: unknown, requiredFieldNames: Array<string>): Map<string, string> {
+  static getLanguageTaggedProperties(source: object, requiredFieldNames: Array<string>): Map<string, string> {
     const languageTagEnabledFieldsNamesMapping: Map<string, string> = new Map<string, string>()
     requiredFieldNames.forEach((value) => languageTagEnabledFieldsNamesMapping.set(value, value))
     return this.getLanguageTaggedPropertiesMapped(source, languageTagEnabledFieldsNamesMapping)
@@ -36,7 +36,7 @@ export class LanguageTagUtils {
    * @param requiredFieldNamesMapping the fields which are supposed to be language enabled. These are the only fields which should be returned. And
    *                                  the fields names will be transformed as per the mapping provided.
    */
-  static getLanguageTaggedPropertiesMapped(source: unknown, requiredFieldNamesMapping: Map<string, string>): Map<string, string> {
+  static getLanguageTaggedPropertiesMapped(source: object, requiredFieldNamesMapping: Map<string, string>): Map<string, string> {
     this.assertSourceIsWorthChecking(source)
     this.assertValidTargetFieldNames(requiredFieldNamesMapping)
 
@@ -103,16 +103,12 @@ export class LanguageTagUtils {
   }
 
   private static assertValidTargetFieldNames(languageTagEnabledFieldsNamesMapping: Map<string, string>): void {
-    if (languageTagEnabledFieldsNamesMapping) {
-      if (!languageTagEnabledFieldsNamesMapping.size) {
-        throw new Error(SIOPErrors.BAD_PARAMS + ' LanguageTagEnabledFieldsNamesMapping must be non-null or non-empty')
-      } else {
-        for (const entry of languageTagEnabledFieldsNamesMapping.entries()) {
-          const key = entry[0]
-          const value = entry[1]
-          if (isStringNullOrEmpty(key) || isStringNullOrEmpty(value)) {
-            throw new Error(SIOPErrors.BAD_PARAMS + '. languageTagEnabledFieldsName must be non-null or non-empty')
-          }
+    if (languageTagEnabledFieldsNamesMapping && languageTagEnabledFieldsNamesMapping.size) {
+      for (const entry of languageTagEnabledFieldsNamesMapping.entries()) {
+        const key = entry[0]
+        const value = entry[1]
+        if (isStringNullOrEmpty(key) || isStringNullOrEmpty(value)) {
+          throw new Error(SIOPErrors.BAD_PARAMS + '. languageTagEnabledFieldsName must be non-null or non-empty')
         }
       }
     }
