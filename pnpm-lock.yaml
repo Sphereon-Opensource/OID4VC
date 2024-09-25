@@ -445,8 +445,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/pex':
-        specifier: 5.0.0-unstable.2
-        version: 5.0.0-unstable.2
+        specifier: 5.0.0-unstable.8
+        version: 5.0.0-unstable.8
       '@sphereon/pex-models':
         specifier: ^2.3.1
         version: 2.3.1
@@ -4991,8 +4991,8 @@ packages:
     resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
     dev: false
 
-  /@sphereon/pex@5.0.0-unstable.2:
-    resolution: {integrity: sha512-mA6lY/OBKKzsh4Jf4btm9Tj4ymVsX6xuVATn85LurD4bt3fhZwNJMkxhFy4tT/QyAtp05E4aaEq0wTVvOjVa7w==}
+  /@sphereon/pex@5.0.0-unstable.8:
+    resolution: {integrity: sha512-DD85XvyK2F+7VH4lRmfalqSiET8SJysY3ryIPuTVfYrZ3KssYCFfxTcip0+mgjAgbTUldjZYIXuhJO42TDjA/A==}
     engines: {node: '>=18'}
     requiresBuild: true
     dependencies:
@@ -5059,46 +5059,6 @@ packages:
       uint8arrays: 3.1.1
     transitivePeerDependencies:
       - supports-color
-    dev: false
-
-  /@sphereon/ssi-sdk-ext.did-utils@0.24.1-next.112:
-    resolution: {integrity: sha512-/qwAk5ivJBF8uRgsA66RK1nBYpDLvoE7ma05HHxENHfQFvrtoE29m/gjcyIFxvlew+HQhI3OHwzOZXGeadLGGw==}
-    dependencies:
-      '@ethersproject/networks': 5.7.1
-      '@ethersproject/transactions': 5.7.0
-      '@sphereon/did-uni-client': 0.6.3
-      '@sphereon/ssi-sdk-ext.key-utils': 0.24.1-next.112
-      '@sphereon/ssi-sdk-ext.x509-utils': 0.24.1-next.112
-      '@sphereon/ssi-sdk.agent-config': 0.29.1-unstable.161
-      '@sphereon/ssi-sdk.core': 0.29.1-unstable.161
-      '@sphereon/ssi-types': 0.29.1-unstable.161
-      '@stablelib/ed25519': 1.0.3
-      '@veramo/core': 4.2.0
-      '@veramo/utils': 4.2.0
-      did-jwt: 6.11.6
-      did-resolver: 4.1.0
-      elliptic: 6.5.7
-      uint8arrays: 3.1.1
-    transitivePeerDependencies:
-      - '@google-cloud/spanner'
-      - '@sap/hana-client'
-      - better-sqlite3
-      - encoding
-      - hdb-pool
-      - ioredis
-      - mongodb
-      - mssql
-      - mysql2
-      - oracledb
-      - pg
-      - pg-native
-      - pg-query-stream
-      - redis
-      - sql.js
-      - sqlite3
-      - supports-color
-      - ts-node
-      - typeorm-aurora-data-api-driver
     dev: false
 
   /@sphereon/ssi-sdk-ext.did-utils@0.24.1-unstable.112:
@@ -5179,13 +5139,13 @@ packages:
   /@sphereon/ssi-sdk-ext.jwt-service@0.24.1-unstable.112:
     resolution: {integrity: sha512-OrBaSg5wLSehkJ4MyuyDWKD4CRIBERnJqRT0o/y5DbaCF3k02+/lN/rWP+4qwk2w192fIEAExG4L2GwZM/5PLQ==}
     dependencies:
-      '@sphereon/ssi-sdk-ext.did-utils': 0.24.1-next.112
+      '@sphereon/ssi-sdk-ext.did-utils': 0.24.1-unstable.112
       '@sphereon/ssi-sdk-ext.identifier-resolution': 0.24.1-unstable.112
       '@sphereon/ssi-sdk-ext.key-manager': 0.24.1-unstable.112
-      '@sphereon/ssi-sdk-ext.key-utils': 0.24.1-next.112
+      '@sphereon/ssi-sdk-ext.key-utils': 0.24.1-unstable.112
       '@sphereon/ssi-sdk-ext.x509-utils': 0.24.1-unstable.112
       '@sphereon/ssi-sdk.agent-config': 0.29.1-unstable.161
-      '@sphereon/ssi-types': 0.29.1-unstable.237
+      '@sphereon/ssi-types': 0.29.1-unstable.161
       '@veramo/core': 4.2.0
       '@veramo/utils': 4.2.0
       debug: 4.3.6
@@ -5250,30 +5210,6 @@ packages:
       - supports-color
     dev: true
 
-  /@sphereon/ssi-sdk-ext.key-utils@0.24.1-next.112:
-    resolution: {integrity: sha512-pySpFqfKn4fJ1wJMWRiVMh6zDyEQFs7adkyxlO5uDTKEYJ/9hQ++MD2t+seDpYjq5x2Wh+g60OzD1uiVdbL2aA==}
-    dependencies:
-      '@ethersproject/random': 5.7.0
-      '@sphereon/ssi-sdk-ext.x509-utils': 0.24.1-next.112
-      '@sphereon/ssi-types': 0.29.1-unstable.237
-      '@stablelib/ed25519': 1.0.3
-      '@stablelib/sha256': 1.0.1
-      '@stablelib/sha512': 1.0.1
-      '@trust/keyto': 1.0.1
-      '@veramo/core': 4.2.0
-      base64url: 3.0.1
-      debug: 4.3.6
-      did-resolver: 4.1.0
-      elliptic: 6.5.7
-      lodash.isplainobject: 4.0.6
-      multiformats: 9.9.0
-      uint8arrays: 3.1.1
-      varint: 6.0.0
-      web-encoding: 1.1.5
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
   /@sphereon/ssi-sdk-ext.key-utils@0.24.1-unstable.112:
     resolution: {integrity: sha512-er6TwGUWxlao2lSP97r1DTFlUXcPSMsIToULOWQJp6wKbvCuvV6pN5luS0qKB/W0/TOUE5kXzFwNx086BPnPRA==}
     dependencies:
@@ -5294,18 +5230,6 @@ packages:
       uint8arrays: 3.1.1
       varint: 6.0.0
       web-encoding: 1.1.5
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
-  /@sphereon/ssi-sdk-ext.x509-utils@0.24.1-next.112:
-    resolution: {integrity: sha512-D15Kqh1oH620dMuPkImfNmVOpXtperQm6dGbo3jiJ9lvafjJzuVM9nHIeDoSI/uh/LkUXB7xuqD+4sATE/RO9g==}
-    dependencies:
-      '@trust/keyto': 1.0.1
-      debug: 4.3.6
-      js-x509-utils: 1.0.7
-      pkijs: 3.2.4
-      uint8arrays: 3.1.1
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -5410,18 +5334,6 @@ packages:
 
   /@sphereon/ssi-types@0.29.1-unstable.208:
     resolution: {integrity: sha512-3YAFzy//BojsYN+RYoEjndWP3w5a8a3qRZi5dS0Gh6s4yMCiykqTJM1agJVeoaLce8JxFFaCWSpkzwbmJYGTaQ==}
-    dependencies:
-      '@sd-jwt/decode': 0.6.1
-      '@sphereon/kmp-mdl-mdoc': 0.2.0-SNAPSHOT.22
-      debug: 4.3.6
-      events: 3.3.0
-      jwt-decode: 3.1.2
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
-  /@sphereon/ssi-types@0.29.1-unstable.237:
-    resolution: {integrity: sha512-H9vqaFbCwbZpPUk5x84Cn1GeIFvwi7EZAsLN4h6EkXDwm55yOT76dvcSVUnL6obC2AzGr+Bjyv4R2cZSwKkguw==}
     dependencies:
       '@sd-jwt/decode': 0.6.1
       '@sphereon/kmp-mdl-mdoc': 0.2.0-SNAPSHOT.22
