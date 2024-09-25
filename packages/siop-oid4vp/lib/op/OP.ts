@@ -183,8 +183,7 @@ export class OP {
     const authResponseAsURI = encodeJsonAsURI(payload, { arraysWithIndex: ['presentation_submission'] })
     try {
       const result = await post(responseUri, authResponseAsURI, { contentType: ContentType.FORM_URL_ENCODED, exceptionOnHttpErrorStatus: true })
-      const redirectUri = result.successBody?.['redirect_uri'];
-      await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response, redirectUri: redirectUri })
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
       return result.origResponse
     } catch (error) {
       await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_FAILED, { correlationId, subject: response, error: error as Error })
@@ -259,7 +258,6 @@ export class OP {
     payload: {
       correlationId: string
       subject: AuthorizationRequest | AuthorizationResponse | string | URI
-      redirectUri?: string
       error?: Error
     },
   ): Promise<void> {
