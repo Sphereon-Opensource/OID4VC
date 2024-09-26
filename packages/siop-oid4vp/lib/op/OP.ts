@@ -1,18 +1,18 @@
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'events';
 
-import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
-import { IIssuerId } from '@sphereon/ssi-types'
+import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common';
+import { IIssuerId } from '@sphereon/ssi-types';
 
-import { AuthorizationRequest, URI, VerifyAuthorizationRequestOpts } from '../authorization-request'
-import { mergeVerificationOpts } from '../authorization-request/Opts'
+import { AuthorizationRequest, URI, VerifyAuthorizationRequestOpts } from '../authorization-request';
+import { mergeVerificationOpts } from '../authorization-request/Opts';
 import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   AuthorizationResponseWithCorrelationId,
-  PresentationExchangeResponseOpts,
-} from '../authorization-response'
-import { encodeJsonAsURI, post } from '../helpers'
-import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
+  PresentationExchangeResponseOpts
+} from '../authorization-response';
+import { encodeJsonAsURI, post } from '../helpers';
+import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion';
 import {
   AuthorizationEvent,
   AuthorizationEvents,
@@ -26,11 +26,11 @@ import {
   SupportedVersion,
   UrlEncodingFormat,
   Verification,
-  VerifiedAuthorizationRequest,
-} from '../types'
+  VerifiedAuthorizationRequest
+} from '../types';
 
-import { OPBuilder } from './OPBuilder'
-import { createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFromBuilderOrExistingOpts } from './Opts'
+import { OPBuilder } from './OPBuilder';
+import { createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFromBuilderOrExistingOpts } from './Opts';
 
 // The OP publishes the formats it supports using the vp_formats_supported metadata parameter as defined above in its "openid-configuration".
 export class OP {
@@ -57,37 +57,40 @@ export class OP {
     requestOpts?: { correlationId?: string; verification?: Verification },
   ): Promise<VerifiedAuthorizationRequest> {
     const correlationId = requestOpts?.correlationId || uuidv4()
-    const authorizationRequest = await AuthorizationRequest.fromUriOrJwt(requestJwtOrUri)
-      .then((result: AuthorizationRequest) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_RECEIVED_SUCCESS, { correlationId, subject: result })
-        return result
-      })
-      .catch((error: Error) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_RECEIVED_FAILED, {
+    
+    let authorizationRequest: AuthorizationRequest
+    try {
+      authorizationRequest = await AuthorizationRequest.fromUriOrJwt(requestJwtOrUri)
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_RECEIVED_SUCCESS, { correlationId, subject: authorizationRequest })
+    } catch (error) {
+      if (error instanceof Error) {
+        await this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_RECEIVED_FAILED, {
           correlationId,
           subject: requestJwtOrUri,
           error,
         })
+      }
         throw error
-      })
+    }
 
-    return authorizationRequest
-      .verify(this.newVerifyAuthorizationRequestOpts({ ...requestOpts, correlationId }))
-      .then((verifiedAuthorizationRequest: VerifiedAuthorizationRequest) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_VERIFIED_SUCCESS, {
+    try {
+      const verifiedAuthorizationRequest = await authorizationRequest.verify(
+        this.newVerifyAuthorizationRequestOpts({ ...requestOpts, correlationId })
+      )
+
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_VERIFIED_SUCCESS, {
           correlationId,
           subject: verifiedAuthorizationRequest.authorizationRequest,
         })
         return verifiedAuthorizationRequest
-      })
-      .catch((error) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_VERIFIED_FAILED, {
+    } catch (error) {
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_VERIFIED_FAILED, {
           correlationId,
           subject: authorizationRequest,
           error,
         })
         throw error
-      })
+    }
   }
 
   public async createAuthorizationResponse(
