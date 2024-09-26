@@ -6,6 +6,7 @@ settings:
 
 overrides:
   node-fetch: 2.6.12
+  '@sphereon/pex': 5.0.0-unstable.8
 
 importers:
 

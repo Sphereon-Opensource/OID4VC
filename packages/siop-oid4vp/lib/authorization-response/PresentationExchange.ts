@@ -320,7 +320,7 @@ export class PresentationExchange {
       throw new Error(SIOPErrors.NO_PRESENTATION_SUBMISSION)
     }
 
-    if (!evaluationResults.areRequiredCredentialsPresent || evaluationResults.errors || !evaluationResults.value) {
+    if (!evaluationResults.areRequiredCredentialsPresent || evaluationResults.errors.length > 0 || !evaluationResults.value) {
       throw new Error(`message: ${SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD}, details: ${JSON.stringify(evaluationResults.errors)}`)
     }
 
