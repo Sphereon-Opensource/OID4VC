@@ -14,7 +14,7 @@ export class LanguageTagUtils {
    * @param source is the object from which the language enabled fields and their values will be extracted.
    */
   static getAllLanguageTaggedProperties(source: object): Map<string, string> {
-    return this.getLanguageTaggedPropertiesMapped(source, new Map() )
+    return this.getLanguageTaggedPropertiesMapped(source, new Map())
   }
 
   /**

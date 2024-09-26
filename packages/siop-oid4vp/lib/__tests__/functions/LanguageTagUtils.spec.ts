@@ -211,7 +211,7 @@ describe('Language tag util should', () => {
   it('return empty if list is given but not effective', async () => {
     expect.assertions(1)
     const result = await LanguageTagUtils.getLanguageTaggedProperties({}, [])
-    expect(result).toEqual(new Map<string, string>)
+    expect(result).toEqual(new Map<string, string>())
   })
 
   it('throw error if list is given but no proper field names', async () => {
@@ -227,7 +227,7 @@ describe('Language tag util should', () => {
   it('return empty map if mapping is given but not effective', async () => {
     expect.assertions(1)
     const result = await LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, new Map<string, string>())
-    expect(result).toEqual(new Map<string, string>)
+    expect(result).toEqual(new Map<string, string>())
   })
 
   it('throw error if mapping is given but no proper names', async () => {

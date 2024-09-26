@@ -61,7 +61,7 @@ const siopFetch = async <T>(
   if (!url || url.toLowerCase().startsWith('did:')) {
     throw Error(`Invalid URL supplied. Expected a http(s) URL. Recieved: ${url}`)
   }
-  const headers:Record<string, any> = opts?.customHeaders ? opts.customHeaders : {}
+  const headers: Record<string, any> = opts?.customHeaders ? opts.customHeaders : {}
   if (opts?.bearerToken) {
     headers['Authorization'] = `Bearer ${opts.bearerToken}`
   }

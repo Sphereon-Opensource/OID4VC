@@ -436,11 +436,11 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
       '@protokoll/core':
-        specifier: ^0.2.10
-        version: 0.2.10(typescript@5.4.5)
+        specifier: ^0.2.11
+        version: 0.2.11(typescript@5.4.5)
       '@protokoll/jarm':
-        specifier: ^0.2.10
-        version: 0.2.10(typescript@5.4.5)
+        specifier: ^0.2.11
+        version: 0.2.11(typescript@5.4.5)
       '@sphereon/did-uni-client':
         specifier: ^0.6.2
         version: 0.6.3(encoding@0.1.13)
@@ -2388,11 +2388,14 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@protokoll/core@0.2.10':
-    resolution: {integrity: sha512-TPKSa2f0Uo3AJiHJPAr/UxJQF0DE8uXNQ5YZ3JP5OJAodE/0RP9Cd7yGuC4T/j8fJygP7ln9nvYH7fcOP/irDw==}
+  '@protokoll/core@0.2.11':
+    resolution: {integrity: sha512-lujNIh5RC4YXMaa6NcYlGI5DqKNkLrWOi4G4qlF0pWHddv76PEZo67p7ugjJJmHtk8D/NlufvPnGMU9I4uPiTg==}
 
-  '@protokoll/jarm@0.2.10':
-    resolution: {integrity: sha512-OafKkwEpO7ZfapqOZni2K+LVVlOnupsrP2wofn9KjuTi5QLz4rtc7ALg+/NAzVBSByc/qxH5QALs5bJNwW5TNw==}
+  '@protokoll/jarm@0.2.11':
+    resolution: {integrity: sha512-Gm70WouUGIBdSx0pOwCpY/eSavlulrbjheVvqUFnqrfmTRjMT7vkAaG4fzIOEmTg74oOSaif5wy91IQ03EX2kg==}
+
+  '@protokoll/jose@0.2.11':
+    resolution: {integrity: sha512-UWl8ylAhXAf3dGQkXMPgNMX45f2mEw7F2YsSkuOAJN5OMDaQ07b2KT4AdT84YjHDiOf1TpJnDvQm9+qIo4qR1A==}
 
   '@react-native-community/cli-clean@10.1.1':
     resolution: {integrity: sha512-iNsrjzjIRv9yb5y309SWJ8NDHdwYtnCpmxZouQDyOljUdC9MwdZ4ChbtA4rwQyAwgOVfS9F/j56ML3Cslmvrxg==}
@@ -11739,16 +11742,25 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@protokoll/core@0.2.10(typescript@5.4.5)':
+  '@protokoll/core@0.2.11(typescript@5.4.5)':
     dependencies:
       jwt-decode: 4.0.0
       valibot: 0.37.0(typescript@5.4.5)
     transitivePeerDependencies:
       - typescript
 
-  '@protokoll/jarm@0.2.10(typescript@5.4.5)':
+  '@protokoll/jarm@0.2.11(typescript@5.4.5)':
     dependencies:
-      '@protokoll/core': 0.2.10(typescript@5.4.5)
+      '@protokoll/core': 0.2.11(typescript@5.4.5)
+      '@protokoll/jose': 0.2.11(typescript@5.4.5)
+      valibot: 0.37.0(typescript@5.4.5)
+    transitivePeerDependencies:
+      - typescript
+
+  '@protokoll/jose@0.2.11(typescript@5.4.5)':
+    dependencies:
+      '@protokoll/core': 0.2.11(typescript@5.4.5)
+      jwt-decode: 4.0.0
       valibot: 0.37.0(typescript@5.4.5)
     transitivePeerDependencies:
       - typescript
