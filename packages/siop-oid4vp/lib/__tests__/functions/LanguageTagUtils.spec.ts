@@ -208,9 +208,10 @@ describe('Language tag util should', () => {
     expect(() => LanguageTagUtils.getLanguageTaggedProperties({}, null as any)).toThrowError()
   })
 
-  it('throw error if list is given but not effective', async () => {
+  it('return empty if list is given but not effective', async () => {
     expect.assertions(1)
-    await expect(() => LanguageTagUtils.getLanguageTaggedProperties({}, [])).toThrowError()
+    const result = await LanguageTagUtils.getLanguageTaggedProperties({}, [])
+    expect(result).toEqual(new Map<string, string>)
   })
 
   it('throw error if list is given but no proper field names', async () => {
@@ -223,9 +224,10 @@ describe('Language tag util should', () => {
     expect(LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, null as any)).toEqual(new Map<string, string>())
   })
 
-  it('throw error if mapping is given but not effective', async () => {
+  it('return empty map if mapping is given but not effective', async () => {
     expect.assertions(1)
-    await expect(() => LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, new Map<string, string>())).toThrowError()
+    const result = await LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, new Map<string, string>())
+    expect(result).toEqual(new Map<string, string>)
   })
 
   it('throw error if mapping is given but no proper names', async () => {
