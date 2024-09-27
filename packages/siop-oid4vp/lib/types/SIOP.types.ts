@@ -1,5 +1,5 @@
 // noinspection JSUnusedGlobalSymbols
-import { JarmClientMetadataParams } from '@protokoll/jarm'
+import { JarmClientMetadataParams } from '@sphereon/jarm'
 import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import {

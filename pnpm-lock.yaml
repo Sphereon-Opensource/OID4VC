@@ -393,7 +393,14 @@ importers:
         specifier: ^29.1.0
         version: 29.2.5(@babel/core@7.25.2)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.25.2))(jest@29.7.0(@types/node@18.19.50)(ts-node@10.9.2(@types/node@18.19.50)(typescript@5.4.5)))(typescript@5.4.5)
 
-  packages/jarm: {}
+  packages/jarm:
+    dependencies:
+      '@sphereon/oid4vc-common':
+        specifier: workspace:*
+        version: link:../common
+      valibot:
+        specifier: ^0.42.1
+        version: 0.42.1(typescript@5.5.3)
 
   packages/oid4vci-common:
     dependencies:
@@ -437,12 +444,12 @@ importers:
       '@astronautlabs/jsonpath':
         specifier: ^1.1.2
         version: 1.1.2
-      '@protokoll/jarm':
-        specifier: ^0.2.17
-        version: 0.2.17(typescript@5.4.5)
       '@sphereon/did-uni-client':
         specifier: ^0.6.2
         version: 0.6.3(encoding@0.1.13)
+      '@sphereon/jarm':
+        specifier: workspace:*
+        version: link:../jarm
       '@sphereon/kmp-mdl-mdoc':
         specifier: 0.2.0-SNAPSHOT.22
         version: 0.2.0-SNAPSHOT.22
@@ -1865,7 +1872,7 @@ packages:
 
   '@expo/bunyan@4.0.1':
     resolution: {integrity: sha512-+Lla7nYSiHZirgK+U/uYzsLv/X+HaJienbD5AKX1UQZHYfWaP+9uuQluRB4GrEVWF0GZ7vEVp/jzaOT9k/SQlg==}
-    engines: {node: '>=0.10.0'}
+    engines: {'0': node >=0.10.0}
 
   '@expo/cli@0.7.3':
     resolution: {integrity: sha512-uMGHbAhApqXR2sd1KPhgvpbOhBBnspad8msEqHleT2PHXwKIwTUDzBGO9+jdOAWwCx2MJfw3+asYjzoD3DN9Bg==}
@@ -2387,15 +2394,6 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@protokoll/core@0.2.17':
-    resolution: {integrity: sha512-F1aLJE4iWKUjfrushX1eehX68cGfWgG3+60gnRMhTF5iBsTUKnrI7LMMFzlseh3JtJJF9laO2qvWc1BU8ZPUBQ==}
-
-  '@protokoll/jarm@0.2.17':
-    resolution: {integrity: sha512-Db5A5zV+2NFAnHyMGb0BgqCLpM6Hy/50QjwWmez826uRv0XzAojclP+SrbprVUVIcRv5gv+wMmW9jjKqFqECYg==}
-
-  '@protokoll/jose@0.2.17':
-    resolution: {integrity: sha512-tkqR9l9hls3xUjQKmtQoUsiuyvbII80JkhMRoixRUshi5pq/Irzfa4nDPxOR0XMRwxrGnBtT7jDCdIFHu1eG9Q==}
-
   '@react-native-community/cli-clean@10.1.1':
     resolution: {integrity: sha512-iNsrjzjIRv9yb5y309SWJ8NDHdwYtnCpmxZouQDyOljUdC9MwdZ4ChbtA4rwQyAwgOVfS9F/j56ML3Cslmvrxg==}
 
@@ -2538,6 +2536,7 @@ packages:
 
   '@sphereon/kmp-mdl-mdoc@0.2.0-SNAPSHOT.22':
     resolution: {integrity: sha512-uAZZExVy+ug9JLircejWa5eLtAZ7bnBP6xb7DO2+86LRsHNLh2k2jMWJYxp+iWtGHTsh6RYsZl14ScQLvjiQ/A==}
+    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.1':
     resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
@@ -8526,8 +8525,8 @@ packages:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
 
-  valibot@0.37.0:
-    resolution: {integrity: sha512-FQz52I8RXgFgOHym3XHYSREbNtkgSjF9prvMFH1nBsRyfL6SfCzoT1GuSDTlbsuPubM7/6Kbw0ZMQb8A+V+VsQ==}
+  valibot@0.42.1:
+    resolution: {integrity: sha512-3keXV29Ar5b//Hqi4MbSdV7lfVp6zuYLZuA9V1PvQUsXqogr+u5lvLPLk3A4f74VUXDnf/JfWMN6sB+koJ/FFw==}
     peerDependencies:
       typescript: '>=5'
     peerDependenciesMeta:
@@ -11739,29 +11738,6 @@ snapshots:
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
-
-  '@protokoll/core@0.2.17(typescript@5.4.5)':
-    dependencies:
-      jwt-decode: 4.0.0
-      valibot: 0.37.0(typescript@5.4.5)
-    transitivePeerDependencies:
-      - typescript
-
-  '@protokoll/jarm@0.2.17(typescript@5.4.5)':
-    dependencies:
-      '@protokoll/core': 0.2.17(typescript@5.4.5)
-      '@protokoll/jose': 0.2.17(typescript@5.4.5)
-      valibot: 0.37.0(typescript@5.4.5)
-    transitivePeerDependencies:
-      - typescript
-
-  '@protokoll/jose@0.2.17(typescript@5.4.5)':
-    dependencies:
-      '@protokoll/core': 0.2.17(typescript@5.4.5)
-      jwt-decode: 4.0.0
-      valibot: 0.37.0(typescript@5.4.5)
-    transitivePeerDependencies:
-      - typescript
 
   '@react-native-community/cli-clean@10.1.1(encoding@0.1.13)':
     dependencies:
@@ -19996,9 +19972,9 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
 
-  valibot@0.37.0(typescript@5.4.5):
+  valibot@0.42.1(typescript@5.5.3):
     optionalDependencies:
-      typescript: 5.4.5
+      typescript: 5.5.3
 
   valid-url@1.0.9: {}
 

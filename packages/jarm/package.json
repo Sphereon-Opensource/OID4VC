@@ -9,8 +9,10 @@
     "build": "tsc",
     "build:clean": "tsc --build --clean && tsc --build"
   },
-  "dependencies": {},
-  "devDependencies": {},
+  "dependencies": {
+    "valibot": "^0.42.1",
+    "@sphereon/oid4vc-common": "workspace:*"
+  },
   "engines": {
     "node": ">=18"
   },

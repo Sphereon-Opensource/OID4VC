@@ -5,7 +5,7 @@ import {
   JarmAuthResponseParams,
   JarmDirectPostJwtAuthResponseValidationContext,
   JarmDirectPostJwtResponseParams,
-} from '@protokoll/jarm'
+} from '@sphereon/jarm'
 import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { Hasher } from '@sphereon/ssi-types'
 
@@ -158,8 +158,7 @@ export class RP {
       { response },
       {
         openid4vp: { authRequest: { getParams } },
-        // @ts-expect-error for now we don't support signing
-        jose: { jwe: { decryptCompact } },
+        jwe: { decryptCompact },
       },
     )
 

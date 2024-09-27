@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 
-import { jarmAuthResponseSend } from '@protokoll/jarm'
+import { jarmAuthResponseSend } from '@sphereon/jarm'
 import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { IIssuerId } from '@sphereon/ssi-types'
 
