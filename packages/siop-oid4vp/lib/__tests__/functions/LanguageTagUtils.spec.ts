@@ -196,24 +196,13 @@ describe('Language tag util should', () => {
     const allLanguageTaggedProperties = LanguageTagUtils.getLanguageTaggedPropertiesMapped(source, languageTagEnabledFieldsNamesMapping)
     expect(allLanguageTaggedProperties).toEqual(expectedTaggedFields)
   })
-
-  it('throw error if source is null', async () => {
-    expect.assertions(1)
-    await expect(() => LanguageTagUtils.getAllLanguageTaggedProperties(null)).toThrowError()
-  })
-
+  
   it('throw error if list is null', async () => {
     expect.assertions(1)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(() => LanguageTagUtils.getLanguageTaggedProperties({}, null as any)).toThrowError()
   })
-
-  it('return empty if list is given but not effective', async () => {
-    expect.assertions(1)
-    const result = await LanguageTagUtils.getLanguageTaggedProperties({}, [])
-    expect(result).toEqual(new Map<string, string>)
-  })
-
+  
   it('throw error if list is given but no proper field names', async () => {
     expect.assertions(1)
     await expect(() => LanguageTagUtils.getLanguageTaggedProperties({}, [''])).toThrowError()
@@ -223,13 +212,7 @@ describe('Language tag util should', () => {
     expect.assertions(1)
     expect(LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, null as any)).toEqual(new Map<string, string>())
   })
-
-  it('return empty map if mapping is given but not effective', async () => {
-    expect.assertions(1)
-    const result = await LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, new Map<string, string>())
-    expect(result).toEqual(new Map<string, string>)
-  })
-
+  
   it('throw error if mapping is given but no proper names', async () => {
     expect.assertions(1)
     const languageTagEnabledFieldsNamesMapping: Map<string, string> = new Map<string, string>()

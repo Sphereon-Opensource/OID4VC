@@ -84,6 +84,17 @@ function supportedSubjectSyntaxTypes(rpMethods: string[] | string, opMethods: st
   return supportedSubjectSyntaxTypes
 }
 
+export function collectAlgValues(o: any): string[] {
+  const algValues: string[] = [];
+  for (const key of Object.keys(o)) {
+    algValues.push(...o[key]);
+  }
+
+  return algValues;
+}
+
+const isJwtFormat = (crFormat: string) => crFormat.includes('jwt') || crFormat.includes('mdoc');
+
 function getFormatIntersection(rpFormat: Format, opFormat: Format): Format {
   const intersectionFormat: Record<string, any> = {}
   const supportedCredentials = getIntersection(Object.keys(rpFormat), Object.keys(opFormat))
@@ -91,19 +102,23 @@ function getFormatIntersection(rpFormat: Format, opFormat: Format): Format {
     throw new Error(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)
   }
   supportedCredentials.forEach(function (crFormat: string) {
-    const rpAlgs = []
-    const opAlgs = []
-    Object.keys(rpFormat[crFormat]).forEach((k) => rpAlgs.push(...rpFormat[crFormat][k]))
-    Object.keys(opFormat[crFormat]).forEach((k) => opAlgs.push(...opFormat[crFormat][k]))
-    let methodKeyRP = undefined
-    let methodKeyOP = undefined
-    Object.keys(rpFormat[crFormat]).forEach((k) => (methodKeyRP = k))
-    Object.keys(opFormat[crFormat]).forEach((k) => (methodKeyOP = k))
+    const rpFormatElement = rpFormat[crFormat as keyof Format];
+    const opFormatElement = opFormat[crFormat as keyof Format];
+    const rpAlgs = collectAlgValues(rpFormatElement);
+    const opAlgs = collectAlgValues(opFormatElement);
+    let methodKeyRP = undefined;
+    let methodKeyOP = undefined;
+    if (rpFormatElement !== undefined) {
+      Object.keys(rpFormatElement).forEach((k) => (methodKeyRP = k));
+    }
+    if (opFormatElement !== undefined) {
+      Object.keys(opFormatElement).forEach((k) => (methodKeyOP = k));
+    }
     if (methodKeyRP !== methodKeyOP) {
       throw new Error(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)
     }
     const algs = getIntersection(rpAlgs, opAlgs)
-    if (!algs.length) {
+    if (!algs.length && isJwtFormat(crFormat)) {
       throw new Error(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)
     }
     intersectionFormat[crFormat] = {}

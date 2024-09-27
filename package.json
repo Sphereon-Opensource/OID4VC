@@ -25,7 +25,7 @@
   "resolutions": {
     "node-fetch": "2.6.12",
     "@sphereon/ssi-types": "0.29.1-unstable.121",
-    "@sphereon/pex": "5.0.0-unstable.7"
+    "@sphereon/pex": "5.0.0-unstable.8"
   },
   "prettier": {
     "endOfLine": "auto",

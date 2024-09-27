@@ -22,7 +22,6 @@ import {
   ResponseIss,
   ResponseMode,
   SIOPErrors,
-  SIOPResonse,
   SupportedVersion,
   UrlEncodingFormat,
   Verification,
@@ -70,7 +69,7 @@ export class OP {
           error,
         })
       }
-        throw error
+      throw error
     }
 
     try {
@@ -79,17 +78,17 @@ export class OP {
       )
 
       await this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_VERIFIED_SUCCESS, {
-          correlationId,
-          subject: verifiedAuthorizationRequest.authorizationRequest,
-        })
-        return verifiedAuthorizationRequest
+        correlationId,
+        subject: verifiedAuthorizationRequest.authorizationRequest,
+      })
+      return verifiedAuthorizationRequest
     } catch (error) {
       await this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_VERIFIED_FAILED, {
-          correlationId,
-          subject: authorizationRequest,
-          error,
-        })
-        throw error
+        correlationId,
+        subject: authorizationRequest,
+        error,
+      })
+      throw error
     }
   }
 
@@ -182,15 +181,14 @@ export class OP {
       throw Error('No response URI present')
     }
     const authResponseAsURI = encodeJsonAsURI(payload, { arraysWithIndex: ['presentation_submission'] })
-    return post(responseUri, authResponseAsURI, { contentType: ContentType.FORM_URL_ENCODED, exceptionOnHttpErrorStatus: true })
-      .then((result: SIOPResonse<unknown>) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
-        return result.origResponse
-      })
-      .catch((error: Error) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_FAILED, { correlationId, subject: response, error })
-        throw error
-      })
+    try {
+      const result = await post(responseUri, authResponseAsURI, { contentType: ContentType.FORM_URL_ENCODED, exceptionOnHttpErrorStatus: true })
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
+      return result.origResponse
+    } catch (error) {
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_FAILED, { correlationId, subject: response, error: error as Error })
+      throw error
+    }
   }
 
   /**

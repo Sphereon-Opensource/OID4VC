@@ -1,11 +1,16 @@
-import { defaultHasher } from '@sphereon/oid4vc-common'
+import { defaultHasher } from '@sphereon/oid4vc-common';
 
-import { CreateAuthorizationRequestOpts, PropertyTarget, PropertyTargets, RequestPropertyWithTargets } from '../authorization-request'
-import { VerifyAuthorizationResponseOpts } from '../authorization-response'
+import {
+  CreateAuthorizationRequestOpts,
+  PropertyTarget,
+  PropertyTargets,
+  RequestPropertyWithTargets
+} from '../authorization-request';
+import { VerifyAuthorizationResponseOpts } from '../authorization-response';
 // import { CreateAuthorizationRequestOptsSchema } from '../schemas';
-import { ClientMetadataOpts, RequestObjectPayload, SIOPErrors, Verification } from '../types'
+import { ClientMetadataOpts, RequestObjectPayload, SIOPErrors, Verification } from '../types';
 
-import { RPBuilder } from './RPBuilder'
+import { RPBuilder } from './RPBuilder';
 
 export const createRequestOptsFromBuilderOrExistingOpts = (opts: { builder?: RPBuilder; createRequestOpts?: CreateAuthorizationRequestOpts }) => {
   const version = opts.builder ? opts.builder.getSupportedRequestVersion() : opts.createRequestOpts.version
@@ -52,6 +57,7 @@ export const createVerifyResponseOptsFromBuilderOrExistingOpts = (opts: { builde
   return opts.builder
     ? {
         hasher: opts.builder.hasher ?? defaultHasher,
+//        correlationId: uuidv4(), We can't set a correlationId here, it will no longer check functions like  this.sessionManager.getCorrelationIdByNonce(resNonce, false)
         verifyJwtCallback: opts.builder.verifyJwtCallback,
         verification: {
           presentationVerificationCallback: opts.builder.presentationVerificationCallback,
