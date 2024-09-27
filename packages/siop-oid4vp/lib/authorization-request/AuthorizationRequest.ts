@@ -66,7 +66,8 @@ export class AuthorizationRequest {
 
     const requestObjectArg =
       opts.requestObject.passBy !== PassBy.NONE ? (requestObject ? requestObject : await RequestObject.fromOpts(opts)) : undefined
-    const requestPayload = await createAuthorizationRequestPayload(opts, requestObjectArg) 
+    // opts?.payload was removed before, but it's not clear atm why opts?.payload was removed  
+    const requestPayload = opts?.payload ? await createAuthorizationRequestPayload(opts, requestObjectArg) : undefined
     return new AuthorizationRequest(requestPayload, requestObjectArg, opts)
   }
 

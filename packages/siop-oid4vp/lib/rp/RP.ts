@@ -166,13 +166,13 @@ export class RP {
         correlationId,
       })
       correlationId = verifyAuthenticationResponseOpts.correlationId ?? correlationId
-      void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_RECEIVED_SUCCESS, {
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_RECEIVED_SUCCESS, {
         correlationId,
         subject: authorizationResponse,
       })
 
       const verifiedAuthorizationResponse = await authorizationResponse.verify(verifyAuthenticationResponseOpts)
-      void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_VERIFIED_SUCCESS, {
+      await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_VERIFIED_SUCCESS, {
         correlationId,
         subject: authorizationResponse,
       })
