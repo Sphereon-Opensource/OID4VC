@@ -1,0 +1,41 @@
+{
+  "name": "@sphereon/jarm",
+  "version": "0.16.0",
+  "description": "Sphereon JARM",
+  "source": "lib/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:clean": "tsc --build --clean && tsc --build"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "lib/**/*",
+    "dist/**/*"
+  ],
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 150
+  },
+  "keywords": [
+    "Sphereon",
+    "Verifiable Credentials",
+    "OpenID",
+    "OpenID for Verifiable Credential Issuance",
+    "OAuth2",
+    "SSI",
+    "JARM",
+    "OpenId for Verifiable Presentations"
+  ],
+  "author": "Sphereon",
+  "license": "Apache-2.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}
