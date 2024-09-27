@@ -87,17 +87,13 @@ function supportedSubjectSyntaxTypes(rpMethods: string[] | string, opMethods: st
 export function collectAlgValues(o: any): string[] {
   const algValues: string[] = [];
   for (const key of Object.keys(o)) {
-      // Check if the object has an 'alg' property that's an array of strings
-      if (key === 'alg' && Array.isArray(o.alg)) {
-        algValues.push(...o.alg);
-      }
-      else if (key === 'sd-jwt_alg_values'  && Array.isArray(o['sd-jwt_alg_values'])) {
-        algValues.push(...o['sd-jwt_alg_values']);
-      }
+    algValues.push(...o[key]);
   }
 
   return algValues;
 }
+
+const isJwtFormat = (crFormat: string) => crFormat.includes('jwt') || crFormat.includes('mdoc');
 
 function getFormatIntersection(rpFormat: Format, opFormat: Format): Format {
   const intersectionFormat: Record<string, any> = {}
@@ -122,7 +118,7 @@ function getFormatIntersection(rpFormat: Format, opFormat: Format): Format {
       throw new Error(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)
     }
     const algs = getIntersection(rpAlgs, opAlgs)
-    if (!algs.length) {
+    if (!algs.length && isJwtFormat(crFormat)) {
       throw new Error(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)
     }
     intersectionFormat[crFormat] = {}

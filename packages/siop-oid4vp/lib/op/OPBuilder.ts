@@ -13,7 +13,7 @@ export class OPBuilder {
   expiresIn?: number
   issuer?: IIssuerId | ResponseIss
   responseMode?: ResponseMode = ResponseMode.DIRECT_POST
-  responseRegistration?: Partial<ResponseRegistrationOpts> = {}
+  responseRegistration?: Partial<ResponseRegistrationOpts> //= {}
   createJwtCallback?: CreateJwtCallback
   verifyJwtCallback?: VerifyJwtCallback
   presentationSignCallback?: PresentationSignCallback
