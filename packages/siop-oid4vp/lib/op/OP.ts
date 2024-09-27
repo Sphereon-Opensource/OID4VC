@@ -14,7 +14,7 @@ import {
 } from '../authorization-response'
 import { encodeJsonAsURI, post } from '../helpers'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
-import { joseJwksExtract, JwksMetadataParams } from '../helpers/extract-jwks'
+import { extractJwksFromJwksMetadata, JwksMetadataParams } from '../helpers/extract-jwks'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
@@ -160,7 +160,7 @@ export class OP {
 
   public static async extractEncJwksFromClientMetadata(clientMetadata: JwksMetadataParams) {
     // The client metadata will be parsed in the joseExtractJWKS function
-    const jwks = await joseJwksExtract(clientMetadata)
+    const jwks = await extractJwksFromJwksMetadata(clientMetadata)
     const encryptionJwk = jwks?.keys.find((key) => key.use === 'enc')
     if (!encryptionJwk) {
       throw new Error('No encryption jwk could be extracted from the client metadata.')
@@ -212,6 +212,9 @@ export class OP {
     }
 
     if (isJarmResponseMode(responseMode)) {
+      if (responseMode !== ResponseMode.DIRECT_POST_JWT) {
+        throw new Error('Only direct_post.jwt response mode is supported for JARM at the moment.')
+      }
       let responseType: 'id_token' | 'id_token vp_token' | 'vp_token'
       if (idToken && payload.vp_token) {
         responseType = 'id_token vp_token'

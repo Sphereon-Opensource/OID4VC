@@ -1,5 +1,7 @@
 import { JWK } from '../types'
 
+import { getJson } from './HttpUtils'
+
 export type Jwks = {
   keys: JWK[]
 }
@@ -16,20 +18,9 @@ export type JwksMetadataParams = {
  * @returns A Promise that resolves to the JWKS object.
  * @throws Will throw an error if the fetch fails or if the response is not valid JSON.
  */
-export async function joseJwksFetch(jwksUri: string): Promise<Jwks | undefined> {
-  const response = await fetch(jwksUri, {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
-  }
-
-  const jwks = await response.json()
-  return jwks
+export async function fetchJwks(jwksUri: string): Promise<Jwks | undefined> {
+  const res = await getJson<Jwks | undefined>(jwksUri)
+  return res.successBody ?? undefined
 }
 
 /**
@@ -41,11 +32,11 @@ export async function joseJwksFetch(jwksUri: string): Promise<Jwks | undefined> 
  * @returns A promise that resolves to the extracted JWKS or undefined.
  * @throws {JoseJwksExtractionError} If the metadata format is invalid or no decryption key is found.
  */
-export const joseJwksExtract = async (metadata: JwksMetadataParams) => {
+export const extractJwksFromJwksMetadata = async (metadata: JwksMetadataParams) => {
   let jwks: Jwks | undefined = metadata.jwks?.keys[0] ? metadata.jwks : undefined
 
   if (!jwks && metadata.jwks_uri) {
-    jwks = await joseJwksFetch(metadata.jwks_uri)
+    jwks = await fetchJwks(metadata.jwks_uri)
   }
 
   return jwks
