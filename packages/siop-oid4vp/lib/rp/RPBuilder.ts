@@ -5,7 +5,6 @@ import { Hasher } from '@sphereon/ssi-types'
 
 import { PropertyTarget, PropertyTargets } from '../authorization-request'
 import { PresentationVerificationCallback } from '../authorization-response'
-import { DecryptJwtCallback } from '../helpers/Jwe'
 import { ClientIdScheme, CreateJwtCallback, RequestAud, VerifyJwtCallback } from '../types'
 import {
   AuthorizationRequestPayload,
@@ -28,7 +27,6 @@ import { IRPSessionManager } from './types'
 export class RPBuilder {
   requestObjectBy: ObjectBy
   createJwtCallback?: CreateJwtCallback
-  decryptJwtCallback: DecryptJwtCallback
   verifyJwtCallback?: VerifyJwtCallback
   revocationVerification?: RevocationVerification
   revocationVerificationCallback?: RevocationVerificationCallback
@@ -211,11 +209,6 @@ export class RPBuilder {
 
   withVerifyJwtCallback(verifyJwtCallback: VerifyJwtCallback): RPBuilder {
     this.verifyJwtCallback = verifyJwtCallback
-    return this
-  }
-
-  withDecryptJwtCallback(decryptJwtCallback: DecryptJwtCallback): RPBuilder {
-    this.decryptJwtCallback = decryptJwtCallback
     return this
   }
 

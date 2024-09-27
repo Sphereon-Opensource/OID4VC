@@ -1,5 +1,11 @@
 import { EventEmitter } from 'events'
 
+import {
+  jarmAuthResponseDirectPostJwtValidate,
+  JarmAuthResponseParams,
+  JarmDirectPostJwtAuthResponseValidationContext,
+  JarmDirectPostJwtResponseParams,
+} from '@protokoll/jarm'
 import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { Hasher } from '@sphereon/ssi-types'
 
@@ -15,12 +21,13 @@ import {
 import { mergeVerificationOpts } from '../authorization-request/Opts'
 import { AuthorizationResponse, PresentationDefinitionWithLocation, VerifyAuthorizationResponseOpts } from '../authorization-response'
 import { getNonce, getState } from '../helpers'
-import { PassBy } from '../types'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
   AuthorizationResponsePayload,
+  PassBy,
   RegisterEventListener,
+  RequestObjectPayload,
   ResponseURIType,
   SIOPErrors,
   SupportedVersion,
@@ -131,6 +138,32 @@ export class RP {
       ...(!opts?.error ? { subject: state.request } : {}),
       ...(opts?.error ? { error: opts.error } : {}),
     })
+  }
+
+  static async processJarmAuthorizationResponse(
+    response: string,
+    opts: {
+      decryptCompact: (input: {
+        jwk: { kid: string }
+        jwe: string
+      }) => Promise<{ plaintext: string; protectedHeader: Record<string, unknown> & { alg: string; enc: string } }>
+      getAuthRequestPayload: (input: JarmDirectPostJwtResponseParams | JarmAuthResponseParams) => Promise<{ authRequestParams: RequestObjectPayload }>
+    },
+  ) {
+    const { decryptCompact, getAuthRequestPayload } = opts
+
+    const getParams = getAuthRequestPayload as JarmDirectPostJwtAuthResponseValidationContext['openid4vp']['authRequest']['getParams']
+
+    const validatedResponse = await jarmAuthResponseDirectPostJwtValidate(
+      { response },
+      {
+        openid4vp: { authRequest: { getParams } },
+        // @ts-expect-error for now we don't support signing
+        jose: { jwe: { decryptCompact } },
+      },
+    )
+
+    return validatedResponse
   }
 
   public async verifyAuthorizationResponse(

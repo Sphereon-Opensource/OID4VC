@@ -24,9 +24,6 @@ export const AuthorizationResponseOptsSchemaObj = {
         "createJwtCallback": {
           "$ref": "#/definitions/CreateJwtCallback"
         },
-        "encryptJwtCallback": {
-          "$ref": "#/definitions/EncryptJwtCallback"
-        },
         "jwtIssuer": {
           "$ref": "#/definitions/JwtIssuer"
         },
@@ -1549,14 +1546,6 @@ export const AuthorizationResponseOptsSchemaObj = {
       "$ref": "#/definitions/CreateJwtCallback%3CJwtIssuerWithContext%3E"
     },
     "CreateJwtCallback<JwtIssuerWithContext>": {
-      "properties": {
-        "isFunction": {
-          "type": "boolean",
-          "const": true
-        }
-      }
-    },
-    "EncryptJwtCallback": {
       "properties": {
         "isFunction": {
           "type": "boolean",

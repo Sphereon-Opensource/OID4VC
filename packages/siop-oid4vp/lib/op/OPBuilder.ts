@@ -4,7 +4,6 @@ import { Hasher, IIssuerId } from '@sphereon/ssi-types'
 
 import { PropertyTargets } from '../authorization-request'
 import { PresentationSignCallback } from '../authorization-response'
-import { EncryptJwtCallback } from '../helpers/Jwe'
 import { ResponseIss, ResponseMode, ResponseRegistrationOpts, SupportedVersion, VerifyJwtCallback } from '../types'
 import { CreateJwtCallback } from '../types/VpJwtIssuer'
 
@@ -16,7 +15,6 @@ export class OPBuilder {
   responseMode?: ResponseMode = ResponseMode.DIRECT_POST
   responseRegistration?: Partial<ResponseRegistrationOpts> = {}
   createJwtCallback?: CreateJwtCallback
-  encryptJwtCallback?: EncryptJwtCallback
   verifyJwtCallback?: VerifyJwtCallback
   presentationSignCallback?: PresentationSignCallback
   supportedVersions?: SupportedVersion[]
@@ -63,11 +61,6 @@ export class OPBuilder {
 
   withCreateJwtCallback(createJwtCallback: CreateJwtCallback): OPBuilder {
     this.createJwtCallback = createJwtCallback
-    return this
-  }
-
-  withEncryptJwtCallback(encryptJwtCallback: EncryptJwtCallback): OPBuilder {
-    this.encryptJwtCallback = encryptJwtCallback
     return this
   }
 

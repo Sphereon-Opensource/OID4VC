@@ -3,7 +3,6 @@ import { IPresentationDefinition, PresentationSignCallBackParams } from '@sphere
 import { Format } from '@sphereon/pex-models'
 import { CompactSdJwtVc, Hasher, PresentationSubmission, W3CVerifiablePresentation } from '@sphereon/ssi-types'
 
-import { EncryptJwtCallback } from '../helpers/Jwe'
 import {
   ResponseMode,
   ResponseRegistrationOpts,
@@ -26,7 +25,6 @@ export interface AuthorizationResponseOpts {
   version?: SupportedVersion
   audience?: string
   createJwtCallback: CreateJwtCallback
-  encryptJwtCallback?: EncryptJwtCallback
   jwtIssuer?: JwtIssuer
   responseMode?: ResponseMode
   responseType?: [ResponseType]

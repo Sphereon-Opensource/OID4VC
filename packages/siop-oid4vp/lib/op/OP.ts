@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events'
 
-import { joseExtractJWKS } from '@protokoll/core'
-import { JarmClientMetadataParams, sendJarmAuthRequest } from '@protokoll/jarm'
+import { jarmAuthResponseSend } from '@protokoll/jarm'
 import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { IIssuerId } from '@sphereon/ssi-types'
 
@@ -15,13 +14,15 @@ import {
 } from '../authorization-response'
 import { encodeJsonAsURI, post } from '../helpers'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
+import { joseJwksExtract, JwksMetadataParams } from '../helpers/extract-jwks'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
+  AuthorizationResponsePayload,
   ContentType,
-  JWK,
   ParsedAuthorizationRequestURI,
   RegisterEventListener,
+  RequestObjectPayload,
   ResponseIss,
   ResponseMode,
   SIOPErrors,
@@ -128,7 +129,7 @@ export class OP {
     try {
       // IF using DIRECT_POST, the response_uri takes precedence over the redirect_uri
       let responseUri = verifiedAuthorizationRequest.responseURI
-      if (verifiedAuthorizationRequest.authorizationRequestPayload.response_mode === ResponseMode.DIRECT_POST) {
+      if (verifiedAuthorizationRequest.payload?.response_mode === ResponseMode.DIRECT_POST) {
         responseUri = verifiedAuthorizationRequest.authorizationRequestPayload.response_uri ?? responseUri
       }
 
@@ -157,13 +158,26 @@ export class OP {
     }
   }
 
+  public static async extractEncJwksFromClientMetadata(clientMetadata: JwksMetadataParams) {
+    // The client metadata will be parsed in the joseExtractJWKS function
+    const jwks = await joseJwksExtract(clientMetadata)
+    const encryptionJwk = jwks?.keys.find((key) => key.use === 'enc')
+    if (!encryptionJwk) {
+      throw new Error('No encryption jwk could be extracted from the client metadata.')
+    }
+
+    return encryptionJwk
+  }
+
   // TODO SK Can you please put some documentation on it?
   public async submitAuthorizationResponse(
     authorizationResponse: AuthorizationResponseWithCorrelationId,
-    clientMetadata?: {
-      jwks?: { keys: JWK[] }
-      jwks_uri?: string
-    } & JarmClientMetadataParams,
+    createJarmResponse?: (opts: {
+      authorizationResponsePayload: AuthorizationResponsePayload
+      requestObjectPayload: RequestObjectPayload
+    }) => Promise<{
+      response: string
+    }>,
   ): Promise<Response> {
     const { correlationId, response } = authorizationResponse
     if (!correlationId) {
@@ -174,7 +188,8 @@ export class OP {
       return responseMode === ResponseMode.DIRECT_POST_JWT || responseMode === ResponseMode.QUERY_JWT || responseMode === ResponseMode.FRAGMENT_JWT
     }
 
-    const responseMode = response.options.responseMode
+    const requestObjectPayload = await response.authorizationRequest.requestObject.getPayload()
+    const { response_mode: responseMode } = requestObjectPayload
 
     if (
       !response ||
@@ -197,27 +212,6 @@ export class OP {
     }
 
     if (isJarmResponseMode(responseMode)) {
-      if (!clientMetadata) {
-        throw new Error(`Sending an authorization response with response_mode '${responseMode}' requires providing client_metadata`)
-      }
-
-      if (!this._createResponseOptions.encryptJwtCallback) {
-        throw new Error(`Sending an authorization response with response_mode '${responseMode}' requires providing an encryptJwtCallback`)
-      }
-
-      // The client metadata will be parsed in the joseExtractJWKS function
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const jwks = await joseExtractJWKS(clientMetadata as any)
-      const dectyptionJwk = jwks.keys.find((key) => key.use === 'enc')
-      if (!dectyptionJwk) {
-        throw new Error('No decryption could be extracted from the client metadata')
-      }
-
-      const { jwe } = await this.createResponseOptions.encryptJwtCallback({
-        jwk: dectyptionJwk,
-        plaintext: JSON.stringify(response.payload),
-      })
-
       let responseType: 'id_token' | 'id_token vp_token' | 'vp_token'
       if (idToken && payload.vp_token) {
         responseType = 'id_token vp_token'
@@ -225,16 +219,31 @@ export class OP {
         responseType = 'id_token'
       } else if (payload.vp_token) {
         responseType = 'vp_token'
+      } else {
+        throw new Error('No id_token or vp_token present in the response payload')
       }
 
-      return sendJarmAuthRequest({
+      const { response } = await createJarmResponse({
+        requestObjectPayload,
+        authorizationResponsePayload: payload,
+      })
+
+      return jarmAuthResponseSend({
         authRequestParams: {
           response_uri: responseUri,
           response_mode: responseMode,
           response_type: responseType,
         },
-        authResponseParams: { response: jwe },
+        authResponse: response,
       })
+        .then((result) => {
+          void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
+          return result
+        })
+        .catch((error: Error) => {
+          void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_FAILED, { correlationId, subject: response, error })
+          throw error
+        })
     }
 
     const authResponseAsURI = encodeJsonAsURI(payload, { arraysWithIndex: ['presentation_submission'] })
