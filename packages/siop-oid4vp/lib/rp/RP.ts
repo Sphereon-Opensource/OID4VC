@@ -25,6 +25,7 @@ import {
   AuthorizationEvent,
   AuthorizationEvents,
   AuthorizationResponsePayload,
+  DecryptCompact,
   PassBy,
   RegisterEventListener,
   RequestObjectPayload,
@@ -143,10 +144,7 @@ export class RP {
   static async processJarmAuthorizationResponse(
     response: string,
     opts: {
-      decryptCompact: (input: {
-        jwk: { kid: string }
-        jwe: string
-      }) => Promise<{ plaintext: string; protectedHeader: Record<string, unknown> & { alg: string; enc: string } }>
+      decryptCompact: DecryptCompact
       getAuthRequestPayload: (input: JarmDirectPostJwtResponseParams | JarmAuthResponseParams) => Promise<{ authRequestParams: RequestObjectPayload }>
     },
   ) {

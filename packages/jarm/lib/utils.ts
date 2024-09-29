@@ -25,3 +25,18 @@ export function appendFragmentParams(input: { url: URL; fragments: Record<string
 
   return url;
 }
+
+interface AssertValueSupported<T> {
+  supported: T[];
+  actual: T;
+  error: Error;
+  required: boolean;
+}
+
+export function assertValueSupported<T>(input: AssertValueSupported<T>): T | undefined {
+  const { required, error, supported, actual } = input;
+  const intersection = supported.find((value) => value === actual);
+
+  if (required && !intersection) throw error;
+  return intersection;
+}

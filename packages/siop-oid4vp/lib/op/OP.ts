@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 
-import { jarmAuthResponseSend } from '@sphereon/jarm'
+import { jarmAuthResponseSend, JarmClientMetadata, jarmMetadataValidate, JarmServerMetadata } from '@sphereon/jarm'
 import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { IIssuerId } from '@sphereon/ssi-types'
 
@@ -360,5 +360,9 @@ export class OP {
 
   get verifyRequestOptions(): Partial<VerifyAuthorizationRequestOpts> {
     return this._verifyRequestOptions
+  }
+
+  public static validateJarmMetadata(input: { client_metadata: JarmClientMetadata; server_metadata: Partial<JarmServerMetadata> }) {
+    return jarmMetadataValidate(input)
   }
 }
