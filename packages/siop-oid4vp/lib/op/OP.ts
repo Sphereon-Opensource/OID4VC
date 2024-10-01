@@ -188,8 +188,8 @@ export class OP {
       return responseMode === ResponseMode.DIRECT_POST_JWT || responseMode === ResponseMode.QUERY_JWT || responseMode === ResponseMode.FRAGMENT_JWT
     }
 
-    const requestObjectPayload = await response.authorizationRequest.requestObject.getPayload()
-    const { response_mode: responseMode } = requestObjectPayload
+    const requestObjectPayload = await response.authorizationRequest.requestObject?.getPayload()
+    const responseMode = requestObjectPayload?.response_mode ?? response.options?.responseMode
 
     if (
       !response ||
