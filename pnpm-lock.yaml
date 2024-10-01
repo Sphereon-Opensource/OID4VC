@@ -7,7 +7,7 @@ settings:
 overrides:
   node-fetch: 2.6.12
   '@sphereon/ssi-types': 0.29.1-unstable.121
-  '@sphereon/pex': 5.0.0-unstable.9
+  '@sphereon/pex': 5.0.0-unstable.10
 
 importers:
 
@@ -447,8 +447,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/pex':
-        specifier: 5.0.0-unstable.9
-        version: 5.0.0-unstable.9
+        specifier: 5.0.0-unstable.10
+        version: 5.0.0-unstable.10
       '@sphereon/pex-models':
         specifier: ^2.3.1
         version: 2.3.1
@@ -2437,17 +2437,29 @@ packages:
     resolution: {integrity: sha512-QgTIoYd5zyKKLgXB4xEYJTrvumVwtsj5Dog0v0L9UH9ZvHekDaeexS247X7A4iSdzTvmZzUpGskgABOa4D8NmQ==}
     engines: {node: '>=16'}
 
-  '@sd-jwt/present@0.6.1':
-    resolution: {integrity: sha512-QRD3TUDLj4PqQNZ70bBxh8FLLrOE9mY8V9qiZrJSsaDOLFs2p1CtZG+v9ig62fxFYJZMf4bWKwYjz+qqGAtxCg==}
-    engines: {node: '>=16'}
+  '@sd-jwt/decode@0.7.2':
+    resolution: {integrity: sha512-dan2LSvK63SKwb62031G4r7TE4TaiI0EK1KbPXqS+LCXNkNDUHqhtYp9uOpj+grXceCsMtMa2f8VnUfsjmwHHg==}
+    engines: {node: '>=18'}
+
+  '@sd-jwt/present@0.7.2':
+    resolution: {integrity: sha512-mQV85u2+mLLy2VZ9Wx2zpaB6yTDnbhCfWkP7eeCrzJQHBKAAHko8GrylEFmLKewFIcajS/r4lT/zHOsCkp5pZw==}
+    engines: {node: '>=18'}
 
   '@sd-jwt/types@0.6.1':
     resolution: {integrity: sha512-LKpABZJGT77jNhOLvAHIkNNmGqXzyfwBT+6r+DN9zNzMx1CzuNR0qXk1GMUbast9iCfPkGbnEpUv/jHTBvlIvg==}
     engines: {node: '>=16'}
 
+  '@sd-jwt/types@0.7.2':
+    resolution: {integrity: sha512-1NRKowiW0ZiB9SGLApLPBH4Xk8gDQJ+nA9NdZ+uy6MmJKLEwjuJxO7yTvRIv/jX/0/Ebh339S7Kq4RD2AiFuRg==}
+    engines: {node: '>=18'}
+
   '@sd-jwt/utils@0.6.1':
     resolution: {integrity: sha512-1NHZ//+GecGQJb+gSdDicnrHG0DvACUk9jTnXA5yLZhlRjgkjyfJLNsCZesYeCyVp/SiyvIC9B+JwoY4kI0TwQ==}
     engines: {node: '>=16'}
+
+  '@sd-jwt/utils@0.7.2':
+    resolution: {integrity: sha512-aMPY7uHRMgyI5PlDvEiIc+eBFGC1EM8OCQRiEjJ8HGN0pajWMYj0qwSw7pS90A49/DsYU1a5Zpvb7nyjgGH0Yg==}
+    engines: {node: '>=18'}
 
   '@segment/ajv-human-errors@2.13.0':
     resolution: {integrity: sha512-rubuhyhxCHmVdTmA5G3aMiWoN8Yutp+LG/AGUSiIKJVs1r7EEE/yjqSzSqyANGj5ZkqGUP802Ur9s19MuWelZQ==}
@@ -2527,8 +2539,8 @@ packages:
   '@sphereon/pex-models@2.3.1':
     resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
 
-  '@sphereon/pex@5.0.0-unstable.9':
-    resolution: {integrity: sha512-4Exw5Uh165izJf9B5FPN0s07liXlfhZUacAWluigniTCdsOw/FxHN7aDPNE7Tfn/h80vkRQFkAMhPmQN37h31A==}
+  '@sphereon/pex@5.0.0-unstable.10':
+    resolution: {integrity: sha512-YP/+fBgUtUVlMyHvKAswuCLC8dKLU55OzC8O6LtKUYnJoPoIB95emtUWnDgLFSWV+TpXnIKGkANQ/3Y8Rj9BsQ==}
     engines: {node: '>=18'}
 
   '@sphereon/ssi-express-support@0.29.1-unstable.121':
@@ -11877,17 +11889,29 @@ snapshots:
       '@sd-jwt/types': 0.6.1
       '@sd-jwt/utils': 0.6.1
 
-  '@sd-jwt/present@0.6.1':
+  '@sd-jwt/decode@0.7.2':
     dependencies:
-      '@sd-jwt/decode': 0.6.1
-      '@sd-jwt/types': 0.6.1
-      '@sd-jwt/utils': 0.6.1
+      '@sd-jwt/types': 0.7.2
+      '@sd-jwt/utils': 0.7.2
+
+  '@sd-jwt/present@0.7.2':
+    dependencies:
+      '@sd-jwt/decode': 0.7.2
+      '@sd-jwt/types': 0.7.2
+      '@sd-jwt/utils': 0.7.2
 
   '@sd-jwt/types@0.6.1': {}
+
+  '@sd-jwt/types@0.7.2': {}
 
   '@sd-jwt/utils@0.6.1':
     dependencies:
       '@sd-jwt/types': 0.6.1
+      js-base64: 3.7.7
+
+  '@sd-jwt/utils@0.7.2':
+    dependencies:
+      '@sd-jwt/types': 0.7.2
       js-base64: 3.7.7
 
   '@segment/ajv-human-errors@2.13.0(ajv@8.17.1)':
@@ -11984,12 +12008,12 @@ snapshots:
 
   '@sphereon/pex-models@2.3.1': {}
 
-  '@sphereon/pex@5.0.0-unstable.9':
+  '@sphereon/pex@5.0.0-unstable.10':
     dependencies:
       '@astronautlabs/jsonpath': 1.1.2
-      '@sd-jwt/decode': 0.6.1
-      '@sd-jwt/present': 0.6.1
-      '@sd-jwt/types': 0.6.1
+      '@sd-jwt/decode': 0.7.2
+      '@sd-jwt/present': 0.7.2
+      '@sd-jwt/types': 0.7.2
       '@sphereon/pex-models': 2.3.1
       '@sphereon/ssi-types': 0.29.1-unstable.121(encoding@0.1.13)(ts-node@10.9.2(@types/node@18.19.47)(typescript@5.5.3))
       ajv: 8.17.1
