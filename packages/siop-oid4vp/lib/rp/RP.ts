@@ -103,12 +103,12 @@ export class RP {
     responseURIType?: ResponseURIType
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
-    if(authorizationRequestOpts.redirectUri !== undefined) {
-      authorizationRequestOpts.redirectUri = authorizationRequestOpts.redirectUri
+    if(authorizationRequestOpts.requestObject.payload?.redirectUri !== undefined) {
+      authorizationRequestOpts.requestObject.payload.redirectUri = authorizationRequestOpts.requestObject.payload.redirectUri
         .replace(':correlation_id', opts.correlationId)
         .replace(':correlationId', opts.correlationId)
       if(typeof(opts.state) === 'string') {
-        authorizationRequestOpts.redirectUri = authorizationRequestOpts.redirectUri.replace(':state', opts.state)
+        authorizationRequestOpts.requestObject.payload.redirectUri = authorizationRequestOpts.requestObject.payload.redirectUri.replace(':state', opts.state)
       }
     }
     
@@ -302,10 +302,6 @@ export class RP {
         newOpts.requestObject.payload.claims = { ...newOpts.requestObject.payload.claims, ...claimsWithTarget.propertyValue }
       }
     }
-    
-    if(this._createRequestOptions.redirectUri !== undefined) {
-      newOpts.redirectUri = this._createRequestOptions.redirectUri 
-    } 
     return newOpts
   }
 

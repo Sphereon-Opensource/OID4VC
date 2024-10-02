@@ -62,7 +62,6 @@ interface AuthorizationRequestCommonOpts<CT extends ClaimPayloadCommonOpts> {
   payload?: AuthorizationRequestPayloadOpts<CT>
   requestObject: RequestObjectOpts<CT>
   uriScheme?: Schema | string // Use a custom scheme for the URI. By default openid:// will be used
-  redirectUri?: string;
 }
 
 export type AuthorizationRequestOptsVID1 = AuthorizationRequestCommonOpts<ClaimPayloadOptsVID1>
