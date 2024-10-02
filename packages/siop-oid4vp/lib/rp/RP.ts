@@ -294,6 +294,10 @@ export class RP {
         newOpts.requestObject.payload.claims = { ...newOpts.requestObject.payload.claims, ...claimsWithTarget.propertyValue }
       }
     }
+    
+    if(this._createRequestOptions.redirectUri !== undefined) {
+      newOpts.redirectUri = this._createRequestOptions.redirectUri 
+    } 
     return newOpts
   }
 
