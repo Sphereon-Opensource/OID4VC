@@ -103,7 +103,15 @@ export class RP {
     responseURIType?: ResponseURIType
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
-
+    if(authorizationRequestOpts.redirectUri !== undefined) {
+      authorizationRequestOpts.redirectUri = authorizationRequestOpts.redirectUri
+        .replace(':correlation_id', opts.correlationId)
+        .replace(':correlationId', opts.correlationId)
+      if(typeof(opts.state) === 'string') {
+        authorizationRequestOpts.redirectUri = authorizationRequestOpts.redirectUri.replace(':state', opts.state)
+      }
+    }
+    
     return await URI.fromOpts(authorizationRequestOpts)
       .then(async (uri: URI) => {
         void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
