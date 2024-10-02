@@ -66,7 +66,6 @@ export const createAuthorizationRequestPayload = async (
     ...(state && { state }),
     ...(registration.payload && isTarget(PropertyTarget.AUTHORIZATION_REQUEST, registration.clientMetadataOpts.targets) ? registration.payload : {}),
     ...(claims && { claims }),
-    ...(opts.requestObject.payload?.redirectUri && { redirect_uri: opts.requestObject.payload.redirectUri })
   }
 
   return removeNullUndefined(authRequestPayload)

@@ -41,6 +41,7 @@ export class RP {
   private readonly _verifyResponseOptions: Partial<VerifyAuthorizationResponseOpts>
   private readonly _eventEmitter?: EventEmitter
   private readonly _sessionManager?: IRPSessionManager
+  private readonly _responseRedirectUri?: string
 
   private constructor(opts: {
     builder?: RPBuilder
@@ -52,6 +53,7 @@ export class RP {
     this._verifyResponseOptions = { ...createVerifyResponseOptsFromBuilderOrExistingOpts(opts) }
     this._eventEmitter = opts.builder?.eventEmitter
     this._sessionManager = opts.builder?.sessionManager
+    this._responseRedirectUri = opts.builder?._responseRedirectUri
   }
 
   public static fromRequestOpts(opts: CreateAuthorizationRequestOpts): RP {
@@ -103,12 +105,12 @@ export class RP {
     responseURIType?: ResponseURIType
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
-    if(authorizationRequestOpts.requestObject.payload?.redirectUri !== undefined) {
-      authorizationRequestOpts.requestObject.payload.redirectUri = authorizationRequestOpts.requestObject.payload.redirectUri
+    if(authorizationRequestOpts.responseRedirectUri !== undefined) {
+      authorizationRequestOpts.responseRedirectUri = authorizationRequestOpts.responseRedirectUri
         .replace(':correlation_id', opts.correlationId)
         .replace(':correlationId', opts.correlationId)
       if(typeof(opts.state) === 'string') {
-        authorizationRequestOpts.requestObject.payload.redirectUri = authorizationRequestOpts.requestObject.payload.redirectUri.replace(':state', opts.state)
+        authorizationRequestOpts.responseRedirectUri = authorizationRequestOpts.responseRedirectUri.replace(':state', opts.state)
       }
     }
     
@@ -302,6 +304,8 @@ export class RP {
         newOpts.requestObject.payload.claims = { ...newOpts.requestObject.payload.claims, ...claimsWithTarget.propertyValue }
       }
     }
+    
+    newOpts.responseRedirectUri = this._responseRedirectUri
     return newOpts
   }
 
