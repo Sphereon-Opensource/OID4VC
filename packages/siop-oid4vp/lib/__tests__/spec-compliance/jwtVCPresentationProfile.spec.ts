@@ -307,7 +307,7 @@ describe('OP using test vectors', () => {
     )
     await op.createAuthorizationResponse(result, {
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         presentationSubmission: TestVectors.presentation_submission,
         vpTokenLocation: VPTokenLocation.ID_TOKEN,
       },

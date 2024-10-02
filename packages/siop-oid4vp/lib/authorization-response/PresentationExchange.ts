@@ -389,7 +389,7 @@ export class PresentationExchange {
       )
     }
 
-    const presentationsToVerify = Array.isArray(evaluationResults.presentation) ? evaluationResults.presentation : [evaluationResults.presentation]
+    const presentationsToVerify = evaluationResults.presentations
     // The verifyPresentationCallback function is mandatory for RP only,
     // So the behavior here is to bypass it if not present
     if (verifyPresentationCallback && evaluationResults.value !== undefined) {
