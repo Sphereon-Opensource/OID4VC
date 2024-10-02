@@ -391,7 +391,7 @@ describe('presentation exchange manager tests', () => {
     expect(result.presentationSubmission.descriptor_map[0]).toStrictEqual({
       format: 'ldp_vp',
       id: 'Ontario Health Insurance Plan',
-      path: '$',
+      path: '$[0]',
       path_nested: {
         format: 'ldp_vc',
         id: 'Ontario Health Insurance Plan',
