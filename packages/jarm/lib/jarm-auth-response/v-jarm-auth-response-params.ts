@@ -27,12 +27,12 @@ export const vJarmAuthResponseParams = v.looseObject({
   iss: v.string(),
 
   /**
-   * The client_id of the client the response is intended for
+   * Expiration of the JWT
    */
   exp: v.number(),
 
   /**
-   * Expiration of the JWT
+   * The client_id of the client the response is intended for
    */
   aud: v.string(),
 });
@@ -50,7 +50,7 @@ export const validateJarmAuthResponseParams = (input: {
   }
 
   // 4. The client obtains the aud element from the JWT and checks whether it matches the client id the client used to identify itself in the corresponding authorization request. If the check fails, the client MUST abort processing and refuse the response.
-  if (authRequestParams.client_id !== authResponseParams.client_id) {
+  if (authRequestParams.client_id !== authResponseParams.aud) {
     throw new Error(`Invalid audience in jarm-auth-response. Expected '${authRequestParams.client_id}' received '${authResponseParams.aud}'.`);
   }
 
