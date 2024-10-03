@@ -211,10 +211,12 @@ export class AuthorizationResponse {
     if (this._payload?.vp_token) {
       const presentations = await extractPresentationsFromAuthorizationResponse(this, opts)
       // We do not verify them, as that is done elsewhere. So we simply can take the first nonce
+
       if (!nonce) {
         nonce = extractNonceFromWrappedVerifiablePresentation(Array.isArray(presentations) ? presentations[0] : presentations)
       }
     }
+
     const idTokenPayload = await this.idToken?.payload()
     if (opts?.consistencyCheck !== false && idTokenPayload) {
       Object.entries(idTokenPayload).forEach((entry) => {

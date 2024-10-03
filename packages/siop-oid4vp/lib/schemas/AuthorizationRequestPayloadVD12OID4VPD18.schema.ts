@@ -413,7 +413,10 @@ export const AuthorizationRequestPayloadVD12OID4VPD18SchemaObj = {
         "form_post",
         "post",
         "direct_post",
-        "query"
+        "query",
+        "direct_post.jwt",
+        "query.jwt",
+        "fragment.jwt"
       ]
     },
     "ClaimPayloadCommon": {

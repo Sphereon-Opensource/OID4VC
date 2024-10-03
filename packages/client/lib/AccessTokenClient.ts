@@ -156,7 +156,7 @@ export class AccessTokenClient {
 
       return request as AccessTokenRequest;
     }
-    
+
     throw new Error('Credential offer request follows neither pre-authorized code nor authorization code flow requirements.');
   }
 

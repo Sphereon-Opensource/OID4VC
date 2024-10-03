@@ -9,7 +9,7 @@ export function isStringNullOrEmpty(key: string) {
   return !key || !key.length
 }
 
-export function removeNullUndefined<T>(data: T) : T {
+export function removeNullUndefined<T>(data: T): T {
   if (!data) {
     return data
   }

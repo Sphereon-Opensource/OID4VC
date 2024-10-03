@@ -135,7 +135,7 @@ describe('OID4VCI-Client using Mattr issuer should', () => {
 
     const correlationId = 'test'
 
-    const authorizationRequest = await AuthorizationRequest.fromUriOrJwt(offer.authorizeRequestUri);
+    const authorizationRequest = await AuthorizationRequest.fromUriOrJwt(offer.authorizeRequestUri)
     const verifiedAuthRequest = await authorizationRequest.verify({
       correlationId,
       verifyJwtCallback: getVerifyJwtCallback(getResolver()),

@@ -13,7 +13,10 @@ export function assertValidMetadata(opMetadata: DiscoveryMetadataPayload, rpMeta
   const credentials = supportedCredentialsFormats(rpMetadata.vp_formats, opMetadata.vp_formats)
   const isValidSubjectSyntax = verifySubjectSyntaxes(rpMetadata.subject_syntax_types_supported)
   if (isValidSubjectSyntax && rpMetadata.subject_syntax_types_supported) {
-    subjectSyntaxTypesSupported = supportedSubjectSyntaxTypes(rpMetadata.subject_syntax_types_supported, opMetadata.subject_syntax_types_supported as string[])
+    subjectSyntaxTypesSupported = supportedSubjectSyntaxTypes(
+      rpMetadata.subject_syntax_types_supported,
+      opMetadata.subject_syntax_types_supported as string[],
+    )
   } else if (isValidSubjectSyntax && (!rpMetadata.subject_syntax_types_supported || !rpMetadata.subject_syntax_types_supported.length)) {
     if (opMetadata.subject_syntax_types_supported) {
       subjectSyntaxTypesSupported = [...opMetadata.subject_syntax_types_supported]
@@ -107,7 +110,7 @@ function getFormatIntersection(rpFormat: Format, opFormat: Format): Format {
       throw new Error(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)
     }
     intersectionFormat[crFormat] = {}
-    if(methodKeyOP !== undefined) {
+    if (methodKeyOP !== undefined) {
       intersectionFormat[crFormat][methodKeyOP] = algs
     }
   })

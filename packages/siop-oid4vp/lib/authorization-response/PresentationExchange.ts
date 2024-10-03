@@ -7,7 +7,7 @@ import {
   Status,
   Validated,
   VerifiablePresentationFromOpts,
-  VerifiablePresentationResult
+  VerifiablePresentationResult,
 } from '@sphereon/pex'
 import { PresentationEvaluationResults } from '@sphereon/pex/dist/main/lib/evaluation'
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2, PresentationSubmission } from '@sphereon/pex-models'
@@ -117,9 +117,11 @@ export class PresentationExchange {
   }
 
   public static assertValidPresentationSubmission(presentationSubmission: PresentationSubmission) {
-    const validationResult:Validated = PEX.validateSubmission(presentationSubmission)
-    if (Array.isArray(validationResult) && validationResult[0].message != 'ok'
-    || !Array.isArray(validationResult) && validationResult.message != 'ok') {
+    const validationResult: Validated = PEX.validateSubmission(presentationSubmission)
+    if (
+      (Array.isArray(validationResult) && validationResult[0].message != 'ok') ||
+      (!Array.isArray(validationResult) && validationResult.message != 'ok')
+    ) {
       throw new Error(`${SIOPErrors.RESPONSE_OPTS_PRESENTATIONS_SUBMISSION_IS_NOT_VALID}, details ${JSON.stringify(validationResult)}`)
     }
   }
@@ -244,8 +246,10 @@ export class PresentationExchange {
 
   private static assertValidPresentationDefinition(presentationDefinition: IPresentationDefinition) {
     const validationResult = PEX.validateDefinition(presentationDefinition)
-    if (Array.isArray(validationResult) && validationResult[0].message != 'ok'
-      || !Array.isArray(validationResult) && validationResult.message != 'ok') {
+    if (
+      (Array.isArray(validationResult) && validationResult[0].message != 'ok') ||
+      (!Array.isArray(validationResult) && validationResult.message != 'ok')
+    ) {
       throw new Error(`${SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID}`)
     }
   }
