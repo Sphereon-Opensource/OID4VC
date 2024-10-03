@@ -177,6 +177,7 @@ export class OP {
     createJarmResponse?: (opts: {
       authorizationResponsePayload: AuthorizationResponsePayload
       requestObjectPayload: RequestObjectPayload
+      clientMetadata: JwksMetadataParams
     }) => Promise<{
       response: string
     }>,
@@ -231,6 +232,7 @@ export class OP {
       const { response } = await createJarmResponse({
         requestObjectPayload,
         authorizationResponsePayload: payload,
+        clientMetadata: authorizationResponse.response.authorizationRequest.options.clientMetadata
       })
 
       return jarmAuthResponseSend({
