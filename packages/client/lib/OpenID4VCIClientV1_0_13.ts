@@ -447,7 +447,7 @@ export class OpenID4VCIClientV1_0_13 {
           );
         }
         const credentialsSupported = metadata.credential_configurations_supported;
-        if (!metadata.credential_configurations_supported || !credentialsSupported[credentialIdentifier]) {
+        if (!credentialsSupported || !credentialsSupported[credentialIdentifier]) {
           throw new Error(`Credential type ${credentialIdentifier} is not supported by issuer ${this.getIssuer()}`);
         }
       } else if (!types) {
