@@ -42,7 +42,7 @@ export const jarmAuthResponseSend = async (input: JarmAuthResponseSendInput): Pr
     case 'fragment.jwt':
       return handleFragmentJwt(responseEndpoint, authResponse);
     case 'form_post.jwt':
-      throw new Error('Not implemented');
+      throw new Error('Not implemented. form_post.jwt is not yet supported.');
   }
 };
 

@@ -161,7 +161,9 @@ export class OP {
   }
 
   public static async extractEncJwksFromClientMetadata(clientMetadata: JwksMetadataParams) {
-    // The client metadata will be parsed in the joseExtractJWKS function
+    // TODO: Currently no mechanisms are in place to deal with multiple 'enc' keys in the client metadata.
+    // TODO: Maybe we should return all 'enc' keys in the client metadata. In addition the JWKS from the jwks_uri are not fetched if jwks are present.
+    // TODO: Is that the expected behavior?
     const jwks = await extractJwksFromJwksMetadata(clientMetadata)
     const encryptionJwk = jwks?.keys.find((key) => key.use === 'enc')
     if (!encryptionJwk) {
