@@ -13,8 +13,8 @@ import {
   PresentationExchangeResponseOpts,
 } from '../authorization-response'
 import { encodeJsonAsURI, post } from '../helpers'
+import { extractJwksFromJwksMetadata, JwksMetadataParams } from '../helpers/ExtractJwks'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
-import { extractJwksFromJwksMetadata, JwksMetadataParams } from '../helpers/extract-jwks'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
