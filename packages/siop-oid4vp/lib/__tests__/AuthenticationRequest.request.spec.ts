@@ -362,7 +362,7 @@ describe('create Request Uri should', () => {
     const uriRequest = await URI.fromOpts(opts)
 
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
-    expect(uriDecoded).toContain(`penid4vp://?client_id=https://www.example.com/`)
+    expect(uriDecoded).toContain(`openid4vp://?client_id=https://www.example.com/`)
 
     const data = URI.parse(uriDecoded)
     expect(data.scheme).toEqual('openid4vp://')
