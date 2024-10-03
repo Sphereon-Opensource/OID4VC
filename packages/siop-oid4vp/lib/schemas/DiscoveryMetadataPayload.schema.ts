@@ -1196,7 +1196,10 @@ export const DiscoveryMetadataPayloadSchemaObj = {
         "form_post",
         "post",
         "direct_post",
-        "query"
+        "query",
+        "direct_post.jwt",
+        "query.jwt",
+        "fragment.jwt"
       ]
     },
     "GrantType": {

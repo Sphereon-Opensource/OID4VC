@@ -133,7 +133,7 @@ export class RPBuilder {
     return this
   }
 
-  withResponsetUri(redirectUri: string, targets?: PropertyTargets): RPBuilder {
+  withResponseUri(redirectUri: string, targets?: PropertyTargets): RPBuilder {
     this._authorizationRequestPayload.response_uri = assignIfAuth({ propertyValue: redirectUri, targets }, false)
     this._requestObjectPayload.response_uri = assignIfRequestObject({ propertyValue: redirectUri, targets }, true)
     return this
