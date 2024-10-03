@@ -105,14 +105,6 @@ export class RP {
     responseURIType?: ResponseURIType
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
-    if(authorizationRequestOpts.responseRedirectUri !== undefined) {
-      authorizationRequestOpts.responseRedirectUri = authorizationRequestOpts.responseRedirectUri
-        .replace(':correlation_id', opts.correlationId)
-        .replace(':correlationId', opts.correlationId)
-      if(typeof(opts.state) === 'string') {
-        authorizationRequestOpts.responseRedirectUri = authorizationRequestOpts.responseRedirectUri.replace(':state', opts.state)
-      }
-    }
     
     return await URI.fromOpts(authorizationRequestOpts)
       .then(async (uri: URI) => {
@@ -203,6 +195,17 @@ export class RP {
 
   get verifyResponseOptions(): Partial<VerifyAuthorizationResponseOpts> {
     return this._verifyResponseOptions
+  }
+
+  public getResponseRedirectUri(mappings: Record<string, string>): string | undefined {
+    if (this._responseRedirectUri === undefined) {
+      return undefined
+    }
+
+    return Object.entries(mappings).reduce(
+      (uri, [key, value]) => uri.replace(`:${key}`, value),
+      this._responseRedirectUri
+    )
   }
 
   private newAuthorizationRequestOpts(opts: {
@@ -304,8 +307,6 @@ export class RP {
         newOpts.requestObject.payload.claims = { ...newOpts.requestObject.payload.claims, ...claimsWithTarget.propertyValue }
       }
     }
-    
-    newOpts.responseRedirectUri = this._responseRedirectUri
     return newOpts
   }
 

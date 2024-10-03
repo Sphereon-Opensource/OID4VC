@@ -27,6 +27,7 @@ import {
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 const EXAMPLE_REFERENCE_URL = 'https://rp.acme.com/siop/jwts'
+const EXAMPLE_RESPONSE_REDIRECT_URL = 'https://acme.com/:correlation_id?state=:state'
 const HEX_KEY = 'f857544a9d1097e242ff0b287a7e6e90f19cf973efe2317f2a4678739664420f'
 const DID = 'did:ethr:0x0106a2e985b1E1De9B5ddb4aF6dC9e928F4e99D0'
 const KID = 'did:ethr:0x0106a2e985b1E1De9B5ddb4aF6dC9e928F4e99D0#keys-1'
@@ -257,12 +258,13 @@ describe('RP should', () => {
     const expectedJwtRegex =
       /^eyJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6ZXRocjoweDAxMDZhMmU5ODViMUUxRGU5QjVkZGI0YUY2ZEM5ZTkyOEY0ZTk5RDAja2V5cy0xIiwidHlwIjoiSldUIn0\.eyJpYXQiO.*$/
 
-    const request = await RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
       .withClientId(WELL_KNOWN_OPENID_FEDERATION, alltargets)
       .withScope('test', alltargets)
       .withResponseType(ResponseType.ID_TOKEN, alltargets)
       .withVerifyJwtCallback(getVerifyJwtCallback(getResolver('ethr')))
       .withRedirectUri(EXAMPLE_REDIRECT_URL, alltargets)
+      .withResponseRedirectUri(EXAMPLE_RESPONSE_REDIRECT_URL)
       .withRequestBy(PassBy.REFERENCE, EXAMPLE_REFERENCE_URL)
       .withCreateJwtCallback(internalSignature(HEX_KEY, DID, KID, SigningAlgo.ES256K))
       .withClientMetadata(
@@ -296,8 +298,7 @@ describe('RP should', () => {
       )
       .withSupportedVersions([SupportedVersion.SIOPv2_D11])
       .build()
-
-      .createAuthorizationRequestURI({
+    const request = await rp.createAuthorizationRequestURI({
         correlationId: '1234',
         state: 'b32f0087fc9816eb813fd11f',
         nonce: 'qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg',
@@ -306,5 +307,8 @@ describe('RP should', () => {
     expect(request.authorizationRequestPayload).toMatchObject(expectedPayloadWithoutRequest)
     expect(request.encodedUri).toMatch(expectedUri)
     expect(request.requestObjectJwt).toMatch(expectedJwtRegex)
+    
+    const responseRedirectUri = rp.getResponseRedirectUri({correlation_id: '1234', state: 'b32f0087fc9816eb813fd11f'})
+    expect(responseRedirectUri).toBe('https://acme.com/1234?state=b32f0087fc9816eb813fd11f')
   })
 })
