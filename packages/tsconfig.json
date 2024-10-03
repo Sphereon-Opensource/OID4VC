@@ -22,6 +22,9 @@
     },
     {
       "path": "did-auth-siop-adapter"
+    },
+    {
+      "path": "jarm"
     }
   ]
 }
