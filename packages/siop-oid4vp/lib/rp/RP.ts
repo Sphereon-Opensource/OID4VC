@@ -197,11 +197,13 @@ export class RP {
     return this._verifyResponseOptions
   }
 
-  public getResponseRedirectUri(mappings: Record<string, string>): string | undefined {
+  public getResponseRedirectUri(mappings?: Record<string, string>): string | undefined {
     if (this._responseRedirectUri === undefined) {
       return undefined
     }
-
+    if(mappings === undefined) {
+      return this._responseRedirectUri
+    }
     return Object.entries(mappings).reduce(
       (uri, [key, value]) => uri.replace(`:${key}`, value),
       this._responseRedirectUri
