@@ -2189,8 +2189,7 @@ export const AuthorizationResponseOptsSchemaObj = {
       "required": [
         "id",
         "type"
-      ],
-      "additionalProperties": false
+      ]
     },
     "CompactJWT": {
       "type": "string",
