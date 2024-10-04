@@ -81,18 +81,25 @@ jobs:
       - name: diff
         run: git diff
 
+      - name: Sets PREID
+        env:
+          name: "${{github.ref_name}}"
+        run: |
+          echo "PRE_ID=${name//[\/_-]/.}" >> $GITHUB_ENV
+
       - name: publish @latest when on main
         if: github.ref == 'refs/heads/main'
-        run: pnpm publish:latest
+        run: lerna publish --conventional-commits --force-publish --include-merged-tags --sync-dist-version --create-release github --yes --dist-tag latest --registry https://registry.npmjs.org
 
       - name: publish @next when on develop
         if: github.ref == 'refs/heads/develop'
-        run: pnpm publish:next
+        run: lerna publish --conventional-prerelease --force-publish --canary --sync-dist-version --no-git-tag-version --include-merged-tags --preid next --pre-dist-tag next --yes --registry https://registry.npmjs.org",
 
-      - name: publish @next when on fix
+      - name: publish @next when on fix branch
         if: startsWith(github.ref, 'refs/heads/fix')
-        run: pnpm publish:next
+        run: lerna publish --conventional-prerelease --force-publish --canary --sync-dist-version --no-git-tag-version --include-merged-tags --preid fix --pre-dist-tag fix --yes --registry https://registry.npmjs.org",
 
       - name: publish @unstable when on unstable branch
         if: startsWith(github.ref, 'refs/heads/feat')
-        run: pnpm publish:unstable
+        run: lerna publish --conventional-prerelease --force-publish --canary --sync-dist-version --no-git-tag-version --include-merged-tags --preid $PRE_ID --pre-dist-tag unstable --yes --throttle-size 75 --registry https://registry.npmjs.org
+     
