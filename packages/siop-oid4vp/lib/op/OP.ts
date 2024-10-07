@@ -231,10 +231,11 @@ export class OP {
         throw new Error('No id_token or vp_token present in the response payload')
       }
 
+      const clientMetadata = authorizationResponse.response.authorizationRequest.options?.clientMetadata ?? requestObjectPayload.client_metadata
       const { response } = await createJarmResponse({
         requestObjectPayload,
         authorizationResponsePayload: payload,
-        clientMetadata: authorizationResponse.response.authorizationRequest.options.clientMetadata
+        clientMetadata
       })
 
       return jarmAuthResponseSend({
