@@ -525,7 +525,7 @@ describe('RP and OP interaction should', () => {
     const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {})
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
         presentationSubmission: verifiablePresentationResult.presentationSubmission,
         /*credentialsAndDefinitions: [
@@ -663,7 +663,7 @@ describe('RP and OP interaction should', () => {
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         presentationSubmission: verifiablePresentationResult.presentationSubmission,
         vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
         /*credentialsAndDefinitions: [
@@ -794,7 +794,7 @@ describe('RP and OP interaction should', () => {
       const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {})
       const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
         presentationExchange: {
-          verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+          verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
           presentationSubmission: verifiablePresentationResult.presentationSubmission,
           vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
           /*credentialsAndDefinitions: [
@@ -934,7 +934,7 @@ describe('RP and OP interaction should', () => {
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         presentationSubmission: verifiablePresentationResult.presentationSubmission,
         vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
         /*credentialsAndDefinitions: [
@@ -1070,7 +1070,7 @@ describe('RP and OP interaction should', () => {
     const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {})
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         presentationSubmission: verifiablePresentationResult.presentationSubmission,
         vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
         /*credentialsAndDefinitions: [
@@ -1357,7 +1357,7 @@ describe('RP and OP interaction should', () => {
     const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {})
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         presentationSubmission: verifiablePresentationResult.presentationSubmission,
         vpTokenLocation: VPTokenLocation.ID_TOKEN,
         /*credentialsAndDefinitions: [
@@ -1480,7 +1480,7 @@ describe('RP and OP interaction should', () => {
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         presentationSubmission: verifiablePresentationResult.presentationSubmission,
         vpTokenLocation: VPTokenLocation.ID_TOKEN,
         /*credentialsAndDefinitions: [
@@ -1831,3 +1831,4 @@ describe('RP and OP interaction should', () => {
     expect(resState?.status).toBe('error')
   })
 })
+

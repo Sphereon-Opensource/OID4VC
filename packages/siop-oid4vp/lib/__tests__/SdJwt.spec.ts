@@ -191,7 +191,7 @@ describe('RP and OP interaction should', () => {
     })
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
         presentationSubmission: verifiablePresentationResult.presentationSubmission,
       },
@@ -310,7 +310,7 @@ describe('RP and OP interaction should', () => {
         didUrl: `${rpMockEntity.did}#controller`,
       },
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
         presentationSubmission: verifiablePresentationResult.presentationSubmission,
       },
