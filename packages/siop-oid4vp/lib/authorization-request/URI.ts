@@ -126,6 +126,7 @@ export class URI implements AuthorizationRequestURI {
         ...authorizationRequest.options.requestObject,
         version: authorizationRequest.options.version,
         uriScheme: authorizationRequest.options.uriScheme,
+        
       },
       authorizationRequest.payload,
       authorizationRequest.requestObject,
