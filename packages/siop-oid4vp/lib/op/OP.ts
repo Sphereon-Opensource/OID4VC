@@ -238,22 +238,25 @@ export class OP {
         clientMetadata
       })
 
-      return jarmAuthResponseSend({
-        authRequestParams: {
-          response_uri: responseUri,
-          response_mode: responseMode,
-          response_type: responseType,
-        },
-        authResponse: response,
-      })
-        .then((result) => {
-          void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
-          return result
+      try {
+        const jarmResponse = await jarmAuthResponseSend({
+          authRequestParams: {
+            response_uri: responseUri,
+            response_mode: responseMode,
+            response_type: responseType
+          },
+          authResponse: response
         })
-        .catch((error: Error) => {
-          void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_FAILED, { correlationId, subject: response, error })
-          throw error
+        void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
+        return jarmResponse
+      } catch (error) {
+        void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_FAILED, {
+          correlationId,
+          subject: response,
+          error
         })
+        throw error
+      }
     }
 
     const authResponseAsURI = encodeJsonAsURI(payload, { arraysWithIndex: ['presentation_submission'] })
