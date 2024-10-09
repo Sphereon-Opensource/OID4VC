@@ -299,7 +299,7 @@ export const assertValidVerifiablePresentations = async (args: {
     args.presentationDefinitions.length &&
     (!presentationsWithFormat || (Array.isArray(presentationsWithFormat) && presentationsWithFormat.length === 0))
   ) {
-    if(nrOfMdocsPresentations === 0) {
+    if(nrOfMdocsPresentations === 0) { // We don't want to crash when processing mdoc credentials
       throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)
     }
   } else if (
