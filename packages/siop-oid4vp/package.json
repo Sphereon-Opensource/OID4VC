@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@astronautlabs/jsonpath": "^1.1.2",
+    "@sphereon/jarm": "workspace:*",
     "@sphereon/did-uni-client": "^0.6.2",
     "@sphereon/oid4vc-common": "workspace:*",
     "@sphereon/pex": "5.0.0-unstable.10",

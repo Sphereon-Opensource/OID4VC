@@ -14,8 +14,8 @@ export function decodeUriAsJson(uri: string) {
   }
   const parts = parse(queryString, { plainObjects: true, depth: 10, parameterLimit: 5000, ignoreQueryPrefix: true })
 
-  const vpToken = (parts?.claims as { [key: string]: any })?.['vp_token'];
-  const descriptors = vpToken?.presentation_definition?.['input_descriptors']; // FIXME?
+  const vpToken = (parts?.claims as { [key: string]: any })?.['vp_token']
+  const descriptors = vpToken?.presentation_definition?.['input_descriptors'] // FIXME?
   if (descriptors && Array.isArray(descriptors)) {
     // Whenever we have a [{'uri': 'str1'}, 'uri': 'str2'] qs changes this to {uri: ['str1','str2']} which means schema validation fails. So we have to fix that
     vpToken.presentation_definition['input_descriptors'] = descriptors.map((descriptor: InputDescriptorV1) => {
@@ -33,7 +33,7 @@ export function decodeUriAsJson(uri: string) {
     })
   }
 
-  const json:Record<string, any> = {}
+  const json: Record<string, any> = {}
   for (const key in parts) {
     const value = parts[key]
     if (!value) {

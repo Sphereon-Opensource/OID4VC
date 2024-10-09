@@ -30,6 +30,14 @@ export const AuthorizationResponseOptsSchemaObj = {
         "responseMode": {
           "$ref": "#/definitions/ResponseMode"
         },
+        "responseType": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResponseType"
+          },
+          "minItems": 1,
+          "maxItems": 1
+        },
         "expiresIn": {
           "type": "number"
         },
@@ -1350,7 +1358,10 @@ export const AuthorizationResponseOptsSchemaObj = {
         "form_post",
         "post",
         "direct_post",
-        "query"
+        "query",
+        "direct_post.jwt",
+        "query.jwt",
+        "fragment.jwt"
       ]
     },
     "GrantType": {

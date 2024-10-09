@@ -1,5 +1,11 @@
 import { EventEmitter } from 'events'
 
+import {
+  jarmAuthResponseDirectPostJwtValidate,
+  JarmAuthResponseParams,
+  JarmDirectPostJwtAuthResponseValidationContext,
+  JarmDirectPostJwtResponseParams,
+} from '@sphereon/jarm'
 import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { Hasher } from '@sphereon/ssi-types'
 
@@ -15,12 +21,14 @@ import {
 import { mergeVerificationOpts } from '../authorization-request/Opts'
 import { AuthorizationResponse, PresentationDefinitionWithLocation, VerifyAuthorizationResponseOpts } from '../authorization-response'
 import { getNonce, getState } from '../helpers'
-import { PassBy } from '../types'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
   AuthorizationResponsePayload,
+  DecryptCompact,
+  PassBy,
   RegisterEventListener,
+  RequestObjectPayload,
   ResponseURIType,
   SIOPErrors,
   SupportedVersion,
@@ -133,6 +141,28 @@ export class RP {
       ...(!opts?.error ? { subject: state.request } : {}),
       ...(opts?.error ? { error: opts.error } : {}),
     })
+  }
+
+  static async processJarmAuthorizationResponse(
+    response: string,
+    opts: {
+      decryptCompact: DecryptCompact
+      getAuthRequestPayload: (input: JarmDirectPostJwtResponseParams | JarmAuthResponseParams) => Promise<{ authRequestParams: RequestObjectPayload }>
+    },
+  ) {
+    const { decryptCompact, getAuthRequestPayload } = opts
+
+    const getParams = getAuthRequestPayload as JarmDirectPostJwtAuthResponseValidationContext['openid4vp']['authRequest']['getParams']
+
+    const validatedResponse = await jarmAuthResponseDirectPostJwtValidate(
+      { response },
+      {
+        openid4vp: { authRequest: { getParams } },
+        jwe: { decryptCompact },
+      },
+    )
+
+    return validatedResponse
   }
 
   public async verifyAuthorizationResponse(

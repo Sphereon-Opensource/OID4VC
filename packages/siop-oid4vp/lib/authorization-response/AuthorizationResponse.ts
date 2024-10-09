@@ -224,19 +224,21 @@ export class AuthorizationResponse {
     if (this._payload?.vp_token) {
       const presentations = await extractPresentationsFromAuthorizationResponse(this, opts)
       const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
-      
+
       // We do not verify them, as that is done elsewhere. So we simply can take the first nonce
+
       nonce = presentationsArray
         // FIXME toWrappedVerifiablePresentation() does not extract the nonce yet from mdocs.
         // Either it's not availble or we or not reading the SessionTranscript yet
-        .filter(presentation => !CredentialMapper.isWrappedMdocPresentation(presentation)) 
+        .filter(presentation => !CredentialMapper.isWrappedMdocPresentation(presentation))
         .map(extractNonceFromWrappedVerifiablePresentation)
         .find(nonce => nonce !== undefined);
-      
+
       if(!nonce && !this._idToken && presentationsArray.some(presentation => CredentialMapper.isWrappedMdocPresentation(presentation))) {
         nonce = 'mdoc' // FIXME toWrappedVerifiablePresentation() does not extract the nonce yet from mdocs.
       }
     }
+
     const idTokenPayload = await this.idToken?.payload()
     if (opts?.consistencyCheck !== false && idTokenPayload) {
       Object.entries(idTokenPayload).forEach((entry) => {

@@ -3,7 +3,15 @@ import { IPresentationDefinition, PresentationSignCallBackParams } from '@sphere
 import { Format } from '@sphereon/pex-models'
 import { CompactSdJwtVc, Hasher, PresentationSubmission, W3CVerifiablePresentation } from '@sphereon/ssi-types'
 
-import { ResponseMode, ResponseRegistrationOpts, ResponseURIType, SupportedVersion, VerifiablePresentationWithFormat, Verification } from '../types'
+import {
+  ResponseMode,
+  ResponseRegistrationOpts,
+  ResponseType,
+  ResponseURIType,
+  SupportedVersion,
+  VerifiablePresentationWithFormat,
+  Verification,
+} from '../types'
 import { CreateJwtCallback } from '../types/VpJwtIssuer'
 import { VerifyJwtCallback } from '../types/VpJwtVerifier'
 
@@ -19,6 +27,7 @@ export interface AuthorizationResponseOpts {
   createJwtCallback: CreateJwtCallback
   jwtIssuer?: JwtIssuer
   responseMode?: ResponseMode
+  responseType?: [ResponseType]
   // did: string;
   expiresIn?: number
   accessToken?: string

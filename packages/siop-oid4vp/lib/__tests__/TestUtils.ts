@@ -3,7 +3,7 @@
 import crypto, { createHash } from 'crypto'
 
 import { JwtPayload, parseJWT, SigningAlgo, uuidv4 } from '@sphereon/oid4vc-common'
-import { PartialSdJwtDecodedVerifiableCredential } from '@sphereon/pex/dist/main/lib';
+import { PartialSdJwtDecodedVerifiableCredential } from '@sphereon/pex/dist/main/lib'
 import { IProofType } from '@sphereon/ssi-types'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

@@ -53,13 +53,16 @@ export class RequestObject {
     return requestObjectJwt ? new RequestObject(undefined, undefined, requestObjectJwt) : undefined
   }
 
-  public static async fromPayload(requestObjectPayload: RequestObjectPayload, authorizationRequestOpts: CreateAuthorizationRequestOpts): Promise<RequestObject> {
+  public static async fromPayload(
+    requestObjectPayload: RequestObjectPayload,
+    authorizationRequestOpts: CreateAuthorizationRequestOpts,
+  ): Promise<RequestObject> {
     return new RequestObject(authorizationRequestOpts, requestObjectPayload)
   }
 
   public static async fromAuthorizationRequestPayload(payload: AuthorizationRequestPayload): Promise<RequestObject | undefined> {
     const requestObjectJwt =
-      payload.request ?? payload.request_uri ? await fetchByReferenceOrUseByValue(payload.request_uri as string, payload.request, true) : undefined
+      (payload.request ?? payload.request_uri) ? await fetchByReferenceOrUseByValue(payload.request_uri as string, payload.request, true) : undefined
     return requestObjectJwt ? await RequestObject.fromJwt(requestObjectJwt) : undefined
   }
 

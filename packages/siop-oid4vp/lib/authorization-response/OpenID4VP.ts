@@ -35,6 +35,7 @@ import {
 export const extractNonceFromWrappedVerifiablePresentation = (wrappedVp: WrappedVerifiablePresentation): string | undefined => {
   // SD-JWT uses kb-jwt for the nonce
   if (CredentialMapper.isWrappedSdJwtVerifiablePresentation(wrappedVp)) {
+    // SD-JWT uses kb-jwt for the nonce
     // TODO: replace this once `kbJwt.payload` is available on the decoded sd-jwt (pr in ssi-sdk)
     // If it doesn't end with ~, it contains a kbJwt
     if (!wrappedVp.presentation.compactSdJwtVc.endsWith('~')) {
@@ -143,7 +144,6 @@ export const extractPresentationsFromAuthorizationResponse = async (
 
   return CredentialMapper.toWrappedVerifiablePresentation(response.payload.vp_token, { hasher: opts?.hasher })
 }
-
 export const createPresentationSubmission = async (
   verifiablePresentations: W3CVerifiablePresentation[],
   opts?: { presentationDefinitions: (PresentationDefinitionWithLocation | IPresentationDefinition)[] },
