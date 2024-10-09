@@ -238,7 +238,7 @@ function assertIssSelfIssuedOrDid(payload: JWTPayload) {
   }
 }
 
-export function getSubDidFromPayload(payload: JWTPayload, header?: JWTHeader): string | undefined {
+export function getSubDidFromPayload(payload: JWTPayload, header?: JWTHeader): string {
   assertIssSelfIssuedOrDid(payload)
 
   if (isIssSelfIssued(payload)) {
@@ -253,7 +253,7 @@ export function getSubDidFromPayload(payload: JWTPayload, header?: JWTHeader): s
       return did
     }
   }
-  return payload.sub
+  return payload.sub!
 }
 
 export function isIssSelfIssued(payload: JWTPayload): boolean {

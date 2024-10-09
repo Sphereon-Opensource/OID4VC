@@ -120,10 +120,7 @@ export class AuthorizationRequest {
     let requestObjectPayload: RequestObjectPayload | undefined = undefined
 
     const jwt = await this.requestObjectJwt()
-    let parsedJwt = undefined
-    if (jwt !== undefined) {
-      parsedJwt = parseJWT(jwt);
-    }
+    const parsedJwt = jwt ? parseJWT(jwt) : undefined
 
     if (parsedJwt) {
       requestObjectPayload = parsedJwt.payload as RequestObjectPayload
@@ -168,7 +165,7 @@ export class AuthorizationRequest {
       )
       assertValidRPRegistrationMedataPayload(registrationMetadataPayload)
       // TODO: We need to do something with the metadata probably
-    } /*else { this makes test mattr.launchpad.spec.ts fail why was this check added?
+    } /*else { // this makes test mattr.launchpad.spec.ts fail why was this check added?
       return Promise.reject(Error(`could not fetch registrationMetadataPayload due to missing payload key ${registrationPropertyKey}`))
     }
     */

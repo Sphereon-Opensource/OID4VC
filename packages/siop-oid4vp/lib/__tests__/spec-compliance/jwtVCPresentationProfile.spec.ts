@@ -172,7 +172,7 @@ describe('RP using test vectors', () => {
     ).toBeTruthy()
   })
 
-  it.skip('should decode auth response', async () => { // FIXME pex is too lenient ATM
+  it('should decode auth response', async () => { 
     const authorizationResponse = await AuthorizationResponse.fromPayload(TestVectors.authorizationResponsePayload)
     expect(authorizationResponse).toBeDefined()
     expect(authorizationResponse.payload).toEqual(TestVectors.authorizationResponsePayload)

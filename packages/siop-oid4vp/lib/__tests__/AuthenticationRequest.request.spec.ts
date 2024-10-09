@@ -286,7 +286,7 @@ describe('create Request Uri should', () => {
   })
 
   it('return an url with an embedded token value', async () => {
-    expect.assertions(3)
+    expect.assertions(4)
     const opts: CreateAuthorizationRequestOpts = {
       version: SupportedVersion.SIOPv2_ID1,
       payload: {
@@ -362,7 +362,8 @@ describe('create Request Uri should', () => {
     const uriRequest = await URI.fromOpts(opts)
 
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
-    expect(uriDecoded).toContain(`openid4vp://?client_id=https://www.example.com/`)
+    expect(uriDecoded).toContain(`request=eyJhbGciOi`)
+    expect(uriDecoded.startsWith(`openid4vp://?client_id=https://www.example.com/`)).toBeTruthy()
 
     const data = URI.parse(uriDecoded)
     expect(data.scheme).toEqual('openid4vp://')
