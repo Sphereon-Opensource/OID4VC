@@ -116,7 +116,10 @@ export class PresentationExchange {
     } else if (!this.allVerifiableCredentials || this.allVerifiableCredentials.length == 0) {
       throw new Error(`${SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD}, no VCs were provided`)
     }
-    const selectResults: SelectResults = this.pex.selectFrom(presentationDefinition, this.removeMDocCredentials(this.allVerifiableCredentials), {
+    // When there are MDoc credentials among the selected ones, filter those out as pex does not support mdoc credentials
+    const filteredCredentials = this.removeMDocCredentials(this.allVerifiableCredentials)
+    const selectResults: SelectResults = this.pex.selectFrom(presentationDefinition, filteredCredentials, {
+
       ...opts,
       holderDIDs: opts?.holderDIDs ?? this.allDIDs,
       // fixme limited disclosure

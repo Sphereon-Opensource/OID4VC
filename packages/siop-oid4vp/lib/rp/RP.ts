@@ -198,13 +198,13 @@ export class RP {
         correlationId,
       })
       correlationId = verifyAuthenticationResponseOpts.correlationId ?? correlationId
-      await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_RECEIVED_SUCCESS, {
+      void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_RECEIVED_SUCCESS, {
         correlationId,
         subject: authorizationResponse,
       })
 
       const verifiedAuthorizationResponse = await authorizationResponse.verify(verifyAuthenticationResponseOpts)
-      await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_VERIFIED_SUCCESS, {
+      void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_VERIFIED_SUCCESS, {
         correlationId,
         subject: authorizationResponse,
       })
@@ -228,10 +228,10 @@ export class RP {
   }
 
   public getResponseRedirectUri(mappings?: Record<string, string>): string | undefined {
-    if (this._responseRedirectUri === undefined) {
+    if (!this._responseRedirectUri) {
       return undefined
     }
-    if(mappings === undefined) {
+    if(!mappings) {
       return this._responseRedirectUri
     }
     return Object.entries(mappings).reduce(
