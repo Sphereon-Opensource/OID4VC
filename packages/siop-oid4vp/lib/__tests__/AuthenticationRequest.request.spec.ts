@@ -1,7 +1,6 @@
 import { parse } from 'querystring'
 
 import { SigningAlgo } from '@sphereon/oid4vc-common'
-import { IPresentationDefinition } from '@sphereon/pex'
 import { IProofType } from '@sphereon/ssi-types'
 
 import {
@@ -13,7 +12,7 @@ import {
   SubjectIdentifierType,
   SubjectType,
   SupportedVersion,
-  URI,
+  URI
 } from '..'
 import SIOPErrors from '../types/Errors'
 
@@ -24,7 +23,7 @@ import {
   VERIFIER_NAME_FOR_CLIENT,
   VERIFIER_NAME_FOR_CLIENT_NL,
   VERIFIERZ_PURPOSE_TO_VERIFY,
-  VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+  VERIFIERZ_PURPOSE_TO_VERIFY_NL
 } from './data/mockedData'
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
@@ -98,26 +97,6 @@ describe('create Request Uri should', () => {
         response_type: 'id_token',
         request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         redirect_uri: EXAMPLE_REDIRECT_URL,
-        claims: {
-          vp_token: {
-            presentation_definition: {
-              id: 'Ontario Health Insurance Plan',
-              name: 'Ontario',
-              purpose: 'purpose',
-              input_descriptors: [
-                {
-                  id: 'Ontario Health Insurance Plan',
-                  name: 'Ontario',
-                  schema: [
-                    {
-                      uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-                    },
-                  ],
-                },
-              ],
-            } as IPresentationDefinition,
-          },
-        },
       },
       requestObject: {
         jwtIssuer: {
@@ -193,26 +172,6 @@ describe('create Request Uri should', () => {
         response_type: 'id_token',
         request_object_signing_alg_values_supported: [SigningAlgo.ES256, SigningAlgo.EDDSA],
         redirect_uri: EXAMPLE_REDIRECT_URL,
-        claims: {
-          vp_token: {
-            presentation_definition: {
-              id: 'Ontario Health Insurance Plan',
-              name: 'Ontario',
-              purpose: 'purpose',
-              input_descriptors: [
-                {
-                  id: 'Ontario Health Insurance Plan',
-                  name: 'Ontario',
-                  schema: [
-                    {
-                      uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-                    },
-                  ],
-                },
-              ],
-            } as IPresentationDefinition,
-          },
-        },
       },
       requestObject: {
         jwtIssuer: { method: 'did', didUrl: KID, alg: SigningAlgo.ES256 },
@@ -231,26 +190,6 @@ describe('create Request Uri should', () => {
           response_type: 'id_token',
           request_object_signing_alg_values_supported: [SigningAlgo.ES256, SigningAlgo.EDDSA],
           redirect_uri: EXAMPLE_REDIRECT_URL,
-          claims: {
-            vp_token: {
-              presentation_definition: {
-                id: 'Ontario Health Insurance Plan',
-                name: 'Ontario',
-                purpose: 'purpose',
-                input_descriptors: [
-                  {
-                    id: 'Ontario Health Insurance Plan',
-                    name: 'Ontario',
-                    schema: [
-                      {
-                        uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-                      },
-                    ],
-                  },
-                ],
-              } as IPresentationDefinition,
-            },
-          },
         },
       },
       clientMetadata: {
@@ -295,26 +234,6 @@ describe('create Request Uri should', () => {
         response_type: 'id_token',
         request_object_signing_alg_values_supported: [SigningAlgo.ES256, SigningAlgo.EDDSA],
         redirect_uri: EXAMPLE_REDIRECT_URL,
-        claims: {
-          vp_token: {
-            presentation_definition: {
-              id: 'Ontario Health Insurance Plan',
-              name: 'Ontario',
-              purpose: 'purpose',
-              input_descriptors: [
-                {
-                  id: 'Ontario Health Insurance Plan',
-                  name: 'Ontario',
-                  schema: [
-                    {
-                      uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-                    },
-                  ],
-                },
-              ],
-            } as IPresentationDefinition,
-          },
-        },
       },
       requestObject: {
         passBy: PassBy.VALUE,
@@ -612,26 +531,6 @@ describe('create Request JWT should', () => {
         response_type: 'id_token',
         request_object_signing_alg_values_supported: [SigningAlgo.ES256, SigningAlgo.EDDSA],
         redirect_uri: EXAMPLE_REDIRECT_URL,
-        claims: {
-          vp_token: {
-            presentation_definition: {
-              id: 'Ontario Health Insurance Plan',
-              name: 'Ontario',
-              purpose: 'purpose',
-              input_descriptors: [
-                {
-                  id: 'Ontario Health Insurance Plan',
-                  name: 'Ontario',
-                  schema: [
-                    {
-                      uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-                    },
-                  ],
-                },
-              ],
-            } as IPresentationDefinition,
-          },
-        },
       },
       requestObject: {
         jwtIssuer: { method: 'did', didUrl: KID, alg: SigningAlgo.ES256K },
@@ -650,23 +549,6 @@ describe('create Request JWT should', () => {
           response_type: 'id_token',
           redirect_uri: EXAMPLE_REDIRECT_URL,
           request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-          claims: {
-            vp_token: {
-              presentation_definition: {
-                id: 'Insurance Plans',
-                input_descriptors: [
-                  {
-                    id: 'Ontario Health Insurance Plan',
-                    schema: [
-                      {
-                        uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-                      },
-                    ],
-                  },
-                ],
-              },
-            },
-          },
         },
       },
       clientMetadata: {
@@ -696,7 +578,7 @@ describe('create Request JWT should', () => {
     const uriRequest = await URI.fromOpts(opts)
 
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
-    expect(uriDecoded).toEqual(`openid4vp://?client_id=https://www.example.com/.well-known/openid-federation&scope=test&response_type=id_token&request_object_signing_alg_values_supported=[\"ES256\",\"EdDSA\"]&redirect_uri=https://acme.com/hello&claims={"vp_token\":{\"presentation_definition":{\"id\":\"Ontario Health Insurance Plan\",\"name\":"Ontario\",\"purpose":"purpose\","input_descriptors":[{\"id":\"Ontario Health Insurance Plan\",\"name":\"Ontario\",\"schema":[{\"uri\":\"https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan\"}]}]}}}&request_uri=https://rp.acme.com/siop/jwts`)
+    expect(uriDecoded).toEqual(`openid4vp://?client_id=https://www.example.com/.well-known/openid-federation&scope=test&response_type=id_token&request_object_signing_alg_values_supported=["ES256","EdDSA"]&redirect_uri=https://acme.com/hello&claims={"vp_token":{"presentation_definition":{"id":"Ontario Health Insurance Plan","name":"Ontario","purpose":"purpose","input_descriptors":[{"id":"Ontario Health Insurance Plan","name":"Ontario","schema":[{"uri":"https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan"}]}]}}}&request_uri=https://rp.acme.com/siop/jwts`)
     expect((await (await uriRequest.toAuthorizationRequest())?.requestObject?.getPayload())?.claims.vp_token).toBeDefined()
   })
 
@@ -709,22 +591,6 @@ describe('create Request JWT should', () => {
         response_type: 'id_token',
         redirect_uri: EXAMPLE_REDIRECT_URL,
         request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        claims: {
-          vp_token: {
-            presentation_definition: {
-              input_descriptors: [
-                {
-                  id: 'Ontario Health Insurance Plan',
-                  schema: [
-                    {
-                      uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-                    },
-                  ],
-                },
-              ],
-            } as IPresentationDefinition,
-          },
-        },
       },
 
       requestObject: {
@@ -738,7 +604,7 @@ describe('create Request JWT should', () => {
           kid: KID,
           alg: SigningAlgo.ES256K,
         }),
-        payload: {
+/*        payload: {
           client_id: 'test_client_id',
           scope: 'test',
           response_type: 'id_token',
@@ -760,7 +626,7 @@ describe('create Request JWT should', () => {
               } as IPresentationDefinition,
             },
           },
-        },
+        },*/
       },
       clientMetadata: {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],

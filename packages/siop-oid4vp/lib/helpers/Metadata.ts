@@ -87,10 +87,10 @@ function supportedSubjectSyntaxTypes(rpMethods: string[] | string, opMethods: st
   return supportedSubjectSyntaxTypes
 }
 
-export function collectAlgValues(o: any): string[] {
+function collectAlgValues(algTableObject: any): string[] {
   const algValues: string[] = [];
-  for (const key of Object.keys(o)) {
-    algValues.push(...o[key]);
+  for (const key of Object.keys(algTableObject)) {
+    algValues.push(...algTableObject[key]);
   }
 
   return algValues;

@@ -82,7 +82,10 @@ export class PresentationExchange {
         keyEncoding: options?.signatureOptions?.keyEncoding ?? KeyEncoding.Hex,
       },
     }
-    return await this.pex.verifiablePresentationFrom(presentationDefinition, this.removeMDocCredentials(selectedCredentials), presentationSignCallback, signOptions)
+    
+    // When there are MDoc credentials among the selected ones, filter those out as pex does not support mdoc credentials
+    const filteredCredentials = this.removeMDocCredentials(selectedCredentials) 
+    return await this.pex.verifiablePresentationFrom(presentationDefinition, filteredCredentials, presentationSignCallback, signOptions)
   }
 
   private removeMDocCredentials(selectedCredentials: OriginalVerifiableCredential[]) {
@@ -383,7 +386,7 @@ export class PresentationExchange {
       throw new Error(SIOPErrors.NO_PRESENTATION_SUBMISSION)
     }
 
-    if (!evaluationResults.areRequiredCredentialsPresent || (evaluationResults.errors && evaluationResults.errors.length > 0) || !evaluationResults.value) {
+    if (evaluationResults.areRequiredCredentialsPresent === Status.ERROR || (evaluationResults.errors && evaluationResults.errors.length > 0) || !evaluationResults.value) {
       throw new Error(`message: ${SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD}, details: ${JSON.stringify(evaluationResults.errors)}`)
     }
 
