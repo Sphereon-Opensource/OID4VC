@@ -8,14 +8,12 @@ import {
   CredentialConfigurationSupportedV1_0_13,
   CredentialDataSupplierInput,
   CredentialIssuerMetadata,
-  CredentialOfferPayloadV1_0_13,
   CredentialOfferSession,
   CredentialOfferV1_0_13,
   CredentialRequest,
   CredentialRequestV1_0_13,
   CredentialResponse,
   DID_NO_DIDDOC_ERROR,
-  Grant,
   IAT_ERROR,
   ISSUER_CONFIG_ERROR,
   IssueStatus,
@@ -29,7 +27,6 @@ import {
   NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
-  PRE_AUTH_CODE_LITERAL,
   PRE_AUTH_GRANT_LITERAL,
   QRCodeOpts,
   TokenErrorResponse,
@@ -42,7 +39,7 @@ import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphere
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common'
 import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
-import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject } from './functions'
+import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
 import { LookupStateManager } from './state-manager'
 import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
 
@@ -92,7 +89,7 @@ export class VcIssuer<DIDDoc extends object> {
   }
 
   public async createCredentialOfferURI(opts: {
-    grants?: Grant
+    grants?: CredentialOfferGrantInput
     credential_configuration_ids?: Array<string>
     credentialDefinition?: JsonLdIssuerCredentialDefinition
     credentialOfferUri?: string
@@ -102,58 +99,39 @@ export class VcIssuer<DIDDoc extends object> {
     pinLength?: number
     qrCodeOpts?: QRCodeOpts
   }): Promise<CreateCredentialOfferURIResult> {
-    let preAuthorizedCode: string | undefined = undefined
-    let issuerState: string | undefined = undefined
-    const { grants, credential_configuration_ids } = opts
+    const { credential_configuration_ids } = opts
 
-    if (!grants?.authorization_code && !grants?.[PRE_AUTH_GRANT_LITERAL]) {
-      throw Error(`No grant issuer state or pre-authorized code could be deduced`)
-    }
-    const credentialOfferPayload: CredentialOfferPayloadV1_0_13 = {
-      ...(grants && { grants }),
-      ...(credential_configuration_ids && { credential_configuration_ids: credential_configuration_ids ?? [] }),
-      credential_issuer: this.issuerMetadata.credential_issuer,
-    } as CredentialOfferPayloadV1_0_13
-    if (grants?.authorization_code) {
-      issuerState = grants?.authorization_code.issuer_state
-      if (!issuerState) {
-        issuerState = uuidv4()
-        grants.authorization_code.issuer_state = issuerState
-      }
-    }
-
-    let txCode: TxCode | undefined
-    if (grants?.[PRE_AUTH_GRANT_LITERAL]) {
-      preAuthorizedCode = grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL]
-      txCode = grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code
-
-      if (txCode !== undefined) {
-        if (!txCode?.length) {
-          txCode.length = opts.pinLength ?? 4
-        }
-        grants[PRE_AUTH_GRANT_LITERAL].tx_code = txCode
-      }
-      if (!preAuthorizedCode) {
-        preAuthorizedCode = uuidv4()
-        grants[PRE_AUTH_GRANT_LITERAL][PRE_AUTH_CODE_LITERAL] = preAuthorizedCode
+    const grants = opts.grants ? { ...opts.grants } : {}
+    // for backwards compat, would be better if user sets the prop on the grants directly
+    if (opts.pinLength !== undefined) {
+      const preAuth = grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']
+      if (preAuth && preAuth.tx_code) {
+        preAuth.tx_code.length = opts.pinLength
       }
     }
 
     const baseUri = opts?.baseUri ?? this.defaultCredentialOfferBaseUri
-
     const credentialOfferObject = createCredentialOfferObject(this._issuerMetadata, {
       ...opts,
-      txCode,
-      credentialOffer: credentialOfferPayload,
-      baseUri,
-      preAuthorizedCode,
-      issuerState,
+      grants,
+      credentialOffer: credential_configuration_ids
+        ? {
+            credential_issuer: this._issuerMetadata.credential_issuer,
+            credential_configuration_ids,
+          }
+        : undefined,
     })
 
+    const preAuthGrant = credentialOfferObject.credential_offer.grants?.[PRE_AUTH_GRANT_LITERAL]
+    const authGrant = credentialOfferObject.credential_offer.grants?.authorization_code
+
+    const preAuthorizedCode = preAuthGrant?.['pre-authorized_code']
+    const issuerState = authGrant?.issuer_state
+    const txCode = preAuthGrant?.tx_code
+
     let userPin: string | undefined
-    // todo: Double check this can only happen in pre-auth flow and if so make sure to not do the below when in a state is present (authorized flow)
-    if (txCode) {
-      const pinLength = txCode.length ?? opts.pinLength ?? 4
+    if (preAuthGrant?.tx_code) {
+      const pinLength = preAuthGrant.tx_code.length ?? 4
 
       userPin = ('' + Math.round((Math.pow(10, pinLength) - 1) * Math.random())).padStart(pinLength, '0')
       assertValidPinNumber(userPin, pinLength)
