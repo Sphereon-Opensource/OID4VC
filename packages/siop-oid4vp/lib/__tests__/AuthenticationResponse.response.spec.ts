@@ -453,9 +453,9 @@ describe('create JWT from Request JWT should', () => {
       }),
       jwtIssuer: { method: 'did', didUrl: `${mockResEntity.did}#controller`, alg: SigningAlgo.ES256K },
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         vpTokenLocation: VPTokenLocation.ID_TOKEN,
-        presentationSubmission: await createPresentationSubmission([verifiablePresentationResult.verifiablePresentation], {
+        presentationSubmission: await createPresentationSubmission(verifiablePresentationResult.verifiablePresentations, {
           presentationDefinitions: [definition],
         }),
       },
@@ -634,8 +634,8 @@ describe('create JWT from Request JWT should', () => {
       }),
       jwtIssuer: { method: 'did', didUrl: `${mockResEntity.did}#controller`, alg: SigningAlgo.ES256K },
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
-        presentationSubmission: await createPresentationSubmission([verifiablePresentationResult.verifiablePresentation], {
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
+        presentationSubmission: await createPresentationSubmission(verifiablePresentationResult.verifiablePresentations, {
           presentationDefinitions: [definition],
         }),
         vpTokenLocation: VPTokenLocation.ID_TOKEN,

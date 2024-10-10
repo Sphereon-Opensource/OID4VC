@@ -170,3 +170,4 @@ describe('ismapolis bug report #63, https://github.com/Sphereon-Opensource/OID4V
     console.log(JSON.stringify(credentialResponse.credential));
   });
 });
+

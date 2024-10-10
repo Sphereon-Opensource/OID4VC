@@ -34,6 +34,7 @@ export class RPBuilder {
   supportedVersions: SupportedVersion[]
   eventEmitter?: EventEmitter
   sessionManager?: IRPSessionManager
+  _responseRedirectUri?: string
   private _authorizationRequestPayload: Partial<AuthorizationRequestPayload> = {}
   private _requestObjectPayload: Partial<RequestObjectPayload> = {}
 
@@ -130,6 +131,11 @@ export class RPBuilder {
   withRedirectUri(redirectUri: string, targets?: PropertyTargets): RPBuilder {
     this._authorizationRequestPayload.redirect_uri = assignIfAuth({ propertyValue: redirectUri, targets }, false)
     this._requestObjectPayload.redirect_uri = assignIfRequestObject({ propertyValue: redirectUri, targets }, true)
+    return this
+  }
+
+  withResponseRedirectUri(responseRedirectUri: string): RPBuilder {
+    this._responseRedirectUri = responseRedirectUri
     return this
   }
 

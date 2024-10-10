@@ -447,7 +447,7 @@ export class OpenID4VCIClientV1_0_13 {
           );
         }
         const credentialsSupported = metadata.credential_configurations_supported;
-        if (!metadata.credential_configurations_supported || !credentialsSupported[credentialIdentifier]) {
+        if (!credentialsSupported || !credentialsSupported[credentialIdentifier]) {
           throw new Error(`Credential type ${credentialIdentifier} is not supported by issuer ${this.getIssuer()}`);
         }
       } else if (!types) {
@@ -472,9 +472,19 @@ export class OpenID4VCIClientV1_0_13 {
           console.log(`Not all credential types ${JSON.stringify(credentialTypes)} are present in metadata for ${this.getIssuer()}`);
           // throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
         }
-      } else if (metadata.credential_configurations_supported && !Array.isArray(metadata.credential_configurations_supported)) {
-        const credentialsSupported = metadata.credential_configurations_supported;
-        if (types.some((type) => !metadata.credential_configurations_supported || !credentialsSupported[type])) {
+      } else if (metadata.credential_configurations_supported && typeof(metadata.credential_configurations_supported) === 'object') {
+        let typeSupported = false;
+        Object.values(metadata.credential_configurations_supported).forEach((supportedCredential) => {
+          const subTypes = getTypesFromCredentialSupported(supportedCredential);
+          if (
+            subTypes.every((t, i) => types[i] === t) ||
+            (types.length === 1 && (types[0] === supportedCredential.id || subTypes.includes(types[0])))
+          ) {
+            typeSupported = true;
+          }
+        })
+
+        if (!typeSupported) {
           throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
         }
       }

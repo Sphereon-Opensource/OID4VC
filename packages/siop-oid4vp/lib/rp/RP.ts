@@ -49,6 +49,7 @@ export class RP {
   private readonly _verifyResponseOptions: Partial<VerifyAuthorizationResponseOpts>
   private readonly _eventEmitter?: EventEmitter
   private readonly _sessionManager?: IRPSessionManager
+  private readonly _responseRedirectUri?: string
 
   private constructor(opts: {
     builder?: RPBuilder
@@ -60,6 +61,7 @@ export class RP {
     this._verifyResponseOptions = { ...createVerifyResponseOptsFromBuilderOrExistingOpts(opts) }
     this._eventEmitter = opts.builder?.eventEmitter
     this._sessionManager = opts.builder?.sessionManager
+    this._responseRedirectUri = opts.builder?._responseRedirectUri
   }
 
   public static fromRequestOpts(opts: CreateAuthorizationRequestOpts): RP {
@@ -111,7 +113,7 @@ export class RP {
     responseURIType?: ResponseURIType
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
-
+    
     return await URI.fromOpts(authorizationRequestOpts)
       .then(async (uri: URI) => {
         void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
@@ -223,6 +225,19 @@ export class RP {
 
   get verifyResponseOptions(): Partial<VerifyAuthorizationResponseOpts> {
     return this._verifyResponseOptions
+  }
+
+  public getResponseRedirectUri(mappings?: Record<string, string>): string | undefined {
+    if (!this._responseRedirectUri) {
+      return undefined
+    }
+    if(!mappings) {
+      return this._responseRedirectUri
+    }
+    return Object.entries(mappings).reduce(
+      (uri, [key, value]) => uri.replace(`:${key}`, value),
+      this._responseRedirectUri
+    )
   }
 
   private newAuthorizationRequestOpts(opts: {

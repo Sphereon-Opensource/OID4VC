@@ -19,7 +19,7 @@
     "@sphereon/oid4vci-client": "workspace:*",
     "@sphereon/oid4vci-common": "workspace:*",
     "@sphereon/oid4vci-issuer": "workspace:*",
-    "@sphereon/ssi-types": "0.29.1-unstable.208",
+    "@sphereon/ssi-types": "0.30.1",
     "jose": "^4.10.0"
   },
   "devDependencies": {

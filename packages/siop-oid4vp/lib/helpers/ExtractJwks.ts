@@ -28,9 +28,9 @@ export async function fetchJwks(jwksUri: string): Promise<Jwks | undefined> {
  * If a jwks field is provided, the JWKS will be extracted from the field.
  * If a jwks_uri is provided, the JWKS will be fetched from the URI.
  *
- * @param input - The metadata input to be validated and parsed.
  * @returns A promise that resolves to the extracted JWKS or undefined.
  * @throws {JoseJwksExtractionError} If the metadata format is invalid or no decryption key is found.
+ * @param metadata
  */
 export const extractJwksFromJwksMetadata = async (metadata: JwksMetadataParams) => {
   let jwks: Jwks | undefined = metadata.jwks?.keys[0] ? metadata.jwks : undefined

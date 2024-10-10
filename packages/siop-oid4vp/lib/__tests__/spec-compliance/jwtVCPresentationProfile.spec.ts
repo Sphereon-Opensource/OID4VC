@@ -172,7 +172,7 @@ describe('RP using test vectors', () => {
     ).toBeTruthy()
   })
 
-  it('should decode auth response', async () => {
+  it('should decode auth response', async () => { 
     const authorizationResponse = await AuthorizationResponse.fromPayload(TestVectors.authorizationResponsePayload)
     expect(authorizationResponse).toBeDefined()
     expect(authorizationResponse.payload).toEqual(TestVectors.authorizationResponsePayload)
@@ -307,7 +307,7 @@ describe('OP using test vectors', () => {
     )
     await op.createAuthorizationResponse(result, {
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         presentationSubmission: TestVectors.presentation_submission,
         vpTokenLocation: VPTokenLocation.ID_TOKEN,
       },

@@ -21,7 +21,7 @@ import {
   PresentationVerificationCallback,
   VerifyAuthorizationResponseOpts,
 } from '../authorization-response'
-import { JwksMetadataParams } from '../helpers/extract-jwks'
+import { JwksMetadataParams } from '../helpers/ExtractJwks'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 

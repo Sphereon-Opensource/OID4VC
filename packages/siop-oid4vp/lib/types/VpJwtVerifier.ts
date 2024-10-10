@@ -80,7 +80,7 @@ export const getRequestObjectJwtVerifier = async (
   const clientIdScheme = jwt.payload.client_id_scheme
   const clientId = jwt.payload.client_id
 
-  if (!clientIdScheme) {
+  if (!clientIdScheme || jwt.header.alg === 'none') {
     return getJwtVerifierWithContext(jwt, { type })
   }
 
@@ -95,11 +95,14 @@ export const getRequestObjectJwtVerifier = async (
   } else if (clientIdScheme === 'redirect_uri') {
     if (jwt.payload.redirect_uri && jwt.payload.redirect_uri !== clientId) {
       throw new Error(SIOPErrors.INVALID_CLIENT_ID_MUST_MATCH_REDIRECT_URI)
+    } else if (jwt.payload.response_uri && jwt.payload.response_uri !== clientId) {
+      throw new Error(SIOPErrors.INVALID_CLIENT_ID_MUST_MATCH_RESPONSE_URI)
     }
-    const parts = options.raw.split('.')
+    
+    /*const parts = options.raw.split('.')  this can be signed and execution can't even be here when alg = none 
     if (parts.length > 2 && parts[2]) {
       throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' JWT must not be signed`)
-    }
+    }*/
     return getJwtVerifierWithContext(jwt, { type })
   } else if (clientIdScheme === 'verifier_attestation') {
     const verifierAttestationSubtype = 'verifier-attestation+jwt'

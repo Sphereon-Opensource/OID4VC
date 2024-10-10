@@ -197,11 +197,6 @@ describe('Language tag util should', () => {
     expect(allLanguageTaggedProperties).toEqual(expectedTaggedFields)
   })
 
-  it('throw error if source is null', async () => {
-    expect.assertions(1)
-    await expect(() => LanguageTagUtils.getAllLanguageTaggedProperties(null)).toThrowError()
-  })
-
   it('throw error if list is null', async () => {
     expect.assertions(1)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

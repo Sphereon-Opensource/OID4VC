@@ -253,14 +253,14 @@ export function getSubDidFromPayload(payload: JWTPayload, header?: JWTHeader): s
       return did
     }
   }
-  return payload.sub
+  return payload.sub!
 }
 
 export function isIssSelfIssued(payload: JWTPayload): boolean {
   return (
-    (payload.iss && payload.iss.includes(ResponseIss.SELF_ISSUED_V1)) ||
+    (payload.iss && (payload.iss.includes(ResponseIss.SELF_ISSUED_V1)) ||
     (payload.iss && payload.iss.includes(ResponseIss.SELF_ISSUED_V2)) ||
-    payload.iss === payload.sub
+    payload.iss === payload.sub)
   )
 }
 
