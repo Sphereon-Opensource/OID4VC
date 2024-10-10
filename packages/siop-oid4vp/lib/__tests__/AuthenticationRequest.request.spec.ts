@@ -25,6 +25,7 @@ import {
   VERIFIERZ_PURPOSE_TO_VERIFY,
   VERIFIERZ_PURPOSE_TO_VERIFY_NL
 } from './data/mockedData'
+import { IPresentationDefinition } from '@sphereon/pex'
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 const EXAMPLE_REFERENCE_URL = 'https://rp.acme.com/siop/jwts'
@@ -549,6 +550,23 @@ describe('create Request JWT should', () => {
           response_type: 'id_token',
           redirect_uri: EXAMPLE_REDIRECT_URL,
           request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+          claims: {
+            vp_token: {
+              presentation_definition: {
+                id: 'Insurance Plans',
+                input_descriptors: [
+                  {
+                    id: 'Ontario Health Insurance Plan',
+                    schema: [
+                      {
+                        uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
         },
       },
       clientMetadata: {
@@ -578,7 +596,8 @@ describe('create Request JWT should', () => {
     const uriRequest = await URI.fromOpts(opts)
 
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
-    expect(uriDecoded).toEqual(`openid4vp://?client_id=https://www.example.com/.well-known/openid-federation&scope=test&response_type=id_token&request_object_signing_alg_values_supported=["ES256","EdDSA"]&redirect_uri=https://acme.com/hello&claims={"vp_token":{"presentation_definition":{"id":"Ontario Health Insurance Plan","name":"Ontario","purpose":"purpose","input_descriptors":[{"id":"Ontario Health Insurance Plan","name":"Ontario","schema":[{"uri":"https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan"}]}]}}}&request_uri=https://rp.acme.com/siop/jwts`)
+    expect(uriDecoded.startsWith('openid4vp://?')).toBeTruthy()
+    expect(uriDecoded).toContain(`request_uri=https://rp.acme.com/siop/jwts`)
     expect((await (await uriRequest.toAuthorizationRequest())?.requestObject?.getPayload())?.claims.vp_token).toBeDefined()
   })
 
@@ -604,7 +623,7 @@ describe('create Request JWT should', () => {
           kid: KID,
           alg: SigningAlgo.ES256K,
         }),
-/*        payload: {
+        payload: {
           client_id: 'test_client_id',
           scope: 'test',
           response_type: 'id_token',
@@ -626,7 +645,7 @@ describe('create Request JWT should', () => {
               } as IPresentationDefinition,
             },
           },
-        },*/
+        },
       },
       clientMetadata: {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],

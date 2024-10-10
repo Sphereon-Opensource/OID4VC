@@ -7,6 +7,7 @@ import {
 } from '@sphereon/ssi-types';
 
 import { RevocationStatus, RevocationVerification, RevocationVerificationCallback, VerifiableCredentialTypeFormat } from '../types'
+import { LOG } from '../types';
 
 export const verifyRevocation = async (
   vpToken: WrappedVerifiablePresentation,
@@ -16,27 +17,29 @@ export const verifyRevocation = async (
   if (!vpToken) {
     throw new Error(`VP token not provided`)
   }
-  if (isWrappedW3CVerifiablePresentation(vpToken) || isWrappedSdJwtVerifiablePresentation(vpToken)) { // Only W3C support for now
-    if (!revocationVerificationCallback) {
-      throw new Error(`Revocation callback not provided`)
-    }
-
+  if (!(isWrappedW3CVerifiablePresentation(vpToken) || isWrappedSdJwtVerifiablePresentation(vpToken))) {
+    LOG.debug('verifyRevocation does not support non-w3c presentations at the moment')
+    return
+  }
+  if (!revocationVerificationCallback) {
+    throw new Error(`Revocation callback not provided`)
+  }
+  
   const vcs =
     CredentialMapper.isWrappedSdJwtVerifiablePresentation(vpToken) || CredentialMapper.isWrappedMdocPresentation(vpToken)
       ? [vpToken.vcs[0]]
       : vpToken.presentation.verifiableCredential
-    for (const vc of vcs) {
-      if (
-        revocationVerification === RevocationVerification.ALWAYS ||
-        (revocationVerification === RevocationVerification.IF_PRESENT && credentialHasStatus(vc))
-      ) {
-        const result = await revocationVerificationCallback(
-          vc.original as W3CVerifiableCredential,
-          originalTypeToVerifiableCredentialTypeFormat(vc.format),
-        )
-        if (result.status === RevocationStatus.INVALID) {
-          throw new Error(`Revocation invalid for vc. Error: ${result.error}`)
-        }
+  for (const vc of vcs) {
+    if (
+      revocationVerification === RevocationVerification.ALWAYS ||
+      (revocationVerification === RevocationVerification.IF_PRESENT && credentialHasStatus(vc))
+    ) {
+      const result = await revocationVerificationCallback(
+        vc.original as W3CVerifiableCredential,
+        originalTypeToVerifiableCredentialTypeFormat(vc.format)
+      )
+      if (result.status === RevocationStatus.INVALID) {
+        throw new Error(`Revocation invalid for vc. Error: ${result.error}`)
       }
     }
   }
