@@ -104,7 +104,7 @@ export class VcIssuer<DIDDoc extends object> {
     const grants = opts.grants ? { ...opts.grants } : {}
     // for backwards compat, would be better if user sets the prop on the grants directly
     if (opts.pinLength !== undefined) {
-      const preAuth = grants['urn:ietf:params:oauth:grant-type:pre-authorized_code']
+      const preAuth = grants[PRE_AUTH_GRANT_LITERAL]
       if (preAuth && preAuth.tx_code) {
         preAuth.tx_code.length = opts.pinLength
       }
