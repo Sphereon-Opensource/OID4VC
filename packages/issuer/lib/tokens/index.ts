@@ -41,12 +41,13 @@ export interface ITokenEndpointOpts {
 
 export const generateAccessToken = async (
   opts: Required<Pick<ITokenEndpointOpts, 'accessTokenSignerCallback' | 'tokenExpiresIn' | 'accessTokenIssuer'>> & {
+    additionalClaims?: Record<string, unknown>
     preAuthorizedCode?: string
     alg?: Alg
     dPoPJwk?: JWK
   },
 ): Promise<string> => {
-  const { dPoPJwk, accessTokenIssuer, alg, accessTokenSignerCallback, tokenExpiresIn, preAuthorizedCode } = opts
+  const { dPoPJwk, accessTokenIssuer, alg, accessTokenSignerCallback, tokenExpiresIn, preAuthorizedCode, additionalClaims } = opts
   // JWT uses seconds for iat and exp
   const iat = new Date().getTime() / 1000
   const exp = iat + tokenExpiresIn
@@ -63,6 +64,7 @@ export const generateAccessToken = async (
       // evaluation process is performed for bearer tokens to prevent downgraded usage of a DPoP-bound access token.
       // Specifically, such a protected resource MUST reject a DPoP-bound access token received as a bearer token per [RFC6750].
       token_type: dPoPJwk ? 'DPoP' : 'Bearer',
+      ...additionalClaims,
     },
   }
   return await accessTokenSignerCallback(jwt)
