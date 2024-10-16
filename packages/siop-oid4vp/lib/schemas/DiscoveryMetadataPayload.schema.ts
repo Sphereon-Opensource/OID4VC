@@ -8,57 +8,6 @@ export const DiscoveryMetadataPayloadSchemaObj = {
         {
           "type": "object",
           "properties": {
-            "redirect_uris": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "token_endpoint_auth_method": {
-              "type": "string"
-            },
-            "grant_types": {
-              "type": "string"
-            },
-            "response_types": {
-              "type": "string"
-            },
-            "client_name": {
-              "type": "string"
-            },
-            "client_uri": {
-              "type": "string"
-            },
-            "logo_uri": {
-              "type": "string"
-            },
-            "scope": {
-              "type": "string"
-            },
-            "contacts": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "tos_uri": {
-              "type": "string"
-            },
-            "policy_uri": {
-              "type": "string"
-            },
-            "jwks_uri": {
-              "type": "string"
-            },
-            "jwks": {
-              "$ref": "#/definitions/JWKS"
-            },
-            "software_id": {
-              "type": "string"
-            },
-            "software_version": {
-              "type": "string"
-            },
             "authorization_endpoint": {
               "anyOf": [
                 {
@@ -154,6 +103,9 @@ export const DiscoveryMetadataPayloadSchemaObj = {
               "type": "string"
             },
             "userinfo_endpoint": {
+              "type": "string"
+            },
+            "jwks_uri": {
               "type": "string"
             },
             "registration_endpoint": {
@@ -401,6 +353,54 @@ export const DiscoveryMetadataPayloadSchemaObj = {
               "type": "string"
             },
             "op_tos_uri": {
+              "type": "string"
+            },
+            "redirect_uris": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "token_endpoint_auth_method": {
+              "type": "string"
+            },
+            "grant_types": {
+              "type": "string"
+            },
+            "response_types": {
+              "type": "string"
+            },
+            "client_name": {
+              "type": "string"
+            },
+            "client_uri": {
+              "type": "string"
+            },
+            "logo_uri": {
+              "type": "string"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "contacts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tos_uri": {
+              "type": "string"
+            },
+            "policy_uri": {
+              "type": "string"
+            },
+            "jwks": {
+              "$ref": "#/definitions/JWKS"
+            },
+            "software_id": {
+              "type": "string"
+            },
+            "software_version": {
               "type": "string"
             },
             "client_id": {
@@ -417,57 +417,6 @@ export const DiscoveryMetadataPayloadSchemaObj = {
         {
           "type": "object",
           "properties": {
-            "redirect_uris": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "token_endpoint_auth_method": {
-              "type": "string"
-            },
-            "grant_types": {
-              "type": "string"
-            },
-            "response_types": {
-              "type": "string"
-            },
-            "client_name": {
-              "type": "string"
-            },
-            "client_uri": {
-              "type": "string"
-            },
-            "logo_uri": {
-              "type": "string"
-            },
-            "scope": {
-              "type": "string"
-            },
-            "contacts": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "tos_uri": {
-              "type": "string"
-            },
-            "policy_uri": {
-              "type": "string"
-            },
-            "jwks_uri": {
-              "type": "string"
-            },
-            "jwks": {
-              "$ref": "#/definitions/JWKS"
-            },
-            "software_id": {
-              "type": "string"
-            },
-            "software_version": {
-              "type": "string"
-            },
             "authorization_endpoint": {
               "anyOf": [
                 {
@@ -563,6 +512,9 @@ export const DiscoveryMetadataPayloadSchemaObj = {
               "type": "string"
             },
             "userinfo_endpoint": {
+              "type": "string"
+            },
+            "jwks_uri": {
               "type": "string"
             },
             "registration_endpoint": {
@@ -810,6 +762,54 @@ export const DiscoveryMetadataPayloadSchemaObj = {
               "type": "string"
             },
             "op_tos_uri": {
+              "type": "string"
+            },
+            "redirect_uris": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "token_endpoint_auth_method": {
+              "type": "string"
+            },
+            "grant_types": {
+              "type": "string"
+            },
+            "response_types": {
+              "type": "string"
+            },
+            "client_name": {
+              "type": "string"
+            },
+            "client_uri": {
+              "type": "string"
+            },
+            "logo_uri": {
+              "type": "string"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "contacts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tos_uri": {
+              "type": "string"
+            },
+            "policy_uri": {
+              "type": "string"
+            },
+            "jwks": {
+              "$ref": "#/definitions/JWKS"
+            },
+            "software_id": {
+              "type": "string"
+            },
+            "software_version": {
               "type": "string"
             },
             "client_id": {
@@ -1196,6 +1196,100 @@ export const DiscoveryMetadataPayloadSchemaObj = {
         }
       ]
     },
+    "Schema": {
+      "type": "string",
+      "enum": [
+        "openid:",
+        "openid-vc:"
+      ]
+    },
+    "ResponseIss": {
+      "type": "string",
+      "enum": [
+        "https://self-issued.me",
+        "https://self-issued.me/v2",
+        "https://self-issued.me/v2/openid-vc"
+      ]
+    },
+    "ResponseType": {
+      "type": "string",
+      "enum": [
+        "id_token",
+        "vp_token"
+      ]
+    },
+    "Scope": {
+      "type": "string",
+      "enum": [
+        "openid",
+        "openid did_authn",
+        "profile",
+        "email",
+        "address",
+        "phone"
+      ]
+    },
+    "SubjectType": {
+      "type": "string",
+      "enum": [
+        "public",
+        "pairwise"
+      ]
+    },
+    "SigningAlgo": {
+      "type": "string",
+      "enum": [
+        "EdDSA",
+        "RS256",
+        "PS256",
+        "ES256",
+        "ES256K"
+      ]
+    },
+    "ResponseMode": {
+      "type": "string",
+      "enum": [
+        "fragment",
+        "form_post",
+        "post",
+        "direct_post",
+        "query",
+        "direct_post.jwt",
+        "query.jwt",
+        "fragment.jwt"
+      ]
+    },
+    "GrantType": {
+      "type": "string",
+      "enum": [
+        "authorization_code",
+        "implicit"
+      ]
+    },
+    "AuthenticationContextReferences": {
+      "type": "string",
+      "enum": [
+        "phr",
+        "phrh"
+      ]
+    },
+    "TokenEndpointAuthMethod": {
+      "type": "string",
+      "enum": [
+        "client_secret_post",
+        "client_secret_basic",
+        "client_secret_jwt",
+        "private_key_jwt"
+      ]
+    },
+    "ClaimType": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "aggregated",
+        "distributed"
+      ]
+    },
     "JWKS": {
       "type": "object",
       "properties": {
@@ -1306,100 +1400,6 @@ export const DiscoveryMetadataPayloadSchemaObj = {
         }
       },
       "additionalProperties": {}
-    },
-    "Schema": {
-      "type": "string",
-      "enum": [
-        "openid:",
-        "openid-vc:"
-      ]
-    },
-    "ResponseIss": {
-      "type": "string",
-      "enum": [
-        "https://self-issued.me",
-        "https://self-issued.me/v2",
-        "https://self-issued.me/v2/openid-vc"
-      ]
-    },
-    "ResponseType": {
-      "type": "string",
-      "enum": [
-        "id_token",
-        "vp_token"
-      ]
-    },
-    "Scope": {
-      "type": "string",
-      "enum": [
-        "openid",
-        "openid did_authn",
-        "profile",
-        "email",
-        "address",
-        "phone"
-      ]
-    },
-    "SubjectType": {
-      "type": "string",
-      "enum": [
-        "public",
-        "pairwise"
-      ]
-    },
-    "SigningAlgo": {
-      "type": "string",
-      "enum": [
-        "EdDSA",
-        "RS256",
-        "PS256",
-        "ES256",
-        "ES256K"
-      ]
-    },
-    "ResponseMode": {
-      "type": "string",
-      "enum": [
-        "fragment",
-        "form_post",
-        "post",
-        "direct_post",
-        "query",
-        "direct_post.jwt",
-        "query.jwt",
-        "fragment.jwt"
-      ]
-    },
-    "GrantType": {
-      "type": "string",
-      "enum": [
-        "authorization_code",
-        "implicit"
-      ]
-    },
-    "AuthenticationContextReferences": {
-      "type": "string",
-      "enum": [
-        "phr",
-        "phrh"
-      ]
-    },
-    "TokenEndpointAuthMethod": {
-      "type": "string",
-      "enum": [
-        "client_secret_post",
-        "client_secret_basic",
-        "client_secret_jwt",
-        "private_key_jwt"
-      ]
-    },
-    "ClaimType": {
-      "type": "string",
-      "enum": [
-        "normal",
-        "aggregated",
-        "distributed"
-      ]
     },
     "Format": {
       "type": "object",

@@ -219,10 +219,10 @@ export const AuthorizationRequestPayloadVD11SchemaObj = {
         },
         "logo_uri": {
           "anyOf": [
-            {},
             {
               "type": "string"
-            }
+            },
+            {}
           ]
         },
         "client_purpose": {

@@ -358,7 +358,7 @@ interface DiscoveryMetadataCommonPayload {
   [x: string]: any
 }
 
-interface DiscoveryMetadataPayloadVID1 extends DiscoveryMetadataCommonPayload, DynamicRegistrationClientMetadata {
+interface DiscoveryMetadataPayloadVID1 extends DynamicRegistrationClientMetadata, DiscoveryMetadataCommonPayload {
   client_id?: string
   application_type?: string
   vp_formats?: Format
