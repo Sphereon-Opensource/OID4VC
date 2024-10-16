@@ -5,6 +5,7 @@ export const VCI_LOG_COMMON = VCI_LOGGERS.get('sphereon:oid4vci:common');
 
 export * from './jwt';
 export * from './dpop';
+export * from './oauth';
 
 export { v4 as uuidv4 } from 'uuid';
 export { defaultHasher } from './hasher';

@@ -225,10 +225,10 @@ export const AuthorizationRequestPayloadVD12OID4VPD20SchemaObj = {
         },
         "logo_uri": {
           "anyOf": [
-            {},
             {
               "type": "string"
-            }
+            },
+            {}
           ]
         },
         "client_purpose": {

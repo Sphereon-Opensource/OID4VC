@@ -1,13 +1,12 @@
-import { SigningAlgo } from '@sphereon/oid4vc-common';
+import { DynamicRegistrationClientMetadata, SigningAlgo } from '@sphereon/oid4vc-common';
 
-export interface AuthorizationServerMetadata {
+export interface AuthorizationServerMetadata extends DynamicRegistrationClientMetadata {
   issuer: string;
   authorization_endpoint?: string;
   token_endpoint?: string;
   token_endpoint_auth_methods_supported?: string[];
   token_endpoint_auth_signing_alg_values_supported?: string[];
 
-  jwks_uri?: string;
   registration_endpoint?: string;
   scopes_supported?: string[];
   response_types_supported: string[];

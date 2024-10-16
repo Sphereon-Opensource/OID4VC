@@ -450,6 +450,33 @@ export const AuthorizationResponseOptsSchemaObj = {
             "clientName": {
               "type": "string"
             },
+            "clientUri": {
+              "type": "string"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "contacts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tosUri": {
+              "type": "string"
+            },
+            "policyUri": {
+              "type": "string"
+            },
+            "jwks": {
+              "$ref": "#/definitions/JWKS"
+            },
+            "softwareId": {
+              "type": "string"
+            },
+            "softwareVersion": {
+              "type": "string"
+            },
             "tokenEndpointAuthMethod": {
               "type": "string"
             },
@@ -856,6 +883,33 @@ export const AuthorizationResponseOptsSchemaObj = {
               ]
             },
             "clientName": {
+              "type": "string"
+            },
+            "clientUri": {
+              "type": "string"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "contacts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tosUri": {
+              "type": "string"
+            },
+            "policyUri": {
+              "type": "string"
+            },
+            "jwks": {
+              "$ref": "#/definitions/JWKS"
+            },
+            "softwareId": {
+              "type": "string"
+            },
+            "softwareVersion": {
               "type": "string"
             },
             "tokenEndpointAuthMethod": {
@@ -1395,6 +1449,117 @@ export const AuthorizationResponseOptsSchemaObj = {
         "distributed"
       ]
     },
+    "JWKS": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JWK"
+          }
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "additionalProperties": false
+    },
+    "JWK": {
+      "type": "object",
+      "properties": {
+        "kty": {
+          "type": "string"
+        },
+        "crv": {
+          "type": "string"
+        },
+        "x": {
+          "type": "string"
+        },
+        "y": {
+          "type": "string"
+        },
+        "e": {
+          "type": "string"
+        },
+        "n": {
+          "type": "string"
+        },
+        "alg": {
+          "type": "string"
+        },
+        "d": {
+          "type": "string"
+        },
+        "dp": {
+          "type": "string"
+        },
+        "dq": {
+          "type": "string"
+        },
+        "ext": {
+          "type": "boolean"
+        },
+        "k": {
+          "type": "string"
+        },
+        "key_ops": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "kid": {
+          "type": "string"
+        },
+        "oth": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "d": {
+                "type": "string"
+              },
+              "r": {
+                "type": "string"
+              },
+              "t": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "p": {
+          "type": "string"
+        },
+        "q": {
+          "type": "string"
+        },
+        "qi": {
+          "type": "string"
+        },
+        "use": {
+          "type": "string"
+        },
+        "x5c": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "x5t": {
+          "type": "string"
+        },
+        "x5t#S256": {
+          "type": "string"
+        },
+        "x5u": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
     "Format": {
       "type": "object",
       "properties": {
@@ -1676,102 +1841,6 @@ export const AuthorizationResponseOptsSchemaObj = {
         "method"
       ],
       "additionalProperties": false
-    },
-    "JWK": {
-      "type": "object",
-      "properties": {
-        "kty": {
-          "type": "string"
-        },
-        "crv": {
-          "type": "string"
-        },
-        "x": {
-          "type": "string"
-        },
-        "y": {
-          "type": "string"
-        },
-        "e": {
-          "type": "string"
-        },
-        "n": {
-          "type": "string"
-        },
-        "alg": {
-          "type": "string"
-        },
-        "d": {
-          "type": "string"
-        },
-        "dp": {
-          "type": "string"
-        },
-        "dq": {
-          "type": "string"
-        },
-        "ext": {
-          "type": "boolean"
-        },
-        "k": {
-          "type": "string"
-        },
-        "key_ops": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "kid": {
-          "type": "string"
-        },
-        "oth": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "d": {
-                "type": "string"
-              },
-              "r": {
-                "type": "string"
-              },
-              "t": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "p": {
-          "type": "string"
-        },
-        "q": {
-          "type": "string"
-        },
-        "qi": {
-          "type": "string"
-        },
-        "use": {
-          "type": "string"
-        },
-        "x5c": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "x5t": {
-          "type": "string"
-        },
-        "x5t#S256": {
-          "type": "string"
-        },
-        "x5u": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": {}
     },
     "JwtIssuerCustom": {
       "type": "object",
