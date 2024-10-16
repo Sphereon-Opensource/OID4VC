@@ -32,3 +32,7 @@ export interface JWK extends BaseJWK {
 
   [propName: string]: unknown;
 }
+
+export type JWKS = {
+  keys: JWK[]
+}
