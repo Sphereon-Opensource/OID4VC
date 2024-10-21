@@ -1,6 +1,7 @@
 enum SIOPErrors {
   // todo: INVALID_REQUEST mapping onto response conforming to spec
   INVALID_CLIENT_ID_MUST_MATCH_REDIRECT_URI = `Invalid request object payload. The redirect_uri must match the client_id with client_id_scheme 'redirect_uri'.`,
+  INVALID_CLIENT_ID_MUST_MATCH_RESPONSE_URI = `Invalid request object payload. The response_uri must match the client_id with client_id_scheme 'redirect_uri'.`,
   INVALID_REQUEST = 'The request contained invalid or conflicting parameters',
   AUTH_REQUEST_EXPECTS_VP = 'authentication request expects a verifiable presentation in the response',
   AUTH_REQUEST_DOESNT_EXPECT_VP = "authentication request doesn't expect a verifiable presentation in the response",
@@ -52,6 +53,7 @@ enum SIOPErrors {
   VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID = 'The signature of the verifiable presentation is not valid',
   VERIFIABLE_PRESENTATION_VERIFICATION_FUNCTION_MISSING = 'The verifiable presentation verification function is missing',
   PRESENTATION_SUBMISSION_DEFINITION_ID_DOES_NOT_MATCHING_DEFINITION_ID = "The 'definition_id' in the presentation submission does not match the id of the presentation definition.",
+  MDOC_CREDENTIALS_NOT_SUPPORTED = 'MDoc credentials are not supported by PEX'
 }
 
 export default SIOPErrors

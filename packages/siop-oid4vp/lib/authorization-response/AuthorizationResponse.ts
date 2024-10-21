@@ -1,19 +1,29 @@
-import { Hasher } from '@sphereon/ssi-types'
+import { CredentialMapper, Hasher } from '@sphereon/ssi-types';
 
-import { AuthorizationRequest, VerifyAuthorizationRequestOpts } from '../authorization-request'
-import { assertValidVerifyAuthorizationRequestOpts } from '../authorization-request/Opts'
-import { IDToken } from '../id-token'
-import { AuthorizationResponsePayload, ResponseType, SIOPErrors, VerifiedAuthorizationRequest, VerifiedAuthorizationResponse } from '../types'
+import { AuthorizationRequest, VerifyAuthorizationRequestOpts } from '../authorization-request';
+import { assertValidVerifyAuthorizationRequestOpts } from '../authorization-request/Opts';
+import { IDToken } from '../id-token';
+import {
+  AuthorizationResponsePayload,
+  ResponseType,
+  SIOPErrors,
+  VerifiedAuthorizationRequest,
+  VerifiedAuthorizationResponse
+} from '../types';
 
 import {
   assertValidVerifiablePresentations,
   extractNonceFromWrappedVerifiablePresentation,
   extractPresentationsFromAuthorizationResponse,
-  verifyPresentations,
-} from './OpenID4VP'
-import { assertValidResponseOpts } from './Opts'
-import { createResponsePayload } from './Payload'
-import { AuthorizationResponseOpts, PresentationDefinitionWithLocation, VerifyAuthorizationResponseOpts } from './types'
+  verifyPresentations
+} from './OpenID4VP';
+import { assertValidResponseOpts } from './Opts';
+import { createResponsePayload } from './Payload';
+import {
+  AuthorizationResponseOpts,
+  PresentationDefinitionWithLocation,
+  VerifyAuthorizationResponseOpts
+} from './types';
 
 export class AuthorizationResponse {
   private readonly _authorizationRequest?: AuthorizationRequest | undefined
@@ -134,9 +144,9 @@ export class AuthorizationResponse {
         verificationCallback: verifyOpts.verification.presentationVerificationCallback,
         opts: {
           ...responseOpts.presentationExchange,
-          hasher: verifyOpts.hasher,
-        },
-      })
+          hasher: verifyOpts.hasher
+        }
+      });
     }
 
     return response
@@ -161,6 +171,9 @@ export class AuthorizationResponse {
     if (verifiedIdToken) allNonces.add(verifiedIdToken.payload.nonce)
     if (merged.nonce) allNonces.add(merged.nonce)
 
+    if (allNonces.size === 0) {
+      throw new Error('both id token and VPs in vp token if present must have a nonce, no nonces were found')
+    }
     const firstNonce = Array.from(allNonces)[0]
     if (allNonces.size !== 1 || typeof firstNonce !== 'string') {
       throw new Error('both id token and VPs in vp token if present must have a nonce, and all nonces must be the same')
@@ -210,10 +223,19 @@ export class AuthorizationResponse {
     let nonce: string | undefined = this._payload.nonce
     if (this._payload?.vp_token) {
       const presentations = await extractPresentationsFromAuthorizationResponse(this, opts)
+      const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
+
       // We do not verify them, as that is done elsewhere. So we simply can take the first nonce
 
-      if (!nonce) {
-        nonce = extractNonceFromWrappedVerifiablePresentation(Array.isArray(presentations) ? presentations[0] : presentations)
+      nonce = presentationsArray
+        // FIXME toWrappedVerifiablePresentation() does not extract the nonce yet from mdocs.
+        // Either it's not availble or we or not reading the SessionTranscript yet
+        .filter(presentation => !CredentialMapper.isWrappedMdocPresentation(presentation))
+        .map(extractNonceFromWrappedVerifiablePresentation)
+        .find(nonce => nonce !== undefined);
+
+      if(!nonce && !this._idToken && presentationsArray.some(presentation => CredentialMapper.isWrappedMdocPresentation(presentation))) {
+        nonce = 'mdoc' // FIXME toWrappedVerifiablePresentation() does not extract the nonce yet from mdocs.
       }
     }
 

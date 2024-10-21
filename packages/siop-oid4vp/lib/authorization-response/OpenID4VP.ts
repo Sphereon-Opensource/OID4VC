@@ -32,7 +32,7 @@ import {
   VPTokenLocation,
 } from './types'
 
-export function extractNonceFromWrappedVerifiablePresentation(wrappedVp: WrappedVerifiablePresentation): string | undefined {
+export const extractNonceFromWrappedVerifiablePresentation = (wrappedVp: WrappedVerifiablePresentation): string | undefined => {
   // SD-JWT uses kb-jwt for the nonce
   if (CredentialMapper.isWrappedSdJwtVerifiablePresentation(wrappedVp)) {
     // SD-JWT uses kb-jwt for the nonce
@@ -108,7 +108,12 @@ export const verifyPresentations = async (
   }
 
   // Nonce may be undefined
-  const nonce = Array.from(nonces)[0]
+  let nonce = Array.from(nonces)[0]
+  if(presentationsArray.some(presentation => presentation.format === 'mso_mdoc')) {  // FIXME Funke
+    verifyOpts.nonce = 'mdoc'
+    nonce = "mdoc" // TODO extract nonce from mdoc session
+  }
+  
   if (typeof nonce !== 'string') {
     throw new Error('Expected all presentations to contain a nonce value')
   }
@@ -155,7 +160,7 @@ export const createPresentationSubmission = async (
     if (typeof submission === 'string') {
       submission = JSON.parse(submission)
     }
-    if (!submission && opts?.presentationDefinitions) {
+    if (!submission && opts?.presentationDefinitions && !CredentialMapper.isWrappedMdocPresentation(wrappedPresentation)) {
       console.log(`No submission_data in VPs and not provided. Will try to deduce, but it is better to create the submission data beforehand`)
       for (const definitionOpt of opts.presentationDefinitions) {
         const definition = 'definition' in definitionOpt ? definitionOpt.definition : definitionOpt
@@ -278,21 +283,25 @@ export const assertValidVerifiablePresentations = async (args: {
     hasher?: Hasher
   }
 }) => {
+  const presentationsArray = Array.isArray(args.presentations) ? args.presentations : [args.presentations]
+  const nrOfMdocsPresentations = presentationsArray.filter(presentation => presentation.format === 'mso_mdoc').length
+  const presentationsWithFormat = presentationsArray.filter(presentation => presentation.format !== 'mso_mdoc')
   if (
     (!args.presentationDefinitions || args.presentationDefinitions.filter((a) => a.definition).length === 0) &&
-    (!args.presentations || (Array.isArray(args.presentations) && args.presentations.filter((vp) => vp.presentation).length === 0))
+    (!presentationsWithFormat || (Array.isArray(presentationsWithFormat) && presentationsWithFormat.filter((vp) => vp.presentation).length === 0))
   ) {
     return
   }
   PresentationExchange.assertValidPresentationDefinitionWithLocations(args.presentationDefinitions)
-  const presentationsWithFormat = args.presentations
 
   if (
     args.presentationDefinitions &&
     args.presentationDefinitions.length &&
     (!presentationsWithFormat || (Array.isArray(presentationsWithFormat) && presentationsWithFormat.length === 0))
   ) {
-    throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)
+    if(nrOfMdocsPresentations === 0) { // We don't want to crash when processing mdoc credentials
+      throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)
+    }
   } else if (
     (!args.presentationDefinitions || args.presentationDefinitions.length === 0) &&
     presentationsWithFormat &&

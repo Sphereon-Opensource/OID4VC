@@ -1,7 +1,6 @@
 import { parse } from 'querystring'
 
 import { SigningAlgo } from '@sphereon/oid4vc-common'
-import { IPresentationDefinition } from '@sphereon/pex'
 import { IProofType } from '@sphereon/ssi-types'
 
 import {
@@ -13,7 +12,7 @@ import {
   SubjectIdentifierType,
   SubjectType,
   SupportedVersion,
-  URI,
+  URI
 } from '..'
 import SIOPErrors from '../types/Errors'
 
@@ -24,8 +23,9 @@ import {
   VERIFIER_NAME_FOR_CLIENT,
   VERIFIER_NAME_FOR_CLIENT_NL,
   VERIFIERZ_PURPOSE_TO_VERIFY,
-  VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+  VERIFIERZ_PURPOSE_TO_VERIFY_NL
 } from './data/mockedData'
+import { IPresentationDefinition } from '@sphereon/pex'
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 const EXAMPLE_REFERENCE_URL = 'https://rp.acme.com/siop/jwts'
@@ -152,7 +152,7 @@ describe('create Request Uri should', () => {
     expect(uriRequest.authorizationRequestPayload).toBeDefined()
 
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
-    expect(uriDecoded).toContain(`openid://`)
+    expect(uriDecoded).toContain(`openid4vp://`)
     expect(uriDecoded).toContain(`response_type=${ResponseType.ID_TOKEN}`)
     expect(uriDecoded).toContain(`&redirect_uri=${opts.payload?.redirect_uri}`)
     expect(uriDecoded).toContain(`&scope=${Scope.OPENID}`)
@@ -167,6 +167,13 @@ describe('create Request Uri should', () => {
     expect.assertions(4)
     const opts: CreateAuthorizationRequestOpts = {
       version: SupportedVersion.SIOPv2_ID1,
+      payload: {
+        client_id: WELL_KNOWN_OPENID_FEDERATION,
+        scope: 'test',
+        response_type: 'id_token',
+        request_object_signing_alg_values_supported: [SigningAlgo.ES256, SigningAlgo.EDDSA],
+        redirect_uri: EXAMPLE_REDIRECT_URL,
+      },
       requestObject: {
         jwtIssuer: { method: 'did', didUrl: KID, alg: SigningAlgo.ES256 },
         passBy: PassBy.REFERENCE,
@@ -219,9 +226,16 @@ describe('create Request Uri should', () => {
   })
 
   it('return an url with an embedded token value', async () => {
-    expect.assertions(3)
+    expect.assertions(4)
     const opts: CreateAuthorizationRequestOpts = {
       version: SupportedVersion.SIOPv2_ID1,
+      payload: {
+        client_id: WELL_KNOWN_OPENID_FEDERATION,
+        scope: 'test',
+        response_type: 'id_token',
+        request_object_signing_alg_values_supported: [SigningAlgo.ES256, SigningAlgo.EDDSA],
+        redirect_uri: EXAMPLE_REDIRECT_URL,
+      },
       requestObject: {
         passBy: PassBy.VALUE,
         jwtIssuer: {
@@ -268,10 +282,11 @@ describe('create Request Uri should', () => {
     const uriRequest = await URI.fromOpts(opts)
 
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
-    expect(uriDecoded).toContain(`openid://?request=eyJhbGciOi`)
+    expect(uriDecoded).toContain(`request=eyJhbGciOi`)
+    expect(uriDecoded.startsWith(`openid4vp://?client_id=https://www.example.com/`)).toBeTruthy()
 
     const data = URI.parse(uriDecoded)
-    expect(data.scheme).toEqual('openid://')
+    expect(data.scheme).toEqual('openid4vp://')
     expect(data.authorizationRequestPayload.request).toContain(`eyJhbGciOi`)
   })
 })
@@ -511,30 +526,13 @@ describe('create Request JWT should', () => {
   it('succeed when requesting with a valid PD', async () => {
     const opts: CreateAuthorizationRequestOpts = {
       version: SupportedVersion.SIOPv2_ID1,
-      /*payload: {
+      payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'test',
         response_type: 'id_token',
+        request_object_signing_alg_values_supported: [SigningAlgo.ES256, SigningAlgo.EDDSA],
         redirect_uri: EXAMPLE_REDIRECT_URL,
-        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        claims: {
-          vp_token: {
-            presentation_definition: {
-              id: 'Insurance Plans',
-              input_descriptors: [
-                {
-                  id: 'Ontario Health Insurance Plan',
-                  schema: [
-                    {
-                      uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-        },
-      },*/
+      },
       requestObject: {
         jwtIssuer: { method: 'did', didUrl: KID, alg: SigningAlgo.ES256K },
         passBy: PassBy.REFERENCE,
@@ -598,7 +596,8 @@ describe('create Request JWT should', () => {
     const uriRequest = await URI.fromOpts(opts)
 
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
-    expect(uriDecoded).toEqual(`openid://?request_uri=https://rp.acme.com/siop/jwts`)
+    expect(uriDecoded.startsWith('openid4vp://?')).toBeTruthy()
+    expect(uriDecoded).toContain(`request_uri=https://rp.acme.com/siop/jwts`)
     expect((await (await uriRequest.toAuthorizationRequest())?.requestObject?.getPayload())?.claims.vp_token).toBeDefined()
   })
 
@@ -611,22 +610,6 @@ describe('create Request JWT should', () => {
         response_type: 'id_token',
         redirect_uri: EXAMPLE_REDIRECT_URL,
         request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        claims: {
-          vp_token: {
-            presentation_definition: {
-              input_descriptors: [
-                {
-                  id: 'Ontario Health Insurance Plan',
-                  schema: [
-                    {
-                      uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-                    },
-                  ],
-                },
-              ],
-            } as IPresentationDefinition,
-          },
-        },
       },
 
       requestObject: {
