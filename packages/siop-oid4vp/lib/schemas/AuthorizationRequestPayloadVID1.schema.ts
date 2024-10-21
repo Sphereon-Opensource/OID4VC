@@ -191,10 +191,10 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
         },
         "logo_uri": {
           "anyOf": [
-            {},
             {
               "type": "string"
-            }
+            },
+            {}
           ]
         },
         "client_purpose": {

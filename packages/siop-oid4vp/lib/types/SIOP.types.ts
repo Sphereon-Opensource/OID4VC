@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 import { JarmClientMetadata } from '@sphereon/jarm'
-import { SigningAlgo } from '@sphereon/oid4vc-common'
+import { DynamicRegistrationClientMetadata, JWKS, SigningAlgo } from '@sphereon/oid4vc-common'
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import {
   AdditionalClaims,
@@ -268,6 +268,14 @@ interface DiscoveryMetadataOptsVID1 extends DiscoveryMetadataCommonOpts {
   client_id?: string // from oidc4vp
   redirectUris?: string[] | string // from oidc4vp
   clientName?: string // from oidc4vp
+  clientUri?: string // from oidc4vp
+  scope?: string // from oidc4vp
+  contacts?: string[] // from oidc4vp
+  tosUri?: string // from oidc4vp
+  policyUri?: string // from oidc4vp
+  jwks?: JWKS // from oidc4vp
+  softwareId?: string // from oidc4vp
+  softwareVersion?: string // from oidc4vp
   tokenEndpointAuthMethod?: string // from oidc4vp
   applicationType?: string // from oidc4vp
   responseTypes?: string // from oidc4vp, also name suggests array
@@ -350,19 +358,13 @@ interface DiscoveryMetadataCommonPayload {
   [x: string]: any
 }
 
-interface DiscoveryMetadataPayloadVID1 extends DiscoveryMetadataCommonPayload {
+interface DiscoveryMetadataPayloadVID1 extends DynamicRegistrationClientMetadata, DiscoveryMetadataCommonPayload {
   client_id?: string
-  redirect_uris?: string[]
-  client_name?: string
-  token_endpoint_auth_method?: string
   application_type?: string
-  response_types?: string
-  grant_types?: string
   vp_formats?: Format
 }
 
 interface JWT_VCDiscoveryMetadataPayload extends DiscoveryMetadataPayloadVID1 {
-  logo_uri?: string
   client_purpose?: string
 }
 
