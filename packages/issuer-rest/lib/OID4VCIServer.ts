@@ -17,7 +17,7 @@ import {
   getCredentialEndpoint,
   getCredentialOfferEndpoint,
   getIssueStatusEndpoint,
-  getMetadataEndpoint,
+  getMetadataEndpoints,
   pushedAuthorizationEndpoint,
 } from './oid4vci-api-functions'
 
@@ -116,7 +116,7 @@ export class OID4VCIServer<DIDDoc extends object> {
     this._issuer = opts?.issuer ? opts.issuer : buildVCIFromEnvironment()
 
     pushedAuthorizationEndpoint(this.router, this.issuer, this.authRequestsData)
-    getMetadataEndpoint(this.router, this.issuer)
+    getMetadataEndpoints(this.router, this.issuer)
     if (opts?.endpointOpts?.createCredentialOfferOpts?.enabled !== false || process.env.CREDENTIAL_OFFER_ENDPOINT_EBALBED === 'true') {
       createCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.createCredentialOfferOpts)
     }

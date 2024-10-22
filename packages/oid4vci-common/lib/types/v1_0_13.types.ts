@@ -209,6 +209,29 @@ export interface CredentialIssuerMetadataOptsV1_0_13 {
   credential_supplier_config?: CredentialSupplierConfig;
 }
 
+// These can be used be a reducer
+export const credentialIssuerMetadataFieldNames: Array<keyof CredentialIssuerMetadataOptsV1_0_13> = [
+  // Required fields
+  'credential_issuer',
+  'credential_configurations_supported',
+  'credential_endpoint',
+
+  // Optional fields from CredentialIssuerMetadataOpts
+  'batch_credential_endpoint',
+  'deferred_credential_endpoint',
+  'notification_endpoint',
+  'credential_response_encryption',
+  'authorization_servers',
+  'token_endpoint',
+  'display',
+  'credential_supplier_config',
+
+  // Optional fields from v1.0.13
+  'credential_identifiers_supported',
+  'signed_metadata'
+] as const
+
+
 export interface EndpointMetadataResultV1_0_13 extends EndpointMetadata {
   // The EndpointMetadata are snake-case so they can easily be used in payloads/JSON.
   // The values below should not end up in requests/responses directly, so they are using our normal CamelCase convention

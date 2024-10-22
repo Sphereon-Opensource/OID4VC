@@ -13,10 +13,13 @@ import {
   JWTPayload,
   OpenId4VCIVersion,
   PRE_AUTH_CODE_LITERAL,
-  PRE_AUTH_GRANT_LITERAL,
+  PRE_AUTH_GRANT_LITERAL
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
 import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
+import {
+  AuthorizationServerMetadataBuilder
+} from '@sphereon/oid4vci-issuer/dist/builder/AuthorizationServerMetadataBuilder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
@@ -54,6 +57,16 @@ describe('VcIssuer', () => {
   // const clientId = 'sphereon:wallet'
   const preAuthorizedCode = 'test_code'
 
+
+  const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
+    .withIssuer(ISSUER_URL)
+    .withCredentialEndpoint('http://localhost:3456/test/credential-endpoin')
+    .withTokenEndpoint('http://localhost:3456/test/token')
+    .withAuthorizationEndpoint('https://token-endpoint.example.com/authorize')
+    .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
+    .withResponseTypesSupported(['code', 'token', 'id_token'])
+    .withScopesSupported(['openid', 'abcdef'])
+    .build();
   /*const preAuthorizedCode1 = 'SplxlOBeZQQYbYS6WxSbIA1'
   const preAuthorizedCode2 = 'SplxlOBeZQQYbYS6WxSbIA2'
   const preAuthorizedCode3 = 'SplxlOBeZQQYbYS6WxSbIA3'
@@ -105,7 +118,7 @@ describe('VcIssuer', () => {
     }
 
     vcIssuer = new VcIssuerBuilder<DIDDocument>()
-      // .withAuthorizationServer('https://authorization-server')
+      .withAuthorizationMetadata(authorizationServerMetadata)
       .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
       .withDefaultCredentialOfferBaseUri('http://localhost:3456/test')
       .withCredentialIssuer(ISSUER_URL)
@@ -255,9 +268,29 @@ describe('VcIssuer', () => {
 
   it('should retrieve server metadata', async () => {
     await expect(client.retrieveServerMetadata()).resolves.toEqual({
-      authorizationServerMetadata: undefined,
+      authorizationServerMetadata: {
+        'authorization_endpoint': 'https://token-endpoint.example.com/authorize',
+        'credential_endpoint': 'http://localhost:3456/test/credential-endpoin',
+        'issuer': 'http://localhost:3456/test',
+        'response_types_supported': [
+          'code',
+          'token',
+          'id_token'
+        ],
+        'scopes_supported': [
+          'openid',
+          'abcdef'
+        ],
+        'token_endpoint': 'http://localhost:3456/test/token',
+        'token_endpoint_auth_methods_supported': [
+          'none',
+          'client_secret_basic',
+          'client_secret_jwt',
+          'client_secret_post'
+        ]
+      },
       authorizationServerType: 'OID4VCI',
-      authorization_endpoint: undefined,
+      authorization_endpoint: 'https://token-endpoint.example.com/authorize',
       deferred_credential_endpoint: undefined,
       authorization_server: 'http://localhost:3456/test',
       credentialIssuerMetadata: {

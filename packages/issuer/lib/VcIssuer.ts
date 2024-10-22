@@ -1,7 +1,7 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   ALG_ERROR,
-  AUD_ERROR,
+  AUD_ERROR, AuthorizationServerMetadata,
   CNonceState,
   CreateCredentialOfferURIResult,
   CREDENTIAL_MISSING_ERROR,
@@ -36,7 +36,7 @@ import {
   toUniformCredentialOfferRequest,
   TxCode,
   TYP_ERROR,
-  URIState,
+  URIState
 } from '@sphereon/oid4vci-common'
 import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common'
@@ -48,6 +48,7 @@ import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceI
 
 export class VcIssuer<DIDDoc extends object> {
   private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_13
+  private readonly _authorizationServerMetadata: AuthorizationServerMetadata
   private readonly _defaultCredentialOfferBaseUri?: string
   private readonly _credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
   private readonly _jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
@@ -59,6 +60,7 @@ export class VcIssuer<DIDDoc extends object> {
 
   constructor(
     issuerMetadata: CredentialIssuerMetadataOptsV1_0_13,
+    authorizationServerMetadata: AuthorizationServerMetadata,
     args: {
       txCode?: TxCode
       baseUri?: string
@@ -74,6 +76,7 @@ export class VcIssuer<DIDDoc extends object> {
   ) {
     this.setDefaultTokenEndpoint(issuerMetadata)
     this._issuerMetadata = issuerMetadata
+    this._authorizationServerMetadata = authorizationServerMetadata
     this._defaultCredentialOfferBaseUri = args.defaultCredentialOfferBaseUri
     this._credentialOfferSessions = args.credentialOfferSessions
     this._cNonces = args.cNonces
@@ -680,4 +683,10 @@ export class VcIssuer<DIDDoc extends object> {
   public get issuerMetadata() {
     return this._issuerMetadata
   }
+  
+  public get authorizationServerMetadata() {
+    return this._authorizationServerMetadata
+  }
+  
+  
 }
