@@ -60,7 +60,7 @@ describe('VcIssuer', () => {
 
   const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
     .withIssuer(ISSUER_URL)
-    .withCredentialEndpoint('http://localhost:3456/test/credential-endpoin')
+    .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
     .withTokenEndpoint('http://localhost:3456/test/token')
     .withAuthorizationEndpoint('https://token-endpoint.example.com/authorize')
     .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
@@ -270,7 +270,7 @@ describe('VcIssuer', () => {
     await expect(client.retrieveServerMetadata()).resolves.toEqual({
       authorizationServerMetadata: {
         'authorization_endpoint': 'https://token-endpoint.example.com/authorize',
-        'credential_endpoint': 'http://localhost:3456/test/credential-endpoin',
+        'credential_endpoint': 'http://localhost:3456/test/credential-endpoint',
         'issuer': 'http://localhost:3456/test',
         'response_types_supported': [
           'code',
