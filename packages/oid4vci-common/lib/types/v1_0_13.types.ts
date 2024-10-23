@@ -23,12 +23,10 @@ import { QRCodeOpts } from './QRCode.types';
 import { AuthorizationServerMetadata, AuthorizationServerType, EndpointMetadata } from './ServerMetadata';
 
 export interface IssuerMetadataV1_0_13 {
-  issuer?: string;
   credential_configurations_supported: Record<string, CredentialConfigurationSupportedV1_0_13>; // REQUIRED. A JSON object containing a list of key value pairs, where the key is a string serving as an abstract identifier of the Credential. This identifier is RECOMMENDED to be collision resistant - it can be globally unique, but does not have to be when naming conflicts are unlikely to arise in a given use case. The value is a JSON object. The JSON object MUST conform to the structure of the Section 11.2.1.
   credential_issuer: string; // A Credential Issuer is identified by a case sensitive URL using the https scheme that contains scheme, host and, optionally, port number and path components, but no query or fragment components.
   credential_endpoint: string; // REQUIRED. URL of the OP's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   authorization_servers?: string[];
-  batch_credential_endpoint?: string;
   deferred_credential_endpoint?: string;
   notification_endpoint?: string;
   credential_response_encryption?: ResponseEncryption;

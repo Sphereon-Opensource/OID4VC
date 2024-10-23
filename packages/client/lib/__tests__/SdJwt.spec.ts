@@ -29,14 +29,15 @@ const issuerMetadata = new IssuerMetadataBuilderV1_13()
   .build();
 
 const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
-  .withIssuer(issuerMetadata.issuer)
+  .withIssuer(issuerMetadata.credential_issuer)
   .withCredentialEndpoint(issuerMetadata.credential_endpoint)
-  .withTokenEndpoint(issuerMetadata.token_endpoint)
+  .withTokenEndpoint(issuerMetadata.token_endpoint!)
   .withAuthorizationEndpoint('https://token-endpoint.example.com/authorize')
   .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
   .withResponseTypesSupported(['code', 'token', 'id_token'])
   .withScopesSupported(['openid', 'abcdef'])
   .build();
+
 
 const vcIssuer = new VcIssuerBuilder()
   .withIssuerMetadata(issuerMetadata)
