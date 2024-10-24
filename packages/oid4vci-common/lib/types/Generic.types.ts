@@ -314,7 +314,7 @@ export interface IssuerCredentialSubject {
 
 export interface Grant {
   authorization_code?: GrantAuthorizationCode;
-  'urn:ietf:params:oauth:grant-type:pre-authorized_code'?: GrantUrnIetf;
+  [PRE_AUTH_GRANT_LITERAL]?: GrantUrnIetf;
 }
 
 export interface GrantAuthorizationCode {

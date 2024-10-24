@@ -285,7 +285,7 @@ describe('VcIssuer', () => {
           credentialOfferUri: 'https://somehost.com/offer-id',
         })
         .then((response) => response.uri),
-    ).resolves.toEqual('http://issuer-example.com?credential_offer_uri=https://somehost.com/offer-id')
+    ).resolves.toEqual('http://issuer-example.com?credential_offer_uri=https%3A%2F%2Fsomehost.com%2Foffer-id')
   })
 
   // Of course this doesn't work. The state is part of the proof to begin with
