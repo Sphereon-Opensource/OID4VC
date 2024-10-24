@@ -1,4 +1,5 @@
 import {
+  AuthorizationServerMetadata,
   CNonceState,
   CredentialConfigurationSupportedV1_0_13,
   CredentialOfferSession,
@@ -9,7 +10,7 @@ import {
   MetadataDisplay,
   TokenErrorResponse,
   TxCode,
-  URIState,
+  URIState
 } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common'
 
@@ -22,6 +23,7 @@ import { IssuerMetadataBuilderV1_13 } from './IssuerMetadataBuilderV1_13'
 export class VcIssuerBuilder<DIDDoc extends object> {
   issuerMetadataBuilder?: IssuerMetadataBuilderV1_13
   issuerMetadata: Partial<CredentialIssuerMetadataOptsV1_0_13> = {}
+  authorizationServerMetadata: Partial<AuthorizationServerMetadata> = {}
   txCode?: TxCode
   defaultCredentialOfferBaseUri?: string
   userPinRequired?: boolean
@@ -38,6 +40,11 @@ export class VcIssuerBuilder<DIDDoc extends object> {
       throw new Error('IssuerMetadata should be from type v1_0_13 or higher.')
     }
     this.issuerMetadata = issuerMetadata as IssuerMetadataV1_0_13
+    return this
+  }
+
+  public withAuthorizationMetadata(authorizationServerMetadata: AuthorizationServerMetadata) {
+    this.authorizationServerMetadata = authorizationServerMetadata
     return this
   }
 
@@ -162,6 +169,12 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     if (!this.cNonceStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
+    if(Object.keys(this.issuerMetadata).length === 0) {
+      throw new Error('issuerMetadata not set')
+    }
+    if(Object.keys(this.authorizationServerMetadata).length === 0) {
+      throw new Error('authorizationServerMetadata not set')
+    }
 
     const builder = this.issuerMetadataBuilder?.build()
     const metadata: Partial<IssuerMetadataV1_0_13> = { ...this.issuerMetadata, ...builder }
@@ -171,7 +184,7 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     if (!metadata.credential_endpoint || !metadata.credential_issuer || !this.issuerMetadata.credential_configurations_supported) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    return new VcIssuer(metadata as IssuerMetadataV1_0_13, {
+    return new VcIssuer(metadata as IssuerMetadataV1_0_13, this.authorizationServerMetadata as AuthorizationServerMetadata, {
       //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
       ...(this.txCode && { txCode: this.txCode }),
       defaultCredentialOfferBaseUri: this.defaultCredentialOfferBaseUri,

@@ -24,6 +24,9 @@ import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
 
 import { generateDid, getIssuerCallbackV1_0_11, getIssuerCallbackV1_0_13, verifyCredential } from '../IssuerCallback'
+import {
+  AuthorizationServerMetadataBuilder
+} from '@sphereon/oid4vci-issuer/dist/builder/AuthorizationServerMetadataBuilder'
 
 const INITIATION_TEST_URI =
   'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credential_configuration_ids%22:%5B%22UniversityDegreeCredential%22%5D,%22grants%22:%7B%22urn:ietf:params:oauth:grant-type:pre-authorized_code%22:%7B%22pre-authorized_code%22:%22oaKazRN8I0IbtZ0C7JuMn5%22,%22tx_code%22:%7B%22input_mode%22:%22text%22,%22description%22:%22Please%20enter%20the%20serial%20number%20of%20your%20physical%20drivers%20license%22%7D%7D%7D%7D'
@@ -46,6 +49,18 @@ async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promi
     .setExpirationTime('2h')
     .sign(keypair.privateKey)
 }
+
+
+const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
+  .withIssuer(IDENTIPROOF_ISSUER_URL)
+  .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
+  .withTokenEndpoint('http://localhost:3456/test/token')
+  .withAuthorizationEndpoint('https://token-endpoint.example.com/authorize')
+  .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
+  .withResponseTypesSupported(['code', 'token', 'id_token'])
+  .withScopesSupported(['openid', 'abcdef'])
+  .build();
+
 
 async function verifyCallbackFunction(args: { jwt: string; kid?: string }): Promise<JwtVerifyResult<DIDDocument>> {
   const result = await jose.jwtVerify(args.jwt, keypair.publicKey)
@@ -150,6 +165,7 @@ describe('issuerCallback', () => {
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
+      .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',

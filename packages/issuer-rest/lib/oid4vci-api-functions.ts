@@ -21,6 +21,7 @@ import {
   trimEnd,
   trimStart,
   validateJWT,
+  WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
@@ -32,9 +33,10 @@ import {
   ICreateCredentialOfferEndpointOpts,
   ICreateCredentialOfferURIResponse,
   IGetCredentialOfferEndpointOpts,
-  IGetIssueStatusEndpointOpts,
+  IGetIssueStatusEndpointOpts
 } from './OID4VCIServer'
 import { validateRequestBody } from './expressUtils'
+
 
 const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90
 
@@ -392,11 +394,16 @@ export function pushedAuthorizationEndpoint<DIDDoc extends object>(
   })
 }
 
-export function getMetadataEndpoint<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>) {
-  const path = `/.well-known/openid-credential-issuer`
-  router.get(path, (request: Request, response: Response) => {
+export function getMetadataEndpoints<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>) {
+  const credentialIssuerHandler = (request: Request, response: Response) => {
     return response.send(issuer.issuerMetadata)
-  })
+  }
+  router.get(WellKnownEndpoints.OPENID4VCI_ISSUER, credentialIssuerHandler)
+
+  const authorizationServerHandler = (request: Request, response: Response) => {
+    return response.send(issuer.authorizationServerMetadata)
+  }
+  router.get(WellKnownEndpoints.OAUTH_AS, authorizationServerHandler)
 }
 
 export function determinePath(
