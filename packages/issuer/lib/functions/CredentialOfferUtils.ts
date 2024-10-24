@@ -24,7 +24,9 @@ export interface CredentialOfferGrantInput {
 
 function createCredentialOfferGrants(inputGrants?: CredentialOfferGrantInput) {
   // Grants is optional
-  if (!inputGrants || Object.keys(inputGrants).length === 0) return undefined
+  if (!inputGrants || Object.keys(inputGrants).length === 0) {
+    return undefined
+  }
 
   const grants: Grant = {}
   if (inputGrants?.[PRE_AUTH_GRANT_LITERAL]) {
@@ -33,8 +35,8 @@ function createCredentialOfferGrants(inputGrants?: CredentialOfferGrantInput) {
       'pre-authorized_code': inputGrants[PRE_AUTH_GRANT_LITERAL]['pre-authorized_code'] ?? uuidv4(),
     }
 
-    if (grant.tx_code) {
-      if (!grant.tx_code.length) grant.tx_code.length = 4
+    if (grant.tx_code && !grant.tx_code.length) {
+      grant.tx_code.length = 4
     }
 
     grants[PRE_AUTH_GRANT_LITERAL] = grant
@@ -106,7 +108,9 @@ export function createCredentialOfferObject(
     }
   }
 
-  if (grants) credential_offer.grants = grants
+  if (grants) {
+    credential_offer.grants = grants
+  }
 
   // todo: check payload against issuer metadata. Especially strings in the credentials array: When processing, the Wallet MUST resolve this string value to the respective object.
   return { credential_offer, credential_offer_uri: opts?.credentialOfferUri }
