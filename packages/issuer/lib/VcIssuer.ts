@@ -315,8 +315,7 @@ export class VcIssuer<DIDDoc extends object> {
             jwk,
           }
         }
-      }
-      if (did && !CredentialMapper.isSdJwtDecodedCredentialPayload(credential)) {
+      } else if (did && !CredentialMapper.isSdJwtDecodedCredentialPayload(credential) && credential.credentialSubject !== undefined) {
         const credentialSubjects = Array.isArray(credential.credentialSubject) ? credential.credentialSubject : [credential.credentialSubject]
         credentialSubjects.map((subject) => {
           if (!subject.id) {
@@ -325,6 +324,9 @@ export class VcIssuer<DIDDoc extends object> {
           return subject
         })
         credential.credentialSubject = Array.isArray(credential.credentialSubject) ? credentialSubjects : credentialSubjects[0]
+      } else {
+        // Mdoc Format
+        // Nothing to do here
       }
 
       let issuer: string | undefined = undefined
@@ -454,7 +456,7 @@ export class VcIssuer<DIDDoc extends object> {
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
 
-    const supportedIssuanceFormats = ['jwt_vc_json', 'jwt_vc_json-ld', 'vc+sd-jwt', 'ldp_vc']
+    const supportedIssuanceFormats = ['jwt_vc_json', 'jwt_vc_json-ld', 'vc+sd-jwt', 'ldp_vc', 'mso_mdoc']
     try {
       if (credentialRequest.format && !supportedIssuanceFormats.includes(credentialRequest.format)) {
         throw Error(`Format ${credentialRequest.format} not supported yet`)
