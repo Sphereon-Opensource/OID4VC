@@ -24,6 +24,8 @@ jobs:
         with:
           node-version: '20.x'
       - uses: pnpm/action-setup@v4
+        with:
+          version: 9        
       - run: pnpm install
       - run: pnpm build
       - name: run CI tests
