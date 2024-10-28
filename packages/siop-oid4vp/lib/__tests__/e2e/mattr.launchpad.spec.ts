@@ -102,7 +102,7 @@ describe('OID4VCI-Client using Mattr issuer should', () => {
     const authResponse = await op.createAuthorizationResponse(verifiedAuthRequest, {
       issuer: didStr,
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         presentationSubmission: verifiablePresentationResult.presentationSubmission,
       },
       correlationId,
@@ -135,7 +135,7 @@ describe('OID4VCI-Client using Mattr issuer should', () => {
 
     const correlationId = 'test'
 
-    const authorizationRequest = await AuthorizationRequest.fromUriOrJwt(offer.authorizeRequestUri);
+    const authorizationRequest = await AuthorizationRequest.fromUriOrJwt(offer.authorizeRequestUri)
     const verifiedAuthRequest = await authorizationRequest.verify({
       correlationId,
       verifyJwtCallback: getVerifyJwtCallback(getResolver()),
@@ -164,7 +164,7 @@ describe('OID4VCI-Client using Mattr issuer should', () => {
           alg: SigningAlgo.EDDSA,
         },
         presentationExchange: {
-          verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+          verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
           presentationSubmission: verifiablePresentationResult.presentationSubmission,
         },
         createJwtCallback: getCreateJwtCallback({

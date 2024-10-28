@@ -355,28 +355,58 @@ export const DiscoveryMetadataPayloadSchemaObj = {
             "op_tos_uri": {
               "type": "string"
             },
-            "client_id": {
-              "type": "string"
-            },
             "redirect_uris": {
               "type": "array",
               "items": {
                 "type": "string"
               }
             },
-            "client_name": {
-              "type": "string"
-            },
             "token_endpoint_auth_method": {
               "type": "string"
             },
-            "application_type": {
+            "grant_types": {
               "type": "string"
             },
             "response_types": {
               "type": "string"
             },
-            "grant_types": {
+            "client_name": {
+              "type": "string"
+            },
+            "client_uri": {
+              "type": "string"
+            },
+            "logo_uri": {
+              "type": "string"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "contacts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tos_uri": {
+              "type": "string"
+            },
+            "policy_uri": {
+              "type": "string"
+            },
+            "jwks": {
+              "$ref": "#/definitions/JWKS"
+            },
+            "software_id": {
+              "type": "string"
+            },
+            "software_version": {
+              "type": "string"
+            },
+            "client_id": {
+              "type": "string"
+            },
+            "application_type": {
               "type": "string"
             },
             "vp_formats": {
@@ -734,35 +764,62 @@ export const DiscoveryMetadataPayloadSchemaObj = {
             "op_tos_uri": {
               "type": "string"
             },
-            "client_id": {
-              "type": "string"
-            },
             "redirect_uris": {
               "type": "array",
               "items": {
                 "type": "string"
               }
             },
-            "client_name": {
-              "type": "string"
-            },
             "token_endpoint_auth_method": {
-              "type": "string"
-            },
-            "application_type": {
-              "type": "string"
-            },
-            "response_types": {
               "type": "string"
             },
             "grant_types": {
               "type": "string"
             },
-            "vp_formats": {
-              "$ref": "#/definitions/Format"
+            "response_types": {
+              "type": "string"
+            },
+            "client_name": {
+              "type": "string"
+            },
+            "client_uri": {
+              "type": "string"
             },
             "logo_uri": {
               "type": "string"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "contacts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tos_uri": {
+              "type": "string"
+            },
+            "policy_uri": {
+              "type": "string"
+            },
+            "jwks": {
+              "$ref": "#/definitions/JWKS"
+            },
+            "software_id": {
+              "type": "string"
+            },
+            "software_version": {
+              "type": "string"
+            },
+            "client_id": {
+              "type": "string"
+            },
+            "application_type": {
+              "type": "string"
+            },
+            "vp_formats": {
+              "$ref": "#/definitions/Format"
             },
             "client_purpose": {
               "type": "string"
@@ -1196,7 +1253,10 @@ export const DiscoveryMetadataPayloadSchemaObj = {
         "form_post",
         "post",
         "direct_post",
-        "query"
+        "query",
+        "direct_post.jwt",
+        "query.jwt",
+        "fragment.jwt"
       ]
     },
     "GrantType": {
@@ -1229,6 +1289,117 @@ export const DiscoveryMetadataPayloadSchemaObj = {
         "aggregated",
         "distributed"
       ]
+    },
+    "JWKS": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JWK"
+          }
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "additionalProperties": false
+    },
+    "JWK": {
+      "type": "object",
+      "properties": {
+        "kty": {
+          "type": "string"
+        },
+        "crv": {
+          "type": "string"
+        },
+        "x": {
+          "type": "string"
+        },
+        "y": {
+          "type": "string"
+        },
+        "e": {
+          "type": "string"
+        },
+        "n": {
+          "type": "string"
+        },
+        "alg": {
+          "type": "string"
+        },
+        "d": {
+          "type": "string"
+        },
+        "dp": {
+          "type": "string"
+        },
+        "dq": {
+          "type": "string"
+        },
+        "ext": {
+          "type": "boolean"
+        },
+        "k": {
+          "type": "string"
+        },
+        "key_ops": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "kid": {
+          "type": "string"
+        },
+        "oth": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "d": {
+                "type": "string"
+              },
+              "r": {
+                "type": "string"
+              },
+              "t": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "p": {
+          "type": "string"
+        },
+        "q": {
+          "type": "string"
+        },
+        "qi": {
+          "type": "string"
+        },
+        "use": {
+          "type": "string"
+        },
+        "x5c": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "x5t": {
+          "type": "string"
+        },
+        "x5t#S256": {
+          "type": "string"
+        },
+        "x5u": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
     },
     "Format": {
       "type": "object",

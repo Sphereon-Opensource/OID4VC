@@ -126,8 +126,8 @@ export const getRequestObjectJwtVerifier = async (
       typeof attestationPayload.exp !== 'number' ||
       typeof attestationPayload.cnf !== 'object' ||
       !attestationPayload.cnf ||
-      (!('jwk' in attestationPayload.cnf) 
-        || typeof attestationPayload.cnf['jwk'] !== 'object')
+      !('jwk' in attestationPayload.cnf) ||
+      typeof attestationPayload.cnf['jwk'] !== 'object'
     ) {
       throw new Error(SIOPErrors.BAD_VERIFIER_ATTESTATION)
     }

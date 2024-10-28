@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 
+import { jarmAuthResponseSend, JarmClientMetadata, jarmMetadataValidate, JarmServerMetadata } from '@sphereon/jarm'
 import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common';
 import { IIssuerId } from '@sphereon/ssi-types';
 
@@ -9,16 +10,19 @@ import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   AuthorizationResponseWithCorrelationId,
-  PresentationExchangeResponseOpts
-} from '../authorization-response';
-import { encodeJsonAsURI, post } from '../helpers';
-import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion';
+  PresentationExchangeResponseOpts,
+} from '../authorization-response'
+import { encodeJsonAsURI, post } from '../helpers'
+import { extractJwksFromJwksMetadata, JwksMetadataParams } from '../helpers/ExtractJwks'
+import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
+  AuthorizationResponsePayload,
   ContentType,
   ParsedAuthorizationRequestURI,
   RegisterEventListener,
+  RequestObjectPayload,
   ResponseIss,
   ResponseMode,
   SIOPErrors,
@@ -56,7 +60,7 @@ export class OP {
     requestOpts?: { correlationId?: string; verification?: Verification },
   ): Promise<VerifiedAuthorizationRequest> {
     const correlationId = requestOpts?.correlationId || uuidv4()
-    
+
     let authorizationRequest: AuthorizationRequest
     try {
       authorizationRequest = await AuthorizationRequest.fromUriOrJwt(requestJwtOrUri)
@@ -127,7 +131,7 @@ export class OP {
     try {
       // IF using DIRECT_POST, the response_uri takes precedence over the redirect_uri
       let responseUri = verifiedAuthorizationRequest.responseURI
-      if (verifiedAuthorizationRequest.authorizationRequestPayload.response_mode === ResponseMode.DIRECT_POST) {
+      if (verifiedAuthorizationRequest.payload?.response_mode === ResponseMode.DIRECT_POST) {
         responseUri = verifiedAuthorizationRequest.authorizationRequestPayload.response_uri ?? responseUri
       }
 
@@ -156,19 +160,50 @@ export class OP {
     }
   }
 
+  public static async extractEncJwksFromClientMetadata(clientMetadata: JwksMetadataParams) {
+    // TODO: Currently no mechanisms are in place to deal with multiple 'enc' keys in the client metadata.
+    // TODO: Maybe we should return all 'enc' keys in the client metadata. In addition the JWKS from the jwks_uri are not fetched if jwks are present.
+    // TODO: Is that the expected behavior?
+    const jwks = await extractJwksFromJwksMetadata(clientMetadata)
+    const encryptionJwk = jwks?.keys.find((key) => key.use === 'enc')
+    if (!encryptionJwk) {
+      throw new Error('No encryption jwk could be extracted from the client metadata.')
+    }
+
+    return encryptionJwk
+  }
+
   // TODO SK Can you please put some documentation on it?
-  public async submitAuthorizationResponse(authorizationResponse: AuthorizationResponseWithCorrelationId): Promise<Response> {
+  public async submitAuthorizationResponse(
+    authorizationResponse: AuthorizationResponseWithCorrelationId,
+    createJarmResponse?: (opts: {
+      authorizationResponsePayload: AuthorizationResponsePayload
+      requestObjectPayload: RequestObjectPayload
+      clientMetadata: JwksMetadataParams
+    }) => Promise<{
+      response: string
+    }>,
+  ): Promise<Response> {
     const { correlationId, response } = authorizationResponse
     if (!correlationId) {
       throw Error('No correlation Id provided')
     }
+
+    const isJarmResponseMode = (responseMode: string): responseMode is 'jwt' | 'direct_post.jwt' | 'query.jwt' | 'fragment.jwt' => {
+      return responseMode === ResponseMode.DIRECT_POST_JWT || responseMode === ResponseMode.QUERY_JWT || responseMode === ResponseMode.FRAGMENT_JWT
+    }
+
+    const requestObjectPayload = await response.authorizationRequest.requestObject?.getPayload()
+    const responseMode = requestObjectPayload?.response_mode ?? response.options?.responseMode
+
     if (
       !response ||
       (response.options?.responseMode &&
         !(
-          response.options.responseMode === ResponseMode.POST ||
-          response.options.responseMode === ResponseMode.FORM_POST ||
-          response.options.responseMode === ResponseMode.DIRECT_POST
+          responseMode === ResponseMode.POST ||
+          responseMode === ResponseMode.FORM_POST ||
+          responseMode === ResponseMode.DIRECT_POST ||
+          isJarmResponseMode(responseMode)
         ))
     ) {
       throw new Error(SIOPErrors.BAD_PARAMS)
@@ -180,6 +215,50 @@ export class OP {
     if (!responseUri) {
       throw Error('No response URI present')
     }
+
+    if (isJarmResponseMode(responseMode)) {
+      if (responseMode !== ResponseMode.DIRECT_POST_JWT) {
+        throw new Error('Only direct_post.jwt response mode is supported for JARM at the moment.')
+      }
+      let responseType: 'id_token' | 'id_token vp_token' | 'vp_token'
+      if (idToken && payload.vp_token) {
+        responseType = 'id_token vp_token'
+      } else if (idToken) {
+        responseType = 'id_token'
+      } else if (payload.vp_token) {
+        responseType = 'vp_token'
+      } else {
+        throw new Error('No id_token or vp_token present in the response payload')
+      }
+
+      const clientMetadata = authorizationResponse.response.authorizationRequest.options?.clientMetadata ?? requestObjectPayload.client_metadata
+      const { response } = await createJarmResponse({
+        requestObjectPayload,
+        authorizationResponsePayload: payload,
+        clientMetadata
+      })
+
+      try {
+        const jarmResponse = await jarmAuthResponseSend({
+          authRequestParams: {
+            response_uri: responseUri,
+            response_mode: responseMode,
+            response_type: responseType
+          },
+          authResponse: response
+        })
+        void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
+        return jarmResponse
+      } catch (error) {
+        void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_FAILED, {
+          correlationId,
+          subject: response,
+          error
+        })
+        throw error
+      }
+    }
+
     const authResponseAsURI = encodeJsonAsURI(payload, { arraysWithIndex: ['presentation_submission'] })
     try {
       const result = await post(responseUri, authResponseAsURI, { contentType: ContentType.FORM_URL_ENCODED, exceptionOnHttpErrorStatus: true })
@@ -290,5 +369,9 @@ export class OP {
 
   get verifyRequestOptions(): Partial<VerifyAuthorizationRequestOpts> {
     return this._verifyRequestOptions
+  }
+
+  public static validateJarmMetadata(input: { client_metadata: JarmClientMetadata; server_metadata: Partial<JarmServerMetadata> }) {
+    return jarmMetadataValidate(input)
   }
 }

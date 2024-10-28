@@ -30,8 +30,8 @@ import { CreateAuthorizationRequestOpts, VerifyAuthorizationRequestOpts } from '
 export class AuthorizationRequest {
   private readonly _requestObject?: RequestObject
   private readonly _payload: AuthorizationRequestPayload
-  private readonly _options: CreateAuthorizationRequestOpts
-  private _uri: URI
+  private readonly _options: CreateAuthorizationRequestOpts | undefined
+  private _uri: URI | undefined
 
   private constructor(payload: AuthorizationRequestPayload, requestObject?: RequestObject, opts?: CreateAuthorizationRequestOpts, uri?: URI) {
     this._options = opts
@@ -66,6 +66,7 @@ export class AuthorizationRequest {
 
     const requestObjectArg =
       opts.requestObject.passBy !== PassBy.NONE ? (requestObject ? requestObject : await RequestObject.fromOpts(opts)) : undefined
+    // opts?.payload was removed before, but it's not clear atm why opts?.payload was removed  
     const requestPayload = opts?.payload ? await createAuthorizationRequestPayload(opts, requestObjectArg) : undefined
     return new AuthorizationRequest(requestPayload, requestObjectArg, opts)
   }
@@ -164,7 +165,10 @@ export class AuthorizationRequest {
       )
       assertValidRPRegistrationMedataPayload(registrationMetadataPayload)
       // TODO: We need to do something with the metadata probably
+    } /*else { // this makes test mattr.launchpad.spec.ts fail why was this check added?
+      return Promise.reject(Error(`could not fetch registrationMetadataPayload due to missing payload key ${registrationPropertyKey}`))
     }
+    */
     // When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
     let responseURIType: ResponseURIType
     let responseURI: string
@@ -193,7 +197,7 @@ export class AuthorizationRequest {
     // TODO: we need to verify somewhere that if response_mode is direct_post, that the response_uri may be present,
     // BUT not both redirect_uri and response_uri. What is the best place to do this?
 
-    const presentationDefinitions = await PresentationExchange.findValidPresentationDefinitions(mergedPayload, await this.getSupportedVersion())
+    const presentationDefinitions: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(mergedPayload, await this.getSupportedVersion())
     return {
       jwt,
       payload: parsedJwt?.payload,
@@ -263,7 +267,11 @@ export class AuthorizationRequest {
   }
 
   public async mergedPayloads(): Promise<RequestObjectPayload> {
-    return { ...this.payload, ...(this.requestObject && (await this.requestObject.getPayload())) }
+    const  requestObjectPayload = { ...this.payload, ...(this.requestObject && (await this.requestObject.getPayload())) }
+    if (requestObjectPayload.scope && typeof requestObjectPayload.scope !== 'string') { //  test mattr.launchpad.spec.ts does not supply a scope value
+      throw new Error('Invalid scope value')
+    }
+    return requestObjectPayload as RequestObjectPayload
   }
 
   public async getPresentationDefinitions(version?: SupportedVersion): Promise<PresentationDefinitionWithLocation[] | undefined> {

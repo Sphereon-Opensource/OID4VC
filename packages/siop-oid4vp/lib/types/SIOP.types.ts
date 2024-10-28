@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
-
-import { SigningAlgo } from '@sphereon/oid4vc-common'
+import { JarmClientMetadata } from '@sphereon/jarm'
+import { DynamicRegistrationClientMetadata, JWKS, SigningAlgo } from '@sphereon/oid4vc-common'
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import {
   AdditionalClaims,
@@ -21,6 +21,7 @@ import {
   PresentationVerificationCallback,
   VerifyAuthorizationResponseOpts,
 } from '../authorization-response'
+import { JwksMetadataParams } from '../helpers/ExtractJwks'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 
@@ -34,6 +35,7 @@ export interface RequestObjectPayload extends RequestCommonPayload, JWTPayload {
   response_type: ResponseType | string // REQUIRED. Constant string value id_token.
   client_id: string // REQUIRED. RP's identifier at the Self-Issued OP.
   client_id_scheme?: ClientIdScheme // The client_id_scheme enables deployments of this specification to use different mechanisms to obtain and validate metadata of the Verifier beyond the scope of [RFC6749]. The term client_id_scheme is used since the Verifier is acting as an OAuth 2.0 Client.
+  client_metadata: ClientMetadataOpts
   redirect_uri?: string // REQUIRED before OID4VP v18, now optional because of response_uri. URI to which the Self-Issued OP Response will be sent
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
   nonce: string
@@ -266,6 +268,14 @@ interface DiscoveryMetadataOptsVID1 extends DiscoveryMetadataCommonOpts {
   client_id?: string // from oidc4vp
   redirectUris?: string[] | string // from oidc4vp
   clientName?: string // from oidc4vp
+  clientUri?: string // from oidc4vp
+  scope?: string // from oidc4vp
+  contacts?: string[] // from oidc4vp
+  tosUri?: string // from oidc4vp
+  policyUri?: string // from oidc4vp
+  jwks?: JWKS // from oidc4vp
+  softwareId?: string // from oidc4vp
+  softwareVersion?: string // from oidc4vp
   tokenEndpointAuthMethod?: string // from oidc4vp
   applicationType?: string // from oidc4vp
   responseTypes?: string // from oidc4vp, also name suggests array
@@ -348,19 +358,13 @@ interface DiscoveryMetadataCommonPayload {
   [x: string]: any
 }
 
-interface DiscoveryMetadataPayloadVID1 extends DiscoveryMetadataCommonPayload {
+interface DiscoveryMetadataPayloadVID1 extends DynamicRegistrationClientMetadata, DiscoveryMetadataCommonPayload {
   client_id?: string
-  redirect_uris?: string[]
-  client_name?: string
-  token_endpoint_auth_method?: string
   application_type?: string
-  response_types?: string
-  grant_types?: string
   vp_formats?: Format
 }
 
 interface JWT_VCDiscoveryMetadataPayload extends DiscoveryMetadataPayloadVID1 {
-  logo_uri?: string
   client_purpose?: string
 }
 
@@ -374,7 +378,7 @@ export type DiscoveryMetadataPayload = DiscoveryMetadataPayloadVID1 | JWT_VCDisc
 export type DiscoveryMetadataOpts = (JWT_VCDiscoveryMetadataOpts | DiscoveryMetadataOptsVID1 | DiscoveryMetadataOptsVD11) &
   DiscoveryMetadataCommonOpts
 
-export type ClientMetadataOpts = RPRegistrationMetadataOpts & ClientMetadataProperties
+export type ClientMetadataOpts = RPRegistrationMetadataOpts & ClientMetadataProperties & JarmClientMetadata & JwksMetadataParams
 
 export type ResponseRegistrationOpts = DiscoveryMetadataOpts & ClientMetadataProperties
 
@@ -534,6 +538,10 @@ export enum ResponseMode {
   // See https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-response-mode-direct_post
   DIRECT_POST = 'direct_post',
   QUERY = 'query',
+
+  DIRECT_POST_JWT = 'direct_post.jwt',
+  QUERY_JWT = 'query.jwt',
+  FRAGMENT_JWT = 'fragment.jwt',
 }
 
 export enum ProtocolFlow {
@@ -706,3 +714,5 @@ export enum ContentType {
   FORM_URL_ENCODED = 'application/x-www-form-urlencoded',
   UTF_8 = 'UTF-8',
 }
+
+export { JarmClientMetadata }

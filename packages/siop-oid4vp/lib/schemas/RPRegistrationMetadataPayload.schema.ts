@@ -103,10 +103,10 @@ export const RPRegistrationMetadataPayloadSchemaObj = {
         },
         "logo_uri": {
           "anyOf": [
-            {},
             {
               "type": "string"
-            }
+            },
+            {}
           ]
         },
         "client_purpose": {

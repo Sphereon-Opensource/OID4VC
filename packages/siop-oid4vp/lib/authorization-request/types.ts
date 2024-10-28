@@ -56,7 +56,6 @@ export interface RequestObjectPayloadOpts<CT extends ClaimPayloadCommonOpts> {
 
 interface AuthorizationRequestCommonOpts<CT extends ClaimPayloadCommonOpts> {
   // Yes, this includes common payload properties both at the payload level as well as in the requestObject.payload property. That is to support OAuth2 with or without a signed OpenID requestObject
-
   version: SupportedVersion
   clientMetadata?: ClientMetadataOpts // this maps to 'registration' for older SIOPv2 specs! OPTIONAL. This parameter is used by the RP to provide information about itself to a Self-Issued OP that would normally be provided to an OP during Dynamic RP Registration, as specified in {#rp-registration-parameter}.
   payload?: AuthorizationRequestPayloadOpts<CT>

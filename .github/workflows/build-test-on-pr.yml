@@ -23,9 +23,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8.15.7
+          version: 9        
       - run: pnpm install
       - run: pnpm build
       - name: run CI tests
@@ -41,4 +41,13 @@ jobs:
           SPHEREON_SSI_MSAL_USERNAME: ${{ secrets.SPHEREON_SSI_MSAL_USERNAME }}
           SPHEREON_SSI_MSAL_PASSWORD: ${{ secrets.SPHEREON_SSI_MSAL_PASSWORD }}
         run: pnpm test:ci
-      - run: npx codecov
+      - name: codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          name: codecove # optional
+          flags: unittest
+          fail_ci_if_error: true # optional (default = false)
+          #directory: ./coverage/reports/
+          #files: ./coverage1.xml,./coverage2.xml
+          verbose: true # optional (default = false)

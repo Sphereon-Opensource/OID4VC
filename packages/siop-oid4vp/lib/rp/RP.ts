@@ -1,5 +1,11 @@
 import { EventEmitter } from 'events'
 
+import {
+  jarmAuthResponseDirectPostJwtValidate,
+  JarmAuthResponseParams,
+  JarmDirectPostJwtAuthResponseValidationContext,
+  JarmDirectPostJwtResponseParams,
+} from '@sphereon/jarm'
 import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { Hasher } from '@sphereon/ssi-types'
 
@@ -15,12 +21,14 @@ import {
 import { mergeVerificationOpts } from '../authorization-request/Opts'
 import { AuthorizationResponse, PresentationDefinitionWithLocation, VerifyAuthorizationResponseOpts } from '../authorization-response'
 import { getNonce, getState } from '../helpers'
-import { PassBy } from '../types'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
   AuthorizationResponsePayload,
+  DecryptCompact,
+  PassBy,
   RegisterEventListener,
+  RequestObjectPayload,
   ResponseURIType,
   SIOPErrors,
   SupportedVersion,
@@ -41,6 +49,7 @@ export class RP {
   private readonly _verifyResponseOptions: Partial<VerifyAuthorizationResponseOpts>
   private readonly _eventEmitter?: EventEmitter
   private readonly _sessionManager?: IRPSessionManager
+  private readonly _responseRedirectUri?: string
 
   private constructor(opts: {
     builder?: RPBuilder
@@ -52,6 +61,7 @@ export class RP {
     this._verifyResponseOptions = { ...createVerifyResponseOptsFromBuilderOrExistingOpts(opts) }
     this._eventEmitter = opts.builder?.eventEmitter
     this._sessionManager = opts.builder?.sessionManager
+    this._responseRedirectUri = opts.builder?._responseRedirectUri
   }
 
   public static fromRequestOpts(opts: CreateAuthorizationRequestOpts): RP {
@@ -103,7 +113,7 @@ export class RP {
     responseURIType?: ResponseURIType
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
-
+    
     return await URI.fromOpts(authorizationRequestOpts)
       .then(async (uri: URI) => {
         void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
@@ -131,6 +141,28 @@ export class RP {
       ...(!opts?.error ? { subject: state.request } : {}),
       ...(opts?.error ? { error: opts.error } : {}),
     })
+  }
+
+  static async processJarmAuthorizationResponse(
+    response: string,
+    opts: {
+      decryptCompact: DecryptCompact
+      getAuthRequestPayload: (input: JarmDirectPostJwtResponseParams | JarmAuthResponseParams) => Promise<{ authRequestParams: RequestObjectPayload }>
+    },
+  ) {
+    const { decryptCompact, getAuthRequestPayload } = opts
+
+    const getParams = getAuthRequestPayload as JarmDirectPostJwtAuthResponseValidationContext['openid4vp']['authRequest']['getParams']
+
+    const validatedResponse = await jarmAuthResponseDirectPostJwtValidate(
+      { response },
+      {
+        openid4vp: { authRequest: { getParams } },
+        jwe: { decryptCompact },
+      },
+    )
+
+    return validatedResponse
   }
 
   public async verifyAuthorizationResponse(
@@ -193,6 +225,19 @@ export class RP {
 
   get verifyResponseOptions(): Partial<VerifyAuthorizationResponseOpts> {
     return this._verifyResponseOptions
+  }
+
+  public getResponseRedirectUri(mappings?: Record<string, string>): string | undefined {
+    if (!this._responseRedirectUri) {
+      return undefined
+    }
+    if(!mappings) {
+      return this._responseRedirectUri
+    }
+    return Object.entries(mappings).reduce(
+      (uri, [key, value]) => uri.replace(`:${key}`, value),
+      this._responseRedirectUri
+    )
   }
 
   private newAuthorizationRequestOpts(opts: {

@@ -225,10 +225,10 @@ export const AuthorizationRequestPayloadVD12OID4VPD20SchemaObj = {
         },
         "logo_uri": {
           "anyOf": [
-            {},
             {
               "type": "string"
-            }
+            },
+            {}
           ]
         },
         "client_purpose": {
@@ -413,7 +413,10 @@ export const AuthorizationRequestPayloadVD12OID4VPD20SchemaObj = {
         "form_post",
         "post",
         "direct_post",
-        "query"
+        "query",
+        "direct_post.jwt",
+        "query.jwt",
+        "fragment.jwt"
       ]
     },
     "ClaimPayloadCommon": {

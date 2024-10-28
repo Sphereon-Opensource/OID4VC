@@ -37,18 +37,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8.15.7
-#      - name: Get yarn cache directory path
-#        id: yarn-cache-dir-path
-#        run: echo "::set-output name=dir::$(yarn cache dir)"
-#      - uses: actions/cache@v2
-#        id: yarn-cache
-#        with:
-#          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-#          key: ${{ runner.os }}-yarn-2-${{ hashFiles('**/package.json') }}
-
+          version: 9
       - run: pnpm install
       - run: pnpm build
       - name: run integration tests
@@ -81,18 +72,25 @@ jobs:
       - name: diff
         run: git diff
 
+      - name: Sets PREID
+        env:
+          name: "${{github.ref_name}}"
+        run: |
+          echo "PRE_ID=${name//[\/_-]/.}" >> $GITHUB_ENV
+
       - name: publish @latest when on main
         if: github.ref == 'refs/heads/main'
-        run: pnpm publish:latest
+        run: lerna publish --conventional-commits --force-publish --include-merged-tags --sync-dist-version --create-release github --yes --dist-tag latest --registry https://registry.npmjs.org
 
       - name: publish @next when on develop
         if: github.ref == 'refs/heads/develop'
-        run: pnpm publish:next
+        run: lerna publish --conventional-prerelease --force-publish --canary --sync-dist-version --no-git-tag-version --include-merged-tags --preid next --pre-dist-tag next --yes --registry https://registry.npmjs.org
 
-      - name: publish @next when on fix
+      - name: publish @next when on fix branch
         if: startsWith(github.ref, 'refs/heads/fix')
-        run: pnpm publish:next
+        run: lerna publish --conventional-prerelease --force-publish --canary --sync-dist-version --no-git-tag-version --include-merged-tags --preid fix --pre-dist-tag fix --yes --registry https://registry.npmjs.org
 
       - name: publish @unstable when on unstable branch
         if: startsWith(github.ref, 'refs/heads/feat')
-        run: pnpm publish:unstable
+        run: lerna publish --conventional-prerelease --force-publish --canary --sync-dist-version --no-git-tag-version --include-merged-tags --preid $PRE_ID --pre-dist-tag unstable --yes --throttle-size 75 --registry https://registry.npmjs.org
+

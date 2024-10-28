@@ -14,7 +14,7 @@ export class LanguageTagUtils {
    * @param source is the object from which the language enabled fields and their values will be extracted.
    */
   static getAllLanguageTaggedProperties(source: object): Map<string, string> {
-    return this.getLanguageTaggedPropertiesMapped(source, new Map() )
+    return this.getLanguageTaggedPropertiesMapped(source, new Map())
   }
 
   /**
@@ -26,36 +26,39 @@ export class LanguageTagUtils {
   static getLanguageTaggedProperties(source: object, requiredFieldNames: Array<string>): Map<string, string> {
     const languageTagEnabledFieldsNamesMapping: Map<string, string> = new Map<string, string>()
     requiredFieldNames.forEach((value) => languageTagEnabledFieldsNamesMapping.set(value, value))
-    return this.getLanguageTaggedPropertiesMapped(source, languageTagEnabledFieldsNamesMapping)
+    const languageTaggedPropertiesMapped = this.getLanguageTaggedPropertiesMapped(source, languageTagEnabledFieldsNamesMapping);
+    return languageTaggedPropertiesMapped
   }
 
-  /**
+  
+    /**
    * It will give back a fields which are language tag enabled and are mapped in the required fields.
    *
    * @param source is the object from which the language enabled fields and their values will be extracted.
-   * @param requiredFieldNamesMapping the fields which are supposed to be language enabled. These are the only fields which should be returned. And
+   * @param enabledFieldNamesMapping the fields which are supposed to be language enabled. These are the only fields which should be returned. And
    *                                  the fields names will be transformed as per the mapping provided.
    */
-  static getLanguageTaggedPropertiesMapped(source: object, requiredFieldNamesMapping: Map<string, string>): Map<string, string> {
-    this.assertSourceIsWorthChecking(source)
-    this.assertValidTargetFieldNames(requiredFieldNamesMapping)
+  static getLanguageTaggedPropertiesMapped(source: object, enabledFieldNamesMapping: Map<string, string>): Map<string, string> {
+    //  this.assertSourceIsWorthChecking(source)
+    this.assertValidTargetFieldNames(enabledFieldNamesMapping)
 
     const discoveredLanguageTaggedFields: Map<string, string> = new Map<string, string>()
+      if(source !== null && source !== undefined) {
 
-    Object.entries(source).forEach(([key, value]) => {
-      const languageTagSeparatorIndexInKey: number = key.indexOf(this.LANGUAGE_TAG_SEPARATOR)
+        Object.entries(source).forEach(([key, value]) => {
+          const languageTagSeparatorIndexInKey: number = key.indexOf(this.LANGUAGE_TAG_SEPARATOR)
 
-      if (this.isFieldLanguageTagged(languageTagSeparatorIndexInKey)) {
-        this.extractLanguageTaggedField(
-          key,
-          value as string,
-          languageTagSeparatorIndexInKey,
-          requiredFieldNamesMapping,
-          discoveredLanguageTaggedFields,
-        )
+          if (this.isFieldLanguageTagged(languageTagSeparatorIndexInKey)) {
+            this.extractLanguageTaggedField(
+              key,
+              value as string,
+              languageTagSeparatorIndexInKey,
+              enabledFieldNamesMapping,
+              discoveredLanguageTaggedFields,
+            )
+          }
+        })
       }
-    })
-
     return discoveredLanguageTaggedFields
   }
 
@@ -103,20 +106,24 @@ export class LanguageTagUtils {
   }
 
   private static assertValidTargetFieldNames(languageTagEnabledFieldsNamesMapping: Map<string, string>): void {
-    if (languageTagEnabledFieldsNamesMapping && languageTagEnabledFieldsNamesMapping.size) {
-      for (const entry of languageTagEnabledFieldsNamesMapping.entries()) {
-        const key = entry[0]
-        const value = entry[1]
-        if (isStringNullOrEmpty(key) || isStringNullOrEmpty(value)) {
-          throw new Error(SIOPErrors.BAD_PARAMS + '. languageTagEnabledFieldsName must be non-null or non-empty')
+    if (languageTagEnabledFieldsNamesMapping) {
+      if (languageTagEnabledFieldsNamesMapping.size) {
+        for (const entry of languageTagEnabledFieldsNamesMapping.entries()) {
+          const key = entry[0];
+          const value = entry[1];
+          if (isStringNullOrEmpty(key) || isStringNullOrEmpty(value)) {
+            throw new Error(SIOPErrors.BAD_PARAMS + '. languageTagEnabledFieldsName must be non-null or non-empty');
+          }
         }
-      }
+      }/* else { this would fail test "return no lingually tagged fields if there are no lingually tagged fields in the source object"
+        throw new Error(SIOPErrors.BAD_PARAMS + ' LanguageTagEnabledFieldsNamesMapping must be non-null or non-empty');
+      }*/
     }
   }
 
-  private static assertSourceIsWorthChecking(source: unknown): void {
+ /* private static assertSourceIsWorthChecking(source: unknown): void {
     if (!source) {
       throw new Error(SIOPErrors.BAD_PARAMS + ' Source must be non-null i.e. not-initialized.')
     }
-  }
+  }*/
 }

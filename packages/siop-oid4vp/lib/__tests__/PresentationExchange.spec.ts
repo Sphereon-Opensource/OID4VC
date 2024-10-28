@@ -461,7 +461,7 @@ describe('presentation exchange manager tests', () => {
     const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, vcs, presentationSignCallback, {})
     await PresentationExchange.validatePresentationsAgainstDefinitions(
       pd,
-      CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentationResult.verifiablePresentation),
+      verifiablePresentationResult.verifiablePresentations.map(verifiablePresentation => CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentation)),
       undefined,
       {
         presentationSubmission: verifiablePresentationResult.presentationSubmission,
@@ -551,7 +551,7 @@ describe('presentation exchange manager tests', () => {
     await expect(
       PresentationExchange.validatePresentationsAgainstDefinitions(
         pd,
-        CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentationResult.verifiablePresentation),
+        verifiablePresentationResult.verifiablePresentations.map(verifiablePresentation => CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentation)),
         () => {
           throw new Error('Verification failed')
         },

@@ -191,10 +191,10 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
         },
         "logo_uri": {
           "anyOf": [
-            {},
             {
               "type": "string"
-            }
+            },
+            {}
           ]
         },
         "client_purpose": {
@@ -379,7 +379,10 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
         "form_post",
         "post",
         "direct_post",
-        "query"
+        "query",
+        "direct_post.jwt",
+        "query.jwt",
+        "fragment.jwt"
       ]
     },
     "ClaimPayloadVID1": {

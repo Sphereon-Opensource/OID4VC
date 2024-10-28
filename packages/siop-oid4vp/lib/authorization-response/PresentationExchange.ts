@@ -7,29 +7,35 @@ import {
   Status,
   Validated,
   VerifiablePresentationFromOpts,
-  VerifiablePresentationResult
-} from '@sphereon/pex'
-import { PresentationEvaluationResults } from '@sphereon/pex/dist/main/lib/evaluation'
-import { Format, PresentationDefinitionV1, PresentationDefinitionV2, PresentationSubmission } from '@sphereon/pex-models'
+  VerifiablePresentationResult,
+} from '@sphereon/pex';
+import { PresentationEvaluationResults } from '@sphereon/pex/dist/main/lib/evaluation';
+import {
+  Format,
+  PresentationDefinitionV1,
+  PresentationDefinitionV2,
+  PresentationSubmission
+} from '@sphereon/pex-models';
 import {
   CredentialMapper,
   Hasher,
   IProofPurpose,
   IProofType,
   OriginalVerifiableCredential,
+  OriginalVerifiablePresentation,
   W3CVerifiablePresentation,
-  WrappedVerifiablePresentation,
-} from '@sphereon/ssi-types'
+  WrappedVerifiablePresentation
+} from '@sphereon/ssi-types';
 
-import { extractDataFromPath, getWithUrl } from '../helpers'
-import { AuthorizationRequestPayload, SIOPErrors, SupportedVersion } from '../types'
+import { extractDataFromPath, getWithUrl } from '../helpers';
+import { AuthorizationRequestPayload, SIOPErrors, SupportedVersion } from '../types';
 
 import {
   PresentationDefinitionLocation,
   PresentationDefinitionWithLocation,
   PresentationSignCallback,
-  PresentationVerificationCallback,
-} from './types'
+  PresentationVerificationCallback
+} from './types';
 
 export class PresentationExchange {
   readonly pex: PEX
@@ -76,8 +82,14 @@ export class PresentationExchange {
         keyEncoding: options?.signatureOptions?.keyEncoding ?? KeyEncoding.Hex,
       },
     }
+    
+    // When there are MDoc credentials among the selected ones, filter those out as pex does not support mdoc credentials
+    const filteredCredentials = this.removeMDocCredentials(selectedCredentials) 
+    return await this.pex.verifiablePresentationFrom(presentationDefinition, filteredCredentials, presentationSignCallback, signOptions)
+  }
 
-    return await this.pex.verifiablePresentationFrom(presentationDefinition, selectedCredentials, presentationSignCallback, signOptions)
+  private removeMDocCredentials(selectedCredentials: OriginalVerifiableCredential[]) {
+    return selectedCredentials.filter(vc => !CredentialMapper.isMsoMdocDecodedCredential(vc) && !CredentialMapper.isMsoMdocDecodedCredential(vc));
   }
 
   /**
@@ -104,7 +116,10 @@ export class PresentationExchange {
     } else if (!this.allVerifiableCredentials || this.allVerifiableCredentials.length == 0) {
       throw new Error(`${SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD}, no VCs were provided`)
     }
-    const selectResults: SelectResults = this.pex.selectFrom(presentationDefinition, this.allVerifiableCredentials, {
+    // When there are MDoc credentials among the selected ones, filter those out as pex does not support mdoc credentials
+    const filteredCredentials = this.removeMDocCredentials(this.allVerifiableCredentials)
+    const selectResults: SelectResults = this.pex.selectFrom(presentationDefinition, filteredCredentials, {
+
       ...opts,
       holderDIDs: opts?.holderDIDs ?? this.allDIDs,
       // fixme limited disclosure
@@ -116,10 +131,59 @@ export class PresentationExchange {
     return selectResults
   }
 
+  /**
+   * validatePresentationAgainstDefinition function is called mainly by the RP
+   * after receiving the VP from the OP
+   * @param presentationDefinition object containing PD
+   * @param verifiablePresentation
+   * @param opts
+   */
+  public static async validatePresentationAgainstDefinition(
+    presentationDefinition: IPresentationDefinition,
+    verifiablePresentation: OriginalVerifiablePresentation | WrappedVerifiablePresentation,
+    opts?: {
+      limitDisclosureSignatureSuites?: string[]
+      restrictToFormats?: Format
+      restrictToDIDMethods?: string[]
+      presentationSubmission?: PresentationSubmission
+      hasher?: Hasher
+    },
+  ): Promise<PresentationEvaluationResults> {
+    const wvp: WrappedVerifiablePresentation =
+      typeof verifiablePresentation === 'object' && 'original' in verifiablePresentation
+        ? (verifiablePresentation as WrappedVerifiablePresentation)
+        : CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentation as OriginalVerifiablePresentation)
+    if (!presentationDefinition) {
+      throw new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID)
+    } else if (
+      !wvp ||
+      !wvp.presentation ||
+      (CredentialMapper.isWrappedW3CVerifiablePresentation(wvp) &&
+        (!wvp.presentation.verifiableCredential || wvp.presentation.verifiableCredential.length === 0))
+    ) {
+      throw new Error(SIOPErrors.NO_VERIFIABLE_PRESENTATION_NO_CREDENTIALS)
+    }
+    if (CredentialMapper.isWrappedMdocPresentation(wvp)) {
+      throw new Error('MDoc credentials are not supported by PEX') // TODO to SIOPErrors?
+    }
+    // console.log(`Presentation (validate): ${JSON.stringify(verifiablePresentation)}`);
+    const evaluationResults: PresentationEvaluationResults = new PEX({ hasher: opts?.hasher }).evaluatePresentation(
+      presentationDefinition,
+      wvp.original,
+      opts,
+    )
+    if (evaluationResults.errors?.length) {
+      throw new Error(`message: ${SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD}, details: ${JSON.stringify(evaluationResults.errors)}`)
+    }
+    return evaluationResults
+  }
+
   public static assertValidPresentationSubmission(presentationSubmission: PresentationSubmission) {
-    const validationResult:Validated = PEX.validateSubmission(presentationSubmission)
-    if (Array.isArray(validationResult) && validationResult[0].message != 'ok'
-    || !Array.isArray(validationResult) && validationResult.message != 'ok') {
+    const validationResult: Validated = PEX.validateSubmission(presentationSubmission)
+    if (
+      (Array.isArray(validationResult) && validationResult[0].message != 'ok') ||
+      (!Array.isArray(validationResult) && validationResult.message != 'ok')
+    ) {
       throw new Error(`${SIOPErrors.RESPONSE_OPTS_PRESENTATIONS_SUBMISSION_IS_NOT_VALID}, details ${JSON.stringify(validationResult)}`)
     }
   }
@@ -244,8 +308,10 @@ export class PresentationExchange {
 
   private static assertValidPresentationDefinition(presentationDefinition: IPresentationDefinition) {
     const validationResult = PEX.validateDefinition(presentationDefinition)
-    if (Array.isArray(validationResult) && validationResult[0].message != 'ok'
-      || !Array.isArray(validationResult) && validationResult.message != 'ok') {
+    if (
+      (Array.isArray(validationResult) && validationResult[0].message != 'ok') ||
+      (!Array.isArray(validationResult) && validationResult.message != 'ok')
+    ) {
       throw new Error(`${SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID}`)
     }
   }
@@ -275,7 +341,7 @@ export class PresentationExchange {
   static async validatePresentationsAgainstDefinition(
     definition: IPresentationDefinition,
     vpPayloads: Array<WrappedVerifiablePresentation> | WrappedVerifiablePresentation,
-    verifyPresentationCallback?: PresentationVerificationCallback | undefined,
+    verifyPresentationCallback?: PresentationVerificationCallback,
     opts?: {
       limitDisclosureSignatureSuites?: string[]
       restrictToFormats?: Format
@@ -291,16 +357,19 @@ export class PresentationExchange {
     if (opts?.presentationSubmission) {
       evaluationResults = pex.evaluatePresentation(
         definition,
-        Array.isArray(vpPayloads) ? vpPayloads.map((wvp) => wvp.original) : vpPayloads.original,
+        vpPayloadsArray.map((wvp) => wvp.original),
         {
           ...opts,
-          // We always have external presentation submissions here. Some older versions of OID4VP allow for submission in presentation,
-          // but in that case the submission will not be provided
           presentationSubmissionLocation: PresentationSubmissionLocation.EXTERNAL,
         },
       )
     } else {
       for (const wvp of vpPayloadsArray) {
+        // Check for MDoc presentations
+        if (CredentialMapper.isWrappedMdocPresentation(wvp)) {
+          throw new Error(SIOPErrors.MDOC_CREDENTIALS_NOT_SUPPORTED)
+        }
+
         if (CredentialMapper.isWrappedW3CVerifiablePresentation(wvp) && wvp.presentation.presentation_submission) {
           const presentationSubmission = wvp.presentation.presentation_submission
           evaluationResults = pex.evaluatePresentation(definition, wvp.original, {
@@ -320,7 +389,7 @@ export class PresentationExchange {
       throw new Error(SIOPErrors.NO_PRESENTATION_SUBMISSION)
     }
 
-    if (evaluationResults.areRequiredCredentialsPresent === Status.ERROR || evaluationResults.errors?.length || !evaluationResults.value) {
+    if (evaluationResults.areRequiredCredentialsPresent === Status.ERROR || (evaluationResults.errors && evaluationResults.errors.length > 0) || !evaluationResults.value) {
       throw new Error(`message: ${SIOPErrors.COULD_NOT_FIND_VCS_MATCHING_PD}, details: ${JSON.stringify(evaluationResults.errors)}`)
     }
 
@@ -330,7 +399,7 @@ export class PresentationExchange {
       )
     }
 
-    const presentationsToVerify = Array.isArray(evaluationResults.presentation) ? evaluationResults.presentation : [evaluationResults.presentation]
+    const presentationsToVerify = evaluationResults.presentations
     // The verifyPresentationCallback function is mandatory for RP only,
     // So the behavior here is to bypass it if not present
     if (verifyPresentationCallback && evaluationResults.value !== undefined) {
@@ -341,7 +410,8 @@ export class PresentationExchange {
             const verificationResult = await verifyPresentationCallback(presentation as W3CVerifiablePresentation, evaluationResults.value!)
             if (!verificationResult.verified) {
               throw new Error(
-                SIOPErrors.VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID + verificationResult.reason ? `. ${verificationResult.reason}` : '',
+                SIOPErrors.VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID +
+                (verificationResult.reason ? `. ${verificationResult.reason}` : ''),
               )
             }
           } catch (error: unknown) {
