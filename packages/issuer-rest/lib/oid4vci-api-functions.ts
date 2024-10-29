@@ -406,7 +406,7 @@ export function getMetadataEndpoints<DIDDoc extends object>(router: Router, issu
   router.get(WellKnownEndpoints.OAUTH_AS, authorizationServerHandler)
   
   const openidFederationHandler = (request: Request, response: Response) => {
-    if(!issuer.openidFederationMetadata) {
+    if(!issuer.openidFederationMetadata || !issuer.openidFederationMetadata.jwt) {
       return response.status(404).send()
     }
     return response.send(issuer.openidFederationMetadata.jwt)
