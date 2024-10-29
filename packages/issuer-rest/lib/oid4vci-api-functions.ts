@@ -405,10 +405,13 @@ export function getMetadataEndpoints<DIDDoc extends object>(router: Router, issu
   }
   router.get(WellKnownEndpoints.OAUTH_AS, authorizationServerHandler)
   
-  const openidFedrationHandler = (request: Request, response: Response) => {
-    return response.send(issuer.openidFederationMetadata)
+  const openidFederationHandler = (request: Request, response: Response) => {
+    if(!issuer.openidFederationMetadata) {
+      return response.status(404).send()
+    }
+    return response.send(issuer.openidFederationMetadata.jwt)
   }
-  router.get(WellKnownEndpoints.OPENID_FEDERATION, openidFedrationHandler)
+  router.get(WellKnownEndpoints.OPENID_FEDERATION, openidFederationHandler)
 }
 
 export function determinePath(
