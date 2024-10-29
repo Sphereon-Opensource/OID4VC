@@ -166,6 +166,7 @@ export enum WellKnownEndpoints {
   OPENID_CONFIGURATION = '/.well-known/openid-configuration',
   OAUTH_AS = '/.well-known/oauth-authorization-server',
   OPENID4VCI_ISSUER = '/.well-known/openid-credential-issuer',
+  OPENID_FEDERATION = '/.well-known/openid-federation',
 }
 
 export type AuthorizationServerType = 'OIDC' | 'OAuth 2.0' | 'OID4VCI'; // OID4VCI means the Issuer hosts a token endpoint itself

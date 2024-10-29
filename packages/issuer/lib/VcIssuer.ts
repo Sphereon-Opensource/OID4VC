@@ -37,6 +37,7 @@ import {
 } from '@sphereon/oid4vci-common'
 import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphereon/oid4vci-common'
 import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common'
+import { OpenidFederationMetadata } from '@sphereon/oid4vci-common/dist/types/OpenidFederationMetadata'
 import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
@@ -46,6 +47,7 @@ import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceI
 export class VcIssuer<DIDDoc extends object> {
   private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_13
   private readonly _authorizationServerMetadata: AuthorizationServerMetadata
+  private readonly _openidFederationMetadata?: OpenidFederationMetadata
   private readonly _defaultCredentialOfferBaseUri?: string
   private readonly _credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
   private readonly _jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
@@ -59,6 +61,7 @@ export class VcIssuer<DIDDoc extends object> {
     issuerMetadata: CredentialIssuerMetadataOptsV1_0_13,
     authorizationServerMetadata: AuthorizationServerMetadata,
     args: {
+      openidFederationMetadata?: OpenidFederationMetadata
       txCode?: TxCode
       baseUri?: string
       credentialOfferSessions: IStateManager<CredentialOfferSession>
@@ -74,6 +77,7 @@ export class VcIssuer<DIDDoc extends object> {
     this.setDefaultTokenEndpoint(issuerMetadata)
     this._issuerMetadata = issuerMetadata
     this._authorizationServerMetadata = authorizationServerMetadata
+    this._openidFederationMetadata = args.openidFederationMetadata
     this._defaultCredentialOfferBaseUri = args.defaultCredentialOfferBaseUri
     this._credentialOfferSessions = args.credentialOfferSessions
     this._cNonces = args.cNonces
@@ -668,5 +672,7 @@ export class VcIssuer<DIDDoc extends object> {
     return this._authorizationServerMetadata
   }
   
-  
+  public get openidFederationMetadata() {
+    return this._openidFederationMetadata
+  }
 }
