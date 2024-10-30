@@ -13,7 +13,7 @@ import {
   TxCode,
   URIState
 } from '@sphereon/oid4vci-common'
-import { OpenidFederationMetadata } from '@sphereon/oid4vci-common/dist/types/OpenidFederationMetadata'
+import { OpenidFederationMetadata } from '@sphereon/oid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
 import { MemoryStates } from '../state-manager'

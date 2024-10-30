@@ -9,8 +9,12 @@ import {
 import nock from 'nock';
 
 import { OpenID4VCIClientV1_0_13 } from '..';
-import { createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilder } from '../../../issuer';
-import { AuthorizationServerMetadataBuilder } from '../../../issuer/lib/builder/AuthorizationServerMetadataBuilder'
+import {
+  AuthorizationServerMetadataBuilder,
+  createAccessTokenResponse,
+  IssuerMetadataBuilderV1_13,
+  VcIssuerBuilder
+} from '../../../issuer'
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
