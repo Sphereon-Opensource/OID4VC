@@ -449,8 +449,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/pex':
-        specifier: 5.0.0-unstable.21
-        version: 5.0.0-unstable.21
+        specifier: 5.0.0-unstable.22
+        version: 5.0.0-unstable.22
       '@sphereon/pex-models':
         specifier: ^2.3.1
         version: 2.3.1
@@ -2544,12 +2544,13 @@ packages:
 
   '@sphereon/kmp-mdl-mdoc@0.2.0-SNAPSHOT.22':
     resolution: {integrity: sha512-uAZZExVy+ug9JLircejWa5eLtAZ7bnBP6xb7DO2+86LRsHNLh2k2jMWJYxp+iWtGHTsh6RYsZl14ScQLvjiQ/A==}
+    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.1':
     resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
 
-  '@sphereon/pex@5.0.0-unstable.21':
-    resolution: {integrity: sha512-/HZxn9EkQ4Htt7y0SvTz5NrKlHwcLpYFfthIHs+3jx0prq9afzF+rPUDzbz+8SkO5KN6px/vTtwV7J0GVqZeIQ==}
+  '@sphereon/pex@5.0.0-unstable.22':
+    resolution: {integrity: sha512-7C/cmIetKLuQGIW1RPgTOmi05Xm55wbsCJx1O58oByMSTAlQ0JcJ4EBDbb+pGMalaIYgXv8P0oddQbrVAtiedA==}
     engines: {node: '>=18'}
 
   '@sphereon/ssi-express-support@0.30.1':
@@ -12009,7 +12010,7 @@ snapshots:
 
   '@sphereon/pex-models@2.3.1': {}
 
-  '@sphereon/pex@5.0.0-unstable.21':
+  '@sphereon/pex@5.0.0-unstable.22':
     dependencies:
       '@astronautlabs/jsonpath': 1.1.2
       '@sd-jwt/decode': 0.7.2

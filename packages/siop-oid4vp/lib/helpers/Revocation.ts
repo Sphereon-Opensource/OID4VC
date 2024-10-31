@@ -67,6 +67,9 @@ function originalTypeToVerifiableCredentialTypeFormat(original: WrappedVerifiabl
 function credentialHasStatus(wrappedVerifiableCredential: WrappedVerifiableCredential) {
   if (CredentialMapper.isWrappedSdJwtVerifiableCredential(wrappedVerifiableCredential)) {
     return wrappedVerifiableCredential.decoded.status !== undefined
+  } else if (CredentialMapper.isWrappedMdocCredential(wrappedVerifiableCredential)) {
+    // No revocation supported at the moment
+    return false
   } else {
     return wrappedVerifiableCredential.credential.credentialStatus !== undefined
   }
