@@ -6,7 +6,7 @@ export const vJarmDirectPostJwtParams = v.looseObject({
   ...v.omit(vJarmAuthResponseParams, ['iss', 'aud', 'exp']).entries,
   ...v.partial(v.pick(vJarmAuthResponseParams, ['iss', 'aud', 'exp'])).entries,
 
-  vp_token: v.string(),
+  vp_token: v.union([v.string(), v.array(v.pipe(v.string(), v.nonEmpty()))]),
   presentation_submission: v.unknown(),
   nonce: v.optional(v.string()),
 });

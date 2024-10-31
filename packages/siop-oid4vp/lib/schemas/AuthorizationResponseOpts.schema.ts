@@ -1872,6 +1872,9 @@ export const AuthorizationResponseOptsSchemaObj = {
               },
               {
                 "$ref": "#/definitions/CompactSdJwtVc"
+              },
+              {
+                "$ref": "#/definitions/MdocOid4vpMdocVpToken"
               }
             ]
           }
@@ -2321,6 +2324,9 @@ export const AuthorizationResponseOptsSchemaObj = {
     "CompactSdJwtVc": {
       "type": "string",
       "description": "Represents a selective disclosure JWT vc in compact form."
+    },
+    "MdocOid4vpMdocVpToken": {
+      "type": "string"
     },
     "VPTokenLocation": {
       "type": "string",

@@ -88,15 +88,15 @@ function supportedSubjectSyntaxTypes(rpMethods: string[] | string, opMethods: st
 }
 
 function collectAlgValues(algTableObject: any): string[] {
-  const algValues: string[] = [];
+  const algValues: string[] = []
   for (const key of Object.keys(algTableObject)) {
-    algValues.push(...algTableObject[key]);
+    algValues.push(...algTableObject[key])
   }
 
-  return algValues;
+  return algValues
 }
 
-const isJwtFormat = (crFormat: string) => crFormat.includes('jwt') || crFormat.includes('mdoc');
+const isJwtFormat = (crFormat: string) => crFormat.includes('jwt') || crFormat.includes('mdoc')
 
 function getFormatIntersection(rpFormat: Format, opFormat: Format): Format {
   const intersectionFormat: Record<string, any> = {}
@@ -105,17 +105,17 @@ function getFormatIntersection(rpFormat: Format, opFormat: Format): Format {
     throw new Error(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)
   }
   supportedCredentials.forEach(function (crFormat: string) {
-    const rpFormatElement = rpFormat[crFormat as keyof Format];
-    const opFormatElement = opFormat[crFormat as keyof Format];
-    const rpAlgs = collectAlgValues(rpFormatElement);
-    const opAlgs = collectAlgValues(opFormatElement);
-    let methodKeyRP = undefined;
-    let methodKeyOP = undefined;
+    const rpFormatElement = rpFormat[crFormat as keyof Format]
+    const opFormatElement = opFormat[crFormat as keyof Format]
+    const rpAlgs = collectAlgValues(rpFormatElement)
+    const opAlgs = collectAlgValues(opFormatElement)
+    let methodKeyRP = undefined
+    let methodKeyOP = undefined
     if (rpFormatElement !== undefined) {
-      Object.keys(rpFormatElement).forEach((k) => (methodKeyRP = k));
+      Object.keys(rpFormatElement).forEach((k) => (methodKeyRP = k))
     }
     if (opFormatElement !== undefined) {
-      Object.keys(opFormatElement).forEach((k) => (methodKeyOP = k));
+      Object.keys(opFormatElement).forEach((k) => (methodKeyOP = k))
     }
     if (methodKeyRP !== methodKeyOP) {
       throw new Error(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)

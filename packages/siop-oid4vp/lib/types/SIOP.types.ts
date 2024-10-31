@@ -7,6 +7,7 @@ import {
   CompactSdJwtVc,
   IPresentation,
   IVerifiablePresentation,
+  MdocOid4vpMdocVpToken,
   PresentationSubmission,
   W3CVerifiableCredential,
   W3CVerifiablePresentation,
@@ -170,7 +171,11 @@ export interface AuthorizationResponsePayload {
   expires_in?: number
   state?: string
   id_token?: string
-  vp_token?: Array<W3CVerifiablePresentation | CompactSdJwtVc> | W3CVerifiablePresentation | CompactSdJwtVc
+  vp_token?:
+    | Array<W3CVerifiablePresentation | CompactSdJwtVc | MdocOid4vpMdocVpToken>
+    | W3CVerifiablePresentation
+    | CompactSdJwtVc
+    | MdocOid4vpMdocVpToken
   presentation_submission?: PresentationSubmission
   verifiedData?: IPresentation | AdditionalClaims
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -508,7 +513,7 @@ export interface VerifiedOpenID4VPSubmission {
   submissionData: PresentationSubmission
   presentationDefinitions: PresentationDefinitionWithLocation[]
   presentations: WrappedVerifiablePresentation[]
-  nonce: string
+  nonce?: string
 }
 
 export interface VerifiedAuthorizationResponse {
