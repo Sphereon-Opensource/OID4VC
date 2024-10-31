@@ -2,6 +2,7 @@ import { parseJWT } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition, PEX, PresentationSubmissionLocation } from '@sphereon/pex'
 import { Format } from '@sphereon/pex-models'
 import {
+  CompactSdJwtVc,
   CredentialMapper,
   Hasher,
   IVerifiablePresentation,
@@ -69,7 +70,9 @@ export const verifyPresentations = async (
   authorizationResponse: AuthorizationResponse,
   verifyOpts: VerifyAuthorizationResponseOpts,
 ): Promise<VerifiedOpenID4VPSubmission | null> => {
-  const presentations = await extractPresentationsFromAuthorizationResponse(authorizationResponse, { hasher: verifyOpts.hasher })
+  const presentations = authorizationResponse.payload.vp_token
+    ? await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher })
+    : []
   const presentationDefinitions = verifyOpts.presentationDefinitions
     ? Array.isArray(verifyOpts.presentationDefinitions)
       ? verifyOpts.presentationDefinitions
@@ -102,19 +105,15 @@ export const verifyPresentations = async (
 
   const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
 
-  const nonces = new Set(presentationsArray.map(extractNonceFromWrappedVerifiablePresentation))
-  if (presentationsArray.length > 0 && nonces.size !== 1) {
-    throw Error(`${nonces.size} nonce values found for ${presentationsArray.length}. Should be 1`)
+  const presentationsWithoutMdoc = presentationsArray.filter((p) => p.format !== 'mso_mdoc')
+  const nonces = new Set(presentationsWithoutMdoc.map(extractNonceFromWrappedVerifiablePresentation))
+  if (presentationsWithoutMdoc.length > 0 && nonces.size !== 1) {
+    throw Error(`${nonces.size} nonce values found for ${presentationsWithoutMdoc.length}. Should be 1`)
   }
 
-  // Nonce may be undefined
-  let nonce = Array.from(nonces)[0]
-  if(presentationsArray.some(presentation => presentation.format === 'mso_mdoc')) {  // FIXME Funke
-    verifyOpts.nonce = 'mdoc'
-    nonce = "mdoc" // TODO extract nonce from mdoc session
-  }
-  
-  if (typeof nonce !== 'string') {
+  // Nonce may be undefined in case there's only mdoc presentations (verified differently)
+  const nonce = Array.from(nonces)[0] as string | undefined
+  if (presentationsWithoutMdoc.length > 0 && typeof nonce !== 'string') {
     throw new Error('Expected all presentations to contain a nonce value')
   }
 
@@ -132,17 +131,14 @@ export const verifyPresentations = async (
   return { nonce, presentations: presentationsArray, presentationDefinitions, submissionData: presentationSubmission }
 }
 
-export const extractPresentationsFromAuthorizationResponse = async (
-  response: AuthorizationResponse,
+export const extractPresentationsFromVpToken = async (
+  vpToken: Array<W3CVerifiablePresentation | CompactSdJwtVc | string> | W3CVerifiablePresentation | CompactSdJwtVc | string,
   opts?: { hasher?: Hasher },
 ): Promise<WrappedVerifiablePresentation[] | WrappedVerifiablePresentation> => {
-  if (!response.payload.vp_token) return []
-
-  if (Array.isArray(response.payload.vp_token)) {
-    return response.payload.vp_token.map((vp) => CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: opts?.hasher }))
+  if (Array.isArray(vpToken)) {
+    return vpToken.map((vp) => CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: opts?.hasher }))
   }
-
-  return CredentialMapper.toWrappedVerifiablePresentation(response.payload.vp_token, { hasher: opts?.hasher })
+  return CredentialMapper.toWrappedVerifiablePresentation(vpToken, { hasher: opts?.hasher })
 }
 export const createPresentationSubmission = async (
   verifiablePresentations: W3CVerifiablePresentation[],
@@ -266,7 +262,7 @@ export const putPresentationSubmissionInLocation = async (
   }
 
   responsePayload.vp_token =
-    resOpts.presentationExchange?.verifiablePresentations.length === 1
+    resOpts.presentationExchange?.verifiablePresentations.length === 1 && submissionData.descriptor_map[0]?.path === '$'
       ? resOpts.presentationExchange.verifiablePresentations[0]
       : resOpts.presentationExchange?.verifiablePresentations
 }
@@ -284,11 +280,9 @@ export const assertValidVerifiablePresentations = async (args: {
   }
 }) => {
   const presentationsArray = Array.isArray(args.presentations) ? args.presentations : [args.presentations]
-  const nrOfMdocsPresentations = presentationsArray.filter(presentation => presentation.format === 'mso_mdoc').length
-  const presentationsWithFormat = presentationsArray.filter(presentation => presentation.format !== 'mso_mdoc')
   if (
     (!args.presentationDefinitions || args.presentationDefinitions.filter((a) => a.definition).length === 0) &&
-    (!presentationsWithFormat || (Array.isArray(presentationsWithFormat) && presentationsWithFormat.filter((vp) => vp.presentation).length === 0))
+    (!presentationsArray || (Array.isArray(presentationsArray) && presentationsArray.filter((vp) => vp.presentation).length === 0))
   ) {
     return
   }
@@ -297,23 +291,21 @@ export const assertValidVerifiablePresentations = async (args: {
   if (
     args.presentationDefinitions &&
     args.presentationDefinitions.length &&
-    (!presentationsWithFormat || (Array.isArray(presentationsWithFormat) && presentationsWithFormat.length === 0))
+    (!presentationsArray || (Array.isArray(presentationsArray) && presentationsArray.length === 0))
   ) {
-    if(nrOfMdocsPresentations === 0) { // We don't want to crash when processing mdoc credentials
-      throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)
-    }
+    throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)
   } else if (
     (!args.presentationDefinitions || args.presentationDefinitions.length === 0) &&
-    presentationsWithFormat &&
-    ((Array.isArray(presentationsWithFormat) && presentationsWithFormat.length > 0) || !Array.isArray(presentationsWithFormat))
+    presentationsArray &&
+    ((Array.isArray(presentationsArray) && presentationsArray.length > 0) || !Array.isArray(presentationsArray))
   ) {
     throw new Error(SIOPErrors.AUTH_REQUEST_DOESNT_EXPECT_VP)
   } else if (args.presentationDefinitions && !args.opts.presentationSubmission) {
     throw new Error(`No presentation submission present. Please use presentationSubmission opt argument!`)
-  } else if (args.presentationDefinitions && presentationsWithFormat) {
+  } else if (args.presentationDefinitions && presentationsArray) {
     await PresentationExchange.validatePresentationsAgainstDefinitions(
       args.presentationDefinitions,
-      presentationsWithFormat,
+      args.presentations,
       args.verificationCallback,
       args.opts,
     )
