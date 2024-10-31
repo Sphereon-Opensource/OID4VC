@@ -102,3 +102,8 @@ export function fromBase64(base64: string): string {
 export function base64urlEncodeBuffer(buf: { toString: (arg0: 'base64') => string }): string {
   return fromBase64(buf.toString('base64'))
 }
+
+export function base64urlToString(base64url: string): string {
+  const uint8array = ua8.fromString(base64url, 'base64url')
+  return ua8.toString(uint8array, 'ascii')
+}

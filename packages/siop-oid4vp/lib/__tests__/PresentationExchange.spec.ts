@@ -461,7 +461,9 @@ describe('presentation exchange manager tests', () => {
     const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, vcs, presentationSignCallback, {})
     await PresentationExchange.validatePresentationsAgainstDefinitions(
       pd,
-      verifiablePresentationResult.verifiablePresentations.map(verifiablePresentation => CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentation)),
+      verifiablePresentationResult.verifiablePresentations.map((verifiablePresentation) =>
+        CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentation),
+      )[0],
       undefined,
       {
         presentationSubmission: verifiablePresentationResult.presentationSubmission,
@@ -524,7 +526,7 @@ describe('presentation exchange manager tests', () => {
         },
       ),
     ).rejects.toThrow(
-      'Could not find VerifiableCredentials matching presentationDefinition object in the provided VC list, details: [{"status":"error","tag":"SubmissionDoesNotSatisfyDefinition","message":"Expected all input descriptors (2) to be satisfifed in submission, but found 1. Missing wa_driver_license"}]',
+      `message: Could not find VerifiableCredentials matching presentationDefinition object in the provided VC list, details: [{"status":"error","tag":"SubmissionDoesNotSatisfyDefinition","message":"Expected all input descriptors ('wa_driver_license', 'ca_driver_license') to be satisfied in submission, but found 'ca_driver_license'. Missing 'wa_driver_license'"}]`,
     )
   })
 
@@ -551,7 +553,9 @@ describe('presentation exchange manager tests', () => {
     await expect(
       PresentationExchange.validatePresentationsAgainstDefinitions(
         pd,
-        verifiablePresentationResult.verifiablePresentations.map(verifiablePresentation => CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentation)),
+        verifiablePresentationResult.verifiablePresentations.map((verifiablePresentation) =>
+          CredentialMapper.toWrappedVerifiablePresentation(verifiablePresentation),
+        )[0],
         () => {
           throw new Error('Verification failed')
         },

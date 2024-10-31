@@ -1,13 +1,14 @@
 import {
-  CredentialMapper, isWrappedSdJwtVerifiablePresentation,
+  CredentialMapper,
+  isWrappedSdJwtVerifiablePresentation,
   isWrappedW3CVerifiablePresentation,
   W3CVerifiableCredential,
   WrappedVerifiableCredential,
-  WrappedVerifiablePresentation
-} from '@sphereon/ssi-types';
+  WrappedVerifiablePresentation,
+} from '@sphereon/ssi-types'
 
 import { RevocationStatus, RevocationVerification, RevocationVerificationCallback, VerifiableCredentialTypeFormat } from '../types'
-import { LOG } from '../types';
+import { LOG } from '../types'
 
 export const verifyRevocation = async (
   vpToken: WrappedVerifiablePresentation,
@@ -24,10 +25,10 @@ export const verifyRevocation = async (
   if (!revocationVerificationCallback) {
     throw new Error(`Revocation callback not provided`)
   }
-  
+
   const vcs =
     CredentialMapper.isWrappedSdJwtVerifiablePresentation(vpToken) || CredentialMapper.isWrappedMdocPresentation(vpToken)
-      ? [vpToken.vcs[0]]
+      ? vpToken.vcs
       : vpToken.presentation.verifiableCredential
   for (const vc of vcs) {
     if (
@@ -36,7 +37,7 @@ export const verifyRevocation = async (
     ) {
       const result = await revocationVerificationCallback(
         vc.original as W3CVerifiableCredential,
-        originalTypeToVerifiableCredentialTypeFormat(vc.format)
+        originalTypeToVerifiableCredentialTypeFormat(vc.format),
       )
       if (result.status === RevocationStatus.INVALID) {
         throw new Error(`Revocation invalid for vc. Error: ${result.error}`)

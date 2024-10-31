@@ -254,6 +254,5 @@ async function presentationSignCalback(args: PresentationSignCallBackParams): Pr
     .setExpirationTime('2h')
     .sign(importedJwk)
 
-  console.log(`VP: ${jwt}`)
   return jwt
 }
