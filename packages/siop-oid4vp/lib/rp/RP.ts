@@ -6,7 +6,7 @@ import {
   JarmDirectPostJwtAuthResponseValidationContext,
   JarmDirectPostJwtResponseParams,
 } from '@sphereon/jarm'
-import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
+import { decodeProtectedHeader, JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { Hasher } from '@sphereon/ssi-types'
 
 import {
@@ -19,8 +19,13 @@ import {
   URI,
 } from '../authorization-request'
 import { mergeVerificationOpts } from '../authorization-request/Opts'
-import { AuthorizationResponse, PresentationDefinitionWithLocation, VerifyAuthorizationResponseOpts } from '../authorization-response'
-import { getNonce, getState } from '../helpers'
+import {
+  AuthorizationResponse,
+  extractPresentationsFromVpToken,
+  PresentationDefinitionWithLocation,
+  VerifyAuthorizationResponseOpts,
+} from '../authorization-response'
+import { base64urlToString, getNonce, getState } from '../helpers'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
@@ -113,7 +118,7 @@ export class RP {
     responseURIType?: ResponseURIType
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
-    
+
     return await URI.fromOpts(authorizationRequestOpts)
       .then(async (uri: URI) => {
         void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
@@ -148,9 +153,10 @@ export class RP {
     opts: {
       decryptCompact: DecryptCompact
       getAuthRequestPayload: (input: JarmDirectPostJwtResponseParams | JarmAuthResponseParams) => Promise<{ authRequestParams: RequestObjectPayload }>
+      hasher?: Hasher
     },
   ) {
-    const { decryptCompact, getAuthRequestPayload } = opts
+    const { decryptCompact, getAuthRequestPayload, hasher } = opts
 
     const getParams = getAuthRequestPayload as JarmDirectPostJwtAuthResponseValidationContext['openid4vp']['authRequest']['getParams']
 
@@ -161,6 +167,27 @@ export class RP {
         jwe: { decryptCompact },
       },
     )
+
+    const presentations = await extractPresentationsFromVpToken(validatedResponse.authResponseParams.vp_token, { hasher })
+    const mdocVerifiablePresentations = (Array.isArray(presentations) ? presentations : [presentations]).filter((p) => p.format === 'mso_mdoc')
+
+    if (mdocVerifiablePresentations.length) {
+      if (validatedResponse.type !== 'encrypted') {
+        throw new Error(`Cannot verify mdoc request nonce. Response should be 'encrypted' but is '${validatedResponse.type}'`)
+      }
+      const requestParamsNonce = validatedResponse.authRequestParams.nonce
+
+      const jweProtectedHeader = decodeProtectedHeader(response) as { apv?: string; apu?: string }
+      const apv = jweProtectedHeader.apv
+      if (!apv) {
+        throw new Error(`Missing required apv parameter in the protected header of the jarm response.`)
+      }
+
+      const requestNonce = base64urlToString(apv)
+      if (!requestParamsNonce || requestParamsNonce !== requestNonce) {
+        throw new Error(`Invalid request nonce found in the jarm protected Header. Expected '${requestParamsNonce}' received '${requestNonce}'`)
+      }
+    }
 
     return validatedResponse
   }
@@ -231,13 +258,10 @@ export class RP {
     if (!this._responseRedirectUri) {
       return undefined
     }
-    if(!mappings) {
+    if (!mappings) {
       return this._responseRedirectUri
     }
-    return Object.entries(mappings).reduce(
-      (uri, [key, value]) => uri.replace(`:${key}`, value),
-      this._responseRedirectUri
-    )
+    return Object.entries(mappings).reduce((uri, [key, value]) => uri.replace(`:${key}`, value), this._responseRedirectUri)
   }
 
   private newAuthorizationRequestOpts(opts: {

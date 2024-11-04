@@ -1,7 +1,14 @@
 import { JwtIssuer } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition, PresentationSignCallBackParams } from '@sphereon/pex'
 import { Format } from '@sphereon/pex-models'
-import { CompactSdJwtVc, Hasher, PresentationSubmission, W3CVerifiablePresentation } from '@sphereon/ssi-types'
+import {
+  CompactSdJwtVc,
+  Hasher,
+  MdocOid4vpIssuerSigned,
+  PresentationSubmission,
+  W3CVerifiablePresentation,
+  MdocOid4vpMdocVpToken,
+} from '@sphereon/ssi-types'
 
 import {
   ResponseMode,
@@ -45,7 +52,7 @@ export interface PresentationExchangeResponseOpts {
     selectedCredentials: W3CVerifiableCredential[]
   }[],*/
 
-  verifiablePresentations: Array<W3CVerifiablePresentation | CompactSdJwtVc>
+  verifiablePresentations: Array<W3CVerifiablePresentation | CompactSdJwtVc | MdocOid4vpMdocVpToken>
   vpTokenLocation?: VPTokenLocation
   presentationSubmission?: PresentationSubmission
   restrictToFormats?: Format
@@ -87,7 +94,7 @@ export enum VPTokenLocation {
 export type PresentationVerificationResult = { verified: boolean; reason?: string }
 
 export type PresentationVerificationCallback = (
-  args: W3CVerifiablePresentation | CompactSdJwtVc,
+  args: W3CVerifiablePresentation | CompactSdJwtVc | MdocOid4vpIssuerSigned,
   presentationSubmission: PresentationSubmission,
 ) => Promise<PresentationVerificationResult>
 
