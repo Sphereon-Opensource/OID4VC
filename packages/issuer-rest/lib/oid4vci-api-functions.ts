@@ -409,7 +409,10 @@ export function getMetadataEndpoints<DIDDoc extends object>(router: Router, issu
     if(!issuer.openidFederationMetadata || !issuer.openidFederationMetadata.jwt) {
       return response.status(404).send()
     }
-    return response.send(issuer.openidFederationMetadata.jwt)
+    const asciiContent = Buffer.from(issuer.openidFederationMetadata.jwt, 'utf8').toString('ascii')
+    return response
+      .type('application/entity-statement+jwt')
+      .send(asciiContent)
   }
   router.get(WellKnownEndpoints.OPENID_FEDERATION, openidFederationHandler)
 }
