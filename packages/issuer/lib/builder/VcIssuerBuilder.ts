@@ -13,7 +13,6 @@ import {
   TxCode,
   URIState
 } from '@sphereon/oid4vci-common'
-import { OpenidFederationMetadata } from '@sphereon/oid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
 import { MemoryStates } from '../state-manager'
@@ -25,7 +24,6 @@ export class VcIssuerBuilder<DIDDoc extends object> {
   issuerMetadataBuilder?: IssuerMetadataBuilderV1_13
   issuerMetadata: Partial<CredentialIssuerMetadataOptsV1_0_13> = {}
   authorizationServerMetadata: Partial<AuthorizationServerMetadata> = {}
-  openidFederationMetadata: Partial<OpenidFederationMetadata> = {} 
   txCode?: TxCode
   defaultCredentialOfferBaseUri?: string
   userPinRequired?: boolean
@@ -47,11 +45,6 @@ export class VcIssuerBuilder<DIDDoc extends object> {
 
   public withAuthorizationMetadata(authorizationServerMetadata: AuthorizationServerMetadata) {
     this.authorizationServerMetadata = authorizationServerMetadata
-    return this
-  }
-
-  public withOpenidFederationMetadata(openidFederationMetadata: OpenidFederationMetadata) {
-    this.openidFederationMetadata = openidFederationMetadata
     return this
   }
 
@@ -194,7 +187,6 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     return new VcIssuer(metadata as IssuerMetadataV1_0_13, 
       this.authorizationServerMetadata as AuthorizationServerMetadata, 
       {
-        openidFederationMetadata: this.openidFederationMetadata as OpenidFederationMetadata,
         //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
       ...(this.txCode && { txCode: this.txCode }),
       defaultCredentialOfferBaseUri: this.defaultCredentialOfferBaseUri,

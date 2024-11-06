@@ -6,7 +6,6 @@ export * from './v1_0_09.types';
 export * from './v1_0_11.types';
 export * from './v1_0_13.types';
 export * from './ServerMetadata';
-export * from './OpenidFederationMetadata';
 export * from './OpenID4VCIErrors';
 export * from './OpenID4VCIVersions.types';
 export * from './StateManager.types';

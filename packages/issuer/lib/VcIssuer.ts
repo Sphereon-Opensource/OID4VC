@@ -1,19 +1,24 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   ALG_ERROR,
-  AUD_ERROR, AuthorizationServerMetadata,
+  AUD_ERROR,
+  AuthorizationServerMetadata,
   CNonceState,
   CreateCredentialOfferURIResult,
   CREDENTIAL_MISSING_ERROR,
   CredentialConfigurationSupportedV1_0_13,
   CredentialDataSupplierInput,
+  CredentialEventNames,
   CredentialIssuerMetadata,
+  CredentialIssuerMetadataOptsV1_0_13,
+  CredentialOfferEventNames,
   CredentialOfferSession,
   CredentialOfferV1_0_13,
   CredentialRequest,
   CredentialRequestV1_0_13,
   CredentialResponse,
   DID_NO_DIDDOC_ERROR,
+  EVENTS,
   IAT_ERROR,
   ISSUER_CONFIG_ERROR,
   IssueStatus,
@@ -35,19 +40,32 @@ import {
   TYP_ERROR,
   URIState
 } from '@sphereon/oid4vci-common'
-import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphereon/oid4vci-common'
-import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common'
-import { OpenidFederationMetadata } from '@sphereon/oid4vci-common'
-import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import {
+  CompactSdJwtVc,
+  CredentialMapper,
+  InitiatorType,
+  SubSystem,
+  System,
+  W3CVerifiableCredential
+} from '@sphereon/ssi-types'
 
-import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
+import {
+  assertValidPinNumber,
+  createCredentialOfferObject,
+  createCredentialOfferURIFromObject,
+  CredentialOfferGrantInput
+} from './functions'
 import { LookupStateManager } from './state-manager'
-import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
+import {
+  CredentialDataSupplier,
+  CredentialDataSupplierArgs,
+  CredentialIssuanceInput,
+  CredentialSignerCallback
+} from './types'
 
 export class VcIssuer<DIDDoc extends object> {
   private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_13
   private readonly _authorizationServerMetadata: AuthorizationServerMetadata
-  private readonly _openidFederationMetadata?: OpenidFederationMetadata
   private readonly _defaultCredentialOfferBaseUri?: string
   private readonly _credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
   private readonly _jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
@@ -61,7 +79,6 @@ export class VcIssuer<DIDDoc extends object> {
     issuerMetadata: CredentialIssuerMetadataOptsV1_0_13,
     authorizationServerMetadata: AuthorizationServerMetadata,
     args: {
-      openidFederationMetadata?: OpenidFederationMetadata
       txCode?: TxCode
       baseUri?: string
       credentialOfferSessions: IStateManager<CredentialOfferSession>
@@ -77,7 +94,6 @@ export class VcIssuer<DIDDoc extends object> {
     this.setDefaultTokenEndpoint(issuerMetadata)
     this._issuerMetadata = issuerMetadata
     this._authorizationServerMetadata = authorizationServerMetadata
-    this._openidFederationMetadata = args.openidFederationMetadata
     this._defaultCredentialOfferBaseUri = args.defaultCredentialOfferBaseUri
     this._credentialOfferSessions = args.credentialOfferSessions
     this._cNonces = args.cNonces
@@ -670,9 +686,5 @@ export class VcIssuer<DIDDoc extends object> {
   
   public get authorizationServerMetadata() {
     return this._authorizationServerMetadata
-  }
-  
-  public get openidFederationMetadata() {
-    return this._openidFederationMetadata
   }
 }
