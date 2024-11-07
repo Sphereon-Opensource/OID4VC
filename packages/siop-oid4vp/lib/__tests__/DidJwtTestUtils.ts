@@ -1,5 +1,4 @@
 import { JwtPayload, parseJWT, SigningAlgo } from '@sphereon/oid4vc-common'
-import { Jwt } from '@sphereon/oid4vc-common/dist/types/CredentialIssuance.types'
 import { VerifyCallback } from '@sphereon/wellknown-dids-client'
 import {
   createJWT,
@@ -19,13 +18,14 @@ import { Resolvable } from 'did-resolver'
 import { DEFAULT_EXPIRATION_TIME, ResponseIss, SIOPErrors, VerifiedJWT, VerifyJwtCallback } from '../types'
 
 import { getResolver } from './ResolverTestUtils'
+import { JWTDecoded } from 'did-jwt/src/JWT'
 
 export async function verifyDidJWT(jwt: string, resolver: Resolvable, options: JWTVerifyOptions): Promise<VerifiedJWT> {
   try {
     return await verifyJWT(jwt, { ...options, resolver })
   } catch (e) {
     if(e.message.includes('502 Bad Gateway')) { // Let the tests pass when Uniresolver is down.
-      const { payload } = decodeJWT(jwt) as Jwt
+      const { payload } = decodeJWT(jwt) as JWTDecoded
       const { exp } = payload
       const currentTimestamp = Math.floor(Date.now() / 1000)
       if(currentTimestamp > exp) {
