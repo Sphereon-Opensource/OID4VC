@@ -64,7 +64,7 @@ const getResolver = () => {
   return { resolve }
 }
 
-describe.skip('OID4VCI-Client using Mattr issuer should', () => { // FIXME remote gives 502 bad gateway
+describe('OID4VCI-Client using Mattr issuer should', () => {
   async function testWithOp(format: string | string[]) {
     const did = await generateCustomDid({ seed: u8a.fromString(hexPrivateKey, 'base16') })
     expect(did).toBeDefined()
@@ -222,7 +222,7 @@ async function getOffer(types: string | string[]): Promise<InitiateOfferResponse
   return (await credentialOffer.json()) as InitiateOfferResponse
 }
 
-describe.skip('Mattr OID4VP v18 credential offer', () => { // FIXME remote gives 502 bad gateway
+describe('Mattr OID4VP v18 credential offer', () => {
   test('should verify using request directly', async () => {
     const offer = await getOffer('OpenBadgeCredential')
     const authorizationRequest = await AuthorizationRequest.fromUriOrJwt(offer.authorizeRequestUri)
