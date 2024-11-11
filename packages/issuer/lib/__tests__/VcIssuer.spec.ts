@@ -14,6 +14,7 @@ import { DIDDocument } from 'did-resolver'
 
 import { VcIssuer } from '../VcIssuer'
 import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../builder'
+import { AuthorizationServerMetadataBuilder } from '../builder/AuthorizationServerMetadataBuilder'
 import { MemoryStates } from '../state-manager'
 
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
@@ -47,6 +48,17 @@ const verifiableCredential_withoutDid = {
     },
   },
 }
+
+const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
+  .withIssuer(IDENTIPROOF_ISSUER_URL)
+  .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
+  .withTokenEndpoint('http://localhost:3456/test/token')
+  .withAuthorizationEndpoint('https://token-endpoint.example.com/authorize')
+  .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
+  .withResponseTypesSupported(['code', 'token', 'id_token'])
+  .withScopesSupported(['openid', 'abcdef'])
+  .build();
+
 
 describe('VcIssuer', () => {
   let vcIssuer: VcIssuer<DIDDocument>
@@ -121,6 +133,7 @@ describe('VcIssuer', () => {
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
+      .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',
@@ -520,6 +533,7 @@ describe('VcIssuer without did', () => {
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
+      .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',
