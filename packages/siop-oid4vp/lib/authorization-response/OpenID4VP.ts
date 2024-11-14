@@ -288,7 +288,7 @@ export const assertValidVerifiablePresentations = async (args: {
 }) => {
   const {presentations} = args
   if (!presentations || (Array.isArray(presentations) && presentations.length === 0)) {
-    throw Error('missing presentation(s)')
+    throw Error(Promise.reject('missing presentation(s)'))
   }
   const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
   if (
