@@ -215,7 +215,7 @@ export class AuthorizationResponse {
     if (this._payload?.vp_token) {
       const presentations = this.payload.vp_token ? await extractPresentationsFromVpToken(this.payload.vp_token, opts) : []
       if (!presentations || (Array.isArray(presentations) && presentations.length === 0)) {
-        return Promise.reject('missing presentation(s)')
+        return Promise.reject(Error('missing presentation(s)'))
       }
       const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
 

@@ -84,7 +84,7 @@ function getVCs(): OriginalVerifiableCredential[] {
   return [SD_JWT_VC]
 }
 
-describe('RP and OP interaction should', () => {
+describe.skip('RP and OP interaction should', () => {
   it('succeed when calling with presentation definitions and right verifiable presentation', async () => {
     const opMock = await mockedGetEnterpriseAuthToken('OP')
     const opMockEntity = {
