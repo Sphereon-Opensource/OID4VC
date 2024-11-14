@@ -70,8 +70,11 @@ export const verifyPresentations = async (
   authorizationResponse: AuthorizationResponse,
   verifyOpts: VerifyAuthorizationResponseOpts,
 ): Promise<VerifiedOpenID4VPSubmission | null> => {
-  const presentations = authorizationResponse.payload.vp_token
-    ? await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher }) : undefined
+  if (!authorizationResponse.payload.vp_token || Array.isArray(authorizationResponse.payload.vp_token) && authorizationResponse.payload.vp_token.length === 0) {
+    return Promise.reject('the payload is missing a vp_token')
+  }
+  
+  const presentations = await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher }) 
   const presentationDefinitions = verifyOpts.presentationDefinitions
     ? Array.isArray(verifyOpts.presentationDefinitions)
       ? verifyOpts.presentationDefinitions
