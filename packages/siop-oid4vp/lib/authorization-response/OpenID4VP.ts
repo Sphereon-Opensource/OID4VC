@@ -71,8 +71,7 @@ export const verifyPresentations = async (
   verifyOpts: VerifyAuthorizationResponseOpts,
 ): Promise<VerifiedOpenID4VPSubmission | null> => {
   const presentations = authorizationResponse.payload.vp_token
-    ? await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher })
-    : []
+    ? await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher }) : undefined
   const presentationDefinitions = verifyOpts.presentationDefinitions
     ? Array.isArray(verifyOpts.presentationDefinitions)
       ? verifyOpts.presentationDefinitions
@@ -135,11 +134,14 @@ export const extractPresentationsFromVpToken = async (
   vpToken: Array<W3CVerifiablePresentation | CompactSdJwtVc | string> | W3CVerifiablePresentation | CompactSdJwtVc | string,
   opts?: { hasher?: Hasher },
 ): Promise<WrappedVerifiablePresentation[] | WrappedVerifiablePresentation> => {
-  if (Array.isArray(vpToken)) {
-    return vpToken.map((vp) => CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: opts?.hasher }))
+  const tokens = Array.isArray(vpToken) ? vpToken : [vpToken];
+  const wrappedTokens = tokens.map(vp =>
+    CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: opts?.hasher })
+  );
+
+  return tokens.length === 1 ? wrappedTokens[0] : wrappedTokens;
   }
-  return CredentialMapper.toWrappedVerifiablePresentation(vpToken, { hasher: opts?.hasher })
-}
+
 export const createPresentationSubmission = async (
   verifiablePresentations: W3CVerifiablePresentation[],
   opts?: { presentationDefinitions: (PresentationDefinitionWithLocation | IPresentationDefinition)[] },
