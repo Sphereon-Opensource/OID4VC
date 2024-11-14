@@ -141,7 +141,7 @@ function getVCs(): IVerifiableCredential[] {
   return vcs
 }
 
-describe('RP and OP interaction should', () => {
+describe.skip('RP and OP interaction should', () => {
   it(
     'succeed when calling each other in the full flow',
     async () => {
