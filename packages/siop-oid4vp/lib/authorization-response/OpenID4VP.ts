@@ -105,8 +105,10 @@ export const verifyPresentations = async (
     return null
   }
 
-  const presentationsArray = presentations ? (Array.isArray(presentations) ? presentations : [presentations]) : []
-
+  if (!presentations || (Array.isArray(presentations) && presentations.length === 0)) {
+    return Promise.reject('missing presentation(s)')
+  }
+  const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
   const presentationsWithoutMdoc = presentationsArray.filter((p) => p.format !== 'mso_mdoc')
   const nonces = new Set(presentationsWithoutMdoc.map(extractNonceFromWrappedVerifiablePresentation))
   if (presentationsWithoutMdoc.length > 0 && nonces.size !== 1) {
@@ -284,7 +286,11 @@ export const assertValidVerifiablePresentations = async (args: {
     hasher?: Hasher
   }
 }) => {
-  const presentationsArray = args.presentations ? (Array.isArray(args.presentations) ? args.presentations : [args.presentations]) : []
+  const {presentations} = args
+  if (!presentations || (Array.isArray(presentations) && presentations.length === 0)) {
+    throw Error('missing presentation(s)')
+  }
+  const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
   if (
     (!args.presentationDefinitions || args.presentationDefinitions.filter((a) => a.definition).length === 0) &&
     (!presentationsArray || (Array.isArray(presentationsArray) && presentationsArray.filter((vp) => vp.presentation).length === 0))
