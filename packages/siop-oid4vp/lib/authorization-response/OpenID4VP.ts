@@ -102,7 +102,7 @@ export const verifyPresentations = async (
     return null
   }
 
-  const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
+  const presentationsArray = presentations ? (Array.isArray(presentations) ? presentations : [presentations]) : []
 
   const presentationsWithoutMdoc = presentationsArray.filter((p) => p.format !== 'mso_mdoc')
   const nonces = new Set(presentationsWithoutMdoc.map(extractNonceFromWrappedVerifiablePresentation))
@@ -281,7 +281,7 @@ export const assertValidVerifiablePresentations = async (args: {
     hasher?: Hasher
   }
 }) => {
-  const presentationsArray = Array.isArray(args.presentations) ? args.presentations : [args.presentations]
+  const presentationsArray = args.presentations ? (Array.isArray(args.presentations) ? args.presentations : [args.presentations]) : []
   if (
     (!args.presentationDefinitions || args.presentationDefinitions.filter((a) => a.definition).length === 0) &&
     (!presentationsArray || (Array.isArray(presentationsArray) && presentationsArray.filter((vp) => vp.presentation).length === 0))
