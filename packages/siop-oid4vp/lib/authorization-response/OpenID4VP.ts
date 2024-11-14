@@ -285,10 +285,10 @@ export const assertValidVerifiablePresentations = async (args: {
     presentationSubmission?: PresentationSubmission
     hasher?: Hasher
   }
-}) => {
+}) : Promise<void> => {
   const {presentations} = args
   if (!presentations || (Array.isArray(presentations) && presentations.length === 0)) {
-    throw Error(Promise.reject('missing presentation(s)'))
+    return Promise.reject(Error('missing presentation(s)'))
   }
   const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
   if (
@@ -304,15 +304,15 @@ export const assertValidVerifiablePresentations = async (args: {
     args.presentationDefinitions.length &&
     (!presentationsArray || (Array.isArray(presentationsArray) && presentationsArray.length === 0))
   ) {
-    throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)
+    return Promise.reject(Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP))
   } else if (
     (!args.presentationDefinitions || args.presentationDefinitions.length === 0) &&
     presentationsArray &&
     ((Array.isArray(presentationsArray) && presentationsArray.length > 0) || !Array.isArray(presentationsArray))
   ) {
-    throw new Error(SIOPErrors.AUTH_REQUEST_DOESNT_EXPECT_VP)
+    return Promise.reject(Error(SIOPErrors.AUTH_REQUEST_DOESNT_EXPECT_VP))
   } else if (args.presentationDefinitions && !args.opts.presentationSubmission) {
-    throw new Error(`No presentation submission present. Please use presentationSubmission opt argument!`)
+    return Promise.reject(Error(`No presentation submission present. Please use presentationSubmission opt argument!`))
   } else if (args.presentationDefinitions && presentationsArray) {
     await PresentationExchange.validatePresentationsAgainstDefinitions(
       args.presentationDefinitions,
