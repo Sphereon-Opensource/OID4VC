@@ -214,7 +214,7 @@ export class AuthorizationResponse {
     let nonce: string | undefined = this._payload.nonce
     if (this._payload?.vp_token) {
       const presentations = this.payload.vp_token ? await extractPresentationsFromVpToken(this.payload.vp_token, opts) : []
-      const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
+      const presentationsArray = presentations ? (Array.isArray(presentations) ? presentations : [presentations]) : []
 
       // We do not verify them, as that is done elsewhere. So we simply can take the first nonce
       nonce = presentationsArray
