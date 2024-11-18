@@ -189,6 +189,18 @@ export interface CredentialOfferPayloadV1_0_13 {
   client_id?: string;
 }
 
+export interface FederationEntityMetadataOpts {
+  federation_fetch_endpoint?: string
+  federation_list_endpoint?: string
+  federation_resolve_endpoint?: string
+  federation_trust_mark_status_endpoint?: string
+  federation_trust_mark_list_endpoint?: string
+  federation_trust_mark_endpoint?: string
+  federation_historical_keys_endpoint?: string
+  organization_name?: string
+  homepage_uri?: string
+}
+
 export interface CredentialIssuerMetadataOptsV1_0_13 {
   credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   batch_credential_endpoint?: string; // OPTIONAL. URL of the Credential Issuer's Batch Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components. If omitted, the Credential Issuer does not support the Batch Credential Endpoint.
@@ -205,6 +217,7 @@ export interface CredentialIssuerMetadataOptsV1_0_13 {
   //todo: these two are not mentioned in the spec
   token_endpoint?: string;
   credential_supplier_config?: CredentialSupplierConfig;
+  federation_entity?: FederationEntityMetadataOpts
 }
 
 // These can be used be a reducer
@@ -226,7 +239,8 @@ export const credentialIssuerMetadataFieldNames: Array<keyof CredentialIssuerMet
 
   // Optional fields from v1.0.13
   'credential_identifiers_supported',
-  'signed_metadata'
+  'signed_metadata',
+  'federation_entity'
 ] as const
 
 

@@ -220,6 +220,18 @@ export interface RequestStateInfo {
   iat?: number
 }
 
+export interface FederationEntityMetadataOpts {
+  federationFetchEndpoint?: string
+  federationListEndpoint?: string
+  federationResolveEndpoint?: string
+  federationTrustMarkStatusEndpoint?: string
+  federationTrustMarkListEndpoint?: string
+  federationTrustMarkEndpoint?: string
+  federationHistoricalKeysEndpoint?: string
+  organizationName?: string
+  homepageUri?: string
+}
+
 interface DiscoveryMetadataCommonOpts {
   //TODO add the check: Mandatory if PassBy.Value
   authorizationEndpoint?: Schema | string
@@ -263,7 +275,7 @@ interface DiscoveryMetadataCommonOpts {
   requireRequestUriRegistration?: boolean // from openid connect discovery 1_0
   opPolicyUri?: string // from openid connect discovery 1_0
   opTosUri?: string // from openid connect discovery 1_0
-
+  federationEntity?: FederationEntityMetadataOpts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }
@@ -297,6 +309,18 @@ interface JWT_VCDiscoveryMetadataOpts extends DiscoveryMetadataOptsVID1 {
 interface DiscoveryMetadataOptsVD11 extends DiscoveryMetadataCommonOpts {
   idTokenTypesSupported?: IdTokenType[] | IdTokenType
   vpFormatsSupported?: Format // from oidc4vp
+}
+
+export interface FederationEntityMetadataPayload {
+  federation_fetch_endpoint?: string
+  federation_list_endpoint?: string
+  federation_resolve_endpoint?: string
+  federation_trust_mark_status_endpoint?: string
+  federation_trust_mark_list_endpoint?: string
+  federation_trust_mark_endpoint?: string
+  federation_historical_keys_endpoint?: string
+  organization_name?: string
+  homepage_uri?: string
 }
 
 // https://openid.net/specs/openid-connect-self-issued-v2-1_0.html#section-8.2
@@ -358,6 +382,7 @@ interface DiscoveryMetadataCommonPayload {
   require_request_uri_registration?: boolean
   op_policy_uri?: string
   op_tos_uri?: string
+  federation_entity?: FederationEntityMetadataPayload
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
