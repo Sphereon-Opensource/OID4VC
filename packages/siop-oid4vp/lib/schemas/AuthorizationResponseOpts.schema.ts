@@ -431,72 +431,6 @@ export const AuthorizationResponseOptsSchemaObj = {
             "opTosUri": {
               "type": "string"
             },
-            "federationEntity": {
-              "$ref": "#/definitions/FederationEntityMetadataOpts"
-            },
-            "openidCredentialVerifier": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "vp_formats": {
-                  "$ref": "#/definitions/Format"
-                },
-                "redirect_uris": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "token_endpoint_auth_method": {
-                  "type": "string"
-                },
-                "grant_types": {
-                  "type": "string"
-                },
-                "response_types": {
-                  "type": "string"
-                },
-                "client_name": {
-                  "type": "string"
-                },
-                "client_uri": {
-                  "type": "string"
-                },
-                "logo_uri": {
-                  "type": "string"
-                },
-                "scope": {
-                  "type": "string"
-                },
-                "contacts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "tos_uri": {
-                  "type": "string"
-                },
-                "policy_uri": {
-                  "type": "string"
-                },
-                "jwks_uri": {
-                  "type": "string"
-                },
-                "jwks": {
-                  "$ref": "#/definitions/JWKS"
-                },
-                "software_id": {
-                  "type": "string"
-                },
-                "software_version": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "vp_formats"
-              ]
-            },
             "client_id": {
               "type": "string"
             },
@@ -566,7 +500,6 @@ export const AuthorizationResponseOptsSchemaObj = {
             }
           },
           "required": [
-            "openidCredentialVerifier",
             "passBy"
           ]
         },
@@ -932,72 +865,6 @@ export const AuthorizationResponseOptsSchemaObj = {
             },
             "opTosUri": {
               "type": "string"
-            },
-            "federationEntity": {
-              "$ref": "#/definitions/FederationEntityMetadataOpts"
-            },
-            "openidCredentialVerifier": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "vp_formats": {
-                  "$ref": "#/definitions/Format"
-                },
-                "redirect_uris": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "token_endpoint_auth_method": {
-                  "type": "string"
-                },
-                "grant_types": {
-                  "type": "string"
-                },
-                "response_types": {
-                  "type": "string"
-                },
-                "client_name": {
-                  "type": "string"
-                },
-                "client_uri": {
-                  "type": "string"
-                },
-                "logo_uri": {
-                  "type": "string"
-                },
-                "scope": {
-                  "type": "string"
-                },
-                "contacts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "tos_uri": {
-                  "type": "string"
-                },
-                "policy_uri": {
-                  "type": "string"
-                },
-                "jwks_uri": {
-                  "type": "string"
-                },
-                "jwks": {
-                  "$ref": "#/definitions/JWKS"
-                },
-                "software_id": {
-                  "type": "string"
-                },
-                "software_version": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "vp_formats"
-              ]
             },
             "client_id": {
               "type": "string"
@@ -1062,7 +929,6 @@ export const AuthorizationResponseOptsSchemaObj = {
             }
           },
           "required": [
-            "openidCredentialVerifier",
             "passBy"
           ]
         },
@@ -1429,72 +1295,6 @@ export const AuthorizationResponseOptsSchemaObj = {
             "opTosUri": {
               "type": "string"
             },
-            "federationEntity": {
-              "$ref": "#/definitions/FederationEntityMetadataOpts"
-            },
-            "openidCredentialVerifier": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "vp_formats": {
-                  "$ref": "#/definitions/Format"
-                },
-                "redirect_uris": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "token_endpoint_auth_method": {
-                  "type": "string"
-                },
-                "grant_types": {
-                  "type": "string"
-                },
-                "response_types": {
-                  "type": "string"
-                },
-                "client_name": {
-                  "type": "string"
-                },
-                "client_uri": {
-                  "type": "string"
-                },
-                "logo_uri": {
-                  "type": "string"
-                },
-                "scope": {
-                  "type": "string"
-                },
-                "contacts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "tos_uri": {
-                  "type": "string"
-                },
-                "policy_uri": {
-                  "type": "string"
-                },
-                "jwks_uri": {
-                  "type": "string"
-                },
-                "jwks": {
-                  "$ref": "#/definitions/JWKS"
-                },
-                "software_id": {
-                  "type": "string"
-                },
-                "software_version": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "vp_formats"
-              ]
-            },
             "idTokenTypesSupported": {
               "anyOf": [
                 {
@@ -1513,7 +1313,6 @@ export const AuthorizationResponseOptsSchemaObj = {
             }
           },
           "required": [
-            "openidCredentialVerifier",
             "passBy"
           ]
         }
@@ -1650,38 +1449,116 @@ export const AuthorizationResponseOptsSchemaObj = {
         "distributed"
       ]
     },
-    "FederationEntityMetadataOpts": {
+    "JWKS": {
       "type": "object",
       "properties": {
-        "federationFetchEndpoint": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JWK"
+          }
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "additionalProperties": false
+    },
+    "JWK": {
+      "type": "object",
+      "properties": {
+        "kty": {
           "type": "string"
         },
-        "federationListEndpoint": {
+        "crv": {
           "type": "string"
         },
-        "federationResolveEndpoint": {
+        "x": {
           "type": "string"
         },
-        "federationTrustMarkStatusEndpoint": {
+        "y": {
           "type": "string"
         },
-        "federationTrustMarkListEndpoint": {
+        "e": {
           "type": "string"
         },
-        "federationTrustMarkEndpoint": {
+        "n": {
           "type": "string"
         },
-        "federationHistoricalKeysEndpoint": {
+        "alg": {
           "type": "string"
         },
-        "organizationName": {
+        "d": {
           "type": "string"
         },
-        "homepageUri": {
+        "dp": {
+          "type": "string"
+        },
+        "dq": {
+          "type": "string"
+        },
+        "ext": {
+          "type": "boolean"
+        },
+        "k": {
+          "type": "string"
+        },
+        "key_ops": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "kid": {
+          "type": "string"
+        },
+        "oth": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "d": {
+                "type": "string"
+              },
+              "r": {
+                "type": "string"
+              },
+              "t": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "p": {
+          "type": "string"
+        },
+        "q": {
+          "type": "string"
+        },
+        "qi": {
+          "type": "string"
+        },
+        "use": {
+          "type": "string"
+        },
+        "x5c": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "x5t": {
+          "type": "string"
+        },
+        "x5t#S256": {
+          "type": "string"
+        },
+        "x5u": {
           "type": "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": {}
     },
     "Format": {
       "type": "object",
@@ -1812,117 +1689,6 @@ export const AuthorizationResponseOptsSchemaObj = {
         "alg"
       ],
       "additionalProperties": false
-    },
-    "JWKS": {
-      "type": "object",
-      "properties": {
-        "keys": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/JWK"
-          }
-        }
-      },
-      "required": [
-        "keys"
-      ],
-      "additionalProperties": false
-    },
-    "JWK": {
-      "type": "object",
-      "properties": {
-        "kty": {
-          "type": "string"
-        },
-        "crv": {
-          "type": "string"
-        },
-        "x": {
-          "type": "string"
-        },
-        "y": {
-          "type": "string"
-        },
-        "e": {
-          "type": "string"
-        },
-        "n": {
-          "type": "string"
-        },
-        "alg": {
-          "type": "string"
-        },
-        "d": {
-          "type": "string"
-        },
-        "dp": {
-          "type": "string"
-        },
-        "dq": {
-          "type": "string"
-        },
-        "ext": {
-          "type": "boolean"
-        },
-        "k": {
-          "type": "string"
-        },
-        "key_ops": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "kid": {
-          "type": "string"
-        },
-        "oth": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "d": {
-                "type": "string"
-              },
-              "r": {
-                "type": "string"
-              },
-              "t": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "p": {
-          "type": "string"
-        },
-        "q": {
-          "type": "string"
-        },
-        "qi": {
-          "type": "string"
-        },
-        "use": {
-          "type": "string"
-        },
-        "x5c": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "x5t": {
-          "type": "string"
-        },
-        "x5t#S256": {
-          "type": "string"
-        },
-        "x5u": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": {}
     },
     "IdTokenType": {
       "type": "string",

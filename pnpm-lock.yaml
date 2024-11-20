@@ -76,7 +76,7 @@ importers:
         version: link:../issuer
       '@sphereon/ssi-types':
         specifier: 0.30.1
-        version: 0.30.1(encoding@0.1.13)(ts-node@10.9.2(@types/node@18.19.54)(typescript@5.4.5))
+        version: 0.30.1(encoding@0.1.13)(ts-node@10.9.2(@types/node@18.19.54)(typescript@5.5.3))
       jose:
         specifier: ^4.10.0
         version: 4.15.9
@@ -129,7 +129,7 @@ importers:
     devDependencies:
       '@sphereon/ssi-sdk-ext.key-utils':
         specifier: ^0.23.0
-        version: 0.23.0(expo@48.0.21(@babel/core@7.25.2)(encoding@0.1.13))(msrcrypto@1.5.8)(react-native-securerandom@1.0.1)
+        version: 0.23.0(expo@48.0.21(@babel/core@7.25.2)(encoding@0.1.13))(msrcrypto@1.5.8)(react-native-securerandom@1.0.1(react-native@0.71.19(@babel/core@7.25.2)(encoding@0.1.13)(react@18.3.1)))
       '@transmute/did-key.js':
         specifier: ^0.3.0-unstable.10
         version: 0.3.0-unstable.10(encoding@0.1.13)
@@ -10164,7 +10164,7 @@ snapshots:
   '@digitalcredentials/bnid@2.1.2(react-native@0.71.19(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(encoding@0.1.13)(react@18.3.1))':
     dependencies:
       '@digitalcredentials/base58-universal': 1.0.1
-      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(encoding@0.1.13)(react@18.3.1))
+      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.25.2)(encoding@0.1.13)(react@18.3.1))
       yargs: 15.4.1
     transitivePeerDependencies:
       - react-native
@@ -11982,7 +11982,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@sphereon/isomorphic-webcrypto@2.4.1-unstable.0(expo@48.0.21(@babel/core@7.25.2)(encoding@0.1.13))(msrcrypto@1.5.8)(react-native-securerandom@1.0.1)':
+  '@sphereon/isomorphic-webcrypto@2.4.1-unstable.0(expo@48.0.21(@babel/core@7.25.2)(encoding@0.1.13))(msrcrypto@1.5.8)(react-native-securerandom@1.0.1(react-native@0.71.19(@babel/core@7.25.2)(encoding@0.1.13)(react@18.3.1)))':
     dependencies:
       '@peculiar/webcrypto': 1.5.0
       asmcrypto.js: 2.3.2
@@ -12000,7 +12000,7 @@ snapshots:
       webcrypto-shim: 0.1.7
     optionalDependencies:
       expo: 48.0.21(@babel/core@7.25.2)(encoding@0.1.13)
-      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(encoding@0.1.13)(react@18.3.1))
+      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.25.2)(encoding@0.1.13)(react@18.3.1))
 
   '@sphereon/kmp-mdl-mdoc@0.2.0-SNAPSHOT.22':
     dependencies:
@@ -12264,10 +12264,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@sphereon/ssi-sdk-ext.key-utils@0.23.0(expo@48.0.21(@babel/core@7.25.2)(encoding@0.1.13))(msrcrypto@1.5.8)(react-native-securerandom@1.0.1)':
+  '@sphereon/ssi-sdk-ext.key-utils@0.23.0(expo@48.0.21(@babel/core@7.25.2)(encoding@0.1.13))(msrcrypto@1.5.8)(react-native-securerandom@1.0.1(react-native@0.71.19(@babel/core@7.25.2)(encoding@0.1.13)(react@18.3.1)))':
     dependencies:
       '@ethersproject/random': 5.7.0
-      '@sphereon/isomorphic-webcrypto': 2.4.1-unstable.0(expo@48.0.21(@babel/core@7.25.2)(encoding@0.1.13))(msrcrypto@1.5.8)(react-native-securerandom@1.0.1)
+      '@sphereon/isomorphic-webcrypto': 2.4.1-unstable.0(expo@48.0.21(@babel/core@7.25.2)(encoding@0.1.13))(msrcrypto@1.5.8)(react-native-securerandom@1.0.1(react-native@0.71.19(@babel/core@7.25.2)(encoding@0.1.13)(react@18.3.1)))
       '@stablelib/ed25519': 1.0.3
       '@stablelib/sha256': 1.0.1
       '@stablelib/sha512': 1.0.1
@@ -18726,7 +18726,7 @@ snapshots:
       react-native: 0.71.19(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(encoding@0.1.13)(react@18.3.1)
     optional: true
 
-  react-native-securerandom@1.0.1(react-native@0.71.19(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(encoding@0.1.13)(react@18.3.1)):
+  react-native-securerandom@1.0.1(react-native@0.71.19(@babel/core@7.25.2)(encoding@0.1.13)(react@18.3.1)):
     dependencies:
       base64-js: 1.5.1
       react-native: 0.71.19(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(encoding@0.1.13)(react@18.3.1)

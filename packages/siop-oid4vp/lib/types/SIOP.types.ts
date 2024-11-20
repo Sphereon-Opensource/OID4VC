@@ -1,6 +1,10 @@
 // noinspection JSUnusedGlobalSymbols
 import { JarmClientMetadata } from '@sphereon/jarm'
-import { DynamicRegistrationClientMetadata, JWKS, SigningAlgo } from '@sphereon/oid4vc-common'
+import {
+  DynamicRegistrationClientMetadata,
+  JWKS,
+  SigningAlgo
+} from '@sphereon/oid4vc-common'
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import {
   AdditionalClaims,
@@ -11,22 +15,28 @@ import {
   PresentationSubmission,
   W3CVerifiableCredential,
   W3CVerifiablePresentation,
-  WrappedVerifiablePresentation,
+  WrappedVerifiablePresentation
 } from '@sphereon/ssi-types'
 
-import { AuthorizationRequest, CreateAuthorizationRequestOpts, PropertyTargets, VerifyAuthorizationRequestOpts } from '../authorization-request'
+import {
+  AuthorizationRequest,
+  CreateAuthorizationRequestOpts,
+  PropertyTargets,
+  VerifyAuthorizationRequestOpts
+} from '../authorization-request'
 import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   PresentationDefinitionWithLocation,
   PresentationVerificationCallback,
-  VerifyAuthorizationResponseOpts,
+  VerifyAuthorizationResponseOpts
 } from '../authorization-response'
-import { JwksMetadataParams } from '../helpers/ExtractJwks'
+import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 
 import { JWTPayload, VerifiedJWT } from './index'
+
 export const DEFAULT_EXPIRATION_TIME = 10 * 60
 
 // https://openid.net/specs/openid-connect-core-1_0.html#RequestObject
@@ -220,6 +230,18 @@ export interface RequestStateInfo {
   iat?: number
 }
 
+export interface FederationEntityMetadataPayload {
+  federation_fetch_endpoint?: string
+  federation_list_endpoint?: string
+  federation_resolve_endpoint?: string
+  federation_trust_mark_status_endpoint?: string
+  federation_trust_mark_list_endpoint?: string
+  federation_trust_mark_endpoint?: string
+  federation_historical_keys_endpoint?: string
+  organization_name?: string
+  homepage_uri?: string
+}
+
 export interface FederationEntityMetadataOpts {
   federationFetchEndpoint?: string
   federationListEndpoint?: string
@@ -231,6 +253,16 @@ export interface FederationEntityMetadataOpts {
   organizationName?: string
   homepageUri?: string
 }
+
+export type OpenIDCredentialVerifierOpts = {
+  federationEntity?: FederationEntityMetadataOpts;
+  openidCredentialVerifier?: DynamicRegistrationClientMetadata & { vp_formats: Format };
+};
+
+export type OpenIDCredentialVerifierPayload = {
+  federation_entity?: FederationEntityMetadataPayload;
+  openid_credential_verifier?: DynamicRegistrationClientMetadata & { vp_formats: Format };
+};
 
 interface DiscoveryMetadataCommonOpts {
   //TODO add the check: Mandatory if PassBy.Value
@@ -275,8 +307,6 @@ interface DiscoveryMetadataCommonOpts {
   requireRequestUriRegistration?: boolean // from openid connect discovery 1_0
   opPolicyUri?: string // from openid connect discovery 1_0
   opTosUri?: string // from openid connect discovery 1_0
-  federationEntity?: FederationEntityMetadataOpts
-  openidCredentialVerifier: DynamicRegistrationClientMetadata & { vp_formats: Format }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }
@@ -310,18 +340,6 @@ interface JWT_VCDiscoveryMetadataOpts extends DiscoveryMetadataOptsVID1 {
 interface DiscoveryMetadataOptsVD11 extends DiscoveryMetadataCommonOpts {
   idTokenTypesSupported?: IdTokenType[] | IdTokenType
   vpFormatsSupported?: Format // from oidc4vp
-}
-
-export interface FederationEntityMetadataPayload {
-  federation_fetch_endpoint?: string
-  federation_list_endpoint?: string
-  federation_resolve_endpoint?: string
-  federation_trust_mark_status_endpoint?: string
-  federation_trust_mark_list_endpoint?: string
-  federation_trust_mark_endpoint?: string
-  federation_historical_keys_endpoint?: string
-  organization_name?: string
-  homepage_uri?: string
 }
 
 // https://openid.net/specs/openid-connect-self-issued-v2-1_0.html#section-8.2
@@ -383,8 +401,6 @@ interface DiscoveryMetadataCommonPayload {
   require_request_uri_registration?: boolean
   op_policy_uri?: string
   op_tos_uri?: string
-  federation_entity?: FederationEntityMetadataPayload
-  openid_credential_verifier?: DynamicRegistrationClientMetadata & { vp_formats: Format }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
@@ -425,14 +441,12 @@ export type RPRegistrationMetadataOpts = Partial<
     | 'subjectTypesSupported'
     | 'subject_syntax_types_supported'
     | 'vpFormatsSupported'
-    | 'federationEntity'
-    | 'openidCredentialVerifier'
     | 'clientName'
     | 'logo_uri'
     | 'tos_uri'
     | 'clientPurpose'
   >
-> & {
+> & OpenIDCredentialVerifierOpts & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }
@@ -447,12 +461,10 @@ export type RPRegistrationMetadataPayload = Pick<
   | 'subject_types_supported'
   | 'subject_syntax_types_supported'
   | 'vp_formats'
-  | 'federation_entity'
-  | 'openid_credential_verifier'
   | 'client_name'
   | 'logo_uri'
   | 'client_purpose'
-> & {
+> & OpenIDCredentialVerifierPayload & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }

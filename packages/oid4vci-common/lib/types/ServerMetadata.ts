@@ -78,9 +78,43 @@ export type RevocationEndpointAuthSigningAlg =
 
 export type PKCECodeChallengeMethod =
   | 'plain'   
-  | 'S256'; 
+  | 'S256';
 
-export interface AuthorizationServerMetadata extends DynamicRegistrationClientMetadata {
+export interface FederationEntityMetadata {
+  federation_fetch_endpoint?: string;
+  federation_list_endpoint?: string;
+  federation_resolve_endpoint?: string;
+  federation_trust_mark_status_endpoint?: string;
+  federation_trust_mark_list_endpoint?: string;
+  federation_trust_mark_endpoint?: string;
+  federation_historical_keys_endpoint?: string;
+  organization_name?: string;
+  homepage_uri?: string;
+}
+
+export interface JwtObject {
+  alg_values_supported?: Array<string>
+}
+
+export interface FormatSupported {
+  jwt?: JwtObject;
+  jwt_vc?: JwtObject;
+  jwt_vc_json?: JwtObject;
+  jwt_vp?: JwtObject;
+  jwt_vp_json?: JwtObject;
+}
+
+export type WalletMetadata = {
+  presentation_definition_uri_supported?: boolean
+  vp_formats_supported?: FormatSupported
+}
+
+export type OpenIDWalletProviderMetadata = {
+  federation_entity?: FederationEntityMetadata
+  openid_wallet_provider?: AuthorizationServerMetadata & WalletMetadata
+}
+
+export interface AuthorizationServerMetadata extends DynamicRegistrationClientMetadata, OpenIDWalletProviderMetadata {
   issuer: string;
   authorization_endpoint?: string;
   token_endpoint?: string;
@@ -159,7 +193,9 @@ export const authorizationServerMetadataFieldNames: Array<keyof AuthorizationSer
   'introspection_endpoint_auth_methods_supported',
   'introspection_endpoint_auth_signing_alg_values_supported',
   'code_challenge_methods_supported',
-  'signed_metadata'
+  'signed_metadata',
+  'federation_entity',
+  'openid_wallet_provider'
 ] as const
 
 export enum WellKnownEndpoints {

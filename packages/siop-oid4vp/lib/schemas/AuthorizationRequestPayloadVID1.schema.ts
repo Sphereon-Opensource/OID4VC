@@ -94,6 +94,72 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
     "RPRegistrationMetadataPayload": {
       "type": "object",
       "properties": {
+        "federation_entity": {
+          "$ref": "#/definitions/FederationEntityMetadataPayload"
+        },
+        "openid_credential_verifier": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "vp_formats": {
+              "$ref": "#/definitions/Format"
+            },
+            "redirect_uris": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "token_endpoint_auth_method": {
+              "type": "string"
+            },
+            "grant_types": {
+              "type": "string"
+            },
+            "response_types": {
+              "type": "string"
+            },
+            "client_name": {
+              "type": "string"
+            },
+            "client_uri": {
+              "type": "string"
+            },
+            "logo_uri": {
+              "type": "string"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "contacts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tos_uri": {
+              "type": "string"
+            },
+            "policy_uri": {
+              "type": "string"
+            },
+            "jwks_uri": {
+              "type": "string"
+            },
+            "jwks": {
+              "$ref": "#/definitions/JWKS"
+            },
+            "software_id": {
+              "type": "string"
+            },
+            "software_version": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "vp_formats"
+          ]
+        },
         "client_id": {
           "anyOf": [
             {
@@ -181,72 +247,6 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
             {}
           ]
         },
-        "federation_entity": {
-          "$ref": "#/definitions/FederationEntityMetadataPayload"
-        },
-        "openid_credential_verifier": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "vp_formats": {
-              "$ref": "#/definitions/Format"
-            },
-            "redirect_uris": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "token_endpoint_auth_method": {
-              "type": "string"
-            },
-            "grant_types": {
-              "type": "string"
-            },
-            "response_types": {
-              "type": "string"
-            },
-            "client_name": {
-              "type": "string"
-            },
-            "client_uri": {
-              "type": "string"
-            },
-            "logo_uri": {
-              "type": "string"
-            },
-            "scope": {
-              "type": "string"
-            },
-            "contacts": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "tos_uri": {
-              "type": "string"
-            },
-            "policy_uri": {
-              "type": "string"
-            },
-            "jwks_uri": {
-              "type": "string"
-            },
-            "jwks": {
-              "$ref": "#/definitions/JWKS"
-            },
-            "software_id": {
-              "type": "string"
-            },
-            "software_version": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "vp_formats"
-          ]
-        },
         "client_name": {
           "anyOf": [
             {
@@ -273,40 +273,38 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
         }
       }
     },
-    "SigningAlgo": {
-      "type": "string",
-      "enum": [
-        "EdDSA",
-        "RS256",
-        "PS256",
-        "ES256",
-        "ES256K"
-      ]
-    },
-    "ResponseType": {
-      "type": "string",
-      "enum": [
-        "id_token",
-        "vp_token"
-      ]
-    },
-    "Scope": {
-      "type": "string",
-      "enum": [
-        "openid",
-        "openid did_authn",
-        "profile",
-        "email",
-        "address",
-        "phone"
-      ]
-    },
-    "SubjectType": {
-      "type": "string",
-      "enum": [
-        "public",
-        "pairwise"
-      ]
+    "FederationEntityMetadataPayload": {
+      "type": "object",
+      "properties": {
+        "federation_fetch_endpoint": {
+          "type": "string"
+        },
+        "federation_list_endpoint": {
+          "type": "string"
+        },
+        "federation_resolve_endpoint": {
+          "type": "string"
+        },
+        "federation_trust_mark_status_endpoint": {
+          "type": "string"
+        },
+        "federation_trust_mark_list_endpoint": {
+          "type": "string"
+        },
+        "federation_trust_mark_endpoint": {
+          "type": "string"
+        },
+        "federation_historical_keys_endpoint": {
+          "type": "string"
+        },
+        "organization_name": {
+          "type": "string"
+        },
+        "homepage_uri": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
     },
     "Format": {
       "type": "object",
@@ -438,39 +436,6 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
       ],
       "additionalProperties": false
     },
-    "FederationEntityMetadataPayload": {
-      "type": "object",
-      "properties": {
-        "federation_fetch_endpoint": {
-          "type": "string"
-        },
-        "federation_list_endpoint": {
-          "type": "string"
-        },
-        "federation_resolve_endpoint": {
-          "type": "string"
-        },
-        "federation_trust_mark_status_endpoint": {
-          "type": "string"
-        },
-        "federation_trust_mark_list_endpoint": {
-          "type": "string"
-        },
-        "federation_trust_mark_endpoint": {
-          "type": "string"
-        },
-        "federation_historical_keys_endpoint": {
-          "type": "string"
-        },
-        "organization_name": {
-          "type": "string"
-        },
-        "homepage_uri": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
     "JWKS": {
       "type": "object",
       "properties": {
@@ -581,6 +546,41 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
         }
       },
       "additionalProperties": {}
+    },
+    "SigningAlgo": {
+      "type": "string",
+      "enum": [
+        "EdDSA",
+        "RS256",
+        "PS256",
+        "ES256",
+        "ES256K"
+      ]
+    },
+    "ResponseType": {
+      "type": "string",
+      "enum": [
+        "id_token",
+        "vp_token"
+      ]
+    },
+    "Scope": {
+      "type": "string",
+      "enum": [
+        "openid",
+        "openid did_authn",
+        "profile",
+        "email",
+        "address",
+        "phone"
+      ]
+    },
+    "SubjectType": {
+      "type": "string",
+      "enum": [
+        "public",
+        "pairwise"
+      ]
     },
     "ResponseMode": {
       "type": "string",

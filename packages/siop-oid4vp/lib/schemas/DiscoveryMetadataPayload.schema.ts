@@ -355,72 +355,6 @@ export const DiscoveryMetadataPayloadSchemaObj = {
             "op_tos_uri": {
               "type": "string"
             },
-            "federation_entity": {
-              "$ref": "#/definitions/FederationEntityMetadataPayload"
-            },
-            "openid_credential_verifier": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "vp_formats": {
-                  "$ref": "#/definitions/Format"
-                },
-                "redirect_uris": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "token_endpoint_auth_method": {
-                  "type": "string"
-                },
-                "grant_types": {
-                  "type": "string"
-                },
-                "response_types": {
-                  "type": "string"
-                },
-                "client_name": {
-                  "type": "string"
-                },
-                "client_uri": {
-                  "type": "string"
-                },
-                "logo_uri": {
-                  "type": "string"
-                },
-                "scope": {
-                  "type": "string"
-                },
-                "contacts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "tos_uri": {
-                  "type": "string"
-                },
-                "policy_uri": {
-                  "type": "string"
-                },
-                "jwks_uri": {
-                  "type": "string"
-                },
-                "jwks": {
-                  "$ref": "#/definitions/JWKS"
-                },
-                "software_id": {
-                  "type": "string"
-                },
-                "software_version": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "vp_formats"
-              ]
-            },
             "redirect_uris": {
               "type": "array",
               "items": {
@@ -829,72 +763,6 @@ export const DiscoveryMetadataPayloadSchemaObj = {
             },
             "op_tos_uri": {
               "type": "string"
-            },
-            "federation_entity": {
-              "$ref": "#/definitions/FederationEntityMetadataPayload"
-            },
-            "openid_credential_verifier": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "vp_formats": {
-                  "$ref": "#/definitions/Format"
-                },
-                "redirect_uris": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "token_endpoint_auth_method": {
-                  "type": "string"
-                },
-                "grant_types": {
-                  "type": "string"
-                },
-                "response_types": {
-                  "type": "string"
-                },
-                "client_name": {
-                  "type": "string"
-                },
-                "client_uri": {
-                  "type": "string"
-                },
-                "logo_uri": {
-                  "type": "string"
-                },
-                "scope": {
-                  "type": "string"
-                },
-                "contacts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "tos_uri": {
-                  "type": "string"
-                },
-                "policy_uri": {
-                  "type": "string"
-                },
-                "jwks_uri": {
-                  "type": "string"
-                },
-                "jwks": {
-                  "$ref": "#/definitions/JWKS"
-                },
-                "software_id": {
-                  "type": "string"
-                },
-                "software_version": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "vp_formats"
-              ]
             },
             "redirect_uris": {
               "type": "array",
@@ -1308,72 +1176,6 @@ export const DiscoveryMetadataPayloadSchemaObj = {
             "op_tos_uri": {
               "type": "string"
             },
-            "federation_entity": {
-              "$ref": "#/definitions/FederationEntityMetadataPayload"
-            },
-            "openid_credential_verifier": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "vp_formats": {
-                  "$ref": "#/definitions/Format"
-                },
-                "redirect_uris": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "token_endpoint_auth_method": {
-                  "type": "string"
-                },
-                "grant_types": {
-                  "type": "string"
-                },
-                "response_types": {
-                  "type": "string"
-                },
-                "client_name": {
-                  "type": "string"
-                },
-                "client_uri": {
-                  "type": "string"
-                },
-                "logo_uri": {
-                  "type": "string"
-                },
-                "scope": {
-                  "type": "string"
-                },
-                "contacts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "tos_uri": {
-                  "type": "string"
-                },
-                "policy_uri": {
-                  "type": "string"
-                },
-                "jwks_uri": {
-                  "type": "string"
-                },
-                "jwks": {
-                  "$ref": "#/definitions/JWKS"
-                },
-                "software_id": {
-                  "type": "string"
-                },
-                "software_version": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "vp_formats"
-              ]
-            },
             "id_token_types_supported": {
               "anyOf": [
                 {
@@ -1488,38 +1290,116 @@ export const DiscoveryMetadataPayloadSchemaObj = {
         "distributed"
       ]
     },
-    "FederationEntityMetadataPayload": {
+    "JWKS": {
       "type": "object",
       "properties": {
-        "federation_fetch_endpoint": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JWK"
+          }
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "additionalProperties": false
+    },
+    "JWK": {
+      "type": "object",
+      "properties": {
+        "kty": {
           "type": "string"
         },
-        "federation_list_endpoint": {
+        "crv": {
           "type": "string"
         },
-        "federation_resolve_endpoint": {
+        "x": {
           "type": "string"
         },
-        "federation_trust_mark_status_endpoint": {
+        "y": {
           "type": "string"
         },
-        "federation_trust_mark_list_endpoint": {
+        "e": {
           "type": "string"
         },
-        "federation_trust_mark_endpoint": {
+        "n": {
           "type": "string"
         },
-        "federation_historical_keys_endpoint": {
+        "alg": {
           "type": "string"
         },
-        "organization_name": {
+        "d": {
           "type": "string"
         },
-        "homepage_uri": {
+        "dp": {
+          "type": "string"
+        },
+        "dq": {
+          "type": "string"
+        },
+        "ext": {
+          "type": "boolean"
+        },
+        "k": {
+          "type": "string"
+        },
+        "key_ops": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "kid": {
+          "type": "string"
+        },
+        "oth": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "d": {
+                "type": "string"
+              },
+              "r": {
+                "type": "string"
+              },
+              "t": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "p": {
+          "type": "string"
+        },
+        "q": {
+          "type": "string"
+        },
+        "qi": {
+          "type": "string"
+        },
+        "use": {
+          "type": "string"
+        },
+        "x5c": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "x5t": {
+          "type": "string"
+        },
+        "x5t#S256": {
+          "type": "string"
+        },
+        "x5u": {
           "type": "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": {}
     },
     "Format": {
       "type": "object",
@@ -1650,117 +1530,6 @@ export const DiscoveryMetadataPayloadSchemaObj = {
         "alg"
       ],
       "additionalProperties": false
-    },
-    "JWKS": {
-      "type": "object",
-      "properties": {
-        "keys": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/JWK"
-          }
-        }
-      },
-      "required": [
-        "keys"
-      ],
-      "additionalProperties": false
-    },
-    "JWK": {
-      "type": "object",
-      "properties": {
-        "kty": {
-          "type": "string"
-        },
-        "crv": {
-          "type": "string"
-        },
-        "x": {
-          "type": "string"
-        },
-        "y": {
-          "type": "string"
-        },
-        "e": {
-          "type": "string"
-        },
-        "n": {
-          "type": "string"
-        },
-        "alg": {
-          "type": "string"
-        },
-        "d": {
-          "type": "string"
-        },
-        "dp": {
-          "type": "string"
-        },
-        "dq": {
-          "type": "string"
-        },
-        "ext": {
-          "type": "boolean"
-        },
-        "k": {
-          "type": "string"
-        },
-        "key_ops": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "kid": {
-          "type": "string"
-        },
-        "oth": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "d": {
-                "type": "string"
-              },
-              "r": {
-                "type": "string"
-              },
-              "t": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "p": {
-          "type": "string"
-        },
-        "q": {
-          "type": "string"
-        },
-        "qi": {
-          "type": "string"
-        },
-        "use": {
-          "type": "string"
-        },
-        "x5c": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "x5t": {
-          "type": "string"
-        },
-        "x5t#S256": {
-          "type": "string"
-        },
-        "x5u": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": {}
     },
     "IdTokenType": {
       "type": "string",
