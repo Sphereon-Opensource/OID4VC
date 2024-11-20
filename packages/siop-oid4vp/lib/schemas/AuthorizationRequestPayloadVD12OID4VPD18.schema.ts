@@ -215,6 +215,72 @@ export const AuthorizationRequestPayloadVD12OID4VPD18SchemaObj = {
             {}
           ]
         },
+        "federation_entity": {
+          "$ref": "#/definitions/FederationEntityMetadataPayload"
+        },
+        "openid_credential_verifier": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "vp_formats": {
+              "$ref": "#/definitions/Format"
+            },
+            "redirect_uris": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "token_endpoint_auth_method": {
+              "type": "string"
+            },
+            "grant_types": {
+              "type": "string"
+            },
+            "response_types": {
+              "type": "string"
+            },
+            "client_name": {
+              "type": "string"
+            },
+            "client_uri": {
+              "type": "string"
+            },
+            "logo_uri": {
+              "type": "string"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "contacts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tos_uri": {
+              "type": "string"
+            },
+            "policy_uri": {
+              "type": "string"
+            },
+            "jwks_uri": {
+              "type": "string"
+            },
+            "jwks": {
+              "$ref": "#/definitions/JWKS"
+            },
+            "software_id": {
+              "type": "string"
+            },
+            "software_version": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "vp_formats"
+          ]
+        },
         "client_name": {
           "anyOf": [
             {
@@ -405,6 +471,150 @@ export const AuthorizationRequestPayloadVD12OID4VPD18SchemaObj = {
         "alg"
       ],
       "additionalProperties": false
+    },
+    "FederationEntityMetadataPayload": {
+      "type": "object",
+      "properties": {
+        "federation_fetch_endpoint": {
+          "type": "string"
+        },
+        "federation_list_endpoint": {
+          "type": "string"
+        },
+        "federation_resolve_endpoint": {
+          "type": "string"
+        },
+        "federation_trust_mark_status_endpoint": {
+          "type": "string"
+        },
+        "federation_trust_mark_list_endpoint": {
+          "type": "string"
+        },
+        "federation_trust_mark_endpoint": {
+          "type": "string"
+        },
+        "federation_historical_keys_endpoint": {
+          "type": "string"
+        },
+        "organization_name": {
+          "type": "string"
+        },
+        "homepage_uri": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "JWKS": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JWK"
+          }
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "additionalProperties": false
+    },
+    "JWK": {
+      "type": "object",
+      "properties": {
+        "kty": {
+          "type": "string"
+        },
+        "crv": {
+          "type": "string"
+        },
+        "x": {
+          "type": "string"
+        },
+        "y": {
+          "type": "string"
+        },
+        "e": {
+          "type": "string"
+        },
+        "n": {
+          "type": "string"
+        },
+        "alg": {
+          "type": "string"
+        },
+        "d": {
+          "type": "string"
+        },
+        "dp": {
+          "type": "string"
+        },
+        "dq": {
+          "type": "string"
+        },
+        "ext": {
+          "type": "boolean"
+        },
+        "k": {
+          "type": "string"
+        },
+        "key_ops": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "kid": {
+          "type": "string"
+        },
+        "oth": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "d": {
+                "type": "string"
+              },
+              "r": {
+                "type": "string"
+              },
+              "t": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "p": {
+          "type": "string"
+        },
+        "q": {
+          "type": "string"
+        },
+        "qi": {
+          "type": "string"
+        },
+        "use": {
+          "type": "string"
+        },
+        "x5c": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "x5t": {
+          "type": "string"
+        },
+        "x5t#S256": {
+          "type": "string"
+        },
+        "x5u": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
     },
     "ResponseMode": {
       "type": "string",

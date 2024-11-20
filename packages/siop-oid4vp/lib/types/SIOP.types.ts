@@ -276,6 +276,7 @@ interface DiscoveryMetadataCommonOpts {
   opPolicyUri?: string // from openid connect discovery 1_0
   opTosUri?: string // from openid connect discovery 1_0
   federationEntity?: FederationEntityMetadataOpts
+  openidCredentialVerifier: DynamicRegistrationClientMetadata & { vp_formats: Format }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }
@@ -383,6 +384,7 @@ interface DiscoveryMetadataCommonPayload {
   op_policy_uri?: string
   op_tos_uri?: string
   federation_entity?: FederationEntityMetadataPayload
+  openid_credential_verifier?: DynamicRegistrationClientMetadata & { vp_formats: Format }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
@@ -423,6 +425,8 @@ export type RPRegistrationMetadataOpts = Partial<
     | 'subjectTypesSupported'
     | 'subject_syntax_types_supported'
     | 'vpFormatsSupported'
+    | 'federationEntity'
+    | 'openidCredentialVerifier'
     | 'clientName'
     | 'logo_uri'
     | 'tos_uri'
@@ -443,6 +447,8 @@ export type RPRegistrationMetadataPayload = Pick<
   | 'subject_types_supported'
   | 'subject_syntax_types_supported'
   | 'vp_formats'
+  | 'federation_entity'
+  | 'openid_credential_verifier'
   | 'client_name'
   | 'logo_uri'
   | 'client_purpose'
