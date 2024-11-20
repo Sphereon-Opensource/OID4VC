@@ -48,6 +48,7 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
     claims,
     presentation_definition_uri: payload.presentation_definition_uri,
     presentation_definition: payload.presentation_definition,
+    dcql_query: payload.dcql_query,
     client_metadata: payload.client_metadata,
     iat,
     nbf,

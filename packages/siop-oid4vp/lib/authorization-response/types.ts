@@ -5,10 +5,11 @@ import {
   CompactSdJwtVc,
   Hasher,
   MdocOid4vpIssuerSigned,
+  MdocOid4vpMdocVpToken,
   PresentationSubmission,
   W3CVerifiablePresentation,
-  MdocOid4vpMdocVpToken,
 } from '@sphereon/ssi-types'
+import { DcqlQuery, DcqlQueryVpToken } from 'dcql'
 
 import {
   ResponseMode,
@@ -41,6 +42,7 @@ export interface AuthorizationResponseOpts {
   tokenType?: string
   refreshToken?: string
   presentationExchange?: PresentationExchangeResponseOpts
+  dcqlQuery?: DcqlQueryResponseOpts
 }
 
 export interface PresentationExchangeResponseOpts {
@@ -59,6 +61,10 @@ export interface PresentationExchangeResponseOpts {
   restrictToDIDMethods?: string[]
 }
 
+export interface DcqlQueryResponseOpts {
+  credentialQueryIdToPresentation: DcqlQueryVpToken
+}
+
 export interface PresentationExchangeRequestOpts {
   presentationVerificationCallback?: PresentationVerificationCallback
 }
@@ -66,6 +72,13 @@ export interface PresentationExchangeRequestOpts {
 export interface PresentationDefinitionPayloadOpts {
   presentation_definition?: IPresentationDefinition
   presentation_definition_uri?: string
+  dcql_query?: never
+}
+
+export interface DcqlQueryPayloadOpts {
+  dcql_query?: string
+  presentation_definition?: never
+  presentation_definition_uri?: never
 }
 
 export interface PresentationDefinitionWithLocation {
@@ -108,6 +121,7 @@ export interface VerifyAuthorizationResponseOpts {
   nonce?: string // To verify the response against the supplied nonce
   state?: string // To verify the response against the supplied state
   presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[] // The presentation definitions to match against VPs in the response
+  dcqlQuery?: DcqlQuery
   audience?: string // The audience/redirect_uri
   restrictToFormats?: Format // Further restrict to certain VC formats, not expressed in the presentation definition
   restrictToDIDMethods?: string[]

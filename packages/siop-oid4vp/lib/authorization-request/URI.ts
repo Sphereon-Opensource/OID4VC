@@ -1,5 +1,6 @@
 import { parseJWT } from '@sphereon/oid4vc-common'
 
+import { findValidDcqlQuery } from '../authorization-response/Dcql'
 import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { decodeUriAsJson, encodeJsonAsURI, fetchByReferenceOrUseByValue } from '../helpers'
 import { assertValidRequestObjectPayload, RequestObject } from '../request-object'
@@ -126,7 +127,6 @@ export class URI implements AuthorizationRequestURI {
         ...authorizationRequest.options.requestObject,
         version: authorizationRequest.options.version,
         uriScheme: authorizationRequest.options.uriScheme,
-        
       },
       authorizationRequest.payload,
       authorizationRequest.requestObject,
@@ -164,8 +164,9 @@ export class URI implements AuthorizationRequestURI {
     const requestObjectPayload: RequestObjectPayload = requestObjectJwt ? (parseJWT(requestObjectJwt).payload as RequestObjectPayload) : undefined
 
     if (requestObjectPayload) {
-      // Only used to validate if the request object contains presentation definition(s)
+      // Only used to validate if the request object contains presentation definition(s) | a dcql query
       await PresentationExchange.findValidPresentationDefinitions({ ...authorizationRequestPayload, ...requestObjectPayload })
+      await findValidDcqlQuery({ ...authorizationRequestPayload, ...requestObjectPayload })
 
       assertValidRequestObjectPayload(requestObjectPayload)
       if (requestObjectPayload.registration) {
@@ -194,7 +195,8 @@ export class URI implements AuthorizationRequestURI {
       }
     } else {
       try {
-        scheme = (await authorizationRequest.getSupportedVersion()) === SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1 ? 'openid-vc://' : 'openid4vp://'
+        scheme =
+          (await authorizationRequest.getSupportedVersion()) === SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1 ? 'openid-vc://' : 'openid4vp://'
       } catch (error: unknown) {
         scheme = 'openid4vp://'
       }

@@ -218,6 +218,24 @@ export class RPBuilder {
     return this
   }
 
+  withDcqlQuery(dcqlQuery: string, targets?: PropertyTargets): RPBuilder {
+    this._authorizationRequestPayload.dcql_query = assignIfAuth(
+      {
+        propertyValue: dcqlQuery,
+        targets,
+      },
+      false,
+    )
+    this._requestObjectPayload.dcql_query = assignIfRequestObject(
+      {
+        propertyValue: dcqlQuery,
+        targets,
+      },
+      true,
+    )
+    return this
+  }
+
   withPresentationDefinition(definitionOpts: { definition: IPresentationDefinition; definitionUri?: string }, targets?: PropertyTargets): RPBuilder {
     const { definition, definitionUri } = definitionOpts
 

@@ -124,21 +124,25 @@ export class AuthorizationResponse {
     })
 
     if (hasVpToken) {
-      const wrappedPresentations = response.payload.vp_token
-        ? await extractPresentationsFromVpToken(response.payload.vp_token, {
-            hasher: verifyOpts.hasher,
-          })
-        : []
+      if (responseOpts.presentationExchange) {
+        const wrappedPresentations = response.payload.vp_token
+          ? await extractPresentationsFromVpToken(response.payload.vp_token, {
+              hasher: verifyOpts.hasher,
+            })
+          : []
 
-      await assertValidVerifiablePresentations({
-        presentationDefinitions,
-        presentations: wrappedPresentations,
-        verificationCallback: verifyOpts.verification.presentationVerificationCallback,
-        opts: {
-          ...responseOpts.presentationExchange,
-          hasher: verifyOpts.hasher,
-        },
-      })
+        await assertValidVerifiablePresentations({
+          presentationDefinitions,
+          presentations: wrappedPresentations,
+          verificationCallback: verifyOpts.verification.presentationVerificationCallback,
+          opts: {
+            ...responseOpts.presentationExchange,
+            hasher: verifyOpts.hasher,
+          },
+        })
+      } else {
+        throw new Error('TODO: VALIDATE PRESENTATION AGAINST DEFINITION')
+      }
     }
 
     return response
@@ -218,7 +222,6 @@ export class AuthorizationResponse {
         return Promise.reject(Error('missing presentation(s)'))
       }
       const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
-
 
       // We do not verify them, as that is done elsewhere. So we simply can take the first nonce
       nonce = presentationsArray

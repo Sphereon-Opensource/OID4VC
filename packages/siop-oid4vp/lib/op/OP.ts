@@ -1,15 +1,16 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'events'
 
 import { jarmAuthResponseSend, JarmClientMetadata, jarmMetadataValidate, JarmServerMetadata } from '@sphereon/jarm'
-import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common';
-import { IIssuerId } from '@sphereon/ssi-types';
+import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
+import { IIssuerId } from '@sphereon/ssi-types'
 
-import { AuthorizationRequest, URI, VerifyAuthorizationRequestOpts } from '../authorization-request';
-import { mergeVerificationOpts } from '../authorization-request/Opts';
+import { AuthorizationRequest, URI, VerifyAuthorizationRequestOpts } from '../authorization-request'
+import { mergeVerificationOpts } from '../authorization-request/Opts'
 import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   AuthorizationResponseWithCorrelationId,
+  DcqlQueryResponseOpts,
   PresentationExchangeResponseOpts,
 } from '../authorization-response'
 import { encodeJsonAsURI, post } from '../helpers'
@@ -29,11 +30,11 @@ import {
   SupportedVersion,
   UrlEncodingFormat,
   Verification,
-  VerifiedAuthorizationRequest
-} from '../types';
+  VerifiedAuthorizationRequest,
+} from '../types'
 
-import { OPBuilder } from './OPBuilder';
-import { createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFromBuilderOrExistingOpts } from './Opts';
+import { OPBuilder } from './OPBuilder'
+import { createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFromBuilderOrExistingOpts } from './Opts'
 
 // The OP publishes the formats it supports using the vp_formats_supported metadata parameter as defined above in its "openid-configuration".
 export class OP {
@@ -78,7 +79,7 @@ export class OP {
 
     try {
       const verifiedAuthorizationRequest = await authorizationRequest.verify(
-        this.newVerifyAuthorizationRequestOpts({ ...requestOpts, correlationId })
+        this.newVerifyAuthorizationRequestOpts({ ...requestOpts, correlationId }),
       )
 
       await this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_VERIFIED_SUCCESS, {
@@ -106,6 +107,7 @@ export class OP {
       issuer?: ResponseIss | string
       verification?: Verification
       presentationExchange?: PresentationExchangeResponseOpts
+      dcqlQuery?: DcqlQueryResponseOpts
     },
   ): Promise<AuthorizationResponseWithCorrelationId> {
     if (
@@ -235,7 +237,7 @@ export class OP {
       const { response } = await createJarmResponse({
         requestObjectPayload,
         authorizationResponsePayload: payload,
-        clientMetadata
+        clientMetadata,
       })
 
       try {
@@ -243,9 +245,9 @@ export class OP {
           authRequestParams: {
             response_uri: responseUri,
             response_mode: responseMode,
-            response_type: responseType
+            response_type: responseType,
           },
-          authResponse: response
+          authResponse: response,
         })
         void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
         return jarmResponse
@@ -253,7 +255,7 @@ export class OP {
         void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_FAILED, {
           correlationId,
           subject: response,
-          error
+          error,
         })
         throw error
       }
@@ -294,6 +296,7 @@ export class OP {
     issuer?: IIssuerId | ResponseIss
     audience?: string
     presentationExchange?: PresentationExchangeResponseOpts
+    dcqlQuery?: DcqlQueryResponseOpts
   }): AuthorizationResponseOpts {
     const version = opts.version ?? this._createResponseOptions.version
     let issuer = opts.issuer ?? this._createResponseOptions?.registration?.issuer
@@ -308,11 +311,14 @@ export class OP {
     }
     // We are taking the whole presentationExchange object from a certain location
     const presentationExchange = opts.presentationExchange ?? this._createResponseOptions.presentationExchange
+    const dcqlQuery = opts.dcqlQuery ?? this._createResponseOptions.dcqlQuery
+
     const responseURI = opts.audience ?? this._createResponseOptions.responseURI
     return {
       ...this._createResponseOptions,
       ...opts,
       ...(presentationExchange && { presentationExchange }),
+      ...(dcqlQuery && { dcqlQuery }),
       registration: { ...this._createResponseOptions?.registration, issuer },
       responseURI,
       responseURIType:

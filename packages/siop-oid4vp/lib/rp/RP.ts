@@ -8,6 +8,7 @@ import {
 } from '@sphereon/jarm'
 import { decodeProtectedHeader, JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { Hasher } from '@sphereon/ssi-types'
+import { DcqlQuery } from 'dcql'
 
 import {
   AuthorizationRequest,
@@ -202,6 +203,7 @@ export class RP {
       nonce?: string
       verification?: Verification
       presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[]
+      dcqlQuery?: DcqlQuery
     },
   ): Promise<VerifiedAuthorizationResponse> {
     const state = opts?.state || this.verifyResponseOptions.state
@@ -376,6 +378,7 @@ export class RP {
       verification?: Verification
       audience?: string
       presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[]
+      dcqlQuery?: DcqlQuery
     },
   ): Promise<VerifyAuthorizationResponseOpts> {
     let correlationId = opts?.correlationId ?? this._verifyResponseOptions.correlationId
@@ -418,6 +421,7 @@ export class RP {
       nonce,
       verification: mergeVerificationOpts(this._verifyResponseOptions, opts),
       presentationDefinitions: opts?.presentationDefinitions ?? this._verifyResponseOptions.presentationDefinitions,
+      dcqlQuery: opts?.dcqlQuery ?? this._verifyResponseOptions.dcqlQuery,
     }
   }
 

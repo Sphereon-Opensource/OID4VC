@@ -1,6 +1,8 @@
 import { parseJWT } from '@sphereon/oid4vc-common'
+import { DcqlQuery } from 'dcql'
 
 import { PresentationDefinitionWithLocation } from '../authorization-response'
+import { findValidDcqlQuery } from '../authorization-response/Dcql'
 import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
@@ -66,7 +68,7 @@ export class AuthorizationRequest {
 
     const requestObjectArg =
       opts.requestObject.passBy !== PassBy.NONE ? (requestObject ? requestObject : await RequestObject.fromOpts(opts)) : undefined
-    // opts?.payload was removed before, but it's not clear atm why opts?.payload was removed  
+    // opts?.payload was removed before, but it's not clear atm why opts?.payload was removed
     const requestPayload = opts?.payload ? await createAuthorizationRequestPayload(opts, requestObjectArg) : undefined
     return new AuthorizationRequest(requestPayload, requestObjectArg, opts)
   }
@@ -190,14 +192,22 @@ export class AuthorizationRequest {
     // TODO see if this is too naive. The OpenID conformance test explicitly tests for this
     // But the spec says: The client_id and client_id_scheme MUST be omitted in unsigned requests defined in Appendix A.3.1.
     // So I would expect client_id_scheme and client_id to be undefined when the JWT header has alg: none
-    if(mergedPayload.client_id && mergedPayload.client_id_scheme === 'redirect_uri' && mergedPayload.client_id !== responseURI) {
-      throw Error(`${SIOPErrors.INVALID_REQUEST}, response_uri does not match the client_id provided by the verifier which is required for client_id_scheme redirect_uri`)
+    if (mergedPayload.client_id && mergedPayload.client_id_scheme === 'redirect_uri' && mergedPayload.client_id !== responseURI) {
+      throw Error(
+        `${SIOPErrors.INVALID_REQUEST}, response_uri does not match the client_id provided by the verifier which is required for client_id_scheme redirect_uri`,
+      )
     }
-    
+
     // TODO: we need to verify somewhere that if response_mode is direct_post, that the response_uri may be present,
     // BUT not both redirect_uri and response_uri. What is the best place to do this?
 
-    const presentationDefinitions: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(mergedPayload, await this.getSupportedVersion())
+    const presentationDefinitions: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(
+      mergedPayload,
+      await this.getSupportedVersion(),
+    )
+
+    const dcqlQuery = await findValidDcqlQuery(mergedPayload)
+
     return {
       jwt,
       payload: parsedJwt?.payload,
@@ -208,6 +218,7 @@ export class AuthorizationRequest {
       correlationId: opts.correlationId,
       authorizationRequest: this,
       verifyOpts: opts,
+      dcqlQuery,
       presentationDefinitions,
       registrationMetadataPayload,
       requestObject: this.requestObject,
@@ -267,8 +278,9 @@ export class AuthorizationRequest {
   }
 
   public async mergedPayloads(): Promise<RequestObjectPayload> {
-    const  requestObjectPayload = { ...this.payload, ...(this.requestObject && (await this.requestObject.getPayload())) }
-    if (requestObjectPayload.scope && typeof requestObjectPayload.scope !== 'string') { //  test mattr.launchpad.spec.ts does not supply a scope value
+    const requestObjectPayload = { ...this.payload, ...(this.requestObject && (await this.requestObject.getPayload())) }
+    if (requestObjectPayload.scope && typeof requestObjectPayload.scope !== 'string') {
+      //  test mattr.launchpad.spec.ts does not supply a scope value
       throw new Error('Invalid scope value')
     }
     return requestObjectPayload as RequestObjectPayload
@@ -276,5 +288,9 @@ export class AuthorizationRequest {
 
   public async getPresentationDefinitions(version?: SupportedVersion): Promise<PresentationDefinitionWithLocation[] | undefined> {
     return await PresentationExchange.findValidPresentationDefinitions(await this.mergedPayloads(), version)
+  }
+
+  public async getDcqlQuery(): Promise<DcqlQuery> {
+    return await findValidDcqlQuery(await this.mergedPayloads())
   }
 }

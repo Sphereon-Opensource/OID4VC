@@ -460,6 +460,9 @@ importers:
       cross-fetch:
         specifier: ^4.0.0
         version: 4.0.0(encoding@0.1.13)
+      dcql:
+        specifier: link:../../../dcql/dcql
+        version: link:../../../dcql/dcql
       debug:
         specifier: ^4.3.5
         version: 4.3.7

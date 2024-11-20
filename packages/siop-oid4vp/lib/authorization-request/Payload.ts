@@ -18,20 +18,28 @@ import { createRequestRegistration } from './RequestRegistration'
 import { ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts, PropertyTarget } from './types'
 
 export const createPresentationDefinitionClaimsProperties = (opts: ClaimPayloadOptsVID1): ClaimPayloadVID1 => {
-  if (!opts || !opts.vp_token || (!opts.vp_token.presentation_definition && !opts.vp_token.presentation_definition_uri)) {
+  if (
+    !opts ||
+    !opts.vp_token ||
+    (!opts.vp_token.presentation_definition && !opts.vp_token.presentation_definition_uri && !opts.vp_token.dcql_query)
+  ) {
     return undefined
   }
-  const discoveryResult = PEX.definitionVersionDiscovery(opts.vp_token.presentation_definition)
-  if (discoveryResult.error) {
-    throw new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID)
+
+  if (opts.vp_token.presentation_definition || opts.vp_token.presentation_definition_uri) {
+    const discoveryResult = PEX.definitionVersionDiscovery(opts.vp_token.presentation_definition)
+    if (discoveryResult.error) {
+      throw new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID)
+    }
   }
 
   return {
     ...(opts.id_token ? { id_token: opts.id_token } : {}),
-    ...((opts.vp_token.presentation_definition || opts.vp_token.presentation_definition_uri) && {
+    ...((opts.vp_token.presentation_definition || opts.vp_token.presentation_definition_uri || opts.vp_token.dcql_query) && {
       vp_token: {
         ...(!opts.vp_token.presentation_definition_uri && { presentation_definition: opts.vp_token.presentation_definition }),
         ...(opts.vp_token.presentation_definition_uri && { presentation_definition_uri: opts.vp_token.presentation_definition_uri }),
+        ...(opts.vp_token.dcql_query && { dcql_query: opts.vp_token.dcql_query }),
       },
     }),
   }
