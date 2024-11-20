@@ -290,7 +290,14 @@ export const assertValidVerifiablePresentations = async (args: {
   if (!presentations || (Array.isArray(presentations) && presentations.length === 0)) {
     return Promise.reject(Error('missing presentation(s)'))
   }
-  const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
+  
+  // Handle mdocs, keep them out of pex
+  let presentationsArray = (Array.isArray(presentations) ? presentations : [presentations])
+  if (presentationsArray.every(p => p.format === 'mso_mdoc')) {
+    return
+  }  
+  presentationsArray = presentationsArray.filter((p) => p.format !== 'mso_mdoc')
+  
   if (
     (!args.presentationDefinitions || args.presentationDefinitions.filter((a) => a.definition).length === 0) &&
     (!presentationsArray || (Array.isArray(presentationsArray) && presentationsArray.filter((vp) => vp.presentation).length === 0))
