@@ -1,5 +1,6 @@
 import { Hasher } from '@sphereon/ssi-types'
 import { DcqlMdocRepresentation, DcqlPresentationRecord, DcqlQuery, DcqlSdJwtVcRepresentation } from 'dcql'
+import { DcqlPresentationQueryResult } from 'dcql'
 
 import { extractDataFromPath } from '../helpers'
 import { AuthorizationRequestPayload, SIOPErrors } from '../types'
@@ -37,7 +38,7 @@ export const findValidDcqlQuery = async (authorizationRequestPayload: Authorizat
   return DcqlQuery.parse(JSON.parse(dcqlQuery[0]))
 }
 
-export const assertValidDcqlPresentationRecrod = async (record: DcqlPresentationRecord | string, dcqlQuery: DcqlQuery, opts: { hasher?: Hasher }) => {
+export const getDcqlPresentationResult = (record: DcqlPresentationRecord | string, dcqlQuery: DcqlQuery, opts: { hasher?: Hasher }) => {
   const wrappedPresentations = Object.values(extractPresentationRecordFromDcqlVpToken(record, opts))
   const credentials = wrappedPresentations.map((p) => {
     if (p.format === 'mso_mdoc') {
@@ -49,5 +50,10 @@ export const assertValidDcqlPresentationRecrod = async (record: DcqlPresentation
     }
   })
 
-  DcqlPresentationRecord.validate(credentials, { dcqlQuery })
+  return DcqlPresentationQueryResult.query(credentials, { dcqlQuery })
+}
+
+export const assertValidDcqlPresentationRecord = async (record: DcqlPresentationRecord | string, dcqlQuery: DcqlQuery, opts: { hasher?: Hasher }) => {
+  const result = getDcqlPresentationResult(record, dcqlQuery, opts)
+  return DcqlPresentationQueryResult.validate(result)
 }

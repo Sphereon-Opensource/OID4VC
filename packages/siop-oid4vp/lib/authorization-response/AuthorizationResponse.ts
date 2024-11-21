@@ -6,7 +6,7 @@ import { assertValidVerifyAuthorizationRequestOpts } from '../authorization-requ
 import { IDToken } from '../id-token'
 import { AuthorizationResponsePayload, ResponseType, SIOPErrors, VerifiedAuthorizationRequest, VerifiedAuthorizationResponse } from '../types'
 
-import { assertValidDcqlPresentationRecrod } from './Dcql'
+import { assertValidDcqlPresentationRecord } from './Dcql'
 import {
   assertValidVerifiablePresentations,
   extractNonceFromWrappedVerifiablePresentation,
@@ -148,7 +148,7 @@ export class AuthorizationResponse {
         if (!dcqlQuery) {
           throw new Error('vp_token is present, but no presentation definitions or dcql query provided')
         }
-        assertValidDcqlPresentationRecrod(responseOpts.dcqlQuery.encodedPresentationRecord as DcqlPresentationRecord, dcqlQuery, {
+        assertValidDcqlPresentationRecord(responseOpts.dcqlQuery.encodedPresentationRecord as DcqlPresentationRecord, dcqlQuery, {
           hasher: verifyOpts.hasher,
         })
       }

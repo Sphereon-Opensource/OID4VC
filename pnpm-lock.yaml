@@ -461,8 +461,8 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0(encoding@0.1.13)
       dcql:
-        specifier: ^0.2.8
-        version: 0.2.8(typescript@5.4.5)
+        specifier: ^0.2.11
+        version: 0.2.11(typescript@5.4.5)
       debug:
         specifier: ^4.3.5
         version: 4.3.7
@@ -1867,7 +1867,7 @@ packages:
 
   '@expo/bunyan@4.0.1':
     resolution: {integrity: sha512-+Lla7nYSiHZirgK+U/uYzsLv/X+HaJienbD5AKX1UQZHYfWaP+9uuQluRB4GrEVWF0GZ7vEVp/jzaOT9k/SQlg==}
-    engines: {'0': node >=0.10.0}
+    engines: {node: '>=0.10.0'}
 
   '@expo/cli@0.7.3':
     resolution: {integrity: sha512-uMGHbAhApqXR2sd1KPhgvpbOhBBnspad8msEqHleT2PHXwKIwTUDzBGO9+jdOAWwCx2MJfw3+asYjzoD3DN9Bg==}
@@ -2547,7 +2547,6 @@ packages:
 
   '@sphereon/kmp-mdl-mdoc@0.2.0-SNAPSHOT.22':
     resolution: {integrity: sha512-uAZZExVy+ug9JLircejWa5eLtAZ7bnBP6xb7DO2+86LRsHNLh2k2jMWJYxp+iWtGHTsh6RYsZl14ScQLvjiQ/A==}
-    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.1':
     resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
@@ -3052,6 +3051,7 @@ packages:
   '@xmldom/xmldom@0.7.13':
     resolution: {integrity: sha512-lm2GW5PkosIzccsaZIz7tp8cPADSIlIHWDFTR1N0SzfinhhYgeIQjFMz4rYzanCScr3DqQLeomUDArp6MWKm+g==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version is no longer supported, please update to at least 0.8.*
 
   '@xmldom/xmldom@0.8.10':
     resolution: {integrity: sha512-2WALfTl4xo2SkGCYRt6rDTFfk9R1czmBvUQy12gK2KuRKIpWEhcbbzy8EZXtz/jkRqHX8bFEc6FC1HjX4TUWYw==}
@@ -3477,6 +3477,7 @@ packages:
 
   boolean@3.2.0:
     resolution: {integrity: sha512-d0II/GO9uf9lfUHH2BQsjxzRJZBdsjgsBiW4BvhWk/3qoKwQFjIDVN19PfX8F2D/r9PCMTtLWjYVCFrpeYUzsw==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   bplist-creator@0.1.0:
     resolution: {integrity: sha512-sXaHZicyEEmY86WyueLTQesbeoH/mquvarJaQNbjuOQO+7gbFcDEWqKmcWA4cOTLzFlfgvkiVxolk1k5bBIpmg==}
@@ -4079,8 +4080,8 @@ packages:
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
 
-  dcql@0.2.8:
-    resolution: {integrity: sha512-/2TbRz3Itj/as4JnmzkupNxq6slN/w07EEx9iAwb/LRI8M8ajhnSN7YQ8rFopImuZAZkPYzOs4zga7zH6xf8eg==}
+  dcql@0.2.11:
+    resolution: {integrity: sha512-hR8MuSx49b7JPoZztcFMSKEHc6iEE4l/Zs6aUsvMCWVa3qFWpuJRiJEp5Rh2+UkCAhsce94fbDpMdBTcS9zn7g==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -4237,10 +4238,6 @@ packages:
 
   did-context@3.1.1:
     resolution: {integrity: sha512-iFpszgSxc7d1kNBJWC+PAzNTpe5LPalzsIunTMIpbG3O37Q7Zi7u4iIaedaM7UhziBhT+Agr9DyvAiXSUyfepQ==}
-
-  did-jwt-vc@3.1.3:
-    resolution: {integrity: sha512-qB1FiQ0sT/FUR5+mQ//P5lS0Gllrtes2OxC3WVMOt8ND0LolF92ohozv50ukyOvB2zBzgfm5durcIPqQcoI+LA==}
-    engines: {node: '>=14'}
 
   did-jwt-vc@3.2.15:
     resolution: {integrity: sha512-M/WPiL34CQUiN4bvWnZ0OFHJ3usPtstfQfbNbHAWHvwjeCGi7nAdv62VXHgy2xIhJMc790hH7PsMN3i6SCGEyg==}
@@ -4518,6 +4515,7 @@ packages:
   eslint@8.57.1:
     resolution: {integrity: sha512-ypowyDxpVSYpkXr9WPv2PAZCtNip1Mv5KTW0SCurXv/9iOpcrH9PaqUElksqEB6pChqHGDRCFTyrZlGhnLNGiA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   esm@3.2.25:
@@ -10795,7 +10793,7 @@ snapshots:
       '@expo/bunyan': 4.0.0
       '@expo/metro-config': 0.7.1
       '@expo/osascript': 2.0.33
-      '@expo/spawn-async': 1.5.0
+      '@expo/spawn-async': 1.7.2
       body-parser: 1.20.3
       chalk: 4.1.2
       connect: 3.7.0
@@ -10871,7 +10869,7 @@ snapshots:
 
   '@expo/osascript@2.0.33':
     dependencies:
-      '@expo/spawn-async': 1.5.0
+      '@expo/spawn-async': 1.7.2
       exec-async: 2.2.0
 
   '@expo/osascript@2.1.3':
@@ -10882,7 +10880,7 @@ snapshots:
   '@expo/package-manager@1.0.3':
     dependencies:
       '@expo/json-file': 8.3.3
-      '@expo/spawn-async': 1.5.0
+      '@expo/spawn-async': 1.7.2
       ansi-regex: 5.0.1
       chalk: 4.1.2
       find-up: 5.0.0
@@ -13199,7 +13197,7 @@ snapshots:
       cross-fetch: 3.1.8(encoding@0.1.13)
       debug: 4.3.7
       did-jwt: 6.11.6
-      did-jwt-vc: 3.1.3
+      did-jwt-vc: 3.2.15
       did-resolver: 4.1.0
       elliptic: 6.5.7
       multiformats: 9.7.1
@@ -14466,7 +14464,7 @@ snapshots:
 
   dayjs@1.11.13: {}
 
-  dcql@0.2.8(typescript@5.4.5):
+  dcql@0.2.11(typescript@5.4.5):
     dependencies:
       valibot: 0.37.0(typescript@5.4.5)
     transitivePeerDependencies:
@@ -14599,11 +14597,6 @@ snapshots:
       wrappy: 1.0.2
 
   did-context@3.1.1: {}
-
-  did-jwt-vc@3.1.3:
-    dependencies:
-      did-jwt: 6.11.6
-      did-resolver: 4.1.0
 
   did-jwt-vc@3.2.15:
     dependencies:
@@ -15125,9 +15118,9 @@ snapshots:
   execa@5.0.0:
     dependencies:
       cross-spawn: 7.0.3
-      get-stream: 6.0.0
+      get-stream: 6.0.1
       human-signals: 2.1.0
-      is-stream: 2.0.0
+      is-stream: 2.0.1
       merge-stream: 2.0.0
       npm-run-path: 4.0.1
       onetime: 5.1.2
@@ -16468,7 +16461,7 @@ snapshots:
 
   jest-diff@29.7.0:
     dependencies:
-      chalk: 4.1.0
+      chalk: 4.1.2
       diff-sequences: 29.6.3
       jest-get-type: 29.6.3
       pretty-format: 29.7.0
@@ -17253,7 +17246,7 @@ snapshots:
 
   log-symbols@4.1.0:
     dependencies:
-      chalk: 4.1.0
+      chalk: 4.1.2
       is-unicode-supported: 0.1.0
 
   logkitty@0.7.1:
@@ -17885,7 +17878,7 @@ snapshots:
       array-differ: 3.0.0
       array-union: 2.1.0
       arrify: 2.0.1
-      minimatch: 3.0.5
+      minimatch: 3.1.2
 
   mute-stream@0.0.8: {}
 
@@ -18116,7 +18109,7 @@ snapshots:
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.7
       axios: 1.7.7(debug@4.3.7)
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       cliui: 8.0.1
@@ -18299,9 +18292,9 @@ snapshots:
   ora@5.3.0:
     dependencies:
       bl: 4.1.0
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
-      cli-spinners: 2.6.1
+      cli-spinners: 2.9.2
       is-interactive: 1.0.0
       log-symbols: 4.1.0
       strip-ansi: 6.0.1
