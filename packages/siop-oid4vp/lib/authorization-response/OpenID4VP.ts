@@ -10,7 +10,7 @@ import {
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
-import { DcqlQuery, DcqlVpToken } from 'dcql'
+import { DcqlPresentationRecord, DcqlQuery } from 'dcql'
 
 import { AuthorizationRequest } from '../authorization-request'
 import { verifyRevocation } from '../helpers'
@@ -26,6 +26,7 @@ import {
 } from '../types'
 
 import { AuthorizationResponse } from './AuthorizationResponse'
+import { assertValidDcqlPresentationRecrod } from './Dcql'
 import { PresentationExchange } from './PresentationExchange'
 import {
   AuthorizationResponseOpts,
@@ -72,15 +73,6 @@ export const verifyPresentations = async (
   authorizationResponse: AuthorizationResponse,
   verifyOpts: VerifyAuthorizationResponseOpts,
 ): Promise<VerifiedOpenID4VPSubmission | VerifiedOpenID4VPSubmissionDcql | null> => {
-  if (!authorizationResponse.payload.vp_token) return null
-  if (
-    authorizationResponse.payload.vp_token &&
-    Array.isArray(authorizationResponse.payload.vp_token) &&
-    authorizationResponse.payload.vp_token.length === 0
-  ) {
-    return Promise.reject(Error('the payload is missing a vp_token'))
-  }
-
   let idPayload: IDTokenPayload | undefined
   if (authorizationResponse.idToken) {
     idPayload = await authorizationResponse.idToken.payload()
@@ -98,8 +90,6 @@ export const verifyPresentations = async (
   let dcqlQuery = verifyOpts.dcqlQuery ?? authorizationResponse?.authorizationRequest?.payload.dcql_query
   if (dcqlQuery) {
     dcqlQuery = DcqlQuery.parse(dcqlQuery)
-    DcqlQuery.validate(dcqlQuery)
-
     wrappedPresentations = extractPresentationsFromDcqlVpToken(authorizationResponse.payload.vp_token as string, { hasher: verifyOpts.hasher })
 
     const verifiedPresentations = await Promise.all(
@@ -108,7 +98,7 @@ export const verifyPresentations = async (
       ),
     )
 
-    // TODO: assert the submission against the definition
+    assertValidDcqlPresentationRecrod(authorizationResponse.payload.vp_token as string, dcqlQuery, { hasher: verifyOpts.hasher })
 
     if (verifiedPresentations.some((verified) => !verified)) {
       const message = verifiedPresentations
@@ -170,12 +160,25 @@ export const verifyPresentations = async (
   }
 }
 
+export const extractPresentationRecordFromDcqlVpToken = (
+  vpToken: DcqlPresentationRecord.Input | string,
+  opts?: { hasher?: Hasher },
+): Record<string, WrappedVerifiablePresentation> => {
+  const presentationRecord = Object.fromEntries(
+    Object.entries(DcqlPresentationRecord.parse(vpToken)).map(([credentialQueryId, vp]) => [
+      credentialQueryId,
+      CredentialMapper.toWrappedVerifiablePresentation(vp as W3CVerifiablePresentation | CompactSdJwtVc | string, { hasher: opts.hasher }),
+    ]),
+  )
+
+  return presentationRecord
+}
+
 export const extractPresentationsFromDcqlVpToken = (
-  vpToken: DcqlVpToken.Input | string,
+  vpToken: DcqlPresentationRecord.Input | string,
   opts?: { hasher?: Hasher },
 ): WrappedVerifiablePresentation[] => {
-  const presentations = Object.values(DcqlVpToken.parse(vpToken)) as Array<W3CVerifiablePresentation | CompactSdJwtVc | string>
-  return presentations.map((vp) => CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: opts.hasher }))
+  return Object.values(extractPresentationRecordFromDcqlVpToken(vpToken, opts))
 }
 
 export const extractPresentationsFromVpToken = (

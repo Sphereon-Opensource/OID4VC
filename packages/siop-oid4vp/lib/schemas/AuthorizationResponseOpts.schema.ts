@@ -2342,7 +2342,7 @@ export const AuthorizationResponseOptsSchemaObj = {
     "DcqlQueryResponseOpts": {
       "type": "object",
       "properties": {
-        "credentialQueryIdToPresentation": {
+        "encodedPresentationRecord": {
           "type": "object",
           "additionalProperties": {
             "anyOf": [
@@ -2358,7 +2358,7 @@ export const AuthorizationResponseOptsSchemaObj = {
         }
       },
       "required": [
-        "credentialQueryIdToPresentation"
+        "encodedPresentationRecord"
       ],
       "additionalProperties": false
     }

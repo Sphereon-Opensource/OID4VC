@@ -62,11 +62,7 @@ export interface PresentationExchangeResponseOpts {
 }
 
 export interface DcqlQueryResponseOpts {
-  credentialQueryIdToPresentation: Record<string, Record<string, unknown> | string>
-}
-
-export interface PresentationExchangeRequestOpts {
-  presentationVerificationCallback?: PresentationVerificationCallback
+  encodedPresentationRecord: Record<string, Record<string, unknown> | string>
 }
 
 export interface PresentationDefinitionPayloadOpts {

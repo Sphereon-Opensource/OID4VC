@@ -167,7 +167,7 @@ export interface IDTokenPayload extends JWTPayload {
   }
 }
 
-export type DcqlQueryVpToken = string
+export type EcodedDcqlQueryVpToken = string
 
 export interface AuthorizationResponsePayload {
   access_token?: string
@@ -181,7 +181,7 @@ export interface AuthorizationResponsePayload {
     | W3CVerifiablePresentation
     | CompactSdJwtVc
     | MdocOid4vpMdocVpToken
-    | DcqlQueryVpToken
+    | EcodedDcqlQueryVpToken
   presentation_submission?: PresentationSubmission
   verifiedData?: IPresentation | AdditionalClaims
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
