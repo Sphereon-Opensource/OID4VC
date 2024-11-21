@@ -10,7 +10,7 @@ import {
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
-import { DcqlQuery, DcqlQueryVpToken } from 'dcql'
+import { DcqlQuery, DcqlVpToken } from 'dcql'
 
 import { AuthorizationRequest } from '../authorization-request'
 import { verifyRevocation } from '../helpers'
@@ -22,6 +22,7 @@ import {
   SIOPErrors,
   SupportedVersion,
   VerifiedOpenID4VPSubmission,
+  VerifiedOpenID4VPSubmissionDcql,
 } from '../types'
 
 import { AuthorizationResponse } from './AuthorizationResponse'
@@ -70,10 +71,12 @@ export const extractNonceFromWrappedVerifiablePresentation = (wrappedVp: Wrapped
 export const verifyPresentations = async (
   authorizationResponse: AuthorizationResponse,
   verifyOpts: VerifyAuthorizationResponseOpts,
-): Promise<VerifiedOpenID4VPSubmission | null> => {
+): Promise<VerifiedOpenID4VPSubmission | VerifiedOpenID4VPSubmissionDcql | null> => {
+  if (!authorizationResponse.payload.vp_token) return null
   if (
-    !authorizationResponse.payload.vp_token ||
-    (Array.isArray(authorizationResponse.payload.vp_token) && authorizationResponse.payload.vp_token.length === 0)
+    authorizationResponse.payload.vp_token &&
+    Array.isArray(authorizationResponse.payload.vp_token) &&
+    authorizationResponse.payload.vp_token.length === 0
   ) {
     return Promise.reject(Error('the payload is missing a vp_token'))
   }
@@ -83,9 +86,6 @@ export const verifyPresentations = async (
     idPayload = await authorizationResponse.idToken.payload()
   }
 
-  // todo: Probably wise to check against request for the location of the submission_data
-  const presentationSubmission = idPayload?._vp_token?.presentation_submission ?? authorizationResponse.payload.presentation_submission
-
   let wrappedPresentations: WrappedVerifiablePresentation[] = []
   const presentationDefinitions = verifyOpts.presentationDefinitions
     ? Array.isArray(verifyOpts.presentationDefinitions)
@@ -93,18 +93,19 @@ export const verifyPresentations = async (
       : [verifyOpts.presentationDefinitions]
     : []
 
-  const dcqlQuery = verifyOpts.dcqlQuery ?? authorizationResponse.authorizationRequest.payload.dcql_query
+  let presentationSubmission: PresentationSubmission | undefined
+
+  let dcqlQuery = verifyOpts.dcqlQuery ?? authorizationResponse?.authorizationRequest?.payload.dcql_query
   if (dcqlQuery) {
-    const dcqlQueryVpToken = DcqlQueryVpToken.parse(JSON.parse(authorizationResponse.payload.vp_token as string))
+    dcqlQuery = DcqlQuery.parse(dcqlQuery)
+    DcqlQuery.validate(dcqlQuery)
 
-    const parsedQuery = DcqlQuery.parse(dcqlQuery)
-    DcqlQuery.validate(parsedQuery)
-
-    const presentations = Object.values(dcqlQueryVpToken) as Array<W3CVerifiablePresentation | CompactSdJwtVc | string>
-    wrappedPresentations = presentations.map((vp) => CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: verifyOpts.hasher }))
+    wrappedPresentations = extractPresentationsFromDcqlVpToken(authorizationResponse.payload.vp_token as string, { hasher: verifyOpts.hasher })
 
     const verifiedPresentations = await Promise.all(
-      presentations.map((presentation) => verifyOpts.verification.presentationVerificationCallback(presentation, presentationSubmission)),
+      wrappedPresentations.map((presentation) =>
+        verifyOpts.verification.presentationVerificationCallback(presentation.original as W3CVerifiablePresentation),
+      ),
     )
 
     // TODO: assert the submission against the definition
@@ -118,8 +119,13 @@ export const verifyPresentations = async (
       throw Error(`Failed to verify presentations. ${message}`)
     }
   } else {
-    const presentations = await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher })
+    const presentations = authorizationResponse.payload.vp_token
+      ? await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher })
+      : []
     wrappedPresentations = Array.isArray(presentations) ? presentations : [presentations]
+
+    // todo: Probably wise to check against request for the location of the submission_data
+    presentationSubmission = idPayload?._vp_token?.presentation_submission ?? authorizationResponse.payload.presentation_submission
 
     await assertValidVerifiablePresentations({
       presentationDefinitions,
@@ -132,12 +138,6 @@ export const verifyPresentations = async (
         hasher: verifyOpts.hasher,
       },
     })
-  }
-
-  // If there are no presentations, and the `assertValidVerifiablePresentations` did not fail
-  // it means there's no oid4vp response and also not requested
-  if (wrappedPresentations.length === 0) {
-    return null
   }
 
   const presentationsWithoutMdoc = wrappedPresentations.filter((p) => p.format !== 'mso_mdoc')
@@ -163,13 +163,25 @@ export const verifyPresentations = async (
       await verifyRevocation(vp, verifyOpts.verification.revocationOpts.revocationVerificationCallback, revocationVerification)
     }
   }
-  return { nonce, presentations: wrappedPresentations, presentationDefinitions, submissionData: presentationSubmission }
+  if (presentationDefinitions) {
+    return { nonce, presentations: wrappedPresentations, presentationDefinitions, submissionData: presentationSubmission }
+  } else {
+    return { nonce, presentations: wrappedPresentations, dcqlQuery }
+  }
 }
 
-export const extractPresentationsFromVpToken = async (
+export const extractPresentationsFromDcqlVpToken = (
+  vpToken: DcqlVpToken.Input | string,
+  opts?: { hasher?: Hasher },
+): WrappedVerifiablePresentation[] => {
+  const presentations = Object.values(DcqlVpToken.parse(vpToken)) as Array<W3CVerifiablePresentation | CompactSdJwtVc | string>
+  return presentations.map((vp) => CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: opts.hasher }))
+}
+
+export const extractPresentationsFromVpToken = (
   vpToken: Array<W3CVerifiablePresentation | CompactSdJwtVc | string> | W3CVerifiablePresentation | CompactSdJwtVc | string,
   opts?: { hasher?: Hasher },
-): Promise<WrappedVerifiablePresentation[] | WrappedVerifiablePresentation> => {
+): WrappedVerifiablePresentation[] | WrappedVerifiablePresentation => {
   const tokens = Array.isArray(vpToken) ? vpToken : [vpToken]
   const wrappedTokens = tokens.map((vp) => CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: opts?.hasher }))
 

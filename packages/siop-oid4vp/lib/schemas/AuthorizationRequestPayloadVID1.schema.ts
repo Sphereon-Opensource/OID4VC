@@ -414,6 +414,9 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
         },
         "presentation_definition_uri": {
           "type": "string"
+        },
+        "dcql_query": {
+          "type": "string"
         }
       },
       "additionalProperties": false

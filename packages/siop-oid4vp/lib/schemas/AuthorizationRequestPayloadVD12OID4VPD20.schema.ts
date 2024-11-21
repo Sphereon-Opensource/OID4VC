@@ -122,6 +122,9 @@ export const AuthorizationRequestPayloadVD12OID4VPD20SchemaObj = {
         },
         "response_uri": {
           "type": "string"
+        },
+        "dcql_query": {
+          "type": "string"
         }
       }
     },

@@ -9,7 +9,7 @@ import {
   PresentationSubmission,
   W3CVerifiablePresentation,
 } from '@sphereon/ssi-types'
-import { DcqlQuery, DcqlQueryVpToken } from 'dcql'
+import { DcqlQuery } from 'dcql'
 
 import {
   ResponseMode,
@@ -62,7 +62,7 @@ export interface PresentationExchangeResponseOpts {
 }
 
 export interface DcqlQueryResponseOpts {
-  credentialQueryIdToPresentation: DcqlQueryVpToken
+  credentialQueryIdToPresentation: Record<string, Record<string, unknown> | string>
 }
 
 export interface PresentationExchangeRequestOpts {
@@ -108,7 +108,7 @@ export type PresentationVerificationResult = { verified: boolean; reason?: strin
 
 export type PresentationVerificationCallback = (
   args: W3CVerifiablePresentation | CompactSdJwtVc | MdocOid4vpIssuerSigned,
-  presentationSubmission: PresentationSubmission,
+  presentationSubmission?: PresentationSubmission,
 ) => Promise<PresentationVerificationResult>
 
 export type PresentationSignCallback = (args: PresentationSignCallBackParams) => Promise<W3CVerifiablePresentation | CompactSdJwtVc>

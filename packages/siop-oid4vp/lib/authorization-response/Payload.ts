@@ -28,7 +28,11 @@ export const createResponsePayload = async (
   }
 
   // vp tokens
-  await putPresentationSubmissionInLocation(authorizationRequest, responsePayload, responseOpts, idTokenPayload)
+  if (responseOpts.dcqlQuery) {
+    responsePayload.vp_token = JSON.stringify(responseOpts.dcqlQuery.credentialQueryIdToPresentation)
+  } else {
+    await putPresentationSubmissionInLocation(authorizationRequest, responsePayload, responseOpts, idTokenPayload)
+  }
   if (idTokenPayload) {
     const idToken = await IDToken.fromIDTokenPayload(idTokenPayload, responseOpts)
     responsePayload.id_token = await idToken.jwt(responseOpts.jwtIssuer)

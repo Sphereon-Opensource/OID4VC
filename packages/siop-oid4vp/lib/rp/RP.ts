@@ -22,6 +22,7 @@ import {
 import { mergeVerificationOpts } from '../authorization-request/Opts'
 import {
   AuthorizationResponse,
+  extractPresentationsFromDcqlVpToken,
   extractPresentationsFromVpToken,
   PresentationDefinitionWithLocation,
   VerifyAuthorizationResponseOpts,
@@ -169,7 +170,10 @@ export class RP {
       },
     )
 
-    const presentations = await extractPresentationsFromVpToken(validatedResponse.authResponseParams.vp_token, { hasher })
+    const presentations = validatedResponse.authRequestParams.dcql_query
+      ? extractPresentationsFromDcqlVpToken(validatedResponse.authResponseParams.vp_token as string, { hasher })
+      : extractPresentationsFromVpToken(validatedResponse.authResponseParams.vp_token, { hasher })
+
     const mdocVerifiablePresentations = (Array.isArray(presentations) ? presentations : [presentations]).filter((p) => p.format === 'mso_mdoc')
 
     if (mdocVerifiablePresentations.length) {

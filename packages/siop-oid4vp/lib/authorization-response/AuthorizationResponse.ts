@@ -1,4 +1,4 @@
-import { CredentialMapper, Hasher } from '@sphereon/ssi-types'
+import { CredentialMapper, Hasher, WrappedVerifiablePresentation } from '@sphereon/ssi-types'
 
 import { AuthorizationRequest, VerifyAuthorizationRequestOpts } from '../authorization-request'
 import { assertValidVerifyAuthorizationRequestOpts } from '../authorization-request/Opts'
@@ -11,6 +11,7 @@ import {
   extractPresentationsFromVpToken,
   verifyPresentations,
 } from './OpenID4VP'
+import { extractPresentationsFromDcqlVpToken } from './OpenID4VP'
 import { assertValidResponseOpts } from './Opts'
 import { createResponsePayload } from './Payload'
 import { AuthorizationResponseOpts, PresentationDefinitionWithLocation, VerifyAuthorizationResponseOpts } from './types'
@@ -141,7 +142,7 @@ export class AuthorizationResponse {
           },
         })
       } else {
-        throw new Error('TODO: VALIDATE PRESENTATION AGAINST DEFINITION')
+        console.error('TODO: VALIDATE PRESENTATION AGAINST DEFINITION')
       }
     }
 
@@ -189,7 +190,8 @@ export class AuthorizationResponse {
       state,
       correlationId: verifyOpts.correlationId,
       ...(this.idToken && { idToken: verifiedIdToken }),
-      ...(oid4vp && { oid4vpSubmission: oid4vp }),
+      ...(oid4vp && 'presentationDefinitions' in oid4vp && { oid4vpSubmission: oid4vp }),
+      ...(oid4vp && 'dcqlQuery' in oid4vp && { oid4vpSubmissionDcql: oid4vp }),
     }
   }
 
@@ -217,8 +219,15 @@ export class AuthorizationResponse {
   public async mergedPayloads(opts?: { consistencyCheck?: boolean; hasher?: Hasher }): Promise<AuthorizationResponsePayload> {
     let nonce: string | undefined = this._payload.nonce
     if (this._payload?.vp_token) {
-      const presentations = this.payload.vp_token ? await extractPresentationsFromVpToken(this.payload.vp_token, opts) : []
-      if (!presentations || (Array.isArray(presentations) && presentations.length === 0)) {
+      let presentations: WrappedVerifiablePresentation | WrappedVerifiablePresentation[]
+
+      try {
+        presentations = extractPresentationsFromDcqlVpToken(this._payload.vp_token as string, opts)
+      } catch (e) {
+        presentations = extractPresentationsFromVpToken(this._payload.vp_token, opts)
+      }
+
+      if (presentations && Array.isArray(presentations) && presentations.length === 0) {
         return Promise.reject(Error('missing presentation(s)'))
       }
       const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]

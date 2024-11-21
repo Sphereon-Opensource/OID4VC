@@ -516,6 +516,12 @@ export interface VerifiedIDToken {
   verifyOpts: VerifyAuthorizationResponseOpts
 }
 
+export interface VerifiedOpenID4VPSubmissionDcql {
+  dcqlQuery: DcqlQuery
+  presentations: WrappedVerifiablePresentation[]
+  nonce?: string
+}
+
 export interface VerifiedOpenID4VPSubmission {
   submissionData: PresentationSubmission
   presentationDefinitions: PresentationDefinitionWithLocation[]
@@ -529,6 +535,7 @@ export interface VerifiedAuthorizationResponse {
   authorizationResponse: AuthorizationResponse
 
   oid4vpSubmission?: VerifiedOpenID4VPSubmission
+  oid4vpSubmissionDcql?: VerifiedOpenID4VPSubmissionDcql
 
   nonce?: string
   state: string
