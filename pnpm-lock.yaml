@@ -461,8 +461,8 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0(encoding@0.1.13)
       dcql:
-        specifier: ^0.2.7
-        version: 0.2.7(typescript@5.4.5)
+        specifier: ^0.2.8
+        version: 0.2.8(typescript@5.4.5)
       debug:
         specifier: ^4.3.5
         version: 4.3.7
@@ -4079,8 +4079,8 @@ packages:
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
 
-  dcql@0.2.7:
-    resolution: {integrity: sha512-Aap1BFjFDHYmtwDWk4v/lhpfZXfnNeQ4WDSIR4pU48kb5FQjnwXkI0csr2Vij8F1nxn0SHWdDiq5iIasJeUDBQ==}
+  dcql@0.2.8:
+    resolution: {integrity: sha512-/2TbRz3Itj/as4JnmzkupNxq6slN/w07EEx9iAwb/LRI8M8ajhnSN7YQ8rFopImuZAZkPYzOs4zga7zH6xf8eg==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -14466,7 +14466,7 @@ snapshots:
 
   dayjs@1.11.13: {}
 
-  dcql@0.2.7(typescript@5.4.5):
+  dcql@0.2.8(typescript@5.4.5):
     dependencies:
       valibot: 0.37.0(typescript@5.4.5)
     transitivePeerDependencies:
