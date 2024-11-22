@@ -1095,6 +1095,10 @@ export const AuthorizationRequestPayloadVD12OID4VPD20SchemaObj = {
         },
         {
           "type": "string",
+          "const": "entity_id"
+        },
+        {
+          "type": "string",
           "const": "verifier_attestation"
         }
       ]

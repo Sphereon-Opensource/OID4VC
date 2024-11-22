@@ -14,7 +14,7 @@ import {
 import { VcIssuer } from '@sphereon/oid4vci-issuer'
 import {
   AuthorizationServerMetadataBuilder
-} from '@sphereon/oid4vci-issuer/dist/builder/AuthorizationServerMetadataBuilder'
+} from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { DIDDocument } from 'did-resolver'

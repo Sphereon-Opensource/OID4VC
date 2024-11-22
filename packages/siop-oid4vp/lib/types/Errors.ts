@@ -28,7 +28,7 @@ enum SIOPErrors {
   MISSING_ATTESTATION_JWT_WITH_CLIENT_ID_SCHEME_ATTESTATION = `Missing jwt header jwt with client_id_scheme 'verifier_attestation'.`,
   MISSING_ATTESTATION_JWT_TYP = `Attestation JWT missing typ 'verifier-attestation+jwt'.`,
   INVALID_CLIENT_ID_SCHEME = 'Invalid client_id_scheme.',
-  INVALID_REQUEST_OBJECT_ENTITY_ID_SCHEME_CLIENT_ID = `Request Object uses client_id_scheme 'entity_id', but the client_id is not a string.`,
+  INVALID_REQUEST_OBJECT_ENTITY_ID_SCHEME_CLIENT_ID = `Request Object uses client_id_scheme 'entity_id', but the entity_id is missing or not an https endpoint.`,
   EXPIRED = 'The token has expired',
   INVALID_AUDIENCE = 'Audience is invalid. Should be a string value.',
   NO_AUDIENCE = 'No audience found in JWT payload or not configured',
