@@ -1,8 +1,7 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
 import { CredentialConfigurationSupportedV1_0_13, IssuerCredentialSubjectDisplay, IssueStatus, TokenErrorResponse } from '@sphereon/oid4vci-common'
 
-import { AuthorizationServerMetadataBuilder } from '../builder/AuthorizationServerMetadataBuilder'
-import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../index'
+import { AuthorizationServerMetadataBuilder, CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../index'
 
 
 const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
