@@ -2,6 +2,7 @@ import {
   AuthorizationServerMetadata,
   CNonceState,
   CredentialConfigurationSupportedV1_0_13,
+  CredentialIssuerMetadataOptsV1_0_13,
   CredentialOfferSession,
   IssuerMetadata,
   IssuerMetadataV1_0_13,
@@ -12,7 +13,6 @@ import {
   TxCode,
   URIState
 } from '@sphereon/oid4vci-common'
-import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
 import { MemoryStates } from '../state-manager'
@@ -52,7 +52,7 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     this.issuerMetadataBuilder = builder
     return this
   }
-
+  
   public withDefaultCredentialOfferBaseUri(baseUri: string) {
     this.defaultCredentialOfferBaseUri = baseUri
     return this
@@ -184,8 +184,10 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     if (!metadata.credential_endpoint || !metadata.credential_issuer || !this.issuerMetadata.credential_configurations_supported) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    return new VcIssuer(metadata as IssuerMetadataV1_0_13, this.authorizationServerMetadata as AuthorizationServerMetadata, {
-      //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
+    return new VcIssuer(metadata as IssuerMetadataV1_0_13, 
+      this.authorizationServerMetadata as AuthorizationServerMetadata, 
+      {
+        //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
       ...(this.txCode && { txCode: this.txCode }),
       defaultCredentialOfferBaseUri: this.defaultCredentialOfferBaseUri,
       credentialSignerCallback: this.credentialSignerCallback,

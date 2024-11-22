@@ -152,11 +152,11 @@ export const getRequestObjectJwtVerifier = async (
     // If the Wallet cannot establish trust, it MUST refuse the request.
     return { method: 'jwk', type, jwk: attestationPayload.cnf['jwk'] as JWK, alg }
   } else if (clientIdScheme === 'entity_id') {
-    if (!clientId.startsWith('http')) {
+    const entityId = jwt.payload.entity_id
+    if (!entityId || !entityId.startsWith('https')) {
       throw new Error(SIOPErrors.INVALID_REQUEST_OBJECT_ENTITY_ID_SCHEME_CLIENT_ID)
     }
-
-    return { method: 'openid-federation', type, entityId: clientId }
+    return { method: 'openid-federation', type, entityId }
   }
 
   throw new Error(SIOPErrors.INVALID_CLIENT_ID_SCHEME)

@@ -15,11 +15,11 @@ import {
   PRE_AUTH_CODE_LITERAL,
   PRE_AUTH_GRANT_LITERAL
 } from '@sphereon/oid4vci-common'
-import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
-import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
 import {
   AuthorizationServerMetadataBuilder
-} from '@sphereon/oid4vci-issuer/dist/builder/AuthorizationServerMetadataBuilder'
+} from '@sphereon/oid4vci-issuer'
+import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'

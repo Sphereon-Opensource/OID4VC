@@ -70,9 +70,11 @@ export const verifyPresentations = async (
   authorizationResponse: AuthorizationResponse,
   verifyOpts: VerifyAuthorizationResponseOpts,
 ): Promise<VerifiedOpenID4VPSubmission | null> => {
-  const presentations = authorizationResponse.payload.vp_token
-    ? await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher })
-    : []
+  if (!authorizationResponse.payload.vp_token || Array.isArray(authorizationResponse.payload.vp_token) && authorizationResponse.payload.vp_token.length === 0) {
+    return Promise.reject(Error('the payload is missing a vp_token'))
+  }
+  
+  const presentations = await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher }) 
   const presentationDefinitions = verifyOpts.presentationDefinitions
     ? Array.isArray(verifyOpts.presentationDefinitions)
       ? verifyOpts.presentationDefinitions
@@ -103,8 +105,10 @@ export const verifyPresentations = async (
     return null
   }
 
+  if (!presentations || (Array.isArray(presentations) && presentations.length === 0)) {
+    return Promise.reject(Error('missing presentation(s)'))
+  }
   const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
-
   const presentationsWithoutMdoc = presentationsArray.filter((p) => p.format !== 'mso_mdoc')
   const nonces = new Set(presentationsWithoutMdoc.map(extractNonceFromWrappedVerifiablePresentation))
   if (presentationsWithoutMdoc.length > 0 && nonces.size !== 1) {
@@ -135,11 +139,14 @@ export const extractPresentationsFromVpToken = async (
   vpToken: Array<W3CVerifiablePresentation | CompactSdJwtVc | string> | W3CVerifiablePresentation | CompactSdJwtVc | string,
   opts?: { hasher?: Hasher },
 ): Promise<WrappedVerifiablePresentation[] | WrappedVerifiablePresentation> => {
-  if (Array.isArray(vpToken)) {
-    return vpToken.map((vp) => CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: opts?.hasher }))
+  const tokens = Array.isArray(vpToken) ? vpToken : [vpToken];
+  const wrappedTokens = tokens.map(vp =>
+    CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: opts?.hasher })
+  );
+
+  return tokens.length === 1 ? wrappedTokens[0] : wrappedTokens;
   }
-  return CredentialMapper.toWrappedVerifiablePresentation(vpToken, { hasher: opts?.hasher })
-}
+
 export const createPresentationSubmission = async (
   verifiablePresentations: W3CVerifiablePresentation[],
   opts?: { presentationDefinitions: (PresentationDefinitionWithLocation | IPresentationDefinition)[] },
@@ -278,8 +285,19 @@ export const assertValidVerifiablePresentations = async (args: {
     presentationSubmission?: PresentationSubmission
     hasher?: Hasher
   }
-}) => {
-  const presentationsArray = Array.isArray(args.presentations) ? args.presentations : [args.presentations]
+}) : Promise<void> => {
+  const {presentations} = args
+  if (!presentations || (Array.isArray(presentations) && presentations.length === 0)) {
+    return Promise.reject(Error('missing presentation(s)'))
+  }
+  
+  // Handle mdocs, keep them out of pex
+  let presentationsArray = (Array.isArray(presentations) ? presentations : [presentations])
+  if (presentationsArray.every(p => p.format === 'mso_mdoc')) {
+    return
+  }  
+  presentationsArray = presentationsArray.filter((p) => p.format !== 'mso_mdoc')
+  
   if (
     (!args.presentationDefinitions || args.presentationDefinitions.filter((a) => a.definition).length === 0) &&
     (!presentationsArray || (Array.isArray(presentationsArray) && presentationsArray.filter((vp) => vp.presentation).length === 0))
@@ -293,15 +311,15 @@ export const assertValidVerifiablePresentations = async (args: {
     args.presentationDefinitions.length &&
     (!presentationsArray || (Array.isArray(presentationsArray) && presentationsArray.length === 0))
   ) {
-    throw new Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP)
+    return Promise.reject(Error(SIOPErrors.AUTH_REQUEST_EXPECTS_VP))
   } else if (
     (!args.presentationDefinitions || args.presentationDefinitions.length === 0) &&
     presentationsArray &&
     ((Array.isArray(presentationsArray) && presentationsArray.length > 0) || !Array.isArray(presentationsArray))
   ) {
-    throw new Error(SIOPErrors.AUTH_REQUEST_DOESNT_EXPECT_VP)
+    return Promise.reject(Error(SIOPErrors.AUTH_REQUEST_DOESNT_EXPECT_VP))
   } else if (args.presentationDefinitions && !args.opts.presentationSubmission) {
-    throw new Error(`No presentation submission present. Please use presentationSubmission opt argument!`)
+    return Promise.reject(Error(`No presentation submission present. Please use presentationSubmission opt argument!`))
   } else if (args.presentationDefinitions && presentationsArray) {
     await PresentationExchange.validatePresentationsAgainstDefinitions(
       args.presentationDefinitions,

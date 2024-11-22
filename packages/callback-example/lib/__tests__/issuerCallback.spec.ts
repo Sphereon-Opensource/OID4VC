@@ -16,7 +16,12 @@ import {
   ProofOfPossession,
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common'
-import { CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import {
+  AuthorizationServerMetadataBuilder,
+  CredentialSupportedBuilderV1_13,
+  VcIssuer,
+  VcIssuerBuilder
+} from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer'
 import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
@@ -24,9 +29,6 @@ import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
 
 import { generateDid, getIssuerCallbackV1_0_11, getIssuerCallbackV1_0_13, verifyCredential } from '../IssuerCallback'
-import {
-  AuthorizationServerMetadataBuilder
-} from '@sphereon/oid4vci-issuer/dist/builder/AuthorizationServerMetadataBuilder'
 
 const INITIATION_TEST_URI =
   'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credential_configuration_ids%22:%5B%22UniversityDegreeCredential%22%5D,%22grants%22:%7B%22urn:ietf:params:oauth:grant-type:pre-authorized_code%22:%7B%22pre-authorized_code%22:%22oaKazRN8I0IbtZ0C7JuMn5%22,%22tx_code%22:%7B%22input_mode%22:%22text%22,%22description%22:%22Please%20enter%20the%20serial%20number%20of%20your%20physical%20drivers%20license%22%7D%7D%7D%7D'

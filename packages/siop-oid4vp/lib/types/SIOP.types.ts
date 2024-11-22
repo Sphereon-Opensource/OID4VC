@@ -46,6 +46,7 @@ export interface RequestObjectPayload extends RequestCommonPayload, JWTPayload {
   response_type: ResponseType | string // REQUIRED. Constant string value id_token.
   client_id: string // REQUIRED. RP's identifier at the Self-Issued OP.
   client_id_scheme?: ClientIdScheme // The client_id_scheme enables deployments of this specification to use different mechanisms to obtain and validate metadata of the Verifier beyond the scope of [RFC6749]. The term client_id_scheme is used since the Verifier is acting as an OAuth 2.0 Client.
+  entity_id?: string // OPTIONAL for OIDF
   client_metadata: ClientMetadataOpts
   redirect_uri?: string // REQUIRED before OID4VP v18, now optional because of response_uri. URI to which the Self-Issued OP Response will be sent
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
@@ -111,7 +112,7 @@ export interface AuthorizationRequestPayloadVD12OID4VPD20
 }
 
 export type ClientIdSchemeOID4VPD18 = 'pre-registered' | 'redirect_uri' | 'entity_id' | 'did'
-export type ClientIdSchemeOID4VPD20 = ClientIdSchemeOID4VPD18 | 'x509_san_dns' | 'x509_san_uri' | 'verifier_attestation'
+export type ClientIdSchemeOID4VPD20 = ClientIdSchemeOID4VPD18 | 'x509_san_dns' | 'x509_san_uri' | 'entity_id' | 'verifier_attestation'
 export type ClientIdScheme = ClientIdSchemeOID4VPD18 | ClientIdSchemeOID4VPD20
 
 // https://openid.bitbucket.io/connect/openid-connect-self-issued-v2-1_0.html#section-10
