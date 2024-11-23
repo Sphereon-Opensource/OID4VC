@@ -18,7 +18,7 @@
     "@sphereon/jarm": "workspace:*",
     "@sphereon/oid4vc-common": "workspace:*",
     "@sphereon/pex": "5.0.0-unstable.24",
-    "dcql": "^0.2.12",
+    "dcql": "^0.2.13",
     "@sphereon/pex-models": "^2.3.1",
     "@sphereon/ssi-types": "0.30.2-next.279",
     "cross-fetch": "^4.0.0",

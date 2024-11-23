@@ -6,7 +6,7 @@ import { assertValidVerifyAuthorizationRequestOpts } from '../authorization-requ
 import { IDToken } from '../id-token'
 import { AuthorizationResponsePayload, ResponseType, SIOPErrors, VerifiedAuthorizationRequest, VerifiedAuthorizationResponse } from '../types'
 
-import { assertValidDcqlPresentation } from './Dcql'
+import { assertValidDcqlPresentationResult } from './Dcql'
 import {
   assertValidVerifiablePresentations,
   extractNonceFromWrappedVerifiablePresentation,
@@ -149,7 +149,7 @@ export class AuthorizationResponse {
       if (!dcqlQuery) {
         throw new Error('vp_token is present, but no presentation definitions or dcql query provided')
       }
-      assertValidDcqlPresentation(responseOpts.dcqlQuery.dcqlPresentation as DcqlPresentation, dcqlQuery, {
+      assertValidDcqlPresentationResult(responseOpts.dcqlQuery.dcqlPresentation as DcqlPresentation, dcqlQuery, {
         hasher: verifyOpts.hasher,
       })
     }
@@ -169,19 +169,19 @@ export class AuthorizationResponse {
 
     const verifiedIdToken = await this.idToken?.verify(verifyOpts)
     if (this.payload.vp_token && !verifyOpts.presentationDefinitions && !verifyOpts.dcqlQuery) {
-      throw Promise.reject(Error('vp_token is present, but no presentation definitions or dcql query provided'))
+      throw new Error('vp_token is present, but no presentation definitions or dcql query provided')
     }
 
     const emptyPresentationDefinitions = Array.isArray(verifyOpts.presentationDefinitions) && verifyOpts.presentationDefinitions.length === 0
     if (!this.payload.vp_token && ((verifyOpts.presentationDefinitions && !emptyPresentationDefinitions) || verifyOpts.dcqlQuery)) {
-      throw Promise.reject(Error('Presentation definitions or dcql query provided, but no vp_token present'))
+      throw new Error('Presentation definitions or dcql query provided, but no vp_token present')
     }
 
     const oid4vp = this.payload.vp_token ? await verifyPresentations(this, verifyOpts) : undefined
 
     // Gather all nonces
     const allNonces = new Set<string>()
-    if (oid4vp && (oid4vp.dcql.nonce || oid4vp.presentationExchange.nonce)) allNonces.add(oid4vp.dcql.nonce ?? oid4vp.presentationExchange.nonce)
+    if (oid4vp && (oid4vp.dcql?.nonce || oid4vp.presentationExchange?.nonce)) allNonces.add(oid4vp.dcql?.nonce ?? oid4vp.presentationExchange?.nonce)
     if (verifiedIdToken) allNonces.add(verifiedIdToken.payload.nonce)
     if (merged.nonce) allNonces.add(merged.nonce)
 

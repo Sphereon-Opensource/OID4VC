@@ -26,7 +26,7 @@ import {
 } from '../types'
 
 import { AuthorizationResponse } from './AuthorizationResponse'
-import { assertValidDcqlPresentation as assertValidDcqlPresentation } from './Dcql'
+import { assertValidDcqlPresentationResult } from './Dcql'
 import { PresentationExchange } from './PresentationExchange'
 import {
   AuthorizationResponseOpts,
@@ -101,7 +101,7 @@ export const verifyPresentations = async (
       ),
     )
 
-    assertValidDcqlPresentation(authorizationResponse.payload.vp_token as string, dcqlQuery, { hasher: verifyOpts.hasher })
+    assertValidDcqlPresentationResult(authorizationResponse.payload.vp_token as string, dcqlQuery, { hasher: verifyOpts.hasher })
 
     if (verifiedPresentations.some((verified) => !verified)) {
       const message = verifiedPresentations
@@ -337,14 +337,14 @@ export const assertValidVerifiablePresentations = async (args: {
   if (!presentations || (Array.isArray(presentations) && presentations.length === 0)) {
     return Promise.reject(Error('missing presentation(s)'))
   }
-  
+
   // Handle mdocs, keep them out of pex
-  let presentationsArray = (Array.isArray(presentations) ? presentations : [presentations])
-  if (presentationsArray.every(p => p.format === 'mso_mdoc')) {
+  let presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
+  if (presentationsArray.every((p) => p.format === 'mso_mdoc')) {
     return
-  }  
+  }
   presentationsArray = presentationsArray.filter((p) => p.format !== 'mso_mdoc')
-  
+
   if (
     (!args.presentationDefinitions || args.presentationDefinitions.filter((a) => a.definition).length === 0) &&
     (!presentationsArray || (Array.isArray(presentationsArray) && presentationsArray.filter((vp) => vp.presentation).length === 0))
