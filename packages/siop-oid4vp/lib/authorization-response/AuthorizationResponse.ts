@@ -207,8 +207,8 @@ export class AuthorizationResponse {
       state,
       correlationId: verifyOpts.correlationId,
       ...(this.idToken && { idToken: verifiedIdToken }),
-      ...(oid4vp.presentationExchange && { oid4vpSubmission: oid4vp.presentationExchange }),
-      ...(oid4vp.dcql && { oid4vpSubmissionDcql: oid4vp.dcql }),
+      ...(oid4vp?.presentationExchange && { oid4vpSubmission: oid4vp.presentationExchange }),
+      ...(oid4vp?.dcql && { oid4vpSubmissionDcql: oid4vp.dcql }),
     }
   }
 
