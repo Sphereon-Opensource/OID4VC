@@ -17,6 +17,7 @@ export class OPBuilder {
   createJwtCallback?: CreateJwtCallback
   verifyJwtCallback?: VerifyJwtCallback
   presentationSignCallback?: PresentationSignCallback
+  trustChain?: Array<string>
   supportedVersions?: SupportedVersion[]
   eventEmitter?: EventEmitter
 
@@ -91,6 +92,11 @@ export class OPBuilder {
 
   withPresentationSignCallback(presentationSignCallback: PresentationSignCallback): OPBuilder {
     this.presentationSignCallback = presentationSignCallback
+    return this
+  }
+
+  withTrustChain(trustChain: Array<string>): OPBuilder {
+    this.trustChain = trustChain
     return this
   }
 

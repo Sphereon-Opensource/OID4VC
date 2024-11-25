@@ -39,9 +39,11 @@ import { createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFro
 export class OP {
   private readonly _createResponseOptions: AuthorizationResponseOpts
   private readonly _verifyRequestOptions: Partial<VerifyAuthorizationRequestOpts>
+  private readonly _trustChain: Array<string>
   private readonly _eventEmitter?: EventEmitter
 
   private constructor(opts: { builder?: OPBuilder; responseOpts?: AuthorizationResponseOpts; verifyOpts?: VerifyAuthorizationRequestOpts }) {
+    this._trustChain = opts.builder?.trustChain
     this._createResponseOptions = { ...createResponseOptsFromBuilderOrExistingOpts(opts) }
     this._verifyRequestOptions = { ...createVerifyRequestOptsFromBuilderOrExistingOpts(opts) }
     this._eventEmitter = opts.builder?.eventEmitter
@@ -276,7 +278,7 @@ export class OP {
    * @param encodedUri
    */
   public async parseAuthorizationRequestURI(encodedUri: string): Promise<ParsedAuthorizationRequestURI> {
-    const { scheme, requestObjectJwt, authorizationRequestPayload, registrationMetadata } = await URI.parseAndResolve(encodedUri)
+    const { scheme, requestObjectJwt, authorizationRequestPayload, registrationMetadata } = await URI.parseAndResolve(encodedUri, this._trustChain)
 
     return {
       encodedUri,
