@@ -1,5 +1,4 @@
 import { parseJWT } from '@sphereon/oid4vc-common'
-import { FederationClient, TrustChainResolveResponse } from '@sphereon/openid-federation-client'
 
 import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { decodeUriAsJson, encodeJsonAsURI, fetchByReferenceOrUseByValue } from '../helpers'
@@ -194,8 +193,7 @@ export class URI implements AuthorizationRequestURI {
       }
     } else {
       try {
-        scheme =
-          (await authorizationRequest.getSupportedVersion()) === SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1 ? 'openid-vc://' : 'openid4vp://'
+        scheme = (await authorizationRequest.getSupportedVersion()) === SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1 ? 'openid-vc://' : 'openid4vp://'
       } catch (error: unknown) {
         scheme = 'openid4vp://'
       }
@@ -236,7 +234,7 @@ export class URI implements AuthorizationRequestURI {
     return { scheme, authorizationRequestPayload }
   }
 
-  public static async parseAndResolve(uri: string, trustChain?: Array<string>) {
+  public static async parseAndResolve(uri: string, rpRegistrationMetadata?: RPRegistrationMetadataPayload) {
     if (!uri) {
       throw Error(SIOPErrors.BAD_PARAMS)
     }
@@ -244,23 +242,10 @@ export class URI implements AuthorizationRequestURI {
 
     const requestObjectJwt = await fetchByReferenceOrUseByValue(authorizationRequestPayload.request_uri, authorizationRequestPayload.request, true)
     let registrationMetadata: RPRegistrationMetadataPayload
-    if (trustChain !== undefined && trustChain !== null) {
-      const fedClient = new FederationClient(null, null)
-      const resolvedTrustChain: TrustChainResolveResponse = await fedClient.resolveTrustChain(
-        authorizationRequestPayload['client_metadata_uri'],
-        trustChain,
-      )
-      if (resolvedTrustChain !== null && resolvedTrustChain !== undefined) {
-        const clientMetadata = resolvedTrustChain.trustChain.asJsReadonlyArrayView()[1]
-        const subordinateStatement = JSON.parse(Buffer.from(clientMetadata.split('.')[1]).toString('base64url'))
-        registrationMetadata = {}
-        registrationMetadata.federation_entity = subordinateStatement.federationEntity
-        registrationMetadata.openid_credential_verifier = subordinateStatement.openIdRelyingParty
-      } else {
-        throw new Error('Cannot resolve OID Federation metadata')
-      }
+    if (rpRegistrationMetadata !== undefined && rpRegistrationMetadata !== null) {
+      registrationMetadata = rpRegistrationMetadata
     } else {
-      registrationMetadata = await fetchByReferenceOrUseByValue(
+        registrationMetadata = await fetchByReferenceOrUseByValue(
         authorizationRequestPayload['client_metadata_uri'] ?? authorizationRequestPayload['registration_uri'],
         authorizationRequestPayload['client_metadata'] ?? authorizationRequestPayload['registration'],
       )

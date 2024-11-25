@@ -24,13 +24,13 @@ import {
   RegisterEventListener,
   RequestObjectPayload,
   ResponseIss,
-  ResponseMode,
+  ResponseMode, RPRegistrationMetadataPayload,
   SIOPErrors,
   SupportedVersion,
   UrlEncodingFormat,
   Verification,
   VerifiedAuthorizationRequest
-} from '../types';
+} from '../types'
 
 import { OPBuilder } from './OPBuilder';
 import { createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFromBuilderOrExistingOpts } from './Opts';
@@ -39,11 +39,9 @@ import { createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFro
 export class OP {
   private readonly _createResponseOptions: AuthorizationResponseOpts
   private readonly _verifyRequestOptions: Partial<VerifyAuthorizationRequestOpts>
-  private readonly _trustChain: Array<string>
   private readonly _eventEmitter?: EventEmitter
 
   private constructor(opts: { builder?: OPBuilder; responseOpts?: AuthorizationResponseOpts; verifyOpts?: VerifyAuthorizationRequestOpts }) {
-    this._trustChain = opts.builder?.trustChain
     this._createResponseOptions = { ...createResponseOptsFromBuilderOrExistingOpts(opts) }
     this._verifyRequestOptions = { ...createVerifyRequestOptsFromBuilderOrExistingOpts(opts) }
     this._eventEmitter = opts.builder?.eventEmitter
@@ -276,9 +274,10 @@ export class OP {
    * Create an Authentication Request Payload from a URI string
    *
    * @param encodedUri
+   * @param rpRegistrationMetadata
    */
-  public async parseAuthorizationRequestURI(encodedUri: string): Promise<ParsedAuthorizationRequestURI> {
-    const { scheme, requestObjectJwt, authorizationRequestPayload, registrationMetadata } = await URI.parseAndResolve(encodedUri, this._trustChain)
+  public async parseAuthorizationRequestURI(encodedUri: string, rpRegistrationMetadata?: RPRegistrationMetadataPayload): Promise<ParsedAuthorizationRequestURI> {
+    const { scheme, requestObjectJwt, authorizationRequestPayload, registrationMetadata } = await URI.parseAndResolve(encodedUri, rpRegistrationMetadata)
 
     return {
       encodedUri,
