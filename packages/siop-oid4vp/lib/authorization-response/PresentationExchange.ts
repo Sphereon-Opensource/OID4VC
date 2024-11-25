@@ -30,6 +30,7 @@ import {
   PresentationDefinitionWithLocation,
   PresentationSignCallback,
   PresentationVerificationCallback,
+  PresentationVerificationResult,
 } from './types'
 
 export class PresentationExchange {
@@ -392,13 +393,10 @@ export class PresentationExchange {
       // Verify the signature of all VPs
       await Promise.all(
         presentationsToVerify.map(async (presentation) => {
+          let verificationResult:PresentationVerificationResult
           try {
-            const verificationResult = await verifyPresentationCallback(presentation as W3CVerifiablePresentation, evaluationResults.value!)
-            if (!verificationResult.verified) {
-              throw new Error(
-                SIOPErrors.VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID + (verificationResult.reason ? `. ${verificationResult.reason}` : ''),
-              )
-            }
+            verificationResult=  await verifyPresentationCallback(presentation as W3CVerifiablePresentation, evaluationResults.value!)
+            
           } catch (error: unknown) {
             throw new Error(SIOPErrors.VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID)
           }
