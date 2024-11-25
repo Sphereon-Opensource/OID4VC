@@ -1,4 +1,4 @@
-import { DynamicRegistrationClientMetadata, JWK } from '@sphereon/oid4vc-common'
+import { JWK } from '@sphereon/oid4vc-common';
 
 import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
 
@@ -20,14 +20,9 @@ import {
   ResponseEncryption,
 } from './Generic.types';
 import { QRCodeOpts } from './QRCode.types';
-import {
-  AuthorizationServerMetadata,
-  AuthorizationServerType,
-  EndpointMetadata,
-  FederationEntityMetadata
-} from './ServerMetadata'
+import { AuthorizationServerMetadata, AuthorizationServerType, EndpointMetadata } from './ServerMetadata';
 
-export interface IssuerMetadataV1_0_13 extends OpenIDCredentialIssuer {
+export interface IssuerMetadataV1_0_13 {
   credential_configurations_supported: Record<string, CredentialConfigurationSupportedV1_0_13>; // REQUIRED. A JSON object containing a list of key value pairs, where the key is a string serving as an abstract identifier of the Credential. This identifier is RECOMMENDED to be collision resistant - it can be globally unique, but does not have to be when naming conflicts are unlikely to arise in a given use case. The value is a JSON object. The JSON object MUST conform to the structure of the Section 11.2.1.
   credential_issuer: string; // A Credential Issuer is identified by a case sensitive URL using the https scheme that contains scheme, host and, optionally, port number and path components, but no query or fragment components.
   credential_endpoint: string; // REQUIRED. URL of the OP's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
@@ -194,13 +189,7 @@ export interface CredentialOfferPayloadV1_0_13 {
   client_id?: string;
 }
 
-export type OpenIDCredentialIssuer = {
-  federation_entity?: FederationEntityMetadata;
-  openid_credential_issuer?: DynamicRegistrationClientMetadata & { openid_credential_offer?: string };
-  oauth_server_metadata?: AuthorizationServerMetadata
-};
-
-export interface CredentialIssuerMetadataOptsV1_0_13 extends OpenIDCredentialIssuer {
+export interface CredentialIssuerMetadataOptsV1_0_13 {
   credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   batch_credential_endpoint?: string; // OPTIONAL. URL of the Credential Issuer's Batch Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components. If omitted, the Credential Issuer does not support the Batch Credential Endpoint.
   deferred_credential_endpoint?: string; // OPTIONAL. URL of the Credential Issuer's Deferred Credential Endpoint, as defined in Section 9. This URL MUST use the https scheme and MAY contain port, path, and query parameter components. If omitted, the Credential Issuer does not support the Deferred Credential Endpoint.
@@ -238,9 +227,6 @@ export const credentialIssuerMetadataFieldNames: Array<keyof CredentialIssuerMet
   // Optional fields from v1.0.13
   'credential_identifiers_supported',
   'signed_metadata',
-  'federation_entity',
-  'openid_credential_issuer',
-  'oauth_server_metadata'
 ] as const;
 
 export interface EndpointMetadataResultV1_0_13 extends EndpointMetadata {
@@ -252,7 +238,7 @@ export interface EndpointMetadataResultV1_0_13 extends EndpointMetadata {
 }
 
 // For now we extend the opts above. Only difference is that the credential endpoint is optional in the Opts, as it can come from other sources. The value is however required in the eventual Issuer Metadata
-export interface CredentialIssuerMetadataV1_0_13 extends CredentialIssuerMetadataOptsV1_0_13 , Partial<AuthorizationServerMetadata>, OpenIDCredentialIssuer{
+export interface CredentialIssuerMetadataV1_0_13 extends CredentialIssuerMetadataOptsV1_0_13, Partial<AuthorizationServerMetadata> {
   authorization_servers?: string[]; // OPTIONAL. Array of strings that identify the OAuth 2.0 Authorization Servers (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
   credential_endpoint: string; // REQUIRED. URL of the Credential Issuer's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   credential_configurations_supported: Record<string, CredentialConfigurationSupportedV1_0_13>; // REQUIRED. A JSON array containing a list of JSON objects, each of them representing metadata about a separate credential type that the Credential Issuer can issue. The JSON objects in the array MUST conform to the structure of the Section 10.2.3.1.

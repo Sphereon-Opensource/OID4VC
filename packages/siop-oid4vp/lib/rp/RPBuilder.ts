@@ -91,7 +91,6 @@ export class RPBuilder {
     return this
   }
 
-
   withIssuer(issuer: ResponseIss, targets?: PropertyTargets): RPBuilder {
     this._authorizationRequestPayload.iss = assignIfAuth({ propertyValue: issuer, targets }, false)
     this._requestObjectPayload.iss = assignIfRequestObject({ propertyValue: issuer, targets }, true)

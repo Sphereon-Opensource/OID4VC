@@ -11,7 +11,7 @@ import {
   MetadataDisplay,
   TokenErrorResponse,
   TxCode,
-  URIState
+  URIState,
 } from '@sphereon/oid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
@@ -52,7 +52,7 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     this.issuerMetadataBuilder = builder
     return this
   }
-  
+
   public withDefaultCredentialOfferBaseUri(baseUri: string) {
     this.defaultCredentialOfferBaseUri = baseUri
     return this
@@ -169,10 +169,10 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     if (!this.cNonceStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    if(Object.keys(this.issuerMetadata).length === 0) {
+    if (Object.keys(this.issuerMetadata).length === 0) {
       throw new Error('issuerMetadata not set')
     }
-    if(Object.keys(this.authorizationServerMetadata).length === 0) {
+    if (Object.keys(this.authorizationServerMetadata).length === 0) {
       throw new Error('authorizationServerMetadata not set')
     }
 
@@ -184,10 +184,8 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     if (!metadata.credential_endpoint || !metadata.credential_issuer || !this.issuerMetadata.credential_configurations_supported) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    return new VcIssuer(metadata as IssuerMetadataV1_0_13, 
-      this.authorizationServerMetadata as AuthorizationServerMetadata, 
-      {
-        //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
+    return new VcIssuer(metadata as IssuerMetadataV1_0_13, this.authorizationServerMetadata as AuthorizationServerMetadata, {
+      //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
       ...(this.txCode && { txCode: this.txCode }),
       defaultCredentialOfferBaseUri: this.defaultCredentialOfferBaseUri,
       credentialSignerCallback: this.credentialSignerCallback,

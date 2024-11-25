@@ -1,16 +1,16 @@
 import { SigningAlgo } from '@sphereon/oid4vc-common'
 import {
   AuthorizationServerMetadata,
-  OAuthGrantType, OAuthResponseMode,
+  OAuthGrantType,
+  OAuthResponseMode,
   OAuthResponseType,
   OAuthScope,
   PKCECodeChallengeMethod,
   RevocationEndpointAuthMethod,
   RevocationEndpointAuthSigningAlg,
   TokenEndpointAuthMethod,
-  TokenEndpointAuthSigningAlg
+  TokenEndpointAuthSigningAlg,
 } from '@sphereon/oid4vci-common'
-
 
 export class AuthorizationServerMetadataBuilder {
   private metadata: Partial<AuthorizationServerMetadata> = {}
@@ -30,7 +30,7 @@ export class AuthorizationServerMetadataBuilder {
     return this
   }
 
-  public withTokenEndpointAuthMethodsSupported(methods:Array<TokenEndpointAuthMethod>): AuthorizationServerMetadataBuilder {
+  public withTokenEndpointAuthMethodsSupported(methods: Array<TokenEndpointAuthMethod>): AuthorizationServerMetadataBuilder {
     this.metadata.token_endpoint_auth_methods_supported = methods
     return this
   }
@@ -60,7 +60,7 @@ export class AuthorizationServerMetadataBuilder {
     return this
   }
 
-  public withGrantTypesSupported(types:  Array<OAuthGrantType>): AuthorizationServerMetadataBuilder {
+  public withGrantTypesSupported(types: Array<OAuthGrantType>): AuthorizationServerMetadataBuilder {
     this.metadata.grant_types_supported = types
     return this
   }
@@ -105,7 +105,7 @@ export class AuthorizationServerMetadataBuilder {
     return this
   }
 
-  public withCodeChallengeMethodsSupported(methods:  Array<PKCECodeChallengeMethod>): AuthorizationServerMetadataBuilder {
+  public withCodeChallengeMethodsSupported(methods: Array<PKCECodeChallengeMethod>): AuthorizationServerMetadataBuilder {
     this.metadata.code_challenge_methods_supported = methods
     return this
   }

@@ -98,7 +98,7 @@ export const getRequestObjectJwtVerifier = async (
     } else if (jwt.payload.response_uri && jwt.payload.response_uri !== clientId) {
       throw new Error(SIOPErrors.INVALID_CLIENT_ID_MUST_MATCH_RESPONSE_URI)
     }
-    
+
     /*const parts = options.raw.split('.')  this can be signed and execution can't even be here when alg = none 
     if (parts.length > 2 && parts[2]) {
       throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' JWT must not be signed`)

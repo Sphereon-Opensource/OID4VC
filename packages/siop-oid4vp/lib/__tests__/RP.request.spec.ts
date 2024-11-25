@@ -299,16 +299,16 @@ describe('RP should', () => {
       .withSupportedVersions([SupportedVersion.SIOPv2_D11])
       .build()
     const request = await rp.createAuthorizationRequestURI({
-        correlationId: '1234',
-        state: 'b32f0087fc9816eb813fd11f',
-        nonce: 'qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg',
-        jwtIssuer: { method: 'did', didUrl: KID, alg: SigningAlgo.ES256K },
-      })
+      correlationId: '1234',
+      state: 'b32f0087fc9816eb813fd11f',
+      nonce: 'qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg',
+      jwtIssuer: { method: 'did', didUrl: KID, alg: SigningAlgo.ES256K },
+    })
     expect(request.authorizationRequestPayload).toMatchObject(expectedPayloadWithoutRequest)
     expect(request.encodedUri).toMatch(expectedUri)
     expect(request.requestObjectJwt).toMatch(expectedJwtRegex)
-    
-    const responseRedirectUri = rp.getResponseRedirectUri({correlation_id: '1234', state: 'b32f0087fc9816eb813fd11f'})
+
+    const responseRedirectUri = rp.getResponseRedirectUri({ correlation_id: '1234', state: 'b32f0087fc9816eb813fd11f' })
     expect(responseRedirectUri).toBe('https://acme.com/1234?state=b32f0087fc9816eb813fd11f')
   })
 })

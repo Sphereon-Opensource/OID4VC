@@ -12,9 +12,7 @@ import {
   URIState,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer'
-import {
-  AuthorizationServerMetadataBuilder
-} from '@sphereon/oid4vci-issuer'
+import { AuthorizationServerMetadataBuilder } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { DIDDocument } from 'did-resolver'
@@ -24,8 +22,6 @@ import requests from 'supertest'
 
 import { OID4VCIServer } from '../OID4VCIServer'
 
-
-
 const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
   .withIssuer('test-issuer')
   .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
@@ -34,8 +30,7 @@ const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
   .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
   .withResponseTypesSupported(['code', 'token', 'id_token'])
   .withScopesSupported(['openid', 'abcdef'])
-  .build();
-
+  .build()
 
 describe('OID4VCIServer', () => {
   let app: Express
@@ -123,11 +118,11 @@ describe('OID4VCIServer', () => {
                   display: [
                     {
                       name: 'given name',
-                      locale: 'en-US'
-                    }
-                  ]
-                }
-              }
+                      locale: 'en-US',
+                    },
+                  ],
+                },
+              },
             },
             format: 'jwt_vc_json',
             credential_signing_alg_values_supported: ['ES256K'],
@@ -138,22 +133,22 @@ describe('OID4VCIServer', () => {
                 locale: 'en-US',
                 logo: {
                   url: 'https://exampleuniversity.com/public/logo.png',
-                  alt_text: 'a square logo of a university'
+                  alt_text: 'a square logo of a university',
                 },
                 background_color: '#12107c',
-                text_color: '#FFFFFF'
-              }
-            ]
-          }
-        }
+                text_color: '#FFFFFF',
+              },
+            ],
+          },
+        },
       } as CredentialIssuerMetadataOptsV1_0_13,
       authorizationServerMetadata,
       {
         cNonceExpiresIn: 300,
         credentialOfferSessions,
         cNonces: new MemoryStates<CNonceState>(),
-        uris: new MemoryStates<URIState>()
-      }
+        uris: new MemoryStates<URIState>(),
+      },
     )
 
     expressSupport = ExpressBuilder.fromServerOpts({
