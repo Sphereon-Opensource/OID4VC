@@ -130,7 +130,7 @@ export class AuthorizationResponse {
 
     if (responseOpts.presentationExchange) {
       const wrappedPresentations = response.payload.vp_token
-        ? await extractPresentationsFromVpToken(response.payload.vp_token, {
+        ? extractPresentationsFromVpToken(response.payload.vp_token, {
             hasher: verifyOpts.hasher,
           })
         : []
@@ -144,14 +144,12 @@ export class AuthorizationResponse {
           hasher: verifyOpts.hasher,
         },
       })
-    } else {
-      const dcqlQuery = verifiedAuthorizationRequest.dcqlQuery
-      if (!dcqlQuery) {
-        throw new Error('vp_token is present, but no presentation definitions or dcql query provided')
-      }
-      assertValidDcqlPresentationResult(responseOpts.dcqlQuery.dcqlPresentation as DcqlPresentation, dcqlQuery, {
+    } else if (verifiedAuthorizationRequest.dcqlQuery) {
+      assertValidDcqlPresentationResult(responseOpts.dcqlQuery.dcqlPresentation as DcqlPresentation, verifiedAuthorizationRequest.dcqlQuery, {
         hasher: verifyOpts.hasher,
       })
+    } else {
+      throw new Error('vp_token is present, but no presentation definitions or dcql query provided')
     }
 
     return response

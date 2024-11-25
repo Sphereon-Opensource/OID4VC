@@ -113,7 +113,7 @@ export const verifyPresentations = async (
     }
   } else {
     const presentations = authorizationResponse.payload.vp_token
-      ? await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher })
+      ? extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher })
       : []
     wrappedPresentations = Array.isArray(presentations) ? presentations : [presentations]
 

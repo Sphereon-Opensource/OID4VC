@@ -43,10 +43,10 @@ export const getDcqlPresentationResult = (record: DcqlPresentation | string, dcq
       if (p.format === 'mso_mdoc') {
         return [
           queryId,
-          { credentialFormat: 'mso_mdoc', doctype: p.vcs[0].credential.toJson().docType, namespaces: p.vcs[0].decoded } satisfies DcqlMdocCredential,
+          { credential_format: 'mso_mdoc', doctype: p.vcs[0].credential.toJson().docType, namespaces: p.vcs[0].decoded } satisfies DcqlMdocCredential,
         ]
       } else if (p.format === 'vc+sd-jwt') {
-        return [queryId, { credentialFormat: 'vc+sd-jwt', vct: p.vcs[0].decoded.vct, claims: p.vcs[0].decoded } satisfies DcqlSdJwtVcCredential]
+        return [queryId, { credential_format: 'vc+sd-jwt', vct: p.vcs[0].decoded.vct, claims: p.vcs[0].decoded } satisfies DcqlSdJwtVcCredential]
       } else {
         throw new Error('DcqlPresentation atm only supports mso_mdoc and vc+sd-jwt')
       }
