@@ -84,7 +84,8 @@ function getVCs(): OriginalVerifiableCredential[] {
   return [SD_JWT_VC]
 }
 
-describe.skip('RP and OP interaction should', () => {  // FIXME SDK-45 Uniresolver failing
+describe.skip('RP and OP interaction should', () => {
+  // FIXME SDK-45 Uniresolver failing
   it('succeed when calling with presentation definitions and right verifiable presentation', async () => {
     const opMock = await mockedGetEnterpriseAuthToken('OP')
     const opMockEntity = {

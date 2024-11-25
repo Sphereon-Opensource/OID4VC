@@ -185,7 +185,7 @@ export class MetadataClient {
         : (authMetadata as CredentialIssuerMetadataV1_0_13);
     }
     debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`);
-    
+
     return {
       issuer,
       token_endpoint,

@@ -5,9 +5,9 @@ import {
   CompactSdJwtVc,
   Hasher,
   MdocOid4vpIssuerSigned,
+  MdocOid4vpMdocVpToken,
   PresentationSubmission,
   W3CVerifiablePresentation,
-  MdocOid4vpMdocVpToken,
 } from '@sphereon/ssi-types'
 
 import {

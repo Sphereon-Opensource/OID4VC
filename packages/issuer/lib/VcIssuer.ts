@@ -38,30 +38,13 @@ import {
   toUniformCredentialOfferRequest,
   TxCode,
   TYP_ERROR,
-  URIState
+  URIState,
 } from '@sphereon/oid4vci-common'
-import {
-  CompactSdJwtVc,
-  CredentialMapper,
-  InitiatorType,
-  SubSystem,
-  System,
-  W3CVerifiableCredential
-} from '@sphereon/ssi-types'
+import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
-import {
-  assertValidPinNumber,
-  createCredentialOfferObject,
-  createCredentialOfferURIFromObject,
-  CredentialOfferGrantInput
-} from './functions'
+import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
 import { LookupStateManager } from './state-manager'
-import {
-  CredentialDataSupplier,
-  CredentialDataSupplierArgs,
-  CredentialIssuanceInput,
-  CredentialSignerCallback
-} from './types'
+import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
 
 export class VcIssuer<DIDDoc extends object> {
   private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_13
@@ -683,7 +666,7 @@ export class VcIssuer<DIDDoc extends object> {
   public get issuerMetadata() {
     return this._issuerMetadata
   }
-  
+
   public get authorizationServerMetadata() {
     return this._authorizationServerMetadata
   }

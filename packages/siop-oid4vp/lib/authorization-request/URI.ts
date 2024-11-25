@@ -126,7 +126,6 @@ export class URI implements AuthorizationRequestURI {
         ...authorizationRequest.options.requestObject,
         version: authorizationRequest.options.version,
         uriScheme: authorizationRequest.options.uriScheme,
-        
       },
       authorizationRequest.payload,
       authorizationRequest.requestObject,
@@ -194,7 +193,8 @@ export class URI implements AuthorizationRequestURI {
       }
     } else {
       try {
-        scheme = (await authorizationRequest.getSupportedVersion()) === SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1 ? 'openid-vc://' : 'openid4vp://'
+        scheme =
+          (await authorizationRequest.getSupportedVersion()) === SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1 ? 'openid-vc://' : 'openid4vp://'
       } catch (error: unknown) {
         scheme = 'openid4vp://'
       }

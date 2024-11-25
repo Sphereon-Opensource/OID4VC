@@ -70,11 +70,14 @@ export const verifyPresentations = async (
   authorizationResponse: AuthorizationResponse,
   verifyOpts: VerifyAuthorizationResponseOpts,
 ): Promise<VerifiedOpenID4VPSubmission | null> => {
-  if (!authorizationResponse.payload.vp_token || Array.isArray(authorizationResponse.payload.vp_token) && authorizationResponse.payload.vp_token.length === 0) {
+  if (
+    !authorizationResponse.payload.vp_token ||
+    (Array.isArray(authorizationResponse.payload.vp_token) && authorizationResponse.payload.vp_token.length === 0)
+  ) {
     return Promise.reject(Error('the payload is missing a vp_token'))
   }
-  
-  const presentations = await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher }) 
+
+  const presentations = await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher })
   const presentationDefinitions = verifyOpts.presentationDefinitions
     ? Array.isArray(verifyOpts.presentationDefinitions)
       ? verifyOpts.presentationDefinitions
@@ -139,13 +142,11 @@ export const extractPresentationsFromVpToken = async (
   vpToken: Array<W3CVerifiablePresentation | CompactSdJwtVc | string> | W3CVerifiablePresentation | CompactSdJwtVc | string,
   opts?: { hasher?: Hasher },
 ): Promise<WrappedVerifiablePresentation[] | WrappedVerifiablePresentation> => {
-  const tokens = Array.isArray(vpToken) ? vpToken : [vpToken];
-  const wrappedTokens = tokens.map(vp =>
-    CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: opts?.hasher })
-  );
+  const tokens = Array.isArray(vpToken) ? vpToken : [vpToken]
+  const wrappedTokens = tokens.map((vp) => CredentialMapper.toWrappedVerifiablePresentation(vp, { hasher: opts?.hasher }))
 
-  return tokens.length === 1 ? wrappedTokens[0] : wrappedTokens;
-  }
+  return tokens.length === 1 ? wrappedTokens[0] : wrappedTokens
+}
 
 export const createPresentationSubmission = async (
   verifiablePresentations: W3CVerifiablePresentation[],
@@ -269,7 +270,7 @@ export const putPresentationSubmissionInLocation = async (
   }
 
   responsePayload.vp_token =
-    resOpts.presentationExchange?.verifiablePresentations.length === 1 && submissionData.descriptor_map[0]?.path === '$'
+    resOpts.presentationExchange?.verifiablePresentations.length === 1
       ? resOpts.presentationExchange.verifiablePresentations[0]
       : resOpts.presentationExchange?.verifiablePresentations
 }
@@ -285,19 +286,19 @@ export const assertValidVerifiablePresentations = async (args: {
     presentationSubmission?: PresentationSubmission
     hasher?: Hasher
   }
-}) : Promise<void> => {
-  const {presentations} = args
+}): Promise<void> => {
+  const { presentations } = args
   if (!presentations || (Array.isArray(presentations) && presentations.length === 0)) {
     return Promise.reject(Error('missing presentation(s)'))
   }
-  
+
   // Handle mdocs, keep them out of pex
-  let presentationsArray = (Array.isArray(presentations) ? presentations : [presentations])
-  if (presentationsArray.every(p => p.format === 'mso_mdoc')) {
+  let presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
+  if (presentationsArray.every((p) => p.format === 'mso_mdoc')) {
     return
-  }  
+  }
   presentationsArray = presentationsArray.filter((p) => p.format !== 'mso_mdoc')
-  
+
   if (
     (!args.presentationDefinitions || args.presentationDefinitions.filter((a) => a.definition).length === 0) &&
     (!presentationsArray || (Array.isArray(presentationsArray) && presentationsArray.filter((vp) => vp.presentation).length === 0))

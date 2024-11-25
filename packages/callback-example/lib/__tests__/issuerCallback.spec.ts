@@ -16,12 +16,7 @@ import {
   ProofOfPossession,
 } from '@sphereon/oid4vci-common'
 import { CredentialOfferSession } from '@sphereon/oid4vci-common'
-import {
-  AuthorizationServerMetadataBuilder,
-  CredentialSupportedBuilderV1_13,
-  VcIssuer,
-  VcIssuerBuilder
-} from '@sphereon/oid4vci-issuer'
+import { AuthorizationServerMetadataBuilder, CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer'
 import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
@@ -52,7 +47,6 @@ async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promi
     .sign(keypair.privateKey)
 }
 
-
 const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
   .withIssuer(IDENTIPROOF_ISSUER_URL)
   .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
@@ -61,8 +55,7 @@ const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
   .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
   .withResponseTypesSupported(['code', 'token', 'id_token'])
   .withScopesSupported(['openid', 'abcdef'])
-  .build();
-
+  .build()
 
 async function verifyCallbackFunction(args: { jwt: string; kid?: string }): Promise<JwtVerifyResult<DIDDocument>> {
   const result = await jose.jwtVerify(args.jwt, keypair.publicKey)

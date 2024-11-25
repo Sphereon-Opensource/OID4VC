@@ -219,7 +219,6 @@ export class AuthorizationResponse {
       }
       const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
 
-
       // We do not verify them, as that is done elsewhere. So we simply can take the first nonce
       nonce = presentationsArray
         // FIXME toWrappedVerifiablePresentation() does not extract the nonce yet from mdocs.

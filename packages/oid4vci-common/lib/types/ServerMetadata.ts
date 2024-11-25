@@ -1,21 +1,8 @@
-import { DynamicRegistrationClientMetadata, SigningAlgo } from '@sphereon/oid4vc-common'
+import { DynamicRegistrationClientMetadata, SigningAlgo } from '@sphereon/oid4vc-common';
 
-export type OAuthResponseType =
-  | 'code'
-  | 'token'
-  | 'id_token'
-  | 'code token'
-  | 'code id_token'
-  | 'token id_token'
-  | 'code token id_token';
+export type OAuthResponseType = 'code' | 'token' | 'id_token' | 'code token' | 'code id_token' | 'token id_token' | 'code token id_token';
 
-
-export type TokenEndpointAuthMethod =
-  | 'client_secret_basic'
-  | 'client_secret_post'
-  | 'client_secret_jwt'
-  | 'private_key_jwt'
-  | 'none';
+export type TokenEndpointAuthMethod = 'client_secret_basic' | 'client_secret_post' | 'client_secret_jwt' | 'private_key_jwt' | 'none';
 
 export type TokenEndpointAuthSigningAlg =
   | 'RS256'
@@ -31,19 +18,9 @@ export type TokenEndpointAuthSigningAlg =
   | 'HS384'
   | 'HS512';
 
-export type OAuthScope =
-  | 'openid'
-  | 'profile'
-  | 'email'
-  | 'address'
-  | 'phone'
-  | 'offline_access'
+export type OAuthScope = 'openid' | 'profile' | 'email' | 'address' | 'phone' | 'offline_access';
 
-
-export type OAuthResponseMode =
-  | 'query'
-  | 'fragment'
-  | 'form_post';
+export type OAuthResponseMode = 'query' | 'fragment' | 'form_post';
 
 export type OAuthGrantType =
   | 'authorization_code'
@@ -51,16 +28,11 @@ export type OAuthGrantType =
   | 'password'
   | 'client_credentials'
   | 'refresh_token'
-  | 'urn:ietf:params:oauth:grant-type:device_code' 
+  | 'urn:ietf:params:oauth:grant-type:device_code'
   | 'urn:ietf:params:oauth:grant-type:saml2-bearer'
-  | 'urn:ietf:params:oauth:grant-type:jwt-bearer'
+  | 'urn:ietf:params:oauth:grant-type:jwt-bearer';
 
-export type RevocationEndpointAuthMethod =
-  | 'client_secret_basic'
-  | 'client_secret_post'
-  | 'client_secret_jwt'
-  | 'private_key_jwt'
-  | 'none'
+export type RevocationEndpointAuthMethod = 'client_secret_basic' | 'client_secret_post' | 'client_secret_jwt' | 'private_key_jwt' | 'none';
 
 export type RevocationEndpointAuthSigningAlg =
   | 'RS256'
@@ -74,11 +46,9 @@ export type RevocationEndpointAuthSigningAlg =
   | 'PS512'
   | 'HS256'
   | 'HS384'
-  | 'HS512'
+  | 'HS512';
 
-export type PKCECodeChallengeMethod =
-  | 'plain'   
-  | 'S256'; 
+export type PKCECodeChallengeMethod = 'plain' | 'S256';
 
 export interface AuthorizationServerMetadata extends DynamicRegistrationClientMetadata {
   issuer: string;
@@ -89,7 +59,7 @@ export interface AuthorizationServerMetadata extends DynamicRegistrationClientMe
 
   registration_endpoint?: string;
   scopes_supported?: Array<OAuthScope | string>;
-  response_types_supported: Array<OAuthResponseType>
+  response_types_supported: Array<OAuthResponseType>;
   response_modes_supported?: Array<OAuthResponseMode>;
   grant_types_supported?: Array<OAuthGrantType>;
   service_documentation?: string;
@@ -159,8 +129,8 @@ export const authorizationServerMetadataFieldNames: Array<keyof AuthorizationSer
   'introspection_endpoint_auth_methods_supported',
   'introspection_endpoint_auth_signing_alg_values_supported',
   'code_challenge_methods_supported',
-  'signed_metadata'
-] as const
+  'signed_metadata',
+] as const;
 
 export enum WellKnownEndpoints {
   OPENID_CONFIGURATION = '/.well-known/openid-configuration',
