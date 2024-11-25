@@ -60,12 +60,10 @@ export class MetadataClient {
   /**
    * Retrieve all metadata from an issuer
    * @param issuer The issuer URL
-   * @param credIssuerMetadata
    * @param opts
    */
   public static async retrieveAllMetadata(
     issuer: string,
-    credIssuerMetadata?: CredentialIssuerMetadataV1_0_11 | CredentialIssuerMetadataV1_0_13 | (IssuerMetadataV1_0_08 & Partial<AuthorizationServerMetadata>),
     opts?: { errorOnNotFound: boolean },
   ): Promise<EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11> {
     let token_endpoint: string | undefined;
@@ -76,7 +74,7 @@ export class MetadataClient {
     let authorization_servers: string[] | undefined = [issuer];
     let authorization_server: string | undefined = undefined;
     const oid4vciResponse = await MetadataClient.retrieveOpenID4VCIServerMetadata(issuer, { errorOnNotFound: false }); // We will handle errors later, given we will also try other metadata locations
-    let credentialIssuerMetadata = credIssuerMetadata ?? oid4vciResponse?.successBody;
+    let credentialIssuerMetadata = oid4vciResponse?.successBody;
     if (credentialIssuerMetadata) {
       debug(`Issuer ${issuer} OID4VCI well-known server metadata\r\n${JSON.stringify(credentialIssuerMetadata)}`);
       credential_endpoint = credentialIssuerMetadata.credential_endpoint;
