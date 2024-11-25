@@ -393,12 +393,17 @@ export class PresentationExchange {
       // Verify the signature of all VPs
       await Promise.all(
         presentationsToVerify.map(async (presentation) => {
-          let verificationResult:PresentationVerificationResult
+          let verificationResult: PresentationVerificationResult
           try {
-            verificationResult=  await verifyPresentationCallback(presentation as W3CVerifiablePresentation, evaluationResults.value!)
-            
+            verificationResult = await verifyPresentationCallback(presentation as W3CVerifiablePresentation, evaluationResults.value!)
           } catch (error: unknown) {
             throw new Error(SIOPErrors.VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID)
+          }
+
+          if (!verificationResult.verified) {
+            throw new Error(
+              SIOPErrors.VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID + (verificationResult.reason ? `. ${verificationResult.reason}` : ''),
+            )
           }
         }),
       )
