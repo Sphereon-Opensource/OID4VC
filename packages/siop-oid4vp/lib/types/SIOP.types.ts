@@ -231,40 +231,6 @@ export interface RequestStateInfo {
   iat?: number
 }
 
-export interface FederationEntityMetadataPayload {
-  federation_fetch_endpoint?: string
-  federation_list_endpoint?: string
-  federation_resolve_endpoint?: string
-  federation_trust_mark_status_endpoint?: string
-  federation_trust_mark_list_endpoint?: string
-  federation_trust_mark_endpoint?: string
-  federation_historical_keys_endpoint?: string
-  organization_name?: string
-  homepage_uri?: string
-}
-
-export interface FederationEntityMetadataOpts {
-  federationFetchEndpoint?: string
-  federationListEndpoint?: string
-  federationResolveEndpoint?: string
-  federationTrustMarkStatusEndpoint?: string
-  federationTrustMarkListEndpoint?: string
-  federationTrustMarkEndpoint?: string
-  federationHistoricalKeysEndpoint?: string
-  organizationName?: string
-  homepageUri?: string
-}
-
-export type OpenIDCredentialVerifierOpts = {
-  federationEntity?: FederationEntityMetadataOpts;
-  openidCredentialVerifier?: DynamicRegistrationClientMetadata & { vp_formats: Format };
-};
-
-export type OpenIDCredentialVerifierPayload = {
-  federation_entity?: FederationEntityMetadataPayload;
-  openid_credential_verifier?: DynamicRegistrationClientMetadata & { vp_formats: Format };
-};
-
 interface DiscoveryMetadataCommonOpts {
   //TODO add the check: Mandatory if PassBy.Value
   authorizationEndpoint?: Schema | string
@@ -308,6 +274,7 @@ interface DiscoveryMetadataCommonOpts {
   requireRequestUriRegistration?: boolean // from openid connect discovery 1_0
   opPolicyUri?: string // from openid connect discovery 1_0
   opTosUri?: string // from openid connect discovery 1_0
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }
@@ -447,7 +414,7 @@ export type RPRegistrationMetadataOpts = Partial<
     | 'tos_uri'
     | 'clientPurpose'
   >
-> & OpenIDCredentialVerifierOpts & {
+> & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }
@@ -465,7 +432,7 @@ export type RPRegistrationMetadataPayload = Pick<
   | 'client_name'
   | 'logo_uri'
   | 'client_purpose'
-> & OpenIDCredentialVerifierPayload & {
+> & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }
