@@ -448,15 +448,6 @@ importers:
       '@sphereon/oid4vc-common':
         specifier: workspace:*
         version: link:../common
-      '@sphereon/openid-federation-client':
-        specifier: ^0.1.1-unstable.21e8440
-        version: 0.1.1-unstable.21e8440(encoding@0.1.13)
-      '@sphereon/openid-federation-common':
-        specifier: ^0.1.1-unstable.21e8440
-        version: 0.1.1-unstable.21e8440(encoding@0.1.13)
-      '@sphereon/openid-federation-open-api':
-        specifier: ^0.1.1-unstable.21e8440
-        version: 0.1.1-unstable.21e8440(encoding@0.1.13)
       '@sphereon/pex':
         specifier: 5.0.0-unstable.24
         version: 5.0.0-unstable.24
@@ -2103,9 +2094,6 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@js-joda/core@3.2.0':
-    resolution: {integrity: sha512-PMqgJ0sw5B7FKb2d5bWYIoxjri+QlW/Pys7+Rw82jSH0QN3rB05jZ/VrrsUdh1w4+i2kw9JOejXGq/KhDOX7Kg==}
-
   '@js-joda/core@5.6.3':
     resolution: {integrity: sha512-T1rRxzdqkEXcou0ZprN1q9yDRlvzCPLqmlNt5IIsGBzoEVgLCCYrKEwc84+TvsXuAc95VAZwtWD2zVsKPY4bcA==}
 
@@ -2535,15 +2523,6 @@ packages:
   '@sphereon/kmp-mdl-mdoc@0.2.0-SNAPSHOT.22':
     resolution: {integrity: sha512-uAZZExVy+ug9JLircejWa5eLtAZ7bnBP6xb7DO2+86LRsHNLh2k2jMWJYxp+iWtGHTsh6RYsZl14ScQLvjiQ/A==}
     bundledDependencies: []
-
-  '@sphereon/openid-federation-client@0.1.1-unstable.21e8440':
-    resolution: {integrity: sha512-O1CW/t3Zan1wKQxdl6fzDXDrL/t+Ph9UB0rypJA4Pr9u4R+7nB+Z3KC/wphH2Q4NrJFP0sASKn0ER78Gc9onLw==}
-
-  '@sphereon/openid-federation-common@0.1.1-unstable.21e8440':
-    resolution: {integrity: sha512-mumhjoqeP1qjy3SsT/3AExV+x+SwrO4On+ZrMTFNYjzY7zRKl6rKWkgA0iGbG6z2XR7xW3y1wzDqFxIGS94tXQ==}
-
-  '@sphereon/openid-federation-open-api@0.1.1-unstable.21e8440':
-    resolution: {integrity: sha512-glePGlpbvZI+NhhsfoD44cFbamwIMIQF0xG1k1Ikr9i8XRZFBHz/w/WK9Hfc9dtP63Ry2Ckq8I4KlRZLL5OJ6g==}
 
   '@sphereon/pex-models@2.3.1':
     resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
@@ -5687,9 +5666,6 @@ packages:
   jose@4.15.9:
     resolution: {integrity: sha512-1vUQX+IdDMVPj4k8kOxgUqlcK518yluMuGZwqlr44FS1ppZB/5GWh4rZG89erpOBOJjU/OBsnCVFfapsRz6nEA==}
 
-  jose@5.9.4:
-    resolution: {integrity: sha512-WBBl6au1qg6OHj67yCffCgFR3BADJBXN8MdRvCgJDuMv3driV2nHr7jdGvaKX9IolosAsn+M0XRArqLXUhyJHQ==}
-
   js-base64@3.7.7:
     resolution: {integrity: sha512-7rCnleh0z2CkXhH67J8K1Ytz0b2Y+yxTPL+/KOJoa20hfnVQ/3/T6W/KflYI4bRHRagNeXeU2bkNGI3v1oS/lw==}
 
@@ -8526,18 +8502,6 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.5.0:
-    resolution: {integrity: sha512-BWX0SWVgLPzYwF8lTzEy1egjhS4S4OEAHfsO8o65WOVsrnSRGaSiUaa9e0ggGlkMTtBlmOpEXiie9RUcBO86qg==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: ^5.0.2
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
   x25519-key-agreement-2020-context@1.0.0:
     resolution: {integrity: sha512-zblYd8oSg6hNAD+fA9X7ek1hJQRircl3jVlEVCaBTNN9Mv9b4G32uJvRZFMQEMmda8iaTtYo9i2dRMdXX8pjpA==}
 
@@ -11059,8 +11023,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@js-joda/core@3.2.0': {}
-
   '@js-joda/core@5.6.3': {}
 
   '@js-joda/timezone@2.3.0(@js-joda/core@5.6.3)':
@@ -11810,42 +11772,6 @@ snapshots:
       '@js-joda/core': 5.6.3
       '@js-joda/timezone': 2.3.0(@js-joda/core@5.6.3)
       format-util: 1.0.5
-
-  '@sphereon/openid-federation-client@0.1.1-unstable.21e8440(encoding@0.1.13)':
-    dependencies:
-      '@js-joda/core': 3.2.0
-      abort-controller: 3.0.0
-      format-util: 1.0.5
-      jose: 5.9.4
-      node-fetch: 2.6.12(encoding@0.1.13)
-      ws: 8.5.0
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - utf-8-validate
-
-  '@sphereon/openid-federation-common@0.1.1-unstable.21e8440(encoding@0.1.13)':
-    dependencies:
-      abort-controller: 3.0.0
-      format-util: 1.0.5
-      node-fetch: 2.6.12(encoding@0.1.13)
-      typescript: 5.5.3
-      ws: 8.5.0
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - utf-8-validate
-
-  '@sphereon/openid-federation-open-api@0.1.1-unstable.21e8440(encoding@0.1.13)':
-    dependencies:
-      abort-controller: 3.0.0
-      format-util: 1.0.5
-      node-fetch: 2.6.12(encoding@0.1.13)
-      ws: 8.5.0
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - utf-8-validate
 
   '@sphereon/pex-models@2.3.1': {}
 
@@ -16144,8 +16070,6 @@ snapshots:
 
   jose@4.15.9: {}
 
-  jose@5.9.4: {}
-
   js-base64@3.7.7: {}
 
   js-binary-schema-parser@2.0.3: {}
@@ -19522,8 +19446,6 @@ snapshots:
   ws@8.17.1: {}
 
   ws@8.18.0: {}
-
-  ws@8.5.0: {}
 
   x25519-key-agreement-2020-context@1.0.0: {}
 
