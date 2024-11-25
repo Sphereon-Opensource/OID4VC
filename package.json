@@ -23,6 +23,7 @@
     "node": ">=18"
   },
   "resolutions": {
+    "@sphereon/ssi-types": "0.30.2-feature.mdoc.funke2.367",
     "node-fetch": "2.6.12"
   },
   "prettier": {
