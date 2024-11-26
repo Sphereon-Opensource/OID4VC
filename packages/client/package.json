@@ -47,6 +47,11 @@
     "uint8arrays": "3.1.1",
     "uuid": "^9.0.1"
   },
+  "peerDependencies": {
+    "@sphereon/openid-federation-client": "^0.1.1-unstable.21e8440",
+    "@sphereon/openid-federation-common": "^0.1.1-unstable.21e8440",
+    "@sphereon/openid-federation-open-api": "^0.1.1-unstable.21e8440"
+  },
   "engines": {
     "node": ">=18"
   },

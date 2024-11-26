@@ -1,4 +1,4 @@
-import { CreateDPoPClientOpts, JWK } from '@sphereon/oid4vc-common';
+import { CreateDPoPClientOpts, JWK, parseJWT } from '@sphereon/oid4vc-common';
 import {
   AccessTokenRequestOpts,
   AccessTokenResponse,
@@ -35,6 +35,7 @@ import {
   ProofOfPossessionCallbacks,
   toAuthorizationResponsePayload,
 } from '@sphereon/oid4vci-common';
+import { FederationClient } from '@sphereon/openid-federation-client';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
@@ -54,7 +55,9 @@ import { generateMissingPKCEOpts, sendNotification } from './functions';
 
 const debug = Debug('sphereon:oid4vci');
 
-export type OpenID4VCIClientState = OpenID4VCIClientStateV1_0_11 | OpenID4VCIClientStateV1_0_13;
+export type OpenID4VCIClientState =
+  | (OpenID4VCIClientStateV1_0_11 & { trustChains?: Array<string> })
+  | (OpenID4VCIClientStateV1_0_13 & { trustChains?: Array<string> });
 
 export type EndpointMetadataResult = EndpointMetadataResultV1_0_11 | EndpointMetadataResultV1_0_13;
 
@@ -76,6 +79,7 @@ export class OpenID4VCIClient {
     authorizationRequestOpts,
     authorizationCodeResponse,
     authorizationURL,
+    trustChains,
   }: {
     credentialOffer?: CredentialOfferRequestWithBaseUrl;
     kid?: string;
@@ -91,6 +95,7 @@ export class OpenID4VCIClient {
     authorizationRequestOpts?: AuthorizationRequestOpts;
     authorizationCodeResponse?: AuthorizationResponse;
     authorizationURL?: string;
+    trustChains?: Array<string>;
   }) {
     const issuer = credentialIssuer ?? (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
     if (!issuer) {
@@ -113,6 +118,7 @@ export class OpenID4VCIClient {
         : (endpointMetadata as EndpointMetadataResultV1_0_13 | undefined),
       accessTokenResponse,
       authorizationURL,
+      trustChains,
     } as OpenID4VCIClientState;
     // Running syncAuthorizationRequestOpts later as it is using the state
     if (!this._state.authorizationRequestOpts) {
@@ -130,6 +136,7 @@ export class OpenID4VCIClient {
     pkce,
     authorizationRequest,
     createAuthorizationRequestURL,
+    trustChains,
   }: {
     credentialIssuer: string;
     kid?: string;
@@ -139,6 +146,7 @@ export class OpenID4VCIClient {
     createAuthorizationRequestURL?: boolean;
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
     pkce?: PKCEOpts;
+    trustChains?: Array<string>;
   }) {
     const client = new OpenID4VCIClient({
       kid,
@@ -147,6 +155,7 @@ export class OpenID4VCIClient {
       credentialIssuer,
       pkce,
       authorizationRequest,
+      trustChains,
     });
     if (retrieveServerMetadata === undefined || retrieveServerMetadata) {
       await client.retrieveServerMetadata();
@@ -257,13 +266,23 @@ export class OpenID4VCIClient {
       if (this.credentialOffer) {
         this._state.endpointMetadata = await MetadataClient.retrieveAllMetadataFromCredentialOffer(this.credentialOffer);
       } else if (this._state.credentialIssuer) {
-        this._state.endpointMetadata = await MetadataClient.retrieveAllMetadata(this._state.credentialIssuer);
+        if (this._state.trustChains !== undefined && this._state.trustChains !== null && this._state.trustChains.length !== 0) {
+          this._state.endpointMetadata = await this.retrieveTrustChainMetadata(this._state.credentialIssuer, this._state.trustChains);
+        } else {
+          this._state.endpointMetadata = await MetadataClient.retrieveAllMetadata(this._state.credentialIssuer);
+        }
       } else {
         throw Error(`Cannot retrieve issuer metadata without either a credential offer, or issuer value`);
       }
     }
 
     return this.endpointMetadata;
+  }
+
+  private async retrieveTrustChainMetadata(credentialIssuer: string, trustChains: Array<string>): Promise<EndpointMetadataResult | undefined> {
+    const oidfClient = new FederationClient(null, null);
+    const resolvedTrustChain = await oidfClient.resolveTrustChain(credentialIssuer, trustChains);
+    return resolvedTrustChain?.trustChain?.asJsReadonlyArrayView().map((s) => parseJWT(s))[1].payload as EndpointMetadataResult | undefined;
   }
 
   private calculatePKCEOpts(pkce?: PKCEOpts) {
