@@ -461,7 +461,7 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0(encoding@0.1.13)
       dcql:
-        specifier: ^0.2.15
+        specifier: 0.2.16
         version: 0.2.16(typescript@5.4.5)
       debug:
         specifier: ^4.3.5
@@ -2535,6 +2535,7 @@ packages:
 
   '@sphereon/kmp-mdl-mdoc@0.2.0-SNAPSHOT.22':
     resolution: {integrity: sha512-uAZZExVy+ug9JLircejWa5eLtAZ7bnBP6xb7DO2+86LRsHNLh2k2jMWJYxp+iWtGHTsh6RYsZl14ScQLvjiQ/A==}
+    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.1':
     resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
