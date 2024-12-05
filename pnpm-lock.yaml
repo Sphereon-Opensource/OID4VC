@@ -6,6 +6,7 @@ settings:
 
 overrides:
   '@sphereon/ssi-types': 0.30.2-feature.mdoc.funke2.367
+  dcql: 0.2.11
   node-fetch: 2.6.12
 
 importers:
@@ -461,6 +462,9 @@ importers:
       cross-fetch:
         specifier: ^4.0.0
         version: 4.0.0(encoding@0.1.13)
+      dcql:
+        specifier: 0.2.11
+        version: 0.2.11(typescript@5.4.5)
       debug:
         specifier: ^4.3.5
         version: 4.3.7
@@ -2542,6 +2546,7 @@ packages:
 
   '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.10':
     resolution: {integrity: sha512-mHH7I6fWdztaNjguGJOLaerXWnQymQ/xKQ8NqClIXoI2PJNgmpQG6DxFcLRs1aYyWg1iY8bPliLJi41u94KdCA==}
+    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.1':
     resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
@@ -4012,6 +4017,9 @@ packages:
 
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
+
+  dcql@0.2.11:
+    resolution: {integrity: sha512-hR8MuSx49b7JPoZztcFMSKEHc6iEE4l/Zs6aUsvMCWVa3qFWpuJRiJEp5Rh2+UkCAhsce94fbDpMdBTcS9zn7g==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -8371,6 +8379,14 @@ packages:
   v8-to-istanbul@9.3.0:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
+
+  valibot@0.37.0:
+    resolution: {integrity: sha512-FQz52I8RXgFgOHym3XHYSREbNtkgSjF9prvMFH1nBsRyfL6SfCzoT1GuSDTlbsuPubM7/6Kbw0ZMQb8A+V+VsQ==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   valibot@0.42.1:
     resolution: {integrity: sha512-3keXV29Ar5b//Hqi4MbSdV7lfVp6zuYLZuA9V1PvQUsXqogr+u5lvLPLk3A4f74VUXDnf/JfWMN6sB+koJ/FFw==}
@@ -13897,6 +13913,12 @@ snapshots:
   dateformat@3.0.3: {}
 
   dayjs@1.11.13: {}
+
+  dcql@0.2.11(typescript@5.4.5):
+    dependencies:
+      valibot: 0.37.0(typescript@5.4.5)
+    transitivePeerDependencies:
+      - typescript
 
   debug@2.6.9:
     dependencies:
@@ -19557,6 +19579,10 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.25
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
+
+  valibot@0.37.0(typescript@5.4.5):
+    optionalDependencies:
+      typescript: 5.4.5
 
   valibot@0.42.1(typescript@5.5.3):
     optionalDependencies:
