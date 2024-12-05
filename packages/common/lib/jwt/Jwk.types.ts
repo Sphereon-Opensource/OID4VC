@@ -34,5 +34,5 @@ export interface JWK extends BaseJWK {
 }
 
 export type JWKS = {
-  keys: JWK[]
-}
+  keys: JWK[];
+};

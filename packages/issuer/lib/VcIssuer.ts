@@ -1,19 +1,24 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   ALG_ERROR,
-  AUD_ERROR, AuthorizationServerMetadata,
+  AUD_ERROR,
+  AuthorizationServerMetadata,
   CNonceState,
   CreateCredentialOfferURIResult,
   CREDENTIAL_MISSING_ERROR,
   CredentialConfigurationSupportedV1_0_13,
   CredentialDataSupplierInput,
+  CredentialEventNames,
   CredentialIssuerMetadata,
+  CredentialIssuerMetadataOptsV1_0_13,
+  CredentialOfferEventNames,
   CredentialOfferSession,
   CredentialOfferV1_0_13,
   CredentialRequest,
   CredentialRequestV1_0_13,
   CredentialResponse,
   DID_NO_DIDDOC_ERROR,
+  EVENTS,
   IAT_ERROR,
   ISSUER_CONFIG_ERROR,
   IssueStatus,
@@ -33,10 +38,8 @@ import {
   toUniformCredentialOfferRequest,
   TxCode,
   TYP_ERROR,
-  URIState
+  URIState,
 } from '@sphereon/oid4vci-common'
-import { CredentialEventNames, CredentialOfferEventNames, EVENTS } from '@sphereon/oid4vci-common'
-import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common'
 import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
@@ -663,10 +666,8 @@ export class VcIssuer<DIDDoc extends object> {
   public get issuerMetadata() {
     return this._issuerMetadata
   }
-  
+
   public get authorizationServerMetadata() {
     return this._authorizationServerMetadata
   }
-  
-  
 }

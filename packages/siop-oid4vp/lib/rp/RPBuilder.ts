@@ -40,6 +40,7 @@ export class RPBuilder {
 
   clientMetadata?: ClientMetadataOpts = undefined
   clientId: string
+  entityId: string
   clientIdScheme: string
 
   hasher: Hasher
@@ -80,6 +81,13 @@ export class RPBuilder {
     this._authorizationRequestPayload.client_id_scheme = assignIfAuth({ propertyValue: clientIdScheme, targets }, false)
     this._requestObjectPayload.client_id_scheme = assignIfRequestObject({ propertyValue: clientIdScheme, targets }, true)
     this.clientIdScheme = clientIdScheme
+    return this
+  }
+
+  withEntityId(entityId: string, targets?: PropertyTargets): RPBuilder {
+    this._authorizationRequestPayload.entity_id = assignIfAuth({ propertyValue: entityId, targets }, false)
+    this._requestObjectPayload.entity_id = assignIfRequestObject({ propertyValue: entityId, targets }, true)
+    this.entityId = entityId
     return this
   }
 

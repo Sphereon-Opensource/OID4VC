@@ -226,9 +226,8 @@ export const credentialIssuerMetadataFieldNames: Array<keyof CredentialIssuerMet
 
   // Optional fields from v1.0.13
   'credential_identifiers_supported',
-  'signed_metadata'
-] as const
-
+  'signed_metadata',
+] as const;
 
 export interface EndpointMetadataResultV1_0_13 extends EndpointMetadata {
   // The EndpointMetadata are snake-case so they can easily be used in payloads/JSON.

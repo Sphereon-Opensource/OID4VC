@@ -472,7 +472,7 @@ export class OpenID4VCIClientV1_0_13 {
           console.log(`Not all credential types ${JSON.stringify(credentialTypes)} are present in metadata for ${this.getIssuer()}`);
           // throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);
         }
-      } else if (metadata.credential_configurations_supported && typeof(metadata.credential_configurations_supported) === 'object') {
+      } else if (metadata.credential_configurations_supported && typeof metadata.credential_configurations_supported === 'object') {
         let typeSupported = false;
         Object.values(metadata.credential_configurations_supported).forEach((supportedCredential) => {
           const subTypes = getTypesFromCredentialSupported(supportedCredential);
@@ -482,7 +482,7 @@ export class OpenID4VCIClientV1_0_13 {
           ) {
             typeSupported = true;
           }
-        })
+        });
 
         if (!typeSupported) {
           throw Error(`Not all credential types ${JSON.stringify(credentialTypes)} are supported by issuer ${this.getIssuer()}`);

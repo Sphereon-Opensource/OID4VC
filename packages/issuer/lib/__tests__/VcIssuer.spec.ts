@@ -57,8 +57,7 @@ const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
   .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
   .withResponseTypesSupported(['code', 'token', 'id_token'])
   .withScopesSupported(['openid', 'abcdef'])
-  .build();
-
+  .build()
 
 describe('VcIssuer', () => {
   let vcIssuer: VcIssuer<DIDDocument>

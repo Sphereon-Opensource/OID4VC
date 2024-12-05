@@ -1,9 +1,7 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
 import { CredentialConfigurationSupportedV1_0_13, IssuerCredentialSubjectDisplay, IssueStatus, TokenErrorResponse } from '@sphereon/oid4vci-common'
 
-import { AuthorizationServerMetadataBuilder } from '../builder/AuthorizationServerMetadataBuilder'
-import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../index'
-
+import { AuthorizationServerMetadataBuilder, CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../index'
 
 const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
   .withIssuer('https://credential-issuer')
@@ -13,8 +11,7 @@ const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
   .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
   .withResponseTypesSupported(['code', 'token', 'id_token'])
   .withScopesSupported(['openid', 'abcdef'])
-  .build();
-
+  .build()
 
 describe('VcIssuer builder should', () => {
   it('generate a VcIssuer', () => {

@@ -141,7 +141,8 @@ function getVCs(): IVerifiableCredential[] {
   return vcs
 }
 
-describe.skip('RP and OP interaction should', () => { // FIXME SDK-45 Uniresolver failing
+describe.skip('RP and OP interaction should', () => {
+  // FIXME SDK-45 Uniresolver failing
   it(
     'succeed when calling each other in the full flow',
     async () => {

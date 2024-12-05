@@ -2,6 +2,7 @@ import {
   AuthorizationServerMetadata,
   CNonceState,
   CredentialConfigurationSupportedV1_0_13,
+  CredentialIssuerMetadataOptsV1_0_13,
   CredentialOfferSession,
   IssuerMetadata,
   IssuerMetadataV1_0_13,
@@ -10,9 +11,8 @@ import {
   MetadataDisplay,
   TokenErrorResponse,
   TxCode,
-  URIState
+  URIState,
 } from '@sphereon/oid4vci-common'
-import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common'
 
 import { VcIssuer } from '../VcIssuer'
 import { MemoryStates } from '../state-manager'
@@ -169,10 +169,10 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     if (!this.cNonceStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    if(Object.keys(this.issuerMetadata).length === 0) {
+    if (Object.keys(this.issuerMetadata).length === 0) {
       throw new Error('issuerMetadata not set')
     }
-    if(Object.keys(this.authorizationServerMetadata).length === 0) {
+    if (Object.keys(this.authorizationServerMetadata).length === 0) {
       throw new Error('authorizationServerMetadata not set')
     }
 

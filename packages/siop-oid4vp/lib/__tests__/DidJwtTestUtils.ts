@@ -11,33 +11,35 @@ import {
   JWTVerified,
   JWTVerifyOptions,
   Signer,
-  verifyJWT
+  verifyJWT,
 } from 'did-jwt'
+import { JWTDecoded } from 'did-jwt/src/JWT'
 import { Resolvable } from 'did-resolver'
 
 import { DEFAULT_EXPIRATION_TIME, ResponseIss, SIOPErrors, VerifiedJWT, VerifyJwtCallback } from '../types'
 
 import { getResolver } from './ResolverTestUtils'
-import { JWTDecoded } from 'did-jwt/src/JWT'
 
 export async function verifyDidJWT(jwt: string, resolver: Resolvable, options: JWTVerifyOptions): Promise<VerifiedJWT> {
   try {
     return await verifyJWT(jwt, { ...options, resolver })
   } catch (e) {
-    if(e.message.includes('502 Bad Gateway')) { // Let the tests pass when Uniresolver is down.
+    if (e.message.includes('502 Bad Gateway')) {
+      // Let the tests pass when Uniresolver is down.
       const { payload } = decodeJWT(jwt) as JWTDecoded
       const { exp } = payload
       const currentTimestamp = Math.floor(Date.now() / 1000)
-      if(currentTimestamp > exp) {
+      if (currentTimestamp > exp) {
         throw Error(`invalid_jwt: JWT has expired: exp: ${exp}`)
       }
-      const fakeJwtVerified:JWTVerified = {
+      const fakeJwtVerified: JWTVerified = {
         didResolutionResult: undefined,
         issuer: 'fake',
         payload: undefined,
         signer: undefined,
         verified: true,
-        jwt: jwt} 
+        jwt: jwt,
+      }
       return Promise.resolve(fakeJwtVerified)
     }
     return Promise.reject(e)

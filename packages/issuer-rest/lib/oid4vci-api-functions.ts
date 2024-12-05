@@ -21,7 +21,7 @@ import {
   trimEnd,
   trimStart,
   validateJWT,
-  WellKnownEndpoints
+  WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
@@ -33,10 +33,9 @@ import {
   ICreateCredentialOfferEndpointOpts,
   ICreateCredentialOfferURIResponse,
   IGetCredentialOfferEndpointOpts,
-  IGetIssueStatusEndpointOpts
+  IGetIssueStatusEndpointOpts,
 } from './OID4VCIServer'
 import { validateRequestBody } from './expressUtils'
-
 
 const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90
 
