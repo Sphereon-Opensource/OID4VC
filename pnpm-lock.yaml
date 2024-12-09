@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@sphereon/ssi-types': 0.30.2-feature.mdoc.funke2.367
+  '@sphereon/ssi-types': link:../SSI-SDK/packages/ssi-types
   dcql: 0.2.11
   node-fetch: 2.6.12
 
@@ -77,8 +77,8 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-types':
-        specifier: 0.30.2-feature.mdoc.funke2.367
-        version: 0.30.2-feature.mdoc.funke2.367
+        specifier: link:../../../SSI-SDK/packages/ssi-types
+        version: link:../../../SSI-SDK/packages/ssi-types
       jose:
         specifier: ^4.10.0
         version: 4.15.9
@@ -120,8 +120,8 @@ importers:
         specifier: workspace:*
         version: link:../oid4vci-common
       '@sphereon/ssi-types':
-        specifier: 0.30.2-feature.mdoc.funke2.367
-        version: 0.30.2-feature.mdoc.funke2.367
+        specifier: link:../../../SSI-SDK/packages/ssi-types
+        version: link:../../../SSI-SDK/packages/ssi-types
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8(encoding@0.1.13)
@@ -205,8 +205,8 @@ importers:
   packages/common:
     dependencies:
       '@sphereon/ssi-types':
-        specifier: 0.30.2-feature.mdoc.funke2.367
-        version: 0.30.2-feature.mdoc.funke2.367
+        specifier: link:../../../SSI-SDK/packages/ssi-types
+        version: link:../../../SSI-SDK/packages/ssi-types
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
@@ -273,8 +273,8 @@ importers:
         specifier: workspace:*
         version: link:../oid4vci-common
       '@sphereon/ssi-types':
-        specifier: 0.30.2-feature.mdoc.funke2.367
-        version: 0.30.2-feature.mdoc.funke2.367
+        specifier: link:../../../SSI-SDK/packages/ssi-types
+        version: link:../../../SSI-SDK/packages/ssi-types
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0(encoding@0.1.13)
@@ -316,8 +316,8 @@ importers:
         specifier: 0.30.2-feature.mdoc.funke2.367
         version: 0.30.2-feature.mdoc.funke2.367
       '@sphereon/ssi-types':
-        specifier: 0.30.2-feature.mdoc.funke2.367
-        version: 0.30.2-feature.mdoc.funke2.367
+        specifier: link:../../../SSI-SDK/packages/ssi-types
+        version: link:../../../SSI-SDK/packages/ssi-types
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0(encoding@0.1.13)
@@ -408,8 +408,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.30.2-feature.mdoc.funke2.367
-        version: 0.30.2-feature.mdoc.funke2.367
+        specifier: link:../../../SSI-SDK/packages/ssi-types
+        version: link:../../../SSI-SDK/packages/ssi-types
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8(encoding@0.1.13)
@@ -454,11 +454,11 @@ importers:
         specifier: 5.0.0-unstable.28
         version: 5.0.0-unstable.28
       '@sphereon/pex-models':
-        specifier: ^2.3.1
-        version: 2.3.1
+        specifier: ^2.3.2
+        version: 2.3.2
       '@sphereon/ssi-types':
-        specifier: 0.30.2-feature.mdoc.funke2.367
-        version: 0.30.2-feature.mdoc.funke2.367
+        specifier: link:../../../SSI-SDK/packages/ssi-types
+        version: link:../../../SSI-SDK/packages/ssi-types
       cross-fetch:
         specifier: ^4.0.0
         version: 4.0.0(encoding@0.1.13)
@@ -2120,14 +2120,6 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@js-joda/core@5.6.3':
-    resolution: {integrity: sha512-T1rRxzdqkEXcou0ZprN1q9yDRlvzCPLqmlNt5IIsGBzoEVgLCCYrKEwc84+TvsXuAc95VAZwtWD2zVsKPY4bcA==}
-
-  '@js-joda/timezone@2.3.0':
-    resolution: {integrity: sha512-DHXdNs0SydSqC5f0oRJPpTcNfnpRojgBqMCFupQFv6WgeZAjU3DBx+A7JtaGPP3dHrP2Odi2N8Vf+uAm/8ynCQ==}
-    peerDependencies:
-      '@js-joda/core': '>=1.11.0'
-
   '@lerna/create@8.1.9':
     resolution: {integrity: sha512-DPnl5lPX4v49eVxEbJnAizrpMdMTBz1qykZrAbBul9rfgk531v8oAt+Pm6O/rpAleRombNM7FJb5rYGzBJatOQ==}
     engines: {node: '>=18.0.0'}
@@ -2544,12 +2536,8 @@ packages:
       react-native-securerandom:
         optional: true
 
-  '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.10':
-    resolution: {integrity: sha512-mHH7I6fWdztaNjguGJOLaerXWnQymQ/xKQ8NqClIXoI2PJNgmpQG6DxFcLRs1aYyWg1iY8bPliLJi41u94KdCA==}
-    bundledDependencies: []
-
-  '@sphereon/pex-models@2.3.1':
-    resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
+  '@sphereon/pex-models@2.3.2':
+    resolution: {integrity: sha512-foFxfLkRwcn/MOp/eht46Q7wsvpQGlO7aowowIIb5Tz9u97kYZ2kz6K2h2ODxWuv5CRA7Q0MY8XUBGE2lfOhOQ==}
 
   '@sphereon/pex@5.0.0-unstable.28':
     resolution: {integrity: sha512-zxHCWAc7fKppS7XX0zxnI4TF+Rdjax8pHc3exrYzn3t59dlv5siEAeYdtFrWJT4UVB5wTGzIEufzV5r+tfjelg==}
@@ -2571,9 +2559,6 @@ packages:
 
   '@sphereon/ssi-sdk-ext.key-utils@0.23.0':
     resolution: {integrity: sha512-BfULXvQmcUrBq2DqYxJHKnEoB2d5icu3TJ9GP2aP1WybSULTjL96Wv5r7QKgktcodKaL+F+oQ7r8sC9qBl1exw==}
-
-  '@sphereon/ssi-types@0.30.2-feature.mdoc.funke2.367':
-    resolution: {integrity: sha512-+acZDnAB08PjhrNX+0sJuGK6X3AN2zZ6dvXjfWCXovWjJwcKJBBGR+nfvguBbefR9aaB8SKPAkDFhQ/U/I7byg==}
 
   '@sphereon/wellknown-dids-client@0.1.3':
     resolution: {integrity: sha512-TAT24L3RoXD8ocrkTcsz7HuJmgjNjdoV6IXP1p3DdaI/GqkynytXE3J1+F7vUFMRYwY5nW2RaXSgDQhrFJemaA==}
@@ -4773,9 +4758,6 @@ packages:
   form-data@4.0.1:
     resolution: {integrity: sha512-tzN8e4TX8+kkxGPK8D5u0FNmjPUjw3lwC9lSLxxoB/+GtsJG91CO8bSWy73APlgAZzZbXEYZJuxjkHH2w+Ezhw==}
     engines: {node: '>= 6'}
-
-  format-util@1.0.5:
-    resolution: {integrity: sha512-varLbTj0e0yVyRpqQhuWV+8hlePAgaoFRhNFj50BNjEIrw1/DphHSObtqwskVCPWNgzwPoQrZAbfa/SBiicNeg==}
 
   formidable@2.1.2:
     resolution: {integrity: sha512-CM3GuJ57US06mlpQ47YcunuUZ9jpm8Vx+P2CGt2j7HpgkKZO/DJYQ0Bobim8G6PFQmK5lOqOOdUXboU+h73A4g==}
@@ -11158,12 +11140,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@js-joda/core@5.6.3': {}
-
-  '@js-joda/timezone@2.3.0(@js-joda/core@5.6.3)':
-    dependencies:
-      '@js-joda/core': 5.6.3
-
   '@lerna/create@8.1.9(encoding@0.1.13)(typescript@5.5.3)':
     dependencies:
       '@npmcli/arborist': 7.5.4
@@ -11888,13 +11864,7 @@ snapshots:
       expo: 48.0.21(@babel/core@7.26.0)(encoding@0.1.13)
       react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(encoding@0.1.13)(react@18.3.1))
 
-  '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.10':
-    dependencies:
-      '@js-joda/core': 5.6.3
-      '@js-joda/timezone': 2.3.0(@js-joda/core@5.6.3)
-      format-util: 1.0.5
-
-  '@sphereon/pex-models@2.3.1': {}
+  '@sphereon/pex-models@2.3.2': {}
 
   '@sphereon/pex@5.0.0-unstable.28':
     dependencies:
@@ -11902,15 +11872,13 @@ snapshots:
       '@sd-jwt/decode': 0.7.2
       '@sd-jwt/present': 0.7.2
       '@sd-jwt/types': 0.7.2
-      '@sphereon/pex-models': 2.3.1
-      '@sphereon/ssi-types': 0.30.2-feature.mdoc.funke2.367
+      '@sphereon/pex-models': 2.3.2
+      '@sphereon/ssi-types': link:../SSI-SDK/packages/ssi-types
       ajv: 8.17.1
       ajv-formats: 2.1.1(ajv@8.17.1)
       jwt-decode: 3.1.2
       nanoid: 3.3.7
       uint8arrays: 3.1.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@sphereon/ssi-express-support@0.30.2-feature.mdoc.funke2.367':
     dependencies:
@@ -11955,24 +11923,13 @@ snapshots:
       - react-native-securerandom
       - supports-color
 
-  '@sphereon/ssi-types@0.30.2-feature.mdoc.funke2.367':
-    dependencies:
-      '@sd-jwt/decode': 0.7.2
-      '@sphereon/kmp-mdoc-core': 0.2.0-SNAPSHOT.10
-      debug: 4.3.7
-      events: 3.3.0
-      jwt-decode: 3.1.2
-    transitivePeerDependencies:
-      - supports-color
-
   '@sphereon/wellknown-dids-client@0.1.3(encoding@0.1.13)':
     dependencies:
-      '@sphereon/ssi-types': 0.30.2-feature.mdoc.funke2.367
+      '@sphereon/ssi-types': link:../SSI-SDK/packages/ssi-types
       cross-fetch: 3.1.8(encoding@0.1.13)
       jwt-decode: 3.1.2
     transitivePeerDependencies:
       - encoding
-      - supports-color
 
   '@stablelib/aead@1.0.1': {}
 
@@ -14980,8 +14937,6 @@ snapshots:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       mime-types: 2.1.35
-
-  format-util@1.0.5: {}
 
   formidable@2.1.2:
     dependencies:
