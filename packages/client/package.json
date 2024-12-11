@@ -17,7 +17,7 @@
   "dependencies": {
     "@sphereon/oid4vc-common": "workspace:*",
     "@sphereon/oid4vci-common": "workspace:*",
-    "@sphereon/ssi-types": "link:../../SSI-SDK/packages/ssi-types",
+    "@sphereon/ssi-types": "0.32.0",
     "cross-fetch": "^3.1.8",
     "debug": "^4.3.5"
   },

@@ -23,7 +23,7 @@
     "node": ">=18"
   },
   "resolutions": {
-    "@sphereon/ssi-types": "link:../SSI-SDK/packages/ssi-types",
+    "@sphereon/ssi-types": "0.32.0",
     "dcql": "0.2.11",
     "node-fetch": "2.6.12"
   },
@@ -65,5 +65,6 @@
     "OIDC4VP",
     "OID4VCI",
     "OID4VP"
-  ]
+  ],
+  "packageManager": "pnpm@9.6.0+sha256.dae0f7e822c56b20979bb5965e3b73b8bdabb6b8b8ef121da6d857508599ca35"
 }

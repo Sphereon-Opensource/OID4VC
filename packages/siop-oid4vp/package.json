@@ -20,7 +20,7 @@
     "@sphereon/pex": "5.0.0-unstable.28",
     "dcql": "0.2.11",
     "@sphereon/pex-models": "^2.3.2",
-    "@sphereon/ssi-types": "link:../../SSI-SDK/packages/ssi-types",
+    "@sphereon/ssi-types": "0.32.0",
     "cross-fetch": "^4.0.0",
     "debug": "^4.3.5",
     "events": "^3.3.0",
