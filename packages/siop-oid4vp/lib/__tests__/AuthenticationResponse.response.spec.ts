@@ -8,6 +8,13 @@ import {
   IVerifiablePresentation,
   OriginalVerifiableCredential,
 } from '@sphereon/ssi-types'
+import {
+  DcqlCredentialRepresentation,
+  DcqlPresentationRecord,
+  DcqlQuery,
+  DcqlQueryResult
+} from 'dcql'
+import { Json } from 'dcql/dist/src/u-dcql'
 
 import {
   AuthorizationResponse,
@@ -649,5 +656,150 @@ describe('create JWT from Request JWT should', () => {
     if (!jwt) throw new Error('JWT is undefined')
     const authResponse = AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
     await expect(authResponse).toBeDefined()
+  })
+
+  it('succeed when valid JWT with DCQL query is passed in', async () => {
+    expect.assertions(1)
+
+    const mockReqEntity = await mockedGetEnterpriseAuthToken('REQ COMPANY')
+    const mockResEntity = await mockedGetEnterpriseAuthToken('RES COMPANY')
+
+    const dcqlQuery: DcqlQuery = {
+      credentials: [
+        {
+          id: 'Credentials',
+          format: 'jwt_vc_json-ld',
+          claims: [
+            {
+              id: 'ID_Card_Credential',
+              path: ['$.issuer.id'],
+              values: ['did:example:issuer'],
+            },
+          ],
+        },
+      ],
+    }
+
+    const dcqlParsedQuery = DcqlQuery.parse(dcqlQuery)
+    DcqlQuery.validate(dcqlParsedQuery)
+
+    const requestOpts: CreateAuthorizationRequestOpts = {
+      version: SupportedVersion.SIOPv2_ID1,
+      requestObject: {
+        passBy: PassBy.REFERENCE,
+        reference_uri: 'https://my-request.com/here',
+        jwtIssuer: { method: 'did', didUrl: mockReqEntity.did, alg: SigningAlgo.ES256K },
+        createJwtCallback: getCreateJwtCallback({
+          hexPrivateKey: mockReqEntity.hexPrivateKey,
+          did: mockReqEntity.did,
+          kid: `${mockReqEntity.did}#controller`,
+          alg: SigningAlgo.ES256K,
+        }),
+        payload: {
+          client_id: WELL_KNOWN_OPENID_FEDERATION,
+          scope: 'test',
+          response_type: 'id_token vp_token',
+          redirect_uri: EXAMPLE_REDIRECT_URL,
+          claims: {
+            vp_token: {
+              dcql_query: dcqlParsedQuery,
+            },
+          },
+        },
+      },
+      clientMetadata: {
+        client_id: WELL_KNOWN_OPENID_FEDERATION,
+        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
+        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        responseTypesSupported: [ResponseType.ID_TOKEN],
+        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subjectTypesSupported: [SubjectType.PAIRWISE],
+        vpFormatsSupported: {
+          ldp_vc: {
+            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+          },
+        },
+        passBy: PassBy.VALUE,
+        logo_uri: VERIFIER_LOGO_FOR_CLIENT,
+        clientName: VERIFIER_NAME_FOR_CLIENT,
+        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100315',
+        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+      },
+    }
+
+    const vc: DcqlCredentialRepresentation = {
+      docType: 'jsonld',
+      claims: {
+        id: 'https://example.com/credentials/1872',
+        type: ['VerifiableCredential', 'IDCardCredential'],
+        '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1/IDCardCredential'],
+        issuer: {
+          id: 'did:example:issuer',
+        },
+        issuanceDate: '2010-01-01T19:23:24Z',
+        credentialSubject: {
+          given_name: 'Fredrik',
+          family_name: 'Stremberg',
+          birthdate: '1949-01-22',
+        },
+      },
+    }
+
+    const dcqlQueryResult: DcqlQueryResult = DcqlQuery.query(dcqlQuery, [vc])
+
+    const presentation: DcqlPresentationRecord.Output = {}
+    for (const [key, value] of Object.entries(dcqlQueryResult.credential_matches)) {
+      if (value.success) {
+        presentation[key] = value.output as string | { [x: string]: Json }
+      }
+    }
+
+    const encodedPresentationRecord = DcqlPresentationRecord.parse(presentation)
+
+    const responseOpts: AuthorizationResponseOpts = {
+      responseURI: EXAMPLE_REDIRECT_URL,
+      responseURIType: 'redirect_uri',
+      registration: {
+        authorizationEndpoint: 'www.myauthorizationendpoint.com',
+        issuer: ResponseIss.SELF_ISSUED_V2,
+        responseTypesSupported: [ResponseType.ID_TOKEN],
+        passBy: PassBy.REFERENCE,
+        reference_uri: EXAMPLE_REFERENCE_URL,
+
+        subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
+        vpFormats: {
+          ldp_vc: {
+            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+          },
+        },
+        logo_uri: VERIFIER_LOGO_FOR_CLIENT,
+        clientName: VERIFIER_NAME_FOR_CLIENT,
+        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100316',
+        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+      },
+      createJwtCallback: getCreateJwtCallback({
+        did: mockResEntity.did,
+        hexPrivateKey: mockResEntity.hexPrivateKey,
+        kid: `${mockResEntity.did}#controller`,
+        alg: SigningAlgo.ES256K,
+      }),
+      jwtIssuer: { method: 'did', didUrl: `${mockResEntity.did}#controller`, alg: SigningAlgo.ES256K },
+      dcqlQuery: {
+        encodedPresentationRecord
+      },
+      responseMode: ResponseMode.POST,
+    }
+
+    const requestObject = await RequestObject.fromOpts(requestOpts)
+    /* console.log(
+      JSON.stringify(await AuthenticationResponse.createJWTFromRequestJWT(requestWithJWT.jwt, responseOpts, verifyOpts))
+    );*/
+    const jwt = await requestObject.toJwt()
+    if (!jwt) throw new Error('JWT is undefined')
+    const authorizationRequest = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
+    expect(authorizationRequest).toBeDefined()
   })
 })
