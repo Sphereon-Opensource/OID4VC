@@ -23,6 +23,7 @@ import {
 import { assignIfAuth, assignIfRequestObject, isTarget, isTargetOrNoTargets } from './Opts'
 import { RP } from './RP'
 import { IRPSessionManager } from './types'
+import { DcqlQuery } from 'dcql'
 
 export class RPBuilder {
   requestObjectBy: ObjectBy
@@ -226,73 +227,78 @@ export class RPBuilder {
     return this
   }
 
-  withDcqlQuery(dcqlQuery: string, targets?: PropertyTargets): RPBuilder {
-    this._authorizationRequestPayload.dcql_query = assignIfAuth(
-      {
-        propertyValue: dcqlQuery,
-        targets,
-      },
-      false,
-    )
-    this._requestObjectPayload.dcql_query = assignIfRequestObject(
-      {
-        propertyValue: dcqlQuery,
-        targets,
-      },
-      true,
-    )
+  withDcqlQuery(dcqlQuery: DcqlQuery, targets?: PropertyTargets): RPBuilder {
+    if (this.getSupportedRequestVersion() >= SupportedVersion.SIOPv2_D12_OID4VP_D20) {
+      this._authorizationRequestPayload.dcql_query = assignIfAuth(
+        {
+          propertyValue: dcqlQuery,
+          targets
+        },
+        false
+      )
+      this._requestObjectPayload.dcql_query = assignIfRequestObject(
+        {
+          propertyValue: dcqlQuery,
+          targets
+        },
+        true
+      )
+    }
     return this
   }
 
-  withPresentationDefinition(definitionOpts: { definition: IPresentationDefinition; definitionUri?: string }, targets?: PropertyTargets): RPBuilder {
+  withPresentationDefinition(definitionOpts: {
+    definition: IPresentationDefinition;
+    definitionUri?: string
+  }, targets?: PropertyTargets): RPBuilder {
     const { definition, definitionUri } = definitionOpts
 
     if (this.getSupportedRequestVersion() < SupportedVersion.SIOPv2_D11) {
       const definitionProperties = {
         presentation_definition: definition,
-        presentation_definition_uri: definitionUri,
+        presentation_definition_uri: definitionUri
       }
       const vp_token = { ...definitionProperties }
       if (isTarget(PropertyTarget.AUTHORIZATION_REQUEST, targets)) {
         this._authorizationRequestPayload.claims = {
           ...(this._authorizationRequestPayload.claims ? this._authorizationRequestPayload.claims : {}),
-          vp_token: vp_token,
+          vp_token: vp_token
         }
       }
       if (isTargetOrNoTargets(PropertyTarget.REQUEST_OBJECT, targets)) {
         this._requestObjectPayload.claims = {
           ...(this._requestObjectPayload.claims ? this._requestObjectPayload.claims : {}),
-          vp_token: vp_token,
+          vp_token: vp_token
         }
       }
     } else {
       this._authorizationRequestPayload.presentation_definition = assignIfAuth(
         {
           propertyValue: definition,
-          targets,
+          targets
         },
-        false,
+        false
       )
       this._authorizationRequestPayload.presentation_definition_uri = assignIfAuth(
         {
           propertyValue: definitionUri,
-          targets,
+          targets
         },
-        true,
+        true
       )
       this._requestObjectPayload.presentation_definition = assignIfRequestObject(
         {
           propertyValue: definition,
-          targets,
+          targets
         },
-        true,
+        true
       )
       this._requestObjectPayload.presentation_definition_uri = assignIfRequestObject(
         {
           propertyValue: definitionUri,
-          targets,
+          targets
         },
-        true,
+        true
       )
     }
     return this
