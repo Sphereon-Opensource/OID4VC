@@ -257,9 +257,6 @@ importers:
       '@types/jest':
         specifier: ^29.5.12
         version: 29.5.14
-      '@types/jwt-decode':
-        specifier: ^3.1.0
-        version: 3.1.0
       typescript:
         specifier: 5.4.5
         version: 5.4.5
@@ -547,9 +544,6 @@ importers:
       '@types/jest':
         specifier: ^29.5.11
         version: 29.5.14
-      '@types/jwt-decode':
-        specifier: ^3.1.0
-        version: 3.1.0
       '@types/language-tags':
         specifier: ^1.0.4
         version: 1.0.4
@@ -2856,10 +2850,6 @@ packages:
 
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
-
-  '@types/jwt-decode@3.1.0':
-    resolution: {integrity: sha512-tthwik7TKkou3mVnBnvVuHnHElbjtdbM63pdBCbZTirCt3WAdM73Y79mOri7+ljsS99ZVwUFZHLMxJuJnv/z1w==}
-    deprecated: This is a stub types definition. jwt-decode provides its own type definitions, so you do not need this installed.
 
   '@types/language-tags@1.0.4':
     resolution: {integrity: sha512-20PQbifv3v/djCT+KlXybv0KqO5ofoR1qD1wkinN59kfggTPVTWGmPFgL/1yWuDyRcsQP/POvkqK+fnl5nOwTg==}
@@ -12398,10 +12388,6 @@ snapshots:
   '@types/json-schema@7.0.15': {}
 
   '@types/json5@0.0.29': {}
-
-  '@types/jwt-decode@3.1.0':
-    dependencies:
-      jwt-decode: 4.0.0
 
   '@types/language-tags@1.0.4': {}
 
