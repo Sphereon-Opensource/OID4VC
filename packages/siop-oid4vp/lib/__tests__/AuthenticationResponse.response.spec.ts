@@ -8,13 +8,7 @@ import {
   IVerifiablePresentation,
   OriginalVerifiableCredential,
 } from '@sphereon/ssi-types'
-import {
-  DcqlCredentialRepresentation,
-  DcqlPresentationRecord,
-  DcqlQuery,
-  DcqlQueryResult
-} from 'dcql'
-import { Json } from 'dcql/dist/src/u-dcql'
+import { DcqlCredentialRepresentation, DcqlPresentationRecord, DcqlQuery, DcqlQueryResult } from 'dcql'
 
 import {
   AuthorizationResponse,
@@ -39,7 +33,7 @@ import SIOPErrors from '../types/Errors'
 
 import { getCreateJwtCallback, getVerifyJwtCallback } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
-import { mockedGetEnterpriseAuthToken, WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
+import { mockedGetEnterpriseAuthToken, pexHasher, WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
 import {
   UNIT_TEST_TIMEOUT,
   VERIFIER_LOGO_FOR_CLIENT,
@@ -97,6 +91,7 @@ describe('create JWT from Request JWT should', () => {
 
   const resolver = getResolver('ethr')
   const verifyOpts: VerifyAuthorizationRequestOpts = {
+    hasher: pexHasher,
     verifyJwtCallback: getVerifyJwtCallback(resolver),
     verification: {},
     supportedVersions: [SupportedVersion.SIOPv2_ID1],
@@ -668,12 +663,11 @@ describe('create JWT from Request JWT should', () => {
       credentials: [
         {
           id: 'Credentials',
-          format: 'jwt_vc_json-ld',
+          format: 'vc+sd-jwt',
           claims: [
             {
-              id: 'ID_Card_Credential',
-              path: ['$.issuer.id'],
-              values: ['did:example:issuer'],
+              path: ['given_name'],
+              values: ['John'],
             },
           ],
         },
@@ -725,22 +719,39 @@ describe('create JWT from Request JWT should', () => {
       },
     }
 
-    const vc: DcqlCredentialRepresentation = {
-      docType: 'jsonld',
-      claims: {
-        id: 'https://example.com/credentials/1872',
-        type: ['VerifiableCredential', 'IDCardCredential'],
-        '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1/IDCardCredential'],
-        issuer: {
-          id: 'did:example:issuer',
+    const sdjwt = {
+      compactJwtVc:
+        'eyJ0eXAiOiJ2YytzZC1qd3QiLCJraWQiOiJkaWQ6andrOmV5SmhiR2NpT2lKRlV6STFOaUlzSW5WelpTSTZJbk5wWnlJc0ltdDBlU0k2SWtWRElpd2lZM0oySWpvaVVDMHlOVFlpTENKNElqb2lTMGRwYzNodlUzaDJhVzB4YTFOSU1XSnROMnhmUkhCeVIyczNZa2RrWkVaYVdXWnRjVXB1VjJWb1NTSXNJbmtpT2lKYVEzQldUVVZSTkhsNGNUSlZiVGRDVGpoSVQyNUdlamszTTFBMFVUQlVkbmRuZVhWUlgyRmlURlZWSW4wIzAiLCJhbGciOiJFUzI1NiJ9.eyJzdWIiOiJkaWQ6andrOmV5SmhiR2NpT2lKRlV6STFOaUlzSW5WelpTSTZJbk5wWnlJc0ltdDBlU0k2SWtWRElpd2lZM0oySWpvaVVDMHlOVFlpTENKNElqb2lXRkpXUVhsNVJIQldNbXBNTm5oNlUwSktZM1JIZW0xS1pqbFFlV0Z4WHpNdFRVeHJlR0ZoUlRBNFRTSXNJbmtpT2lKQ1NtOUtWM05WYTBaQlUyVlRZMmx4VDFsNVNWTTBZMFpoZVU4emFHaEJTalZaYjJ0dU9IcFRTVEZuSW4wIzAiLCJpc3MiOiJkaWQ6andrOmV5SmhiR2NpT2lKRlV6STFOaUlzSW5WelpTSTZJbk5wWnlJc0ltdDBlU0k2SWtWRElpd2lZM0oySWpvaVVDMHlOVFlpTENKNElqb2lTMGRwYzNodlUzaDJhVzB4YTFOSU1XSnROMnhmUkhCeVIyczNZa2RrWkVaYVdXWnRjVXB1VjJWb1NTSXNJbmtpT2lKYVEzQldUVVZSTkhsNGNUSlZiVGRDVGpoSVQyNUdlamszTTFBMFVUQlVkbmRuZVhWUlgyRmlURlZWSW4wIzAiLCJpYXQiOjE3MzQ0NTgwNDIsInZjdCI6InVybjpldS5ldXJvcGEuZWMuZXVkaTpwaWQ6MSIsIl9zZCI6WyIwWWdpR25hck1LSERnVWx1QktteGdRZUJ4OF8xazMwd3NSRVN1X2t1Y0JFIiwiNEpwU2JzUEsxZndUQzRhR24zZ0hXb1BkVEJrMExOTWZMOEJXeEIxZ1JPWSIsIjRpZmplQUZveUEyQmc0STVNWEFrMVlyc1AtUVBQQXRnZGlHY0RMQTZiTFEiLCJBdTFjdURISUNISE1jUjZxM2R3d1pHbHp5dzMwSXhvTGVhWlNxRktEbmo4IiwiQ0QxbWxOY19VaVBoQUp6YkJveTVMY3dtekFNZTM3d0VLZF9iMTB6QTNxNCIsInFwZ1FOUVRac0VJWHdxUk9fT24xdUVCSVVNODBTcTJLR2tlN0JSU2N0WHciXSwiX3NkX2FsZyI6IlNIQS0yNTYifQ.P84d0CoS4M-zQ29l3S97RMatfJMYkoTgR5EqSMTdYlZAMp4e8iiuz2PXQMfJ-_undCvg4SRXxDACGiLL3Tt7Bw~WyJlNTFiNWI2NS0wNzM3LTQ0MjQtYTUxYS1jNGYzZGNlZGFmMmYiLCJnaXZlbl9uYW1lIiwiSm9obiJd~WyIxM2I1NDIwNi1kYWQ3LTQ3N2UtODYyZC03N2ZiMTQ1MDE5NjUiLCJmYW1pbHlfbmFtZSIsIkRvZSJd~WyJkMmQxNjg3Zi04ZmY4LTRlOTMtYWJjYi1hYTNlNGVjYzY0ZTMiLCJlbWFpbCIsImpvaG5kZW9AZXhhbXBsZS5jb20iXQ~WyIyZDA4YTk2YS03YzYwLTQ3NDEtYTI5YS00ZjBjYTFlNGQ3M2IiLCJwaG9uZSIsIisxLTIwMi01NTUtMDEwMSJd~WyI2YjVkN2FmOS01ZmIxLTQzNTEtYWM1ZS1hMzA1YTBkNjU0ZDUiLCJhZGRyZXNzIix7InN0cmVldF9hZGRyZXNzIjoiMTIzIE1haW4gU3QiLCJsb2NhbGl0eSI6IkFueXRvd24iLCJyZWdpb24iOiJBbnlzdGF0ZSIsImNvdW50cnkiOiJVUyJ9XQ~WyI5MmYzY2M5ZC0yMjQ2LTRiODQtYTk5OS0xYmQyM2U0OGQ0MGEiLCJiaXJ0aGRhdGUiLCIxOTQwLTAxLTAxIl0~',
+      decodedPayload: {
+        header: {
+          typ: 'vc+sd-jwt',
+          kid: 'did:jwk:eyJhbGciOiJFUzI1NiIsInVzZSI6InNpZyIsImt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiS0dpc3hvU3h2aW0xa1NIMWJtN2xfRHByR2s3YkdkZEZaWWZtcUpuV2VoSSIsInkiOiJaQ3BWTUVRNHl4cTJVbTdCTjhIT25Gejk3M1A0UTBUdndneXVRX2FiTFVVIn0#0',
+          alg: 'ES256',
         },
-        issuanceDate: '2010-01-01T19:23:24Z',
-        credentialSubject: {
-          given_name: 'Fredrik',
-          family_name: 'Stremberg',
-          birthdate: '1949-01-22',
+        payload: {
+          sub: 'did:jwk:eyJhbGciOiJFUzI1NiIsInVzZSI6InNpZyIsImt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiWFJWQXl5RHBWMmpMNnh6U0JKY3RHem1KZjlQeWFxXzMtTUxreGFhRTA4TSIsInkiOiJCSm9KV3NVa0ZBU2VTY2lxT1l5SVM0Y0ZheU8zaGhBSjVZb2tuOHpTSTFnIn0#0',
+          iss: 'did:jwk:eyJhbGciOiJFUzI1NiIsInVzZSI6InNpZyIsImt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiS0dpc3hvU3h2aW0xa1NIMWJtN2xfRHByR2s3YkdkZEZaWWZtcUpuV2VoSSIsInkiOiJaQ3BWTUVRNHl4cTJVbTdCTjhIT25Gejk3M1A0UTBUdndneXVRX2FiTFVVIn0#0',
+          iat: 1734458042,
+          vct: 'urn:eu.europa.ec.eudi:pid:1',
+          given_name: 'John',
+          email: 'johndeo@example.com',
+          birthdate: '1940-01-01',
+          phone: '+1-202-555-0101',
+          address: {
+            street_address: '123 Main St',
+            locality: 'Anytown',
+            region: 'Anystate',
+            country: 'US',
+          },
+          family_name: 'Doe',
         },
+        kb: undefined,
       },
+    }
+
+    const vc: DcqlCredentialRepresentation = {
+      vct: sdjwt.decodedPayload.payload.vct,
+      claims: sdjwt.decodedPayload.payload,
     }
 
     const dcqlQueryResult: DcqlQueryResult = DcqlQuery.query(dcqlQuery, [vc])
@@ -748,7 +759,7 @@ describe('create JWT from Request JWT should', () => {
     const presentation: DcqlPresentationRecord.Output = {}
     for (const [key, value] of Object.entries(dcqlQueryResult.credential_matches)) {
       if (value.success) {
-        presentation[key] = value.output as string | { [x: string]: Json }
+        presentation[key] = sdjwt.compactJwtVc
       }
     }
 
@@ -765,7 +776,7 @@ describe('create JWT from Request JWT should', () => {
       }),
       jwtIssuer: { method: 'did', didUrl: `${mockResEntity.did}#controller`, alg: SigningAlgo.ES256K },
       dcqlQuery: {
-        encodedPresentationRecord
+        encodedPresentationRecord,
       },
       responseMode: ResponseMode.DIRECT_POST,
     }
