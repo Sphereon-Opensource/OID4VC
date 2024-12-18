@@ -684,7 +684,7 @@ describe('create JWT from Request JWT should', () => {
     DcqlQuery.validate(dcqlParsedQuery)
 
     const requestOpts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.SIOPv2_D12_OID4VP_D20,
       requestObject: {
         passBy: PassBy.REFERENCE,
         reference_uri: 'https://my-request.com/here',
@@ -700,11 +700,7 @@ describe('create JWT from Request JWT should', () => {
           scope: 'test',
           response_type: 'id_token vp_token',
           redirect_uri: EXAMPLE_REDIRECT_URL,
-          claims: {
-            vp_token: {
-              dcql_query: dcqlParsedQuery,
-            },
-          },
+          dcql_query: JSON.stringify(dcqlParsedQuery),
         },
       },
       clientMetadata: {
@@ -761,25 +757,6 @@ describe('create JWT from Request JWT should', () => {
     const responseOpts: AuthorizationResponseOpts = {
       responseURI: EXAMPLE_REDIRECT_URL,
       responseURIType: 'redirect_uri',
-      registration: {
-        authorizationEndpoint: 'www.myauthorizationendpoint.com',
-        issuer: ResponseIss.SELF_ISSUED_V2,
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        passBy: PassBy.REFERENCE,
-        reference_uri: EXAMPLE_REFERENCE_URL,
-
-        subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        vpFormats: {
-          ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
-          },
-        },
-        logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100316',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      },
       createJwtCallback: getCreateJwtCallback({
         did: mockResEntity.did,
         hexPrivateKey: mockResEntity.hexPrivateKey,
@@ -790,7 +767,7 @@ describe('create JWT from Request JWT should', () => {
       dcqlQuery: {
         encodedPresentationRecord
       },
-      responseMode: ResponseMode.POST,
+      responseMode: ResponseMode.DIRECT_POST,
     }
 
     const requestObject = await RequestObject.fromOpts(requestOpts)
