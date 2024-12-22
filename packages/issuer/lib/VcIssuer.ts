@@ -30,6 +30,7 @@ import {
   KID_DID_NO_DID_ERROR,
   KID_JWK_X5C_ERROR,
   NO_ISS_IN_AUTHORIZATION_CODE_CONTEXT,
+  NotificationRequest,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PRE_AUTH_GRANT_LITERAL,
@@ -45,6 +46,8 @@ import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3C
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
 import { LookupStateManager } from './state-manager'
 import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
+
+import { LOG } from './index'
 
 export class VcIssuer<DIDDoc extends object> {
   private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_13
@@ -94,6 +97,31 @@ export class VcIssuer<DIDDoc extends object> {
     return new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, 'uri').getAsserted(id)
   }
 
+  public async processNotification({
+    preAuthorizedCode,
+    issuerState,
+    notification,
+  }: {
+    preAuthorizedCode?: string
+    issuerState?: string
+    notification: NotificationRequest
+  }): Promise<Error | CredentialOfferSession> {
+    const sessionId = preAuthorizedCode ?? issuerState
+    const session = sessionId ? await this.getCredentialOfferSessionById(sessionId) : undefined
+    if (!session || !sessionId) {
+      LOG.error(`No session or session id found ${sessionId}`)
+      return Error('invalid_notification_request')
+    }
+    if (notification.notification_id !== session.notification_id) {
+      LOG.error(`Notification id ${notification.notification_id} not found in session. session notification id ${session.notification_id}`)
+      return Error('invalid_notification_id')
+    } else if (session.notification) {
+      LOG.info(`Overwriting existing notification, as a new notification came in ${session.notification_id}`)
+    }
+    await this.updateSession({ preAuthorizedCode: preAuthorizedCode, issuerState: issuerState, notification })
+    LOG.info(`Processed notification ${notification} for ${session.notification_id}`)
+    return session
+  }
   public async createCredentialOfferURI(opts: {
     grants?: CredentialOfferGrantInput
     credential_configuration_ids?: Array<string>
@@ -399,26 +427,49 @@ export class VcIssuer<DIDDoc extends object> {
       }
       return response
     } catch (error: unknown) {
-      await this.updateErrorStatus({ preAuthorizedCode, issuerState, error })
+      await this.updateSession({ preAuthorizedCode, issuerState, error })
       throw error
     }
   }
 
-  private async updateErrorStatus({
+  private async updateSession({
     preAuthorizedCode,
     error,
     issuerState,
+    notification,
   }: {
-    preAuthorizedCode: string | undefined
-    issuerState: string | undefined
-    error: unknown
+    preAuthorizedCode?: string
+    issuerState?: string
+    error?: unknown
+    notification?: NotificationRequest
   }) {
+    let issueState: IssueStatus | undefined = undefined
+    if (error) {
+      issueState = IssueStatus.ERROR
+    } else if (notification) {
+      if (notification.event == 'credential_accepted') {
+        issueState = IssueStatus.NOTIFICATION_CREDENTIAL_ACCEPTED
+      } else if (notification.event == 'credential_deleted') {
+        issueState = IssueStatus.NOTIFICATION_CREDENTIAL_DELETED
+      } else if (notification.event == 'credential_failure') {
+        issueState = IssueStatus.NOTIFICATION_CREDENTIAL_FAILURE
+      }
+    }
+
     if (preAuthorizedCode) {
       const preAuthSession = await this._credentialOfferSessions.get(preAuthorizedCode)
       if (preAuthSession) {
         preAuthSession.lastUpdatedAt = +new Date()
-        preAuthSession.status = IssueStatus.ERROR
-        preAuthSession.error = error instanceof Error ? error.message : error?.toString()
+        if (issueState) {
+          preAuthSession.status = issueState
+        }
+        if (error) {
+          preAuthSession.error = error instanceof Error ? error.message : error?.toString()
+        }
+        preAuthSession.notification_id
+        if (notification) {
+          preAuthSession.notification = notification
+        }
         await this._credentialOfferSessions.set(preAuthorizedCode, preAuthSession)
       }
     }
@@ -426,8 +477,15 @@ export class VcIssuer<DIDDoc extends object> {
       const authSession = await this._credentialOfferSessions.get(issuerState)
       if (authSession) {
         authSession.lastUpdatedAt = +new Date()
-        authSession.status = IssueStatus.ERROR
-        authSession.error = error instanceof Error ? error.message : error?.toString()
+        if (issueState) {
+          authSession.status = issueState
+        }
+        if (error) {
+          authSession.error = error instanceof Error ? error.message : error?.toString()
+        }
+        if (notification) {
+          authSession.notification = notification
+        }
         await this._credentialOfferSessions.set(issuerState, authSession)
       }
     }
@@ -569,7 +627,7 @@ export class VcIssuer<DIDDoc extends object> {
 
       return { jwtVerifyResult, preAuthorizedCode, preAuthSession, issuerState, authSession, cNonceState }
     } catch (error: unknown) {
-      await this.updateErrorStatus({ preAuthorizedCode, issuerState, error })
+      await this.updateSession({ preAuthorizedCode, issuerState, error })
       throw error
     }
   }

@@ -1,6 +1,7 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
+  AccessTokenRequest,
   adjustUrl,
   AuthorizationRequest,
   CredentialOfferRESTRequest,
@@ -216,23 +217,39 @@ export function notificationEndpoint<DIDDoc extends object>(
       })
       try {
         const jwtResult = await validateJWT(jwt, { accessTokenVerificationCallback: opts.accessTokenVerificationCallback })
-        EVENTS.emit(NotificationStatusEventNames.OID4VCI_NOTIFICATION_PROCESSED, {
-          eventName: NotificationStatusEventNames.OID4VCI_NOTIFICATION_PROCESSED,
-          id: uuidv4(),
-          data: notificationRequest,
-          initiator: jwtResult.jwt,
-          initiatorType: InitiatorType.EXTERNAL,
-          system: System.OID4VCI,
-          subsystem: SubSystem.API,
+        const accessToken = jwtResult.jwt.payload as AccessTokenRequest
+        const errorOrSession = await issuer.processNotification({
+          preAuthorizedCode: accessToken['pre-authorized_code'],
+          /*TODO: authorizationCode*/ notification: notificationRequest,
         })
+        if (errorOrSession instanceof Error) {
+          EVENTS.emit(NotificationStatusEventNames.OID4VCI_NOTIFICATION_ERROR, {
+            eventName: NotificationStatusEventNames.OID4VCI_NOTIFICATION_ERROR,
+            id: uuidv4(),
+            data: notificationRequest,
+            initiator: jwtResult.jwt,
+            initiatorType: InitiatorType.EXTERNAL,
+            system: System.OID4VCI,
+            subsystem: SubSystem.API,
+          })
+          return sendErrorResponse(response, 400, errorOrSession.message)
+        } else {
+          EVENTS.emit(NotificationStatusEventNames.OID4VCI_NOTIFICATION_PROCESSED, {
+            eventName: NotificationStatusEventNames.OID4VCI_NOTIFICATION_PROCESSED,
+            id: uuidv4(),
+            data: notificationRequest,
+            initiator: jwtResult.jwt,
+            initiatorType: InitiatorType.EXTERNAL,
+            system: System.OID4VCI,
+            subsystem: SubSystem.API,
+          })
+        }
       } catch (e) {
         LOG.warning(e)
         return sendErrorResponse(response, 400, {
           error: 'invalid_token',
         })
       }
-
-      // TODO Send event
       return response.status(204).send()
     } catch (e) {
       return sendErrorResponse(
