@@ -37,18 +37,24 @@ export interface ITokenEndpointOpts {
   accessTokenSignerCallback?: JWTSignerCallback
   accessTokenVerificationCallback?: JWTVerifyCallback<never>
   accessTokenIssuer?: string
+  accessTokenProvider?:  AccessTokenProvider
 }
 
+export type AccessTokenProvider = 'internal' | 'oidc' | 'oauth2'
+
 export const generateAccessToken = async (
-  opts: Required<Pick<ITokenEndpointOpts, 'accessTokenSignerCallback' | 'tokenExpiresIn' | 'accessTokenIssuer'>> & {
+  opts: Required<Pick<ITokenEndpointOpts, 'accessTokenSignerCallback' | 'tokenExpiresIn' | 'accessTokenIssuer' | 'accessTokenProvider'>> & {
     additionalClaims?: Record<string, unknown>
     preAuthorizedCode?: string
     alg?: Alg
     dPoPJwk?: JWK
   },
 ): Promise<string> => {
-  const { dPoPJwk, accessTokenIssuer, alg, accessTokenSignerCallback, tokenExpiresIn, preAuthorizedCode, additionalClaims } = opts
+  const { dPoPJwk, accessTokenIssuer, alg, accessTokenSignerCallback, tokenExpiresIn, preAuthorizedCode, additionalClaims, accessTokenProvider = 'internal' } = opts
   // JWT uses seconds for iat and exp
+  if (accessTokenProvider !== 'internal') {
+    throw new TokenError(400, TokenErrorResponse.invalid_request, `Access token provider ${accessTokenProvider} is an external access token provider. We cannot generate tokens ourselves in this case`)
+  }
   const iat = new Date().getTime() / 1000
   const exp = iat + tokenExpiresIn
   const cnf = dPoPJwk ? { cnf: { jkt: await calculateJwkThumbprint(dPoPJwk, 'sha256') } } : undefined
@@ -202,11 +208,12 @@ export const createAccessTokenResponse = async (
     // preAuthorizedCodeExpirationDuration?: number
     accessTokenSignerCallback: JWTSignerCallback
     accessTokenIssuer: string
+    accessTokenProvider?: AccessTokenProvider
     interval?: number
     dPoPJwk?: JWK
   },
 ) => {
-  const { dPoPJwk, credentialOfferSessions, cNonces, cNonceExpiresIn, tokenExpiresIn, accessTokenIssuer, accessTokenSignerCallback, interval } = opts
+  const { dPoPJwk, credentialOfferSessions, cNonces, cNonceExpiresIn, tokenExpiresIn, accessTokenIssuer, accessTokenSignerCallback, interval, accessTokenProvider = 'internal' } = opts
   // Pre-auth flow
   const preAuthorizedCode = request[PRE_AUTH_CODE_LITERAL] as string
 
@@ -219,6 +226,7 @@ export const createAccessTokenResponse = async (
     preAuthorizedCode,
     accessTokenIssuer,
     dPoPJwk,
+    accessTokenProvider
   })
 
   const response: AccessTokenResponse = {

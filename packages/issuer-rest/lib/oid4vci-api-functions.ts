@@ -1,9 +1,10 @@
-import { uuidv4 } from '@sphereon/oid4vc-common'
+import { decodeJwt, decodeProtectedHeader, uuidv4 } from '@sphereon/oid4vc-common'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AccessTokenRequest,
   adjustUrl,
   AuthorizationRequest,
+  CredentialIssuerMetadataOptsV1_0_13,
   CredentialOfferRESTRequest,
   CredentialRequestV1_0_13,
   determineGrantTypes,
@@ -14,6 +15,9 @@ import {
   Grant,
   IssueStatusResponse,
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
+  JWTHeader,
+  JWTVerifyCallback,
+  JwtVerifyResult,
   NotificationRequest,
   NotificationStatusEventNames,
   OpenId4VCIVersion,
@@ -25,9 +29,10 @@ import {
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
-import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
+import { env, ISingleEndpointOpts, oidcDiscoverIssuer, oidcGetClient, sendErrorResponse } from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
+
 
 import { handleTokenRequest, verifyTokenRequest } from './IssuerTokenEndpoint'
 import {
@@ -37,6 +42,8 @@ import {
   IGetIssueStatusEndpointOpts,
 } from './OID4VCIServer'
 import { validateRequestBody } from './expressUtils'
+
+import { ClientMetadata } from './index'
 
 const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90
 
@@ -76,13 +83,17 @@ export function getIssueStatusEndpoint<DIDDoc extends object>(router: Router, is
   })
 }
 
+function isExternalAS(issuerMetadata: CredentialIssuerMetadataOptsV1_0_13) {
+  return issuerMetadata.authorization_servers?.some((as) => !as.includes(issuerMetadata.credential_issuer))
+}
+
 export function accessTokenEndpoint<DIDDoc extends object>(
   router: Router,
   issuer: VcIssuer<DIDDoc>,
   opts: ITokenEndpointOpts & ISingleEndpointOpts & { baseUrl: string | URL },
 ) {
   const tokenEndpoint = issuer.issuerMetadata.token_endpoint
-  const externalAS = issuer.issuerMetadata.authorization_servers
+  const externalAS = isExternalAS(issuer.issuerMetadata)
   if (externalAS) {
     LOG.log(`[OID4VCI] External Authorization Server ${tokenEndpoint} is being used. Not enabling issuer token endpoint`)
     return
@@ -90,7 +101,11 @@ export function accessTokenEndpoint<DIDDoc extends object>(
     LOG.log(`[OID4VCI] Token endpoint is not enabled`)
     return
   }
-  const accessTokenIssuer = opts?.accessTokenIssuer ?? process.env.ACCESS_TOKEN_ISSUER ?? issuer.issuerMetadata.credential_issuer
+  const accessTokenIssuer =
+    opts?.accessTokenIssuer ??
+    process.env.ACCESS_TOKEN_ISSUER ??
+    issuer.issuerMetadata.authorization_servers?.[0] ??
+    issuer.issuerMetadata.credential_issuer
 
   const preAuthorizedCodeExpirationDuration =
     opts?.preAuthorizedCodeExpirationDuration ?? getNumberOrUndefined(process.env.PRE_AUTHORIZED_CODE_EXPIRATION_DURATION) ?? 300
@@ -483,4 +498,32 @@ export function getBasePath(url?: URL | string) {
     return ''
   }
   return `/${trimBoth(basePath, '/')}`
+}
+
+export async function oidcAccessTokenVerifyCallback(opts: {
+  credentialIssuer: string
+  authorizationServer: string
+  clientMetadata?: ClientMetadata
+}): Promise<JWTVerifyCallback> {
+  const callback = async (args: { jwt: string; kid?: string }): Promise<JwtVerifyResult> => {
+    const introspection = await oidcClient.introspect(args.jwt)
+    if (!introspection.active) {
+      return Promise.reject(Error('Access token is not active or invalid'))
+    }
+    const jwt = { header: decodeProtectedHeader(args.jwt) as JWTHeader, payload: decodeJwt(args.jwt) }
+
+    return {
+      jwt,
+      alg: jwt.header.alg,
+      ...(jwt.header.jwk && { jwk: jwt.header.jwk }),
+      ...(jwt.header.x5c && { x5c: jwt.header.x5c }),
+      ...(jwt.header.kid && { kid: jwt.header.kid }),
+      // We could resolve the did document here if the kid is a VM
+    }
+  }
+
+  const clientMetadata = opts.clientMetadata ?? { client_id: opts.credentialIssuer }
+  const oidcIssuer = await oidcDiscoverIssuer({ issuerUrl: opts.authorizationServer })
+  const oidcClient = await oidcGetClient(oidcIssuer.issuer, clientMetadata)
+  return callback
 }
