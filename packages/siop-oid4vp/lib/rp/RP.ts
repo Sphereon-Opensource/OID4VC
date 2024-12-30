@@ -425,10 +425,10 @@ export class RP {
       nonce,
       verification: mergeVerificationOpts(this._verifyResponseOptions, opts),
       ...(opts?.presentationDefinitions && !opts?.dcqlQuery && {
-        presentationDefinitions: this._verifyResponseOptions.presentationDefinitions
+        presentationDefinitions: this._verifyResponseOptions.presentationDefinitions ?? opts?.presentationDefinitions
       }),
-      ...(opts?.dcqlQuery && {
-        dcqlQuery: this._verifyResponseOptions.dcqlQuery
+      ...(opts?.dcqlQuery && !opts?.presentationDefinitions && {
+        dcqlQuery: this._verifyResponseOptions.dcqlQuery ?? opts?.dcqlQuery
       })
     }
   }

@@ -141,7 +141,7 @@ function getVCs(): IVerifiableCredential[] {
   return vcs
 }
 
-describe.skip('RP and OP interaction should', () => {
+describe('RP and OP interaction should', () => {
   // FIXME SDK-45 Uniresolver failing
   it(
     'succeed when calling each other in the full flow',
@@ -425,7 +425,7 @@ describe.skip('RP and OP interaction should', () => {
     const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt)
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
     await expect(op.createAuthorizationResponse(verifiedAuthReqWithJWT, {})).rejects.toThrow(
-      Error('authentication request expects a verifiable presentation in the response'),
+      Error('vp_token is present, but no presentation definitions or dcql query provided'),
     )
 
     expect(verifiedAuthReqWithJWT.payload?.['registration'].client_name).toEqual(VERIFIER_NAME_FOR_CLIENT)
