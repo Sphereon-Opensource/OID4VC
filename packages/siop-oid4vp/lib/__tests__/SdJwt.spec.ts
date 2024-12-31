@@ -1,6 +1,8 @@
-import { SigningAlgo } from '@sphereon/oid4vc-common'
+import { defaultHasher, SigningAlgo } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition } from '@sphereon/pex'
-import { OriginalVerifiableCredential } from '@sphereon/ssi-types'
+import { decodeSdJwtVc, OriginalVerifiableCredential } from '@sphereon/ssi-types'
+import { DcqlCredentialRepresentation, DcqlQuery } from 'dcql'
+import { Json } from 'dcql/dist/src/u-dcql'
 
 import {
   OP,
@@ -10,6 +12,7 @@ import {
   PresentationVerificationCallback,
   PropertyTarget,
   ResponseIss,
+  ResponseMode,
   ResponseType,
   RevocationVerification,
   RP,
@@ -79,6 +82,21 @@ function getPresentationDefinition(): IPresentationDefinition {
     ],
   }
 }
+
+const sdJwtVcQuery: DcqlQuery = {
+  credentials: [
+    {
+      id: 'my_credential',
+      format: 'vc+sd-jwt',
+      meta: {
+        vct_values: ['https://high-assurance.com/StateBusinessLicense'],
+      },
+      claims: [{ path: ['license', 'number'] }, { path: ['user', 'name'] }],
+    },
+  ],
+}
+
+DcqlQuery.validate(sdJwtVcQuery)
 
 function getVCs(): OriginalVerifiableCredential[] {
   return [SD_JWT_VC]
@@ -325,5 +343,120 @@ describe('RP and OP interaction should', () => {
 
     expect(verifiedAuthResponseWithJWT.oid4vpSubmission?.nonce).toEqual('qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg')
     expect(verifiedAuthResponseWithJWT.idToken).toBeUndefined()
+  })
+
+  it('succeed when calling with DCQL and right verifiable presentation', async () => {
+    const opMock = await mockedGetEnterpriseAuthToken('OP')
+    const opMockEntity = {
+      ...opMock,
+      didKey: `${opMock.did}#controller`,
+    }
+    const rpMock = await mockedGetEnterpriseAuthToken('RP')
+    const rpMockEntity = {
+      ...rpMock,
+      didKey: `${rpMock.did}#controller`,
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const presentationVerificationCallback: PresentationVerificationCallback = async (_args) => {
+      return { verified: true }
+    }
+
+    const resolver = getResolver('ethr')
+    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_D12_OID4VP_D20 })
+      .withClientId(rpMockEntity.did)
+      .withScope('test')
+      .withHasher(pexHasher)
+      .withResponseType([ResponseType.ID_TOKEN, ResponseType.VP_TOKEN])
+      .withResponseMode(ResponseMode.DIRECT_POST)
+      .withRedirectUri(EXAMPLE_REDIRECT_URL)
+      .withDcqlQuery(JSON.stringify(sdJwtVcQuery), [PropertyTarget.REQUEST_OBJECT])
+      .withPresentationVerification(presentationVerificationCallback)
+      .withRevocationVerification(RevocationVerification.NEVER)
+      .withRequestBy(PassBy.VALUE)
+      .withCreateJwtCallback(internalSignature(rpMockEntity.hexPrivateKey, rpMockEntity.did, `${rpMockEntity.did}#controller`, SigningAlgo.ES256K))
+      .withAuthorizationEndpoint('www.myauthorizationendpoint.com')
+      .withVerifyJwtCallback(getVerifyJwtCallback(resolver))
+      .withClientMetadata({
+        client_id: WELL_KNOWN_OPENID_FEDERATION,
+        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
+        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        responseTypesSupported: [ResponseType.ID_TOKEN],
+        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subjectTypesSupported: [SubjectType.PAIRWISE],
+        subject_syntax_types_supported: ['did', 'did:key'],
+        passBy: PassBy.VALUE,
+        logo_uri: VERIFIER_LOGO_FOR_CLIENT,
+        clientName: VERIFIER_NAME_FOR_CLIENT,
+        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100322',
+        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+      })
+      .build()
+
+    const op = OP.builder()
+      .withPresentationSignCallback(sdJwtVcPresentationSignCallback)
+      .withExpiresIn(1000)
+      .withHasher(pexHasher)
+      .withCreateJwtCallback(internalSignature(opMockEntity.hexPrivateKey, opMockEntity.did, `${opMockEntity.did}#controller`, SigningAlgo.ES256K))
+      .withVerifyJwtCallback(getVerifyJwtCallback(resolver))
+      .withRegistration({
+        authorizationEndpoint: 'www.myauthorizationendpoint.com',
+        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
+        issuer: ResponseIss.SELF_ISSUED_V2,
+        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        responseTypesSupported: [ResponseType.ID_TOKEN, ResponseType.VP_TOKEN],
+        vpFormats: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subjectTypesSupported: [SubjectType.PAIRWISE],
+        subject_syntax_types_supported: [],
+        passBy: PassBy.VALUE,
+        logo_uri: VERIFIER_LOGO_FOR_CLIENT,
+        clientName: VERIFIER_NAME_FOR_CLIENT,
+        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100323',
+        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+      })
+      .withSupportedVersions(SupportedVersion.SIOPv2_D12_OID4VP_D20)
+      .build()
+
+    const requestURI = await rp.createAuthorizationRequestURI({
+      correlationId: '1234',
+      nonce: 'qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg',
+      state: 'b32f0087fc9816eb813fd11f',
+    })
+
+    // Let's test the parsing
+    const parsedAuthReqURI = await op.parseAuthorizationRequestURI(requestURI.encodedUri)
+    expect(parsedAuthReqURI.authorizationRequestPayload).toBeDefined()
+    expect(parsedAuthReqURI.requestObjectJwt).toBeDefined()
+
+    if (!parsedAuthReqURI.requestObjectJwt) throw new Error('requestObjectJwt is undefined')
+    const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt)
+    expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
+
+    const dcqlCredentials: DcqlCredentialRepresentation[] = getVCs().map(vc => ({ claims: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload as { [x: string]: Json } }))
+
+    const queryResult = DcqlQuery.query(sdJwtVcQuery, dcqlCredentials)
+
+    const encodedPresentationRecord: { [x: string]: string | { [x: string]: Json } } = {}
+
+    for (const [key, _] of Object.entries(queryResult.credential_matches)) {
+      encodedPresentationRecord[key] = getVCs()[0] as string | { [x: string]: Json }
+    }
+
+    const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
+      dcqlQuery: { encodedPresentationRecord },
+    })
+    expect(authenticationResponseWithJWT.response.payload).toBeDefined()
+    expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
+
+    const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
+      dcqlQuery: sdJwtVcQuery,
+    })
+
+    expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
+    expect(verifiedAuthResponseWithJWT.idToken?.payload.nonce).toMatch('qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg')
   })
 })

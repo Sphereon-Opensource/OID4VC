@@ -44,7 +44,7 @@ export const authorizationRequestVersionDiscovery = (authorizationRequest: Autho
       !authorizationRequestCopy.registration_uri &&
       !authorizationRequestCopy.registration &&
       !(authorizationRequestCopy.claims && 'vp_token' in authorizationRequestCopy.claims) &&
-      authorizationRequestCopy.response_mode !== ResponseMode.POST // Post has been replaced by direct post
+      authorizationRequestCopy.response_mode !== ResponseMode.DIRECT_POST // Post has been replaced by direct post
     ) {
       versions.push(SupportedVersion.SIOPv2_D12_OID4VP_D20)
     }
