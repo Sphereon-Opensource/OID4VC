@@ -1,4 +1,3 @@
-import { parseJWT } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition, PEX, PresentationSubmissionLocation } from '@sphereon/pex'
 import { Format } from '@sphereon/pex-models'
 import {
@@ -43,11 +42,7 @@ export const extractNonceFromWrappedVerifiablePresentation = (wrappedVp: Wrapped
     // TODO: replace this once `kbJwt.payload` is available on the decoded sd-jwt (pr in ssi-sdk)
     // If it doesn't end with ~, it contains a kbJwt
     if (!wrappedVp.presentation.compactSdJwtVc.endsWith('~')) {
-      const kbJwt = wrappedVp.presentation.compactSdJwtVc.split('~').pop()
-
-      const { payload } = parseJWT(kbJwt)
-
-      return payload.nonce
+      return wrappedVp.presentation.kbJwt.payload.nonce
     }
 
     // No kb-jwt means no nonce (error will be handled later)
