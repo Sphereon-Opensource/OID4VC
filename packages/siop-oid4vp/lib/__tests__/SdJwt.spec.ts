@@ -437,10 +437,77 @@ describe('RP and OP interaction should', () => {
     const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt)
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
 
-    // FIXME kb-sd-jwts are not working with pex, so the presentation was not added to getVCs(...)
-    const dcqlCredentials: DcqlCredentialRepresentation[] = [KB_SD_JWT_PRESENTATION].map(vc => ({ claims: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload as { [x: string]: Json } }))
+    // The KB property is added to the JWT when the presentation is signed. Passing a VC will make the test fail
+    const dcqlCredentials: DcqlCredentialRepresentation[] = [KB_SD_JWT_PRESENTATION].map(vc => ({ claims: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload as { [x: string]: Json }, vct: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload.vct } ))
 
     const queryResult = DcqlQuery.query(sdJwtVcQuery, dcqlCredentials)
+
+    expect(queryResult).toEqual({
+      "canBeSatisfied": true,
+      "credential_matches": {
+        "my_credential": {
+          "all": [
+            [
+              {
+                "credential_index": 0,
+                "output": {
+                  "claims": {
+                    "license": {
+                      "number": 10
+                    },
+                    "user": {
+                      "name": "John"
+                    }
+                  },
+                  "vct": "https://high-assurance.com/StateBusinessLicense"
+                },
+                "success": true,
+                "typed": true
+              }
+            ]
+          ],
+          "credential_index": 0,
+          "output": {
+            "claims": {
+              "license": {
+                "number": 10
+              },
+              "user": {
+                "name": "John"
+              }
+            },
+            "vct": "https://high-assurance.com/StateBusinessLicense"
+          },
+          "success": true,
+          "typed": true
+        }
+      },
+      "credentials": [
+        {
+          "claims": [
+            {
+              "path": [
+                "license",
+                "number"
+              ]
+            },
+            {
+              "path": [
+                "user",
+                "name"
+              ]
+            }
+          ],
+          "format": "vc+sd-jwt",
+          "id": "my_credential",
+          "meta": {
+            "vct_values": [
+              "https://high-assurance.com/StateBusinessLicense"
+            ]
+          }
+        }
+      ]
+    })
 
     const encodedPresentationRecord: { [x: string]: string | { [x: string]: Json } } = {}
 
