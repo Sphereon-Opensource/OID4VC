@@ -1,5 +1,5 @@
 import { AssertedUniformCredentialOffer } from './CredentialIssuance.types';
-import { CredentialDataSupplierInput, NotificationRequest } from './Generic.types'
+import { CredentialDataSupplierInput, NotificationRequest } from './Generic.types';
 
 export interface StateType {
   createdAt: number;

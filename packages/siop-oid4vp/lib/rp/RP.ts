@@ -424,12 +424,14 @@ export class RP {
       state,
       nonce,
       verification: mergeVerificationOpts(this._verifyResponseOptions, opts),
-      ...(opts?.presentationDefinitions && !opts?.dcqlQuery && {
-        presentationDefinitions: this._verifyResponseOptions.presentationDefinitions ?? opts?.presentationDefinitions
-      }),
-      ...(opts?.dcqlQuery && !opts?.presentationDefinitions && {
-        dcqlQuery: this._verifyResponseOptions.dcqlQuery ?? opts?.dcqlQuery
-      })
+      ...(opts?.presentationDefinitions &&
+        !opts?.dcqlQuery && {
+          presentationDefinitions: this._verifyResponseOptions.presentationDefinitions ?? opts?.presentationDefinitions,
+        }),
+      ...(opts?.dcqlQuery &&
+        !opts?.presentationDefinitions && {
+          dcqlQuery: this._verifyResponseOptions.dcqlQuery ?? opts?.dcqlQuery,
+        }),
     }
   }
 

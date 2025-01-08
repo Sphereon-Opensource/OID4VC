@@ -40,7 +40,8 @@ const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 const HOLDER_DID = 'did:example:ebfeb1f712ebc6f1c276e12ec21'
 const SD_JWT_VC =
   'eyJhbGciOiJFZERTQSIsInR5cCI6InZjK3NkLWp3dCJ9.eyJpYXQiOjE3MDA0NjQ3MzYwNzYsImlzcyI6ImRpZDprZXk6c29tZS1yYW5kb20tZGlkLWtleSIsIm5iZiI6MTcwMDQ2NDczNjE3NiwidmN0IjoiaHR0cHM6Ly9oaWdoLWFzc3VyYW5jZS5jb20vU3RhdGVCdXNpbmVzc0xpY2Vuc2UiLCJ1c2VyIjp7Il9zZCI6WyI5QmhOVDVsSG5QVmpqQUp3TnR0NDIzM216MFVVMUd3RmFmLWVNWkFQV0JNIiwiSVl5d1FQZl8tNE9hY2Z2S2l1cjRlSnFMa1ZleWRxcnQ1Y2UwMGJReWNNZyIsIlNoZWM2TUNLakIxeHlCVl91QUtvLURlS3ZvQllYbUdBd2VGTWFsd05xbUEiLCJXTXpiR3BZYmhZMkdoNU9pWTRHc2hRU1dQREtSeGVPZndaNEhaQW5YS1RZIiwiajZ6ZFg1OUJYZHlTNFFaTGJITWJ0MzJpenRzWXdkZzRjNkpzWUxNc3ZaMCIsInhKR3Radm41cFM4VEhqVFlJZ3MwS1N5VC1uR3BSR3hDVnp6c1ZEbmMyWkUiXX0sImxpY2Vuc2UiOnsibnVtYmVyIjoxMH0sImNuZiI6eyJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJUQ0FFUjE5WnZ1M09IRjRqNFc0dmZTVm9ISVAxSUxpbERsczd2Q2VHZW1jIiwieSI6Ilp4amlXV2JaTVFHSFZXS1ZRNGhiU0lpcnNWZnVlY0NFNnQ0alQ5RjJIWlEifX0sIl9zZF9hbGciOiJzaGEtMjU2IiwiX3NkIjpbIl90YnpMeHBaeDBQVHVzV2hPOHRUZlVYU2ZzQjVlLUtrbzl3dmZaaFJrYVkiLCJ1WmNQaHdUTmN4LXpNQU1zemlYMkFfOXlJTGpQSEhobDhEd2pvVXJLVVdZIl19.HAcudVInhNpXkTPQGNosjKTFRJWgKj90NpfloRaDQchGd4zxc1ChWTCCPXzUXTBypASKrzgjZCiXlTr0bzmLAg~WyJHeDZHRUZvR2t6WUpWLVNRMWlDREdBIiwiZGF0ZU9mQmlydGgiLCIyMDAwMDEwMSJd~WyJ1LUt3cmJvMkZfTExQekdSZE1XLUtBIiwibmFtZSIsIkpvaG4iXQ~WyJNV1ZieGJqVFZxUXdLS3h2UGVZdWlnIiwibGFzdE5hbWUiLCJEb2UiXQ~'
-const KB_SD_JWT_PRESENTATION = 'eyJ0eXAiOiJ2YytzZC1qd3QiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6a2V5OnNvbWUtcmFuZG9tLWRpZC1rZXkiLCJpYXQiOjE3MzU4MzY0NzY1NjksInZjdCI6Imh0dHBzOi8vaGlnaC1hc3N1cmFuY2UuY29tL1N0YXRlQnVzaW5lc3NMaWNlbnNlIiwiX3NkIjpbIk5ub3U2OGN6VG9qQWY0Z3dIMmJiNFBaWHB4WHJzQ29oWm5CbEZvQ293TTAiLCJ1ajZZZVZwSnRwUjhVWHRpbmVDOGM5LXpTRFJVQzJzSGhsRkNNNWtkLXlNIl0sIl9zZF9hbGciOiJzaGEtMjU2In0.X1pNBBmR-7h6SgxtmZY9GL_nSBzoIvWNw7nqqgJVCnSEbvyTjqTgu4bLSPKeaxf1jY2zHJK1jdxiDzIizRZ0gA~WyI4OTE4YjkxZGFjMzk1OTdkIiwidXNlciIseyJkYXRlX29mX2JpcnRoIjoiMDEvMDEvMTk3MCIsIl9zZCI6WyJ6UE8zb1RCT3BxMmRNcWQtekt5SmF2UlQyWVIwSHBPaV9jczZRajEtVmR3Il19XQ~WyIyOTc4NTNiODE5MTI0MTJkIiwibmFtZSIsIkpvaG4iXQ~WyJkYjEzNDQ4NTgxMzY0M2JlIiwibGljZW5zZSIseyJfc2QiOlsiWUFUR3A3TGxjNEMtTWtYWkZWTEF6RHRtbDFTMVpFWFFyTW5CdmVDWVFwayJdfV0~WyJlOTc3MzhiNmM0OGNhMWJlIiwibnVtYmVyIiwxMF0~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3MzU4MzY0NzYsImF1ZCI6Imh0dHBzOi8vZXhhbXBsZS5jb20iLCJub25jZSI6InFCclI3bXFuWTNRcjQ5ZEFaeWNQRjhGemdFODNtNkgwYzJsMGJ6UDR4U2ciLCJjdXN0b20iOiJkYXRhIiwic2RfaGFzaCI6IlVwYzNYQWpzRU1mdnVmSzJ5Q3RkNDZXUFJmTDVfVDc4UThEZVNZQXlEX28ifQ.Crw56nLFFnVulRQElpq9HoskdKIyd5Mj6vg9UVNSWfhxQ0oGe10RHtifUv4BiFharSvWN99y_DnkhCPu1sPIYw'
+const KB_SD_JWT_PRESENTATION =
+  'eyJ0eXAiOiJ2YytzZC1qd3QiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6a2V5OnNvbWUtcmFuZG9tLWRpZC1rZXkiLCJpYXQiOjE3MzU4MzY0NzY1NjksInZjdCI6Imh0dHBzOi8vaGlnaC1hc3N1cmFuY2UuY29tL1N0YXRlQnVzaW5lc3NMaWNlbnNlIiwiX3NkIjpbIk5ub3U2OGN6VG9qQWY0Z3dIMmJiNFBaWHB4WHJzQ29oWm5CbEZvQ293TTAiLCJ1ajZZZVZwSnRwUjhVWHRpbmVDOGM5LXpTRFJVQzJzSGhsRkNNNWtkLXlNIl0sIl9zZF9hbGciOiJzaGEtMjU2In0.X1pNBBmR-7h6SgxtmZY9GL_nSBzoIvWNw7nqqgJVCnSEbvyTjqTgu4bLSPKeaxf1jY2zHJK1jdxiDzIizRZ0gA~WyI4OTE4YjkxZGFjMzk1OTdkIiwidXNlciIseyJkYXRlX29mX2JpcnRoIjoiMDEvMDEvMTk3MCIsIl9zZCI6WyJ6UE8zb1RCT3BxMmRNcWQtekt5SmF2UlQyWVIwSHBPaV9jczZRajEtVmR3Il19XQ~WyIyOTc4NTNiODE5MTI0MTJkIiwibmFtZSIsIkpvaG4iXQ~WyJkYjEzNDQ4NTgxMzY0M2JlIiwibGljZW5zZSIseyJfc2QiOlsiWUFUR3A3TGxjNEMtTWtYWkZWTEF6RHRtbDFTMVpFWFFyTW5CdmVDWVFwayJdfV0~WyJlOTc3MzhiNmM0OGNhMWJlIiwibnVtYmVyIiwxMF0~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3MzU4MzY0NzYsImF1ZCI6Imh0dHBzOi8vZXhhbXBsZS5jb20iLCJub25jZSI6InFCclI3bXFuWTNRcjQ5ZEFaeWNQRjhGemdFODNtNkgwYzJsMGJ6UDR4U2ciLCJjdXN0b20iOiJkYXRhIiwic2RfaGFzaCI6IlVwYzNYQWpzRU1mdnVmSzJ5Q3RkNDZXUFJmTDVfVDc4UThEZVNZQXlEX28ifQ.Crw56nLFFnVulRQElpq9HoskdKIyd5Mj6vg9UVNSWfhxQ0oGe10RHtifUv4BiFharSvWN99y_DnkhCPu1sPIYw'
 
 function getPresentationDefinition(): IPresentationDefinition {
   return {
@@ -438,75 +439,70 @@ describe('RP and OP interaction should', () => {
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
 
     // The KB property is added to the JWT when the presentation is signed. Passing a VC will make the test fail
-    const dcqlCredentials: DcqlCredentialRepresentation[] = [KB_SD_JWT_PRESENTATION].map(vc => ({ claims: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload as { [x: string]: Json }, vct: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload.vct } ))
+    const dcqlCredentials: DcqlCredentialRepresentation[] = [KB_SD_JWT_PRESENTATION].map((vc) => ({
+      claims: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload as { [x: string]: Json },
+      vct: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload.vct,
+    }))
 
     const queryResult = DcqlQuery.query(sdJwtVcQuery, dcqlCredentials)
 
     expect(queryResult).toEqual({
-      "canBeSatisfied": true,
-      "credential_matches": {
-        "my_credential": {
-          "all": [
+      canBeSatisfied: true,
+      credential_matches: {
+        my_credential: {
+          all: [
             [
               {
-                "credential_index": 0,
-                "output": {
-                  "claims": {
-                    "license": {
-                      "number": 10
+                credential_index: 0,
+                output: {
+                  claims: {
+                    license: {
+                      number: 10,
                     },
-                    "user": {
-                      "name": "John"
-                    }
+                    user: {
+                      name: 'John',
+                    },
                   },
-                  "vct": "https://high-assurance.com/StateBusinessLicense"
+                  vct: 'https://high-assurance.com/StateBusinessLicense',
                 },
-                "success": true,
-                "typed": true
-              }
-            ]
-          ],
-          "credential_index": 0,
-          "output": {
-            "claims": {
-              "license": {
-                "number": 10
+                success: true,
+                typed: true,
               },
-              "user": {
-                "name": "John"
-              }
-            },
-            "vct": "https://high-assurance.com/StateBusinessLicense"
-          },
-          "success": true,
-          "typed": true
-        }
-      },
-      "credentials": [
-        {
-          "claims": [
-            {
-              "path": [
-                "license",
-                "number"
-              ]
-            },
-            {
-              "path": [
-                "user",
-                "name"
-              ]
-            }
+            ],
           ],
-          "format": "vc+sd-jwt",
-          "id": "my_credential",
-          "meta": {
-            "vct_values": [
-              "https://high-assurance.com/StateBusinessLicense"
-            ]
-          }
-        }
-      ]
+          credential_index: 0,
+          output: {
+            claims: {
+              license: {
+                number: 10,
+              },
+              user: {
+                name: 'John',
+              },
+            },
+            vct: 'https://high-assurance.com/StateBusinessLicense',
+          },
+          success: true,
+          typed: true,
+        },
+      },
+      credentials: [
+        {
+          claims: [
+            {
+              path: ['license', 'number'],
+            },
+            {
+              path: ['user', 'name'],
+            },
+          ],
+          format: 'vc+sd-jwt',
+          id: 'my_credential',
+          meta: {
+            vct_values: ['https://high-assurance.com/StateBusinessLicense'],
+          },
+        },
+      ],
     })
 
     const encodedPresentationRecord: { [x: string]: string | { [x: string]: Json } } = {}

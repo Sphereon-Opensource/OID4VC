@@ -33,7 +33,6 @@ import { env, ISingleEndpointOpts, oidcDiscoverIssuer, oidcGetClient, sendErrorR
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
 
-
 import { handleTokenRequest, verifyTokenRequest } from './IssuerTokenEndpoint'
 import {
   ICreateCredentialOfferEndpointOpts,

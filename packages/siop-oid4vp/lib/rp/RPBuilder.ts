@@ -247,10 +247,10 @@ export class RPBuilder {
   }
 
   withPresentationDefinition(definitionOpts: { definition: IPresentationDefinition; definitionUri?: string }, targets?: PropertyTargets): RPBuilder {
-    if(this._authorizationRequestPayload.dcql_query) {
+    if (this._authorizationRequestPayload.dcql_query) {
       return this
     }
-    
+
     const { definition, definitionUri } = definitionOpts
 
     if (this.getSupportedRequestVersion() < SupportedVersion.SIOPv2_D11) {
