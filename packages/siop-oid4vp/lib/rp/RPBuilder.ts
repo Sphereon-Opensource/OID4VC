@@ -226,7 +226,31 @@ export class RPBuilder {
     return this
   }
 
+  withDcqlQuery(dcqlQuery: string, targets?: PropertyTargets): RPBuilder {
+    this._authorizationRequestPayload.dcql_query = assignIfAuth(
+      {
+        propertyValue: dcqlQuery,
+        targets,
+      },
+      false,
+    )
+    this._requestObjectPayload.dcql_query = assignIfRequestObject(
+      {
+        propertyValue: dcqlQuery,
+        targets,
+      },
+      true,
+    )
+    this._authorizationRequestPayload.presentation_definition = undefined
+    this._requestObjectPayload.presentation_definition = undefined
+    return this
+  }
+
   withPresentationDefinition(definitionOpts: { definition: IPresentationDefinition; definitionUri?: string }, targets?: PropertyTargets): RPBuilder {
+    if(this._authorizationRequestPayload.dcql_query) {
+      return this
+    }
+    
     const { definition, definitionUri } = definitionOpts
 
     if (this.getSupportedRequestVersion() < SupportedVersion.SIOPv2_D11) {

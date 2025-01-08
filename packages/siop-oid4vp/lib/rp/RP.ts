@@ -8,6 +8,7 @@ import {
 } from '@sphereon/jarm'
 import { decodeProtectedHeader, JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
 import { Hasher } from '@sphereon/ssi-types'
+import { DcqlQuery } from 'dcql'
 
 import {
   AuthorizationRequest,
@@ -21,6 +22,7 @@ import {
 import { mergeVerificationOpts } from '../authorization-request/Opts'
 import {
   AuthorizationResponse,
+  extractPresentationsFromDcqlVpToken,
   extractPresentationsFromVpToken,
   PresentationDefinitionWithLocation,
   VerifyAuthorizationResponseOpts,
@@ -168,7 +170,10 @@ export class RP {
       },
     )
 
-    const presentations = await extractPresentationsFromVpToken(validatedResponse.authResponseParams.vp_token, { hasher })
+    const presentations = validatedResponse.authRequestParams.dcql_query
+      ? extractPresentationsFromDcqlVpToken(validatedResponse.authResponseParams.vp_token as string, { hasher })
+      : extractPresentationsFromVpToken(validatedResponse.authResponseParams.vp_token, { hasher })
+
     const mdocVerifiablePresentations = (Array.isArray(presentations) ? presentations : [presentations]).filter((p) => p.format === 'mso_mdoc')
 
     if (mdocVerifiablePresentations.length) {
@@ -202,6 +207,7 @@ export class RP {
       nonce?: string
       verification?: Verification
       presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[]
+      dcqlQuery?: DcqlQuery
     },
   ): Promise<VerifiedAuthorizationResponse> {
     const state = opts?.state || this.verifyResponseOptions.state
@@ -376,6 +382,7 @@ export class RP {
       verification?: Verification
       audience?: string
       presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[]
+      dcqlQuery?: DcqlQuery
     },
   ): Promise<VerifyAuthorizationResponseOpts> {
     let correlationId = opts?.correlationId ?? this._verifyResponseOptions.correlationId
@@ -417,7 +424,12 @@ export class RP {
       state,
       nonce,
       verification: mergeVerificationOpts(this._verifyResponseOptions, opts),
-      presentationDefinitions: opts?.presentationDefinitions ?? this._verifyResponseOptions.presentationDefinitions,
+      ...(opts?.presentationDefinitions && !opts?.dcqlQuery && {
+        presentationDefinitions: this._verifyResponseOptions.presentationDefinitions ?? opts?.presentationDefinitions
+      }),
+      ...(opts?.dcqlQuery && !opts?.presentationDefinitions && {
+        dcqlQuery: this._verifyResponseOptions.dcqlQuery ?? opts?.dcqlQuery
+      })
     }
   }
 
