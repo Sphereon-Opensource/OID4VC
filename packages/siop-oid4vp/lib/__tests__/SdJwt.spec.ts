@@ -1,7 +1,7 @@
 import { defaultHasher, SigningAlgo } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition } from '@sphereon/pex'
 import { decodeSdJwtVc, OriginalVerifiableCredential } from '@sphereon/ssi-types'
-import { DcqlCredentialRepresentation, DcqlQuery } from 'dcql'
+import { DcqlCredential, DcqlQuery } from 'dcql'
 import { Json } from 'dcql/dist/src/u-dcql'
 
 import {
@@ -438,7 +438,7 @@ describe.skip('RP and OP interaction should', () => {
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
 
     // The KB property is added to the JWT when the presentation is signed. Passing a VC will make the test fail
-    const dcqlCredentials: DcqlCredentialRepresentation[] = [KB_SD_JWT_PRESENTATION].map(vc => ({ claims: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload as { [x: string]: Json }, vct: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload.vct } ))
+    const dcqlCredentials: DcqlCredential[] = [KB_SD_JWT_PRESENTATION].map(vc => ({ credential_format: 'vc+sd-jwt', claims: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload as { [x: string]: Json }, vct: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload.vct } ))
 
     const queryResult = DcqlQuery.query(sdJwtVcQuery, dcqlCredentials)
 
@@ -509,14 +509,14 @@ describe.skip('RP and OP interaction should', () => {
       ]
     })
 
-    const encodedPresentationRecord: { [x: string]: string | { [x: string]: Json } } = {}
+    const dcqlPresentation: { [x: string]: string | { [x: string]: Json } } = {}
 
     for (const [key, _] of Object.entries(queryResult.credential_matches)) {
-      encodedPresentationRecord[key] = KB_SD_JWT_PRESENTATION as string | { [x: string]: Json }
+      dcqlPresentation[key] = KB_SD_JWT_PRESENTATION as string | { [x: string]: Json }
     }
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-      dcqlQuery: { encodedPresentationRecord },
+      dcqlQuery: { dcqlPresentation },
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
