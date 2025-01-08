@@ -62,7 +62,7 @@ export interface PresentationExchangeResponseOpts {
 }
 
 export interface DcqlQueryResponseOpts {
-  encodedPresentationRecord: Record<string, Record<string, unknown> | string>
+  dcqlPresentation: Record<string, Record<string, unknown> | string>
 }
 
 export interface PresentationDefinitionPayloadOpts {

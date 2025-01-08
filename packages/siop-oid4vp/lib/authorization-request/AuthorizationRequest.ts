@@ -290,7 +290,7 @@ export class AuthorizationRequest {
     return await PresentationExchange.findValidPresentationDefinitions(await this.mergedPayloads(), version)
   }
 
-  public async getDcqlQuery(): Promise<DcqlQuery> {
+  public async getDcqlQuery(): Promise<DcqlQuery | undefined> {
     return await findValidDcqlQuery(await this.mergedPayloads())
   }
 }

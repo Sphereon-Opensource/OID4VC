@@ -1,4 +1,4 @@
-import { DcqlPresentationRecord } from 'dcql'
+import { DcqlPresentation } from 'dcql'
 
 import { AuthorizationRequest } from '../authorization-request'
 import { IDToken } from '../id-token'
@@ -31,7 +31,7 @@ export const createResponsePayload = async (
 
   // vp tokens
   if (responseOpts.dcqlQuery) {
-    responsePayload.vp_token = DcqlPresentationRecord.encode(responseOpts.dcqlQuery.encodedPresentationRecord as DcqlPresentationRecord)
+    responsePayload.vp_token = DcqlPresentation.encode(responseOpts.dcqlQuery.dcqlPresentation as DcqlPresentation)
   } else {
     await putPresentationSubmissionInLocation(authorizationRequest, responsePayload, responseOpts, idTokenPayload)
   }
