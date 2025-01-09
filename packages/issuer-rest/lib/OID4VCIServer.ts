@@ -12,6 +12,7 @@ import express, { Express } from 'express'
 
 import {
   accessTokenEndpoint,
+  authorizationChallengeEndpoint,
   createCredentialOfferEndpoint,
   getBasePath,
   getCredentialEndpoint,
@@ -84,6 +85,13 @@ export interface IGetIssueStatusEndpointOpts extends ISingleEndpointOpts {
   baseUrl: string | URL
 }
 
+export interface IAuthorizationChallengeEndpointOpts extends ISingleEndpointOpts {
+  // TODO docs
+  // optional state so when rest is not used one could sync the state
+  createAuthRequestUriCallback: (presentationDefinitionId: string, state?: string) => Promise<string>
+  verifyAuthResponseCallback: (correlationId: string) => Promise<boolean> // TODO authorizationResponsePayload: any,  -> AuthorizationResponse
+}
+
 export interface IOID4VCIServerOpts extends HasEndpointOpts {
   endpointOpts?: {
     tokenEndpointOpts?: ITokenEndpointOpts
@@ -92,6 +100,7 @@ export interface IOID4VCIServerOpts extends HasEndpointOpts {
     getCredentialOfferOpts?: IGetCredentialOfferEndpointOpts
     getStatusOpts?: IGetIssueStatusEndpointOpts
     parOpts?: ISingleEndpointOpts
+    authorizationChallengeOpts?: IAuthorizationChallengeEndpointOpts
   }
   baseUrl?: string
 }
@@ -129,6 +138,20 @@ export class OID4VCIServer<DIDDoc extends object> {
     if (this.isStatusEndpointEnabled(opts?.endpointOpts?.getStatusOpts)) {
       getIssueStatusEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.getStatusOpts, baseUrl: this.baseUrl })
     }
+    if (this.isAuthorizationChallengeEndpointEnabled(opts?.endpointOpts?.authorizationChallengeOpts)) {
+      // TODO errors or just continue without endpoint
+      if (!opts?.endpointOpts?.authorizationChallengeOpts?.createAuthRequestUriCallback) {
+        throw Error(
+          `Unable to enable authorization challenge endpoint. No createAuthRequestUriCallback present in authorization challenge options`,
+        )
+      }
+      if (!opts?.endpointOpts?.authorizationChallengeOpts?.verifyAuthResponseCallback) {
+        throw Error(
+          `Unable to enable authorization challenge endpoint. No verifyAuthResponseCallback present in authorization challenge options`,
+        )
+      }
+      authorizationChallengeEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.authorizationChallengeOpts, baseUrl: this.baseUrl })
+    }
     this._app.use(getBasePath(this.baseUrl), this._router)
   }
 
@@ -160,7 +183,11 @@ export class OID4VCIServer<DIDDoc extends object> {
   }
 
   private isStatusEndpointEnabled(statusEndpointOpts?: IGetIssueStatusEndpointOpts) {
-    return statusEndpointOpts?.enabled !== false || process.env.STATUS_ENDPOINT_ENABLED === 'false'
+    return statusEndpointOpts?.enabled !== false || process.env.STATUS_ENDPOINT_ENABLED !== 'false'
+  }
+
+  private isAuthorizationChallengeEndpointEnabled(authorizationChallengeEndpointOpts?: IAuthorizationChallengeEndpointOpts) {
+    return authorizationChallengeEndpointOpts?.enabled !== false || process.env.AUTHORIZATION_CHALLENGE_ENDPOINT_ENABLED !== 'false'
   }
 
   private assertAccessTokenHandling(tokenEndpointOpts?: ITokenEndpointOpts) {

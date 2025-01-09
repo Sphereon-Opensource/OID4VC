@@ -2,13 +2,18 @@ import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   adjustUrl,
+  AuthorizationChallengeCodeResponse,
+  AuthorizationChallengeError,
+  AuthorizationChallengeErrorResponse,
   AuthorizationRequest,
+  CommonAuthorizationChallengeRequest,
   CredentialOfferRESTRequest,
   CredentialRequestV1_0_13,
   determineGrantTypes,
   determineSpecVersionFromOffer,
   EVENTS,
   extractBearerToken,
+  generateRandomString,
   getNumberOrUndefined,
   Grant,
   IssueStatusResponse,
@@ -21,19 +26,24 @@ import {
   trimEnd,
   trimStart,
   validateJWT,
-  WellKnownEndpoints,
+  WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
-import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
+import {
+  ITokenEndpointOpts,
+  LOG,
+  VcIssuer
+} from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
 
 import { handleTokenRequest, verifyTokenRequest } from './IssuerTokenEndpoint'
 import {
+  IAuthorizationChallengeEndpointOpts,
   ICreateCredentialOfferEndpointOpts,
   ICreateCredentialOfferURIResponse,
   IGetCredentialOfferEndpointOpts,
-  IGetIssueStatusEndpointOpts,
+  IGetIssueStatusEndpointOpts
 } from './OID4VCIServer'
 import { validateRequestBody } from './expressUtils'
 
@@ -69,6 +79,98 @@ export function getIssueStatusEndpoint<DIDDoc extends object>(router: Router, is
           error: 'invalid_request',
           error_description: (e as Error).message,
         },
+        e,
+      )
+    }
+  })
+}
+
+export function authorizationChallengeEndpoint<DIDDoc extends object>(
+  router: Router,
+  issuer: VcIssuer<DIDDoc>,
+  opts: IAuthorizationChallengeEndpointOpts & { baseUrl: string | URL },
+) {
+  const endpoint = issuer.issuerMetadata.authorization_challenge_endpoint
+  const baseUrl = getBaseUrl(opts.baseUrl)
+  if (!endpoint) {
+    LOG.warning('authorization challenge endpoint disabled as no "authorization_challenge_endpoint" has been configured in issuer metadata')
+    return
+  }
+  const path = determinePath(baseUrl, endpoint, { stripBasePath: true })
+  LOG.log(`[OID4VCI] authorization challenge endpoint at ${path}`)
+  router.post(path, async (request: Request, response: Response) => {
+    const authorizationChallengeRequest = request.body as CommonAuthorizationChallengeRequest // TODO we need the request object here
+    const {
+      client_id,
+      issuer_state,
+      auth_session,
+      presentation_during_issuance_session,
+      definition_id
+    } = authorizationChallengeRequest
+
+    try {
+      if (!client_id && !auth_session) {
+        const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
+          error: AuthorizationChallengeError.invalid_request
+        }
+        return Promise.reject(authorizationChallengeErrorResponse)
+      }
+
+      if (!auth_session && issuer_state) {
+        const session = await issuer.credentialOfferSessions.get(issuer_state)
+        if (!session) {
+          const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
+            error: AuthorizationChallengeError.invalid_session
+          }
+          return Promise.reject(authorizationChallengeErrorResponse)
+        }
+
+        if (!definition_id) {
+          const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
+            error: AuthorizationChallengeError.invalid_request
+          }
+          return Promise.reject(authorizationChallengeErrorResponse)
+        }
+
+        const authRequestURI = await opts.createAuthRequestUriCallback(definition_id, issuer_state)
+        const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
+          error: AuthorizationChallengeError.insufficient_authorization,
+          auth_session: issuer_state,
+          presentation: authRequestURI
+        }
+        return Promise.reject(authorizationChallengeErrorResponse)
+      }
+
+      if (auth_session && presentation_during_issuance_session) {
+        const session = await issuer.credentialOfferSessions.get(auth_session)
+        if (!session) {
+          const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
+            error: AuthorizationChallengeError.invalid_session
+          }
+          return Promise.reject(authorizationChallengeErrorResponse)
+        }
+
+        const verifiedResponse = await opts.verifyAuthResponseCallback(presentation_during_issuance_session)
+        if (verifiedResponse) {
+          const authorizationCode  = generateRandomString(16, 'base64url')
+          session.authorizationCode = authorizationCode
+          await issuer.credentialOfferSessions.set(auth_session, session)
+          const authorizationChallengeCodeResponse: AuthorizationChallengeCodeResponse = {
+            authorization_code: authorizationCode
+          }
+          return response.send(authorizationChallengeCodeResponse)
+        }
+      }
+
+      const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
+        error: AuthorizationChallengeError.invalid_request
+      }
+      return Promise.reject(authorizationChallengeErrorResponse)
+    } catch (e) {
+      return sendErrorResponse(
+        response,
+        400,
+        (e as Error),
         e,
       )
     }
