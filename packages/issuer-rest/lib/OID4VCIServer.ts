@@ -86,10 +86,17 @@ export interface IGetIssueStatusEndpointOpts extends ISingleEndpointOpts {
 }
 
 export interface IAuthorizationChallengeEndpointOpts extends ISingleEndpointOpts {
-  // TODO docs
-  // optional state so when rest is not used one could sync the state
+  /**
+   * Callback used for creating the authorization request uri used for the RP.
+   * Added an optional state parameter so that when direct calls are used,
+   * one could set the state value of the RP session to match the state value of the VCI session.
+   */
   createAuthRequestUriCallback: (presentationDefinitionId: string, state?: string) => Promise<string>
-  verifyAuthResponseCallback: (correlationId: string) => Promise<boolean> // TODO authorizationResponsePayload: any,  -> AuthorizationResponse
+  /**
+   * Callback used for verifying the status of the authorization response.
+   * This is checked by the issuer before issuing an authorization code.
+   */
+  verifyAuthResponseCallback: (correlationId: string) => Promise<boolean>
 }
 
 export interface IOID4VCIServerOpts extends HasEndpointOpts {
