@@ -146,7 +146,6 @@ export class OID4VCIServer<DIDDoc extends object> {
       getIssueStatusEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.getStatusOpts, baseUrl: this.baseUrl })
     }
     if (this.isAuthorizationChallengeEndpointEnabled(opts?.endpointOpts?.authorizationChallengeOpts)) {
-      // TODO errors or just continue without endpoint
       if (!opts?.endpointOpts?.authorizationChallengeOpts?.createAuthRequestUriCallback) {
         throw Error(
           `Unable to enable authorization challenge endpoint. No createAuthRequestUriCallback present in authorization challenge options`,

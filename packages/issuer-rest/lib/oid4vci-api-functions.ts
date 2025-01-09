@@ -111,7 +111,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
   const path = determinePath(baseUrl, endpoint, { stripBasePath: true })
   LOG.log(`[OID4VCI] authorization challenge endpoint at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
-    const authorizationChallengeRequest = request.body as CommonAuthorizationChallengeRequest // TODO we need the request object here
+    const authorizationChallengeRequest = request.body as CommonAuthorizationChallengeRequest
     const {
       client_id,
       issuer_state,
