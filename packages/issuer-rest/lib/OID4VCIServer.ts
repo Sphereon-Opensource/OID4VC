@@ -193,7 +193,7 @@ export class OID4VCIServer<DIDDoc extends object> {
   }
 
   private isAuthorizationChallengeEndpointEnabled(authorizationChallengeEndpointOpts?: IAuthorizationChallengeEndpointOpts) {
-    return authorizationChallengeEndpointOpts?.enabled !== false || process.env.AUTHORIZATION_CHALLENGE_ENDPOINT_ENABLED !== 'false'
+    return authorizationChallengeEndpointOpts?.enabled === true || process.env.AUTHORIZATION_CHALLENGE_ENDPOINT_ENABLED === 'true'
   }
 
   private assertAccessTokenHandling(tokenEndpointOpts?: ITokenEndpointOpts) {
