@@ -15,6 +15,7 @@ export enum CredentialEventNames {
 export enum NotificationStatusEventNames {
   OID4VCI_NOTIFICATION_RECEIVED = 'OID4VCI_NOTIFICATION_RECEIVED',
   OID4VCI_NOTIFICATION_PROCESSED = 'OID4VCI_NOTIFICATION_PROCESSED',
+  OID4VCI_NOTIFICATION_ERROR = 'OID4VCI_NOTIFICATION_ERROR',
 }
 export type LogEvents = 'oid4vciLog';
 export const EVENTS = EventManager.instance();

@@ -1,5 +1,5 @@
 import { AssertedUniformCredentialOffer } from './CredentialIssuance.types';
-import { CredentialDataSupplierInput } from './Generic.types';
+import { CredentialDataSupplierInput, NotificationRequest } from './Generic.types'
 
 export interface StateType {
   createdAt: number;
@@ -14,6 +14,7 @@ export interface CredentialOfferSession extends StateType {
   error?: string;
   lastUpdatedAt: number;
   notification_id: string;
+  notification?: NotificationRequest;
   issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   authorizationCode?: string
@@ -26,6 +27,9 @@ export enum IssueStatus {
   ACCESS_TOKEN_CREATED = 'ACCESS_TOKEN_CREATED', // Optional state, given the token endpoint could also be on a separate AS
   CREDENTIAL_REQUEST_RECEIVED = 'CREDENTIAL_REQUEST_RECEIVED', // Credential request received. Next state would either be error or issued
   CREDENTIAL_ISSUED = 'CREDENTIAL_ISSUED',
+  NOTIFICATION_CREDENTIAL_ACCEPTED = 'NOTIFICATION_CREDENTIAL_ACCEPTED',
+  NOTIFICATION_CREDENTIAL_DELETED = 'NOTIFICATION_CREDENTIAL_DELETED',
+  NOTIFICATION_CREDENTIAL_FAILURE = 'NOTIFICATION_CREDENTIAL_FAILURE',
   ERROR = 'ERROR',
 }
 

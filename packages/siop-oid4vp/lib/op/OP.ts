@@ -247,6 +247,7 @@ export class OP {
             response_type: responseType,
           },
           authResponse: response,
+          state: requestObjectPayload.state
         })
         void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
         return jarmResponse

@@ -417,7 +417,7 @@ export interface NotificationRequest {
 
 export type NotificationError = 'invalid_notification_id' | 'invalid_notification_request';
 
-export type NotificationResult = {
+export type NotificationResponseResult = {
   error: boolean;
   response?: NotificationErrorResponse;
 };
