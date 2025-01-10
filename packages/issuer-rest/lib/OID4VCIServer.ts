@@ -166,16 +166,16 @@ export class OID4VCIServer<DIDDoc extends object> {
   private assertAccessTokenHandling(tokenEndpointOpts?: ITokenEndpointOpts) {
     const authServer = this.issuer.issuerMetadata.authorization_servers
     if (this.isTokenEndpointDisabled(tokenEndpointOpts)) {
-      if (!authServer) {
+      if (!authServer || authServer.length === 0) {
         throw Error(
           `No Authorization Server (AS) is defined in the issuer metadata and the token endpoint is disabled. An AS or token endpoints needs to be present`,
         )
       }
       console.log('Token endpoint disabled by configuration')
     } else {
-      if (authServer) {
+      if (authServer && authServer.some(as => as !== this.issuer.issuerMetadata.credential_issuer)) {
         throw Error(
-          `A Authorization Server (AS) was already enabled in the issuer metadata (${authServer}). Cannot both have an AS and enable the token endpoint at the same time `,
+          `An external Authorization Server (AS) was already enabled in the issuer metadata (${authServer}). Cannot both have an AS and enable the token endpoint at the same time `,
         )
       }
     }
