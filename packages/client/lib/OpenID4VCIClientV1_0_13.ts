@@ -279,7 +279,7 @@ export class OpenID4VCIClientV1_0_13 {
   public async acquireAccessToken(
     opts?: Omit<AccessTokenRequestOpts, 'credentialOffer' | 'credentialIssuer' | 'metadata' | 'additionalParams'> & {
       clientId?: string;
-      authorizationResponse?: string | AuthorizationResponse; // Pass in an auth response, either as URI/redirect, or object
+      authorizationResponse?: string | AuthorizationResponse | AuthorizationChallengeCodeResponse; // Pass in an auth response, either as URI/redirect, or object
       additionalRequestParams?: Record<string, any>;
     },
   ): Promise<AccessTokenResponse & { params?: DPoPResponseParams }> {
