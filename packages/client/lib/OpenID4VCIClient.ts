@@ -3,7 +3,7 @@ import {
   AccessTokenRequestOpts,
   AccessTokenResponse,
   Alg,
-  AuthorizationChallengeCodeResponse,
+  AuthorizationChallengeCodeResponse, AuthorizationChallengeErrorResponse,
   AuthorizationChallengeRequestOpts,
   AuthorizationRequestOpts,
   AuthorizationResponse,
@@ -33,7 +33,6 @@ import {
   NotificationResponseResult,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
-  OpenIDResponse,
   PKCEOpts,
   ProofOfPossessionCallbacks,
   toAuthorizationResponsePayload
@@ -276,17 +275,22 @@ export class OpenID4VCIClient {
     this._state.pkce = generateMissingPKCEOpts({ ...this._state.pkce, ...pkce });
   }
 
-  public async acquireAuthorizationChallengeCode(opts?: AuthorizationChallengeRequestOpts): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse>> { //AuthorizationChallengeErrorResponse
+  public async acquireAuthorizationChallengeCode(opts?: AuthorizationChallengeRequestOpts): Promise<AuthorizationChallengeCodeResponse> {
     const response = await acquireAuthorizationChallengeAuthCode({
       clientId: this._state.clientId ?? this._state.authorizationRequestOpts?.clientId,
       ...opts
     })
 
-    if (!this._state.authorizationCodeResponse) {
-      this._state.authorizationCodeResponse = response.successBody;
+    if (response.errorBody) {
+      debug(`Authorization code error:\r\n${JSON.stringify(response.errorBody)}`);
+      const error = response.errorBody as AuthorizationChallengeErrorResponse
+      return Promise.reject(error)
+    } else if (!response.successBody) {
+      debug(`Authorization code error. No success body`);
+      return Promise.reject(Error(`Retrieving an authorization code token from ${this._state.endpointMetadata?.authorization_challenge_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`))
     }
 
-    return response
+    return { ...response.successBody }
   }
 
   public async acquireAccessToken(
