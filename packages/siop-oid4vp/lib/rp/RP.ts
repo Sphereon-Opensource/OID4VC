@@ -437,7 +437,8 @@ export class RP {
       ...(opts?.presentationDefinitions && !opts?.dcqlQuery && {
         presentationDefinitions: this._verifyResponseOptions.presentationDefinitions ?? opts?.presentationDefinitions
       }),
-      ...(opts?.dcqlQuery && !opts?.presentationDefinitions && {
+      ...(opts?.dcqlQuery /*&& !opts?.presentationDefinitions */&& { // FIXME presentationDefinitions will be there until we fix the OID4VC-DEMO, it wants a PD purpose field for the screens
+
         dcqlQuery: this._verifyResponseOptions.dcqlQuery ?? opts?.dcqlQuery
       })
     }
