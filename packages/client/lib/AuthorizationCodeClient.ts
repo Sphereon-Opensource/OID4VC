@@ -1,9 +1,11 @@
 import {
   AuthorizationChallengeCodeResponse,
-  AuthorizationChallengeErrorResponse, AuthorizationChallengeRequestOpts,
+  AuthorizationChallengeErrorResponse,
+  AuthorizationChallengeRequestOpts,
   AuthorizationDetails,
   AuthorizationRequestOpts,
-  CodeChallengeMethod, CommonAuthorizationChallengeRequest,
+  CodeChallengeMethod,
+  CommonAuthorizationChallengeRequest,
   convertJsonToURI,
   CreateRequestObjectMode,
   CredentialConfigurationSupportedV1_0_13,
