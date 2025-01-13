@@ -23,7 +23,7 @@
     "node": ">=18"
   },
   "resolutions": {
-    "@sphereon/ssi-types": "0.32.1-feature.VDX.341.27",
+    "@sphereon/ssi-types": "0.32.1-feature.VDX.341.53",
     "dcql": "0.2.11",
     "node-fetch": "2.6.12"
   },

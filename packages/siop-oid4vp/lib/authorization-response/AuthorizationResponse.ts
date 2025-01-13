@@ -229,7 +229,7 @@ export class AuthorizationResponse {
   }
 
   public async getMergedProperty<T>(key: string, opts?: { consistencyCheck?: boolean; hasher?: Hasher }): Promise<T | undefined> {
-    const merged = await this.mergedPayloads(opts)
+    const merged = await this.mergedPayloads(opts) // FIXME this is really bad, expensive...
     return merged[key] as T
   }
 
