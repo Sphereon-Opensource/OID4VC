@@ -397,7 +397,8 @@ export class PresentationExchange {
           try {
             verificationResult = await verifyPresentationCallback(presentation as W3CVerifiablePresentation, evaluationResults.value!)
           } catch (error: unknown) {
-            throw new Error(SIOPErrors.VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID)
+            const errorMessage = error instanceof Error ? error.message : String(error)
+            throw new Error(`${SIOPErrors.VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID}: ${errorMessage}`)
           }
 
           if (!verificationResult.verified) {
