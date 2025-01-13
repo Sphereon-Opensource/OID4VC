@@ -6,7 +6,7 @@ settings:
 
 overrides:
   '@sphereon/ssi-types': 0.32.1-feature.VDX.341.53
-  dcql: 0.2.11
+  dcql: 0.2.19
   node-fetch: 2.6.12
 
 importers:
@@ -460,8 +460,8 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0(encoding@0.1.13)
       dcql:
-        specifier: 0.2.11
-        version: 0.2.11(typescript@5.4.5)
+        specifier: 0.2.19
+        version: 0.2.19(typescript@5.4.5)
       debug:
         specifier: ^4.3.5
         version: 4.3.7
@@ -523,6 +523,15 @@ importers:
       '@digitalcredentials/vc':
         specifier: ^6.0.0
         version: 6.0.1(encoding@0.1.13)(expo@48.0.21(@babel/core@7.26.0)(encoding@0.1.13))(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1))(web-streams-polyfill@3.3.3)
+      '@sd-jwt/crypto-nodejs':
+        specifier: 0.7.2
+        version: 0.7.2
+      '@sd-jwt/sd-jwt-vc':
+        specifier: 0.7.2
+        version: 0.7.2
+      '@sd-jwt/types':
+        specifier: 0.7.2
+        version: 0.7.2
       '@sphereon/did-uni-client':
         specifier: ^0.6.2
         version: 0.6.3(encoding@0.1.13)
@@ -2451,12 +2460,28 @@ packages:
   '@scure/base@1.2.1':
     resolution: {integrity: sha512-DGmGtC8Tt63J5GfHgfl5CuAXh96VF/LD8K9Hr/Gv0J2lAoRGlPOMpqMpMbCTOoOJMZCk2Xt+DskdDyn6dEFdzQ==}
 
+  '@sd-jwt/core@0.7.2':
+    resolution: {integrity: sha512-vix1GplUFc1A9H42r/yXkg7cKYthggyqZEwlFdsBbn4xdZNE+AHVF4N7kPa1pPxipwN3UIHd4XnQ5MJV15mhsQ==}
+    engines: {node: '>=18'}
+
+  '@sd-jwt/crypto-nodejs@0.7.2':
+    resolution: {integrity: sha512-7DHy1WBHwvXseiX+U7XA6jX4dX4Ins3Nxd12JhBSm+FJfIwU97FU/H0KlF6lLyi4a4nbY/O6U9wJjYI1PxA9sQ==}
+    engines: {node: '>=18'}
+
   '@sd-jwt/decode@0.7.2':
     resolution: {integrity: sha512-dan2LSvK63SKwb62031G4r7TE4TaiI0EK1KbPXqS+LCXNkNDUHqhtYp9uOpj+grXceCsMtMa2f8VnUfsjmwHHg==}
     engines: {node: '>=18'}
 
+  '@sd-jwt/jwt-status-list@0.7.2':
+    resolution: {integrity: sha512-o/Mg/Zg21poFsPXuxtPD9sdXq2b/0L+rb9gxU2k1rp1aT+DWmqD0k8v0Ttr2tlMc8l1xXQNA8FLXbL1AdLRmbQ==}
+    engines: {node: '>=18'}
+
   '@sd-jwt/present@0.7.2':
     resolution: {integrity: sha512-mQV85u2+mLLy2VZ9Wx2zpaB6yTDnbhCfWkP7eeCrzJQHBKAAHko8GrylEFmLKewFIcajS/r4lT/zHOsCkp5pZw==}
+    engines: {node: '>=18'}
+
+  '@sd-jwt/sd-jwt-vc@0.7.2':
+    resolution: {integrity: sha512-rryYmnoJHRSNqHcrs0Atta+bfJzU2yT7mYumR2D4lTfxJKWZd0OHHFq57uZSEm/wXPI6uytUJXYbEboCqLUAtw==}
     engines: {node: '>=18'}
 
   '@sd-jwt/types@0.7.2':
@@ -2540,6 +2565,7 @@ packages:
 
   '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.26':
     resolution: {integrity: sha512-QXJ6R8ENiZV2rPMbn06cw5JKwqUYN1kzVRbYfONqE1PEXx1noQ4md7uxr2zSczi0ubKkNcbyYDNtIMTZIhGzmQ==}
+    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.2':
     resolution: {integrity: sha512-foFxfLkRwcn/MOp/eht46Q7wsvpQGlO7aowowIIb5Tz9u97kYZ2kz6K2h2ODxWuv5CRA7Q0MY8XUBGE2lfOhOQ==}
@@ -4007,8 +4033,8 @@ packages:
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
 
-  dcql@0.2.11:
-    resolution: {integrity: sha512-hR8MuSx49b7JPoZztcFMSKEHc6iEE4l/Zs6aUsvMCWVa3qFWpuJRiJEp5Rh2+UkCAhsce94fbDpMdBTcS9zn7g==}
+  dcql@0.2.19:
+    resolution: {integrity: sha512-/EvT8tArlg8zFsTQbRn6PijfeQ3nUwuEeCRDpptWcYqE8Wyt8J9Sb44gMPFzVCoIEb3R0M7Hl+XWkUMobC8jXQ==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -8369,16 +8395,16 @@ packages:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
 
-  valibot@0.37.0:
-    resolution: {integrity: sha512-FQz52I8RXgFgOHym3XHYSREbNtkgSjF9prvMFH1nBsRyfL6SfCzoT1GuSDTlbsuPubM7/6Kbw0ZMQb8A+V+VsQ==}
+  valibot@0.42.1:
+    resolution: {integrity: sha512-3keXV29Ar5b//Hqi4MbSdV7lfVp6zuYLZuA9V1PvQUsXqogr+u5lvLPLk3A4f74VUXDnf/JfWMN6sB+koJ/FFw==}
     peerDependencies:
       typescript: '>=5'
     peerDependenciesMeta:
       typescript:
         optional: true
 
-  valibot@0.42.1:
-    resolution: {integrity: sha512-3keXV29Ar5b//Hqi4MbSdV7lfVp6zuYLZuA9V1PvQUsXqogr+u5lvLPLk3A4f74VUXDnf/JfWMN6sB+koJ/FFw==}
+  valibot@1.0.0-beta.8:
+    resolution: {integrity: sha512-OPAwJZtowb0j91b+bd77+ny7D1VVzsCzD7Jl9waLUlMprTsfI9Y3HHbW3hAQD7wKDKHsmGEesuiYWaYvcZL2wg==}
     peerDependencies:
       typescript: '>=5'
     peerDependenciesMeta:
@@ -11773,15 +11799,36 @@ snapshots:
 
   '@scure/base@1.2.1': {}
 
+  '@sd-jwt/core@0.7.2':
+    dependencies:
+      '@sd-jwt/decode': 0.7.2
+      '@sd-jwt/present': 0.7.2
+      '@sd-jwt/types': 0.7.2
+      '@sd-jwt/utils': 0.7.2
+
+  '@sd-jwt/crypto-nodejs@0.7.2': {}
+
   '@sd-jwt/decode@0.7.2':
     dependencies:
       '@sd-jwt/types': 0.7.2
       '@sd-jwt/utils': 0.7.2
 
+  '@sd-jwt/jwt-status-list@0.7.2':
+    dependencies:
+      '@sd-jwt/types': 0.7.2
+      base64url: 3.0.1
+      pako: 2.1.0
+
   '@sd-jwt/present@0.7.2':
     dependencies:
       '@sd-jwt/decode': 0.7.2
       '@sd-jwt/types': 0.7.2
+      '@sd-jwt/utils': 0.7.2
+
+  '@sd-jwt/sd-jwt-vc@0.7.2':
+    dependencies:
+      '@sd-jwt/core': 0.7.2
+      '@sd-jwt/jwt-status-list': 0.7.2
       '@sd-jwt/utils': 0.7.2
 
   '@sd-jwt/types@0.7.2': {}
@@ -13900,9 +13947,9 @@ snapshots:
 
   dayjs@1.11.13: {}
 
-  dcql@0.2.11(typescript@5.4.5):
+  dcql@0.2.19(typescript@5.4.5):
     dependencies:
-      valibot: 0.37.0(typescript@5.4.5)
+      valibot: 1.0.0-beta.8(typescript@5.4.5)
     transitivePeerDependencies:
       - typescript
 
@@ -19566,13 +19613,13 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
 
-  valibot@0.37.0(typescript@5.4.5):
-    optionalDependencies:
-      typescript: 5.4.5
-
   valibot@0.42.1(typescript@5.5.3):
     optionalDependencies:
       typescript: 5.5.3
+
+  valibot@1.0.0-beta.8(typescript@5.4.5):
+    optionalDependencies:
+      typescript: 5.4.5
 
   valid-url@1.0.9: {}
 
