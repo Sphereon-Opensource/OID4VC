@@ -268,7 +268,7 @@ export class OpenID4VCIClientV1_0_13 {
     this._state.pkce = generateMissingPKCEOpts({ ...this._state.pkce, ...pkce });
   }
 
-  public async acquireAuthorizationChallengeCode(opts: AuthorizationChallengeRequestOpts): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse | AuthorizationChallengeErrorResponse>> {
+  public async acquireAuthorizationChallengeCode(opts?: AuthorizationChallengeRequestOpts): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse | AuthorizationChallengeErrorResponse>> {
     const response = await acquireAuthorizationChallengeAuthCode({
       clientId: this._state.clientId ?? this._state.authorizationRequestOpts?.clientId,
       ...opts
