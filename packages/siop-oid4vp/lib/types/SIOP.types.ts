@@ -100,7 +100,7 @@ export interface AuthorizationRequestPayloadVD12OID4VPD20
   presentation_definition_uri?: string
   client_id_scheme?: ClientIdSchemeOID4VPD20
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
-  dcql_query?: DcqlQuery
+  dcql_query?: string
 }
 
 export type ClientIdSchemeOID4VPD18 = 'pre-registered' | 'redirect_uri' | 'entity_id' | 'did'

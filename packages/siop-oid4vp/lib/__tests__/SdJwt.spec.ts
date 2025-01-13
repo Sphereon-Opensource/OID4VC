@@ -2,7 +2,6 @@ import { defaultHasher, SigningAlgo } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition } from '@sphereon/pex'
 import { decodeSdJwtVc, OriginalVerifiableCredential } from '@sphereon/ssi-types'
 import { DcqlCredential, DcqlQuery } from 'dcql'
-import { Json } from 'dcql/dist/src/u-dcql'
 
 import {
   OP,
@@ -34,6 +33,11 @@ import {
 } from './data/mockedData'
 
 jest.setTimeout(30000)
+
+type Json = string | number | boolean | null | { // Not exported from dcql
+  [key: string]: Json;
+} | Json[];
+
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 
@@ -371,7 +375,7 @@ describe.skip('RP and OP interaction should', () => {
       .withResponseType([ResponseType.ID_TOKEN, ResponseType.VP_TOKEN])
       .withResponseMode(ResponseMode.DIRECT_POST)
       .withRedirectUri(EXAMPLE_REDIRECT_URL)
-      .withDcqlQuery(JSON.stringify(sdJwtVcQuery), [PropertyTarget.REQUEST_OBJECT])
+      .withDcqlQuery(sdJwtVcQuery, [PropertyTarget.REQUEST_OBJECT])
       .withPresentationVerification(presentationVerificationCallback)
       .withRevocationVerification(RevocationVerification.NEVER)
       .withRequestBy(PassBy.VALUE)

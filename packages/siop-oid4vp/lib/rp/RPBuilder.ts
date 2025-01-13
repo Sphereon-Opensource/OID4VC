@@ -2,6 +2,7 @@ import { EventEmitter } from 'events'
 
 import { IPresentationDefinition } from '@sphereon/pex'
 import { Hasher } from '@sphereon/ssi-types'
+import { DcqlQuery } from 'dcql'
 
 import { PropertyTarget, PropertyTargets } from '../authorization-request'
 import { PresentationVerificationCallback } from '../authorization-response'
@@ -23,7 +24,7 @@ import {
 import { assignIfAuth, assignIfRequestObject, isTarget, isTargetOrNoTargets } from './Opts'
 import { RP } from './RP'
 import { IRPSessionManager } from './types'
-import { DcqlQuery } from 'dcql'
+
 
 export class RPBuilder {
   requestObjectBy: ObjectBy
