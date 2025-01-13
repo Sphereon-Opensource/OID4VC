@@ -2,7 +2,7 @@ import { parseJWT } from '@sphereon/oid4vc-common'
 import { DcqlQuery } from 'dcql'
 
 import { PresentationDefinitionWithLocation } from '../authorization-response'
-import { findValidDcqlQuery } from '../authorization-response/Dcql'
+import { findValidDcqlQuery } from '../authorization-response'
 import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
@@ -290,7 +290,7 @@ export class AuthorizationRequest {
     return await PresentationExchange.findValidPresentationDefinitions(await this.mergedPayloads(), version)
   }
 
-  public async getDcqlQuery(): Promise<DcqlQuery> {
+  public async getDcqlQuery(): Promise<DcqlQuery | undefined> {
     return await findValidDcqlQuery(await this.mergedPayloads())
   }
 }

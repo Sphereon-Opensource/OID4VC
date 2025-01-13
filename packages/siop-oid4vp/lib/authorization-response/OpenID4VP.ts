@@ -1,4 +1,3 @@
-import { parseJWT } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition, PEX, PresentationSubmissionLocation } from '@sphereon/pex'
 import { Format } from '@sphereon/pex-models'
 import {
@@ -10,7 +9,7 @@ import {
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
-import { DcqlPresentationRecord, DcqlQuery } from 'dcql'
+import { DcqlPresentation, DcqlQuery } from 'dcql'
 
 import { AuthorizationRequest } from '../authorization-request'
 import { verifyRevocation } from '../helpers'
@@ -26,7 +25,7 @@ import {
 } from '../types'
 
 import { AuthorizationResponse } from './AuthorizationResponse'
-import { assertValidDcqlPresentationRecord } from './Dcql'
+import { assertValidDcqlPresentationResult } from './Dcql'
 import { PresentationExchange } from './PresentationExchange'
 import {
   AuthorizationResponseOpts,
@@ -43,11 +42,7 @@ export const extractNonceFromWrappedVerifiablePresentation = (wrappedVp: Wrapped
     // TODO: replace this once `kbJwt.payload` is available on the decoded sd-jwt (pr in ssi-sdk)
     // If it doesn't end with ~, it contains a kbJwt
     if (!wrappedVp.presentation.compactSdJwtVc.endsWith('~')) {
-      const kbJwt = wrappedVp.presentation.compactSdJwtVc.split('~').pop()
-
-      const { payload } = parseJWT(kbJwt)
-
-      return payload.nonce
+      return wrappedVp.presentation.kbJwt.payload.nonce
     }
 
     // No kb-jwt means no nonce (error will be handled later)
@@ -72,7 +67,7 @@ export const extractNonceFromWrappedVerifiablePresentation = (wrappedVp: Wrapped
 export const verifyPresentations = async (
   authorizationResponse: AuthorizationResponse,
   verifyOpts: VerifyAuthorizationResponseOpts,
-): Promise<VerifiedOpenID4VPSubmission | VerifiedOpenID4VPSubmissionDcql | null> => {
+): Promise<{ presentationExchange?: VerifiedOpenID4VPSubmission; dcql?: VerifiedOpenID4VPSubmissionDcql }> => {
   let idPayload: IDTokenPayload | undefined
   if (authorizationResponse.idToken) {
     idPayload = await authorizationResponse.idToken.payload()
@@ -87,10 +82,13 @@ export const verifyPresentations = async (
 
   let presentationSubmission: PresentationSubmission | undefined
 
+  let dcqlPresentation: { [credentialQueryId: string]: WrappedVerifiablePresentation } | undefined
+
   let dcqlQuery = verifyOpts.dcqlQuery ?? authorizationResponse?.authorizationRequest?.payload.dcql_query
   if (dcqlQuery) {
     dcqlQuery = DcqlQuery.parse(dcqlQuery)
-    wrappedPresentations = extractPresentationsFromDcqlVpToken(authorizationResponse.payload.vp_token as string, { hasher: verifyOpts.hasher })
+    dcqlPresentation = extractDcqlPresentationFromDcqlVpToken(authorizationResponse.payload.vp_token as string, { hasher: verifyOpts.hasher })
+    wrappedPresentations = Object.values(dcqlPresentation)
 
     const verifiedPresentations = await Promise.all(
       wrappedPresentations.map((presentation) =>
@@ -98,7 +96,7 @@ export const verifyPresentations = async (
       ),
     )
 
-    assertValidDcqlPresentationRecord(authorizationResponse.payload.vp_token as string, dcqlQuery, { hasher: verifyOpts.hasher })
+    assertValidDcqlPresentationResult(authorizationResponse.payload.vp_token as string, dcqlQuery, { hasher: verifyOpts.hasher })
 
     if (verifiedPresentations.some((verified) => !verified)) {
       const message = verifiedPresentations
@@ -110,7 +108,7 @@ export const verifyPresentations = async (
     }
   } else {
     const presentations = authorizationResponse.payload.vp_token
-      ? await extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher })
+      ? extractPresentationsFromVpToken(authorizationResponse.payload.vp_token, { hasher: verifyOpts.hasher })
       : []
     wrappedPresentations = Array.isArray(presentations) ? presentations : [presentations]
 
@@ -154,31 +152,31 @@ export const verifyPresentations = async (
     }
   }
   if (presentationDefinitions) {
-    return { nonce, presentations: wrappedPresentations, presentationDefinitions, submissionData: presentationSubmission }
+    return { presentationExchange: { nonce, presentations: wrappedPresentations, presentationDefinitions, submissionData: presentationSubmission } }
   } else {
-    return { nonce, presentations: wrappedPresentations, dcqlQuery }
+    return { dcql: { nonce, presentation: dcqlPresentation, dcqlQuery } }
   }
 }
 
-export const extractPresentationRecordFromDcqlVpToken = (
-  vpToken: DcqlPresentationRecord.Input | string,
+export const extractDcqlPresentationFromDcqlVpToken = (
+  vpToken: DcqlPresentation.Input | string,
   opts?: { hasher?: Hasher },
-): Record<string, WrappedVerifiablePresentation> => {
-  const presentationRecord = Object.fromEntries(
-    Object.entries(DcqlPresentationRecord.parse(vpToken)).map(([credentialQueryId, vp]) => [
+): { [credentialQueryId: string]: WrappedVerifiablePresentation } => {
+  const dcqlPresentation = Object.fromEntries(
+    Object.entries(DcqlPresentation.parse(vpToken)).map(([credentialQueryId, vp]) => [
       credentialQueryId,
       CredentialMapper.toWrappedVerifiablePresentation(vp as W3CVerifiablePresentation | CompactSdJwtVc | string, { hasher: opts.hasher }),
     ]),
   )
 
-  return presentationRecord
+  return dcqlPresentation
 }
 
 export const extractPresentationsFromDcqlVpToken = (
-  vpToken: DcqlPresentationRecord.Input | string,
+  vpToken: DcqlPresentation.Input | string,
   opts?: { hasher?: Hasher },
 ): WrappedVerifiablePresentation[] => {
-  return Object.values(extractPresentationRecordFromDcqlVpToken(vpToken, opts))
+  return Object.values(extractDcqlPresentationFromDcqlVpToken(vpToken, opts))
 }
 
 export const extractPresentationsFromVpToken = (

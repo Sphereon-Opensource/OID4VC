@@ -1,12 +1,12 @@
 import { CredentialMapper, Hasher, WrappedVerifiablePresentation } from '@sphereon/ssi-types'
-import { DcqlPresentationRecord } from 'dcql'
+import { DcqlPresentation } from 'dcql'
 
 import { AuthorizationRequest, VerifyAuthorizationRequestOpts } from '../authorization-request'
 import { assertValidVerifyAuthorizationRequestOpts } from '../authorization-request/Opts'
 import { IDToken } from '../id-token'
 import { AuthorizationResponsePayload, ResponseType, SIOPErrors, VerifiedAuthorizationRequest, VerifiedAuthorizationResponse } from '../types'
 
-import { assertValidDcqlPresentationRecord } from './Dcql'
+import { assertValidDcqlPresentationResult } from './Dcql'
 import {
   assertValidVerifiablePresentations,
   extractNonceFromWrappedVerifiablePresentation,
@@ -126,32 +126,30 @@ export class AuthorizationResponse {
       authorizationRequest,
     })
 
-    if (hasVpToken) {
-      if (responseOpts.presentationExchange) {
-        const wrappedPresentations = response.payload.vp_token
-          ? await extractPresentationsFromVpToken(response.payload.vp_token, {
-              hasher: verifyOpts.hasher,
-            })
-          : []
+    if (!hasVpToken) return response
 
-        await assertValidVerifiablePresentations({
-          presentationDefinitions,
-          presentations: wrappedPresentations,
-          verificationCallback: verifyOpts.verification.presentationVerificationCallback,
-          opts: {
-            ...responseOpts.presentationExchange,
+    if (responseOpts.presentationExchange) {
+      const wrappedPresentations = response.payload.vp_token
+        ? extractPresentationsFromVpToken(response.payload.vp_token, {
             hasher: verifyOpts.hasher,
-          },
-        })
-      } else {
-        const dcqlQuery = verifiedAuthorizationRequest.dcqlQuery
-        if (!dcqlQuery) {
-          throw new Error('vp_token is present, but no presentation definitions or dcql query provided')
-        }
-        assertValidDcqlPresentationRecord(responseOpts.dcqlQuery.encodedPresentationRecord as DcqlPresentationRecord, dcqlQuery, {
+          })
+        : []
+
+      await assertValidVerifiablePresentations({
+        presentationDefinitions,
+        presentations: wrappedPresentations,
+        verificationCallback: verifyOpts.verification.presentationVerificationCallback,
+        opts: {
+          ...responseOpts.presentationExchange,
           hasher: verifyOpts.hasher,
-        })
-      }
+        },
+      })
+    } else if (verifiedAuthorizationRequest.dcqlQuery) {
+      assertValidDcqlPresentationResult(responseOpts.dcqlQuery.dcqlPresentation as DcqlPresentation, verifiedAuthorizationRequest.dcqlQuery, {
+        hasher: verifyOpts.hasher,
+      })
+    } else {
+      throw new Error('vp_token is present, but no presentation definitions or dcql query provided')
     }
 
     return response
@@ -169,19 +167,19 @@ export class AuthorizationResponse {
 
     const verifiedIdToken = await this.idToken?.verify(verifyOpts)
     if (this.payload.vp_token && !verifyOpts.presentationDefinitions && !verifyOpts.dcqlQuery) {
-      throw Promise.reject(Error('vp_token is present, but no presentation definitions or dcql query provided'))
+      throw new Error('vp_token is present, but no presentation definitions or dcql query provided')
     }
 
     const emptyPresentationDefinitions = Array.isArray(verifyOpts.presentationDefinitions) && verifyOpts.presentationDefinitions.length === 0
     if (!this.payload.vp_token && ((verifyOpts.presentationDefinitions && !emptyPresentationDefinitions) || verifyOpts.dcqlQuery)) {
-      throw Promise.reject(Error('Presentation definitions or dcql query provided, but no vp_token present'))
+      throw new Error('Presentation definitions or dcql query provided, but no vp_token present')
     }
 
     const oid4vp = this.payload.vp_token ? await verifyPresentations(this, verifyOpts) : undefined
 
     // Gather all nonces
     const allNonces = new Set<string>()
-    if (oid4vp && oid4vp.nonce) allNonces.add(oid4vp.nonce)
+    if (oid4vp && (oid4vp.dcql?.nonce || oid4vp.presentationExchange?.nonce)) allNonces.add(oid4vp.dcql?.nonce ?? oid4vp.presentationExchange?.nonce)
     if (verifiedIdToken) allNonces.add(verifiedIdToken.payload.nonce)
     if (merged.nonce) allNonces.add(merged.nonce)
 
@@ -207,8 +205,8 @@ export class AuthorizationResponse {
       state,
       correlationId: verifyOpts.correlationId,
       ...(this.idToken && { idToken: verifiedIdToken }),
-      ...(oid4vp && 'presentationDefinitions' in oid4vp && { oid4vpSubmission: oid4vp }),
-      ...(oid4vp && 'dcqlQuery' in oid4vp && { oid4vpSubmissionDcql: oid4vp }),
+      ...(oid4vp?.presentationExchange && { oid4vpSubmission: oid4vp.presentationExchange }),
+      ...(oid4vp?.dcql && { oid4vpSubmissionDcql: oid4vp.dcql }),
     }
   }
 

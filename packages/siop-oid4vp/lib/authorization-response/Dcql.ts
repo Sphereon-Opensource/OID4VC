@@ -1,11 +1,10 @@
 import { Hasher } from '@sphereon/ssi-types'
-import { DcqlMdocRepresentation, DcqlPresentationRecord, DcqlQuery, DcqlSdJwtVcRepresentation } from 'dcql'
-import { DcqlPresentationQueryResult } from 'dcql'
+import { DcqlMdocCredential, DcqlPresentation, DcqlPresentationResult, DcqlQuery, DcqlSdJwtVcCredential } from 'dcql'
 
 import { extractDataFromPath } from '../helpers'
 import { AuthorizationRequestPayload, SIOPErrors } from '../types'
 
-import { extractPresentationRecordFromDcqlVpToken } from './OpenID4VP'
+import { extractDcqlPresentationFromDcqlVpToken } from './OpenID4VP'
 
 /**
  * Finds a valid DcqlQuery inside the given AuthenticationRequestPayload
@@ -38,22 +37,26 @@ export const findValidDcqlQuery = async (authorizationRequestPayload: Authorizat
   return DcqlQuery.parse(JSON.parse(dcqlQuery[0]))
 }
 
-export const getDcqlPresentationResult = (record: DcqlPresentationRecord | string, dcqlQuery: DcqlQuery, opts: { hasher?: Hasher }) => {
-  const wrappedPresentations = Object.values(extractPresentationRecordFromDcqlVpToken(record, opts))
-  const credentials = wrappedPresentations.map((p) => {
-    if (p.format === 'mso_mdoc') {
-      return { docType: p.vcs[0].credential.toJson().docType, namespaces: p.vcs[0].decoded } satisfies DcqlMdocRepresentation
-    } else if (p.format === 'vc+sd-jwt') {
-      return { vct: p.vcs[0].decoded.vct, claims: p.vcs[0].decoded } satisfies DcqlSdJwtVcRepresentation
-    } else {
-      throw new Error('DcqlPresentation atm only supports mso_mdoc and vc+sd-jwt')
-    }
-  })
+export const getDcqlPresentationResult = (record: DcqlPresentation | string, dcqlQuery: DcqlQuery, opts: { hasher?: Hasher }) => {
+  const dcqlPresentation = Object.fromEntries(
+    Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
+      if (p.format === 'mso_mdoc') {
+        return [
+          queryId,
+          { credential_format: 'mso_mdoc', doctype: p.vcs[0].credential.toJson().docType, namespaces: p.vcs[0].decoded } satisfies DcqlMdocCredential,
+        ]
+      } else if (p.format === 'vc+sd-jwt') {
+        return [queryId, { credential_format: 'vc+sd-jwt', vct: p.vcs[0].decoded.vct, claims: p.vcs[0].decoded } satisfies DcqlSdJwtVcCredential]
+      } else {
+        throw new Error('DcqlPresentation atm only supports mso_mdoc and vc+sd-jwt')
+      }
+    }),
+  )
 
-  return DcqlPresentationQueryResult.query(credentials, { dcqlQuery })
+  return DcqlPresentationResult.fromDcqlPresentation(dcqlPresentation, { dcqlQuery })
 }
 
-export const assertValidDcqlPresentationRecord = async (record: DcqlPresentationRecord | string, dcqlQuery: DcqlQuery, opts: { hasher?: Hasher }) => {
+export const assertValidDcqlPresentationResult = async (record: DcqlPresentation | string, dcqlQuery: DcqlQuery, opts: { hasher?: Hasher }) => {
   const result = getDcqlPresentationResult(record, dcqlQuery, opts)
-  return DcqlPresentationQueryResult.validate(result)
+  return DcqlPresentationResult.validate(result)
 }
