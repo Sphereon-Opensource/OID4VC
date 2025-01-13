@@ -61,7 +61,7 @@ export interface OpenID4VCIClientStateV1_0_13 {
   accessTokenResponse?: AccessTokenResponse;
   dpopResponseParams?: DPoPResponseParams;
   authorizationRequestOpts?: AuthorizationRequestOpts;
-  authorizationCodeResponse?: AuthorizationResponse;
+  authorizationCodeResponse?: AuthorizationResponse | AuthorizationChallengeCodeResponse;
   pkce: PKCEOpts;
   accessToken?: string;
   authorizationURL?: string;
@@ -290,7 +290,7 @@ export class OpenID4VCIClientV1_0_13 {
     } else if (opts?.code) {
       this._state.authorizationCodeResponse = { code: opts.code };
     }
-    const code = this._state.authorizationCodeResponse?.code;
+    const code = (this._state.authorizationCodeResponse as AuthorizationResponse)?.code ?? (this._state.authorizationCodeResponse as AuthorizationChallengeCodeResponse)?.authorization_code;
 
     if (opts?.codeVerifier) {
       this._state.pkce.codeVerifier = opts.codeVerifier;

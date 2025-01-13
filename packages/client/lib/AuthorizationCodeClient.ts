@@ -1,6 +1,5 @@
 import {
   AuthorizationChallengeCodeResponse,
-  AuthorizationChallengeErrorResponse,
   AuthorizationChallengeRequestOpts,
   AuthorizationDetails,
   AuthorizationRequestOpts,
@@ -278,13 +277,13 @@ const handleLocations = (endpointMetadata: EndpointMetadataResultV1_0_13, author
   return authorizationDetails;
 };
 
-export const acquireAuthorizationChallengeAuthCode = async (opts: AuthorizationChallengeRequestOpts): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse | AuthorizationChallengeErrorResponse>> => {
+export const acquireAuthorizationChallengeAuthCode = async (opts: AuthorizationChallengeRequestOpts): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse>> => { //AuthorizationChallengeErrorResponse
   return await acquireAuthorizationChallengeAuthCodeUsingRequest({
     authorizationChallengeRequest: await createAuthorizationChallengeRequest(opts)
   });
 }
 
-export const acquireAuthorizationChallengeAuthCodeUsingRequest = async (opts: { authorizationChallengeRequest: CommonAuthorizationChallengeRequest }): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse | AuthorizationChallengeErrorResponse>> => {
+export const acquireAuthorizationChallengeAuthCodeUsingRequest = async (opts: { authorizationChallengeRequest: CommonAuthorizationChallengeRequest }): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse>> => { //AuthorizationChallengeErrorResponse
   const { authorizationChallengeRequest } = opts
   // TODO validate request
   const authorizationChallengeCodeUrl = '' // TODO
@@ -326,7 +325,7 @@ export const sendAuthorizationChallengeRequest = async (
   authorizationChallengeCodeUrl: string,
   authorizationChallengeRequest: CommonAuthorizationChallengeRequest,
   opts?: { headers?: Record<string, string> }
-): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse | AuthorizationChallengeErrorResponse>> => {
+): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse>> => { //AuthorizationChallengeErrorResponse
   return await formPost(authorizationChallengeCodeUrl, convertJsonToURI(authorizationChallengeRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }), { // TODO check encoding
     customHeaders: opts?.headers ? opts.headers : undefined,
   });

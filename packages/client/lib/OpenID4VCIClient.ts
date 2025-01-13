@@ -4,7 +4,6 @@ import {
   AccessTokenResponse,
   Alg,
   AuthorizationChallengeCodeResponse,
-  AuthorizationChallengeErrorResponse,
   AuthorizationChallengeRequestOpts,
   AuthorizationRequestOpts,
   AuthorizationResponse,
@@ -277,11 +276,16 @@ export class OpenID4VCIClient {
     this._state.pkce = generateMissingPKCEOpts({ ...this._state.pkce, ...pkce });
   }
 
-  public async acquireAuthorizationChallengeCode(opts?: AuthorizationChallengeRequestOpts): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse | AuthorizationChallengeErrorResponse>> {
+  public async acquireAuthorizationChallengeCode(opts?: AuthorizationChallengeRequestOpts): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse>> { //AuthorizationChallengeErrorResponse
     const response = await acquireAuthorizationChallengeAuthCode({
       clientId: this._state.clientId ?? this._state.authorizationRequestOpts?.clientId,
       ...opts
     })
+
+    if (!this._state.authorizationCodeResponse) {
+      this._state.authorizationCodeResponse = response.successBody;
+    }
+
     return response
   }
 
@@ -299,7 +303,7 @@ export class OpenID4VCIClient {
     } else if (opts?.code) {
       this._state.authorizationCodeResponse = { code: opts.code };
     }
-    const code = this._state.authorizationCodeResponse?.code;
+    const code = (this._state.authorizationCodeResponse as AuthorizationResponse)?.code ?? (this._state.authorizationCodeResponse as AuthorizationChallengeCodeResponse)?.authorization_code;
 
     if (opts?.codeVerifier) {
       this._state.pkce.codeVerifier = opts.codeVerifier;
