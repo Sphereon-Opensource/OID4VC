@@ -1,7 +1,9 @@
 import {
+  AuthorizationChallengeCodeResponse,
+  AuthorizationChallengeErrorResponse, AuthorizationChallengeRequestOpts,
   AuthorizationDetails,
   AuthorizationRequestOpts,
-  CodeChallengeMethod,
+  CodeChallengeMethod, CommonAuthorizationChallengeRequest,
   convertJsonToURI,
   CreateRequestObjectMode,
   CredentialConfigurationSupportedV1_0_13,
@@ -16,12 +18,13 @@ import {
   JsonURIMode,
   Jwt,
   OpenId4VCIVersion,
+  OpenIDResponse,
   PARMode,
   PKCEOpts,
   PushedAuthorizationResponse,
   RequestObjectOpts,
-  ResponseType,
-} from '@sphereon/oid4vci-common';
+  ResponseType
+} from '@sphereon/oid4vci-common'
 import Debug from 'debug';
 
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
@@ -272,3 +275,57 @@ const handleLocations = (endpointMetadata: EndpointMetadataResultV1_0_13, author
   }
   return authorizationDetails;
 };
+
+export const acquireAuthorizationChallengeAuthCode = async (opts: AuthorizationChallengeRequestOpts): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse | AuthorizationChallengeErrorResponse>> => {
+  return await acquireAuthorizationChallengeAuthCodeUsingRequest({
+    authorizationChallengeRequest: await createAuthorizationChallengeRequest(opts)
+  });
+}
+
+export const acquireAuthorizationChallengeAuthCodeUsingRequest = async (opts: { authorizationChallengeRequest: CommonAuthorizationChallengeRequest }): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse | AuthorizationChallengeErrorResponse>> => {
+  const { authorizationChallengeRequest } = opts
+  // TODO validate request
+  const authorizationChallengeCodeUrl = '' // TODO
+  const response = await sendAuthorizationChallengeRequest(
+    authorizationChallengeCodeUrl,
+    authorizationChallengeRequest
+  );
+
+  return response
+}
+
+export const createAuthorizationChallengeRequest = async (opts: AuthorizationChallengeRequestOpts): Promise<CommonAuthorizationChallengeRequest> => {
+  const {
+    clientId,
+    issuerState,
+    authSession,
+    scope,
+    definitionId,
+    codeChallenge,
+    codeChallengeMethod,
+    presentationDuringIssuanceSession
+  } = opts;
+
+  const request: CommonAuthorizationChallengeRequest = {
+    client_id: clientId,
+    issuer_state: issuerState,
+    auth_session: authSession,
+    scope,
+    code_challenge: codeChallenge,
+    code_challenge_method: codeChallengeMethod,
+    definition_id: definitionId,
+    presentation_during_issuance_session: presentationDuringIssuanceSession
+  }
+
+  return request
+}
+
+export const sendAuthorizationChallengeRequest = async (
+  authorizationChallengeCodeUrl: string,
+  authorizationChallengeRequest: CommonAuthorizationChallengeRequest,
+  opts?: { headers?: Record<string, string> }
+): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse | AuthorizationChallengeErrorResponse>> => {
+  return await formPost(authorizationChallengeCodeUrl, convertJsonToURI(authorizationChallengeRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }), { // TODO check encoding
+    customHeaders: opts?.headers ? opts.headers : undefined,
+  });
+}

@@ -3,6 +3,9 @@ import {
   AccessTokenRequestOpts,
   AccessTokenResponse,
   Alg,
+  AuthorizationChallengeCodeResponse,
+  AuthorizationChallengeErrorResponse,
+  AuthorizationChallengeRequestOpts,
   AuthorizationRequestOpts,
   AuthorizationResponse,
   AuthorizationServerOpts,
@@ -25,10 +28,11 @@ import {
   KID_JWK_X5C_ERROR,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
+  OpenIDResponse,
   PKCEOpts,
   ProofOfPossessionCallbacks,
-  toAuthorizationResponsePayload,
-} from '@sphereon/oid4vci-common';
+  toAuthorizationResponsePayload
+} from '@sphereon/oid4vci-common'
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
@@ -39,6 +43,7 @@ import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClient
 import { MetadataClientV1_0_11 } from './MetadataClientV1_0_11';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 import { generateMissingPKCEOpts } from './functions';
+import { acquireAuthorizationChallengeAuthCode } from './AuthorizationCodeClient'
 
 const debug = Debug('sphereon:oid4vci');
 
@@ -254,6 +259,14 @@ export class OpenID4VCIClientV1_0_11 {
 
   private calculatePKCEOpts(pkce?: PKCEOpts) {
     this._state.pkce = generateMissingPKCEOpts({ ...this._state.pkce, ...pkce });
+  }
+
+  public async acquireAuthorizationChallengeCode(opts: AuthorizationChallengeRequestOpts): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse | AuthorizationChallengeErrorResponse>> {
+    const response = await acquireAuthorizationChallengeAuthCode({
+      clientId: this._state.clientId ?? this._state.authorizationRequestOpts?.clientId,
+      ...opts
+    })
+    return response
   }
 
   public async acquireAccessToken(

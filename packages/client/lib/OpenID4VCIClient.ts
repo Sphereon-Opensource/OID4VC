@@ -3,6 +3,9 @@ import {
   AccessTokenRequestOpts,
   AccessTokenResponse,
   Alg,
+  AuthorizationChallengeCodeResponse,
+  AuthorizationChallengeErrorResponse,
+  AuthorizationChallengeRequestOpts,
   AuthorizationRequestOpts,
   AuthorizationResponse,
   AuthorizationServerOpts,
@@ -31,16 +34,20 @@ import {
   NotificationResponseResult,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
+  OpenIDResponse,
   PKCEOpts,
   ProofOfPossessionCallbacks,
-  toAuthorizationResponsePayload,
-} from '@sphereon/oid4vci-common';
+  toAuthorizationResponsePayload
+} from '@sphereon/oid4vci-common'
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';
 import { AccessTokenClientV1_0_11 } from './AccessTokenClientV1_0_11';
-import { createAuthorizationRequestUrl } from './AuthorizationCodeClient';
+import {
+  acquireAuthorizationChallengeAuthCode,
+  createAuthorizationRequestUrl
+} from './AuthorizationCodeClient'
 import { createAuthorizationRequestUrlV1_0_11 } from './AuthorizationCodeClientV1_0_11';
 import { CredentialOfferClient } from './CredentialOfferClient';
 import { CredentialRequestOpts } from './CredentialRequestClient';
@@ -270,10 +277,18 @@ export class OpenID4VCIClient {
     this._state.pkce = generateMissingPKCEOpts({ ...this._state.pkce, ...pkce });
   }
 
+  public async acquireAuthorizationChallengeCode(opts: AuthorizationChallengeRequestOpts): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse | AuthorizationChallengeErrorResponse>> {
+    const response = await acquireAuthorizationChallengeAuthCode({
+      clientId: this._state.clientId ?? this._state.authorizationRequestOpts?.clientId,
+      ...opts
+    })
+    return response
+  }
+
   public async acquireAccessToken(
     opts?: Omit<AccessTokenRequestOpts, 'credentialOffer' | 'credentialIssuer' | 'metadata' | 'additionalParams'> & {
       clientId?: string;
-      authorizationResponse?: string | AuthorizationResponse; // Pass in an auth response, either as URI/redirect, or object
+      authorizationResponse?: string | AuthorizationResponse; // Pass in an auth response, either as URI/redirect, or object // TODO we need to add support for the authorization code from the auth challenge
       additionalRequestParams?: Record<string, any>;
     },
   ): Promise<AccessTokenResponse & { params?: DPoPResponseParams }> {
@@ -652,6 +667,15 @@ export class OpenID4VCIClient {
   public getCredentialEndpoint(): string {
     this.assertIssuerData();
     return this.endpointMetadata ? this.endpointMetadata.credential_endpoint : `${this.getIssuer()}/credential`;
+  }
+
+  public getAuthorizationChallengeEndpoint(): string | undefined {
+    this.assertIssuerData();
+    return this.endpointMetadata?.authorization_challenge_endpoint;
+  }
+
+  public hasAuthorizationChallengeEndpoint(): boolean {
+    return !!this.getAuthorizationChallengeEndpoint();
   }
 
   public hasDeferredCredentialEndpoint(): boolean {

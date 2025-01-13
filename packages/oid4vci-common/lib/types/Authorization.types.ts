@@ -122,6 +122,17 @@ export interface CommonAuthorizationChallengeRequest {
   presentation_during_issuance_session?: string;
 }
 
+export interface AuthorizationChallengeRequestOpts {
+  clientId?: string;
+  issuerState?: string
+  authSession?: string
+  scope?: string
+  codeChallenge?: string
+  codeChallengeMethod?: CodeChallengeMethod
+  definitionId?: string
+  presentationDuringIssuanceSession?: string;
+}
+
 // https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-apps-02.html#name-error-response
 export interface AuthorizationChallengeErrorResponse {
   /**
