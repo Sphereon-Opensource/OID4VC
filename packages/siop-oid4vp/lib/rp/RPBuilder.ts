@@ -228,22 +228,28 @@ export class RPBuilder {
     return this
   }
 
-  withDcqlQuery(dcqlQuery: DcqlQuery, targets?: PropertyTargets): RPBuilder {
+  withDcqlQuery(dcqlQuery: DcqlQuery | string, targets?: PropertyTargets): RPBuilder {
     if (this.getSupportedRequestVersion() >= SupportedVersion.SIOPv2_D12_OID4VP_D20) {
       this._authorizationRequestPayload.dcql_query = assignIfAuth(
         {
-          propertyValue: dcqlQuery,
+          propertyValue: typeof dcqlQuery === 'string' ? dcqlQuery : JSON.stringify(dcqlQuery),
           targets
         },
         false
       )
       this._requestObjectPayload.dcql_query = assignIfRequestObject(
         {
-          propertyValue: dcqlQuery,
+          propertyValue: typeof dcqlQuery === 'string' ? dcqlQuery : JSON.stringify(dcqlQuery),
           targets
         },
         true
       )
+
+      // FIXME we need to find a way in the config to select dcql vs PD without breaking OID4VC-DEMO
+      this._authorizationRequestPayload.presentation_definition = undefined;
+      this._authorizationRequestPayload.presentation_definition_uri = undefined;
+      this._requestObjectPayload.presentation_definition = undefined;
+      this._requestObjectPayload.presentation_definition_uri = undefined;
     }
     return this
   }
