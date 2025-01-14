@@ -25,7 +25,7 @@ import {
 } from '../types'
 
 import { AuthorizationResponse } from './AuthorizationResponse'
-import { assertValidDcqlPresentationResult } from './Dcql'
+import { Dcql } from './Dcql'
 import { PresentationExchange } from './PresentationExchange'
 import {
   AuthorizationResponseOpts,
@@ -96,7 +96,7 @@ export const verifyPresentations = async (
       ),
     )
 
-    assertValidDcqlPresentationResult(authorizationResponse.payload.vp_token as string, dcqlQuery, { hasher: verifyOpts.hasher })
+    await Dcql.assertValidDcqlPresentationResult(authorizationResponse.payload.vp_token as string, dcqlQuery, { hasher: verifyOpts.hasher })
 
     if (verifiedPresentations.some((verified) => !verified)) {
       const message = verifiedPresentations
