@@ -13,8 +13,10 @@ import {
   CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
+  EndpointMetadata,
   EndpointMetadataResultV1_0_13,
   formPost,
+  IssuerOpts,
   isW3cCredentialSupported,
   JsonURIMode,
   Jwt,
@@ -28,6 +30,7 @@ import {
 } from '@sphereon/oid4vci-common'
 import Debug from 'debug';
 
+import { MetadataClient } from './MetadataClient'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 
 const debug = Debug('sphereon:oid4vci');
@@ -278,15 +281,43 @@ const handleLocations = (endpointMetadata: EndpointMetadataResultV1_0_13, author
 };
 
 export const acquireAuthorizationChallengeAuthCode = async (opts: AuthorizationChallengeRequestOpts): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse>> => {
+  const { metadata } = opts
+
+  const issuer = opts.credentialIssuer ?? opts?.metadata?.issuer as string
+  if (!issuer) {
+    throw Error('Issuer required at this point');
+  }
+
+  const issuerOpts = {
+    issuer,
+  }
+
   return await acquireAuthorizationChallengeAuthCodeUsingRequest({
-    authorizationChallengeRequest: await createAuthorizationChallengeRequest(opts)
+    authorizationChallengeRequest: await createAuthorizationChallengeRequest(opts),
+    metadata,
+    issuerOpts
   });
 }
 
-export const acquireAuthorizationChallengeAuthCodeUsingRequest = async (opts: { authorizationChallengeRequest: CommonAuthorizationChallengeRequest }): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse>> => {
-  const { authorizationChallengeRequest } = opts
-  // TODO validate request
-  const authorizationChallengeCodeUrl = '' // TODO
+export const acquireAuthorizationChallengeAuthCodeUsingRequest = async (
+  opts: {
+    authorizationChallengeRequest: CommonAuthorizationChallengeRequest,
+    metadata?: EndpointMetadata,
+    issuerOpts?: IssuerOpts
+  }
+): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse>> => {
+  const { authorizationChallengeRequest, issuerOpts } = opts
+  const metadata = opts?.metadata
+    ? opts?.metadata
+    : issuerOpts?.fetchMetadata
+      ? await MetadataClient.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
+      : undefined
+  const authorizationChallengeCodeUrl = metadata?.authorization_challenge_endpoint
+
+  if (!authorizationChallengeCodeUrl) {
+    return Promise.reject(Error('Cannot determine authorization challenge endpoint URL'))
+  }
+
   const response = await sendAuthorizationChallengeRequest(
     authorizationChallengeCodeUrl,
     authorizationChallengeRequest
