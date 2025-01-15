@@ -269,6 +269,8 @@ export class OpenID4VCIClientV1_0_13 {
 
   public async acquireAuthorizationChallengeCode(opts?: AuthorizationChallengeRequestOpts): Promise<AuthorizationChallengeCodeResponse> {
     const response = await acquireAuthorizationChallengeAuthCode({
+      metadata: this.endpointMetadata,
+      credentialIssuer: this.getIssuer(),
       clientId: this._state.clientId ?? this._state.authorizationRequestOpts?.clientId,
       ...opts
     })

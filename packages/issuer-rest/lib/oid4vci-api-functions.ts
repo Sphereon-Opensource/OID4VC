@@ -93,10 +93,10 @@ export function getIssueStatusEndpoint<DIDDoc extends object>(router: Router, is
   })
 }
 
-
 function isExternalAS(issuerMetadata: CredentialIssuerMetadataOptsV1_0_13) {
   return issuerMetadata.authorization_servers?.some((as) => !as.includes(issuerMetadata.credential_issuer))
 }
+
 export function authorizationChallengeEndpoint<DIDDoc extends object>(
   router: Router,
   issuer: VcIssuer<DIDDoc>,
