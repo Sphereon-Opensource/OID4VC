@@ -29,7 +29,6 @@ describe('OID4VCIServer', () => {
 
   beforeAll(async () => {
     const credentialOfferState1: CredentialOfferSession = {
-      // preAuthorizedCode: preAuthorizedCode1,
       txCode: '493536',
       notification_id: uuidv4(),
       createdAt: +new Date(),
@@ -47,18 +46,7 @@ describe('OID4VCIServer', () => {
                 credentialSubject: {},
               },
             },
-          ],
-
-          // grants: {
-          //   'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-          //     tx_code: {
-          //       length: 6,
-          //       input_mode: 'numeric',
-          //       description: 'Please enter the 6 digit code you received on your phone',
-          //     },
-          //     //'pre-authorized_code': preAuthorizedCode1,
-          //   },
-          // },
+          ]
         },
       },
     }
