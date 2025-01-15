@@ -92,7 +92,7 @@ export class OpenID4VCIClientV1_0_11 {
     endpointMetadata?: EndpointMetadataResultV1_0_11;
     accessTokenResponse?: AccessTokenResponse;
     authorizationRequestOpts?: AuthorizationRequestOpts;
-    authorizationCodeResponse?: AuthorizationResponse;
+    authorizationCodeResponse?: AuthorizationResponse | AuthorizationChallengeCodeResponse;
     authorizationURL?: string;
   }) {
     const issuer = credentialIssuer ?? (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
@@ -287,12 +287,8 @@ export class OpenID4VCIClientV1_0_11 {
   ): Promise<AccessTokenResponse & { params?: DPoPResponseParams }> {
     const { pin, clientId = this._state.clientId ?? this._state.authorizationRequestOpts?.clientId } = opts ?? {};
     let { redirectUri } = opts ?? {};
-    if (opts?.authorizationResponse) {
-      this._state.authorizationCodeResponse = { ...toAuthorizationResponsePayload(opts.authorizationResponse) };
-    } else if (opts?.code) {
-      this._state.authorizationCodeResponse = { code: opts.code };
-    }
-    const code = (this._state.authorizationCodeResponse as AuthorizationResponse)?.code ?? (this._state.authorizationCodeResponse as AuthorizationChallengeCodeResponse)?.authorization_code;
+
+    const code = this.getAuthorizationCode(opts?.authorizationResponse, opts?.code)
 
     if (opts?.codeVerifier) {
       this._state.pkce.codeVerifier = opts.codeVerifier;
@@ -693,5 +689,15 @@ export class OpenID4VCIClientV1_0_11 {
     this._state.clientId = clientId;
     authorizationRequestOpts.clientId = clientId;
     return authorizationRequestOpts;
+  }
+
+  private getAuthorizationCode = (authorizationResponse?: string | AuthorizationResponse | AuthorizationChallengeCodeResponse, code?: string): string | undefined => {
+    if (authorizationResponse) {
+      this._state.authorizationCodeResponse = { ...toAuthorizationResponsePayload(authorizationResponse) };
+    } else if (code) {
+      this._state.authorizationCodeResponse = { code };
+    }
+
+    return (this._state.authorizationCodeResponse as AuthorizationResponse)?.code ?? (this._state.authorizationCodeResponse as AuthorizationChallengeCodeResponse)?.authorization_code;
   }
 }

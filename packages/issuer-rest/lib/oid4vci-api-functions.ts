@@ -153,7 +153,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
         return Promise.reject(authorizationChallengeErrorResponse)
       }
 
-      if (auth_session && presentation_during_issuance_session) {
+      if (auth_session && presentation_during_issuance_session && definition_id) {
         const session = await issuer.credentialOfferSessions.get(auth_session)
         if (!session) {
           const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
@@ -162,7 +162,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
           return Promise.reject(authorizationChallengeErrorResponse)
         }
 
-        const verifiedResponse = await opts.verifyAuthResponseCallback(presentation_during_issuance_session)
+        const verifiedResponse = await opts.verifyAuthResponseCallback(definition_id, presentation_during_issuance_session)
         if (verifiedResponse) {
           const authorizationCode  = generateRandomString(16, 'base64url')
           session.authorizationCode = authorizationCode

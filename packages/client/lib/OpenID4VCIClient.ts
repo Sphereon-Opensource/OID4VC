@@ -3,7 +3,8 @@ import {
   AccessTokenRequestOpts,
   AccessTokenResponse,
   Alg,
-  AuthorizationChallengeCodeResponse, AuthorizationChallengeErrorResponse,
+  AuthorizationChallengeCodeResponse,
+  AuthorizationChallengeErrorResponse,
   AuthorizationChallengeRequestOpts,
   AuthorizationRequestOpts,
   AuthorizationResponse,
@@ -94,7 +95,7 @@ export class OpenID4VCIClient {
     endpointMetadata?: EndpointMetadataResult;
     accessTokenResponse?: AccessTokenResponse;
     authorizationRequestOpts?: AuthorizationRequestOpts;
-    authorizationCodeResponse?: AuthorizationResponse;
+    authorizationCodeResponse?: AuthorizationResponse | AuthorizationChallengeCodeResponse;
     authorizationURL?: string;
   }) {
     const issuer = credentialIssuer ?? (credentialOffer ? getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer) : undefined);
@@ -296,18 +297,14 @@ export class OpenID4VCIClient {
   public async acquireAccessToken(
     opts?: Omit<AccessTokenRequestOpts, 'credentialOffer' | 'credentialIssuer' | 'metadata' | 'additionalParams'> & {
       clientId?: string;
-      authorizationResponse?: string | AuthorizationResponse | AuthorizationChallengeCodeResponse; // Pass in an auth response, either as URI/redirect, or object // TODO we need to add support for the authorization code from the auth challenge
+      authorizationResponse?: string | AuthorizationResponse | AuthorizationChallengeCodeResponse; // Pass in an auth response, either as URI/redirect, or object
       additionalRequestParams?: Record<string, any>;
     },
   ): Promise<AccessTokenResponse & { params?: DPoPResponseParams }> {
     const { pin, clientId = this._state.clientId ?? this._state.authorizationRequestOpts?.clientId } = opts ?? {};
     let { redirectUri } = opts ?? {};
-    if (opts?.authorizationResponse) {
-      this._state.authorizationCodeResponse = { ...toAuthorizationResponsePayload(opts.authorizationResponse) };
-    } else if (opts?.code) {
-      this._state.authorizationCodeResponse = { code: opts.code };
-    }
-    const code = (this._state.authorizationCodeResponse as AuthorizationResponse)?.code ?? (this._state.authorizationCodeResponse as AuthorizationChallengeCodeResponse)?.authorization_code;
+
+    const code = this.getAuthorizationCode(opts?.authorizationResponse, opts?.code)
 
     if (opts?.codeVerifier) {
       this._state.pkce.codeVerifier = opts.codeVerifier;
@@ -758,5 +755,15 @@ export class OpenID4VCIClient {
     this._state.clientId = clientId;
     authorizationRequestOpts.clientId = clientId;
     return authorizationRequestOpts;
+  }
+
+  private getAuthorizationCode = (authorizationResponse?: string | AuthorizationResponse | AuthorizationChallengeCodeResponse, code?: string): string | undefined => {
+    if (authorizationResponse) {
+      this._state.authorizationCodeResponse = { ...toAuthorizationResponsePayload(authorizationResponse) };
+    } else if (code) {
+      this._state.authorizationCodeResponse = { code };
+    }
+
+    return (this._state.authorizationCodeResponse as AuthorizationResponse)?.code ?? (this._state.authorizationCodeResponse as AuthorizationChallengeCodeResponse)?.authorization_code;
   }
 }

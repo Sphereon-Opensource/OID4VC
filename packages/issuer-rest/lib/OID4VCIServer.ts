@@ -86,6 +86,8 @@ export interface IGetIssueStatusEndpointOpts extends ISingleEndpointOpts {
 }
 
 export interface IAuthorizationChallengeEndpointOpts extends ISingleEndpointOpts {
+  createAuthRequestUriEndpointPath?: string
+  verifyAuthResponseEndpointPath?: string
   /**
    * Callback used for creating the authorization request uri used for the RP.
    * Added an optional state parameter so that when direct calls are used,
@@ -96,7 +98,7 @@ export interface IAuthorizationChallengeEndpointOpts extends ISingleEndpointOpts
    * Callback used for verifying the status of the authorization response.
    * This is checked by the issuer before issuing an authorization code.
    */
-  verifyAuthResponseCallback: (correlationId: string) => Promise<boolean>
+  verifyAuthResponseCallback: (presentationDefinitionId: string, correlationId: string) => Promise<boolean>
 }
 
 export interface IOID4VCIServerOpts extends HasEndpointOpts {
