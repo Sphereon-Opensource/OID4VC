@@ -123,25 +123,28 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
     try {
       if (!client_id && !auth_session) {
         const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
-          error: AuthorizationChallengeError.invalid_request
-        }
-        return Promise.reject(authorizationChallengeErrorResponse)
+          error: AuthorizationChallengeError.invalid_request,
+          error_description: 'No client id or auth session present'
+        } as AuthorizationChallengeErrorResponse
+        throw authorizationChallengeErrorResponse
       }
 
       if (!auth_session && issuer_state) {
         const session = await issuer.credentialOfferSessions.get(issuer_state)
         if (!session) {
           const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
-            error: AuthorizationChallengeError.invalid_session
+            error: AuthorizationChallengeError.invalid_session,
+            error_description: 'Session is invalid'
           }
-          return Promise.reject(authorizationChallengeErrorResponse)
+          throw authorizationChallengeErrorResponse
         }
 
         if (!definition_id) {
           const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
-            error: AuthorizationChallengeError.invalid_request
+            error: AuthorizationChallengeError.invalid_request,
+            error_description: 'No definition id present'
           }
-          return Promise.reject(authorizationChallengeErrorResponse)
+          throw authorizationChallengeErrorResponse
         }
 
         const authRequestURI = await opts.createAuthRequestUriCallback(definition_id, issuer_state)
@@ -150,16 +153,17 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
           auth_session: issuer_state,
           presentation: authRequestURI
         }
-        return Promise.reject(authorizationChallengeErrorResponse)
+        throw authorizationChallengeErrorResponse
       }
 
       if (auth_session && presentation_during_issuance_session && definition_id) {
         const session = await issuer.credentialOfferSessions.get(auth_session)
         if (!session) {
           const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
-            error: AuthorizationChallengeError.invalid_session
+            error: AuthorizationChallengeError.invalid_session,
+            error_description: 'Session is invalid'
           }
-          return Promise.reject(authorizationChallengeErrorResponse)
+          throw authorizationChallengeErrorResponse
         }
 
         const verifiedResponse = await opts.verifyAuthResponseCallback(definition_id, presentation_during_issuance_session)
@@ -177,7 +181,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
       const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
         error: AuthorizationChallengeError.invalid_request
       }
-      return Promise.reject(authorizationChallengeErrorResponse)
+      throw authorizationChallengeErrorResponse
     } catch (e) {
       return sendErrorResponse(
         response,

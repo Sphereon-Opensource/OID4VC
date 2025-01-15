@@ -110,6 +110,7 @@ export interface AuthorizationServerMetadata extends DynamicRegistrationClientMe
 export const authorizationServerMetadataFieldNames: Array<keyof AuthorizationServerMetadata> = [
   'issuer',
   'authorization_endpoint',
+  'authorization_challenge_endpoint',
   'token_endpoint',
   'jwks_uri',
   'registration_endpoint',
