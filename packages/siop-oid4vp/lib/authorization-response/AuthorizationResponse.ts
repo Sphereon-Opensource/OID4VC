@@ -6,7 +6,7 @@ import { assertValidVerifyAuthorizationRequestOpts } from '../authorization-requ
 import { IDToken } from '../id-token'
 import { AuthorizationResponsePayload, ResponseType, SIOPErrors, VerifiedAuthorizationRequest, VerifiedAuthorizationResponse } from '../types'
 
-import { assertValidDcqlPresentationResult } from './Dcql'
+import { Dcql } from './Dcql'
 import {
   assertValidVerifiablePresentations,
   extractNonceFromWrappedVerifiablePresentation,
@@ -145,7 +145,7 @@ export class AuthorizationResponse {
         },
       })
     } else if (verifiedAuthorizationRequest.dcqlQuery) {
-      assertValidDcqlPresentationResult(responseOpts.dcqlQuery.dcqlPresentation as DcqlPresentation, verifiedAuthorizationRequest.dcqlQuery, {
+      await Dcql.assertValidDcqlPresentationResult(responseOpts.dcqlQuery.dcqlPresentation as DcqlPresentation, verifiedAuthorizationRequest.dcqlQuery, {
         hasher: verifyOpts.hasher,
       })
     } else {
