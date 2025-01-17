@@ -93,12 +93,12 @@ export interface IAuthorizationChallengeEndpointOpts extends ISingleEndpointOpts
    * Added an optional state parameter so that when direct calls are used,
    * one could set the state value of the RP session to match the state value of the VCI session.
    */
-  createAuthRequestUriCallback: (presentationDefinitionId: string, state?: string) => Promise<string>
+  createAuthRequestUriCallback: (state?: string) => Promise<string>
   /**
    * Callback used for verifying the status of the authorization response.
    * This is checked by the issuer before issuing an authorization code.
    */
-  verifyAuthResponseCallback: (presentationDefinitionId: string, correlationId: string) => Promise<boolean>
+  verifyAuthResponseCallback: (correlationId: string) => Promise<boolean>
 }
 
 export interface IOID4VCIServerOpts extends HasEndpointOpts {

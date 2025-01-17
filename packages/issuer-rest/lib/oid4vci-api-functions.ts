@@ -116,8 +116,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
       client_id,
       issuer_state,
       auth_session,
-      presentation_during_issuance_session,
-      definition_id
+      presentation_during_issuance_session
     } = authorizationChallengeRequest
 
     try {
@@ -139,15 +138,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
           throw authorizationChallengeErrorResponse
         }
 
-        if (!definition_id) {
-          const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
-            error: AuthorizationChallengeError.invalid_request,
-            error_description: 'No definition id present'
-          }
-          throw authorizationChallengeErrorResponse
-        }
-
-        const authRequestURI = await opts.createAuthRequestUriCallback(definition_id, issuer_state)
+        const authRequestURI = await opts.createAuthRequestUriCallback(issuer_state)
         const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
           error: AuthorizationChallengeError.insufficient_authorization,
           auth_session: issuer_state,
@@ -156,7 +147,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
         throw authorizationChallengeErrorResponse
       }
 
-      if (auth_session && presentation_during_issuance_session && definition_id) {
+      if (auth_session && presentation_during_issuance_session) {
         const session = await issuer.credentialOfferSessions.get(auth_session)
         if (!session) {
           const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
@@ -166,7 +157,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
           throw authorizationChallengeErrorResponse
         }
 
-        const verifiedResponse = await opts.verifyAuthResponseCallback(definition_id, presentation_during_issuance_session)
+        const verifiedResponse = await opts.verifyAuthResponseCallback(presentation_during_issuance_session)
         if (verifiedResponse) {
           const authorizationCode  = generateRandomString(16, 'base64url')
           session.authorizationCode = authorizationCode

@@ -109,10 +109,6 @@ export interface CommonAuthorizationChallengeRequest {
    */
   code_challenge_method?: CodeChallengeMethod; // TODO what we do with this
   /**
-   * OPTIONAL. A presentation definition id used to create the authorization request uri that will be used to authorize with the RP
-   */
-  definition_id?: string
-  /**
    * OPTIONAL. String containing information about the session when credential presentation is happening during issuance of another
    * credential. The content of this parameter is opaque to the wallet. When this parameter is present the Wallet MUST use this parameter in
    * the subsequent Authorization Challenge Request. This allows the Issuer to determine which it can be used by to prevent session
@@ -129,7 +125,6 @@ export interface AuthorizationChallengeRequestOpts {
   scope?: string
   codeChallenge?: string
   codeChallengeMethod?: CodeChallengeMethod
-  definitionId?: string
   presentationDuringIssuanceSession?: string;
   metadata?: EndpointMetadata;
   credentialIssuer?: string;

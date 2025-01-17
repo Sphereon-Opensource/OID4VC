@@ -107,7 +107,7 @@ export class MetadataClientV1_0_11 {
       }
       authorization_endpoint = authMetadata.authorization_endpoint;
       if (!authMetadata.authorization_challenge_endpoint) {
-        console.warn(`Authorization Server ${authorization_challenge_endpoint} did not provide a authorization_challenge_endpoint`);
+        debug(`Authorization Server ${authorization_server} did not provide a authorization_challenge_endpoint`);
       } else if (authorization_challenge_endpoint && authMetadata.authorization_challenge_endpoint !== authorization_challenge_endpoint) {
         throw Error(
           `Credential issuer has a different authorization_challenge_endpoint (${authorization_challenge_endpoint}) from the Authorization Server (${authMetadata.authorization_challenge_endpoint})`,

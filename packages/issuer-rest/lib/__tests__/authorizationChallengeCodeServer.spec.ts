@@ -131,22 +131,10 @@ describe('OID4VCIServer', () => {
     })
   })
 
-  it('should return http code 400 with message No definition id present', async () => {
-    const res = await requests(app)
-      .post('/authorize-challenge')
-      .send(`client_id=${uuidv4()}&issuer_state=${sessionId}`)
-    expect(res.statusCode).toEqual(400)
-    const actual = JSON.parse(res.text)
-    expect(actual).toEqual({
-      error: AuthorizationChallengeError.invalid_request,
-      error_description: 'No definition id present'
-    })
-  })
-
   it('should return http code 400 with error insufficient_authorization', async () => {
     const res = await requests(app)
       .post('/authorize-challenge')
-      .send(`client_id=${uuidv4()}&issuer_state=${sessionId}&definition_id=${'testValue'}`)
+      .send(`client_id=${uuidv4()}&issuer_state=${sessionId}`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -159,7 +147,7 @@ describe('OID4VCIServer', () => {
   it('should return http code 400 with message Session is invalid with invalid auth_session', async () => {
     const res = await requests(app)
       .post('/authorize-challenge')
-      .send(`auth_session=${uuidv4()}&presentation_during_issuance_session=${uuidv4()}&definition_id=testDefinitionId`)
+      .send(`auth_session=${uuidv4()}&presentation_during_issuance_session=${uuidv4()}`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
@@ -171,7 +159,7 @@ describe('OID4VCIServer', () => {
   it('should return http code 200 with authorization_code', async () => {
     const res = await requests(app)
       .post('/authorize-challenge')
-      .send(`auth_session=${sessionId}&presentation_during_issuance_session=${uuidv4()}&definition_id=testDefinitionId`)
+      .send(`auth_session=${sessionId}&presentation_during_issuance_session=${uuidv4()}`)
     expect(res.statusCode).toEqual(200)
     const actual = JSON.parse(res.text)
     expect(actual).toBeDefined()

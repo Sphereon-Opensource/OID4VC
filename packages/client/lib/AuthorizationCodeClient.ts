@@ -332,7 +332,6 @@ export const createAuthorizationChallengeRequest = async (opts: AuthorizationCha
     issuerState,
     authSession,
     scope,
-    definitionId,
     codeChallenge,
     codeChallengeMethod,
     presentationDuringIssuanceSession
@@ -345,7 +344,6 @@ export const createAuthorizationChallengeRequest = async (opts: AuthorizationCha
     scope,
     code_challenge: codeChallenge,
     code_challenge_method: codeChallengeMethod,
-    definition_id: definitionId,
     presentation_during_issuance_session: presentationDuringIssuanceSession
   }
 
