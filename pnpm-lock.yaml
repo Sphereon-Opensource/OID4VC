@@ -10022,7 +10022,7 @@ snapshots:
   '@digitalcredentials/bnid@2.1.2(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1))':
     dependencies:
       '@digitalcredentials/base58-universal': 1.0.1
-      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(encoding@0.1.13)(react@18.3.1))
+      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1))
       yargs: 15.4.1
     transitivePeerDependencies:
       - react-native
@@ -11892,7 +11892,7 @@ snapshots:
       webcrypto-shim: 0.1.7
     optionalDependencies:
       expo: 48.0.21(@babel/core@7.26.0)(encoding@0.1.13)
-      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(encoding@0.1.13)(react@18.3.1))
+      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1))
 
   '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.26':
     dependencies:
@@ -18230,7 +18230,7 @@ snapshots:
       react-native: 0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1)
     optional: true
 
-  react-native-securerandom@1.0.1(react-native@0.71.19(@babel/core@7.26.0)(encoding@0.1.13)(react@18.3.1)):
+  react-native-securerandom@1.0.1(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1)):
     dependencies:
       base64-js: 1.5.1
       react-native: 0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1)
