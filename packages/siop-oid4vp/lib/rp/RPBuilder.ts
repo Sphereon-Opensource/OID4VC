@@ -245,7 +245,7 @@ export class RPBuilder {
         true
       )
 
-      // FIXME we need to find a way in the config to select dcql vs PD without breaking OID4VC-DEMO
+      // FIXME SPRIND-144 we need to find a way in the config to select dcql vs PD without breaking OID4VC-DEMO
       this._authorizationRequestPayload.presentation_definition = undefined;
       this._authorizationRequestPayload.presentation_definition_uri = undefined;
       this._requestObjectPayload.presentation_definition = undefined;

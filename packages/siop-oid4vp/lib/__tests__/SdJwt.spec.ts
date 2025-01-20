@@ -520,7 +520,7 @@ describe.skip('RP and OP interaction should', () => {
     }
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-      dcqlQuery: { dcqlPresentation },
+      dcqlResponse: { dcqlPresentation },
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeDefined()

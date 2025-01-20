@@ -30,8 +30,8 @@ export const createResponsePayload = async (
   }
 
   // vp tokens
-  if (responseOpts.dcqlQuery) {
-    responsePayload.vp_token = DcqlPresentation.encode(responseOpts.dcqlQuery.dcqlPresentation as DcqlPresentation)
+  if (responseOpts.dcqlResponse) {
+    responsePayload.vp_token = DcqlPresentation.encode(responseOpts.dcqlResponse.dcqlPresentation as DcqlPresentation)
   } else {
     await putPresentationSubmissionInLocation(authorizationRequest, responsePayload, responseOpts, idTokenPayload)
   }
