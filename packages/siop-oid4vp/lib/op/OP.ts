@@ -25,7 +25,7 @@ import {
   RegisterEventListener,
   RequestObjectPayload,
   ResponseIss,
-  ResponseMode,
+  ResponseMode, RPRegistrationMetadataPayload,
   SIOPErrors,
   SupportedVersion,
   UrlEncodingFormat,
@@ -248,6 +248,7 @@ export class OP {
             response_type: responseType,
           },
           authResponse: response,
+          state: requestObjectPayload.state
         })
         void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
         return jarmResponse
@@ -276,9 +277,10 @@ export class OP {
    * Create an Authentication Request Payload from a URI string
    *
    * @param encodedUri
+   * @param rpRegistrationMetadata
    */
-  public async parseAuthorizationRequestURI(encodedUri: string): Promise<ParsedAuthorizationRequestURI> {
-    const { scheme, requestObjectJwt, authorizationRequestPayload, registrationMetadata } = await URI.parseAndResolve(encodedUri)
+  public async parseAuthorizationRequestURI(encodedUri: string, rpRegistrationMetadata?: RPRegistrationMetadataPayload): Promise<ParsedAuthorizationRequestURI> {
+    const { scheme, requestObjectJwt, authorizationRequestPayload, registrationMetadata } = await URI.parseAndResolve(encodedUri, rpRegistrationMetadata)
 
     return {
       encodedUri,

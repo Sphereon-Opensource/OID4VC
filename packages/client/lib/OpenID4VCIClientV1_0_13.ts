@@ -22,7 +22,7 @@ import {
   getTypesFromCredentialSupported,
   KID_JWK_X5C_ERROR,
   NotificationRequest,
-  NotificationResult,
+  NotificationResponseResult,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PKCEOpts,
@@ -577,7 +577,7 @@ export class OpenID4VCIClientV1_0_13 {
     credentialRequestOpts: Partial<CredentialRequestOpts>,
     request: NotificationRequest,
     accessToken?: string,
-  ): Promise<NotificationResult> {
+  ): Promise<NotificationResponseResult> {
     return sendNotification(credentialRequestOpts, request, accessToken ?? this._state.accessToken ?? this._state.accessTokenResponse?.access_token);
   }
 
