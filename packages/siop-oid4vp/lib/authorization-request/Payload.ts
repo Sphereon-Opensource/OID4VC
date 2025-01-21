@@ -26,7 +26,7 @@ export const createPresentationDefinitionClaimsProperties = (opts: ClaimPayloadO
     return undefined
   }
 
-  if (!opts.vp_token.presentation_definition && !opts.vp_token.presentation_definition_uri) {
+  if (opts.vp_token.presentation_definition) {
     const discoveryResult = PEX.definitionVersionDiscovery(opts.vp_token.presentation_definition)
     if (discoveryResult.error) {
       throw new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID)
