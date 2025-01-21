@@ -102,7 +102,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
   issuer: VcIssuer<DIDDoc>,
   opts: IAuthorizationChallengeEndpointOpts & { baseUrl: string | URL },
 ) {
-  const endpoint = issuer.issuerMetadata.authorization_challenge_endpoint
+  const endpoint = issuer.authorizationServerMetadata.authorization_challenge_endpoint ?? issuer.issuerMetadata.authorization_challenge_endpoint
   const baseUrl = getBaseUrl(opts.baseUrl)
   if (!endpoint) {
     LOG.warning('authorization challenge endpoint disabled as no "authorization_challenge_endpoint" has been configured in issuer metadata')
