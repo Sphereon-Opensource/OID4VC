@@ -465,9 +465,6 @@ describe('create JWT from Request JWT should', () => {
     }
 
     const requestObject = await RequestObject.fromOpts(requestOpts)
-    /* console.log(
-      JSON.stringify(await AuthenticationResponse.createJWTFromRequestJWT(requestWithJWT.jwt, responseOpts, verifyOpts))
-    );*/
     const jwt = await requestObject.toJwt()
     if (!jwt) throw new Error('JWT is undefined')
     const authorizationRequest = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
@@ -783,9 +780,6 @@ describe('create JWT from Request JWT should', () => {
     }
 
     const requestObject = await RequestObject.fromOpts(requestOpts)
-    /* console.log(
-      JSON.stringify(await AuthenticationResponse.createJWTFromRequestJWT(requestWithJWT.jwt, responseOpts, verifyOpts))
-    );*/
     const jwt = await requestObject.toJwt()
     if (!jwt) throw new Error('JWT is undefined')
     const authorizationRequest = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
