@@ -173,7 +173,7 @@ export class OID4VCIServer<DIDDoc extends object> {
       }
       console.log('Token endpoint disabled by configuration')
     } else {
-      if (authServer && authServer.some(as => as !== this.issuer.issuerMetadata.credential_issuer)) {
+      if (authServer && authServer.some((as) => as !== this.issuer.issuerMetadata.credential_issuer)) {
         throw Error(
           `An external Authorization Server (AS) was already enabled in the issuer metadata (${authServer}). Cannot both have an AS and enable the token endpoint at the same time `,
         )

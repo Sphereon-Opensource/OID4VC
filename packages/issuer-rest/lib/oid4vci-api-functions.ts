@@ -93,7 +93,7 @@ export function accessTokenEndpoint<DIDDoc extends object>(
 ) {
   const tokenEndpoint = issuer.issuerMetadata.token_endpoint
   const externalAS = isExternalAS(issuer.issuerMetadata)
-  if (externalAS) {
+  if (externalAS || (opts.accessTokenProvider && opts.accessTokenProvider !== 'internal')) {
     LOG.log(`[OID4VCI] External Authorization Server ${tokenEndpoint} is being used. Not enabling issuer token endpoint`)
     return
   } else if (opts?.enabled === false) {
