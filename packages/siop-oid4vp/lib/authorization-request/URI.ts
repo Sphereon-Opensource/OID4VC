@@ -237,16 +237,22 @@ export class URI implements AuthorizationRequestURI {
     return { scheme, authorizationRequestPayload }
   }
 
-  public static async parseAndResolve(uri: string) {
+  public static async parseAndResolve(uri: string, rpRegistrationMetadata?: RPRegistrationMetadataPayload) {
     if (!uri) {
       throw Error(SIOPErrors.BAD_PARAMS)
     }
     const { authorizationRequestPayload, scheme } = this.parse(uri)
+
     const requestObjectJwt = await fetchByReferenceOrUseByValue(authorizationRequestPayload.request_uri, authorizationRequestPayload.request, true)
-    const registrationMetadata: RPRegistrationMetadataPayload = await fetchByReferenceOrUseByValue(
-      authorizationRequestPayload['client_metadata_uri'] ?? authorizationRequestPayload['registration_uri'],
-      authorizationRequestPayload['client_metadata'] ?? authorizationRequestPayload['registration'],
-    )
+    let registrationMetadata: RPRegistrationMetadataPayload
+    if (rpRegistrationMetadata !== undefined && rpRegistrationMetadata !== null) {
+      registrationMetadata = rpRegistrationMetadata
+    } else {
+        registrationMetadata = await fetchByReferenceOrUseByValue(
+        authorizationRequestPayload['client_metadata_uri'] ?? authorizationRequestPayload['registration_uri'],
+        authorizationRequestPayload['client_metadata'] ?? authorizationRequestPayload['registration'],
+      )
+    }
     assertValidRPRegistrationMedataPayload(registrationMetadata)
     return { scheme, authorizationRequestPayload, requestObjectJwt, registrationMetadata }
   }
