@@ -205,7 +205,7 @@ describe('OpenID4VCIClientV1_0_13 should', () => {
   it('it should successfully respond with a authorization code when authorization challenge is used', async () => {
     const url = new URL(`${MOCK_URL}/authorize-challenge`)
     const responseBody = {
-      authorization_code: 'test_value',
+      authorization_code: 'test_authorization_code',
     };
     (await client.retrieveServerMetadata()).authorization_challenge_endpoint = url.toString()
 
@@ -220,6 +220,6 @@ describe('OpenID4VCIClientV1_0_13 should', () => {
     const response = await client.acquireAuthorizationChallengeCode({ clientId: client.clientId, authSession, presentationDuringIssuanceSession });
 
     expect(response).toBeDefined();
-    expect(response.authorization_code).toBeDefined();
+    expect(response.authorization_code).toEqual(responseBody.authorization_code);
   })
 });

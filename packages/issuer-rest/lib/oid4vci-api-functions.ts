@@ -105,7 +105,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
   const endpoint = issuer.authorizationServerMetadata.authorization_challenge_endpoint ?? issuer.issuerMetadata.authorization_challenge_endpoint
   const baseUrl = getBaseUrl(opts.baseUrl)
   if (!endpoint) {
-    LOG.warning('authorization challenge endpoint disabled as no "authorization_challenge_endpoint" has been configured in issuer metadata')
+    LOG.info('authorization challenge endpoint disabled as no "authorization_challenge_endpoint" has been configured in issuer metadata')
     return
   }
   const path = determinePath(baseUrl, endpoint, { stripBasePath: true })
@@ -138,7 +138,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
           throw authorizationChallengeErrorResponse
         }
 
-        const authRequestURI = await opts.createAuthRequestUriCallback(issuer_state)
+        const authRequestURI = await opts.createAuthRequestUriCallback(issuer_state) // TODO generate some error
         const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
           error: AuthorizationChallengeError.insufficient_authorization,
           auth_session: issuer_state,
@@ -157,7 +157,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
           throw authorizationChallengeErrorResponse
         }
 
-        const verifiedResponse = await opts.verifyAuthResponseCallback(presentation_during_issuance_session)
+        const verifiedResponse = await opts.verifyAuthResponseCallback(presentation_during_issuance_session) // TODO generate some error
         if (verifiedResponse) {
           const authorizationCode  = generateRandomString(16, 'base64url')
           session.authorizationCode = authorizationCode

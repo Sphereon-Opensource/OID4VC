@@ -101,7 +101,7 @@ export interface IAuthorizationChallengeEndpointOpts extends ISingleEndpointOpts
   verifyAuthResponseCallback: (correlationId: string) => Promise<boolean>
 }
 
-export interface IEndpointOpts {
+export interface IOID4VCIEndpointOpts {
   tokenEndpointOpts?: ITokenEndpointOpts
   notificationOpts?: ISingleEndpointOpts
   createCredentialOfferOpts?: ICreateCredentialOfferEndpointOpts
@@ -112,7 +112,7 @@ export interface IEndpointOpts {
 }
 
 export interface IOID4VCIServerOpts extends HasEndpointOpts {
-  endpointOpts?: IEndpointOpts
+  endpointOpts?: IOID4VCIEndpointOpts
   baseUrl?: string
 }
 
