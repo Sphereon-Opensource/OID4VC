@@ -18,7 +18,7 @@ import { OID4VCIServer } from '../OID4VCIServer'
 
 const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
   .withIssuer('test-issuer')
-  .withAuthorizationChallengeEndpoint('http://localhost:3456/test/authorize-challenge')
+  .withAuthorizationChallengeEndpoint('http://localhost:9000/authorize-challenge')
   .withResponseTypesSupported(['code', 'token', 'id_token'])
   .build()
 
@@ -98,8 +98,8 @@ describe('OID4VCIServer', () => {
 
   it('should return http code 400 with error invalid_request', async () => {
     const res = await requests(app)
-    .post('/authorize-challenge')
-    .send(`client_id=${uuidv4()}`)
+      .post('/authorize-challenge')
+      .send(`client_id=${uuidv4()}`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
