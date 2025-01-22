@@ -24,7 +24,6 @@ export const createResponsePayload = async (
     ...(responseOpts.accessToken && { access_token: responseOpts.accessToken, expires_in: responseOpts.expiresIn || 3600 }),
     ...(responseOpts.tokenType && { token_type: responseOpts.tokenType }),
     ...(responseOpts.refreshToken && { refresh_token: responseOpts.refreshToken }),
-    ...(responseOpts.isFirstParty && { is_first_party: responseOpts.isFirstParty }),
     state,
   }
 
