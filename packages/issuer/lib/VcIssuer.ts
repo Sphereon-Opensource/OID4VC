@@ -3,6 +3,7 @@ import {
   ALG_ERROR,
   AUD_ERROR,
   AuthorizationServerMetadata,
+  ClientMetadata,
   CNonceState,
   CreateCredentialOfferURIResult,
   CREDENTIAL_MISSING_ERROR,
@@ -49,17 +50,18 @@ import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceI
 
 import { LOG } from './index'
 
-export class VcIssuer<DIDDoc extends object> {
+export class VcIssuer {
   private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_13
   private readonly _authorizationServerMetadata: AuthorizationServerMetadata
   private readonly _defaultCredentialOfferBaseUri?: string
-  private readonly _credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
-  private readonly _jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
+  private readonly _credentialSignerCallback?: CredentialSignerCallback
+  private readonly _jwtVerifyCallback?: JWTVerifyCallback
   private readonly _credentialDataSupplier?: CredentialDataSupplier
   private readonly _credentialOfferSessions: IStateManager<CredentialOfferSession>
   private readonly _cNonces: IStateManager<CNonceState>
   private readonly _uris?: IStateManager<URIState>
   private readonly _cNonceExpiresIn: number
+  private readonly _asClientOpts?: ClientMetadata
 
   constructor(
     issuerMetadata: CredentialIssuerMetadataOptsV1_0_13,
@@ -71,10 +73,11 @@ export class VcIssuer<DIDDoc extends object> {
       defaultCredentialOfferBaseUri?: string
       cNonces: IStateManager<CNonceState>
       uris?: IStateManager<URIState>
-      credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
-      jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
+      credentialSignerCallback?: CredentialSignerCallback
+      jwtVerifyCallback?: JWTVerifyCallback
       credentialDataSupplier?: CredentialDataSupplier
       cNonceExpiresIn?: number | undefined // expiration duration in seconds
+      asClientOpts?: ClientMetadata
     },
   ) {
     this.setDefaultTokenEndpoint(issuerMetadata)
@@ -88,6 +91,7 @@ export class VcIssuer<DIDDoc extends object> {
     this._jwtVerifyCallback = args?.jwtVerifyCallback
     this._credentialDataSupplier = args?.credentialDataSupplier
     this._cNonceExpiresIn = (args?.cNonceExpiresIn ?? (process.env.C_NONCE_EXPIRES_IN ? parseInt(process.env.C_NONCE_EXPIRES_IN) : 300)) as number
+    this._asClientOpts = args?.asClientOpts
   }
 
   public getCredentialOfferSessionById(id: string): Promise<CredentialOfferSession> {
@@ -259,8 +263,8 @@ export class VcIssuer<DIDDoc extends object> {
     newCNonce?: string
     cNonceExpiresIn?: number // expiration duration in seconds
     tokenExpiresIn?: number // expiration duration in seconds
-    jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
-    credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
+    jwtVerifyCallback?: JWTVerifyCallback
+    credentialSignerCallback?: CredentialSignerCallback
     responseCNonce?: string
   }): Promise<CredentialResponse> {
     /*if (!('credential_identifier' in opts.credentialRequest)) {
@@ -301,7 +305,7 @@ export class VcIssuer<DIDDoc extends object> {
       }
       let credential: CredentialIssuanceInput | undefined
       let format: OID4VCICredentialFormat | undefined = credentialRequest.format
-      let signerCallback: CredentialSignerCallback<DIDDoc> | undefined = opts.credentialSignerCallback
+      let signerCallback: CredentialSignerCallback | undefined = opts.credentialSignerCallback
       if (opts.credential) {
         credential = opts.credential
       } else {
@@ -515,7 +519,7 @@ export class VcIssuer<DIDDoc extends object> {
     tokenExpiresIn: number // expiration duration in seconds
     // grants?: Grant,
     clientId?: string
-    jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
+    jwtVerifyCallback?: JWTVerifyCallback
   }) {
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
@@ -657,11 +661,11 @@ export class VcIssuer<DIDDoc extends object> {
     opts: {
       credentialRequest: CredentialRequest
       credential: CredentialIssuanceInput
-      jwtVerifyResult: JwtVerifyResult<DIDDoc>
+      jwtVerifyResult: JwtVerifyResult
       format?: OID4VCICredentialFormat
       issuer?: string
     },
-    issuerCallback?: CredentialSignerCallback<DIDDoc>,
+    issuerCallback?: CredentialSignerCallback,
   ): Promise<W3CVerifiableCredential | CompactSdJwtVc> {
     if ((!opts.credential && !opts.credentialRequest) || !this._credentialSignerCallback) {
       throw new Error(ISSUER_CONFIG_ERROR)
@@ -689,11 +693,11 @@ export class VcIssuer<DIDDoc extends object> {
     }
   }
 
-  get credentialSignerCallback(): CredentialSignerCallback<DIDDoc> | undefined {
+  get credentialSignerCallback(): CredentialSignerCallback | undefined {
     return this._credentialSignerCallback
   }
 
-  get jwtVerifyCallback(): JWTVerifyCallback<DIDDoc> | undefined {
+  get jwtVerifyCallback(): JWTVerifyCallback | undefined {
     return this._jwtVerifyCallback
   }
 
@@ -727,5 +731,9 @@ export class VcIssuer<DIDDoc extends object> {
 
   public get authorizationServerMetadata() {
     return this._authorizationServerMetadata
+  }
+
+  get asClientOpts() {
+    return this._asClientOpts
   }
 }

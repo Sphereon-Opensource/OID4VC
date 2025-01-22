@@ -10,7 +10,6 @@ import {
   STATE_MISSING_ERROR,
 } from '@sphereon/oid4vci-common'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
-import { DIDDocument } from 'did-resolver'
 
 import { VcIssuer } from '../VcIssuer'
 import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../builder'
@@ -60,7 +59,7 @@ const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
   .build()
 
 describe('VcIssuer', () => {
-  let vcIssuer: VcIssuer<DIDDocument>
+  let vcIssuer: VcIssuer
   const issuerState = 'previously-created-state'
   const clientId = 'sphereon:wallet'
   const preAuthorizedCode = 'test_code'
@@ -128,7 +127,7 @@ describe('VcIssuer', () => {
         },
       },
     })
-    vcIssuer = new VcIssuerBuilder<DIDDocument>()
+    vcIssuer = new VcIssuerBuilder()
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
@@ -460,7 +459,7 @@ describe('VcIssuer', () => {
 })
 
 describe('VcIssuer without did', () => {
-  let vcIssuer: VcIssuer<DIDDocument>
+  let vcIssuer: VcIssuer
   const issuerState = 'previously-created-state'
   const clientId = 'sphereon:wallet'
   const preAuthorizedCode = 'test_code'
@@ -528,7 +527,7 @@ describe('VcIssuer without did', () => {
         },
       },
     })
-    vcIssuer = new VcIssuerBuilder<DIDDocument>()
+    vcIssuer = new VcIssuerBuilder()
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)

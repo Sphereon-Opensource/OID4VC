@@ -1,7 +1,7 @@
-import { post } from '@sphereon/did-auth-siop'
 import {
   DEFAULT_EXPIRATION_TIME,
   IDTokenPayload,
+  post,
   RequestObjectPayload,
   ResponseIss,
   SignatureResponse,

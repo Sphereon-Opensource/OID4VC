@@ -35,7 +35,7 @@ export interface ITokenEndpointOpts {
   tokenExpiresIn?: number
   preAuthorizedCodeExpirationDuration?: number
   accessTokenSignerCallback?: JWTSignerCallback
-  accessTokenVerificationCallback?: JWTVerifyCallback<never>
+  accessTokenVerificationCallback?: JWTVerifyCallback
   accessTokenIssuer?: string
   accessTokenProvider?: AccessTokenProvider
 }

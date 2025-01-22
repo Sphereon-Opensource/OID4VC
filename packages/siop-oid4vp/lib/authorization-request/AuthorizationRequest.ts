@@ -1,8 +1,7 @@
 import { parseJWT } from '@sphereon/oid4vc-common'
 import { DcqlQuery } from 'dcql'
 
-import { PresentationDefinitionWithLocation } from '../authorization-response'
-import { findValidDcqlQuery } from '../authorization-response'
+import { findValidDcqlQuery, PresentationDefinitionWithLocation } from '../authorization-response'
 import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
@@ -268,22 +267,23 @@ export class AuthorizationRequest {
   }
 
   public async containsResponseType(singleType: ResponseType | string): Promise<boolean> {
-    const responseType: string = await this.getMergedProperty('response_type')
+    const responseType: string = this.getMergedProperty('response_type')
     return responseType?.includes(singleType) === true
   }
 
-  public async getMergedProperty<T>(key: string): Promise<T | undefined> {
-    const merged = await this.mergedPayloads()
+  public getMergedProperty<T>(key: string): T | undefined {
+    const merged = this.mergedPayloads()
     return merged[key] as T
   }
 
-  public async mergedPayloads(): Promise<RequestObjectPayload> {
-    const requestObjectPayload = { ...this.payload, ...(this.requestObject && (await this.requestObject.getPayload())) }
-    if (requestObjectPayload.scope && typeof requestObjectPayload.scope !== 'string') {
+  public mergedPayloads(): RequestObjectPayload {
+    const requestObjectPayload = this.requestObject?.getPayload()
+    const mergedPayload = { ...this.payload, ...requestObjectPayload }
+    if (mergedPayload.scope && typeof mergedPayload.scope !== 'string') {
       //  test mattr.launchpad.spec.ts does not supply a scope value
       throw new Error('Invalid scope value')
     }
-    return requestObjectPayload as RequestObjectPayload
+    return mergedPayload as RequestObjectPayload
   }
 
   public async getPresentationDefinitions(version?: SupportedVersion): Promise<PresentationDefinitionWithLocation[] | undefined> {

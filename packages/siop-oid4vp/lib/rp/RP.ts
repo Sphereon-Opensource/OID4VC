@@ -6,7 +6,7 @@ import {
   JarmDirectPostJwtAuthResponseValidationContext,
   JarmDirectPostJwtResponseParams,
 } from '@sphereon/jarm'
-import { decodeProtectedHeader, JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
+import { decodeProtectedHeader, JwtIssuer } from '@sphereon/oid4vc-common'
 import { Hasher } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
 
@@ -121,21 +121,21 @@ export class RP {
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
-    return await URI.fromOpts(authorizationRequestOpts)
-      .then(async (uri: URI) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
-          correlationId: opts.correlationId,
-          subject: await AuthorizationRequest.fromOpts(authorizationRequestOpts),
-        })
-        return uri
+    try {
+      const uri = await URI.fromOpts(authorizationRequestOpts)
+      const authRequest = await AuthorizationRequest.fromOpts(authorizationRequestOpts)
+      this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
+        correlationId: opts.correlationId,
+        subject: authRequest,
       })
-      .catch((error: Error) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_FAILED, {
-          correlationId: opts.correlationId,
-          error,
-        })
-        throw error
+      return uri
+    } catch (error) {
+      this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_FAILED, {
+        correlationId: opts.correlationId,
+        error,
       })
+      throw error
+    }
   }
 
   public async signalAuthRequestRetrieved(opts: { correlationId: string; error?: Error }) {
@@ -154,7 +154,9 @@ export class RP {
     response: string,
     opts: {
       decryptCompact: DecryptCompact
-      getAuthRequestPayload: (input: JarmDirectPostJwtResponseParams | JarmAuthResponseParams) => Promise<{ authRequestParams: RequestObjectPayload }>
+      getAuthRequestPayload: (input: JarmDirectPostJwtResponseParams | JarmAuthResponseParams) => Promise<{
+        authRequestParams: RequestObjectPayload
+      }>
       hasher?: Hasher
     },
   ) {
@@ -210,15 +212,15 @@ export class RP {
       dcqlQuery?: DcqlQuery
     },
   ): Promise<VerifiedAuthorizationResponse> {
-    const state = opts?.state || this.verifyResponseOptions.state
-    let correlationId: string | undefined = opts?.correlationId || state
+    const state = opts?.state ?? authorizationResponsePayload.state
+    let correlationId: string | undefined = opts?.correlationId ?? (await this.sessionManager.getCorrelationIdByState(state, true))
     let authorizationResponse: AuthorizationResponse
     try {
       authorizationResponse = await AuthorizationResponse.fromPayload(authorizationResponsePayload)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_RECEIVED_FAILED, {
-        correlationId: correlationId ?? uuidv4(), // correlation id cannot be derived from state in payload possible, hence a uuid as fallback
+        correlationId,
         subject: authorizationResponsePayload,
         error,
       })
@@ -408,8 +410,8 @@ export class RP {
       }
       const requestState = await this.sessionManager.getRequestStateByCorrelationId(correlationId, false)
       if (requestState) {
-        const reqNonce: string = await requestState.request.getMergedProperty('nonce')
-        const reqState: string = await requestState.request.getMergedProperty('state')
+        const reqNonce: string = requestState.request.getMergedProperty('nonce')
+        const reqState: string = requestState.request.getMergedProperty('state')
         nonce = nonce ?? reqNonce
         state = state ?? reqState
       }
@@ -435,10 +437,14 @@ export class RP {
     }
   }
 
-  private async emitEvent(
+  private emitEvent(
     type: AuthorizationEvents,
-    payload: { correlationId: string; subject?: AuthorizationRequest | AuthorizationResponse | AuthorizationResponsePayload; error?: Error },
-  ): Promise<void> {
+    payload: {
+      correlationId: string
+      subject?: AuthorizationRequest | AuthorizationResponse | AuthorizationResponsePayload
+      error?: Error
+    },
+  ): void {
     if (this._eventEmitter) {
       try {
         this._eventEmitter.emit(type, new AuthorizationEvent(payload))

@@ -1,4 +1,5 @@
 import { randomBytes } from './randomBytes.js';
+
 export * from './CredentialRequestUtil';
 export * from './CredentialResponseUtil';
 export * from './CredentialOfferUtil';

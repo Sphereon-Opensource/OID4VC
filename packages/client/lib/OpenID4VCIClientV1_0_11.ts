@@ -362,7 +362,7 @@ export class OpenID4VCIClientV1_0_11 {
   }: {
     credentialTypes: string | string[];
     context?: string[];
-    proofCallbacks: ProofOfPossessionCallbacks<any>;
+    proofCallbacks: ProofOfPossessionCallbacks;
     format?: CredentialFormat | OID4VCICredentialFormat;
     kid?: string;
     jwk?: JWK;

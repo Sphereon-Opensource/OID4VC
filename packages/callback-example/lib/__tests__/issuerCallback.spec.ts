@@ -7,6 +7,7 @@ import {
   CNonceState,
   CredentialConfigurationSupportedV1_0_13,
   CredentialIssuerMetadataV1_0_13,
+  CredentialOfferSession,
   CredentialRequest,
   IssuerCredentialSubjectDisplay,
   IssueStatus,
@@ -15,9 +16,13 @@ import {
   OpenId4VCIVersion,
   ProofOfPossession,
 } from '@sphereon/oid4vci-common'
-import { CredentialOfferSession } from '@sphereon/oid4vci-common'
-import { AuthorizationServerMetadataBuilder, CredentialSupportedBuilderV1_13, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
-import { MemoryStates } from '@sphereon/oid4vci-issuer'
+import {
+  AuthorizationServerMetadataBuilder,
+  CredentialSupportedBuilderV1_13,
+  MemoryStates,
+  VcIssuer,
+  VcIssuerBuilder,
+} from '@sphereon/oid4vci-issuer'
 import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
@@ -57,7 +62,7 @@ const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
   .withScopesSupported(['openid', 'abcdef'])
   .build()
 
-async function verifyCallbackFunction(args: { jwt: string; kid?: string }): Promise<JwtVerifyResult<DIDDocument>> {
+async function verifyCallbackFunction(args: { jwt: string; kid?: string }): Promise<JwtVerifyResult> {
   const result = await jose.jwtVerify(args.jwt, keypair.publicKey)
   const kid = result.protectedHeader.kid ?? args.kid
   const did = kid!.split('#')[0]
@@ -93,7 +98,7 @@ afterAll(async () => {
   await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
 })
 describe('issuerCallback', () => {
-  let vcIssuer: VcIssuer<DIDDocument>
+  let vcIssuer: VcIssuer
   const state = 'existing-state'
   const clientId = 'sphereon:wallet'
 
@@ -156,7 +161,7 @@ describe('issuerCallback', () => {
 
     const nonces = new MemoryStates<CNonceState>()
     await nonces.set('test_value', { cNonce: 'test_value', createdAt: +new Date(), issuerState: 'existing-state' })
-    vcIssuer = new VcIssuerBuilder<DIDDocument>()
+    vcIssuer = new VcIssuerBuilder()
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)

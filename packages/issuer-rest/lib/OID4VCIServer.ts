@@ -1,5 +1,6 @@
 import {
   AuthorizationRequest,
+  ClientMetadata,
   CredentialConfigurationSupportedV1_0_13,
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
@@ -21,7 +22,7 @@ import {
   pushedAuthorizationEndpoint,
 } from './oid4vci-api-functions'
 
-function buildVCIFromEnvironment<DIDDoc extends object>() {
+function buildVCIFromEnvironment() {
   const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
     .withCredentialSigningAlgValuesSupported(process.env.credential_signing_alg_values_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
@@ -50,7 +51,7 @@ function buildVCIFromEnvironment<DIDDoc extends object>() {
       } as IssuerCredentialSubjectDisplay, // fixme: This is wrong (remove the cast and see it has no matches)
     )
     .build()
-  return new VcIssuerBuilder<DIDDoc>()
+  const issuerBuilder = new VcIssuerBuilder()
     .withTXCode({ length: process.env.user_pin_length as unknown as number, input_mode: process.env.user_pin_input_mode as 'numeric' | 'text' })
     .withAuthorizationServers(process.env.authorization_server as string)
     .withCredentialEndpoint(process.env.credential_endpoint as string)
@@ -62,7 +63,19 @@ function buildVCIFromEnvironment<DIDDoc extends object>() {
     .withCredentialConfigurationsSupported(credentialsSupported)
     .withInMemoryCredentialOfferState()
     .withInMemoryCNonceState()
-    .build()
+
+  if (process.env.authorization_server_client_id) {
+    if (!process.env.authorization_server_redirect_uri) {
+      throw Error('Authorization server redirect uri is required when client id is set')
+    }
+    issuerBuilder.withASClientMetadataParams({
+      client_id: process.env.authorization_server_client_id,
+      client_secret: process.env.authorization_server_client_secret,
+      redirect_uris: [process.env.authorization_server_redirect_uri],
+    })
+  }
+
+  return issuerBuilder.build()
 }
 
 export type ICreateCredentialOfferURIResponse = {
@@ -85,6 +98,7 @@ export interface IGetIssueStatusEndpointOpts extends ISingleEndpointOpts {
 }
 
 export interface IOID4VCIServerOpts extends HasEndpointOpts {
+  asClientOpts?: ClientMetadata
   endpointOpts?: {
     tokenEndpointOpts?: ITokenEndpointOpts
     notificationOpts?: ISingleEndpointOpts
@@ -96,24 +110,27 @@ export interface IOID4VCIServerOpts extends HasEndpointOpts {
   baseUrl?: string
 }
 
-export class OID4VCIServer<DIDDoc extends object> {
-  private readonly _issuer: VcIssuer<DIDDoc>
+export class OID4VCIServer {
+  private readonly _issuer: VcIssuer
   private authRequestsData: Map<string, AuthorizationRequest> = new Map()
   private readonly _app: Express
   private readonly _baseUrl: URL
   private readonly _expressSupport: ExpressSupport
   // private readonly _server?: http.Server
   private readonly _router: express.Router
+  private readonly _asClientOpts?: ClientMetadata
 
   constructor(
     expressSupport: ExpressSupport,
-    opts: IOID4VCIServerOpts & { issuer?: VcIssuer<DIDDoc> } /*If not supplied as argument, it will be fully configured from environment variables*/,
+    opts: IOID4VCIServerOpts & { issuer?: VcIssuer } /*If not supplied as argument, it will be fully configured from environment variables*/,
   ) {
     this._baseUrl = new URL(opts?.baseUrl ?? process.env.BASE_URL ?? opts?.issuer?.issuerMetadata?.credential_issuer ?? 'http://localhost')
     this._expressSupport = expressSupport
     this._app = expressSupport.express
     this._router = express.Router()
     this._issuer = opts?.issuer ? opts.issuer : buildVCIFromEnvironment()
+    this._asClientOpts =
+      opts.asClientOpts || this._issuer.asClientOpts ? ({ ...opts.asClientOpts, ...this._issuer.asClientOpts } as ClientMetadata) : undefined
 
     pushedAuthorizationEndpoint(this.router, this.issuer, this.authRequestsData)
     getMetadataEndpoints(this.router, this.issuer)
@@ -144,7 +161,7 @@ export class OID4VCIServer<DIDDoc extends object> {
     return this._router
   }
 
-  get issuer(): VcIssuer<DIDDoc> {
+  get issuer(): VcIssuer {
     return this._issuer
   }
 
@@ -177,6 +194,8 @@ export class OID4VCIServer<DIDDoc extends object> {
         throw Error(
           `An external Authorization Server (AS) was already enabled in the issuer metadata (${authServer}). Cannot both have an AS and enable the token endpoint at the same time `,
         )
+      } else if (this._asClientOpts) {
+        throw Error(`OIDC Client metadata is set, but the token endpoint is not disabled. This is not supported.`)
       }
     }
   }

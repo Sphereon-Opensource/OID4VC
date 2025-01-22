@@ -48,8 +48,8 @@ interface KeyPair {
 jest.setTimeout(15000)
 
 describe('VcIssuer', () => {
-  let vcIssuer: VcIssuer<DIDDocument>
-  let server: OID4VCIServer<DIDDocument>
+  let vcIssuer: VcIssuer
+  let server: OID4VCIServer
   let accessToken: AccessTokenResponse
   const issuerState = 'previously-created-state'
   // const clientId = 'sphereon:wallet'
@@ -114,7 +114,7 @@ describe('VcIssuer', () => {
       credentialSubject: {},
     }
 
-    vcIssuer = new VcIssuerBuilder<DIDDocument>()
+    vcIssuer = new VcIssuerBuilder()
       .withAuthorizationMetadata(authorizationServerMetadata)
       .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
       .withDefaultCredentialOfferBaseUri('http://localhost:3456/test')

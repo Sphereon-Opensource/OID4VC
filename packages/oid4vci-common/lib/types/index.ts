@@ -1,3 +1,4 @@
+export * from './OpenIDClient';
 export * from './Authorization.types';
 export * from './CredentialIssuance.types';
 export * from './Generic.types';

@@ -29,7 +29,7 @@ import {
   ProofOfPossessionCallbacks,
   toAuthorizationResponsePayload,
 } from '@sphereon/oid4vci-common';
-import { CredentialFormat, DIDDocument } from '@sphereon/ssi-types';
+import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';
@@ -371,7 +371,7 @@ export class OpenID4VCIClientV1_0_13 {
     credentialIdentifier?: string;
     credentialTypes?: string | string[];
     context?: string[];
-    proofCallbacks: ProofOfPossessionCallbacks<any>;
+    proofCallbacks: ProofOfPossessionCallbacks;
     format?: CredentialFormat | OID4VCICredentialFormat;
     kid?: string;
     jwk?: JWK;
@@ -402,7 +402,7 @@ export class OpenID4VCIClientV1_0_13 {
     credentialIdentifier?: string;
     credentialTypes?: string | string[];
     context?: string[];
-    proofCallbacks?: ProofOfPossessionCallbacks<any>;
+    proofCallbacks?: ProofOfPossessionCallbacks;
     format?: CredentialFormat | OID4VCICredentialFormat;
     kid?: string;
     jwk?: JWK;
@@ -521,7 +521,7 @@ export class OpenID4VCIClientV1_0_13 {
       }
     }
     const request = proofBuilder
-      ? await credentialRequestClient.createCredentialRequest<DIDDocument>({
+      ? await credentialRequestClient.createCredentialRequest({
           proofInput: proofBuilder,
           credentialTypes,
           context,
@@ -530,7 +530,7 @@ export class OpenID4VCIClientV1_0_13 {
           credentialIdentifier,
           subjectIssuance,
         })
-      : await credentialRequestClient.createCredentialRequestWithoutProof<DIDDocument>({
+      : await credentialRequestClient.createCredentialRequestWithoutProof({
           credentialTypes,
           context,
           format,

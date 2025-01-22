@@ -212,7 +212,7 @@ export type AuthorizationServerClientOpts = {
   clientAssertionType?: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
   kid?: string;
   alg?: Alg;
-  signCallbacks?: ProofOfPossessionCallbacks<never>;
+  signCallbacks?: ProofOfPossessionCallbacks;
 };
 
 export interface IssuerOpts {
@@ -299,7 +299,7 @@ export enum CreateRequestObjectMode {
 
 export type RequestObjectOpts = {
   requestObjectMode?: CreateRequestObjectMode;
-  signCallbacks?: ProofOfPossessionCallbacks<never>;
+  signCallbacks?: ProofOfPossessionCallbacks;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clientMetadata?: Record<string, any>; // TODO: Merge SIOP/OID4VP
   iss?: string;

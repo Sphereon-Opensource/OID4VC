@@ -1,6 +1,6 @@
 import { SubjectIdentifierType, SubjectSyntaxTypesSupportedValues } from '@sphereon/did-auth-siop'
 import { getUniResolver, UniResolver } from '@sphereon/did-uni-client'
-import { DIDResolutionOptions, DIDResolutionResult, ParsedDID, Resolvable, Resolver } from 'did-resolver'
+import { DIDResolutionOptions, DIDResolutionResult, ParsedDID, Resolvable, Resolver, ResolverRegistry } from 'did-resolver'
 
 import { DIDDocument, ResolveOpts } from '../types'
 
@@ -78,13 +78,19 @@ export function getResolverUnion(
   }
   const specificDidMethods = subjectTypes.filter((sst) => !!sst && sst.startsWith('did:'))
   specificDidMethods.forEach((dm) => {
-    let methodResolver
+    let methodResolver: ResolverRegistry | Resolvable | undefined
     if (!resolverMap.has(dm) || resolverMap.get(dm) === null) {
       methodResolver = getUniResolver(getMethodFromDid(dm))
+      if (methodResolver) {
+        uniResolvers.push(methodResolver)
+      }
     } else {
       methodResolver = resolverMap.get(dm)
+      if (methodResolver) {
+        uniResolvers.push({ [dm]: methodResolver.resolve })
+      }
+
     }
-    uniResolvers.push(methodResolver)
   })
   return subjectTypes.indexOf(SubjectSyntaxTypesSupportedValues.DID.valueOf()) !== -1
     ? new Resolver(...{ fallbackResolver, ...uniResolvers })

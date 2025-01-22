@@ -5,6 +5,7 @@ import {
   CredentialRequestWithoutProofV1_0_13,
   CredentialResponse,
   DPoPResponseParams,
+  ExperimentalSubjectIssuance,
   getCredentialRequestForVersion,
   getUniformFormat,
   isDeferredCredentialResponse,
@@ -17,7 +18,6 @@ import {
   UniformCredentialRequest,
   URL_NOT_VALID,
 } from '@sphereon/oid4vci-common';
-import { ExperimentalSubjectIssuance } from '@sphereon/oid4vci-common';
 import { CredentialFormat, DIDDocument } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
@@ -53,7 +53,7 @@ export type CreateCredentialRequestOpts<DIDDoc = DIDDocument> = {
 };
 
 export async function buildProof<DIDDoc = DIDDocument>(
-  proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession,
+  proofInput: ProofOfPossessionBuilder | ProofOfPossession,
   opts: {
     version: OpenId4VCIVersion;
     cNonce?: string;
@@ -111,7 +111,7 @@ export class CredentialRequestClient {
   }): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     const { credentialIdentifier, credentialTypes, format, context, subjectIssuance } = opts;
 
-    const request = await this.createCredentialRequestWithoutProof<DIDDoc>({
+    const request = await this.createCredentialRequestWithoutProof({
       credentialTypes,
       context,
       format,
@@ -123,7 +123,7 @@ export class CredentialRequestClient {
   }
 
   public async acquireCredentialsUsingProof<DIDDoc = DIDDocument>(opts: {
-    proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
+    proofInput: ProofOfPossessionBuilder | ProofOfPossession;
     credentialIdentifier?: string;
     credentialTypes?: string | string[];
     context?: string[];
@@ -133,7 +133,7 @@ export class CredentialRequestClient {
   }): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     const { credentialIdentifier, credentialTypes, proofInput, format, context, subjectIssuance } = opts;
 
-    const request = await this.createCredentialRequest<DIDDoc>({
+    const request = await this.createCredentialRequest({
       proofInput,
       credentialTypes,
       context,
@@ -246,22 +246,22 @@ export class CredentialRequestClient {
   }
 
   public async createCredentialRequestWithoutProof<DIDDoc = DIDDocument>(
-    opts: CreateCredentialRequestOpts<DIDDoc>,
+    opts: CreateCredentialRequestOpts,
   ): Promise<CredentialRequestWithoutProofV1_0_13> {
     return await this.createCredentialRequestImpl(opts);
   }
 
   public async createCredentialRequest<DIDDoc = DIDDocument>(
-    opts: CreateCredentialRequestOpts<DIDDoc> & {
-      proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
+    opts: CreateCredentialRequestOpts & {
+      proofInput: ProofOfPossessionBuilder | ProofOfPossession;
     },
   ): Promise<CredentialRequestV1_0_13> {
     return await this.createCredentialRequestImpl(opts);
   }
 
   private async createCredentialRequestImpl<DIDDoc = DIDDocument>(
-    opts: CreateCredentialRequestOpts<DIDDoc> & {
-      proofInput?: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
+    opts: CreateCredentialRequestOpts & {
+      proofInput?: ProofOfPossessionBuilder | ProofOfPossession;
     },
   ): Promise<CredentialRequestV1_0_13> {
     const { proofInput, credentialIdentifier: credential_identifier } = opts;

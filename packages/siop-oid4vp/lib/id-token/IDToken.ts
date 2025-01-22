@@ -71,7 +71,7 @@ export class IDToken {
     return idToken
   }
 
-  public async payload(): Promise<IDTokenPayload> {
+  public payload(): IDTokenPayload {
     if (!this._payload) {
       if (!this._jwt) {
         throw new Error(SIOPErrors.NO_JWT)

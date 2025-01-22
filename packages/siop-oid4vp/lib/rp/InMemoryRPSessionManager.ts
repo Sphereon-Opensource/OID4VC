@@ -83,47 +83,51 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     const correlationId = await this.getCorrelationIdImpl(type, value, errorOnNotFound)
     const result = mapping[correlationId] as T
     if (!result && errorOnNotFound) {
-      throw Error(`Could not find ${type} from correlation id ${correlationId}`)
+      throw Error(`Could not find '${type}' belonging to correlation id '${correlationId}'`)
     }
     return result
   }
 
   private async onAuthorizationRequestCreatedSuccess(event: AuthorizationEvent<AuthorizationRequest>): Promise<void> {
-    this.cleanup().catch((error) => console.log(JSON.stringify(error)))
-    this.updateState('request', event, AuthorizationRequestStateStatus.CREATED).catch((error) => console.log(JSON.stringify(error)))
+    try {
+      this.updateState('request', event, AuthorizationRequestStateStatus.CREATED)
+      this.cleanup().catch((error) => console.log(JSON.stringify(error)))
+    } catch (error) {
+      console.log(JSON.stringify(error))
+    }
   }
 
   private async onAuthorizationRequestCreatedFailed(event: AuthorizationEvent<AuthorizationRequest>): Promise<void> {
     this.cleanup().catch((error) => console.log(JSON.stringify(error)))
-    this.updateState('request', event, AuthorizationRequestStateStatus.ERROR).catch((error) => console.log(JSON.stringify(error)))
+    this.updateState('request', event, AuthorizationRequestStateStatus.ERROR)
   }
 
   private async onAuthorizationRequestSentSuccess(event: AuthorizationEvent<AuthorizationRequest>): Promise<void> {
     this.cleanup().catch((error) => console.log(JSON.stringify(error)))
-    this.updateState('request', event, AuthorizationRequestStateStatus.SENT).catch((error) => console.log(JSON.stringify(error)))
+    this.updateState('request', event, AuthorizationRequestStateStatus.SENT)
   }
 
   private async onAuthorizationRequestSentFailed(event: AuthorizationEvent<AuthorizationRequest>): Promise<void> {
     this.cleanup().catch((error) => console.log(JSON.stringify(error)))
-    this.updateState('request', event, AuthorizationRequestStateStatus.ERROR).catch((error) => console.log(JSON.stringify(error)))
+    this.updateState('request', event, AuthorizationRequestStateStatus.ERROR)
   }
 
   private async onAuthorizationResponseReceivedSuccess(event: AuthorizationEvent<AuthorizationResponse>): Promise<void> {
     this.cleanup().catch((error) => console.log(JSON.stringify(error)))
-    await this.updateState('response', event, AuthorizationResponseStateStatus.RECEIVED)
+    this.updateState('response', event, AuthorizationResponseStateStatus.RECEIVED)
   }
 
   private async onAuthorizationResponseReceivedFailed(event: AuthorizationEvent<AuthorizationResponse>): Promise<void> {
     this.cleanup().catch((error) => console.log(JSON.stringify(error)))
-    await this.updateState('response', event, AuthorizationResponseStateStatus.ERROR)
+    this.updateState('response', event, AuthorizationResponseStateStatus.ERROR)
   }
 
   private async onAuthorizationResponseVerifiedFailed(event: AuthorizationEvent<AuthorizationResponse>): Promise<void> {
-    await this.updateState('response', event, AuthorizationResponseStateStatus.ERROR)
+    this.updateState('response', event, AuthorizationResponseStateStatus.ERROR)
   }
 
   private async onAuthorizationResponseVerifiedSuccess(event: AuthorizationEvent<AuthorizationResponse>): Promise<void> {
-    await this.updateState('response', event, AuthorizationResponseStateStatus.VERIFIED)
+    this.updateState('response', event, AuthorizationResponseStateStatus.VERIFIED)
   }
 
   public async getCorrelationIdByNonce(nonce: string, errorOnNotFound?: boolean): Promise<string | undefined> {
@@ -145,7 +149,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     if (type === 'correlationId') {
       return value
     }
-    const hash = await hashCode(value)
+    const hash = hashCode(value)
     const correlationId = type === 'nonce' ? this.nonceMapping[hash] : this.stateMapping[hash]
     if (!correlationId && errorOnNotFound) {
       throw Error(`Could not find ${type} value for ${value}`)
@@ -153,20 +157,20 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     return correlationId
   }
 
-  private async updateMapping(
+  private updateMapping(
     mapping: Record<number, string>,
     event: AuthorizationEvent<AuthorizationRequest | AuthorizationResponse>,
     key: string,
     value: string | undefined,
     allowExisting: boolean,
-  ) {
-    const hash = await hashcodeForValue(event, key)
+  ): void {
+    const hash = hashcodeForValue(event, key)
     const existing = mapping[hash]
     if (existing) {
       if (!allowExisting) {
         throw Error(`Mapping exists for key ${key} and we do not allow overwriting values`)
       } else if (value && existing !== value) {
-        throw Error('Value changed for key')
+        throw Error(`Value changed for key ${key} from ${existing} to ${value}`)
       }
     }
     if (!value) {
@@ -176,11 +180,11 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     }
   }
 
-  private async updateState(
+  private updateState(
     type: 'request' | 'response',
     event: AuthorizationEvent<AuthorizationRequest | AuthorizationResponse>,
     status: AuthorizationRequestStateStatus | AuthorizationResponseStateStatus,
-  ): Promise<void> {
+  ): void {
     if (!event) {
       throw new Error('event not present')
     } else if (!event.correlationId) {
@@ -198,9 +202,8 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
       }
       if (type === 'request') {
         this.authorizationRequests[event.correlationId] = eventState as AuthorizationRequestState
-        // We do not await these
-        this.updateMapping(this.nonceMapping, event, 'nonce', event.correlationId, true).catch((error) => console.log(JSON.stringify(error)))
-        this.updateMapping(this.stateMapping, event, 'state', event.correlationId, true).catch((error) => console.log(JSON.stringify(error)))
+        this.updateMapping(this.nonceMapping, event, 'nonce', event.correlationId, true)
+        this.updateMapping(this.stateMapping, event, 'state', event.correlationId, true)
       } else {
         this.authorizationResponses[event.correlationId] = eventState as AuthorizationResponseState
       }
@@ -216,6 +219,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     delete this.authorizationRequests[correlationId]
     delete this.authorizationResponses[correlationId]
   }
+
   private static async cleanMappingForCorrelationId(mapping: Record<number, string>, correlationId: string): Promise<void> {
     const keys = InMemoryRPSessionManager.getKeysForCorrelationId(mapping, correlationId)
     if (keys && keys.length > 0) {
@@ -247,8 +251,8 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
   }
 }
 
-async function hashcodeForValue(event: AuthorizationEvent<AuthorizationRequest | AuthorizationResponse>, key: string): Promise<number> {
-  const value = (await event.subject.getMergedProperty(key)) as string
+function hashcodeForValue(event: AuthorizationEvent<AuthorizationRequest | AuthorizationResponse>, key: string): number {
+  const value = event.subject.getMergedProperty<string>(key)
   if (!value) {
     throw Error(`No value found for key ${key} in Authorization Request`)
   }

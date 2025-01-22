@@ -1,6 +1,5 @@
 import { Hasher } from '@sphereon/ssi-types'
-import { DcqlMdocRepresentation, DcqlPresentationRecord, DcqlQuery, DcqlSdJwtVcRepresentation } from 'dcql'
-import { DcqlPresentationQueryResult } from 'dcql'
+import { DcqlMdocRepresentation, DcqlPresentationQueryResult, DcqlPresentationRecord, DcqlQuery, DcqlSdJwtVcRepresentation } from 'dcql'
 
 import { extractDataFromPath } from '../helpers'
 import { AuthorizationRequestPayload, SIOPErrors } from '../types'

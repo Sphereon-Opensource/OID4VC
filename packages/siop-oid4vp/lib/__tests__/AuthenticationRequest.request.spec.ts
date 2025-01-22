@@ -521,7 +521,7 @@ describe('create Request JWT should', () => {
     }
 
     // await URI.fromOpts(opts).then((uri) => console.log(uri.encodedUri));
-    await expect((await RequestObject.fromOpts(opts)).getPayload()).resolves.toMatchObject(expected)
+    expect((await RequestObject.fromOpts(opts)).getPayload()).toMatchObject(expected)
   })
 
   it('succeed when requesting with a valid PD', async () => {

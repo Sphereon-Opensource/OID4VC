@@ -4,17 +4,18 @@ import {
   DidJwtVerifier,
   getDidJwtVerifier,
   getDigestAlgorithmFromJwkThumbprintUri,
+  getJwtVerifierWithContext as getJwtVerifierWithContextCommon,
   getX5cVerifier,
   JWK,
   JwkJwtVerifier as JwkJwtVerifierBase,
   JwtHeader,
   JwtPayload,
+  JwtType,
   OpenIdFederationJwtVerifier,
+  parseJWT,
   VerifyJwtCallbackBase,
   X5cJwtVerifier,
 } from '@sphereon/oid4vc-common'
-import { getJwtVerifierWithContext as getJwtVerifierWithContextCommon } from '@sphereon/oid4vc-common'
-import { JwtType, parseJWT } from '@sphereon/oid4vc-common'
 
 import SIOPErrors from './Errors'
 import { RequestObjectPayload } from './SIOP.types'

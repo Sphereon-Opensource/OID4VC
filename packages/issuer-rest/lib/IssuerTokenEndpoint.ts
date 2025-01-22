@@ -13,7 +13,7 @@ import { NextFunction, Request, Response } from 'express'
  * @param issuer
  * @param interval
  */
-export const handleTokenRequest = <T extends object>({
+export const handleTokenRequest = ({
   tokenExpiresIn, // expiration in seconds
   accessTokenEndpoint,
   accessTokenSignerCallback,
@@ -23,7 +23,7 @@ export const handleTokenRequest = <T extends object>({
   interval,
   dpop,
 }: Required<Pick<ITokenEndpointOpts, 'accessTokenIssuer' | 'cNonceExpiresIn' | 'interval' | 'accessTokenSignerCallback' | 'tokenExpiresIn'>> & {
-  issuer: VcIssuer<T>
+  issuer: VcIssuer
   dpop?: {
     requireDPoP?: boolean
     dPoPVerifyJwtCallback: DPoPVerifyJwtCallback
@@ -114,10 +114,10 @@ export const handleTokenRequest = <T extends object>({
   }
 }
 
-export const verifyTokenRequest = <T extends object>({
+export const verifyTokenRequest = ({
   preAuthorizedCodeExpirationDuration,
   issuer,
-}: Required<Pick<ITokenEndpointOpts, 'preAuthorizedCodeExpirationDuration'> & { issuer: VcIssuer<T> }>) => {
+}: Required<Pick<ITokenEndpointOpts, 'preAuthorizedCodeExpirationDuration'> & { issuer: VcIssuer }>) => {
   return async (request: Request, response: Response, next: NextFunction) => {
     try {
       await assertValidAccessTokenRequest(request.body, {

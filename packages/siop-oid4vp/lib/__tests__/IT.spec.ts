@@ -154,7 +154,11 @@ describe('RP and OP interaction should', () => {
       const presentationVerificationCallback: PresentationVerificationCallback = async (_args) => ({ verified: true })
 
       const resolver = getResolver(['ethr'])
+      const eventEmitter = new EventEmitter()
+      const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
       const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+        .withEventEmitter(eventEmitter)
+        .withSessionManager(replayRegistry)
         .withClientId(rpMockEntity.did)
         .withScope('test')
         .withResponseType(ResponseType.ID_TOKEN)
@@ -255,7 +259,11 @@ describe('RP and OP interaction should', () => {
     const presentationVerificationCallback: PresentationVerificationCallback = async (_args) => ({ verified: true })
 
     const resolver = getResolver('ethr')
+    const eventEmitter = new EventEmitter()
+    const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
     const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      .withEventEmitter(eventEmitter)
+      .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
       .withScope('test')
       .withResponseType(ResponseType.ID_TOKEN)
@@ -448,7 +456,11 @@ describe('RP and OP interaction should', () => {
     const presentationVerificationCallback: PresentationVerificationCallback = async (_args) => ({ verified: true })
 
     const resolver = getResolver('ethr')
+    const eventEmitter = new EventEmitter()
+    const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
     const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      .withEventEmitter(eventEmitter)
+      .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
       .withScope('test')
       .withResponseType([ResponseType.ID_TOKEN, ResponseType.VP_TOKEN])
@@ -565,7 +577,11 @@ describe('RP and OP interaction should', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const presentationVerificationCallback: PresentationVerificationCallback = async (_args) => ({ verified: true })
     const resolver = getResolver('ethr')
+    const eventEmitter = new EventEmitter()
+    const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
     const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      .withEventEmitter(eventEmitter)
+      .withSessionManager(replayRegistry)
       .withClientId('test_client_id')
       .withScope('test')
       .withResponseType([ResponseType.VP_TOKEN, ResponseType.ID_TOKEN])
@@ -713,7 +729,11 @@ describe('RP and OP interaction should', () => {
       const presentationVerificationCallback: PresentationVerificationCallback = async (_args) => ({ verified: true })
 
       const resolver = getResolver('ethr')
+      const eventEmitter = new EventEmitter()
+      const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
       const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+        .withEventEmitter(eventEmitter)
+        .withSessionManager(replayRegistry)
         .withClientId(rpMockEntity.did)
         .withScope('test')
         .withResponseType([ResponseType.ID_TOKEN, ResponseType.VP_TOKEN])
@@ -835,7 +855,11 @@ describe('RP and OP interaction should', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const presentationVerificationCallback: PresentationVerificationCallback = async (_args) => ({ verified: true })
     const resolver = getResolver('ethr')
+    const eventEmitter = new EventEmitter()
+    const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
     const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      .withEventEmitter(eventEmitter)
+      .withSessionManager(replayRegistry)
       .withClientId('test_client_id')
       .withScope('test')
       .withResponseType([ResponseType.VP_TOKEN, ResponseType.ID_TOKEN])
@@ -982,7 +1006,11 @@ describe('RP and OP interaction should', () => {
     const presentationVerificationCallback: PresentationVerificationCallback = async (_args) => ({ verified: true })
 
     const resolver = getResolver('ethr')
+    const eventEmitter = new EventEmitter()
+    const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
     const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      .withEventEmitter(eventEmitter)
+      .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
       .withScope('test')
       .withResponseType([ResponseType.ID_TOKEN, ResponseType.VP_TOKEN])
@@ -1274,7 +1302,11 @@ describe('RP and OP interaction should', () => {
     const presentationVerificationCallback: PresentationVerificationCallback = async (_args) => ({ verified: true })
 
     const resolver = getResolver('ethr')
+    const eventEmitter = new EventEmitter()
+    const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
     const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      .withEventEmitter(eventEmitter)
+      .withSessionManager(replayRegistry)
       .withClientId('test_client_id')
       .withScope('test')
       .withResponseType(ResponseType.ID_TOKEN)
@@ -1394,7 +1426,11 @@ describe('RP and OP interaction should', () => {
     }
 
     const resolver = getResolver('ethr')
+    const eventEmitter = new EventEmitter()
+    const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
     const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      .withEventEmitter(eventEmitter)
+      .withSessionManager(replayRegistry)
       .withClientId('test_client_id')
       .withScope('test')
       .withResponseType(ResponseType.ID_TOKEN)
@@ -1716,7 +1752,7 @@ describe('RP and OP interaction should', () => {
       .build()
     const requestURI = await rp.createAuthorizationRequestURI({
       correlationId: '12345',
-      nonce: { propertyValue: 'qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg' },
+      nonce: { propertyValue: 'qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg', targets: PropertyTarget.REQUEST_OBJECT },
       state: { propertyValue: 'b32f0087fc9816eb813fd11f1' },
     })
     const reqStateCreated = await replayRegistry.getRequestStateByState('b32f0087fc9816eb813fd11f1', true)

@@ -1,4 +1,4 @@
-import { JwtIssuer, parseJWT } from '@sphereon/oid4vc-common'
+import { JwtHeader, JwtIssuer, parseJWT } from '@sphereon/oid4vc-common'
 
 import { ClaimPayloadCommonOpts, ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts } from '../authorization-request'
 import { assertValidAuthorizationRequestOpts } from '../authorization-request/Opts'
@@ -114,12 +114,12 @@ export class RequestObject {
     return this.jwt
   }
 
-  public async getPayload(): Promise<RequestObjectPayload | undefined> {
+  public getPayload(): RequestObjectPayload | undefined {
     if (!this.payload) {
       if (!this.jwt) {
         return undefined
       }
-      this.payload = removeNullUndefined(parseJWT(this.jwt).payload) as RequestObjectPayload
+      this.payload = removeNullUndefined(parseJWT<JwtHeader, RequestObjectPayload>(this.jwt).payload)
       this.removeRequestProperties()
       if (this.payload.registration_uri) {
         delete this.payload.registration

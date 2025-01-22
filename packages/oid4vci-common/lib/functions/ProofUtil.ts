@@ -36,9 +36,9 @@ const debug = Debug('sphereon:openid4vci:common');
  * @param existingJwt
  *  - Optional, clientId of the party requesting the credential
  */
-export const createProofOfPossession = async <DIDDoc>(
+export const createProofOfPossession = async <DIDDoc extends object = never>(
   popMode: PoPMode,
-  callbacks: ProofOfPossessionCallbacks<DIDDoc>,
+  callbacks: ProofOfPossessionCallbacks,
   jwtProps?: JwtProps,
   existingJwt?: Jwt,
 ): Promise<ProofOfPossession> => {
@@ -88,10 +88,10 @@ export const extractBearerToken = (authorizationHeader?: string): string | undef
   return authorizationHeader ? /Bearer (.*)/i.exec(authorizationHeader)?.[1] : undefined;
 };
 
-export const validateJWT = async (
+export const validateJWT = async <DIDDoc extends object = never>(
   jwt?: string,
-  opts?: { kid?: string; accessTokenVerificationCallback?: JWTVerifyCallback<never> },
-): Promise<JwtVerifyResult<any>> => {
+  opts?: { kid?: string; accessTokenVerificationCallback?: JWTVerifyCallback },
+): Promise<JwtVerifyResult> => {
   if (!jwt) {
     throw Error('No JWT was supplied');
   }

@@ -1,4 +1,4 @@
-import { decodeJwt, decodeProtectedHeader, uuidv4 } from '@sphereon/oid4vc-common'
+import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AccessTokenRequest,
@@ -15,9 +15,6 @@ import {
   Grant,
   IssueStatusResponse,
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
-  JWTHeader,
-  JWTVerifyCallback,
-  JwtVerifyResult,
   NotificationRequest,
   NotificationStatusEventNames,
   OpenId4VCIVersion,
@@ -29,7 +26,7 @@ import {
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
-import { env, ISingleEndpointOpts, oidcDiscoverIssuer, oidcGetClient, sendErrorResponse } from '@sphereon/ssi-express-support'
+import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
 
@@ -42,11 +39,9 @@ import {
 } from './OID4VCIServer'
 import { validateRequestBody } from './expressUtils'
 
-import { ClientMetadata } from './index'
-
 const expiresIn = process.env.EXPIRES_IN ? parseInt(process.env.EXPIRES_IN) : 90
 
-export function getIssueStatusEndpoint<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>, opts: IGetIssueStatusEndpointOpts) {
+export function getIssueStatusEndpoint(router: Router, issuer: VcIssuer, opts: IGetIssueStatusEndpointOpts) {
   const path = determinePath(opts.baseUrl, opts?.path ?? '/webapp/credential-offer-status', { stripBasePath: true })
   LOG.log(`[OID4VCI] getIssueStatus endpoint enabled at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
@@ -86,18 +81,15 @@ function isExternalAS(issuerMetadata: CredentialIssuerMetadataOptsV1_0_13) {
   return issuerMetadata.authorization_servers?.some((as) => !as.includes(issuerMetadata.credential_issuer))
 }
 
-export function accessTokenEndpoint<DIDDoc extends object>(
-  router: Router,
-  issuer: VcIssuer<DIDDoc>,
-  opts: ITokenEndpointOpts & ISingleEndpointOpts & { baseUrl: string | URL },
-) {
-  const tokenEndpoint = issuer.issuerMetadata.token_endpoint
-  const externalAS = isExternalAS(issuer.issuerMetadata)
+export function accessTokenEndpoint(router: Router, issuer: VcIssuer, opts: ITokenEndpointOpts & ISingleEndpointOpts & { baseUrl: string | URL }) {
+  const externalAS = isExternalAS(issuer.issuerMetadata) || issuer.asClientOpts
   if (externalAS || (opts.accessTokenProvider && opts.accessTokenProvider !== 'internal')) {
-    LOG.log(`[OID4VCI] External Authorization Server ${tokenEndpoint} is being used. Not enabling issuer token endpoint`)
+    LOG.log(
+      `[OID4VCI] External Authorization Server ${issuer.issuerMetadata.authorization_servers} is being used. Not enabling internal issuer token endpoint`,
+    )
     return
   } else if (opts?.enabled === false) {
-    LOG.log(`[OID4VCI] Token endpoint is not enabled`)
+    LOG.log(`[OID4VCI] Internal issuer token endpoint is not enabled`)
     return
   }
   const accessTokenIssuer =
@@ -149,9 +141,9 @@ export function accessTokenEndpoint<DIDDoc extends object>(
   )
 }
 
-export function getCredentialEndpoint<DIDDoc extends object>(
+export function getCredentialEndpoint(
   router: Router,
-  issuer: VcIssuer<DIDDoc>,
+  issuer: VcIssuer,
   opts: Pick<ITokenEndpointOpts, 'accessTokenVerificationCallback' | 'accessTokenSignerCallback' | 'tokenExpiresIn' | 'cNonceExpiresIn'> &
     ISingleEndpointOpts & { baseUrl: string | URL },
 ) {
@@ -172,7 +164,7 @@ export function getCredentialEndpoint<DIDDoc extends object>(
       LOG.log(`credential request received`, credentialRequest)
       try {
         const jwt = extractBearerToken(request.header('Authorization'))
-        await validateJWT(jwt, { accessTokenVerificationCallback: opts.accessTokenVerificationCallback })
+        await validateJWT(jwt, { accessTokenVerificationCallback: opts.accessTokenVerificationCallback ?? issuer.jwtVerifyCallback })
       } catch (e) {
         LOG.warning(e)
         return sendErrorResponse(response, 400, {
@@ -200,9 +192,9 @@ export function getCredentialEndpoint<DIDDoc extends object>(
   })
 }
 
-export function notificationEndpoint<DIDDoc extends object>(
+export function notificationEndpoint(
   router: Router,
-  issuer: VcIssuer<DIDDoc>,
+  issuer: VcIssuer,
   opts: ISingleEndpointOpts & Pick<ITokenEndpointOpts, 'accessTokenVerificationCallback'> & { baseUrl: string | URL },
 ) {
   const endpoint = issuer.issuerMetadata.notification_endpoint
@@ -279,7 +271,7 @@ export function notificationEndpoint<DIDDoc extends object>(
   })
 }
 
-export function getCredentialOfferEndpoint<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>, opts?: IGetCredentialOfferEndpointOpts) {
+export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: IGetCredentialOfferEndpointOpts) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers/:id', { stripBasePath: true })
   LOG.log(`[OID4VCI] getCredentialOffer endpoint enabled at ${path}`)
   router.get(path, async (request: Request, response: Response) => {
@@ -307,11 +299,7 @@ export function getCredentialOfferEndpoint<DIDDoc extends object>(router: Router
   })
 }
 
-export function createCredentialOfferEndpoint<DIDDoc extends object>(
-  router: Router,
-  issuer: VcIssuer<DIDDoc>,
-  opts?: ICreateCredentialOfferEndpointOpts & { baseUrl?: string },
-) {
+export function createCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: ICreateCredentialOfferEndpointOpts & { baseUrl?: string }) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers', { stripBasePath: true })
   LOG.log(`[OID4VCI] createCredentialOffer endpoint enabled at ${path}`)
   router.post(path, async (request: Request<CredentialOfferRESTRequest>, response: Response<ICreateCredentialOfferURIResponse>) => {
@@ -359,12 +347,23 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
   })
 }
 
-export function pushedAuthorizationEndpoint<DIDDoc extends object>(
+export function pushedAuthorizationEndpoint(
   router: Router,
-  issuer: VcIssuer<DIDDoc>,
+  issuer: VcIssuer,
   authRequestsData: Map<string, AuthorizationRequest>,
   opts?: ISingleEndpointOpts,
 ) {
+  const externalAS = isExternalAS(issuer.issuerMetadata) || issuer.asClientOpts
+  if (externalAS) {
+    LOG.log(
+      `[OID4VCI] External Authorization Server ${issuer.issuerMetadata.authorization_servers} is being used. Not enabling internal PAR endpoint`,
+    )
+    return
+  } else if (opts?.enabled === false) {
+    LOG.log(`[OID4VCI] Internal PAR endpoint is not enabled`)
+    return
+  }
+
   const handleHttpStatus400 = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.body) {
       return res.status(400).send({ error: 'invalid_request', error_description: 'Request body must be present' })
@@ -424,7 +423,7 @@ export function pushedAuthorizationEndpoint<DIDDoc extends object>(
   })
 }
 
-export function getMetadataEndpoints<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>) {
+export function getMetadataEndpoints(router: Router, issuer: VcIssuer) {
   const credentialIssuerHandler = (request: Request, response: Response) => {
     return response.send(issuer.issuerMetadata)
   }
@@ -497,32 +496,4 @@ export function getBasePath(url?: URL | string) {
     return ''
   }
   return `/${trimBoth(basePath, '/')}`
-}
-
-export async function oidcAccessTokenVerifyCallback(opts: {
-  credentialIssuer: string
-  authorizationServer: string
-  clientMetadata?: ClientMetadata
-}): Promise<JWTVerifyCallback> {
-  const callback = async (args: { jwt: string; kid?: string }): Promise<JwtVerifyResult> => {
-    const introspection = await oidcClient.introspect(args.jwt)
-    if (!introspection.active) {
-      return Promise.reject(Error('Access token is not active or invalid'))
-    }
-    const jwt = { header: decodeProtectedHeader(args.jwt) as JWTHeader, payload: decodeJwt(args.jwt) }
-
-    return {
-      jwt,
-      alg: jwt.header.alg,
-      ...(jwt.header.jwk && { jwk: jwt.header.jwk }),
-      ...(jwt.header.x5c && { x5c: jwt.header.x5c }),
-      ...(jwt.header.kid && { kid: jwt.header.kid }),
-      // We could resolve the did document here if the kid is a VM
-    }
-  }
-
-  const clientMetadata = opts.clientMetadata ?? { client_id: opts.credentialIssuer }
-  const oidcIssuer = await oidcDiscoverIssuer({ issuerUrl: opts.authorizationServer })
-  const oidcClient = await oidcGetClient(oidcIssuer.issuer, clientMetadata)
-  return callback
 }

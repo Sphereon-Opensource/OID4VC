@@ -20,7 +20,7 @@ export const createResponsePayload = async (
   }
 
   // If state was in request, it must be in response
-  const state: string | undefined = await authorizationRequest.getMergedProperty('state')
+  const state: string | undefined = authorizationRequest.getMergedProperty('state')
 
   const responsePayload: AuthorizationResponsePayload = {
     ...(responseOpts.accessToken && { access_token: responseOpts.accessToken, expires_in: responseOpts.expiresIn || 3600 }),

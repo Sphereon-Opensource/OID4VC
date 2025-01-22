@@ -1,10 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 import { JarmClientMetadata } from '@sphereon/jarm'
-import {
-  DynamicRegistrationClientMetadata,
-  JWKS,
-  SigningAlgo
-} from '@sphereon/oid4vc-common'
+import { DynamicRegistrationClientMetadata, JWKS, SigningAlgo } from '@sphereon/oid4vc-common'
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import {
   AdditionalClaims,
@@ -15,22 +11,17 @@ import {
   PresentationSubmission,
   W3CVerifiableCredential,
   W3CVerifiablePresentation,
-  WrappedVerifiablePresentation
+  WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
 
-import {
-  AuthorizationRequest,
-  CreateAuthorizationRequestOpts,
-  PropertyTargets,
-  VerifyAuthorizationRequestOpts
-} from '../authorization-request'
+import { AuthorizationRequest, CreateAuthorizationRequestOpts, PropertyTargets, VerifyAuthorizationRequestOpts } from '../authorization-request'
 import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   PresentationDefinitionWithLocation,
   PresentationVerificationCallback,
-  VerifyAuthorizationResponseOpts
+  VerifyAuthorizationResponseOpts,
 } from '../authorization-response'
 import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'

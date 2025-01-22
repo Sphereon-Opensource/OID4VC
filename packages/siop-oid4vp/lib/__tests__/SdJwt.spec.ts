@@ -1,3 +1,5 @@
+import { EventEmitter } from 'events'
+
 import { defaultHasher, SigningAlgo } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition } from '@sphereon/pex'
 import { decodeSdJwtVc, OriginalVerifiableCredential } from '@sphereon/ssi-types'
@@ -5,6 +7,7 @@ import { DcqlCredentialRepresentation, DcqlQuery } from 'dcql'
 import { Json } from 'dcql/dist/src/u-dcql'
 
 import {
+  InMemoryRPSessionManager,
   OP,
   PassBy,
   PresentationDefinitionWithLocation,
@@ -124,7 +127,11 @@ describe('RP and OP interaction should', () => {
     }
 
     const resolver = getResolver('ethr')
+    const eventEmitter = new EventEmitter()
+    const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
     const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      .withEventEmitter(eventEmitter)
+      .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
       .withScope('test')
       .withHasher(pexHasher)
@@ -238,9 +245,13 @@ describe('RP and OP interaction should', () => {
     }
 
     const resolver = getResolver('ethr')
+    const eventEmitter = new EventEmitter()
+    const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
     const rp = RP.builder({
       requestVersion: SupportedVersion.SIOPv2_D12_OID4VP_D18,
     })
+      .withEventEmitter(eventEmitter)
+      .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
       .withHasher(pexHasher)
       .withResponseType([ResponseType.VP_TOKEN])
@@ -365,7 +376,11 @@ describe('RP and OP interaction should', () => {
     }
 
     const resolver = getResolver('ethr')
+    const eventEmitter = new EventEmitter()
+    const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
     const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_D12_OID4VP_D20 })
+      .withEventEmitter(eventEmitter)
+      .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
       .withScope('test')
       .withHasher(pexHasher)

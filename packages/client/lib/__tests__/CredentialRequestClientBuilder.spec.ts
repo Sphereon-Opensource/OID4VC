@@ -57,7 +57,7 @@ interface KeyPair {
   privateKey: KeyObject;
 }
 
-async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; kid?: string }): Promise<JwtVerifyResult<unknown>> {
+async function proofOfPossessionVerifierCallbackFunction(args: { jwt: string; kid?: string }): Promise<JwtVerifyResult> {
   const result = await jose.jwtVerify(args.jwt, keypair.publicKey);
   const kid = result.protectedHeader.kid ?? args.kid;
   const did = kid!.split('#')[0];

@@ -5,12 +5,14 @@ import { Hasher } from '@sphereon/ssi-types'
 
 import { PropertyTarget, PropertyTargets } from '../authorization-request'
 import { PresentationVerificationCallback } from '../authorization-response'
-import { ClientIdScheme, CreateJwtCallback, RequestAud, VerifyJwtCallback } from '../types'
 import {
   AuthorizationRequestPayload,
+  ClientIdScheme,
   ClientMetadataOpts,
+  CreateJwtCallback,
   ObjectBy,
   PassBy,
+  RequestAud,
   RequestObjectPayload,
   ResponseIss,
   ResponseMode,
@@ -18,6 +20,7 @@ import {
   RevocationVerification,
   RevocationVerificationCallback,
   SupportedVersion,
+  VerifyJwtCallback,
 } from '../types'
 
 import { assignIfAuth, assignIfRequestObject, isTarget, isTargetOrNoTargets } from './Opts'

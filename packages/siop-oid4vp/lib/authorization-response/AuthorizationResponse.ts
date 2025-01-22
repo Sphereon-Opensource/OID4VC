@@ -10,10 +10,10 @@ import { assertValidDcqlPresentationRecord } from './Dcql'
 import {
   assertValidVerifiablePresentations,
   extractNonceFromWrappedVerifiablePresentation,
+  extractPresentationsFromDcqlVpToken,
   extractPresentationsFromVpToken,
   verifyPresentations,
 } from './OpenID4VP'
-import { extractPresentationsFromDcqlVpToken } from './OpenID4VP'
 import { assertValidResponseOpts } from './Opts'
 import { createResponsePayload } from './Payload'
 import { AuthorizationResponseOpts, PresentationDefinitionWithLocation, VerifyAuthorizationResponseOpts } from './types'
@@ -169,12 +169,12 @@ export class AuthorizationResponse {
 
     const verifiedIdToken = await this.idToken?.verify(verifyOpts)
     if (this.payload.vp_token && !verifyOpts.presentationDefinitions && !verifyOpts.dcqlQuery) {
-      throw Promise.reject(Error('vp_token is present, but no presentation definitions or dcql query provided'))
+      return Promise.reject(Error('vp_token is present, but no presentation definitions or dcql query provided'))
     }
 
     const emptyPresentationDefinitions = Array.isArray(verifyOpts.presentationDefinitions) && verifyOpts.presentationDefinitions.length === 0
     if (!this.payload.vp_token && ((verifyOpts.presentationDefinitions && !emptyPresentationDefinitions) || verifyOpts.dcqlQuery)) {
-      throw Promise.reject(Error('Presentation definitions or dcql query provided, but no vp_token present'))
+      return Promise.reject(Error('Presentation definitions or dcql query provided, but no vp_token present'))
     }
 
     const oid4vp = this.payload.vp_token ? await verifyPresentations(this, verifyOpts) : undefined
@@ -228,12 +228,12 @@ export class AuthorizationResponse {
     return this._idToken
   }
 
-  public async getMergedProperty<T>(key: string, opts?: { consistencyCheck?: boolean; hasher?: Hasher }): Promise<T | undefined> {
-    const merged = await this.mergedPayloads(opts)
+  public getMergedProperty<T>(key: string, opts?: { consistencyCheck?: boolean; hasher?: Hasher }): T | undefined {
+    const merged = this.mergedPayloads(opts)
     return merged[key] as T
   }
 
-  public async mergedPayloads(opts?: { consistencyCheck?: boolean; hasher?: Hasher }): Promise<AuthorizationResponsePayload> {
+  public mergedPayloads(opts?: { consistencyCheck?: boolean; hasher?: Hasher }): AuthorizationResponsePayload {
     let nonce: string | undefined = this._payload.nonce
     if (this._payload?.vp_token) {
       let presentations: WrappedVerifiablePresentation | WrappedVerifiablePresentation[]
@@ -259,7 +259,7 @@ export class AuthorizationResponse {
         .find((nonce) => nonce !== undefined)
     }
 
-    const idTokenPayload = await this.idToken?.payload()
+    const idTokenPayload = this.idToken?.payload()
     if (opts?.consistencyCheck !== false && idTokenPayload) {
       Object.entries(idTokenPayload).forEach((entry) => {
         if (typeof entry[0] === 'string' && this.payload[entry[0]] && this.payload[entry[0]] !== entry[1]) {
@@ -268,7 +268,7 @@ export class AuthorizationResponse {
       })
     }
     if (!nonce && this._idToken) {
-      nonce = (await this._idToken.payload()).nonce
+      nonce = idTokenPayload.nonce
     }
 
     return { ...this.payload, ...idTokenPayload, nonce }
