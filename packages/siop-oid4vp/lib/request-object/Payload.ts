@@ -18,7 +18,7 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
 
   const state = getState(payload.state)
   const registration = await createRequestRegistration(opts.clientMetadata, opts)
-  const claims = createPresentationDefinitionClaimsProperties(payload.claims)
+  const claims = await createPresentationDefinitionClaimsProperties(payload.claims)
 
   const metadataKey = opts.version >= SupportedVersion.SIOPv2_D11.valueOf() ? 'client_metadata' : 'registration'
   const clientId = payload.client_id ?? registration.payload[metadataKey]?.client_id

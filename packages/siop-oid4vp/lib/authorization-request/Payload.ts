@@ -1,6 +1,6 @@
 import { PEX } from '@sphereon/pex'
 
-import { getNonce, removeNullUndefined } from '../helpers'
+import { getNonce, getWithUrl, removeNullUndefined } from '../helpers'
 import { RequestObject } from '../request-object'
 import { isTarget, isTargetOrNoTargets } from '../rp/Opts'
 import { RPRegistrationMetadataPayloadSchema } from '../schemas'
@@ -11,13 +11,13 @@ import {
   PassBy,
   RPRegistrationMetadataPayload,
   SIOPErrors,
-  SupportedVersion,
+  SupportedVersion
 } from '../types'
 
 import { createRequestRegistration } from './RequestRegistration'
 import { ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts, PropertyTarget } from './types'
 
-export const createPresentationDefinitionClaimsProperties = (opts: ClaimPayloadOptsVID1): ClaimPayloadVID1 => {
+export const createPresentationDefinitionClaimsProperties = async (opts: ClaimPayloadOptsVID1): Promise<ClaimPayloadVID1> => {
   if (
     !opts ||
     !opts.vp_token ||
@@ -26,10 +26,14 @@ export const createPresentationDefinitionClaimsProperties = (opts: ClaimPayloadO
     return undefined
   }
 
-  if (opts.vp_token.presentation_definition) {
-    const discoveryResult = PEX.definitionVersionDiscovery(opts.vp_token.presentation_definition)
+  let presentationDef = opts.vp_token.presentation_definition
+  if (!presentationDef && opts.vp_token.presentation_definition_uri) {
+    presentationDef = await getWithUrl(opts.vp_token.presentation_definition_uri, false)
+  }
+  if (presentationDef) {
+    const discoveryResult = PEX.definitionVersionDiscovery(presentationDef)
     if (discoveryResult.error) {
-      throw new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID)
+      return Promise.reject(new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID))
     }
   }
 
@@ -55,7 +59,7 @@ export const createAuthorizationRequestPayload = async (
   // TODO: if opts['registration] throw Error to get rid of test code using that key
   const clientMetadata = opts['registration'] ?? (opts.clientMetadata as ClientMetadataOpts)
   const registration = await createRequestRegistration(clientMetadata, opts)
-  const claims = opts.version >= SupportedVersion.SIOPv2_ID1 ? opts.payload.claims : createPresentationDefinitionClaimsProperties(opts.payload.claims)
+  const claims = opts.version >= SupportedVersion.SIOPv2_ID1 ? opts.payload.claims : await createPresentationDefinitionClaimsProperties(opts.payload.claims)
   const isRequestTarget = isTargetOrNoTargets(PropertyTarget.AUTHORIZATION_REQUEST, opts.requestObject.targets)
   const isRequestByValue = opts.requestObject.passBy === PassBy.VALUE
 
