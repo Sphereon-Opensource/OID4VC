@@ -136,6 +136,7 @@ export class OpenID4VCIClient {
     pkce,
     authorizationRequest,
     createAuthorizationRequestURL,
+    endpointMetadata
   }: {
     credentialIssuer: string;
     kid?: string;
@@ -145,6 +146,7 @@ export class OpenID4VCIClient {
     createAuthorizationRequestURL?: boolean;
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
     pkce?: PKCEOpts;
+    endpointMetadata?: EndpointMetadataResult
   }) {
     const client = new OpenID4VCIClient({
       kid,
@@ -153,6 +155,7 @@ export class OpenID4VCIClient {
       credentialIssuer,
       pkce,
       authorizationRequest,
+      endpointMetadata
     });
     if (retrieveServerMetadata === undefined || retrieveServerMetadata) {
       await client.retrieveServerMetadata();
@@ -179,6 +182,7 @@ export class OpenID4VCIClient {
     createAuthorizationRequestURL,
     authorizationRequest,
     resolveOfferUri,
+    endpointMetadata
   }: {
     uri: string;
     kid?: string;
@@ -189,6 +193,7 @@ export class OpenID4VCIClient {
     pkce?: PKCEOpts;
     clientId?: string;
     authorizationRequest?: AuthorizationRequestOpts; // Can be provided here, or when manually calling createAuthorizationUrl
+    endpointMetadata?: EndpointMetadataResult
   }): Promise<OpenID4VCIClient> {
     const credentialOfferClient = await CredentialOfferClient.fromURI(uri, { resolve: resolveOfferUri });
     const client = new OpenID4VCIClient({
@@ -198,6 +203,7 @@ export class OpenID4VCIClient {
       clientId: clientId ?? authorizationRequest?.clientId ?? credentialOfferClient.clientId,
       pkce,
       authorizationRequest,
+      endpointMetadata
     });
 
     if (retrieveServerMetadata === undefined || retrieveServerMetadata) {

@@ -1,5 +1,6 @@
 import { parseJWT } from '@sphereon/oid4vc-common'
 
+import { Dcql } from '../authorization-response'
 import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { decodeUriAsJson, encodeJsonAsURI, fetchByReferenceOrUseByValue } from '../helpers'
 import { assertValidRequestObjectPayload, RequestObject } from '../request-object'
@@ -163,8 +164,9 @@ export class URI implements AuthorizationRequestURI {
     const requestObjectPayload: RequestObjectPayload = requestObjectJwt ? (parseJWT(requestObjectJwt).payload as RequestObjectPayload) : undefined
 
     if (requestObjectPayload) {
-      // Only used to validate if the request object contains presentation definition(s)
+      // Only used to validate if the request object contains presentation definition(s) | a dcql query
       await PresentationExchange.findValidPresentationDefinitions({ ...authorizationRequestPayload, ...requestObjectPayload })
+      await Dcql.findValidDcqlQuery({ ...authorizationRequestPayload, ...requestObjectPayload })
 
       assertValidRequestObjectPayload(requestObjectPayload)
       if (requestObjectPayload.registration) {
@@ -235,16 +237,22 @@ export class URI implements AuthorizationRequestURI {
     return { scheme, authorizationRequestPayload }
   }
 
-  public static async parseAndResolve(uri: string) {
+  public static async parseAndResolve(uri: string, rpRegistrationMetadata?: RPRegistrationMetadataPayload) {
     if (!uri) {
       throw Error(SIOPErrors.BAD_PARAMS)
     }
     const { authorizationRequestPayload, scheme } = this.parse(uri)
+
     const requestObjectJwt = await fetchByReferenceOrUseByValue(authorizationRequestPayload.request_uri, authorizationRequestPayload.request, true)
-    const registrationMetadata: RPRegistrationMetadataPayload = await fetchByReferenceOrUseByValue(
-      authorizationRequestPayload['client_metadata_uri'] ?? authorizationRequestPayload['registration_uri'],
-      authorizationRequestPayload['client_metadata'] ?? authorizationRequestPayload['registration'],
-    )
+    let registrationMetadata: RPRegistrationMetadataPayload
+    if (rpRegistrationMetadata !== undefined && rpRegistrationMetadata !== null) {
+      registrationMetadata = rpRegistrationMetadata
+    } else {
+        registrationMetadata = await fetchByReferenceOrUseByValue(
+        authorizationRequestPayload['client_metadata_uri'] ?? authorizationRequestPayload['registration_uri'],
+        authorizationRequestPayload['client_metadata'] ?? authorizationRequestPayload['registration'],
+      )
+    }
     assertValidRPRegistrationMedataPayload(registrationMetadata)
     return { scheme, authorizationRequestPayload, requestObjectJwt, registrationMetadata }
   }

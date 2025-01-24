@@ -10,6 +10,7 @@ import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   AuthorizationResponseWithCorrelationId,
+  DcqlResponseOpts,
   PresentationExchangeResponseOpts,
 } from '../authorization-response'
 import { encodeJsonAsURI, post } from '../helpers'
@@ -24,7 +25,7 @@ import {
   RegisterEventListener,
   RequestObjectPayload,
   ResponseIss,
-  ResponseMode,
+  ResponseMode, RPRegistrationMetadataPayload,
   SIOPErrors,
   SupportedVersion,
   UrlEncodingFormat,
@@ -106,7 +107,8 @@ export class OP {
       issuer?: ResponseIss | string
       verification?: Verification
       presentationExchange?: PresentationExchangeResponseOpts
-      isFirstParty?: boolean
+      dcqlResponse?: DcqlResponseOpts
+	  isFirstParty?: boolean
     },
   ): Promise<AuthorizationResponseWithCorrelationId> {
     if (
@@ -276,9 +278,10 @@ export class OP {
    * Create an Authentication Request Payload from a URI string
    *
    * @param encodedUri
+   * @param rpRegistrationMetadata
    */
-  public async parseAuthorizationRequestURI(encodedUri: string): Promise<ParsedAuthorizationRequestURI> {
-    const { scheme, requestObjectJwt, authorizationRequestPayload, registrationMetadata } = await URI.parseAndResolve(encodedUri)
+  public async parseAuthorizationRequestURI(encodedUri: string, rpRegistrationMetadata?: RPRegistrationMetadataPayload): Promise<ParsedAuthorizationRequestURI> {
+    const { scheme, requestObjectJwt, authorizationRequestPayload, registrationMetadata } = await URI.parseAndResolve(encodedUri, rpRegistrationMetadata)
 
     return {
       encodedUri,
@@ -296,6 +299,7 @@ export class OP {
     issuer?: IIssuerId | ResponseIss
     audience?: string
     presentationExchange?: PresentationExchangeResponseOpts
+    dcqlResponse?: DcqlResponseOpts
   }): AuthorizationResponseOpts {
     const version = opts.version ?? this._createResponseOptions.version
     let issuer = opts.issuer ?? this._createResponseOptions?.registration?.issuer
@@ -310,11 +314,14 @@ export class OP {
     }
     // We are taking the whole presentationExchange object from a certain location
     const presentationExchange = opts.presentationExchange ?? this._createResponseOptions.presentationExchange
+    const dcqlQuery = opts.dcqlResponse ?? this._createResponseOptions.dcqlResponse
+
     const responseURI = opts.audience ?? this._createResponseOptions.responseURI
     return {
       ...this._createResponseOptions,
       ...opts,
       ...(presentationExchange && { presentationExchange }),
+      ...(dcqlQuery && { dcqlQuery }),
       registration: { ...this._createResponseOptions?.registration, issuer },
       responseURI,
       responseURIType:

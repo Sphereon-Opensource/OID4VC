@@ -1,6 +1,10 @@
 // noinspection JSUnusedGlobalSymbols
 import { JarmClientMetadata } from '@sphereon/jarm'
-import { DynamicRegistrationClientMetadata, JWKS, SigningAlgo } from '@sphereon/oid4vc-common'
+import {
+  DynamicRegistrationClientMetadata,
+  JWKS,
+  SigningAlgo
+} from '@sphereon/oid4vc-common'
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import {
   AdditionalClaims,
@@ -11,22 +15,29 @@ import {
   PresentationSubmission,
   W3CVerifiableCredential,
   W3CVerifiablePresentation,
-  WrappedVerifiablePresentation,
+  WrappedVerifiablePresentation
 } from '@sphereon/ssi-types'
+import { DcqlQuery } from 'dcql'
 
-import { AuthorizationRequest, CreateAuthorizationRequestOpts, PropertyTargets, VerifyAuthorizationRequestOpts } from '../authorization-request'
+import {
+  AuthorizationRequest,
+  CreateAuthorizationRequestOpts,
+  PropertyTargets,
+  VerifyAuthorizationRequestOpts
+} from '../authorization-request'
 import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   PresentationDefinitionWithLocation,
   PresentationVerificationCallback,
-  VerifyAuthorizationResponseOpts,
+  VerifyAuthorizationResponseOpts
 } from '../authorization-response'
-import { JwksMetadataParams } from '../helpers/ExtractJwks'
+import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 
 import { JWTPayload, VerifiedJWT } from './index'
+
 export const DEFAULT_EXPIRATION_TIME = 10 * 60
 
 // https://openid.net/specs/openid-connect-core-1_0.html#RequestObject
@@ -99,6 +110,7 @@ export interface AuthorizationRequestPayloadVD12OID4VPD20
   presentation_definition_uri?: string
   client_id_scheme?: ClientIdSchemeOID4VPD20
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
+  dcql_query?: string
 }
 
 export type ClientIdSchemeOID4VPD18 = 'pre-registered' | 'redirect_uri' | 'entity_id' | 'did'
@@ -140,6 +152,7 @@ export interface VerifiedAuthorizationRequest extends Partial<VerifiedJWT> {
   requestObject?: RequestObject // The Request object
   registrationMetadataPayload: RPRegistrationMetadataPayload
   presentationDefinitions?: PresentationDefinitionWithLocation[] // The optional presentation definition objects that the RP requests
+  dcqlQuery?: DcqlQuery
   verifyOpts: VerifyAuthorizationRequestOpts // The verification options for the authentication request
   versions: SupportedVersion[]
 }
@@ -165,6 +178,8 @@ export interface IDTokenPayload extends JWTPayload {
   }
 }
 
+export type EncodedDcqlQueryVpToken = string
+
 export interface AuthorizationResponsePayload {
   access_token?: string
   token_type?: string
@@ -177,6 +192,7 @@ export interface AuthorizationResponsePayload {
     | W3CVerifiablePresentation
     | CompactSdJwtVc
     | MdocOid4vpMdocVpToken
+    | EncodedDcqlQueryVpToken
   presentation_submission?: PresentationSubmission
   verifiedData?: IPresentation | AdditionalClaims
   is_first_party?: boolean
@@ -192,6 +208,7 @@ export interface IdTokenClaimPayload {
 export interface VpTokenClaimPayload {
   presentation_definition?: PresentationDefinitionV1 | PresentationDefinitionV2
   presentation_definition_uri?: string
+  dcql_query?: string
 }
 
 export interface ClaimPayloadCommon {
@@ -511,6 +528,12 @@ export interface VerifiedIDToken {
   verifyOpts: VerifyAuthorizationResponseOpts
 }
 
+export interface VerifiedOpenID4VPSubmissionDcql {
+  dcqlQuery: DcqlQuery
+  presentation: { [credentialQueryId: string]: WrappedVerifiablePresentation }
+  nonce?: string
+}
+
 export interface VerifiedOpenID4VPSubmission {
   submissionData: PresentationSubmission
   presentationDefinitions: PresentationDefinitionWithLocation[]
@@ -524,6 +547,7 @@ export interface VerifiedAuthorizationResponse {
   authorizationResponse: AuthorizationResponse
 
   oid4vpSubmission?: VerifiedOpenID4VPSubmission
+  oid4vpSubmissionDcql?: VerifiedOpenID4VPSubmissionDcql
 
   nonce?: string
   state: string
