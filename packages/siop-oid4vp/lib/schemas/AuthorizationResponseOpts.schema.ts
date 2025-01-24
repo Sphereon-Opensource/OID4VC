@@ -55,6 +55,9 @@ export const AuthorizationResponseOptsSchemaObj = {
         },
         "dcqlResponse": {
           "$ref": "#/definitions/DcqlResponseOpts"
+        },
+        "isFirstParty": {
+          "type": "boolean"
         }
       },
       "required": [

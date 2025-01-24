@@ -108,6 +108,7 @@ export class OP {
       verification?: Verification
       presentationExchange?: PresentationExchangeResponseOpts
       dcqlResponse?: DcqlResponseOpts
+	  isFirstParty?: boolean
     },
   ): Promise<AuthorizationResponseWithCorrelationId> {
     if (

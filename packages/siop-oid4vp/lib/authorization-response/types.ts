@@ -43,6 +43,7 @@ export interface AuthorizationResponseOpts {
   refreshToken?: string
   presentationExchange?: PresentationExchangeResponseOpts
   dcqlResponse?: DcqlResponseOpts
+  isFirstParty?: boolean
 }
 
 export interface PresentationExchangeResponseOpts {

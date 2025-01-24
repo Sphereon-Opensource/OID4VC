@@ -70,6 +70,7 @@ export class MetadataClient {
     let credential_endpoint: string | undefined;
     let deferred_credential_endpoint: string | undefined;
     let authorization_endpoint: string | undefined;
+    let authorization_challenge_endpoint: string | undefined;
     let authorizationServerType: AuthorizationServerType = 'OID4VCI';
     let authorization_servers: string[] | undefined = [issuer];
     let authorization_server: string | undefined = undefined;
@@ -84,6 +85,7 @@ export class MetadataClient {
       if (credentialIssuerMetadata.token_endpoint) {
         token_endpoint = credentialIssuerMetadata.token_endpoint;
       }
+      authorization_challenge_endpoint = credentialIssuerMetadata.authorization_challenge_endpoint
       if (credentialIssuerMetadata.authorization_servers) {
         authorization_servers = credentialIssuerMetadata.authorization_servers as string[];
       } else if (credentialIssuerMetadata.authorization_server) {
@@ -130,8 +132,14 @@ export class MetadataClient {
         );
       }
       authorization_endpoint = authMetadata.authorization_endpoint;
+      if (authorization_challenge_endpoint && authMetadata.authorization_challenge_endpoint !== authorization_challenge_endpoint) {
+        throw Error(
+          `Credential issuer has a different authorization_challenge_endpoint (${authorization_challenge_endpoint}) from the Authorization Server (${authMetadata.authorization_challenge_endpoint})`,
+        );
+      }
+      authorization_challenge_endpoint = authMetadata.authorization_challenge_endpoint;
       if (!authMetadata.token_endpoint) {
-        throw Error(`Authorization Sever ${authorization_servers} did not provide a token_endpoint`);
+        throw Error(`Authorization Server ${authorization_servers} did not provide a token_endpoint`);
       } else if (token_endpoint && authMetadata.token_endpoint !== token_endpoint) {
         throw Error(
           `Credential issuer has a different token_endpoint (${token_endpoint}) from the Authorization Server (${authMetadata.token_endpoint})`,
@@ -193,6 +201,7 @@ export class MetadataClient {
       deferred_credential_endpoint,
       ...(authorization_server ? { authorization_server } : { authorization_servers: authorization_servers }),
       authorization_endpoint,
+      authorization_challenge_endpoint,
       authorizationServerType,
       credentialIssuerMetadata: authorization_server
         ? (credentialIssuerMetadata as IssuerMetadataV1_0_08 & Partial<AuthorizationServerMetadata>)
