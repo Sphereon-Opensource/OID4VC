@@ -37,10 +37,16 @@ import {
 
 jest.setTimeout(30000)
 
-type Json = string | number | boolean | null | { // Not exported from dcql
-  [key: string]: Json;
-} | Json[];
-
+type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | {
+      // Not exported from dcql
+      [key: string]: Json
+    }
+  | Json[]
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 
@@ -459,7 +465,8 @@ describe.skip('RP and OP interaction should', () => {
 
     // The KB property is added to the JWT when the presentation is signed. Passing a VC will make the test fail
     const dcqlCredentials: DcqlCredential[] = [KB_SD_JWT_PRESENTATION].map((vc) => ({
-     credential_format: 'vc+sd-jwt', claims: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload as { [x: string]: Json },
+      credential_format: 'vc+sd-jwt',
+      claims: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload as { [x: string]: Json },
       vct: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload.vct,
     }))
 

@@ -28,13 +28,9 @@ import {
   trimEnd,
   trimStart,
   validateJWT,
-  WellKnownEndpoints
+  WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
-import {
-  ITokenEndpointOpts,
-  LOG,
-  VcIssuer
-} from '@sphereon/oid4vci-issuer'
+import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
@@ -45,7 +41,7 @@ import {
   ICreateCredentialOfferEndpointOpts,
   ICreateCredentialOfferURIResponse,
   IGetCredentialOfferEndpointOpts,
-  IGetIssueStatusEndpointOpts
+  IGetIssueStatusEndpointOpts,
 } from './OID4VCIServer'
 import { validateRequestBody } from './expressUtils'
 
@@ -91,9 +87,9 @@ function isExternalAS(issuerMetadata: CredentialIssuerMetadataOptsV1_0_13) {
   return issuerMetadata.authorization_servers?.some((as) => !as.includes(issuerMetadata.credential_issuer))
 }
 
-export function authorizationChallengeEndpoint<DIDDoc extends object>(
+export function authorizationChallengeEndpoint(
   router: Router,
-  issuer: VcIssuer<DIDDoc>,
+  issuer: VcIssuer,
   opts: IAuthorizationChallengeEndpointOpts & { baseUrl: string | URL },
 ) {
   const endpoint = issuer.authorizationServerMetadata.authorization_challenge_endpoint ?? issuer.issuerMetadata.authorization_challenge_endpoint
@@ -106,18 +102,13 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
   LOG.log(`[OID4VCI] authorization challenge endpoint at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
     const authorizationChallengeRequest = request.body as CommonAuthorizationChallengeRequest
-    const {
-      client_id,
-      issuer_state,
-      auth_session,
-      presentation_during_issuance_session
-    } = authorizationChallengeRequest
+    const { client_id, issuer_state, auth_session, presentation_during_issuance_session } = authorizationChallengeRequest
 
     try {
       if (!client_id && !auth_session) {
         const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
           error: AuthorizationChallengeError.invalid_request,
-          error_description: 'No client id or auth session present'
+          error_description: 'No client id or auth session present',
         } as AuthorizationChallengeErrorResponse
         throw authorizationChallengeErrorResponse
       }
@@ -127,7 +118,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
         if (!session) {
           const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
             error: AuthorizationChallengeError.invalid_session,
-            error_description: 'Session is invalid'
+            error_description: 'Session is invalid',
           }
           throw authorizationChallengeErrorResponse
         }
@@ -136,7 +127,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
         const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
           error: AuthorizationChallengeError.insufficient_authorization,
           auth_session: issuer_state,
-          presentation: authRequestURI
+          presentation: authRequestURI,
         }
         throw authorizationChallengeErrorResponse
       }
@@ -146,34 +137,29 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
         if (!session) {
           const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
             error: AuthorizationChallengeError.invalid_session,
-            error_description: 'Session is invalid'
+            error_description: 'Session is invalid',
           }
           throw authorizationChallengeErrorResponse
         }
 
         const verifiedResponse = await opts.verifyAuthResponseCallback(presentation_during_issuance_session) // TODO generate some error
         if (verifiedResponse) {
-          const authorizationCode  = generateRandomString(16, 'base64url')
+          const authorizationCode = generateRandomString(16, 'base64url')
           session.authorizationCode = authorizationCode
           await issuer.credentialOfferSessions.set(auth_session, session)
           const authorizationChallengeCodeResponse: AuthorizationChallengeCodeResponse = {
-            authorization_code: authorizationCode
+            authorization_code: authorizationCode,
           }
           return response.send(authorizationChallengeCodeResponse)
         }
       }
 
       const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
-        error: AuthorizationChallengeError.invalid_request
+        error: AuthorizationChallengeError.invalid_request,
       }
       throw authorizationChallengeErrorResponse
     } catch (e) {
-      return sendErrorResponse(
-        response,
-        400,
-        (e as Error),
-        e,
-      )
+      return sendErrorResponse(response, 400, e as Error, e)
     }
   })
 }

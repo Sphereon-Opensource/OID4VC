@@ -386,5 +386,4 @@ describe('VcIssuer', () => {
       format: 'jwt_vc_json',
     })
   })
-
 })

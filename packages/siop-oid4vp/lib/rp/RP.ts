@@ -43,11 +43,7 @@ import {
   VerifiedAuthorizationResponse,
 } from '../types'
 
-import {
-  createRequestOptsFromBuilderOrExistingOpts,
-  createVerifyResponseOptsFromBuilderOrExistingOpts,
-  isTargetOrNoTargets
-} from './Opts'
+import { createRequestOptsFromBuilderOrExistingOpts, createVerifyResponseOptsFromBuilderOrExistingOpts, isTargetOrNoTargets } from './Opts'
 import { RPBuilder } from './RPBuilder'
 import { IRPSessionManager } from './types'
 
@@ -421,9 +417,14 @@ export class RP {
       }
     }
 
-    const hasPD = (this._verifyResponseOptions.presentationDefinitions !== undefined && this._verifyResponseOptions.presentationDefinitions !== null || (Array.isArray(this._verifyResponseOptions.presentationDefinitions) && this._verifyResponseOptions.presentationDefinitions.length > 0)) ||
-      (opts.presentationDefinitions !== undefined && opts.presentationDefinitions !== null || (Array.isArray(opts.presentationDefinitions) && opts.presentationDefinitions.length > 0))
-    const hasDcql = (this._verifyResponseOptions.dcqlQuery !== undefined && this._verifyResponseOptions.dcqlQuery !== null) || (opts.dcqlQuery !== undefined && opts.dcqlQuery !== null)
+    const hasPD =
+      (this._verifyResponseOptions.presentationDefinitions !== undefined && this._verifyResponseOptions.presentationDefinitions !== null) ||
+      (Array.isArray(this._verifyResponseOptions.presentationDefinitions) && this._verifyResponseOptions.presentationDefinitions.length > 0) ||
+      (opts.presentationDefinitions !== undefined && opts.presentationDefinitions !== null) ||
+      (Array.isArray(opts.presentationDefinitions) && opts.presentationDefinitions.length > 0)
+    const hasDcql =
+      (this._verifyResponseOptions.dcqlQuery !== undefined && this._verifyResponseOptions.dcqlQuery !== null) ||
+      (opts.dcqlQuery !== undefined && opts.dcqlQuery !== null)
 
     if (hasPD && hasDcql) {
       throw Error(`Only Presentation Definitions or DCQL is required`)
@@ -445,10 +446,11 @@ export class RP {
           presentationDefinitions: this._verifyResponseOptions.presentationDefinitions ?? opts?.presentationDefinitions,
         }),
       ...(opts?.dcqlQuery /*&&
-        !opts?.presentationDefinitions */&& { // FIXME presentationDefinitions will be there until we fix the OID4VC-DEMO, it wants a PD purpose field for the screens
+        !opts?.presentationDefinitions */ && {
+        // FIXME presentationDefinitions will be there until we fix the OID4VC-DEMO, it wants a PD purpose field for the screens
 
-          dcqlQuery: this._verifyResponseOptions.dcqlQuery ?? opts?.dcqlQuery,
-        }),
+        dcqlQuery: this._verifyResponseOptions.dcqlQuery ?? opts?.dcqlQuery,
+      }),
     }
   }
 

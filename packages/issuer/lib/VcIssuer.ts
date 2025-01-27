@@ -42,14 +42,7 @@ import {
   TYP_ERROR,
   URIState,
 } from '@sphereon/oid4vci-common'
-import {
-  CompactSdJwtVc,
-  CredentialMapper,
-  InitiatorType,
-  SubSystem,
-  System,
-  W3CVerifiableCredential
-} from '@sphereon/ssi-types'
+import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
 import { LookupStateManager } from './state-manager'

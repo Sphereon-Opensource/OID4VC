@@ -62,7 +62,7 @@ export class MetadataClientV1_0_13 {
       if (credentialIssuerMetadata.token_endpoint) {
         token_endpoint = credentialIssuerMetadata.token_endpoint;
       }
-      authorization_challenge_endpoint = credentialIssuerMetadata.authorization_challenge_endpoint
+      authorization_challenge_endpoint = credentialIssuerMetadata.authorization_challenge_endpoint;
       if (credentialIssuerMetadata.authorization_servers) {
         authorization_servers = credentialIssuerMetadata.authorization_servers;
       }

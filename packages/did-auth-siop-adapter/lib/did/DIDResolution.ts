@@ -89,7 +89,6 @@ export function getResolverUnion(
       if (methodResolver) {
         uniResolvers.push({ [dm]: methodResolver.resolve })
       }
-
     }
   })
   return subjectTypes.indexOf(SubjectSyntaxTypesSupportedValues.DID.valueOf()) !== -1

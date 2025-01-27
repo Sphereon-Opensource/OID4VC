@@ -36,17 +36,14 @@ import {
   OpenId4VCIVersion,
   PKCEOpts,
   ProofOfPossessionCallbacks,
-  toAuthorizationResponsePayload
-} from '@sphereon/oid4vci-common'
+  toAuthorizationResponsePayload,
+} from '@sphereon/oid4vci-common';
 import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { AccessTokenClient } from './AccessTokenClient';
 import { AccessTokenClientV1_0_11 } from './AccessTokenClientV1_0_11';
-import {
-  acquireAuthorizationChallengeAuthCode,
-  createAuthorizationRequestUrl
-} from './AuthorizationCodeClient'
+import { acquireAuthorizationChallengeAuthCode, createAuthorizationRequestUrl } from './AuthorizationCodeClient';
 import { createAuthorizationRequestUrlV1_0_11 } from './AuthorizationCodeClientV1_0_11';
 import { CredentialOfferClient } from './CredentialOfferClient';
 import { CredentialRequestOpts } from './CredentialRequestClient';
@@ -287,19 +284,23 @@ export class OpenID4VCIClient {
       metadata: this.endpointMetadata,
       credentialIssuer: this.getIssuer(),
       clientId: this._state.clientId ?? this._state.authorizationRequestOpts?.clientId,
-      ...opts
-    })
+      ...opts,
+    });
 
     if (response.errorBody) {
       debug(`Authorization code error:\r\n${JSON.stringify(response.errorBody)}`);
-      const error = response.errorBody as AuthorizationChallengeErrorResponse
-      return Promise.reject(error)
+      const error = response.errorBody as AuthorizationChallengeErrorResponse;
+      return Promise.reject(error);
     } else if (!response.successBody) {
       debug(`Authorization code error. No success body`);
-      return Promise.reject(Error(`Retrieving an authorization code token from ${this._state.endpointMetadata?.authorization_challenge_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`))
+      return Promise.reject(
+        Error(
+          `Retrieving an authorization code token from ${this._state.endpointMetadata?.authorization_challenge_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`,
+        ),
+      );
     }
 
-    return { ...response.successBody }
+    return { ...response.successBody };
   }
 
   public async acquireAccessToken(
@@ -312,7 +313,7 @@ export class OpenID4VCIClient {
     const { pin, clientId = this._state.clientId ?? this._state.authorizationRequestOpts?.clientId } = opts ?? {};
     let { redirectUri } = opts ?? {};
 
-    const code = this.getAuthorizationCode(opts?.authorizationResponse, opts?.code)
+    const code = this.getAuthorizationCode(opts?.authorizationResponse, opts?.code);
 
     if (opts?.codeVerifier) {
       this._state.pkce.codeVerifier = opts.codeVerifier;
@@ -765,13 +766,19 @@ export class OpenID4VCIClient {
     return authorizationRequestOpts;
   }
 
-  private getAuthorizationCode = (authorizationResponse?: string | AuthorizationResponse | AuthorizationChallengeCodeResponse, code?: string): string | undefined => {
+  private getAuthorizationCode = (
+    authorizationResponse?: string | AuthorizationResponse | AuthorizationChallengeCodeResponse,
+    code?: string,
+  ): string | undefined => {
     if (authorizationResponse) {
       this._state.authorizationCodeResponse = { ...toAuthorizationResponsePayload(authorizationResponse) };
     } else if (code) {
       this._state.authorizationCodeResponse = { code };
     }
 
-    return (this._state.authorizationCodeResponse as AuthorizationResponse)?.code ?? (this._state.authorizationCodeResponse as AuthorizationChallengeCodeResponse)?.authorization_code;
-  }
+    return (
+      (this._state.authorizationCodeResponse as AuthorizationResponse)?.code ??
+      (this._state.authorizationCodeResponse as AuthorizationChallengeCodeResponse)?.authorization_code
+    );
+  };
 }

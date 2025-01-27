@@ -168,14 +168,10 @@ export class OID4VCIServer {
     }
     if (this.isAuthorizationChallengeEndpointEnabled(opts?.endpointOpts?.authorizationChallengeOpts)) {
       if (!opts?.endpointOpts?.authorizationChallengeOpts?.createAuthRequestUriCallback) {
-        throw Error(
-          `Unable to enable authorization challenge endpoint. No createAuthRequestUriCallback present in authorization challenge options`,
-        )
+        throw Error(`Unable to enable authorization challenge endpoint. No createAuthRequestUriCallback present in authorization challenge options`)
       }
       if (!opts?.endpointOpts?.authorizationChallengeOpts?.verifyAuthResponseCallback) {
-        throw Error(
-          `Unable to enable authorization challenge endpoint. No verifyAuthResponseCallback present in authorization challenge options`,
-        )
+        throw Error(`Unable to enable authorization challenge endpoint. No verifyAuthResponseCallback present in authorization challenge options`)
       }
       authorizationChallengeEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.authorizationChallengeOpts, baseUrl: this.baseUrl })
     }

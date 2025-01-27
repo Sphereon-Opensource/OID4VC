@@ -5,8 +5,8 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@sphereon/ssi-types': 0.32.0
-  dcql: 0.2.11
+  '@sphereon/ssi-types': 0.32.1-next.113
+  dcql: 0.2.19
   node-fetch: 2.6.12
 
 importers:
@@ -77,8 +77,8 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-types':
-        specifier: 0.32.0
-        version: 0.32.0
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       jose:
         specifier: ^4.10.0
         version: 4.15.9
@@ -120,8 +120,8 @@ importers:
         specifier: workspace:*
         version: link:../oid4vci-common
       '@sphereon/ssi-types':
-        specifier: 0.32.0
-        version: 0.32.0
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       cross-fetch:
         specifier: ^3.1.8
         version: 3.2.0(encoding@0.1.13)
@@ -205,8 +205,8 @@ importers:
   packages/common:
     dependencies:
       '@sphereon/ssi-types':
-        specifier: 0.32.0
-        version: 0.32.0
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
@@ -270,11 +270,11 @@ importers:
         specifier: workspace:*
         version: link:../oid4vci-common
       '@sphereon/ssi-express-support':
-        specifier: 0.32.0
-        version: 0.32.0
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       '@sphereon/ssi-types':
-        specifier: 0.32.0
-        version: 0.32.0
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0(encoding@0.1.13)
@@ -313,11 +313,11 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-express-support':
-        specifier: 0.32.0
-        version: 0.32.0
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       '@sphereon/ssi-types':
-        specifier: 0.32.0
-        version: 0.32.0
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0(encoding@0.1.13)
@@ -408,8 +408,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.32.0
-        version: 0.32.0
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       cross-fetch:
         specifier: ^3.1.8
         version: 3.2.0(encoding@0.1.13)
@@ -457,14 +457,14 @@ importers:
         specifier: ^2.3.2
         version: 2.3.2
       '@sphereon/ssi-types':
-        specifier: 0.32.0
-        version: 0.32.0
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       cross-fetch:
         specifier: ^4.0.0
         version: 4.1.0(encoding@0.1.13)
       dcql:
-        specifier: 0.2.11
-        version: 0.2.11(typescript@5.4.5)
+        specifier: 0.2.19
+        version: 0.2.19(typescript@5.4.5)
       debug:
         specifier: ^4.3.5
         version: 4.4.0
@@ -2568,8 +2568,8 @@ packages:
     resolution: {integrity: sha512-zxHCWAc7fKppS7XX0zxnI4TF+Rdjax8pHc3exrYzn3t59dlv5siEAeYdtFrWJT4UVB5wTGzIEufzV5r+tfjelg==}
     engines: {node: '>=18'}
 
-  '@sphereon/ssi-express-support@0.32.0':
-    resolution: {integrity: sha512-6C9vDa3zj11t8FH6/5X7q6BjBGMREfa7S/oBIUejtnCcyovrxoDPlSbBcpfvt2/RTvsR9bxcUVmmRBWIsCKeYQ==}
+  '@sphereon/ssi-express-support@0.32.1-next.113':
+    resolution: {integrity: sha512-XaLaN3PzPCsnslK7Q5WflzFrpwKAPGkYvdC9I2knNGL39M8+QnN1KR5f6+iCRkNgkirAtXYDTaZOSlSrdj5NXg==}
     peerDependencies:
       '@noble/hashes': 1.6.1
       passport-azure-ad: ^4.3.5
@@ -2585,8 +2585,8 @@ packages:
   '@sphereon/ssi-sdk-ext.key-utils@0.23.0':
     resolution: {integrity: sha512-BfULXvQmcUrBq2DqYxJHKnEoB2d5icu3TJ9GP2aP1WybSULTjL96Wv5r7QKgktcodKaL+F+oQ7r8sC9qBl1exw==}
 
-  '@sphereon/ssi-types@0.32.0':
-    resolution: {integrity: sha512-v5yC/bj1nvHE30cYMMqmjz2KHPpXj3OL8ZwnZQTiAMISS4DOVTjpYt0qZgb4eA1Lsdw2smd1bNYyVsOEJ02PAw==}
+  '@sphereon/ssi-types@0.32.1-next.113':
+    resolution: {integrity: sha512-kEKYGMImOgGYbxmFPq6VKj5PiZ2ZaQjxoP9WSbRIivca+5+DAV+U6055+QBwV70lz38Ty6R5icgzQdd+ZJRlzw==}
 
   '@sphereon/wellknown-dids-client@0.1.3':
     resolution: {integrity: sha512-TAT24L3RoXD8ocrkTcsz7HuJmgjNjdoV6IXP1p3DdaI/GqkynytXE3J1+F7vUFMRYwY5nW2RaXSgDQhrFJemaA==}
@@ -4033,8 +4033,8 @@ packages:
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
 
-  dcql@0.2.11:
-    resolution: {integrity: sha512-hR8MuSx49b7JPoZztcFMSKEHc6iEE4l/Zs6aUsvMCWVa3qFWpuJRiJEp5Rh2+UkCAhsce94fbDpMdBTcS9zn7g==}
+  dcql@0.2.19:
+    resolution: {integrity: sha512-/EvT8tArlg8zFsTQbRn6PijfeQ3nUwuEeCRDpptWcYqE8Wyt8J9Sb44gMPFzVCoIEb3R0M7Hl+XWkUMobC8jXQ==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -8443,16 +8443,16 @@ packages:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
 
-  valibot@0.37.0:
-    resolution: {integrity: sha512-FQz52I8RXgFgOHym3XHYSREbNtkgSjF9prvMFH1nBsRyfL6SfCzoT1GuSDTlbsuPubM7/6Kbw0ZMQb8A+V+VsQ==}
+  valibot@0.42.1:
+    resolution: {integrity: sha512-3keXV29Ar5b//Hqi4MbSdV7lfVp6zuYLZuA9V1PvQUsXqogr+u5lvLPLk3A4f74VUXDnf/JfWMN6sB+koJ/FFw==}
     peerDependencies:
       typescript: '>=5'
     peerDependenciesMeta:
       typescript:
         optional: true
 
-  valibot@0.42.1:
-    resolution: {integrity: sha512-3keXV29Ar5b//Hqi4MbSdV7lfVp6zuYLZuA9V1PvQUsXqogr+u5lvLPLk3A4f74VUXDnf/JfWMN6sB+koJ/FFw==}
+  valibot@1.0.0-beta.8:
+    resolution: {integrity: sha512-OPAwJZtowb0j91b+bd77+ny7D1VVzsCzD7Jl9waLUlMprTsfI9Y3HHbW3hAQD7wKDKHsmGEesuiYWaYvcZL2wg==}
     peerDependencies:
       typescript: '>=5'
     peerDependenciesMeta:
@@ -10092,7 +10092,7 @@ snapshots:
   '@digitalcredentials/bnid@2.1.2(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1))':
     dependencies:
       '@digitalcredentials/base58-universal': 1.0.1
-      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1))
+      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(encoding@0.1.13)(react@18.3.1))
       yargs: 15.4.1
     transitivePeerDependencies:
       - react-native
@@ -11960,7 +11960,7 @@ snapshots:
       webcrypto-shim: 0.1.7
     optionalDependencies:
       expo: 48.0.21(@babel/core@7.26.0)(encoding@0.1.13)
-      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1))
+      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(encoding@0.1.13)(react@18.3.1))
 
   '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.26':
     dependencies:
@@ -11977,7 +11977,7 @@ snapshots:
       '@sd-jwt/present': 0.7.2
       '@sd-jwt/types': 0.7.2
       '@sphereon/pex-models': 2.3.2
-      '@sphereon/ssi-types': 0.32.0
+      '@sphereon/ssi-types': 0.32.1-next.113
       ajv: 8.17.1
       ajv-formats: 2.1.1(ajv@8.17.1)
       jwt-decode: 3.1.2
@@ -11986,7 +11986,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@sphereon/ssi-express-support@0.32.0':
+  '@sphereon/ssi-express-support@0.32.1-next.113':
     dependencies:
       body-parser: 1.20.3
       casbin: 5.36.0
@@ -12029,20 +12029,20 @@ snapshots:
       - react-native-securerandom
       - supports-color
 
-  '@sphereon/ssi-types@0.32.0':
+  '@sphereon/ssi-types@0.32.1-next.113':
     dependencies:
       '@sd-jwt/decode': 0.7.2
       '@sphereon/kmp-mdoc-core': 0.2.0-SNAPSHOT.26
       debug: 4.4.0
       events: 3.3.0
-      jwt-decode: 3.1.2
+      jwt-decode: 4.0.0
       uint8arrays: 3.1.1
     transitivePeerDependencies:
       - supports-color
 
   '@sphereon/wellknown-dids-client@0.1.3(encoding@0.1.13)':
     dependencies:
-      '@sphereon/ssi-types': 0.32.0
+      '@sphereon/ssi-types': 0.32.1-next.113
       cross-fetch: 3.2.0(encoding@0.1.13)
       jwt-decode: 3.1.2
     transitivePeerDependencies:
@@ -13987,9 +13987,9 @@ snapshots:
 
   dayjs@1.11.13: {}
 
-  dcql@0.2.11(typescript@5.4.5):
+  dcql@0.2.19(typescript@5.4.5):
     dependencies:
-      valibot: 0.37.0(typescript@5.4.5)
+      valibot: 1.0.0-beta.8(typescript@5.4.5)
     transitivePeerDependencies:
       - typescript
 
@@ -18349,7 +18349,7 @@ snapshots:
       react-native: 0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1)
     optional: true
 
-  react-native-securerandom@1.0.1(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1)):
+  react-native-securerandom@1.0.1(react-native@0.71.19(@babel/core@7.26.0)(encoding@0.1.13)(react@18.3.1)):
     dependencies:
       base64-js: 1.5.1
       react-native: 0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1)
@@ -19744,13 +19744,13 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
 
-  valibot@0.37.0(typescript@5.4.5):
-    optionalDependencies:
-      typescript: 5.4.5
-
   valibot@0.42.1(typescript@5.5.3):
     optionalDependencies:
       typescript: 5.5.3
+
+  valibot@1.0.0-beta.8(typescript@5.4.5):
+    optionalDependencies:
+      typescript: 5.4.5
 
   valid-url@1.0.9: {}
 
