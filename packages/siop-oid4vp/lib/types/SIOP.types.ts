@@ -169,7 +169,7 @@ export interface IDTokenPayload extends JWTPayload {
   }
 }
 
-export type EcodedDcqlQueryVpToken = string
+export type EncodedDcqlQueryVpToken = string
 
 export interface AuthorizationResponsePayload {
   access_token?: string
@@ -183,9 +183,10 @@ export interface AuthorizationResponsePayload {
     | W3CVerifiablePresentation
     | CompactSdJwtVc
     | MdocOid4vpMdocVpToken
-    | EcodedDcqlQueryVpToken
+    | EncodedDcqlQueryVpToken
   presentation_submission?: PresentationSubmission
   verifiedData?: IPresentation | AdditionalClaims
+  is_first_party?: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }
@@ -520,7 +521,7 @@ export interface VerifiedIDToken {
 
 export interface VerifiedOpenID4VPSubmissionDcql {
   dcqlQuery: DcqlQuery
-  presentations: WrappedVerifiablePresentation[]
+  presentation: { [credentialQueryId: string]: WrappedVerifiablePresentation }
   nonce?: string
 }
 

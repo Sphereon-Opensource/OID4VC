@@ -12,8 +12,8 @@
   "dependencies": {
     "@sphereon/oid4vc-common": "workspace:*",
     "@sphereon/oid4vci-common": "workspace:*",
-    "@sphereon/ssi-types": "0.32.0",
-    "@sphereon/ssi-express-support": "0.32.0",
+    "@sphereon/ssi-types": "0.32.1-next.113",
+    "@sphereon/ssi-express-support": "0.32.1-next.113",
     "uuid": "^9.0.0"
   },
   "peerDependencies": {

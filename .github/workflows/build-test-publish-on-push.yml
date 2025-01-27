@@ -39,7 +39,7 @@ jobs:
           node-version: '20.x'
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.15.3 # TODO remove later, we are temporary dealing with a broken pnpm version in the CI container
       - run: pnpm install
       - run: pnpm build
       - name: run integration tests

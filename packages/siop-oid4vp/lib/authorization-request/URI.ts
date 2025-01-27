@@ -1,6 +1,6 @@
 import { parseJWT } from '@sphereon/oid4vc-common'
 
-import { findValidDcqlQuery } from '../authorization-response/Dcql'
+import { Dcql } from '../authorization-response'
 import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { decodeUriAsJson, encodeJsonAsURI, fetchByReferenceOrUseByValue } from '../helpers'
 import { assertValidRequestObjectPayload, RequestObject } from '../request-object'
@@ -166,7 +166,7 @@ export class URI implements AuthorizationRequestURI {
     if (requestObjectPayload) {
       // Only used to validate if the request object contains presentation definition(s) | a dcql query
       await PresentationExchange.findValidPresentationDefinitions({ ...authorizationRequestPayload, ...requestObjectPayload })
-      await findValidDcqlQuery({ ...authorizationRequestPayload, ...requestObjectPayload })
+      await Dcql.findValidDcqlQuery({ ...authorizationRequestPayload, ...requestObjectPayload })
 
       assertValidRequestObjectPayload(requestObjectPayload)
       if (requestObjectPayload.registration) {

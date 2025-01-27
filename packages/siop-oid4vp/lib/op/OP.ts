@@ -10,7 +10,7 @@ import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   AuthorizationResponseWithCorrelationId,
-  DcqlQueryResponseOpts,
+  DcqlResponseOpts,
   PresentationExchangeResponseOpts,
 } from '../authorization-response'
 import { encodeJsonAsURI, post } from '../helpers'
@@ -108,7 +108,8 @@ export class OP {
       issuer?: ResponseIss | string
       verification?: Verification
       presentationExchange?: PresentationExchangeResponseOpts
-      dcqlQuery?: DcqlQueryResponseOpts
+      dcqlResponse?: DcqlResponseOpts
+	  isFirstParty?: boolean
     },
   ): Promise<AuthorizationResponseWithCorrelationId> {
     if (
@@ -305,7 +306,7 @@ export class OP {
     issuer?: IIssuerId | ResponseIss
     audience?: string
     presentationExchange?: PresentationExchangeResponseOpts
-    dcqlQuery?: DcqlQueryResponseOpts
+    dcqlResponse?: DcqlResponseOpts
   }): AuthorizationResponseOpts {
     const version = opts.version ?? this._createResponseOptions.version
     let issuer = opts.issuer ?? this._createResponseOptions?.registration?.issuer
@@ -320,7 +321,7 @@ export class OP {
     }
     // We are taking the whole presentationExchange object from a certain location
     const presentationExchange = opts.presentationExchange ?? this._createResponseOptions.presentationExchange
-    const dcqlQuery = opts.dcqlQuery ?? this._createResponseOptions.dcqlQuery
+    const dcqlQuery = opts.dcqlResponse ?? this._createResponseOptions.dcqlResponse
 
     const responseURI = opts.audience ?? this._createResponseOptions.responseURI
     return {

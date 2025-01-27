@@ -42,7 +42,8 @@ export interface AuthorizationResponseOpts {
   tokenType?: string
   refreshToken?: string
   presentationExchange?: PresentationExchangeResponseOpts
-  dcqlQuery?: DcqlQueryResponseOpts
+  dcqlResponse?: DcqlResponseOpts
+  isFirstParty?: boolean
 }
 
 export interface PresentationExchangeResponseOpts {
@@ -61,8 +62,8 @@ export interface PresentationExchangeResponseOpts {
   restrictToDIDMethods?: string[]
 }
 
-export interface DcqlQueryResponseOpts {
-  encodedPresentationRecord: Record<string, Record<string, unknown> | string>
+export interface DcqlResponseOpts {
+  dcqlPresentation: Record<string, Record<string, unknown> | string>
 }
 
 export interface PresentationDefinitionPayloadOpts {

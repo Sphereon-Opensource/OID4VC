@@ -23,8 +23,8 @@
     "node": ">=18"
   },
   "resolutions": {
-    "@sphereon/ssi-types": "0.32.0",
-    "dcql": "0.2.11",
+    "@sphereon/ssi-types": "0.32.1-next.113",
+    "dcql": "0.2.19",
     "node-fetch": "2.6.12"
   },
   "prettier": {

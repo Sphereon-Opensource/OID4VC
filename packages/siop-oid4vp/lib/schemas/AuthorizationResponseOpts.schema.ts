@@ -53,8 +53,11 @@ export const AuthorizationResponseOptsSchemaObj = {
         "presentationExchange": {
           "$ref": "#/definitions/PresentationExchangeResponseOpts"
         },
-        "dcqlQuery": {
-          "$ref": "#/definitions/DcqlQueryResponseOpts"
+        "dcqlResponse": {
+          "$ref": "#/definitions/DcqlResponseOpts"
+        },
+        "isFirstParty": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -2339,10 +2342,10 @@ export const AuthorizationResponseOptsSchemaObj = {
         "token_response"
       ]
     },
-    "DcqlQueryResponseOpts": {
+    "DcqlResponseOpts": {
       "type": "object",
       "properties": {
-        "encodedPresentationRecord": {
+        "dcqlPresentation": {
           "type": "object",
           "additionalProperties": {
             "anyOf": [
@@ -2358,7 +2361,7 @@ export const AuthorizationResponseOptsSchemaObj = {
         }
       },
       "required": [
-        "encodedPresentationRecord"
+        "dcqlPresentation"
       ],
       "additionalProperties": false
     }

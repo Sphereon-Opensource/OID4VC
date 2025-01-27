@@ -1,7 +1,8 @@
 import { parseJWT } from '@sphereon/oid4vc-common'
 import { DcqlQuery } from 'dcql'
 
-import { findValidDcqlQuery, PresentationDefinitionWithLocation } from '../authorization-response'
+import { PresentationDefinitionWithLocation } from '../authorization-response'
+import { Dcql } from '../authorization-response'
 import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
@@ -205,7 +206,7 @@ export class AuthorizationRequest {
       await this.getSupportedVersion(),
     )
 
-    const dcqlQuery = await findValidDcqlQuery(mergedPayload)
+    const dcqlQuery = await Dcql.findValidDcqlQuery(mergedPayload)
 
     return {
       jwt,
@@ -290,7 +291,7 @@ export class AuthorizationRequest {
     return await PresentationExchange.findValidPresentationDefinitions(await this.mergedPayloads(), version)
   }
 
-  public async getDcqlQuery(): Promise<DcqlQuery> {
-    return await findValidDcqlQuery(await this.mergedPayloads())
+  public async getDcqlQuery(): Promise<DcqlQuery | undefined> {
+    return await Dcql.findValidDcqlQuery(await this.mergedPayloads())
   }
 }

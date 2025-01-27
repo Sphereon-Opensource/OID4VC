@@ -8,7 +8,7 @@ import {
   IVerifiablePresentation,
   OriginalVerifiableCredential,
 } from '@sphereon/ssi-types'
-import { DcqlCredentialRepresentation, DcqlPresentationRecord, DcqlQuery, DcqlQueryResult } from 'dcql'
+import { DcqlCredential, DcqlPresentation, DcqlQuery, DcqlQueryResult } from 'dcql'
 
 import {
   AuthorizationResponse,
@@ -28,7 +28,7 @@ import {
   VerifyAuthorizationRequestOpts,
   VPTokenLocation,
 } from '..'
-import { createPresentationSubmission } from '../authorization-response/OpenID4VP'
+import { createPresentationSubmission } from '../authorization-response'
 import SIOPErrors from '../types/Errors'
 
 import { getCreateJwtCallback, getVerifyJwtCallback } from './DidJwtTestUtils'
@@ -465,9 +465,6 @@ describe('create JWT from Request JWT should', () => {
     }
 
     const requestObject = await RequestObject.fromOpts(requestOpts)
-    /* console.log(
-      JSON.stringify(await AuthenticationResponse.createJWTFromRequestJWT(requestWithJWT.jwt, responseOpts, verifyOpts))
-    );*/
     const jwt = await requestObject.toJwt()
     if (!jwt) throw new Error('JWT is undefined')
     const authorizationRequest = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
@@ -749,21 +746,22 @@ describe('create JWT from Request JWT should', () => {
       },
     }
 
-    const vc: DcqlCredentialRepresentation = {
+    const vc: DcqlCredential = {
+      credential_format: 'vc+sd-jwt',
       vct: sdjwt.decodedPayload.payload.vct,
       claims: sdjwt.decodedPayload.payload,
     }
 
     const dcqlQueryResult: DcqlQueryResult = DcqlQuery.query(dcqlQuery, [vc])
 
-    const presentation: DcqlPresentationRecord.Output = {}
+    const presentation: DcqlPresentation.Output = {}
     for (const [key, value] of Object.entries(dcqlQueryResult.credential_matches)) {
       if (value.success) {
         presentation[key] = sdjwt.compactJwtVc
       }
     }
 
-    const encodedPresentationRecord = DcqlPresentationRecord.parse(presentation)
+    const dcqlPresentation = DcqlPresentation.parse(presentation)
 
     const responseOpts: AuthorizationResponseOpts = {
       responseURI: EXAMPLE_REDIRECT_URL,
@@ -775,16 +773,13 @@ describe('create JWT from Request JWT should', () => {
         alg: SigningAlgo.ES256K,
       }),
       jwtIssuer: { method: 'did', didUrl: `${mockResEntity.did}#controller`, alg: SigningAlgo.ES256K },
-      dcqlQuery: {
-        encodedPresentationRecord,
+      dcqlResponse: {
+        dcqlPresentation
       },
       responseMode: ResponseMode.DIRECT_POST,
     }
 
     const requestObject = await RequestObject.fromOpts(requestOpts)
-    /* console.log(
-      JSON.stringify(await AuthenticationResponse.createJWTFromRequestJWT(requestWithJWT.jwt, responseOpts, verifyOpts))
-    );*/
     const jwt = await requestObject.toJwt()
     if (!jwt) throw new Error('JWT is undefined')
     const authorizationRequest = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
