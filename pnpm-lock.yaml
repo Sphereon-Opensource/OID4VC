@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@sphereon/ssi-types': 0.32.1-feature.VDX.341.53
+  '@sphereon/ssi-types': 0.32.1-next.113
   dcql: 0.2.19
   node-fetch: 2.6.12
 
@@ -77,8 +77,8 @@ importers:
         specifier: workspace:*
         version: link:../issuer
       '@sphereon/ssi-types':
-        specifier: 0.32.1-feature.VDX.341.53
-        version: 0.32.1-feature.VDX.341.53
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       jose:
         specifier: ^4.10.0
         version: 4.15.9
@@ -120,8 +120,8 @@ importers:
         specifier: workspace:*
         version: link:../oid4vci-common
       '@sphereon/ssi-types':
-        specifier: 0.32.1-feature.VDX.341.53
-        version: 0.32.1-feature.VDX.341.53
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8(encoding@0.1.13)
@@ -205,8 +205,8 @@ importers:
   packages/common:
     dependencies:
       '@sphereon/ssi-types':
-        specifier: 0.32.1-feature.VDX.341.53
-        version: 0.32.1-feature.VDX.341.53
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
@@ -270,8 +270,8 @@ importers:
         specifier: workspace:*
         version: link:../oid4vci-common
       '@sphereon/ssi-types':
-        specifier: 0.32.1-feature.VDX.341.53
-        version: 0.32.1-feature.VDX.341.53
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0(encoding@0.1.13)
@@ -313,8 +313,8 @@ importers:
         specifier: 0.30.2-feature.mdoc.funke2.367
         version: 0.30.2-feature.mdoc.funke2.367
       '@sphereon/ssi-types':
-        specifier: 0.32.1-feature.VDX.341.53
-        version: 0.32.1-feature.VDX.341.53
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0(encoding@0.1.13)
@@ -405,8 +405,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.32.1-feature.VDX.341.53
-        version: 0.32.1-feature.VDX.341.53
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       cross-fetch:
         specifier: ^3.1.8
         version: 3.1.8(encoding@0.1.13)
@@ -454,8 +454,8 @@ importers:
         specifier: ^2.3.2
         version: 2.3.2
       '@sphereon/ssi-types':
-        specifier: 0.32.1-feature.VDX.341.53
-        version: 0.32.1-feature.VDX.341.53
+        specifier: 0.32.1-next.113
+        version: 0.32.1-next.113
       cross-fetch:
         specifier: ^4.0.0
         version: 4.0.0(encoding@0.1.13)
@@ -2555,7 +2555,6 @@ packages:
 
   '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.26':
     resolution: {integrity: sha512-QXJ6R8ENiZV2rPMbn06cw5JKwqUYN1kzVRbYfONqE1PEXx1noQ4md7uxr2zSczi0ubKkNcbyYDNtIMTZIhGzmQ==}
-    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.2':
     resolution: {integrity: sha512-foFxfLkRwcn/MOp/eht46Q7wsvpQGlO7aowowIIb5Tz9u97kYZ2kz6K2h2ODxWuv5CRA7Q0MY8XUBGE2lfOhOQ==}
@@ -2581,8 +2580,8 @@ packages:
   '@sphereon/ssi-sdk-ext.key-utils@0.23.0':
     resolution: {integrity: sha512-BfULXvQmcUrBq2DqYxJHKnEoB2d5icu3TJ9GP2aP1WybSULTjL96Wv5r7QKgktcodKaL+F+oQ7r8sC9qBl1exw==}
 
-  '@sphereon/ssi-types@0.32.1-feature.VDX.341.53':
-    resolution: {integrity: sha512-SC5GMqMZDILQJLGUddXjkVmSHIsDevp/ANVRGtLsWQK1pt3272eOA6Xq0yBMaAFmknYlisHMOf29JlYLJy/fZw==}
+  '@sphereon/ssi-types@0.32.1-next.113':
+    resolution: {integrity: sha512-kEKYGMImOgGYbxmFPq6VKj5PiZ2ZaQjxoP9WSbRIivca+5+DAV+U6055+QBwV70lz38Ty6R5icgzQdd+ZJRlzw==}
 
   '@sphereon/wellknown-dids-client@0.1.3':
     resolution: {integrity: sha512-TAT24L3RoXD8ocrkTcsz7HuJmgjNjdoV6IXP1p3DdaI/GqkynytXE3J1+F7vUFMRYwY5nW2RaXSgDQhrFJemaA==}
@@ -10022,7 +10021,7 @@ snapshots:
   '@digitalcredentials/bnid@2.1.2(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1))':
     dependencies:
       '@digitalcredentials/base58-universal': 1.0.1
-      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1))
+      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(encoding@0.1.13)(react@18.3.1))
       yargs: 15.4.1
     transitivePeerDependencies:
       - react-native
@@ -11892,7 +11891,7 @@ snapshots:
       webcrypto-shim: 0.1.7
     optionalDependencies:
       expo: 48.0.21(@babel/core@7.26.0)(encoding@0.1.13)
-      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1))
+      react-native-securerandom: 1.0.1(react-native@0.71.19(@babel/core@7.26.0)(encoding@0.1.13)(react@18.3.1))
 
   '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.26':
     dependencies:
@@ -11909,7 +11908,7 @@ snapshots:
       '@sd-jwt/present': 0.7.2
       '@sd-jwt/types': 0.7.2
       '@sphereon/pex-models': 2.3.2
-      '@sphereon/ssi-types': 0.32.1-feature.VDX.341.53
+      '@sphereon/ssi-types': 0.32.1-next.113
       ajv: 8.17.1
       ajv-formats: 2.1.1(ajv@8.17.1)
       jwt-decode: 3.1.2
@@ -11961,7 +11960,7 @@ snapshots:
       - react-native-securerandom
       - supports-color
 
-  '@sphereon/ssi-types@0.32.1-feature.VDX.341.53':
+  '@sphereon/ssi-types@0.32.1-next.113':
     dependencies:
       '@sd-jwt/decode': 0.7.2
       '@sphereon/kmp-mdoc-core': 0.2.0-SNAPSHOT.26
@@ -11974,7 +11973,7 @@ snapshots:
 
   '@sphereon/wellknown-dids-client@0.1.3(encoding@0.1.13)':
     dependencies:
-      '@sphereon/ssi-types': 0.32.1-feature.VDX.341.53
+      '@sphereon/ssi-types': 0.32.1-next.113
       cross-fetch: 3.1.8(encoding@0.1.13)
       jwt-decode: 3.1.2
     transitivePeerDependencies:
@@ -18230,7 +18229,7 @@ snapshots:
       react-native: 0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1)
     optional: true
 
-  react-native-securerandom@1.0.1(react-native@0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1)):
+  react-native-securerandom@1.0.1(react-native@0.71.19(@babel/core@7.26.0)(encoding@0.1.13)(react@18.3.1)):
     dependencies:
       base64-js: 1.5.1
       react-native: 0.71.19(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(encoding@0.1.13)(react@18.3.1)
