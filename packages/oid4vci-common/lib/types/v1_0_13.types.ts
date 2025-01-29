@@ -151,11 +151,13 @@ export interface CredentialOfferV1_0_13 {
 }
 
 export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_13 {
+  redirectUri?: string;
   baseUri?: string;
   scheme?: string;
   // auth_session?: string; Would be a nice extension to support, to allow external systems to determine what the auth_session value should be
   pinLength?: number;
   qrCodeOpts?: QRCodeOpts;
+  client_id?: string;
   credentialDataSupplierInput?: CredentialDataSupplierInput;
 }
 

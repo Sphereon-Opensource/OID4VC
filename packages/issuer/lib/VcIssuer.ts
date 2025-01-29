@@ -126,6 +126,8 @@ export class VcIssuer {
   }
   public async createCredentialOfferURI(opts: {
     grants?: CredentialOfferGrantInput
+    client_id?: string
+    redirectUri?: string
     credential_configuration_ids?: Array<string>
     credentialDefinition?: JsonLdIssuerCredentialDefinition
     credentialOfferUri?: string
@@ -205,6 +207,7 @@ export class VcIssuer {
       lastUpdatedAt,
       status,
       notification_id: uuidv4(),
+      ...(opts.client_id && { clientId: opts.client_id }),
       ...(userPin && { txCode: userPin }), // We used to use userPin according to older specs. We map these onto txCode now. If both are used, txCode in the end wins, even if they are different
       ...(opts.credentialDataSupplierInput && { credentialDataSupplierInput: opts.credentialDataSupplierInput }),
       credentialOffer,

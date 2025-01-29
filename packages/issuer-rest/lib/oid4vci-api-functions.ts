@@ -408,7 +408,8 @@ export function createCredentialOfferEndpoint(router: Router, issuer: VcIssuer, 
         })
       }
       const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
-      const result = await issuer.createCredentialOfferURI({ ...request.body, qrCodeOpts, grants })
+      const client_id: string | undefined = request.body.client_id ?? request.body.original_credential_offer?.client_id
+      const result = await issuer.createCredentialOfferURI({ ...request.body, qrCodeOpts, grants, client_id, credentialConfigIds })
       const resultResponse: ICreateCredentialOfferURIResponse = result
       if ('session' in resultResponse) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

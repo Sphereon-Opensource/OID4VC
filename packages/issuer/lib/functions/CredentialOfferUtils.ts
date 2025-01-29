@@ -85,6 +85,7 @@ export function createCredentialOfferObject(
     credentialOffer?: CredentialOfferPayloadV1_0_13
     credentialOfferUri?: string
     grants?: CredentialOfferGrantInput
+    client_id?: string
   },
 ): AssertedUniformCredentialOffer {
   if (!issuerMetadata && !opts?.credentialOffer && !opts?.credentialOfferUri) {
@@ -110,6 +111,9 @@ export function createCredentialOfferObject(
 
   if (grants) {
     credential_offer.grants = grants
+  }
+  if (opts?.client_id) {
+    credential_offer.client_id = opts.client_id
   }
 
   // todo: check payload against issuer metadata. Especially strings in the credentials array: When processing, the Wallet MUST resolve this string value to the respective object.
