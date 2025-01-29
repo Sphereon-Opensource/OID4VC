@@ -10,7 +10,6 @@ import {
   CredentialConfigurationSupportedV1_0_13,
   CredentialDataSupplierInput,
   CredentialEventNames,
-  CredentialIssuerMetadata,
   CredentialIssuerMetadataOptsV1_0_13,
   CredentialOfferEventNames,
   CredentialOfferSession,
@@ -80,7 +79,6 @@ export class VcIssuer {
       asClientOpts?: ClientMetadata
     },
   ) {
-    this.setDefaultTokenEndpoint(issuerMetadata)
     this._issuerMetadata = issuerMetadata
     this._authorizationServerMetadata = authorizationServerMetadata
     this._defaultCredentialOfferBaseUri = args.defaultCredentialOfferBaseUri
@@ -685,12 +683,6 @@ export class VcIssuer {
     })
 
     return credential
-  }
-
-  private setDefaultTokenEndpoint(issuerMetadata: Partial<CredentialIssuerMetadata>) {
-    if (!issuerMetadata.token_endpoint) {
-      issuerMetadata.token_endpoint = `${issuerMetadata.credential_issuer}/token`
-    }
   }
 
   get credentialSignerCallback(): CredentialSignerCallback | undefined {
