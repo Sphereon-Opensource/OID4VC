@@ -154,7 +154,7 @@ export class OID4VCIServer {
 
     pushedAuthorizationEndpoint(this.router, this.issuer, this.authRequestsData)
     getMetadataEndpoints(this.router, this.issuer)
-    if (opts?.endpointOpts?.createCredentialOfferOpts?.enabled !== false || process.env.CREDENTIAL_OFFER_ENDPOINT_EBALBED === 'true') {
+    if (opts?.endpointOpts?.createCredentialOfferOpts?.enabled !== false || process.env.CREDENTIAL_OFFER_ENDPOINT_ENABLBED === 'true') {
       createCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.createCredentialOfferOpts)
     }
     getCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.getCredentialOfferOpts)
@@ -169,8 +169,7 @@ export class OID4VCIServer {
     if (this.isAuthorizationChallengeEndpointEnabled(opts?.endpointOpts?.authorizationChallengeOpts)) {
       if (!opts?.endpointOpts?.authorizationChallengeOpts?.createAuthRequestUriCallback) {
         throw Error(`Unable to enable authorization challenge endpoint. No createAuthRequestUriCallback present in authorization challenge options`)
-      }
-      if (!opts?.endpointOpts?.authorizationChallengeOpts?.verifyAuthResponseCallback) {
+      } else if (!opts?.endpointOpts?.authorizationChallengeOpts?.verifyAuthResponseCallback) {
         throw Error(`Unable to enable authorization challenge endpoint. No verifyAuthResponseCallback present in authorization challenge options`)
       }
       authorizationChallengeEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.authorizationChallengeOpts, baseUrl: this.baseUrl })
@@ -201,8 +200,8 @@ export class OID4VCIServer {
     await this._expressSupport.stop()
   }
 
-  private isTokenEndpointDisabled(tokenEndpointOpts?: ITokenEndpointOpts) {
-    return tokenEndpointOpts?.tokenEndpointDisabled === true || process.env.TOKEN_ENDPOINT_DISABLED === 'true'
+  private isTokenEndpointDisabled(tokenEndpointOpts?: ITokenEndpointOpts, asClientMetadata?: ClientMetadata) {
+    return tokenEndpointOpts?.tokenEndpointDisabled === true || process.env.TOKEN_ENDPOINT_DISABLED === 'true' || asClientMetadata
   }
 
   private isStatusEndpointEnabled(statusEndpointOpts?: IGetIssueStatusEndpointOpts) {
@@ -215,13 +214,17 @@ export class OID4VCIServer {
 
   private assertAccessTokenHandling(tokenEndpointOpts?: ITokenEndpointOpts) {
     const authServer = this.issuer.issuerMetadata.authorization_servers
-    if (this.isTokenEndpointDisabled(tokenEndpointOpts)) {
+    if (this.isTokenEndpointDisabled(tokenEndpointOpts, this.issuer.asClientOpts)) {
       if (!authServer || authServer.length === 0) {
         throw Error(
           `No Authorization Server (AS) is defined in the issuer metadata and the token endpoint is disabled. An AS or token endpoints needs to be present`,
         )
       }
-      console.log('Token endpoint disabled by configuration')
+      if (this.issuer.asClientOpts) {
+        console.log(`Token endpoint disabled because AS client metadata is set for ${authServer[0]}`)
+      } else {
+        console.log(`Token endpoint disabled by configuration`)
+      }
     } else {
       if (authServer && authServer.some((as) => as !== this.issuer.issuerMetadata.credential_issuer)) {
         throw Error(
