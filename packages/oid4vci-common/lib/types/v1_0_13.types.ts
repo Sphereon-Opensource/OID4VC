@@ -17,8 +17,8 @@ import {
   MetadataDisplay,
   OID4VCICredentialFormat,
   ProofTypesSupported,
-  ResponseEncryption,
-} from './Generic.types';
+  ResponseEncryption, StatusListOpts
+} from './Generic.types'
 import { QRCodeOpts } from './QRCode.types';
 import { AuthorizationServerMetadata, AuthorizationServerType, EndpointMetadata } from './ServerMetadata';
 
@@ -156,7 +156,7 @@ export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_13 {
   pinLength?: number;
   qrCodeOpts?: QRCodeOpts;
   credentialDataSupplierInput?: CredentialDataSupplierInput;
-  statusEntryCorrelationId?: string
+  statusListOpts?: Array<StatusListOpts>
 }
 
 export interface CredentialOfferPayloadV1_0_13 {

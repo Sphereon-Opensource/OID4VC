@@ -5,8 +5,8 @@ import {
   CredentialRequest,
   CredentialSupplierConfig,
   JwtVerifyResult,
-  OID4VCICredentialFormat,
-  UniformCredentialRequest,
+  OID4VCICredentialFormat, StatusListOpts,
+  UniformCredentialRequest
 } from '@sphereon/oid4vci-common'
 import {
   CompactSdJwtVc,
@@ -25,7 +25,7 @@ export type CredentialSignerCallback<T extends object> = (opts: {
    * An implementation that wants to look into the DIDDoc would have to do a cast in the signer callback implementation
    */
   jwtVerifyResult: JwtVerifyResult<T>
-  statusEntryCorrelationId?: string
+  statusListOpts? :Array<StatusListOpts>
 }) => Promise<W3CVerifiableCredential | CompactSdJwtVc>
 
 export interface CredentialDataSupplierArgs extends CNonceState {

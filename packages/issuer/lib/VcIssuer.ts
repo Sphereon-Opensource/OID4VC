@@ -35,11 +35,12 @@ import {
   OpenId4VCIVersion,
   PRE_AUTH_GRANT_LITERAL,
   QRCodeOpts,
+  StatusListOpts,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
   TxCode,
   TYP_ERROR,
-  URIState,
+  URIState
 } from '@sphereon/oid4vci-common'
 import {
   CompactSdJwtVc,
@@ -139,9 +140,9 @@ export class VcIssuer<DIDDoc extends object> {
     scheme?: string
     pinLength?: number
     qrCodeOpts?: QRCodeOpts,
-    statusEntryCorrelationId?: string
+    statusListOpts? :Array<StatusListOpts>
   }): Promise<CreateCredentialOfferURIResult> {
-    const { credential_configuration_ids, statusEntryCorrelationId } = opts
+    const { credential_configuration_ids, statusListOpts } = opts
 
     const grants = opts.grants ? { ...opts.grants } : {}
     // for backwards compat, would be better if user sets the prop on the grants directly
@@ -214,7 +215,7 @@ export class VcIssuer<DIDDoc extends object> {
       ...(userPin && { txCode: userPin }), // We used to use userPin according to older specs. We map these onto txCode now. If both are used, txCode in the end wins, even if they are different
       ...(opts.credentialDataSupplierInput && { credentialDataSupplierInput: opts.credentialDataSupplierInput }),
       credentialOffer,
-      statusEntryCorrelationId
+      statusListOpts
     }
 
     if (preAuthorizedCode) {
@@ -391,7 +392,7 @@ export class VcIssuer<DIDDoc extends object> {
           credential,
           jwtVerifyResult,
           issuer,
-          ...(session && {statusEntryCorrelationId: session.statusEntryCorrelationId})
+          ...(session && {statusListOpts: session.statusListOpts})
         },
         signerCallback,
       )
@@ -671,7 +672,7 @@ export class VcIssuer<DIDDoc extends object> {
       jwtVerifyResult: JwtVerifyResult<DIDDoc>
       format?: OID4VCICredentialFormat
       issuer?: string
-      statusEntryCorrelationId?: string
+      statusListOpts?: Array<StatusListOpts>
     },
     issuerCallback?: CredentialSignerCallback<DIDDoc>,
   ): Promise<W3CVerifiableCredential | CompactSdJwtVc> {

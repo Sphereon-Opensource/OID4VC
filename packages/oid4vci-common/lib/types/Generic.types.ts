@@ -425,3 +425,10 @@ export type NotificationResponseResult = {
 export interface NotificationErrorResponse {
   error: NotificationError | string;
 }
+
+export interface StatusListOpts {
+  statusListId: string
+  statusListCorrelationId: string
+  statusEntryIndex?: number
+  statusEntryCorrelationId?: string
+}
