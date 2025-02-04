@@ -427,8 +427,8 @@ export interface NotificationErrorResponse {
 }
 
 export interface StatusListOpts {
-  statusListId: string
-  statusListCorrelationId: string
+  statusListId?: string // Explicit status list to use. Determines the id from the credentialStatus object in the VC itself or uses the default otherwise
+  statusListCorrelationId?: string
   statusEntryIndex?: number
-  statusEntryCorrelationId?: string
+  statusEntryCorrelationId?: string // An id to use for correlation. Can be the credential id, but also a business identifier. Will only be used for lookups/management
 }
