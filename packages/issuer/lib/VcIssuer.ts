@@ -138,9 +138,10 @@ export class VcIssuer<DIDDoc extends object> {
     baseUri?: string
     scheme?: string
     pinLength?: number
-    qrCodeOpts?: QRCodeOpts
+    qrCodeOpts?: QRCodeOpts,
+    statusEntryCorrelationId?: string
   }): Promise<CreateCredentialOfferURIResult> {
-    const { credential_configuration_ids } = opts
+    const { credential_configuration_ids, statusEntryCorrelationId } = opts
 
     const grants = opts.grants ? { ...opts.grants } : {}
     // for backwards compat, would be better if user sets the prop on the grants directly
@@ -213,6 +214,7 @@ export class VcIssuer<DIDDoc extends object> {
       ...(userPin && { txCode: userPin }), // We used to use userPin according to older specs. We map these onto txCode now. If both are used, txCode in the end wins, even if they are different
       ...(opts.credentialDataSupplierInput && { credentialDataSupplierInput: opts.credentialDataSupplierInput }),
       credentialOffer,
+      statusEntryCorrelationId
     }
 
     if (preAuthorizedCode) {
@@ -309,6 +311,7 @@ export class VcIssuer<DIDDoc extends object> {
       let credential: CredentialIssuanceInput | undefined
       let format: OID4VCICredentialFormat | undefined = credentialRequest.format
       let signerCallback: CredentialSignerCallback<DIDDoc> | undefined = opts.credentialSignerCallback
+      let session: CredentialOfferSession | undefined
       if (opts.credential) {
         credential = opts.credential
       } else {
@@ -317,7 +320,7 @@ export class VcIssuer<DIDDoc extends object> {
         if (typeof credentialDataSupplier !== 'function') {
           throw Error('Data supplier is mandatory if no credential is supplied')
         }
-        const session = preAuthorizedCode && preAuthSession ? preAuthSession : authSession
+        session  = preAuthorizedCode && preAuthSession ? preAuthSession : authSession
         if (!session) {
           throw Error('Either a preAuth or Auth session is required, none found')
         }
@@ -388,6 +391,7 @@ export class VcIssuer<DIDDoc extends object> {
           credential,
           jwtVerifyResult,
           issuer,
+          ...(session && {statusEntryCorrelationId: session.statusEntryCorrelationId})
         },
         signerCallback,
       )
@@ -667,6 +671,7 @@ export class VcIssuer<DIDDoc extends object> {
       jwtVerifyResult: JwtVerifyResult<DIDDoc>
       format?: OID4VCICredentialFormat
       issuer?: string
+      statusEntryCorrelationId?: string
     },
     issuerCallback?: CredentialSignerCallback<DIDDoc>,
   ): Promise<W3CVerifiableCredential | CompactSdJwtVc> {

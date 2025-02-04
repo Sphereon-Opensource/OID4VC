@@ -156,6 +156,7 @@ export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_13 {
   pinLength?: number;
   qrCodeOpts?: QRCodeOpts;
   credentialDataSupplierInput?: CredentialDataSupplierInput;
+  statusEntryCorrelationId?: string
 }
 
 export interface CredentialOfferPayloadV1_0_13 {
