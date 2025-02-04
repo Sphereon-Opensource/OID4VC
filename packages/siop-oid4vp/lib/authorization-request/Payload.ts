@@ -11,7 +11,7 @@ import {
   PassBy,
   RPRegistrationMetadataPayload,
   SIOPErrors,
-  SupportedVersion
+  SupportedVersion,
 } from '../types'
 
 import { createRequestRegistration } from './RequestRegistration'
@@ -59,7 +59,8 @@ export const createAuthorizationRequestPayload = async (
   // TODO: if opts['registration] throw Error to get rid of test code using that key
   const clientMetadata = opts['registration'] ?? (opts.clientMetadata as ClientMetadataOpts)
   const registration = await createRequestRegistration(clientMetadata, opts)
-  const claims = opts.version >= SupportedVersion.SIOPv2_ID1 ? opts.payload.claims : await createPresentationDefinitionClaimsProperties(opts.payload.claims)
+  const claims =
+    opts.version >= SupportedVersion.SIOPv2_ID1 ? opts.payload.claims : await createPresentationDefinitionClaimsProperties(opts.payload.claims)
   const isRequestTarget = isTargetOrNoTargets(PropertyTarget.AUTHORIZATION_REQUEST, opts.requestObject.targets)
   const isRequestByValue = opts.requestObject.passBy === PassBy.VALUE
 

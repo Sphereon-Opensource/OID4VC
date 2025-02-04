@@ -25,7 +25,8 @@ import {
   RegisterEventListener,
   RequestObjectPayload,
   ResponseIss,
-  ResponseMode, RPRegistrationMetadataPayload,
+  ResponseMode,
+  RPRegistrationMetadataPayload,
   SIOPErrors,
   SupportedVersion,
   UrlEncodingFormat,
@@ -108,7 +109,7 @@ export class OP {
       verification?: Verification
       presentationExchange?: PresentationExchangeResponseOpts
       dcqlResponse?: DcqlResponseOpts
-	  isFirstParty?: boolean
+      isFirstParty?: boolean
     },
   ): Promise<AuthorizationResponseWithCorrelationId> {
     if (
@@ -249,7 +250,7 @@ export class OP {
             response_type: responseType,
           },
           authResponse: response,
-          state: requestObjectPayload.state
+          state: requestObjectPayload.state,
         })
         void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
         return jarmResponse
@@ -280,8 +281,14 @@ export class OP {
    * @param encodedUri
    * @param rpRegistrationMetadata
    */
-  public async parseAuthorizationRequestURI(encodedUri: string, rpRegistrationMetadata?: RPRegistrationMetadataPayload): Promise<ParsedAuthorizationRequestURI> {
-    const { scheme, requestObjectJwt, authorizationRequestPayload, registrationMetadata } = await URI.parseAndResolve(encodedUri, rpRegistrationMetadata)
+  public async parseAuthorizationRequestURI(
+    encodedUri: string,
+    rpRegistrationMetadata?: RPRegistrationMetadataPayload,
+  ): Promise<ParsedAuthorizationRequestURI> {
+    const { scheme, requestObjectJwt, authorizationRequestPayload, registrationMetadata } = await URI.parseAndResolve(
+      encodedUri,
+      rpRegistrationMetadata,
+    )
 
     return {
       encodedUri,

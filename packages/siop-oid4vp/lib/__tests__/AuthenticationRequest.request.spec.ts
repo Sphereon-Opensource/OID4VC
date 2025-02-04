@@ -3,6 +3,7 @@ import { parse } from 'querystring'
 import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition } from '@sphereon/pex'
 import { IProofType } from '@sphereon/ssi-types'
+import { DcqlQuery } from 'dcql'
 
 import {
   CreateAuthorizationRequestOpts,
@@ -26,7 +27,6 @@ import {
   VERIFIERZ_PURPOSE_TO_VERIFY,
   VERIFIERZ_PURPOSE_TO_VERIFY_NL,
 } from './data/mockedData'
-import { DcqlQuery } from 'dcql'
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 const EXAMPLE_REFERENCE_URL = 'https://rp.acme.com/siop/jwts'
@@ -717,7 +717,7 @@ describe('create Request JWT should', () => {
           request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
           claims: {
             vp_token: {
-              dcql_query: JSON.stringify(dcqlQuery)
+              dcql_query: JSON.stringify(dcqlQuery),
             },
           },
         },

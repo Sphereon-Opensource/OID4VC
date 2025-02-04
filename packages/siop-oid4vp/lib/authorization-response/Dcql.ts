@@ -15,7 +15,6 @@ import { extractDcqlPresentationFromDcqlVpToken } from './OpenID4VP'
  */
 
 export class Dcql {
-
   static findValidDcqlQuery = async (authorizationRequestPayload: AuthorizationRequestPayload): Promise<DcqlQuery | undefined> => {
     const dcqlQuery: string[] = extractDataFromPath(authorizationRequestPayload, '$.dcql_query').map((d) => d.value)
     const definitions = extractDataFromPath(authorizationRequestPayload, '$.presentation_definition')
@@ -40,9 +39,13 @@ export class Dcql {
     return DcqlQuery.parse(JSON.parse(dcqlQuery[0]))
   }
 
-  static getDcqlPresentationResult = (record: DcqlPresentation | string, dcqlQuery: DcqlQuery, opts: {
-    hasher?: Hasher
-  }) => {
+  static getDcqlPresentationResult = (
+    record: DcqlPresentation | string,
+    dcqlQuery: DcqlQuery,
+    opts: {
+      hasher?: Hasher
+    },
+  ) => {
     const dcqlPresentation = Object.fromEntries(
       Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
         if (p.format === 'mso_mdoc') {
@@ -51,15 +54,18 @@ export class Dcql {
             {
               credential_format: 'mso_mdoc',
               doctype: p.vcs[0].credential.toJson().docType,
-              namespaces: p.vcs[0].decoded
+              namespaces: p.vcs[0].decoded,
             } satisfies DcqlMdocCredential,
           ]
         } else if (p.format === 'vc+sd-jwt') {
-          return [queryId, {
-            credential_format: 'vc+sd-jwt',
-            vct: p.vcs[0].decoded.vct,
-            claims: p.vcs[0].decoded
-          } satisfies DcqlSdJwtVcCredential]
+          return [
+            queryId,
+            {
+              credential_format: 'vc+sd-jwt',
+              vct: p.vcs[0].decoded.vct,
+              claims: p.vcs[0].decoded,
+            } satisfies DcqlSdJwtVcCredential,
+          ]
         } else {
           throw new Error('DcqlPresentation atm only supports mso_mdoc and vc+sd-jwt')
         }
@@ -69,9 +75,13 @@ export class Dcql {
     return DcqlPresentationResult.fromDcqlPresentation(dcqlPresentation, { dcqlQuery })
   }
 
-  static assertValidDcqlPresentationResult = async (record: DcqlPresentation | string, dcqlQuery: DcqlQuery, opts: {
-    hasher?: Hasher
-  }) => {
+  static assertValidDcqlPresentationResult = async (
+    record: DcqlPresentation | string,
+    dcqlQuery: DcqlQuery,
+    opts: {
+      hasher?: Hasher
+    },
+  ) => {
     const result = Dcql.getDcqlPresentationResult(record, dcqlQuery, opts)
     return DcqlPresentationResult.validate(result)
   }

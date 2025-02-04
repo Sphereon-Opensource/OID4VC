@@ -14,6 +14,7 @@ import {
   accessTokenEndpoint,
   authorizationChallengeEndpoint,
   createCredentialOfferEndpoint,
+  deleteCredentialOfferEndpoint,
   getBasePath,
   getCredentialEndpoint,
   getCredentialOfferEndpoint,
@@ -76,6 +77,10 @@ export interface IGetCredentialOfferEndpointOpts extends ISingleEndpointOpts {
   baseUrl: string
 }
 
+export interface IDeleteCredentialOfferEndpointOpts extends ISingleEndpointOpts {
+  baseUrl: string
+}
+
 export interface ICreateCredentialOfferEndpointOpts extends ISingleEndpointOpts {
   getOfferPath?: string
   qrCodeOpts?: QRCodeOpts
@@ -105,6 +110,7 @@ export interface IOID4VCIEndpointOpts {
   tokenEndpointOpts?: ITokenEndpointOpts
   notificationOpts?: ISingleEndpointOpts
   createCredentialOfferOpts?: ICreateCredentialOfferEndpointOpts
+  deleteCredentialOfferOpts?: IDeleteCredentialOfferEndpointOpts
   getCredentialOfferOpts?: IGetCredentialOfferEndpointOpts
   getStatusOpts?: IGetIssueStatusEndpointOpts
   parOpts?: ISingleEndpointOpts
@@ -137,8 +143,9 @@ export class OID4VCIServer<DIDDoc extends object> {
 
     pushedAuthorizationEndpoint(this.router, this.issuer, this.authRequestsData)
     getMetadataEndpoints(this.router, this.issuer)
-    if (opts?.endpointOpts?.createCredentialOfferOpts?.enabled !== false || process.env.CREDENTIAL_OFFER_ENDPOINT_EBALBED === 'true') {
+    if (opts?.endpointOpts?.createCredentialOfferOpts?.enabled !== false || process.env.CREDENTIAL_OFFER_ENDPOINT_ENABLED === 'true') {
       createCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.createCredentialOfferOpts)
+      deleteCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.deleteCredentialOfferOpts)
     }
     getCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.getCredentialOfferOpts)
     getCredentialEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.tokenEndpointOpts, baseUrl: this.baseUrl })
@@ -151,14 +158,10 @@ export class OID4VCIServer<DIDDoc extends object> {
     }
     if (this.isAuthorizationChallengeEndpointEnabled(opts?.endpointOpts?.authorizationChallengeOpts)) {
       if (!opts?.endpointOpts?.authorizationChallengeOpts?.createAuthRequestUriCallback) {
-        throw Error(
-          `Unable to enable authorization challenge endpoint. No createAuthRequestUriCallback present in authorization challenge options`,
-        )
+        throw Error(`Unable to enable authorization challenge endpoint. No createAuthRequestUriCallback present in authorization challenge options`)
       }
       if (!opts?.endpointOpts?.authorizationChallengeOpts?.verifyAuthResponseCallback) {
-        throw Error(
-          `Unable to enable authorization challenge endpoint. No verifyAuthResponseCallback present in authorization challenge options`,
-        )
+        throw Error(`Unable to enable authorization challenge endpoint. No verifyAuthResponseCallback present in authorization challenge options`)
       }
       authorizationChallengeEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.authorizationChallengeOpts, baseUrl: this.baseUrl })
     }

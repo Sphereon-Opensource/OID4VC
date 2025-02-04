@@ -190,47 +190,47 @@ describe('OpenID4VCIClient should', () => {
   });
 
   it('it should respond with insufficient_authorization when no sessions are provided', async () => {
-    const url = new URL(`${MOCK_URL}/authorize-challenge`)
+    const url = new URL(`${MOCK_URL}/authorize-challenge`);
     const responseBody = {
-      error: "insufficient_authorization",
-      auth_session: "123456789",
-      presentation: "/authorize?client_id=..&request_uri=https://rp.example.com/oidc/request/1234",
+      error: 'insufficient_authorization',
+      auth_session: '123456789',
+      presentation: '/authorize?client_id=..&request_uri=https://rp.example.com/oidc/request/1234',
     };
-    (await client.retrieveServerMetadata()).authorization_challenge_endpoint = url.toString()
+    (await client.retrieveServerMetadata()).authorization_challenge_endpoint = url.toString();
 
-    nock(url.origin)
-      .post(url.pathname, { client_id: client.clientId })
-      .times(1)
-      .reply(400, responseBody)
+    nock(url.origin).post(url.pathname, { client_id: client.clientId }).times(1).reply(400, responseBody);
 
     await expect(client.acquireAuthorizationChallengeCode({ clientId: client.clientId })).rejects.toEqual({
-      error: "insufficient_authorization",
-      auth_session: "123456789",
-      presentation: "/authorize?client_id=..&request_uri=https://rp.example.com/oidc/request/1234",
+      error: 'insufficient_authorization',
+      auth_session: '123456789',
+      presentation: '/authorize?client_id=..&request_uri=https://rp.example.com/oidc/request/1234',
     });
-  })
+  });
 
   it('it should successfully respond with a authorization code when authorization challenge is used', async () => {
-    const url = new URL(`${MOCK_URL}/authorize-challenge`)
+    const url = new URL(`${MOCK_URL}/authorize-challenge`);
     const responseBody = {
       authorization_code: 'test_authorization_code',
     };
-    (await client.retrieveServerMetadata()).authorization_challenge_endpoint = url.toString()
+    (await client.retrieveServerMetadata()).authorization_challenge_endpoint = url.toString();
 
-    const authSession = 'test-authSession'
-    const presentationDuringIssuanceSession = 'test-presentationDuringIssuanceSession'
+    const authSession = 'test-authSession';
+    const presentationDuringIssuanceSession = 'test-presentationDuringIssuanceSession';
 
     nock(url.origin)
-      .post(url.pathname, { client_id: client.clientId, auth_session: authSession, presentation_during_issuance_session: presentationDuringIssuanceSession })
+      .post(url.pathname, {
+        client_id: client.clientId,
+        auth_session: authSession,
+        presentation_during_issuance_session: presentationDuringIssuanceSession,
+      })
       .times(1)
-      .reply(200, responseBody)
+      .reply(200, responseBody);
 
     const response = await client.acquireAuthorizationChallengeCode({ clientId: client.clientId, authSession, presentationDuringIssuanceSession });
 
     expect(response).toBeDefined();
     expect(response.authorization_code).toEqual(responseBody.authorization_code);
-  })
-
+  });
 });
 describe('should successfully handle isEbsi function', () => {
   it('should return true when calling isEbsi function', async () => {

@@ -145,9 +145,13 @@ export class AuthorizationResponse {
         },
       })
     } else if (verifiedAuthorizationRequest.dcqlQuery) {
-      await Dcql.assertValidDcqlPresentationResult(responseOpts.dcqlResponse.dcqlPresentation as DcqlPresentation, verifiedAuthorizationRequest.dcqlQuery, {
-        hasher: verifyOpts.hasher,
-      })
+      await Dcql.assertValidDcqlPresentationResult(
+        responseOpts.dcqlResponse.dcqlPresentation as DcqlPresentation,
+        verifiedAuthorizationRequest.dcqlQuery,
+        {
+          hasher: verifyOpts.hasher,
+        },
+      )
     } else {
       throw new Error('vp_token is present, but no presentation definitions or dcql query provided')
     }

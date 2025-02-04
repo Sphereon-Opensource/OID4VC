@@ -1,5 +1,5 @@
 import { AssertedUniformCredentialOffer } from './CredentialIssuance.types';
-import { CredentialDataSupplierInput, NotificationRequest } from './Generic.types'
+import { CredentialDataSupplierInput, NotificationRequest } from './Generic.types';
 
 export interface StateType {
   createdAt: number;
@@ -17,7 +17,7 @@ export interface CredentialOfferSession extends StateType {
   notification?: NotificationRequest;
   issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
-  authorizationCode?: string
+  authorizationCode?: string;
 }
 
 export enum IssueStatus {

@@ -248,7 +248,7 @@ export class URI implements AuthorizationRequestURI {
     if (rpRegistrationMetadata !== undefined && rpRegistrationMetadata !== null) {
       registrationMetadata = rpRegistrationMetadata
     } else {
-        registrationMetadata = await fetchByReferenceOrUseByValue(
+      registrationMetadata = await fetchByReferenceOrUseByValue(
         authorizationRequestPayload['client_metadata_uri'] ?? authorizationRequestPayload['registration_uri'],
         authorizationRequestPayload['client_metadata'] ?? authorizationRequestPayload['registration'],
       )

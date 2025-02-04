@@ -4,7 +4,7 @@ import {
   CNonceState,
   CredentialIssuerMetadataOptsV1_0_13,
   CredentialOfferSession,
-  IssueStatus
+  IssueStatus,
 } from '@sphereon/oid4vci-common'
 import { VcIssuer } from '@sphereon/oid4vci-issuer'
 import { AuthorizationServerMetadataBuilder } from '@sphereon/oid4vci-issuer'
@@ -46,7 +46,7 @@ describe('OID4VCIServer', () => {
                 credentialSubject: {},
               },
             },
-          ]
+          ],
         },
       },
     }
@@ -76,13 +76,13 @@ describe('OID4VCIServer', () => {
       baseUrl: 'http://localhost:9000',
       endpointOpts: {
         tokenEndpointOpts: {
-          tokenEndpointDisabled: true
+          tokenEndpointDisabled: true,
         },
         authorizationChallengeOpts: {
           enabled: true,
           verifyAuthResponseCallback: async () => true,
-          createAuthRequestUriCallback: async () => '/authorize?client_id=..&request_uri=https://rp.example.com/oidc/request/1234'
-        }
+          createAuthRequestUriCallback: async () => '/authorize?client_id=..&request_uri=https://rp.example.com/oidc/request/1234',
+        },
       },
     })
     expressSupport.start()
@@ -97,73 +97,60 @@ describe('OID4VCIServer', () => {
   })
 
   it('should return http code 400 with error invalid_request', async () => {
-    const res = await requests(app)
-      .post('/authorize-challenge')
-      .send(`client_id=${uuidv4()}`)
-    expect(res.statusCode).toEqual(400)
-    const actual = JSON.parse(res.text)
-    expect(actual).toEqual({
-      error: AuthorizationChallengeError.invalid_request
-    })
-  })
-
-  it('should return http code 400 with message No client id or auth session present', async () => {
-    const res = await requests(app)
-      .post('/authorize-challenge')
-      .send()
+    const res = await requests(app).post('/authorize-challenge').send(`client_id=${uuidv4()}`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
       error: AuthorizationChallengeError.invalid_request,
-      error_description: 'No client id or auth session present'
+    })
+  })
+
+  it('should return http code 400 with message No client id or auth session present', async () => {
+    const res = await requests(app).post('/authorize-challenge').send()
+    expect(res.statusCode).toEqual(400)
+    const actual = JSON.parse(res.text)
+    expect(actual).toEqual({
+      error: AuthorizationChallengeError.invalid_request,
+      error_description: 'No client id or auth session present',
     })
   })
 
   it('should return http code 400 with message Session is invalid with invalid issuer_state', async () => {
-    const res = await requests(app)
-      .post('/authorize-challenge')
-      .send(`client_id=${uuidv4()}&issuer_state=${uuidv4()}`)
+    const res = await requests(app).post('/authorize-challenge').send(`client_id=${uuidv4()}&issuer_state=${uuidv4()}`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
       error: AuthorizationChallengeError.invalid_session,
-      error_description: 'Session is invalid'
+      error_description: 'Session is invalid',
     })
   })
 
   it('should return http code 400 with error insufficient_authorization', async () => {
-    const res = await requests(app)
-      .post('/authorize-challenge')
-      .send(`client_id=${uuidv4()}&issuer_state=${sessionId}`)
+    const res = await requests(app).post('/authorize-challenge').send(`client_id=${uuidv4()}&issuer_state=${sessionId}`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
       error: AuthorizationChallengeError.insufficient_authorization,
-      auth_session: "c1413695-8744-4369-845b-c2bd0ee8d5e4",
-      presentation: "/authorize?client_id=..&request_uri=https://rp.example.com/oidc/request/1234"
+      auth_session: 'c1413695-8744-4369-845b-c2bd0ee8d5e4',
+      presentation: '/authorize?client_id=..&request_uri=https://rp.example.com/oidc/request/1234',
     })
   })
 
   it('should return http code 400 with message Session is invalid with invalid auth_session', async () => {
-    const res = await requests(app)
-      .post('/authorize-challenge')
-      .send(`auth_session=${uuidv4()}&presentation_during_issuance_session=${uuidv4()}`)
+    const res = await requests(app).post('/authorize-challenge').send(`auth_session=${uuidv4()}&presentation_during_issuance_session=${uuidv4()}`)
     expect(res.statusCode).toEqual(400)
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
       error: AuthorizationChallengeError.invalid_session,
-      error_description: 'Session is invalid'
+      error_description: 'Session is invalid',
     })
   })
 
   it('should return http code 200 with authorization_code', async () => {
-    const res = await requests(app)
-      .post('/authorize-challenge')
-      .send(`auth_session=${sessionId}&presentation_during_issuance_session=${uuidv4()}`)
+    const res = await requests(app).post('/authorize-challenge').send(`auth_session=${sessionId}&presentation_during_issuance_session=${uuidv4()}`)
     expect(res.statusCode).toEqual(200)
     const actual = JSON.parse(res.text)
     expect(actual).toBeDefined()
     expect(actual.authorization_code).toBeDefined()
   })
-
 })
