@@ -166,7 +166,7 @@ export class VcIssuer<DIDDoc extends object> {
         }
       }
     }
-    if (grants[PRE_AUTH_GRANT_LITERAL]?.tx_code && grants[PRE_AUTH_GRANT_LITERAL]?.tx_code?.length) {
+    if (grants[PRE_AUTH_GRANT_LITERAL]?.tx_code && !grants[PRE_AUTH_GRANT_LITERAL]?.tx_code?.length) {
       grants[PRE_AUTH_GRANT_LITERAL].tx_code.length = 4
     }
 
