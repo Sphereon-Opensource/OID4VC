@@ -774,7 +774,7 @@ describe('create JWT from Request JWT should', () => {
       }),
       jwtIssuer: { method: 'did', didUrl: `${mockResEntity.did}#controller`, alg: SigningAlgo.ES256K },
       dcqlResponse: {
-        dcqlPresentation
+        dcqlPresentation,
       },
       responseMode: ResponseMode.DIRECT_POST,
     }

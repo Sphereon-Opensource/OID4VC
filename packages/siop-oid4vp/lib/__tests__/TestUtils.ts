@@ -28,7 +28,7 @@ import {
   RPRegistrationMetadataPayload,
   Scope,
   SubjectSyntaxTypesSupportedValues,
-  SubjectType
+  SubjectType,
 } from '../'
 import SIOPErrors from '../types/Errors'
 
@@ -40,9 +40,8 @@ import {
   VERIFIER_NAME_FOR_CLIENT,
   VERIFIER_NAME_FOR_CLIENT_NL,
   VERIFIERZ_PURPOSE_TO_VERIFY,
-  VERIFIERZ_PURPOSE_TO_VERIFY_NL
+  VERIFIERZ_PURPOSE_TO_VERIFY_NL,
 } from './data/mockedData'
-
 
 export interface TESTKEY {
   key: JWK
@@ -307,14 +306,14 @@ export const sdJwtVcPresentationSignCallback: PresentationSignCallback = async (
   })
 
   const createSignerVerifier = async () => {
-    const { privateKey, publicKey } = await ES256.generateKeyPair();
+    const { privateKey, publicKey } = await ES256.generateKeyPair()
     return {
       signer: await ES256.getSigner(privateKey),
-      verifier: await ES256.getVerifier(publicKey)
+      verifier: await ES256.getVerifier(publicKey),
     }
   }
 
-  const { signer, verifier } = await createSignerVerifier();
+  const { signer, verifier } = await createSignerVerifier()
 
   const sdjwt = new SDJwtVcInstance({
     signer,
@@ -324,17 +323,17 @@ export const sdJwtVcPresentationSignCallback: PresentationSignCallback = async (
     saltGenerator: generateSalt,
     kbSigner: signer,
     kbSignAlg: ES256.alg,
-    kbVerifier: verifier
+    kbVerifier: verifier,
   })
 
   const claims = {
     license: {
-      number: 10
+      number: 10,
     },
     user: {
       name: 'John',
-      date_of_birth: '01/01/1970'
-    }
+      date_of_birth: '01/01/1970',
+    },
   }
 
   const kbPayload: Omit<SdJwtVcKbJwtPayload, 'sd_hash'> = presentation.kbJwt.payload
@@ -343,14 +342,14 @@ export const sdJwtVcPresentationSignCallback: PresentationSignCallback = async (
     presentation.compactSdJwtVc,
     {
       user: { name: true },
-      license: { number: true }
+      license: { number: true },
     },
     {
       kb: {
         payload: kbPayload,
       },
     },
-  );
+  )
 
   return presentation.compactSdJwtVc
 }

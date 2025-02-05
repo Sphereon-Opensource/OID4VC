@@ -1,7 +1,7 @@
-import { appendFragmentParams, appendQueryParams } from '../utils.js'
-import type { JarmResponseMode, Openid4vpJarmResponseMode } from '../v-response-mode-registry.js'
-import { getJarmDefaultResponseMode, validateResponseMode } from '../v-response-mode-registry.js'
-import type { ResponseTypeOut } from '../v-response-type-registry.js'
+import { appendFragmentParams, appendQueryParams } from '../utils.js';
+import type { JarmResponseMode, Openid4vpJarmResponseMode } from '../v-response-mode-registry.js';
+import { getJarmDefaultResponseMode, validateResponseMode } from '../v-response-mode-registry.js';
+import type { ResponseTypeOut } from '../v-response-type-registry.js';
 
 interface JarmAuthResponseSendInput {
   authRequestParams: {
@@ -48,11 +48,11 @@ export const jarmAuthResponseSend = async (input: JarmAuthResponseSendInput): Pr
 };
 
 async function handleDirectPostJwt(responseEndpoint: URL, responseJwt: string, state: string) {
-  const response =  await fetch(responseEndpoint, {
+  const response = await fetch(responseEndpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `response=${responseJwt}&state=${state}`
-  })
+    body: `response=${responseJwt}&state=${state}`,
+  });
   return response;
 }
 

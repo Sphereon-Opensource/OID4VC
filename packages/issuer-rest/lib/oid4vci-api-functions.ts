@@ -31,17 +31,12 @@ import {
   trimEnd,
   trimStart,
   validateJWT,
-  WellKnownEndpoints
+  WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
-import {
-  ITokenEndpointOpts,
-  LOG,
-  VcIssuer
-} from '@sphereon/oid4vci-issuer'
+import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, oidcDiscoverIssuer, oidcGetClient, sendErrorResponse } from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
-
 
 import { handleTokenRequest, verifyTokenRequest } from './IssuerTokenEndpoint'
 import {
@@ -49,7 +44,7 @@ import {
   ICreateCredentialOfferEndpointOpts,
   ICreateCredentialOfferURIResponse,
   IGetCredentialOfferEndpointOpts,
-  IGetIssueStatusEndpointOpts
+  IGetIssueStatusEndpointOpts,
 } from './OID4VCIServer'
 import { validateRequestBody } from './expressUtils'
 
@@ -63,7 +58,7 @@ export function getIssueStatusEndpoint<DIDDoc extends object>(router: Router, is
   router.post(path, async (request: Request, response: Response) => {
     try {
       const { id } = request.body
-      const session = await issuer.credentialOfferSessions.get(id)
+      const session = await issuer.getCredentialOfferSessionById(id)
       if (!session || !session.credentialOffer) {
         return sendErrorResponse(response, 404, {
           error: 'invalid_request',
@@ -78,7 +73,7 @@ export function getIssueStatusEndpoint<DIDDoc extends object>(router: Router, is
         ...(session.error && { error: session.error }),
         ...(session.clientId && { clientId: session.clientId }),
       }
-      return response.send(JSON.stringify(authStatusBody))
+      return response.json(authStatusBody)
     } catch (e) {
       return sendErrorResponse(
         response,
@@ -112,18 +107,13 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
   LOG.log(`[OID4VCI] authorization challenge endpoint at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
     const authorizationChallengeRequest = request.body as CommonAuthorizationChallengeRequest
-    const {
-      client_id,
-      issuer_state,
-      auth_session,
-      presentation_during_issuance_session
-    } = authorizationChallengeRequest
+    const { client_id, issuer_state, auth_session, presentation_during_issuance_session } = authorizationChallengeRequest
 
     try {
       if (!client_id && !auth_session) {
         const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
           error: AuthorizationChallengeError.invalid_request,
-          error_description: 'No client id or auth session present'
+          error_description: 'No client id or auth session present',
         } as AuthorizationChallengeErrorResponse
         throw authorizationChallengeErrorResponse
       }
@@ -133,7 +123,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
         if (!session) {
           const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
             error: AuthorizationChallengeError.invalid_session,
-            error_description: 'Session is invalid'
+            error_description: 'Session is invalid',
           }
           throw authorizationChallengeErrorResponse
         }
@@ -142,7 +132,7 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
         const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
           error: AuthorizationChallengeError.insufficient_authorization,
           auth_session: issuer_state,
-          presentation: authRequestURI
+          presentation: authRequestURI,
         }
         throw authorizationChallengeErrorResponse
       }
@@ -152,34 +142,29 @@ export function authorizationChallengeEndpoint<DIDDoc extends object>(
         if (!session) {
           const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
             error: AuthorizationChallengeError.invalid_session,
-            error_description: 'Session is invalid'
+            error_description: 'Session is invalid',
           }
           throw authorizationChallengeErrorResponse
         }
 
         const verifiedResponse = await opts.verifyAuthResponseCallback(presentation_during_issuance_session) // TODO generate some error
         if (verifiedResponse) {
-          const authorizationCode  = generateRandomString(16, 'base64url')
+          const authorizationCode = generateRandomString(16, 'base64url')
           session.authorizationCode = authorizationCode
           await issuer.credentialOfferSessions.set(auth_session, session)
           const authorizationChallengeCodeResponse: AuthorizationChallengeCodeResponse = {
-            authorization_code: authorizationCode
+            authorization_code: authorizationCode,
           }
-          return response.send(authorizationChallengeCodeResponse)
+          return response.json(authorizationChallengeCodeResponse)
         }
       }
 
       const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
-        error: AuthorizationChallengeError.invalid_request
+        error: AuthorizationChallengeError.invalid_request,
       }
       throw authorizationChallengeErrorResponse
     } catch (e) {
-      return sendErrorResponse(
-        response,
-        400,
-        (e as Error),
-        e,
-      )
+      return sendErrorResponse(response, 400, e as Error, e)
     }
   })
 }
@@ -283,7 +268,7 @@ export function getCredentialEndpoint<DIDDoc extends object>(
         tokenExpiresIn: opts.tokenExpiresIn,
         cNonceExpiresIn: opts.cNonceExpiresIn,
       })
-      return response.send(credential)
+      return response.json(credential)
     } catch (e) {
       return sendErrorResponse(
         response,
@@ -390,7 +375,33 @@ export function getCredentialOfferEndpoint<DIDDoc extends object>(router: Router
           error_description: `Credential offer ${id} not found`,
         })
       }
-      return response.send(JSON.stringify(session.credentialOffer.credential_offer))
+      return response.json(session.credentialOffer.credential_offer)
+    } catch (e) {
+      return sendErrorResponse(
+        response,
+        500,
+        {
+          error: 'invalid_request',
+          error_description: (e as Error).message,
+        },
+        e,
+      )
+    }
+  })
+}
+
+export function deleteCredentialOfferEndpoint<DIDDoc extends object>(
+  router: Router,
+  issuer: VcIssuer<DIDDoc>,
+  opts?: IGetCredentialOfferEndpointOpts,
+) {
+  const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers/:id', { stripBasePath: true })
+  LOG.log(`[OID4VCI] deleteCredentialOffer endpoint enabled at ${path}`)
+  router.delete(path, async (request: Request, response: Response) => {
+    try {
+      const { id } = request.params
+      await issuer.deleteCredentialOfferSessionById(id)
+      return response.sendStatus(204)
     } catch (e) {
       return sendErrorResponse(
         response,
@@ -442,7 +453,7 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
         // @ts-ignore
         delete resultResponse.session
       }
-      return response.send(resultResponse)
+      return response.json(resultResponse)
     } catch (e) {
       return sendErrorResponse(
         response,
@@ -465,7 +476,7 @@ export function pushedAuthorizationEndpoint<DIDDoc extends object>(
 ) {
   const handleHttpStatus400 = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.body) {
-      return res.status(400).send({ error: 'invalid_request', error_description: 'Request body must be present' })
+      return res.status(400).json({ error: 'invalid_request', error_description: 'Request body must be present' })
     }
     const required = ['client_id', 'code_challenge_method', 'code_challenge', 'redirect_uri']
     const conditional = ['authorization_details', 'scope']
@@ -524,12 +535,12 @@ export function pushedAuthorizationEndpoint<DIDDoc extends object>(
 
 export function getMetadataEndpoints<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>) {
   const credentialIssuerHandler = (request: Request, response: Response) => {
-    return response.send(issuer.issuerMetadata)
+    return response.json(issuer.issuerMetadata)
   }
   router.get(WellKnownEndpoints.OPENID4VCI_ISSUER, credentialIssuerHandler)
 
   const authorizationServerHandler = (request: Request, response: Response) => {
-    return response.send(issuer.authorizationServerMetadata)
+    return response.json(issuer.authorizationServerMetadata)
   }
   router.get(WellKnownEndpoints.OAUTH_AS, authorizationServerHandler)
 }

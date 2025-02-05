@@ -25,7 +25,6 @@ import { assignIfAuth, assignIfRequestObject, isTarget, isTargetOrNoTargets } fr
 import { RP } from './RP'
 import { IRPSessionManager } from './types'
 
-
 export class RPBuilder {
   requestObjectBy: ObjectBy
   createJwtCallback?: CreateJwtCallback
@@ -233,32 +232,35 @@ export class RPBuilder {
       this._authorizationRequestPayload.dcql_query = assignIfAuth(
         {
           propertyValue: typeof dcqlQuery === 'string' ? dcqlQuery : JSON.stringify(dcqlQuery),
-          targets
+          targets,
         },
-        false
+        false,
       )
       this._requestObjectPayload.dcql_query = assignIfRequestObject(
         {
           propertyValue: typeof dcqlQuery === 'string' ? dcqlQuery : JSON.stringify(dcqlQuery),
-          targets
+          targets,
         },
-        true
+        true,
       )
 
       // FIXME SPRIND-144 we need to find a way in the config to select dcql vs PD without breaking OID4VC-DEMO
-      this._authorizationRequestPayload.presentation_definition = undefined;
-      this._authorizationRequestPayload.presentation_definition_uri = undefined;
-      this._requestObjectPayload.presentation_definition = undefined;
-      this._requestObjectPayload.presentation_definition_uri = undefined;
+      this._authorizationRequestPayload.presentation_definition = undefined
+      this._authorizationRequestPayload.presentation_definition_uri = undefined
+      this._requestObjectPayload.presentation_definition = undefined
+      this._requestObjectPayload.presentation_definition_uri = undefined
     }
     return this
   }
 
-  withPresentationDefinition(definitionOpts: {
-    definition: IPresentationDefinition;
-    definitionUri?: string
-  }, targets?: PropertyTargets): RPBuilder {
-    if(this._authorizationRequestPayload.dcql_query) {
+  withPresentationDefinition(
+    definitionOpts: {
+      definition: IPresentationDefinition
+      definitionUri?: string
+    },
+    targets?: PropertyTargets,
+  ): RPBuilder {
+    if (this._authorizationRequestPayload.dcql_query) {
       return this
     }
 
@@ -267,49 +269,49 @@ export class RPBuilder {
     if (this.getSupportedRequestVersion() < SupportedVersion.SIOPv2_D11) {
       const definitionProperties = {
         presentation_definition: definition,
-        presentation_definition_uri: definitionUri
+        presentation_definition_uri: definitionUri,
       }
       const vp_token = { ...definitionProperties }
       if (isTarget(PropertyTarget.AUTHORIZATION_REQUEST, targets)) {
         this._authorizationRequestPayload.claims = {
           ...(this._authorizationRequestPayload.claims ? this._authorizationRequestPayload.claims : {}),
-          vp_token: vp_token
+          vp_token: vp_token,
         }
       }
       if (isTargetOrNoTargets(PropertyTarget.REQUEST_OBJECT, targets)) {
         this._requestObjectPayload.claims = {
           ...(this._requestObjectPayload.claims ? this._requestObjectPayload.claims : {}),
-          vp_token: vp_token
+          vp_token: vp_token,
         }
       }
     } else {
       this._authorizationRequestPayload.presentation_definition = assignIfAuth(
         {
           propertyValue: definition,
-          targets
+          targets,
         },
-        false
+        false,
       )
       this._authorizationRequestPayload.presentation_definition_uri = assignIfAuth(
         {
           propertyValue: definitionUri,
-          targets
+          targets,
         },
-        true
+        true,
       )
       this._requestObjectPayload.presentation_definition = assignIfRequestObject(
         {
           propertyValue: definition,
-          targets
+          targets,
         },
-        true
+        true,
       )
       this._requestObjectPayload.presentation_definition_uri = assignIfRequestObject(
         {
           propertyValue: definitionUri,
-          targets
+          targets,
         },
-        true
+        true,
       )
     }
     return this

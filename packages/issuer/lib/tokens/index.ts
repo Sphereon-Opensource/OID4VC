@@ -37,7 +37,7 @@ export interface ITokenEndpointOpts {
   accessTokenSignerCallback?: JWTSignerCallback
   accessTokenVerificationCallback?: JWTVerifyCallback<never>
   accessTokenIssuer?: string
-  accessTokenProvider?:  AccessTokenProvider
+  accessTokenProvider?: AccessTokenProvider
 }
 
 export type AccessTokenProvider = 'internal' | 'oidc' | 'oauth2'
@@ -50,10 +50,23 @@ export const generateAccessToken = async (
     dPoPJwk?: JWK
   },
 ): Promise<string> => {
-  const { dPoPJwk, accessTokenIssuer, alg, accessTokenSignerCallback, tokenExpiresIn, preAuthorizedCode, additionalClaims, accessTokenProvider = 'internal' } = opts
+  const {
+    dPoPJwk,
+    accessTokenIssuer,
+    alg,
+    accessTokenSignerCallback,
+    tokenExpiresIn,
+    preAuthorizedCode,
+    additionalClaims,
+    accessTokenProvider = 'internal',
+  } = opts
   // JWT uses seconds for iat and exp
   if (accessTokenProvider !== 'internal') {
-    throw new TokenError(400, TokenErrorResponse.invalid_request, `Access token provider ${accessTokenProvider} is an external access token provider. We cannot generate tokens ourselves in this case`)
+    throw new TokenError(
+      400,
+      TokenErrorResponse.invalid_request,
+      `Access token provider ${accessTokenProvider} is an external access token provider. We cannot generate tokens ourselves in this case`,
+    )
   }
   const iat = new Date().getTime() / 1000
   const exp = iat + tokenExpiresIn
@@ -213,7 +226,17 @@ export const createAccessTokenResponse = async (
     dPoPJwk?: JWK
   },
 ) => {
-  const { dPoPJwk, credentialOfferSessions, cNonces, cNonceExpiresIn, tokenExpiresIn, accessTokenIssuer, accessTokenSignerCallback, interval, accessTokenProvider = 'internal' } = opts
+  const {
+    dPoPJwk,
+    credentialOfferSessions,
+    cNonces,
+    cNonceExpiresIn,
+    tokenExpiresIn,
+    accessTokenIssuer,
+    accessTokenSignerCallback,
+    interval,
+    accessTokenProvider = 'internal',
+  } = opts
   // Pre-auth flow
   const preAuthorizedCode = request[PRE_AUTH_CODE_LITERAL] as string
 
@@ -226,7 +249,7 @@ export const createAccessTokenResponse = async (
     preAuthorizedCode,
     accessTokenIssuer,
     dPoPJwk,
-    accessTokenProvider
+    accessTokenProvider,
   })
 
   const response: AccessTokenResponse = {

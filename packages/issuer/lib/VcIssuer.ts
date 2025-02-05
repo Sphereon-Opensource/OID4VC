@@ -42,14 +42,7 @@ import {
   TYP_ERROR,
   URIState
 } from '@sphereon/oid4vci-common'
-import {
-  CompactSdJwtVc,
-  CredentialMapper,
-  InitiatorType,
-  SubSystem,
-  System,
-  W3CVerifiableCredential
-} from '@sphereon/ssi-types'
+import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
 import { LookupStateManager } from './state-manager'
@@ -98,11 +91,31 @@ export class VcIssuer<DIDDoc extends object> {
     this._cNonceExpiresIn = (args?.cNonceExpiresIn ?? (process.env.C_NONCE_EXPIRES_IN ? parseInt(process.env.C_NONCE_EXPIRES_IN) : 300)) as number
   }
 
-  public getCredentialOfferSessionById(id: string): Promise<CredentialOfferSession> {
+  public async getCredentialOfferSessionById(id: string, lookup?: 'uri' | 'id'): Promise<CredentialOfferSession> {
     if (!this.uris) {
-      throw Error('Cannot lookup credential offer by id if URI state manager is not set')
+      return Promise.reject(Error('Cannot lookup credential offer by id if URI state manager is not set'))
     }
-    return new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, 'uri').getAsserted(id)
+    if (lookup) {
+      return new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, lookup).getAsserted(id)
+    }
+    const session = await this._credentialOfferSessions.get(id)
+    if (!session) {
+      return Promise.reject(Error(`No session found for id ${id}`))
+    }
+    return session
+  }
+
+  public async deleteCredentialOfferSessionById(id: string, lookup: 'uri' | 'id' = 'id'): Promise<CredentialOfferSession> {
+    const session = await this.getCredentialOfferSessionById(id, lookup)
+    if (session) {
+      if (session.preAuthorizedCode && (await this._credentialOfferSessions.has(session.preAuthorizedCode))) {
+        await this._credentialOfferSessions.delete(session.preAuthorizedCode)
+      }
+      if (session.issuerState && (await this._credentialOfferSessions.has(session.issuerState))) {
+        await this._credentialOfferSessions.delete(session.issuerState)
+      }
+    }
+    return session
   }
 
   public async processNotification({
@@ -130,6 +143,7 @@ export class VcIssuer<DIDDoc extends object> {
     LOG.info(`Processed notification ${notification} for ${session.notification_id}`)
     return session
   }
+
   public async createCredentialOfferURI(opts: {
     grants?: CredentialOfferGrantInput
     credential_configuration_ids?: Array<string>
@@ -147,10 +161,15 @@ export class VcIssuer<DIDDoc extends object> {
     const grants = opts.grants ? { ...opts.grants } : {}
     // for backwards compat, would be better if user sets the prop on the grants directly
     if (opts.pinLength !== undefined) {
-      const preAuth = grants[PRE_AUTH_GRANT_LITERAL]
-      if (preAuth && preAuth.tx_code) {
-        preAuth.tx_code.length = opts.pinLength
+      if (grants[PRE_AUTH_GRANT_LITERAL]) {
+        grants[PRE_AUTH_GRANT_LITERAL].tx_code = {
+          ...grants[PRE_AUTH_GRANT_LITERAL].tx_code,
+          length: grants[PRE_AUTH_GRANT_LITERAL].tx_code?.length ?? opts.pinLength,
+        }
       }
+    }
+    if (grants[PRE_AUTH_GRANT_LITERAL]?.tx_code && grants[PRE_AUTH_GRANT_LITERAL]?.tx_code?.length) {
+      grants[PRE_AUTH_GRANT_LITERAL].tx_code.length = 4
     }
 
     const baseUri = opts?.baseUri ?? this.defaultCredentialOfferBaseUri
