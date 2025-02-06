@@ -331,7 +331,7 @@ export class VcIssuer<DIDDoc extends object> {
       let credential: CredentialIssuanceInput | undefined
       let format: OID4VCICredentialFormat | undefined = credentialRequest.format
       let signerCallback: CredentialSignerCallback<DIDDoc> | undefined = opts.credentialSignerCallback
-      let session: CredentialOfferSession | undefined
+      const session: CredentialOfferSession | undefined = preAuthorizedCode && preAuthSession ? preAuthSession : authSession
       if (opts.credential) {
         credential = opts.credential
       } else {
@@ -340,7 +340,6 @@ export class VcIssuer<DIDDoc extends object> {
         if (typeof credentialDataSupplier !== 'function') {
           throw Error('Data supplier is mandatory if no credential is supplied')
         }
-        session  = preAuthorizedCode && preAuthSession ? preAuthSession : authSession
         if (!session) {
           throw Error('Either a preAuth or Auth session is required, none found')
         }
@@ -691,7 +690,7 @@ export class VcIssuer<DIDDoc extends object> {
       jwtVerifyResult: JwtVerifyResult<DIDDoc>
       format?: OID4VCICredentialFormat
       issuer?: string
-      statusListOpts?: Array<StatusListOpts>
+      statusLists?: Array<StatusListOpts>
     },
     issuerCallback?: CredentialSignerCallback<DIDDoc>,
   ): Promise<W3CVerifiableCredential | CompactSdJwtVc> {
