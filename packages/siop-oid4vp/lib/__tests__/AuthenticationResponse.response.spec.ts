@@ -302,7 +302,7 @@ describe('create JWT from Request JWT should', () => {
       await expect(response).toBeDefined()
       } catch (e) {
         if (e.message.includes('Service Unavailable')) {
-          return test.skip('Skipping due to Service Unavailable')
+          return test.skip('Skipping due to Service Unavailable', () => { /* skip test */})
         }
         throw e
       }
@@ -479,7 +479,7 @@ describe('create JWT from Request JWT should', () => {
       await expect(authorizationRequest).toBeDefined()
     } catch (e) {
       if (e.message.includes('Service Unavailable')) {
-        return test.skip('Skipping due to Service Unavailable')
+        return test.skip('Skipping due to Service Unavailable', () => { /* skip test */})
       }
       throw e
     }
@@ -793,10 +793,18 @@ describe('create JWT from Request JWT should', () => {
       responseMode: ResponseMode.DIRECT_POST,
     }
 
-    const requestObject = await RequestObject.fromOpts(requestOpts)
-    const jwt = await requestObject.toJwt()
-    if (!jwt) throw new Error('JWT is undefined')
-    const authorizationRequest = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
-    expect(authorizationRequest).toBeDefined()
+    try {
+      const requestObject = await RequestObject.fromOpts(requestOpts)
+      const jwt = await requestObject.toJwt()
+      if (!jwt) throw new Error('JWT is undefined')
+      const authorizationRequest = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
+      expect(authorizationRequest).toBeDefined()
+    } catch (e) {
+      if (e.message.includes('Service Unavailable')) {
+        return test.skip('Skipping due to Service Unavailable', () => { /* skip test */
+        })
+      }
+      throw e
+    }
   })
 })

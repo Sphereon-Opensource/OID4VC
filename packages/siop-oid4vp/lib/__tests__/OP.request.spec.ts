@@ -189,7 +189,7 @@ describe('OP should', () => {
         expect(verifiedRequest.jwt).toBeDefined()
       } catch (e) {
         if (e.message.includes('Service Unavailable')) {
-          return test.skip('Skipping due to Service Unavailable')
+          return test.skip('Skipping due to Service Unavailable', () => { /* skip test */})
         }
         throw e
       }
@@ -279,7 +279,7 @@ describe('OP should', () => {
       expect(verifiedRequest.jwt).toBeDefined()
     } catch (e) {
       if (e.message.includes('Service Unavailable')) {
-        return test.skip('Skipping due to Service Unavailable')
+        return test.skip('Skipping due to Service Unavailable', () => { /* skip test */})
       }
       throw e
     }

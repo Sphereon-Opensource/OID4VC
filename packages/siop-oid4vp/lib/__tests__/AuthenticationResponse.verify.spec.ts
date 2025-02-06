@@ -37,7 +37,7 @@ describe('verify JWT from Request JWT should', () => {
       )
     } catch (e) {
       if (e.message.includes('Service Unavailable')) {
-        return test.skip('Skipping due to Service Unavailable')
+        return test.skip('Skipping due to Service Unavailable', () => { /* skip test */})
       }
       throw e
     }
@@ -51,7 +51,7 @@ describe('verify JWT from Request JWT should', () => {
       )
     } catch (e) {
       if (e.message.includes('Service Unavailable')) {
-        return test.skip('Skipping due to Service Unavailable')
+        test.todo('Temporarily skipped due to Service Unavailable')
       }
       throw e
     }

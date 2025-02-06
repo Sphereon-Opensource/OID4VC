@@ -313,7 +313,7 @@ describe('verifyJWT should', () => {
       await expect(AuthorizationRequest.verify(jwt as string, verifyOpts)).rejects.toThrow(SIOPErrors.BAD_NONCE)
     } catch (e) {
       if (e.message.includes('Service Unavailable')) {
-        return test.skip('Skipping due to Service Unavailable')
+        test.todo('Temporarily skipped due to Service Unavailable')
       }
       throw e
     }
