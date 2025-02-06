@@ -216,6 +216,7 @@ describe('create JWT from Request JWT should', () => {
     async () => {
       expect.assertions(1)
 
+      try{
       const mockReqEntity = await mockedGetEnterpriseAuthToken('REQ COMPANY')
       const mockResEntity = await mockedGetEnterpriseAuthToken('RES COMPANY')
       const requestOpts: CreateAuthorizationRequestOpts = {
@@ -299,6 +300,12 @@ describe('create JWT from Request JWT should', () => {
       if (!jwt) throw new Error('JWT is undefined')
       const response = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
       await expect(response).toBeDefined()
+      } catch (e) {
+        if (e.message.includes('Service Unavailable')) {
+          return test.skip('Skipping due to Service Unavailable')
+        }
+        throw e
+      }
     },
     UNIT_TEST_TIMEOUT,
   )
@@ -306,169 +313,176 @@ describe('create JWT from Request JWT should', () => {
   it('succeed when valid JWT with PD is passed in', async () => {
     expect.assertions(1)
 
-    const mockReqEntity = await mockedGetEnterpriseAuthToken('REQ COMPANY')
-    const mockResEntity = await mockedGetEnterpriseAuthToken('RES COMPANY')
-    const presentationSignCallback: PresentationSignCallback = async (_args) => ({
-      ...(_args.presentation as IPresentation),
-      proof: {
-        type: 'RsaSignature2018',
-        created: '2018-09-14T21:19:10Z',
-        proofPurpose: 'authentication',
-        verificationMethod: 'did:example:ebfeb1f712ebc6f1c276e12ec21#keys-1',
-        challenge: '1f44d55f-f161-4938-a659-f8026467f126',
-        domain: '4jt78h47fh47',
-        jws: 'eyJhbGciOiJSUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..kTCYt5XsITJX1CxPCT8yAV-TVIw5WEuts01mq-pQy7UJiN5mgREEMGlv50aqzpqh4Qq_PbChOMqsLfRoPsnsgxD-WUcX16dUOqV0G_zS245-kronKb78cPktb3rk-BuQy72IFLN25DYuNzVBAh4vGHSrQyHUGlcTwLtjPAnKb78',
-      },
-    })
-    const definition: IPresentationDefinition = {
-      id: 'Credentials',
-      input_descriptors: [
-        {
-          id: 'ID Card Credential',
-          schema: [
-            {
-              uri: 'https://www.w3.org/2018/credentials/examples/v1/IDCardCredential',
-            },
-          ],
-          constraints: {
-            //limit_disclosure: 'required',
-            fields: [
+    try {
+      const mockReqEntity = await mockedGetEnterpriseAuthToken('REQ COMPANY')
+      const mockResEntity = await mockedGetEnterpriseAuthToken('RES COMPANY')
+      const presentationSignCallback: PresentationSignCallback = async (_args) => ({
+        ...(_args.presentation as IPresentation),
+        proof: {
+          type: 'RsaSignature2018',
+          created: '2018-09-14T21:19:10Z',
+          proofPurpose: 'authentication',
+          verificationMethod: 'did:example:ebfeb1f712ebc6f1c276e12ec21#keys-1',
+          challenge: '1f44d55f-f161-4938-a659-f8026467f126',
+          domain: '4jt78h47fh47',
+          jws: 'eyJhbGciOiJSUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..kTCYt5XsITJX1CxPCT8yAV-TVIw5WEuts01mq-pQy7UJiN5mgREEMGlv50aqzpqh4Qq_PbChOMqsLfRoPsnsgxD-WUcX16dUOqV0G_zS245-kronKb78cPktb3rk-BuQy72IFLN25DYuNzVBAh4vGHSrQyHUGlcTwLtjPAnKb78',
+        },
+      })
+      const definition: IPresentationDefinition = {
+        id: 'Credentials',
+        input_descriptors: [
+          {
+            id: 'ID Card Credential',
+            schema: [
               {
-                path: ['$.issuer.id'],
-                purpose: 'We can only verify bank accounts if they are attested by a source.',
-                filter: {
-                  type: 'string',
-                  pattern: 'did:example:issuer',
-                },
+                uri: 'https://www.w3.org/2018/credentials/examples/v1/IDCardCredential',
               },
             ],
+            constraints: {
+              //limit_disclosure: 'required',
+              fields: [
+                {
+                  path: ['$.issuer.id'],
+                  purpose: 'We can only verify bank accounts if they are attested by a source.',
+                  filter: {
+                    type: 'string',
+                    pattern: 'did:example:issuer',
+                  },
+                },
+              ],
+            },
           },
-        },
-      ],
-    }
-    const requestOpts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
-      requestObject: {
-        passBy: PassBy.REFERENCE,
-        reference_uri: 'https://my-request.com/here',
-        jwtIssuer: { method: 'did', didUrl: mockReqEntity.did, alg: SigningAlgo.ES256K },
-        createJwtCallback: getCreateJwtCallback({
-          hexPrivateKey: mockReqEntity.hexPrivateKey,
-          did: mockReqEntity.did,
-          kid: `${mockReqEntity.did}#controller`,
-          alg: SigningAlgo.ES256K,
-        }),
-        payload: {
-          client_id: WELL_KNOWN_OPENID_FEDERATION,
-          scope: 'test',
-          response_type: 'id_token vp_token',
-          redirect_uri: EXAMPLE_REDIRECT_URL,
-          claims: {
-            vp_token: {
-              presentation_definition: definition,
+        ],
+      }
+      const requestOpts: CreateAuthorizationRequestOpts = {
+        version: SupportedVersion.SIOPv2_ID1,
+        requestObject: {
+          passBy: PassBy.REFERENCE,
+          reference_uri: 'https://my-request.com/here',
+          jwtIssuer: { method: 'did', didUrl: mockReqEntity.did, alg: SigningAlgo.ES256K },
+          createJwtCallback: getCreateJwtCallback({
+            hexPrivateKey: mockReqEntity.hexPrivateKey,
+            did: mockReqEntity.did,
+            kid: `${mockReqEntity.did}#controller`,
+            alg: SigningAlgo.ES256K,
+          }),
+          payload: {
+            client_id: WELL_KNOWN_OPENID_FEDERATION,
+            scope: 'test',
+            response_type: 'id_token vp_token',
+            redirect_uri: EXAMPLE_REDIRECT_URL,
+            claims: {
+              vp_token: {
+                presentation_definition: definition,
+              },
             },
           },
         },
-      },
-      clientMetadata: {
-        client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
-          ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+        clientMetadata: {
+          client_id: WELL_KNOWN_OPENID_FEDERATION,
+          idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+          subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
+          requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+          responseTypesSupported: [ResponseType.ID_TOKEN],
+          scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+          subjectTypesSupported: [SubjectType.PAIRWISE],
+          vpFormatsSupported: {
+            ldp_vc: {
+              proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+            },
           },
+          passBy: PassBy.VALUE,
+          logo_uri: VERIFIER_LOGO_FOR_CLIENT,
+          clientName: VERIFIER_NAME_FOR_CLIENT,
+          'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100315',
+          clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+          'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         },
-        passBy: PassBy.VALUE,
-        logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100315',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      },
-    }
-    const vc: ICredential = {
-      id: 'https://example.com/credentials/1872',
-      type: ['VerifiableCredential', 'IDCardCredential'],
-      '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1/IDCardCredential'],
-      issuer: {
-        id: 'did:example:issuer',
-      },
-      issuanceDate: '2010-01-01T19:23:24Z',
-      credentialSubject: {
-        given_name: 'Fredrik',
-        family_name: 'Stremberg',
-        birthdate: '1949-01-22',
-      },
-    }
-    const presentation: IVerifiablePresentation = {
-      '@context': ['https://www.w3.org/2018/credentials/v1'],
-      presentation_submission: undefined,
-      type: ['verifiablePresentation'],
-      holder: 'did:example:holder',
-      verifiableCredential: [vc as IVerifiableCredential],
-      proof: undefined as any,
-    }
+      }
+      const vc: ICredential = {
+        id: 'https://example.com/credentials/1872',
+        type: ['VerifiableCredential', 'IDCardCredential'],
+        '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1/IDCardCredential'],
+        issuer: {
+          id: 'did:example:issuer',
+        },
+        issuanceDate: '2010-01-01T19:23:24Z',
+        credentialSubject: {
+          given_name: 'Fredrik',
+          family_name: 'Stremberg',
+          birthdate: '1949-01-22',
+        },
+      }
+      const presentation: IVerifiablePresentation = {
+        '@context': ['https://www.w3.org/2018/credentials/v1'],
+        presentation_submission: undefined,
+        type: ['verifiablePresentation'],
+        holder: 'did:example:holder',
+        verifiableCredential: [vc as IVerifiableCredential],
+        proof: undefined as any,
+      }
 
-    const pex = new PresentationExchange({
-      allDIDs: ['did:example:holder'],
-      allVerifiableCredentials: presentation.verifiableCredential as OriginalVerifiableCredential[],
-    })
-    await pex.selectVerifiableCredentialsForSubmission(definition)
-    const verifiablePresentationResult = await pex.createVerifiablePresentation(
-      definition,
-      presentation.verifiableCredential as OriginalVerifiableCredential[],
-      presentationSignCallback,
-      {},
-    )
-    const responseOpts: AuthorizationResponseOpts = {
-      responseURI: EXAMPLE_REDIRECT_URL,
-      responseURIType: 'redirect_uri',
-      registration: {
-        authorizationEndpoint: 'www.myauthorizationendpoint.com',
-        issuer: ResponseIss.SELF_ISSUED_V2,
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        passBy: PassBy.REFERENCE,
-        reference_uri: EXAMPLE_REFERENCE_URL,
+      const pex = new PresentationExchange({
+        allDIDs: ['did:example:holder'],
+        allVerifiableCredentials: presentation.verifiableCredential as OriginalVerifiableCredential[],
+      })
+      await pex.selectVerifiableCredentialsForSubmission(definition)
+      const verifiablePresentationResult = await pex.createVerifiablePresentation(
+        definition,
+        presentation.verifiableCredential as OriginalVerifiableCredential[],
+        presentationSignCallback,
+        {},
+      )
+      const responseOpts: AuthorizationResponseOpts = {
+        responseURI: EXAMPLE_REDIRECT_URL,
+        responseURIType: 'redirect_uri',
+        registration: {
+          authorizationEndpoint: 'www.myauthorizationendpoint.com',
+          issuer: ResponseIss.SELF_ISSUED_V2,
+          responseTypesSupported: [ResponseType.ID_TOKEN],
+          passBy: PassBy.REFERENCE,
+          reference_uri: EXAMPLE_REFERENCE_URL,
 
-        subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        vpFormats: {
-          ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+          subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
+          vpFormats: {
+            ldp_vc: {
+              proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+            },
           },
+          logo_uri: VERIFIER_LOGO_FOR_CLIENT,
+          clientName: VERIFIER_NAME_FOR_CLIENT,
+          'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100316',
+          clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+          'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         },
-        logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100316',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      },
-      createJwtCallback: getCreateJwtCallback({
-        did: mockResEntity.did,
-        hexPrivateKey: mockResEntity.hexPrivateKey,
-        kid: `${mockResEntity.did}#controller`,
-        alg: SigningAlgo.ES256K,
-      }),
-      jwtIssuer: { method: 'did', didUrl: `${mockResEntity.did}#controller`, alg: SigningAlgo.ES256K },
-      presentationExchange: {
-        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
-        vpTokenLocation: VPTokenLocation.ID_TOKEN,
-        presentationSubmission: await createPresentationSubmission(verifiablePresentationResult.verifiablePresentations, {
-          presentationDefinitions: [definition],
+        createJwtCallback: getCreateJwtCallback({
+          did: mockResEntity.did,
+          hexPrivateKey: mockResEntity.hexPrivateKey,
+          kid: `${mockResEntity.did}#controller`,
+          alg: SigningAlgo.ES256K,
         }),
-      },
-      responseMode: ResponseMode.POST,
-    }
+        jwtIssuer: { method: 'did', didUrl: `${mockResEntity.did}#controller`, alg: SigningAlgo.ES256K },
+        presentationExchange: {
+          verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
+          vpTokenLocation: VPTokenLocation.ID_TOKEN,
+          presentationSubmission: await createPresentationSubmission(verifiablePresentationResult.verifiablePresentations, {
+            presentationDefinitions: [definition],
+          }),
+        },
+        responseMode: ResponseMode.POST,
+      }
 
-    const requestObject = await RequestObject.fromOpts(requestOpts)
-    const jwt = await requestObject.toJwt()
-    if (!jwt) throw new Error('JWT is undefined')
-    const authorizationRequest = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
-    await expect(authorizationRequest).toBeDefined()
+      const requestObject = await RequestObject.fromOpts(requestOpts)
+      const jwt = await requestObject.toJwt()
+      if (!jwt) throw new Error('JWT is undefined')
+      const authorizationRequest = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
+      await expect(authorizationRequest).toBeDefined()
+    } catch (e) {
+      if (e.message.includes('Service Unavailable')) {
+        return test.skip('Skipping due to Service Unavailable')
+      }
+      throw e
+    }
   })
 
   it('succeed when valid JWT with PD is passed in for id_token', async () => {

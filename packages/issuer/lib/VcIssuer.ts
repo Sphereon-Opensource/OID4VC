@@ -154,7 +154,7 @@ export class VcIssuer<DIDDoc extends object> {
     scheme?: string
     pinLength?: number
     qrCodeOpts?: QRCodeOpts,
-    statusListOpts? :Array<StatusListOpts>
+    statusListOpts?: Array<StatusListOpts>
   }): Promise<CreateCredentialOfferURIResult> {
     const { credential_configuration_ids, statusListOpts } = opts
 
@@ -234,7 +234,7 @@ export class VcIssuer<DIDDoc extends object> {
       ...(userPin && { txCode: userPin }), // We used to use userPin according to older specs. We map these onto txCode now. If both are used, txCode in the end wins, even if they are different
       ...(opts.credentialDataSupplierInput && { credentialDataSupplierInput: opts.credentialDataSupplierInput }),
       credentialOffer,
-      statusListOpts
+      statusLists: statusListOpts
     }
 
     if (preAuthorizedCode) {
@@ -410,7 +410,7 @@ export class VcIssuer<DIDDoc extends object> {
           credential,
           jwtVerifyResult,
           issuer,
-          ...(session && {statusListOpts: session.statusListOpts})
+          ...(session && {statusLists: session.statusLists})
         },
         signerCallback,
       )

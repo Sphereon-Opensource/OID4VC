@@ -18,7 +18,7 @@ export interface CredentialOfferSession extends StateType {
   issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   authorizationCode?: string;
-  statusListOpts? :Array<StatusListOpts>;
+  statusLists?: Array<StatusListOpts>;
 }
 
 export enum IssueStatus {
@@ -51,6 +51,7 @@ export interface IssueStatusResponse {
   status: IssueStatus;
   error?: string;
   clientId?: string;
+  statusLists?: Array<StatusListOpts>
 }
 
 export interface IStateManager<T extends StateType> {

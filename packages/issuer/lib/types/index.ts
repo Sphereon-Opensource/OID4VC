@@ -25,7 +25,7 @@ export type CredentialSignerCallback<T extends object> = (opts: {
    * An implementation that wants to look into the DIDDoc would have to do a cast in the signer callback implementation
    */
   jwtVerifyResult: JwtVerifyResult<T>
-  statusListOpts? :Array<StatusListOpts>
+  statusLists? :Array<StatusListOpts>
 }) => Promise<W3CVerifiableCredential | CompactSdJwtVc>
 
 export interface CredentialDataSupplierArgs extends CNonceState {
