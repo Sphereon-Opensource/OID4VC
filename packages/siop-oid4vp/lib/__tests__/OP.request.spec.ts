@@ -189,7 +189,7 @@ describe('OP should', () => {
         expect(verifiedRequest.jwt).toBeDefined()
       } catch (e) {
         if (e.message.includes('Service Unavailable')) {
-          test.todo('Temporarily skipped due to Service Unavailable')
+          console.warn('Temporarily skipped due to Service Unavailable')
         } else {
           throw e
         }
@@ -280,7 +280,7 @@ describe('OP should', () => {
       expect(verifiedRequest.jwt).toBeDefined()
     } catch (e) {
       if (e.message.includes('Service Unavailable')) {
-        test.todo('Temporarily skipped due to Service Unavailable')
+        console.warn('Temporarily skipped due to Service Unavailable')
       } else {
         throw e
       }
