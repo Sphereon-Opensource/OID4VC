@@ -302,9 +302,10 @@ describe('create JWT from Request JWT should', () => {
       await expect(response).toBeDefined()
       } catch (e) {
         if (e.message.includes('Service Unavailable')) {
-          return test.skip('Skipping due to Service Unavailable', () => { /* skip test */})
+          test.todo('Temporarily skipped due to Service Unavailable')
+        } else {
+          throw e
         }
-        throw e
       }
     },
     UNIT_TEST_TIMEOUT,
@@ -479,9 +480,10 @@ describe('create JWT from Request JWT should', () => {
       await expect(authorizationRequest).toBeDefined()
     } catch (e) {
       if (e.message.includes('Service Unavailable')) {
-        return test.skip('Skipping due to Service Unavailable', () => { /* skip test */})
+        test.todo('Temporarily skipped due to Service Unavailable')
+      } else {
+        throw e
       }
-      throw e
     }
   })
 
@@ -801,10 +803,10 @@ describe('create JWT from Request JWT should', () => {
       expect(authorizationRequest).toBeDefined()
     } catch (e) {
       if (e.message.includes('Service Unavailable')) {
-        return test.skip('Skipping due to Service Unavailable', () => { /* skip test */
-        })
+        test.todo('Temporarily skipped due to Service Unavailable')
+      } else {
+        throw e
       }
-      throw e
     }
   })
 })

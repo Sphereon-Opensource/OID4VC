@@ -314,8 +314,9 @@ describe('verifyJWT should', () => {
     } catch (e) {
       if (e.message.includes('Service Unavailable')) {
         test.todo('Temporarily skipped due to Service Unavailable')
+      } else {
+        throw e
       }
-      throw e
     }
   })
 
