@@ -100,8 +100,14 @@ export function getIssuePayloadEndpoint<DIDDoc extends object>(router: Router, i
   LOG.log(`[OID4VCI] getIssuePayloadEndpoint endpoint enabled at ${path}`)
   router.get(path, async (request: Request, response: Response) => {
     try {
-      const { id } = request.params
-      const session = await issuer.getCredentialOfferSessionById(id)
+      const { id } = request.query
+      if (!id) {
+        return sendErrorResponse(response, 404, {
+          error: 'invalid_request',
+          error_description: `query parameter 'id' is missing`
+        })
+      }
+      const session = await issuer.getCredentialOfferSessionById(id as string)
       if (!session || !session.credentialOffer) {
         return sendErrorResponse(response, 404, {
           error: 'invalid_request',
