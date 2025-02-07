@@ -453,6 +453,25 @@ export function deleteCredentialOfferEndpoint<DIDDoc extends object>(
   })
 }
 
+function buildIssuerPayloadUri(request: Request<CredentialOfferRESTRequest>, issuerPayloadPathConst?: string) {
+  if (!issuerPayloadPathConst) {
+    return Promise.reject(Error('issuePayloadPath must bet set for credentialOfferPayloadMode by_uri_reference!'))
+  }
+
+  const protocol = request.headers['x-forwarded-proto']?.toString() ?? request.protocol
+  let host = request.headers['x-forwarded-host']?.toString() ?? request.get('host')
+  const forwardedPort = request.headers['x-forwarded-port']?.toString()
+
+  if (forwardedPort && !(protocol === 'https' && forwardedPort === '443') && !(protocol === 'http' && forwardedPort === '80')) {
+    host += `:${forwardedPort}`
+  }
+
+  const forwardedPrefix = request.headers['x-forwarded-prefix']?.toString() ?? ''
+
+  return `${protocol}://${host}${forwardedPrefix}${request.baseUrl}${issuerPayloadPathConst}`
+}
+
+
 export function createCredentialOfferEndpoint<DIDDoc extends object>(
   router: Router,
   issuer: VcIssuer<DIDDoc>,
@@ -486,14 +505,15 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
         })
       }
       const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
-      const credentialOfferPayloadMode: CredentialOfferPayloadMode = request.params.credentialOfferPayloadMode
+      const credentialOfferPayloadMode: CredentialOfferPayloadMode = request.body.credentialOfferPayloadMode
         ?? opts?.defaultCredentialOfferPayloadMode
         ?? 'by_value' // default to existing mode when nothing specified
+
 
       const result = await issuer.createCredentialOfferURI({
         ...request.body,
         credentialOfferPayloadMode,
-        issuerPayloadPath: issuerPayloadPathConst,
+        ...(credentialOfferPayloadMode === 'by_uri_reference' && { issuerPayloadUri: buildIssuerPayloadUri(request, issuerPayloadPathConst) }),
         qrCodeOpts,
         grants
       })

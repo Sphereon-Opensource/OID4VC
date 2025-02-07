@@ -146,7 +146,7 @@ export class VcIssuer<DIDDoc extends object> {
 
   public async createCredentialOfferURI(opts: {
     credentialOfferPayloadMode: CredentialOfferPayloadMode
-    issuePayloadPath?: string
+    issuerPayloadUri?: string
     grants?: CredentialOfferGrantInput
     credential_configuration_ids?: Array<string>
     credentialDefinition?: JsonLdIssuerCredentialDefinition
@@ -158,8 +158,8 @@ export class VcIssuer<DIDDoc extends object> {
     qrCodeOpts?: QRCodeOpts,
     statusListOpts?: Array<StatusListOpts>
   }): Promise<CreateCredentialOfferURIResult> {
-    const { credentialOfferPayloadMode, issuePayloadPath, credential_configuration_ids, statusListOpts } = opts
-    if (credentialOfferPayloadMode === 'by_uri_reference' && !issuePayloadPath) {
+    const { credentialOfferPayloadMode, issuerPayloadUri, credential_configuration_ids, statusListOpts } = opts
+    if (credentialOfferPayloadMode === 'by_uri_reference' && !issuerPayloadUri) {
       return Promise.reject(Error('issuePayloadPath must bet set for credentialOfferPayloadMode by_uri_reference!'))
     }
 
@@ -210,7 +210,7 @@ export class VcIssuer<DIDDoc extends object> {
       if (!this.uris) {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
-      credentialOfferObject.credential_offer_uri = opts.credentialOfferUri ?? `${issuePayloadPath}?id=${preAuthorizedCode}` // TODO how is this going to work with auth code flow?
+      credentialOfferObject.credential_offer_uri = opts.credentialOfferUri ?? `${issuerPayloadUri}?id=${preAuthorizedCode}` // TODO how is this going to work with auth code flow?
       await this.uris.set(credentialOfferObject.credential_offer_uri, {
         uri: credentialOfferObject.credential_offer_uri,
         createdAt: createdAt,
