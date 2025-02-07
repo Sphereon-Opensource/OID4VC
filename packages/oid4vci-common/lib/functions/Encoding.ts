@@ -97,7 +97,7 @@ export function convertURIToJsonObject(uri: string, opts?: DecodeURIAsJsonOpts):
   return decodeJsonProperties(uriComponents);
 }
 
-function decodeJsonProperties(parts: string[] | string[][]): unknown {
+export function decodeJsonProperties(parts: string[] | string[][]): unknown {
   const json: { [s: string]: unknown } | ArrayLike<unknown> = {};
   for (const key in parts) {
     const value = parts[key];
@@ -133,7 +133,7 @@ function decodeJsonProperties(parts: string[] | string[][]): unknown {
  * @param {string} uri uri
  * @param {string[]} [arrayTypes] array of string containing array like keys
  */
-function getURIComponentsAsArray(uri: string, arrayTypes?: string[]): string[] | string[][] {
+export function getURIComponentsAsArray(uri: string, arrayTypes?: string[]): string[] | string[][] {
   const parts = uri.includes('?') ? uri.split('?')[1] : uri.includes('://') ? uri.split('://')[1] : uri;
   const json: string[] | string[][] = [];
   const dict: string[] = parts.split('&');

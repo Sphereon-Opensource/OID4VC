@@ -66,6 +66,8 @@ import {
   CredentialSignerCallback
 } from './types'
 
+import uuid from 'short-uuid'
+
 import { LOG } from './index'
 
 export class VcIssuer<DIDDoc extends object> {
@@ -228,12 +230,14 @@ export class VcIssuer<DIDDoc extends object> {
       if (!this.uris) {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
-      credentialOfferObject.credential_offer_uri = opts.credentialOfferUri ?? `${issuerPayloadUri}?id=${preAuthorizedCode}` // TODO how is this going to work with auth code flow?
+      const credentialOfferCorrelationId = uuid.uuid() // TODO allow to be supplied
+      credentialOfferObject.credential_offer_uri = opts.credentialOfferUri ?? `${issuerPayloadUri}/${credentialOfferCorrelationId}` // TODO how is this going to work with auth code flow?
       await this.uris.set(credentialOfferObject.credential_offer_uri, {
         uri: credentialOfferObject.credential_offer_uri,
         createdAt: createdAt,
         preAuthorizedCode,
         issuerState,
+        credentialOfferCorrelationId
       })
     }
 

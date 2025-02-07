@@ -97,11 +97,11 @@ export function getIssueStatusEndpoint<DIDDoc extends object>(router: Router, is
 }
 
 export function getIssuePayloadEndpoint<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>, opts: IGetIssueStatusEndpointOpts) : string {
-  const path = determinePath(opts.baseUrl, opts?.path ?? '/webapp/credential-offer-payload', { stripBasePath: true })
+  const path = determinePath(opts.baseUrl, opts?.path ?? '/credential-offers/:id', { stripBasePath: true })
   LOG.log(`[OID4VCI] getIssuePayloadEndpoint endpoint enabled at ${path}`)
   router.get(path, async (request: Request, response: Response) => {
     try {
-      const { id } = request.query
+      const { id } = request.params
       if (!id) {
         return sendErrorResponse(response, 404, {
           error: 'invalid_request',
