@@ -8,7 +8,7 @@ import {
   AuthorizationChallengeErrorResponse,
   AuthorizationRequest,
   CommonAuthorizationChallengeRequest,
-  CredentialIssuerMetadataOptsV1_0_13,
+  CredentialIssuerMetadataOptsV1_0_13, CredentialOfferPayloadMode,
   CredentialOfferRESTRequest,
   CredentialRequestV1_0_13,
   determineGrantTypes,
@@ -93,6 +93,36 @@ export function getIssueStatusEndpoint<DIDDoc extends object>(router: Router, is
       )
     }
   })
+}
+
+export function getIssuePayloadEndpoint<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>, opts: IGetIssueStatusEndpointOpts) : string {
+  const path = determinePath(opts.baseUrl, opts?.path ?? '/webapp/credential-offer-payload', { stripBasePath: true })
+  LOG.log(`[OID4VCI] getIssuePayloadEndpoint endpoint enabled at ${path}`)
+  router.get(path, async (request: Request, response: Response) => {
+    try {
+      const { id } = request.params
+      const session = await issuer.getCredentialOfferSessionById(id)
+      if (!session || !session.credentialOffer) {
+        return sendErrorResponse(response, 404, {
+          error: 'invalid_request',
+          error_description: `Credential offer ${id} not found`,
+        })
+      }
+
+      return response.json(session.credentialOffer.credential_offer)
+    } catch (e) {
+      return sendErrorResponse(
+        response,
+        500,
+        {
+          error: 'invalid_request',
+          error_description: (e as Error).message,
+        },
+        e,
+      )
+    }
+  })
+  return path
 }
 
 function isExternalAS(issuerMetadata: CredentialIssuerMetadataOptsV1_0_13) {
@@ -427,8 +457,11 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
   router: Router,
   issuer: VcIssuer<DIDDoc>,
   opts?: ICreateCredentialOfferEndpointOpts & { baseUrl?: string },
+  issuerPayloadPath?: string
 ) {
+  const issuerPayloadPathConst = issuerPayloadPath
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers', { stripBasePath: true })
+
   LOG.log(`[OID4VCI] createCredentialOffer endpoint enabled at ${path}`)
   router.post(path, async (request: Request<CredentialOfferRESTRequest>, response: Response<ICreateCredentialOfferURIResponse>) => {
     try {
@@ -453,7 +486,17 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
         })
       }
       const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
-      const result = await issuer.createCredentialOfferURI({ ...request.body, qrCodeOpts, grants })
+      const credentialOfferPayloadMode: CredentialOfferPayloadMode = request.params.credentialOfferPayloadMode
+        ?? opts?.defaultCredentialOfferPayloadMode
+        ?? 'by_value' // default to existing mode when nothing specified
+
+      const result = await issuer.createCredentialOfferURI({
+        ...request.body,
+        credentialOfferPayloadMode,
+        issuerPayloadPath: issuerPayloadPathConst,
+        qrCodeOpts,
+        grants
+      })
       const resultResponse: ICreateCredentialOfferURIResponse = result
       if ('session' in resultResponse) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -11,7 +11,7 @@ import {
   CredentialEventNames,
   CredentialIssuerMetadata,
   CredentialIssuerMetadataOptsV1_0_13,
-  CredentialOfferEventNames,
+  CredentialOfferEventNames, CredentialOfferPayloadMode,
   CredentialOfferSession,
   CredentialOfferV1_0_13,
   CredentialRequest,
@@ -145,6 +145,8 @@ export class VcIssuer<DIDDoc extends object> {
   }
 
   public async createCredentialOfferURI(opts: {
+    credentialOfferPayloadMode: CredentialOfferPayloadMode
+    issuePayloadPath?: string
     grants?: CredentialOfferGrantInput
     credential_configuration_ids?: Array<string>
     credentialDefinition?: JsonLdIssuerCredentialDefinition
@@ -156,7 +158,10 @@ export class VcIssuer<DIDDoc extends object> {
     qrCodeOpts?: QRCodeOpts,
     statusListOpts?: Array<StatusListOpts>
   }): Promise<CreateCredentialOfferURIResult> {
-    const { credential_configuration_ids, statusListOpts } = opts
+    const { credentialOfferPayloadMode, issuePayloadPath, credential_configuration_ids, statusListOpts } = opts
+    if (credentialOfferPayloadMode === 'by_uri_reference' && !issuePayloadPath) {
+      return Promise.reject(Error('issuePayloadPath must bet set for credentialOfferPayloadMode by_uri_reference!'))
+    }
 
     const grants = opts.grants ? { ...opts.grants } : {}
     // for backwards compat, would be better if user sets the prop on the grants directly
@@ -171,6 +176,7 @@ export class VcIssuer<DIDDoc extends object> {
     if (grants[PRE_AUTH_GRANT_LITERAL]?.tx_code && !grants[PRE_AUTH_GRANT_LITERAL]?.tx_code?.length) {
       grants[PRE_AUTH_GRANT_LITERAL].tx_code.length = 4
     }
+
 
     const baseUri = opts?.baseUri ?? this.defaultCredentialOfferBaseUri
     const credentialOfferObject = createCredentialOfferObject(this._issuerMetadata, {
@@ -200,17 +206,19 @@ export class VcIssuer<DIDDoc extends object> {
     }
     const createdAt = +new Date()
     const lastUpdatedAt = createdAt
-    if (opts?.credentialOfferUri) {
+    if (credentialOfferPayloadMode === 'by_uri_reference') {
       if (!this.uris) {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
-      await this.uris.set(opts.credentialOfferUri, {
-        uri: opts.credentialOfferUri,
+      credentialOfferObject.credential_offer_uri = opts.credentialOfferUri ?? `${issuePayloadPath}?id=${preAuthorizedCode}` // TODO how is this going to work with auth code flow?
+      await this.uris.set(credentialOfferObject.credential_offer_uri, {
+        uri: credentialOfferObject.credential_offer_uri,
         createdAt: createdAt,
         preAuthorizedCode,
         issuerState,
       })
     }
+
 
     const credentialOffer = await toUniformCredentialOfferRequest(
       {
@@ -245,7 +253,7 @@ export class VcIssuer<DIDDoc extends object> {
       await this.credentialOfferSessions.set(issuerState, session)
     }
 
-    const uri = createCredentialOfferURIFromObject(credentialOffer, { ...opts, baseUri })
+    const uri = createCredentialOfferURIFromObject(credentialOffer, credentialOfferPayloadMode, { ...opts, baseUri })
     let qrCodeDataUri: string | undefined
     if (opts.qrCodeOpts) {
       const { AwesomeQR } = await import('awesome-qr')

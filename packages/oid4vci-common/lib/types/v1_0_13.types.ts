@@ -6,7 +6,7 @@ import { ProofOfPossession } from './CredentialIssuance.types';
 import {
   AlgValue,
   CommonCredentialRequest,
-  CredentialDataSupplierInput,
+  CredentialDataSupplierInput, CredentialOfferPayloadMode,
   CredentialRequestMsoMdoc,
   CredentialRequestSdJwtVc,
   CredentialsSupportedDisplay,
@@ -157,6 +157,7 @@ export interface CredentialOfferRESTRequest extends Partial<CredentialOfferPaylo
   qrCodeOpts?: QRCodeOpts;
   credentialDataSupplierInput?: CredentialDataSupplierInput;
   statusListOpts?: Array<StatusListOpts>
+  credentialOfferPayloadMode?: CredentialOfferPayloadMode;
 }
 
 export interface CredentialOfferPayloadV1_0_13 {

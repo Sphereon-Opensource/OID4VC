@@ -3,7 +3,7 @@ import {
   AssertedUniformCredentialOffer,
   CredentialIssuerMetadataOpts,
   CredentialIssuerMetadataOptsV1_0_13,
-  CredentialIssuerMetadataV1_0_11,
+  CredentialIssuerMetadataV1_0_11, CredentialOfferPayloadMode,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferPayloadV1_0_13,
   CredentialOfferSession,
@@ -14,7 +14,7 @@ import {
   IssuerMetadataV1_0_13,
   PIN_NOT_MATCH_ERROR,
   PRE_AUTH_GRANT_LITERAL,
-  UniformCredentialOffer,
+  UniformCredentialOffer
 } from '@sphereon/oid4vci-common'
 
 export interface CredentialOfferGrantInput {
@@ -162,21 +162,31 @@ export function createCredentialOfferObjectv1_0_11(
 
 export function createCredentialOfferURIFromObject(
   credentialOffer: CredentialOfferV1_0_13 | UniformCredentialOffer,
-  opts?: { scheme?: string; baseUri?: string },
+  credentialOfferPayloadMode: CredentialOfferPayloadMode,
+  opts?: { scheme?: string; baseUri?: string }
 ) {
-  const { scheme, baseUri } = parseCredentialOfferSchemeAndBaseUri(opts?.scheme, opts?.baseUri, credentialOffer.credential_offer?.credential_issuer)
+  const {
+    scheme,
+    baseUri
+  } = parseCredentialOfferSchemeAndBaseUri(opts?.scheme, opts?.baseUri, credentialOffer.credential_offer?.credential_issuer)
 
-  if (credentialOffer.credential_offer_uri) {
+  if (credentialOfferPayloadMode === 'by_uri_reference') {
+    if (!credentialOffer.credential_offer_uri) {
+      throw Error(`credential_offer_uri must be set for credentialOfferPayloadMode ${credentialOfferPayloadMode}`)
+    }
     if (credentialOffer.credential_offer_uri.includes('credential_offer_uri=')) {
       // discard the scheme. Apparently a URI is set and it already contains the actual uri, so assume that takes priority
       return credentialOffer.credential_offer_uri
     }
     return `${scheme}://${baseUri}?credential_offer_uri=${encodeURIComponent(credentialOffer.credential_offer_uri)}`
+  } else if (credentialOfferPayloadMode === 'by_value') {
+    return `${scheme}://${baseUri}?credential_offer=${encodeURIComponent(JSON.stringify(credentialOffer.credential_offer))}`
   }
-  return `${scheme}://${baseUri}?credential_offer=${encodeURIComponent(JSON.stringify(credentialOffer.credential_offer))}`
+  throw Error(`unsupported credentialOfferPayloadMode ${credentialOfferPayloadMode}`)
 }
 
 export function createCredentialOfferURI(
+  credentialOfferPayloadMode: CredentialOfferPayloadMode,
   issuerMetadata?: IssuerMetadataV1_0_13,
   // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
   opts?: {
@@ -188,10 +198,11 @@ export function createCredentialOfferURI(
   },
 ): string {
   const credentialOffer = createCredentialOfferObject(issuerMetadata, opts)
-  return createCredentialOfferURIFromObject(credentialOffer, opts)
+  return createCredentialOfferURIFromObject(credentialOffer, credentialOfferPayloadMode, opts)
 }
 
 export function createCredentialOfferURIv1_0_11(
+  credentialOfferPayloadMode: CredentialOfferPayloadMode,
   issuerMetadata?: CredentialIssuerMetadataV1_0_11,
   // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
   opts?: {
@@ -203,7 +214,7 @@ export function createCredentialOfferURIv1_0_11(
   },
 ): string {
   const credentialOffer = createCredentialOfferObjectv1_0_11(issuerMetadata, opts)
-  return createCredentialOfferURIFromObject(credentialOffer, opts)
+  return createCredentialOfferURIFromObject(credentialOffer, credentialOfferPayloadMode, opts)
 }
 
 export const isPreAuthorizedCodeExpired = (state: CredentialOfferSession, expirationDurationInSeconds: number) => {
