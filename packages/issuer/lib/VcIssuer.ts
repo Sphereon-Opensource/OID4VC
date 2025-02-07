@@ -11,7 +11,8 @@ import {
   CredentialEventNames,
   CredentialIssuerMetadata,
   CredentialIssuerMetadataOptsV1_0_13,
-  CredentialOfferEventNames, CredentialOfferPayloadMode,
+  CredentialOfferEventNames,
+  CredentialOfferPayloadMode,
   CredentialOfferSession,
   CredentialOfferV1_0_13,
   CredentialRequest,
@@ -42,11 +43,28 @@ import {
   TYP_ERROR,
   URIState
 } from '@sphereon/oid4vci-common'
-import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import {
+  CompactSdJwtVc,
+  CredentialMapper,
+  InitiatorType,
+  SubSystem,
+  System,
+  W3CVerifiableCredential
+} from '@sphereon/ssi-types'
 
-import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
+import {
+  assertValidPinNumber,
+  createCredentialOfferObject,
+  createCredentialOfferURIFromObject,
+  CredentialOfferGrantInput
+} from './functions'
 import { LookupStateManager } from './state-manager'
-import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
+import {
+  CredentialDataSupplier,
+  CredentialDataSupplierArgs,
+  CredentialIssuanceInput,
+  CredentialSignerCallback
+} from './types'
 
 import { LOG } from './index'
 

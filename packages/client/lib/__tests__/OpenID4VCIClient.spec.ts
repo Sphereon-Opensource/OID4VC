@@ -4,14 +4,14 @@ import {
   determineSpecVersionFromOffer,
   determineSpecVersionFromURI,
   OpenId4VCIVersion,
-  WellKnownEndpoints,
-} from '@sphereon/oid4vci-common';
+  WellKnownEndpoints
+} from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import nock from 'nock';
+import nock from 'nock'
 
-import { createCredentialOfferURIFromObject } from '../../../issuer/lib';
-import { OpenID4VCIClient } from '../OpenID4VCIClient';
+import { createCredentialOfferURIFromObject } from '../../../issuer/lib'
+import { OpenID4VCIClient } from '../OpenID4VCIClient'
 
 const MOCK_URL = 'https://server.example.com/';
 

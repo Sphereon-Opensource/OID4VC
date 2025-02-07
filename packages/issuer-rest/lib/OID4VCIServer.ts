@@ -1,12 +1,18 @@
 import {
   AuthorizationRequest,
-  CredentialConfigurationSupportedV1_0_13, CredentialOfferPayloadMode,
+  CredentialConfigurationSupportedV1_0_13,
+  CredentialOfferPayloadMode,
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
   QRCodeOpts,
   TxCode
 } from '@sphereon/oid4vci-common'
-import { CredentialSupportedBuilderV1_13, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import {
+  CredentialSupportedBuilderV1_13,
+  ITokenEndpointOpts,
+  VcIssuer,
+  VcIssuerBuilder
+} from '@sphereon/oid4vci-issuer'
 import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
 import express, { Express } from 'express'
 
@@ -17,7 +23,8 @@ import {
   deleteCredentialOfferEndpoint,
   getBasePath,
   getCredentialEndpoint,
-  getCredentialOfferEndpoint, getIssuePayloadEndpoint,
+  getCredentialOfferEndpoint,
+  getIssuePayloadEndpoint,
   getIssueStatusEndpoint,
   getMetadataEndpoints,
   pushedAuthorizationEndpoint
