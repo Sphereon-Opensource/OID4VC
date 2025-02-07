@@ -31,10 +31,16 @@ import {
   trimEnd,
   trimStart,
   validateJWT,
-  WellKnownEndpoints,
+  WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
-import { env, ISingleEndpointOpts, oidcDiscoverIssuer, oidcGetClient, sendErrorResponse } from '@sphereon/ssi-express-support'
+import {
+  env,
+  ISingleEndpointOpts,
+  oidcDiscoverIssuer,
+  oidcGetClient,
+  sendErrorResponse
+} from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
 
@@ -44,7 +50,7 @@ import {
   ICreateCredentialOfferEndpointOpts,
   ICreateCredentialOfferURIResponse,
   IGetCredentialOfferEndpointOpts,
-  IGetIssueStatusEndpointOpts,
+  IGetIssueStatusEndpointOpts
 } from './OID4VCIServer'
 import { validateRequestBody } from './expressUtils'
 
@@ -70,6 +76,7 @@ export function getIssueStatusEndpoint<DIDDoc extends object>(router: Router, is
         createdAt: session.createdAt,
         lastUpdatedAt: session.lastUpdatedAt,
         status: session.status,
+        statusLists: session.statusLists,
         ...(session.error && { error: session.error }),
         ...(session.clientId && { clientId: session.clientId }),
       }
