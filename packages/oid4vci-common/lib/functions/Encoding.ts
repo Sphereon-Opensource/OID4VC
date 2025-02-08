@@ -98,34 +98,35 @@ export function convertURIToJsonObject(uri: string, opts?: DecodeURIAsJsonOpts):
 }
 
 export function decodeJsonProperties(parts: string[] | string[][]): unknown {
-  const json: { [s: string]: unknown } | ArrayLike<unknown> = {};
+  const result: { [s: string]: unknown } | ArrayLike<unknown> = {};
   for (const key in parts) {
     const value = parts[key];
     if (!value) {
       continue;
     }
     if (Array.isArray(value)) {
-      // if (value.length > 1) {
-      json[decodeURIComponent(key)] = value.map((v) => decodeURIComponent(v));
-      /*} else {
-        json[decodeURIComponent(key)] = decodeURIComponent(value[0]);
-      }*/
+      result[decodeURIComponent(key)] = value.map((v) => decodeURIComponent(v));
+      continue
     }
+
     const isBool = typeof value == 'boolean';
     const isNumber = typeof value == 'number';
     const isString = typeof value == 'string';
+    const isObject = typeof value == 'object';
     if (isBool || isNumber) {
-      json[decodeURIComponent(key)] = value;
+      result[decodeURIComponent(key)] = value;
     } else if (isString) {
       const decoded = decodeURIComponent(value);
       if (decoded.startsWith('{') && decoded.endsWith('}')) {
-        json[decodeURIComponent(key)] = JSON.parse(decoded);
+        result[decodeURIComponent(key)] = JSON.parse(decoded);
       } else {
-        json[decodeURIComponent(key)] = decoded;
+        result[decodeURIComponent(key)] = decoded;
       }
+    } else if(isObject) {
+      result[decodeURIComponent(key)] = decodeJsonProperties(value)
     }
   }
-  return json;
+  return result;
 }
 
 /**

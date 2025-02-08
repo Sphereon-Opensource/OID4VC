@@ -51,6 +51,7 @@ import {
   System,
   W3CVerifiableCredential
 } from '@sphereon/ssi-types'
+import ShortUUID from 'short-uuid'
 
 import {
   assertValidPinNumber,
@@ -66,9 +67,10 @@ import {
   CredentialSignerCallback
 } from './types'
 
-import uuid from 'short-uuid'
 
 import { LOG } from './index'
+
+const shortUUID = ShortUUID()
 
 export class VcIssuer<DIDDoc extends object> {
   private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_13
@@ -230,7 +232,7 @@ export class VcIssuer<DIDDoc extends object> {
       if (!this.uris) {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
-      const credentialOfferCorrelationId = uuid.uuid() // TODO allow to be supplied
+      const credentialOfferCorrelationId = shortUUID.generate()// TODO allow to be supplied
       credentialOfferObject.credential_offer_uri = opts.credentialOfferUri ?? `${issuerPayloadUri}/${credentialOfferCorrelationId}` // TODO how is this going to work with auth code flow?
       await this.uris.set(credentialOfferObject.credential_offer_uri, {
         uri: credentialOfferObject.credential_offer_uri,

@@ -722,9 +722,9 @@ describe('VcIssuer without did', () => {
       baseUri: 'issuer-example.com'
     })
 
-    expect(result.uri).toMatch(/http:\/\/issuer-example\.com\?credential_offer_uri=https%3A%2F%2Fexample\.com%2Fapi%2Fcredentials%3Fid%3D[\w-]+/)
+    expect(result.uri).toMatch(/http:\/\/issuer-example\.com\?credential_offer_uri=https%3A%2F%2Fexample\.com%2Fapi%2Fcredentials%2F[\w-]+/)
     expect(result.session).toBeDefined()
-    expect(result.session.credentialOffer.credential_offer_uri).toMatch(/https:\/\/example\.com\/api\/credentials\?id=[\w-]+/)
+    expect(result.session.credentialOffer.credential_offer_uri).toMatch(/https:\/\/example\.com\/api\/credentials\/[\w-]+/)
   })
 
   it('should throw error if issuePayloadPath is missing with by_uri_reference mode', async () => {

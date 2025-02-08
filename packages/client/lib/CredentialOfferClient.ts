@@ -47,7 +47,7 @@ export class CredentialOfferClient {
       if (uri.includes('credential_offer_uri')) {
         const uriObj = getURIComponentsAsArray(uri) as unknown as Record<string, string> // FIXME
         const credentialOfferUri = uriObj['credential_offer_uri']
-        const response = await fetch(credentialOfferUri)
+        const response = await fetch(decodeURIComponent(credentialOfferUri))
         if (!(response && response.status >= 200 && response.status < 400)) {
           return Promise.reject(`the credential offer URI endpoint call was not successful. http code ${response.status} - reason ${response.statusText}`)
         }
@@ -55,7 +55,9 @@ export class CredentialOfferClient {
         if (response.headers.get('Content-Type')?.startsWith('application/json') === false) {
           return Promise.reject('the credential offer URI endpoint did not return content type application/json')
         }
-        credentialOffer = decodeJsonProperties(await response.json()) as CredentialOfferV1_0_11 | CredentialOfferV1_0_13
+        credentialOffer = {
+          credential_offer: decodeJsonProperties(await response.json())
+        } as CredentialOfferV1_0_11 | CredentialOfferV1_0_13
       } else {
         credentialOffer = convertURIToJsonObject(uri, {
           // It must have the '=' sign after credential_offer otherwise the uri will get split at openid_credential_offer
