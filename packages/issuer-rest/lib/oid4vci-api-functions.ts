@@ -108,7 +108,7 @@ export function getIssuePayloadEndpoint<DIDDoc extends object>(router: Router, i
           error_description: `query parameter 'id' is missing`
         })
       }
-      const session = await issuer.getCredentialOfferSessionById(id as string)
+      const session = await issuer.getCredentialOfferSessionById(id as string, 'preAuthorizedCode')
       if (!session || !session.credentialOffer) {
         return sendErrorResponse(response, 404, {
           error: 'invalid_request',

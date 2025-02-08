@@ -288,7 +288,7 @@ describe('VcIssuer', () => {
       vcIssuer
         .createCredentialOfferURI({
           credentialOfferPayloadMode: 'by_uri_reference',
-          issuerPayloadUri: 'http://issuer-example.com',
+          issuerPayloadUri: 'http://issuer-example.com/:id',
           grants: {
             authorization_code: {
               issuer_state: issuerState
@@ -712,7 +712,7 @@ describe('VcIssuer without did', () => {
   it('should create credential offer uri with by_uri_reference mode', async () => {
     const result = await vcIssuer.createCredentialOfferURI({
       credentialOfferPayloadMode: 'by_uri_reference',
-      issuerPayloadUri: 'https://example.com/api/credentials',
+      issuerPayloadUri: 'https://example.com/api/credentials/:id',
       grants: {
         authorization_code: {
           issuer_state: issuerState
@@ -743,7 +743,7 @@ describe('VcIssuer without did', () => {
   it('should get credential offer session by uri', async () => {
     const result = await vcIssuer.createCredentialOfferURI({
       credentialOfferPayloadMode: 'by_uri_reference',
-      issuerPayloadUri: 'https://example.com/api/credentials',
+      issuerPayloadUri: 'https://example.com/api/credentials/:id',
       grants: {
         authorization_code: {
           issuer_state: issuerState

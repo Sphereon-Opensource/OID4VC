@@ -113,7 +113,7 @@ export class VcIssuer<DIDDoc extends object> {
     this._cNonceExpiresIn = (args?.cNonceExpiresIn ?? (process.env.C_NONCE_EXPIRES_IN ? parseInt(process.env.C_NONCE_EXPIRES_IN) : 300)) as number
   }
 
-  public async getCredentialOfferSessionById(id: string, lookup?: 'uri' | 'id'): Promise<CredentialOfferSession> {
+  public async getCredentialOfferSessionById(id: string, lookup?: 'uri' | 'id' | 'preAuthorizedCode'): Promise<CredentialOfferSession> {
     if (!this.uris) {
       return Promise.reject(Error('Cannot lookup credential offer by id if URI state manager is not set'))
     }
@@ -233,8 +233,8 @@ export class VcIssuer<DIDDoc extends object> {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
       const credentialOfferCorrelationId = shortUUID.generate()// TODO allow to be supplied
-      credentialOfferObject.credential_offer_uri = opts.credentialOfferUri ?? `${issuerPayloadUri}/${credentialOfferCorrelationId}` // TODO how is this going to work with auth code flow?
-      await this.uris.set(credentialOfferObject.credential_offer_uri, {
+      credentialOfferObject.credential_offer_uri = opts.credentialOfferUri ?? `${issuerPayloadUri?.replace(':id', credentialOfferCorrelationId)}` // TODO how is this going to work with auth code flow?
+      await this.uris.set(credentialOfferCorrelationId, {
         uri: credentialOfferObject.credential_offer_uri,
         createdAt: createdAt,
         preAuthorizedCode,
