@@ -6,18 +6,21 @@ import {
   CredentialOfferPayloadV1_0_09,
   CredentialOfferRequestWithBaseUrl,
   CredentialOfferV1_0_11,
-  CredentialOfferV1_0_13, decodeJsonProperties,
+  CredentialOfferV1_0_13,
+  decodeJsonProperties,
   determineSpecVersionFromURI,
-  getClientIdFromCredentialOfferPayload, getURIComponentsAsArray,
+  getClientIdFromCredentialOfferPayload,
+  getURIComponentsAsArray,
   OpenId4VCIVersion,
   PRE_AUTH_CODE_LITERAL,
   PRE_AUTH_GRANT_LITERAL,
   toUniformCredentialOfferRequest
 } from '@sphereon/oid4vci-common'
-import Debug from 'debug';
+import Debug from 'debug'
 
-import { LOG } from './types';
+import { LOG } from './types'
 import { fetch } from 'cross-fetch'
+import { isUrlEncoded } from './functions'
 
 const debug = Debug('sphereon:oid4vci:offer');
 
@@ -47,7 +50,7 @@ export class CredentialOfferClient {
       if (uri.includes('credential_offer_uri')) {
         const uriObj = getURIComponentsAsArray(uri) as unknown as Record<string, string> // FIXME
         const credentialOfferUri = decodeURIComponent(uriObj['credential_offer_uri'])
-        const decodedUri = decodeURIComponent(credentialOfferUri); // It is double URI encoded
+        const decodedUri = isUrlEncoded(credentialOfferUri) ? decodeURIComponent(credentialOfferUri) : credentialOfferUri
         const response = await fetch(decodedUri)
         if (!(response && response.status >= 200 && response.status < 400)) {
           return Promise.reject(`the credential offer URI endpoint call was not successful. http code ${response.status} - reason ${response.statusText}`)

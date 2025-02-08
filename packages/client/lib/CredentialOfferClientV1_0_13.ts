@@ -1,17 +1,22 @@
 import {
   convertJsonToURI,
-  convertURIToJsonObject, CredentialOffer,
-  CredentialOfferRequestWithBaseUrl, CredentialOfferV1_0_11,
-  CredentialOfferV1_0_13, decodeJsonProperties,
+  convertURIToJsonObject,
+  CredentialOffer,
+  CredentialOfferRequestWithBaseUrl,
+  CredentialOfferV1_0_11,
+  CredentialOfferV1_0_13,
+  decodeJsonProperties,
   determineSpecVersionFromURI,
-  getClientIdFromCredentialOfferPayload, getURIComponentsAsArray,
+  getClientIdFromCredentialOfferPayload,
+  getURIComponentsAsArray,
   OpenId4VCIVersion,
   PRE_AUTH_CODE_LITERAL,
   PRE_AUTH_GRANT_LITERAL,
   toUniformCredentialOfferRequest
 } from '@sphereon/oid4vci-common'
-import Debug from 'debug';
+import Debug from 'debug'
 import { fetch } from 'cross-fetch'
+import { isUrlEncoded } from './functions'
 
 const debug = Debug('sphereon:oid4vci:offer');
 
@@ -28,8 +33,8 @@ export class CredentialOfferClientV1_0_13 {
     let credentialOffer: CredentialOffer
     if (uri.includes('credential_offer_uri')) { // FIXME deduplicate
       const uriObj = getURIComponentsAsArray(uri) as unknown as Record<string, string> // FIXME
-      const credentialOfferUri = decodeURIComponent(uriObj['credential_offer_uri']) // It is double URI encoded
-      const decodedUri = decodeURIComponent(credentialOfferUri);
+      const credentialOfferUri = decodeURIComponent(uriObj['credential_offer_uri'])
+      const decodedUri = isUrlEncoded(credentialOfferUri) ? decodeURIComponent(credentialOfferUri) : credentialOfferUri
       const response = await fetch(decodedUri)
       if (!(response && response.status >= 200 && response.status < 400)) {
         return Promise.reject(`the credential offer URI endpoint call was not successful. http code ${response.status} - reason ${response.statusText}`)
