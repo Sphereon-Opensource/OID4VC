@@ -46,8 +46,8 @@ export class CredentialOfferClient {
     } else {
       if (uri.includes('credential_offer_uri')) {
         const uriObj = getURIComponentsAsArray(uri) as unknown as Record<string, string> // FIXME
-        const credentialOfferUri = uriObj['credential_offer_uri']
-        const decodedUri = decodeURIComponent(credentialOfferUri);
+        const credentialOfferUri = decodeURIComponent(uriObj['credential_offer_uri'])
+        const decodedUri = decodeURIComponent(credentialOfferUri); // It is double URI encoded
         const response = await fetch(decodedUri)
         if (!(response && response.status >= 200 && response.status < 400)) {
           return Promise.reject(`the credential offer URI endpoint call was not successful. http code ${response.status} - reason ${response.statusText}`)
