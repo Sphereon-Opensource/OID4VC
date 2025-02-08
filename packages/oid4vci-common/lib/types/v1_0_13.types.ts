@@ -7,7 +7,7 @@ import {
   AlgValue,
   CommonCredentialRequest,
   CredentialDataSupplierInput,
-  CredentialOfferPayloadMode,
+  CredentialOfferMode,
   CredentialRequestMsoMdoc,
   CredentialRequestSdJwtVc,
   CredentialsSupportedDisplay,
@@ -159,7 +159,7 @@ export interface CredentialOfferRESTRequest extends Partial<CredentialOfferPaylo
   qrCodeOpts?: QRCodeOpts;
   credentialDataSupplierInput?: CredentialDataSupplierInput;
   statusListOpts?: Array<StatusListOpts>
-  credentialOfferPayloadMode?: CredentialOfferPayloadMode;
+  offerMode?: CredentialOfferMode;
 }
 
 export interface CredentialOfferPayloadV1_0_13 {

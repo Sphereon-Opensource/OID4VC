@@ -19,7 +19,7 @@ export type KeyProofType = 'jwt' | 'cwt' | 'ldp_vp';
 
 export type PoPMode = 'pop' | 'JWT'; // Proof of possession, or regular JWT
 
-export type CredentialOfferPayloadMode = 'by_value' | 'by_uri_reference';
+export type CredentialOfferMode = 'VALUE' | 'REFERENCE';
 
 /**
  * Important Note: please be aware that these Common interfaces are based on versions v1_0.11 and v1_0.09

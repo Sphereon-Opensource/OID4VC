@@ -84,7 +84,7 @@ describe('sd-jwt vc', () => {
     'succeed with a full flow',
     async () => {
       const offerUri = await vcIssuer.createCredentialOfferURI({
-        credentialOfferPayloadMode: 'by_value',
+        offerMode: 'VALUE',
         grants: {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             tx_code: {
@@ -188,7 +188,7 @@ describe('sd-jwt vc', () => {
     'succeed with a full flow without did',
     async () => {
       const offerUri = await vcIssuer.createCredentialOfferURI({
-        credentialOfferPayloadMode: 'by_value',
+        offerMode: 'VALUE',
         grants: {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             tx_code: {

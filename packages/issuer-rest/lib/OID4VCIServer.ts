@@ -1,7 +1,7 @@
 import {
   AuthorizationRequest,
   CredentialConfigurationSupportedV1_0_13,
-  CredentialOfferPayloadMode,
+  CredentialOfferMode,
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
   QRCodeOpts,
@@ -91,7 +91,7 @@ export interface IDeleteCredentialOfferEndpointOpts extends ISingleEndpointOpts 
 export interface ICreateCredentialOfferEndpointOpts extends ISingleEndpointOpts {
   getOfferPath?: string
   qrCodeOpts?: QRCodeOpts
-  defaultCredentialOfferPayloadMode?: CredentialOfferPayloadMode
+  defaultCredentialOfferPayloadMode?: CredentialOfferMode
 }
 
 export interface IGetIssueStatusEndpointOpts extends ISingleEndpointOpts {

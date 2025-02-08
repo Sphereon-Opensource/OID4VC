@@ -12,7 +12,7 @@ import {
   CredentialIssuerMetadata,
   CredentialIssuerMetadataOptsV1_0_13,
   CredentialOfferEventNames,
-  CredentialOfferPayloadMode,
+  CredentialOfferMode,
   CredentialOfferSession,
   CredentialOfferV1_0_13,
   CredentialRequest,
@@ -167,7 +167,7 @@ export class VcIssuer<DIDDoc extends object> {
   }
 
   public async createCredentialOfferURI(opts: {
-    credentialOfferPayloadMode: CredentialOfferPayloadMode
+    offerMode: CredentialOfferMode
     issuerPayloadUri?: string
     grants?: CredentialOfferGrantInput
     credential_configuration_ids?: Array<string>
@@ -180,9 +180,9 @@ export class VcIssuer<DIDDoc extends object> {
     qrCodeOpts?: QRCodeOpts,
     statusListOpts?: Array<StatusListOpts>
   }): Promise<CreateCredentialOfferURIResult> {
-    const { credentialOfferPayloadMode, issuerPayloadUri, credential_configuration_ids, statusListOpts } = opts
-    if (credentialOfferPayloadMode === 'by_uri_reference' && !issuerPayloadUri) {
-      return Promise.reject(Error('issuePayloadPath must bet set for credentialOfferPayloadMode by_uri_reference!'))
+    const { offerMode, issuerPayloadUri, credential_configuration_ids, statusListOpts } = opts
+    if (offerMode === 'REFERENCE' && !issuerPayloadUri) {
+      return Promise.reject(Error('issuePayloadPath must bet set for offerMode REFERENCE!'))
     }
 
     const grants = opts.grants ? { ...opts.grants } : {}
@@ -228,7 +228,7 @@ export class VcIssuer<DIDDoc extends object> {
     }
     const createdAt = +new Date()
     const lastUpdatedAt = createdAt
-    if (credentialOfferPayloadMode === 'by_uri_reference') {
+    if (offerMode === 'REFERENCE') {
       if (!this.uris) {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
@@ -277,7 +277,7 @@ export class VcIssuer<DIDDoc extends object> {
       await this.credentialOfferSessions.set(issuerState, session)
     }
 
-    const uri = createCredentialOfferURIFromObject(credentialOffer, credentialOfferPayloadMode, { ...opts, baseUri })
+    const uri = createCredentialOfferURIFromObject(credentialOffer, offerMode, { ...opts, baseUri })
     let qrCodeDataUri: string | undefined
     if (opts.qrCodeOpts) {
       const { AwesomeQR } = await import('awesome-qr')

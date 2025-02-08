@@ -168,7 +168,7 @@ describe('VcIssuer', () => {
 
   it.skip('should create credential offer', async () => {
     const { uri, ...rest } = await vcIssuer.createCredentialOfferURI({
-      credentialOfferPayloadMode: 'by_value',
+      offerMode: 'VALUE',
       grants: {
         authorization_code: {
           issuer_state: issuerState
@@ -287,7 +287,7 @@ describe('VcIssuer', () => {
     await expect(
       vcIssuer
         .createCredentialOfferURI({
-          credentialOfferPayloadMode: 'by_uri_reference',
+          offerMode: 'REFERENCE',
           issuerPayloadUri: 'http://issuer-example.com/:id',
           grants: {
             authorization_code: {
@@ -709,9 +709,9 @@ describe('VcIssuer without did', () => {
     ).rejects.toThrow(Error(ALG_ERROR))
   })
 
-  it('should create credential offer uri with by_uri_reference mode', async () => {
+  it('should create credential offer uri with REFERENCE mode', async () => {
     const result = await vcIssuer.createCredentialOfferURI({
-      credentialOfferPayloadMode: 'by_uri_reference',
+      offerMode: 'REFERENCE',
       issuerPayloadUri: 'https://example.com/api/credentials/:id',
       grants: {
         authorization_code: {
@@ -727,22 +727,22 @@ describe('VcIssuer without did', () => {
     expect(result.session.credentialOffer.credential_offer_uri).toMatch(/https:\/\/example\.com\/api\/credentials\/[\w-]+/)
   })
 
-  it('should throw error if issuePayloadPath is missing with by_uri_reference mode', async () => {
+  it('should throw error if issuePayloadPath is missing with REFERENCE mode', async () => {
     await expect(
       vcIssuer.createCredentialOfferURI({
-        credentialOfferPayloadMode: 'by_uri_reference',
+        offerMode: 'REFERENCE',
         grants: {
           authorization_code: {
             issuer_state: issuerState
           }
         }
       })
-    ).rejects.toThrow('issuePayloadPath must bet set for credentialOfferPayloadMode by_uri_reference!')
+    ).rejects.toThrow('issuePayloadPath must bet set for offerMode REFERENCE!')
   })
 
   it('should get credential offer session by uri', async () => {
     const result = await vcIssuer.createCredentialOfferURI({
-      credentialOfferPayloadMode: 'by_uri_reference',
+      offerMode: 'REFERENCE',
       issuerPayloadUri: 'https://example.com/api/credentials/:id',
       grants: {
         authorization_code: {

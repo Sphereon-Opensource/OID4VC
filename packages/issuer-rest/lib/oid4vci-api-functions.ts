@@ -9,7 +9,7 @@ import {
   AuthorizationRequest,
   CommonAuthorizationChallengeRequest,
   CredentialIssuerMetadataOptsV1_0_13,
-  CredentialOfferPayloadMode,
+  CredentialOfferMode,
   CredentialOfferRESTRequest,
   CredentialRequestV1_0_13,
   determineGrantTypes,
@@ -462,7 +462,7 @@ export function deleteCredentialOfferEndpoint<DIDDoc extends object>(
 
 function buildIssuerPayloadUri(request: Request<CredentialOfferRESTRequest>, issuerPayloadPathConst?: string) {
   if (!issuerPayloadPathConst) {
-    return Promise.reject(Error('issuePayloadPath must bet set for credentialOfferPayloadMode by_uri_reference!'))
+    return Promise.reject(Error('issuePayloadPath must bet set for offerMode REFERENCE!'))
   }
 
   const protocol = request.headers['x-forwarded-proto']?.toString() ?? request.protocol
@@ -512,15 +512,15 @@ export function createCredentialOfferEndpoint<DIDDoc extends object>(
         })
       }
       const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
-      const credentialOfferPayloadMode: CredentialOfferPayloadMode = request.body.credentialOfferPayloadMode
+      const offerMode: CredentialOfferMode = request.body.offerMode
         ?? opts?.defaultCredentialOfferPayloadMode
-        ?? 'by_value' // default to existing mode when nothing specified
+        ?? 'VALUE' // default to existing mode when nothing specified
 
 
       const result = await issuer.createCredentialOfferURI({
         ...request.body,
-        credentialOfferPayloadMode,
-        ...(credentialOfferPayloadMode === 'by_uri_reference' && { issuerPayloadUri: buildIssuerPayloadUri(request, issuerPayloadPathConst) }),
+        offerMode: offerMode,
+        ...(offerMode === 'REFERENCE' && { issuerPayloadUri: buildIssuerPayloadUri(request, issuerPayloadPathConst) }),
         qrCodeOpts,
         grants
       })

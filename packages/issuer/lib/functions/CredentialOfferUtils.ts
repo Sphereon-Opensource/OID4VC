@@ -4,7 +4,7 @@ import {
   CredentialIssuerMetadataOpts,
   CredentialIssuerMetadataOptsV1_0_13,
   CredentialIssuerMetadataV1_0_11,
-  CredentialOfferPayloadMode,
+  CredentialOfferMode,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferPayloadV1_0_13,
   CredentialOfferSession,
@@ -163,7 +163,7 @@ export function createCredentialOfferObjectv1_0_11(
 
 export function createCredentialOfferURIFromObject(
   credentialOffer: CredentialOfferV1_0_13 | UniformCredentialOffer,
-  credentialOfferPayloadMode: CredentialOfferPayloadMode,
+  offerMode: CredentialOfferMode,
   opts?: { scheme?: string; baseUri?: string }
 ) {
   const {
@@ -171,23 +171,23 @@ export function createCredentialOfferURIFromObject(
     baseUri
   } = parseCredentialOfferSchemeAndBaseUri(opts?.scheme, opts?.baseUri, credentialOffer.credential_offer?.credential_issuer)
 
-  if (credentialOfferPayloadMode === 'by_uri_reference') {
+  if (offerMode === 'REFERENCE') {
     if (!credentialOffer.credential_offer_uri) {
-      throw Error(`credential_offer_uri must be set for credentialOfferPayloadMode ${credentialOfferPayloadMode}`)
+      throw Error(`credential_offer_uri must be set for offerMode ${offerMode}`)
     }
     if (credentialOffer.credential_offer_uri.includes('credential_offer_uri=')) {
       // discard the scheme. Apparently a URI is set and it already contains the actual uri, so assume that takes priority
       return credentialOffer.credential_offer_uri
     }
     return `${scheme}://${baseUri}?credential_offer_uri=${encodeURIComponent(credentialOffer.credential_offer_uri)}`
-  } else if (credentialOfferPayloadMode === 'by_value') {
+  } else if (offerMode === 'VALUE') {
     return `${scheme}://${baseUri}?credential_offer=${encodeURIComponent(JSON.stringify(credentialOffer.credential_offer))}`
   }
-  throw Error(`unsupported credentialOfferPayloadMode ${credentialOfferPayloadMode}`)
+  throw Error(`unsupported offerMode ${offerMode}`)
 }
 
 export function createCredentialOfferURI(
-  credentialOfferPayloadMode: CredentialOfferPayloadMode,
+  offerMode: CredentialOfferMode,
   issuerMetadata?: IssuerMetadataV1_0_13,
   // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
   opts?: {
@@ -199,11 +199,11 @@ export function createCredentialOfferURI(
   },
 ): string {
   const credentialOffer = createCredentialOfferObject(issuerMetadata, opts)
-  return createCredentialOfferURIFromObject(credentialOffer, credentialOfferPayloadMode, opts)
+  return createCredentialOfferURIFromObject(credentialOffer, offerMode, opts)
 }
 
 export function createCredentialOfferURIv1_0_11(
-  credentialOfferPayloadMode: CredentialOfferPayloadMode,
+  offerMode: CredentialOfferMode,
   issuerMetadata?: CredentialIssuerMetadataV1_0_11,
   // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
   opts?: {
@@ -215,7 +215,7 @@ export function createCredentialOfferURIv1_0_11(
   },
 ): string {
   const credentialOffer = createCredentialOfferObjectv1_0_11(issuerMetadata, opts)
-  return createCredentialOfferURIFromObject(credentialOffer, credentialOfferPayloadMode, opts)
+  return createCredentialOfferURIFromObject(credentialOffer, offerMode, opts)
 }
 
 export const isPreAuthorizedCodeExpired = (state: CredentialOfferSession, expirationDurationInSeconds: number) => {

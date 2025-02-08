@@ -20,7 +20,7 @@ describe('CredentialOfferUtils should', () => {
         },
       },
     } satisfies CredentialOfferPayloadV1_0_13
-    expect(createCredentialOfferURI('by_value', undefined, { credentialOffer })).toEqual(
+    expect(createCredentialOfferURI('VALUE', undefined, { credentialOffer })).toEqual(
       'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fcredential-issuer.example.com%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegreeCredential%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D%7D',
     )
   })
@@ -91,7 +91,7 @@ describe('CredentialOfferUtils should', () => {
 
     expect(
       createCredentialOfferURIv1_0_11(
-        'by_value',
+        'VALUE',
         {
           credential_issuer: credentialOffer.credential_issuer,
           credential_endpoint: 'test_issuer',
@@ -124,7 +124,7 @@ describe('CredentialOfferUtils should', () => {
     } as CredentialOfferPayloadV1_0_11
 
     expect(
-      createCredentialOfferURIv1_0_11('by_value',
+      createCredentialOfferURIv1_0_11('VALUE',
         {
           credential_issuer: credentialOffer.credential_issuer,
           credential_endpoint: 'test_issuer',
@@ -138,12 +138,12 @@ describe('CredentialOfferUtils should', () => {
     )
   })
 
-  it('should create a deeplink with by_uri_reference mode', () => {
+  it('should create a deeplink with REFERENCE mode', () => {
     const credentialOfferUri = 'https://example.com/credential-offer-1234'
 
     expect(
       createCredentialOfferURIv1_0_11(
-        'by_uri_reference',
+        'REFERENCE',
         {
           credential_issuer: 'https://credential-issuer.example.com',
           credential_endpoint: 'test_issuer',
@@ -157,12 +157,12 @@ describe('CredentialOfferUtils should', () => {
     )
   })
 
-  it('should create an https link with by_uri_reference mode', () => {
+  it('should create an https link with REFERENCE mode', () => {
     const credentialOfferUri = 'https://example.com/credential-offer-1234'
 
     expect(
       createCredentialOfferURIv1_0_11(
-        'by_uri_reference',
+        'REFERENCE',
         {
           credential_issuer: 'https://credential-issuer.example.com',
           credential_endpoint: 'test_issuer',
@@ -181,7 +181,7 @@ describe('CredentialOfferUtils should', () => {
 
     expect(
       createCredentialOfferURIv1_0_11(
-        'by_uri_reference',
+        'REFERENCE',
         {
           credential_issuer: 'https://credential-issuer.example.com',
           credential_endpoint: 'test_issuer',
@@ -193,10 +193,10 @@ describe('CredentialOfferUtils should', () => {
     ).toEqual(credentialOfferUri)
   })
 
-  it('should throw error when credential_offer_uri is missing in by_uri_reference mode', () => {
+  it('should throw error when credential_offer_uri is missing in REFERENCE mode', () => {
     expect(() =>
       createCredentialOfferURIv1_0_11(
-        'by_uri_reference',
+        'REFERENCE',
         {
           credential_issuer: 'https://credential-issuer.example.com',
           credential_endpoint: 'test_issuer',
@@ -205,6 +205,6 @@ describe('CredentialOfferUtils should', () => {
         },
         { scheme: 'https', baseUri: 'credential-issuer.example.com' }
       )
-    ).toThrow('credential_offer_uri must be set for credentialOfferPayloadMode by_uri_reference')
+    ).toThrow('credential_offer_uri must be set for offerMode REFERENCE')
   })
 })

@@ -199,7 +199,7 @@ describe('VcIssuer', () => {
     expect(server.issuer).toBeDefined()
     uri = await vcIssuer
       .createCredentialOfferURI({
-        credentialOfferPayloadMode: 'by_value',
+        offerMode: 'VALUE',
         grants: {
           authorization_code: {
             issuer_state: issuerState,
