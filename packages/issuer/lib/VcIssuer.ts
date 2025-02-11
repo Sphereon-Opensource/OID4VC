@@ -620,8 +620,8 @@ export class VcIssuer<DIDDoc extends object> {
         throw Error(TYP_ERROR)
       } else if (!alg) {
         throw Error(ALG_ERROR)
-      } else if (!([kid, jwk, x5c].filter((x) => !!x).length === 1)) {
-        // only 1 is allowed, but need to look into whether jwk and x5c are allowed together
+      } else if (x5c && (kid || jwk)) {
+        // x5c cannot be used together with kid or jwk
         throw Error(KID_JWK_X5C_ERROR)
       } else if (kid && !did) {
         if (!jwk && !x5c) {
