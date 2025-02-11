@@ -405,7 +405,9 @@ export class VcIssuer<DIDDoc extends object> {
           credential.cnf = {
             kid,
           }
-        } else if (jwk) {
+        }
+        // else  TODO temp workaround IATAB2B-57
+          if (jwk) {
           credential.cnf = {
             jwk,
           }
