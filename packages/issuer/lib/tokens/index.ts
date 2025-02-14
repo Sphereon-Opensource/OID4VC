@@ -258,7 +258,6 @@ export const createAccessTokenResponse = async (
     expires_in: tokenExpiresIn,
     c_nonce: cNonce,
     c_nonce_expires_in: cNonceExpiresIn,
-    authorization_pending: false,
     interval,
   }
   const credentialOfferSession = await credentialOfferSessions.getAsserted(preAuthorizedCode)

@@ -207,6 +207,7 @@ export class URI implements AuthorizationRequestURI {
         throw new Error(SIOPErrors.NO_REFERENCE_URI)
       }
       uniformAuthorizationRequestPayload.request_uri = opts.reference_uri
+      uniformAuthorizationRequestPayload.client_id = requestObjectPayload.client_id
       delete uniformAuthorizationRequestPayload.request
     } else if (type === PassBy.VALUE) {
       uniformAuthorizationRequestPayload.request = requestObjectJwt

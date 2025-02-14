@@ -191,7 +191,6 @@ describe('OID4VCIServer', () => {
       expires_in: 300,
       c_nonce: expect.any(String),
       c_nonce_expires_in: 300,
-      authorization_pending: false,
       interval: 300,
     })
   })
