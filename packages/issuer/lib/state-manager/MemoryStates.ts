@@ -9,6 +9,7 @@ export class MemoryStates<T extends StateType> implements IStateManager<T> {
     this.expiresInMS = opts?.expiresInSec !== undefined ? opts?.expiresInSec * 1000 : 180000
     this.states = new Map()
   }
+
   async clearAll(): Promise<void> {
     this.states.clear()
   }
@@ -17,8 +18,13 @@ export class MemoryStates<T extends StateType> implements IStateManager<T> {
     const states = Array.from(this.states.entries())
     const ts = timestamp ?? +new Date()
     for (const [id, state] of states) {
-      if (state.createdAt + this.expiresInMS < ts) {
+      if (state.expiresAt && state.expiresAt < ts) {
         this.states.delete(id)
+      } else if (!state.expiresAt) {
+        // If there is no expiration set on the state itself, we will use the state manager expiresInMS value
+        if (state.createdAt + this.expiresInMS < ts) {
+          this.states.delete(id)
+        }
       }
     }
   }

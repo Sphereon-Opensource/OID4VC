@@ -3,6 +3,7 @@ import { CredentialDataSupplierInput, NotificationRequest, StatusListOpts } from
 
 export interface StateType {
   createdAt: number;
+  expiresAt?: number;
 }
 
 export interface CredentialOfferSession extends StateType {
@@ -49,6 +50,7 @@ export interface URIState extends StateType {
 export interface IssueStatusResponse {
   createdAt: number;
   lastUpdatedAt: number;
+  expiresAt?: number;
   status: IssueStatus;
   error?: string;
   clientId?: string;

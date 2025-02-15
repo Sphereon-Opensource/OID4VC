@@ -65,6 +65,7 @@ export function getIssueStatusEndpoint(router: Router, issuer: VcIssuer, opts: I
       const authStatusBody: IssueStatusResponse = {
         createdAt: session.createdAt,
         lastUpdatedAt: session.lastUpdatedAt,
+        expiresAt: session.expiresAt,
         status: session.status,
         statusLists: session.statusLists,
         ...(session.error && { error: session.error }),

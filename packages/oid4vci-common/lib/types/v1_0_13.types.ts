@@ -159,6 +159,7 @@ export interface CredentialOfferRESTRequest extends Partial<CredentialOfferPaylo
   // auth_session?: string; Would be a nice extension to support, to allow external systems to determine what the auth_session value should be
   // @Deprecated use tx_code in the grant object
   correlationId?: string;
+  sessionLifeTimeInSec?: number
   pinLength?: number;
   qrCodeOpts?: QRCodeOpts;
   client_id?: string;

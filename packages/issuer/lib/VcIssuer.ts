@@ -98,10 +98,10 @@ export class VcIssuer {
   }
 
   public async getCredentialOfferSessionById(id: string, lookup?: 'uri' | 'id' | 'preAuthorizedCode'): Promise<CredentialOfferSession> {
-    if (!this.uris) {
-      return Promise.reject(Error('Cannot lookup credential offer by id if URI state manager is not set'))
-    }
     if (lookup) {
+      if (!this.uris) {
+        return Promise.reject(Error('Cannot lookup credential offer by id if URI state manager is not set'))
+      }
       return new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, lookup).getAsserted(id)
     }
     const session = await this._credentialOfferSessions.get(id)
@@ -165,6 +165,7 @@ export class VcIssuer {
     qrCodeOpts?: QRCodeOpts
     correlationId?: string
     statusListOpts?: Array<StatusListOpts>
+    sessionLifeTimeInSec?: number
   }): Promise<CreateCredentialOfferURIResult> {
     const { offerMode = 'VALUE', correlationId = shortUUID.generate(), credential_configuration_ids, statusListOpts, credentialOfferUri } = opts
     if (offerMode === 'REFERENCE' && !credentialOfferUri) {
@@ -213,9 +214,11 @@ export class VcIssuer {
     }
     const createdAt = +new Date()
     const lastUpdatedAt = createdAt
+    const expirationInMs = (opts.sessionLifeTimeInSec ?? 10*60) * 1000
+    const expiresAt = createdAt + Math.abs(expirationInMs)
     if (offerMode === 'REFERENCE') {
       if (!this.uris) {
-        throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
+        throw Error('No URI state manager set, whilst apparently credential offer by reference is being used')
       }
 
       const offerUri = opts.credentialOfferUri?.replace(':id', correlationId) // TODO how is this going to work with auth code flow?
@@ -227,6 +230,7 @@ export class VcIssuer {
       await this.uris.set(correlationId, {
         uri: offerUri,
         createdAt: createdAt,
+        expiresAt,
         preAuthorizedCode,
         issuerState,
         credentialOfferCorrelationId: correlationId,
@@ -250,6 +254,7 @@ export class VcIssuer {
       issuerState,
       createdAt,
       lastUpdatedAt,
+      expiresAt,
       status,
       notification_id: uuidv4(),
       ...(opts.client_id && { clientId: opts.client_id }),
@@ -276,7 +281,7 @@ export class VcIssuer {
     }
     EVENTS.emit(CredentialOfferEventNames.OID4VCI_OFFER_CREATED, {
       eventName: CredentialOfferEventNames.OID4VCI_OFFER_CREATED,
-      id: uuidv4(),
+      id: correlationId,
       data: uri,
       initiator: '<unknown>',
       initiatorType: InitiatorType.EXTERNAL,
