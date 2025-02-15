@@ -1,9 +1,4 @@
-import {
-  CredentialOfferPayloadV1_0_11,
-  CredentialOfferPayloadV1_0_13,
-  PRE_AUTH_CODE_LITERAL,
-  PRE_AUTH_GRANT_LITERAL
-} from '@sphereon/oid4vci-common'
+import { CredentialOfferPayloadV1_0_11, CredentialOfferPayloadV1_0_13, PRE_AUTH_CODE_LITERAL, PRE_AUTH_GRANT_LITERAL } from '@sphereon/oid4vci-common'
 
 import { createCredentialOfferObject, createCredentialOfferURI, createCredentialOfferURIv1_0_11 } from '../index'
 
@@ -124,7 +119,8 @@ describe('CredentialOfferUtils should', () => {
     } as CredentialOfferPayloadV1_0_11
 
     expect(
-      createCredentialOfferURIv1_0_11('VALUE',
+      createCredentialOfferURIv1_0_11(
+        'VALUE',
         {
           credential_issuer: credentialOffer.credential_issuer,
           credential_endpoint: 'test_issuer',
@@ -150,11 +146,9 @@ describe('CredentialOfferUtils should', () => {
           issuer: 'test_issuer',
           credentials_supported: [],
         },
-        { credentialOfferUri }
-      )
-    ).toEqual(
-      'openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fexample.com%2Fcredential-offer-1234'
-    )
+        { credentialOfferUri },
+      ),
+    ).toEqual('openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fexample.com%2Fcredential-offer-1234')
   })
 
   it('should create an https link with REFERENCE mode', () => {
@@ -169,11 +163,9 @@ describe('CredentialOfferUtils should', () => {
           issuer: 'test_issuer',
           credentials_supported: [],
         },
-        { credentialOfferUri, scheme: 'https', baseUri: 'credential-issuer.example.com' }
-      )
-    ).toEqual(
-      'https://credential-issuer.example.com?credential_offer_uri=https%3A%2F%2Fexample.com%2Fcredential-offer-1234'
-    )
+        { credentialOfferUri, scheme: 'https', baseUri: 'credential-issuer.example.com' },
+      ),
+    ).toEqual('https://credential-issuer.example.com?credential_offer_uri=https%3A%2F%2Fexample.com%2Fcredential-offer-1234')
   })
 
   it('should use credential_offer_uri directly if it already contains the parameter', () => {
@@ -188,8 +180,8 @@ describe('CredentialOfferUtils should', () => {
           issuer: 'test_issuer',
           credentials_supported: [],
         },
-        { credentialOfferUri, scheme: 'https', baseUri: 'credential-issuer.example.com' }
-      )
+        { credentialOfferUri, scheme: 'https', baseUri: 'credential-issuer.example.com' },
+      ),
     ).toEqual(credentialOfferUri)
   })
 
@@ -203,8 +195,8 @@ describe('CredentialOfferUtils should', () => {
           issuer: 'test_issuer',
           credentials_supported: [],
         },
-        { scheme: 'https', baseUri: 'credential-issuer.example.com' }
-      )
+        { scheme: 'https', baseUri: 'credential-issuer.example.com' },
+      ),
     ).toThrow('credential_offer_uri must be set for offerMode REFERENCE')
   })
 })

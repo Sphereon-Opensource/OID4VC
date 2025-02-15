@@ -41,25 +41,14 @@ import {
   toUniformCredentialOfferRequest,
   TxCode,
   TYP_ERROR,
-  URIState
+  URIState,
 } from '@sphereon/oid4vci-common'
 import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import ShortUUID from 'short-uuid'
 
-import {
-  assertValidPinNumber,
-  createCredentialOfferObject,
-  createCredentialOfferURIFromObject,
-  CredentialOfferGrantInput
-} from './functions'
+import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
 import { LookupStateManager } from './state-manager'
-import {
-  CredentialDataSupplier,
-  CredentialDataSupplierArgs,
-  CredentialIssuanceInput,
-  CredentialSignerCallback
-} from './types'
-
+import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
 
 import { LOG } from './index'
 
@@ -174,7 +163,7 @@ export class VcIssuer {
     baseUri?: string
     scheme?: string
     pinLength?: number
-    qrCodeOpts?: QRCodeOpts,
+    qrCodeOpts?: QRCodeOpts
     statusListOpts?: Array<StatusListOpts>
   }): Promise<CreateCredentialOfferURIResult> {
     const { offerMode, issuerPayloadUri, credential_configuration_ids, statusListOpts } = opts
@@ -195,7 +184,6 @@ export class VcIssuer {
     if (grants[PRE_AUTH_GRANT_LITERAL]?.tx_code && !grants[PRE_AUTH_GRANT_LITERAL]?.tx_code?.length) {
       grants[PRE_AUTH_GRANT_LITERAL].tx_code.length = 4
     }
-
 
     const baseUri = opts?.baseUri ?? this.defaultCredentialOfferBaseUri
     const credentialOfferObject = createCredentialOfferObject(this._issuerMetadata, {
@@ -229,17 +217,16 @@ export class VcIssuer {
       if (!this.uris) {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
-      const credentialOfferCorrelationId = shortUUID.generate()// TODO allow to be supplied
+      const credentialOfferCorrelationId = shortUUID.generate() // TODO allow to be supplied
       credentialOfferObject.credential_offer_uri = opts.credentialOfferUri ?? `${issuerPayloadUri?.replace(':id', credentialOfferCorrelationId)}` // TODO how is this going to work with auth code flow?
       await this.uris.set(credentialOfferCorrelationId, {
         uri: credentialOfferObject.credential_offer_uri,
         createdAt: createdAt,
         preAuthorizedCode,
         issuerState,
-        credentialOfferCorrelationId
+        credentialOfferCorrelationId,
       })
     }
-
 
     const credentialOffer = await toUniformCredentialOfferRequest(
       {
@@ -264,7 +251,7 @@ export class VcIssuer {
       ...(userPin && { txCode: userPin }), // We used to use userPin according to older specs. We map these onto txCode now. If both are used, txCode in the end wins, even if they are different
       ...(opts.credentialDataSupplierInput && { credentialDataSupplierInput: opts.credentialDataSupplierInput }),
       credentialOffer,
-      statusLists: statusListOpts
+      statusLists: statusListOpts,
     }
 
     if (preAuthorizedCode) {
@@ -405,7 +392,7 @@ export class VcIssuer {
           }
         }
         // else  TODO temp workaround IATAB2B-57
-          if (jwk) {
+        if (jwk) {
           credential.cnf = {
             jwk,
           }
@@ -442,7 +429,7 @@ export class VcIssuer {
           credential,
           jwtVerifyResult,
           issuer,
-          ...(session && {statusLists: session.statusLists})
+          ...(session && { statusLists: session.statusLists }),
         },
         signerCallback,
       )

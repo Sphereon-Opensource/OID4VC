@@ -106,7 +106,7 @@ export function decodeJsonProperties(parts: string[] | string[][]): unknown {
     }
     if (Array.isArray(value)) {
       result[decodeURIComponent(key)] = value.map((v) => decodeURIComponent(v));
-      continue
+      continue;
     }
 
     const isBool = typeof value == 'boolean';
@@ -122,8 +122,8 @@ export function decodeJsonProperties(parts: string[] | string[][]): unknown {
       } else {
         result[decodeURIComponent(key)] = decoded;
       }
-    } else if(isObject) {
-      result[decodeURIComponent(key)] = decodeJsonProperties(value)
+    } else if (isObject) {
+      result[decodeURIComponent(key)] = decodeJsonProperties(value);
     }
   }
   return result;

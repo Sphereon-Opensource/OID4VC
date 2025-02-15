@@ -1,8 +1,8 @@
-import { JWK } from '@sphereon/oid4vc-common'
+import { JWK } from '@sphereon/oid4vc-common';
 
-import { ExperimentalSubjectIssuance } from '../experimental/holder-vci'
+import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
 
-import { ProofOfPossession } from './CredentialIssuance.types'
+import { ProofOfPossession } from './CredentialIssuance.types';
 import {
   AlgValue,
   CommonCredentialRequest,
@@ -19,10 +19,10 @@ import {
   OID4VCICredentialFormat,
   ProofTypesSupported,
   ResponseEncryption,
-  StatusListOpts
-} from './Generic.types'
-import { QRCodeOpts } from './QRCode.types'
-import { AuthorizationServerMetadata, AuthorizationServerType, EndpointMetadata } from './ServerMetadata'
+  StatusListOpts,
+} from './Generic.types';
+import { QRCodeOpts } from './QRCode.types';
+import { AuthorizationServerMetadata, AuthorizationServerType, EndpointMetadata } from './ServerMetadata';
 
 export interface IssuerMetadataV1_0_13 {
   credential_configurations_supported: Record<string, CredentialConfigurationSupportedV1_0_13>; // REQUIRED. A JSON object containing a list of key value pairs, where the key is a string serving as an abstract identifier of the Credential. This identifier is RECOMMENDED to be collision resistant - it can be globally unique, but does not have to be when naming conflicts are unlikely to arise in a given use case. The value is a JSON object. The JSON object MUST conform to the structure of the Section 11.2.1.
@@ -161,7 +161,7 @@ export interface CredentialOfferRESTRequest extends Partial<CredentialOfferPaylo
   qrCodeOpts?: QRCodeOpts;
   client_id?: string;
   credentialDataSupplierInput?: CredentialDataSupplierInput;
-  statusListOpts?: Array<StatusListOpts>
+  statusListOpts?: Array<StatusListOpts>;
   offerMode?: CredentialOfferMode;
 }
 

@@ -14,13 +14,13 @@ import {
   OpenId4VCIVersion,
   PRE_AUTH_CODE_LITERAL,
   PRE_AUTH_GRANT_LITERAL,
-  toUniformCredentialOfferRequest
-} from '@sphereon/oid4vci-common'
-import Debug from 'debug'
+  toUniformCredentialOfferRequest,
+} from '@sphereon/oid4vci-common';
+import Debug from 'debug';
 
-import { LOG } from './types'
-import { fetch } from 'cross-fetch'
-import { isUrlEncoded } from './functions'
+import { LOG } from './types';
+import { fetch } from 'cross-fetch';
+import { isUrlEncoded } from './functions';
 
 const debug = Debug('sphereon:oid4vci:offer');
 
@@ -48,29 +48,31 @@ export class CredentialOfferClient {
       };
     } else {
       if (uri.includes('credential_offer_uri')) {
-        const uriObj = getURIComponentsAsArray(uri) as unknown as Record<string, string> // FIXME
-        const credentialOfferUri = decodeURIComponent(uriObj['credential_offer_uri'])
-        const decodedUri = isUrlEncoded(credentialOfferUri) ? decodeURIComponent(credentialOfferUri) : credentialOfferUri
-        const response = await fetch(decodedUri)
+        const uriObj = getURIComponentsAsArray(uri) as unknown as Record<string, string>; // FIXME
+        const credentialOfferUri = decodeURIComponent(uriObj['credential_offer_uri']);
+        const decodedUri = isUrlEncoded(credentialOfferUri) ? decodeURIComponent(credentialOfferUri) : credentialOfferUri;
+        const response = await fetch(decodedUri);
         if (!(response && response.status >= 200 && response.status < 400)) {
-          return Promise.reject(`the credential offer URI endpoint call was not successful. http code ${response.status} - reason ${response.statusText}`)
+          return Promise.reject(
+            `the credential offer URI endpoint call was not successful. http code ${response.status} - reason ${response.statusText}`,
+          );
         }
 
         if (response.headers.get('Content-Type')?.startsWith('application/json') === false) {
-          return Promise.reject('the credential offer URI endpoint did not return content type application/json')
+          return Promise.reject('the credential offer URI endpoint did not return content type application/json');
         }
         credentialOffer = {
-          credential_offer: decodeJsonProperties(await response.json())
-        } as CredentialOfferV1_0_11 | CredentialOfferV1_0_13
+          credential_offer: decodeJsonProperties(await response.json()),
+        } as CredentialOfferV1_0_11 | CredentialOfferV1_0_13;
       } else {
         credentialOffer = convertURIToJsonObject(uri, {
           // It must have the '=' sign after credential_offer otherwise the uri will get split at openid_credential_offer
           arrayTypeProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['credential_offer='],
-          requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['credential_offer=']
-        }) as CredentialOfferV1_0_11 | CredentialOfferV1_0_13
+          requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['credential_offer='],
+        }) as CredentialOfferV1_0_11 | CredentialOfferV1_0_13;
       }
       if (credentialOffer?.credential_offer_uri === undefined && !credentialOffer?.credential_offer) {
-        throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri)
+        throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri);
       }
     }
 

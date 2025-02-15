@@ -33,7 +33,7 @@ describe('verify JWT from Request JWT should', () => {
     expect.assertions(1)
     try {
       await expect(IDToken.verify(validButExpiredResJWT, { ...verifyOpts, audience: 'https://acme.com/hello' })).rejects.toThrow(
-        /invalid_jwt: JWT has expired: exp: 1632272403/
+        /invalid_jwt: JWT has expired: exp: 1632272403/,
       )
     } catch (e) {
       if (e.message.includes('Service Unavailable')) {
@@ -48,7 +48,7 @@ describe('verify JWT from Request JWT should', () => {
     expect.assertions(1)
     try {
       await expect(IDToken.verify(validButExpiredResJWT, { ...verifyOpts, audience: 'https://acme.com/hello' })).rejects.toThrow(
-        /invalid_jwt: JWT has expired: exp: 1632272403/
+        /invalid_jwt: JWT has expired: exp: 1632272403/,
       )
     } catch (e) {
       if (e.message.includes('Service Unavailable')) {

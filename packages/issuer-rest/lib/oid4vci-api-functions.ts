@@ -32,9 +32,7 @@ import {
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
-import { env, ISingleEndpointOpts,
-  sendErrorResponse
-} from '@sphereon/ssi-express-support'
+import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
 
@@ -87,7 +85,7 @@ export function getIssueStatusEndpoint(router: Router, issuer: VcIssuer, opts: I
   })
 }
 
-export function getIssuePayloadEndpoint<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>, opts: IGetIssueStatusEndpointOpts) : string {
+export function getIssuePayloadEndpoint(router: Router, issuer: VcIssuer, opts: IGetIssueStatusEndpointOpts): string {
   const path = determinePath(opts.baseUrl, opts?.path ?? '/credential-offers/:id', { stripBasePath: true })
   LOG.log(`[OID4VCI] getIssuePayloadEndpoint endpoint enabled at ${path}`)
   router.get(path, async (request: Request, response: Response) => {
@@ -96,7 +94,7 @@ export function getIssuePayloadEndpoint<DIDDoc extends object>(router: Router, i
       if (!id) {
         return sendErrorResponse(response, 404, {
           error: 'invalid_request',
-          error_description: `query parameter 'id' is missing`
+          error_description: `query parameter 'id' is missing`,
         })
       }
       const session = await issuer.getCredentialOfferSessionById(id as string, 'preAuthorizedCode')
@@ -422,9 +420,9 @@ export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opt
   })
 }
 
-export function deleteCredentialOfferEndpoint<DIDDoc extends object>(
+export function deleteCredentialOfferEndpoint(
   router: Router,
-  issuer: VcIssuer<DIDDoc>,
+  issuer: VcIssuer,
   opts?: IGetCredentialOfferEndpointOpts,
 ) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers/:id', { stripBasePath: true })
@@ -466,8 +464,12 @@ function buildIssuerPayloadUri(request: Request<CredentialOfferRESTRequest>, iss
   return `${protocol}://${host}${forwardedPrefix}${request.baseUrl}${issuerPayloadPathConst}`
 }
 
-export function createCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: ICreateCredentialOfferEndpointOpts & { baseUrl?: string },
-                                              issuerPayloadPath?: string) {
+export function createCredentialOfferEndpoint(
+  router: Router,
+  issuer: VcIssuer,
+  opts?: ICreateCredentialOfferEndpointOpts & { baseUrl?: string },
+  issuerPayloadPath?: string,
+) {
   const issuerPayloadPathConst = issuerPayloadPath
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers', { stripBasePath: true })
 
@@ -495,9 +497,7 @@ export function createCredentialOfferEndpoint(router: Router, issuer: VcIssuer, 
         })
       }
       const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
-      const offerMode: CredentialOfferMode = request.body.offerMode
-        ?? opts?.defaultCredentialOfferPayloadMode
-        ?? 'VALUE' // default to existing mode when nothing specified
+      const offerMode: CredentialOfferMode = request.body.offerMode ?? opts?.defaultCredentialOfferPayloadMode ?? 'VALUE' // default to existing mode when nothing specified
 
       const client_id: string | undefined = request.body.client_id ?? request.body.original_credential_offer?.client_id
       const result = await issuer.createCredentialOfferURI({
@@ -506,7 +506,7 @@ export function createCredentialOfferEndpoint(router: Router, issuer: VcIssuer, 
         client_id,
         ...(offerMode === 'REFERENCE' && { issuerPayloadUri: buildIssuerPayloadUri(request, issuerPayloadPathConst) }),
         qrCodeOpts,
-        grants
+        grants,
       })
       const resultResponse: ICreateCredentialOfferURIResponse = result
       if ('session' in resultResponse) {

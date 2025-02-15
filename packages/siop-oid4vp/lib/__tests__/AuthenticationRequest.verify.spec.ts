@@ -380,7 +380,7 @@ describe('verifyJWT should', () => {
           verifyJwtCallback: getVerifyJwtCallback(resolver, { checkLinkedDomain: 'if_present' }),
           verification: {},
           supportedVersions: [SupportedVersion.SIOPv2_ID1],
-          correlationId: '1234'
+          correlationId: '1234',
         }
 
         const verifyJWT = await AuthorizationRequest.verify((await requestObject.toJwt()) as string, verifyOpts)

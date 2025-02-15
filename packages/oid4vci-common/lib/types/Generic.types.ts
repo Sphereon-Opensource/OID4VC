@@ -1,18 +1,18 @@
-import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import { ICredentialContextType, IVerifiableCredential, W3CVerifiableCredential } from '@sphereon/ssi-types';
 
-import { ExperimentalSubjectIssuance } from '../experimental/holder-vci'
+import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
 
-import { ProofOfPossession } from './CredentialIssuance.types'
-import { AuthorizationServerMetadata } from './ServerMetadata'
-import { CredentialOfferSession } from './StateManager.types'
-import { IssuerMetadataV1_0_08 } from './v1_0_08.types'
-import { CredentialRequestV1_0_11, EndpointMetadataResultV1_0_11 } from './v1_0_11.types'
+import { ProofOfPossession } from './CredentialIssuance.types';
+import { AuthorizationServerMetadata } from './ServerMetadata';
+import { CredentialOfferSession } from './StateManager.types';
+import { IssuerMetadataV1_0_08 } from './v1_0_08.types';
+import { CredentialRequestV1_0_11, EndpointMetadataResultV1_0_11 } from './v1_0_11.types';
 import {
   CredentialConfigurationSupportedV1_0_13,
   CredentialRequestV1_0_13,
   EndpointMetadataResultV1_0_13,
-  IssuerMetadataV1_0_13
-} from './v1_0_13.types'
+  IssuerMetadataV1_0_13,
+} from './v1_0_13.types';
 
 export type InputCharSet = 'numeric' | 'text';
 export type KeyProofType = 'jwt' | 'cwt' | 'ldp_vp';
@@ -429,8 +429,8 @@ export interface NotificationErrorResponse {
 }
 
 export interface StatusListOpts {
-  statusListId?: string // Explicit status list to use. Determines the id from the credentialStatus object in the VC itself or uses the default otherwise
-  statusListCorrelationId?: string
-  statusListIndex?: number
-  statusEntryCorrelationId?: string // An id to use for correlation. Can be the credential id, but also a business identifier. Will only be used for lookups/management
+  statusListId?: string; // Explicit status list to use. Determines the id from the credentialStatus object in the VC itself or uses the default otherwise
+  statusListCorrelationId?: string;
+  statusListIndex?: number;
+  statusEntryCorrelationId?: string; // An id to use for correlation. Can be the credential id, but also a business identifier. Will only be used for lookups/management
 }

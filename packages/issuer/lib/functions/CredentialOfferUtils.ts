@@ -15,7 +15,7 @@ import {
   IssuerMetadataV1_0_13,
   PIN_NOT_MATCH_ERROR,
   PRE_AUTH_GRANT_LITERAL,
-  UniformCredentialOffer
+  UniformCredentialOffer,
 } from '@sphereon/oid4vci-common'
 
 export interface CredentialOfferGrantInput {
@@ -168,12 +168,9 @@ export function createCredentialOfferObjectv1_0_11(
 export function createCredentialOfferURIFromObject(
   credentialOffer: CredentialOfferV1_0_13 | UniformCredentialOffer,
   offerMode: CredentialOfferMode,
-  opts?: { scheme?: string; baseUri?: string }
+  opts?: { scheme?: string; baseUri?: string },
 ) {
-  const {
-    scheme,
-    baseUri
-  } = parseCredentialOfferSchemeAndBaseUri(opts?.scheme, opts?.baseUri, credentialOffer.credential_offer?.credential_issuer)
+  const { scheme, baseUri } = parseCredentialOfferSchemeAndBaseUri(opts?.scheme, opts?.baseUri, credentialOffer.credential_offer?.credential_issuer)
 
   if (offerMode === 'REFERENCE') {
     if (!credentialOffer.credential_offer_uri) {

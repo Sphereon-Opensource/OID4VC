@@ -6,14 +6,9 @@ import {
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
   QRCodeOpts,
-  TxCode
+  TxCode,
 } from '@sphereon/oid4vci-common'
-import {
-  CredentialSupportedBuilderV1_13,
-  ITokenEndpointOpts,
-  VcIssuer,
-  VcIssuerBuilder
-} from '@sphereon/oid4vci-issuer'
+import { CredentialSupportedBuilderV1_13, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
 import express, { Express } from 'express'
 
@@ -28,7 +23,7 @@ import {
   getIssuePayloadEndpoint,
   getIssueStatusEndpoint,
   getMetadataEndpoints,
-  pushedAuthorizationEndpoint
+  pushedAuthorizationEndpoint,
 } from './oid4vci-api-functions'
 
 function buildVCIFromEnvironment() {
@@ -174,7 +169,7 @@ export class OID4VCIServer {
     pushedAuthorizationEndpoint(this.router, this.issuer, this.authRequestsData)
     getMetadataEndpoints(this.router, this.issuer)
     let issuerPayloadPath: string | undefined
-    if(this.isGetIssuePayloadEndpointEnabled(opts?.endpointOpts?.getIssuePayloadOpts)) {
+    if (this.isGetIssuePayloadEndpointEnabled(opts?.endpointOpts?.getIssuePayloadOpts)) {
       issuerPayloadPath = getIssuePayloadEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.getIssuePayloadOpts, baseUrl: this.baseUrl })
     }
 

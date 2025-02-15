@@ -29,7 +29,7 @@ export enum IssueStatus {
   CREDENTIAL_ISSUED = 'CREDENTIAL_ISSUED', // The credential iss issued from the issuer's perspective
   NOTIFICATION_CREDENTIAL_ACCEPTED = 'NOTIFICATION_CREDENTIAL_ACCEPTED', // The holder/user stored the credential in the wallet (If notifications are enabled)
   NOTIFICATION_CREDENTIAL_DELETED = 'NOTIFICATION_CREDENTIAL_DELETED', // The holder/user did not store the credential in the wallet (If notifications are enabled)
-  NOTIFICATION_CREDENTIAL_FAILURE = 'NOTIFICATION_CREDENTIAL_FAILURE',  // The holder/user encountered an error (If notifications are enabled)
+  NOTIFICATION_CREDENTIAL_FAILURE = 'NOTIFICATION_CREDENTIAL_FAILURE', // The holder/user encountered an error (If notifications are enabled)
   ERROR = 'ERROR', // An error occurred
 }
 
@@ -52,7 +52,7 @@ export interface IssueStatusResponse {
   status: IssueStatus;
   error?: string;
   clientId?: string;
-  statusLists?: Array<StatusListOpts>
+  statusLists?: Array<StatusListOpts>;
 }
 
 export interface IStateManager<T extends StateType> {

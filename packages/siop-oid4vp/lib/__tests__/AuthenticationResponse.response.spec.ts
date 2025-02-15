@@ -216,90 +216,90 @@ describe('create JWT from Request JWT should', () => {
     async () => {
       expect.assertions(1)
 
-      try{
-      const mockReqEntity = await mockedGetEnterpriseAuthToken('REQ COMPANY')
-      const mockResEntity = await mockedGetEnterpriseAuthToken('RES COMPANY')
-      const requestOpts: CreateAuthorizationRequestOpts = {
-        version: SupportedVersion.SIOPv2_ID1,
+      try {
+        const mockReqEntity = await mockedGetEnterpriseAuthToken('REQ COMPANY')
+        const mockResEntity = await mockedGetEnterpriseAuthToken('RES COMPANY')
+        const requestOpts: CreateAuthorizationRequestOpts = {
+          version: SupportedVersion.SIOPv2_ID1,
 
-        requestObject: {
-          passBy: PassBy.REFERENCE,
-          reference_uri: 'https://my-request.com/here',
-          jwtIssuer: { method: 'did', didUrl: `${mockReqEntity.did}#controller`, alg: SigningAlgo.ES256K },
+          requestObject: {
+            passBy: PassBy.REFERENCE,
+            reference_uri: 'https://my-request.com/here',
+            jwtIssuer: { method: 'did', didUrl: `${mockReqEntity.did}#controller`, alg: SigningAlgo.ES256K },
+            createJwtCallback: getCreateJwtCallback({
+              hexPrivateKey: mockReqEntity.hexPrivateKey,
+              did: mockReqEntity.did,
+              kid: `${mockReqEntity.did}#controller`,
+              alg: SigningAlgo.ES256K,
+            }),
+            payload: {
+              client_id: WELL_KNOWN_OPENID_FEDERATION,
+              scope: 'test',
+              response_type: 'id_token',
+              redirect_uri: EXAMPLE_REDIRECT_URL,
+            },
+          },
+          clientMetadata: {
+            client_id: WELL_KNOWN_OPENID_FEDERATION,
+            idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+            subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
+            requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+            responseTypesSupported: [ResponseType.ID_TOKEN],
+            scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+            subjectTypesSupported: [SubjectType.PAIRWISE],
+            vpFormatsSupported: {
+              ldp_vc: {
+                proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+              },
+            },
+            passBy: PassBy.VALUE,
+            logo_uri: VERIFIER_LOGO_FOR_CLIENT,
+            clientName: VERIFIER_NAME_FOR_CLIENT,
+            'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100313',
+            clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+            'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+          },
+        }
+        const responseOpts: AuthorizationResponseOpts = {
+          responseURI: EXAMPLE_REDIRECT_URL,
+          responseURIType: 'redirect_uri',
+          registration: {
+            authorizationEndpoint: 'www.myauthorizationendpoint.com',
+            idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+            issuer: ResponseIss.SELF_ISSUED_V2,
+            responseTypesSupported: [ResponseType.ID_TOKEN],
+            subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
+            vpFormats: {
+              ldp_vc: {
+                proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+              },
+            },
+
+            passBy: PassBy.REFERENCE,
+            reference_uri: EXAMPLE_REFERENCE_URL,
+
+            logo_uri: VERIFIER_LOGO_FOR_CLIENT,
+            clientName: VERIFIER_NAME_FOR_CLIENT,
+            'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100314',
+            clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+            'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+          },
           createJwtCallback: getCreateJwtCallback({
-            hexPrivateKey: mockReqEntity.hexPrivateKey,
-            did: mockReqEntity.did,
-            kid: `${mockReqEntity.did}#controller`,
+            did: mockResEntity.did,
+            hexPrivateKey: mockResEntity.hexPrivateKey,
+            kid: `${mockResEntity.did}#controller`,
             alg: SigningAlgo.ES256K,
           }),
-          payload: {
-            client_id: WELL_KNOWN_OPENID_FEDERATION,
-            scope: 'test',
-            response_type: 'id_token',
-            redirect_uri: EXAMPLE_REDIRECT_URL,
-          },
-        },
-        clientMetadata: {
-          client_id: WELL_KNOWN_OPENID_FEDERATION,
-          idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-          subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-          requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-          responseTypesSupported: [ResponseType.ID_TOKEN],
-          scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-          subjectTypesSupported: [SubjectType.PAIRWISE],
-          vpFormatsSupported: {
-            ldp_vc: {
-              proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
-            },
-          },
-          passBy: PassBy.VALUE,
-          logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-          clientName: VERIFIER_NAME_FOR_CLIENT,
-          'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100313',
-          clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-          'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-        },
-      }
-      const responseOpts: AuthorizationResponseOpts = {
-        responseURI: EXAMPLE_REDIRECT_URL,
-        responseURIType: 'redirect_uri',
-        registration: {
-          authorizationEndpoint: 'www.myauthorizationendpoint.com',
-          idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-          issuer: ResponseIss.SELF_ISSUED_V2,
-          responseTypesSupported: [ResponseType.ID_TOKEN],
-          subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-          vpFormats: {
-            ldp_vc: {
-              proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
-            },
-          },
+          jwtIssuer: { method: 'did', didUrl: `${mockResEntity.did}#controller`, alg: SigningAlgo.ES256K },
+          responseMode: ResponseMode.POST,
+        }
 
-          passBy: PassBy.REFERENCE,
-          reference_uri: EXAMPLE_REFERENCE_URL,
-
-          logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-          clientName: VERIFIER_NAME_FOR_CLIENT,
-          'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100314',
-          clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-          'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-        },
-        createJwtCallback: getCreateJwtCallback({
-          did: mockResEntity.did,
-          hexPrivateKey: mockResEntity.hexPrivateKey,
-          kid: `${mockResEntity.did}#controller`,
-          alg: SigningAlgo.ES256K,
-        }),
-        jwtIssuer: { method: 'did', didUrl: `${mockResEntity.did}#controller`, alg: SigningAlgo.ES256K },
-        responseMode: ResponseMode.POST,
-      }
-
-      const requestObject = await RequestObject.fromOpts(requestOpts)
-      // console.log(JSON.stringify(await AuthorizationResponse.fromRequestObject(await requestObject.toJwt(), responseOpts, verifyOpts)));
-      const jwt = await requestObject.toJwt()
-      if (!jwt) throw new Error('JWT is undefined')
-      const response = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
-      await expect(response).toBeDefined()
+        const requestObject = await RequestObject.fromOpts(requestOpts)
+        // console.log(JSON.stringify(await AuthorizationResponse.fromRequestObject(await requestObject.toJwt(), responseOpts, verifyOpts)));
+        const jwt = await requestObject.toJwt()
+        if (!jwt) throw new Error('JWT is undefined')
+        const response = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
+        await expect(response).toBeDefined()
       } catch (e) {
         if (e.message.includes('Service Unavailable')) {
           console.warn('Temporarily skipped due to Service Unavailable')
