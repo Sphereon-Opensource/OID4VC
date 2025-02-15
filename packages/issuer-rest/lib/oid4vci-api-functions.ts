@@ -9,6 +9,7 @@ import {
   AuthorizationRequest,
   CommonAuthorizationChallengeRequest,
   CredentialIssuerMetadataOptsV1_0_13,
+  CredentialOfferMode,
   CredentialOfferRESTRequest,
   CredentialRequestV1_0_13,
   determineGrantTypes,
@@ -31,7 +32,9 @@ import {
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
-import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
+import { env, ISingleEndpointOpts,
+  sendErrorResponse
+} from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
 
@@ -53,7 +56,7 @@ export function getIssueStatusEndpoint(router: Router, issuer: VcIssuer, opts: I
   router.post(path, async (request: Request, response: Response) => {
     try {
       const { id } = request.body
-      const session = await issuer.credentialOfferSessions.get(id)
+      const session = await issuer.getCredentialOfferSessionById(id)
       if (!session || !session.credentialOffer) {
         return sendErrorResponse(response, 404, {
           error: 'invalid_request',
@@ -65,10 +68,11 @@ export function getIssueStatusEndpoint(router: Router, issuer: VcIssuer, opts: I
         createdAt: session.createdAt,
         lastUpdatedAt: session.lastUpdatedAt,
         status: session.status,
+        statusLists: session.statusLists,
         ...(session.error && { error: session.error }),
         ...(session.clientId && { clientId: session.clientId }),
       }
-      return response.send(JSON.stringify(authStatusBody))
+      return response.json(authStatusBody)
     } catch (e) {
       return sendErrorResponse(
         response,
@@ -81,6 +85,42 @@ export function getIssueStatusEndpoint(router: Router, issuer: VcIssuer, opts: I
       )
     }
   })
+}
+
+export function getIssuePayloadEndpoint<DIDDoc extends object>(router: Router, issuer: VcIssuer<DIDDoc>, opts: IGetIssueStatusEndpointOpts) : string {
+  const path = determinePath(opts.baseUrl, opts?.path ?? '/credential-offers/:id', { stripBasePath: true })
+  LOG.log(`[OID4VCI] getIssuePayloadEndpoint endpoint enabled at ${path}`)
+  router.get(path, async (request: Request, response: Response) => {
+    try {
+      const { id } = request.params
+      if (!id) {
+        return sendErrorResponse(response, 404, {
+          error: 'invalid_request',
+          error_description: `query parameter 'id' is missing`
+        })
+      }
+      const session = await issuer.getCredentialOfferSessionById(id as string, 'preAuthorizedCode')
+      if (!session || !session.credentialOffer) {
+        return sendErrorResponse(response, 404, {
+          error: 'invalid_request',
+          error_description: `Credential offer ${id} not found`,
+        })
+      }
+
+      return response.json(session.credentialOffer.credential_offer)
+    } catch (e) {
+      return sendErrorResponse(
+        response,
+        500,
+        {
+          error: 'invalid_request',
+          error_description: (e as Error).message,
+        },
+        e,
+      )
+    }
+  })
+  return path
 }
 
 function isExternalAS(issuerMetadata: CredentialIssuerMetadataOptsV1_0_13) {
@@ -150,7 +190,7 @@ export function authorizationChallengeEndpoint(
           const authorizationChallengeCodeResponse: AuthorizationChallengeCodeResponse = {
             authorization_code: authorizationCode,
           }
-          return response.send(authorizationChallengeCodeResponse)
+          return response.json(authorizationChallengeCodeResponse)
         }
       }
 
@@ -260,7 +300,7 @@ export function getCredentialEndpoint(
         tokenExpiresIn: opts.tokenExpiresIn,
         cNonceExpiresIn: opts.cNonceExpiresIn,
       })
-      return response.send(credential)
+      return response.json(credential)
     } catch (e) {
       return sendErrorResponse(
         response,
@@ -367,7 +407,7 @@ export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opt
           error_description: `Credential offer ${id} not found`,
         })
       }
-      return response.send(JSON.stringify(session.credentialOffer.credential_offer))
+      return response.json(session.credentialOffer.credential_offer)
     } catch (e) {
       return sendErrorResponse(
         response,
@@ -382,8 +422,55 @@ export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opt
   })
 }
 
-export function createCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: ICreateCredentialOfferEndpointOpts & { baseUrl?: string }) {
+export function deleteCredentialOfferEndpoint<DIDDoc extends object>(
+  router: Router,
+  issuer: VcIssuer<DIDDoc>,
+  opts?: IGetCredentialOfferEndpointOpts,
+) {
+  const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers/:id', { stripBasePath: true })
+  LOG.log(`[OID4VCI] deleteCredentialOffer endpoint enabled at ${path}`)
+  router.delete(path, async (request: Request, response: Response) => {
+    try {
+      const { id } = request.params
+      await issuer.deleteCredentialOfferSessionById(id)
+      return response.sendStatus(204)
+    } catch (e) {
+      return sendErrorResponse(
+        response,
+        500,
+        {
+          error: 'invalid_request',
+          error_description: (e as Error).message,
+        },
+        e,
+      )
+    }
+  })
+}
+
+function buildIssuerPayloadUri(request: Request<CredentialOfferRESTRequest>, issuerPayloadPathConst?: string) {
+  if (!issuerPayloadPathConst) {
+    return Promise.reject(Error('issuePayloadPath must bet set for offerMode REFERENCE!'))
+  }
+
+  const protocol = request.headers['x-forwarded-proto']?.toString() ?? request.protocol
+  let host = request.headers['x-forwarded-host']?.toString() ?? request.get('host')
+  const forwardedPort = request.headers['x-forwarded-port']?.toString()
+
+  if (forwardedPort && !(protocol === 'https' && forwardedPort === '443') && !(protocol === 'http' && forwardedPort === '80')) {
+    host += `:${forwardedPort}`
+  }
+
+  const forwardedPrefix = request.headers['x-forwarded-prefix']?.toString() ?? ''
+
+  return `${protocol}://${host}${forwardedPrefix}${request.baseUrl}${issuerPayloadPathConst}`
+}
+
+export function createCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: ICreateCredentialOfferEndpointOpts & { baseUrl?: string },
+                                              issuerPayloadPath?: string) {
+  const issuerPayloadPathConst = issuerPayloadPath
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers', { stripBasePath: true })
+
   LOG.log(`[OID4VCI] createCredentialOffer endpoint enabled at ${path}`)
   router.post(path, async (request: Request<CredentialOfferRESTRequest>, response: Response<ICreateCredentialOfferURIResponse>) => {
     try {
@@ -408,15 +495,26 @@ export function createCredentialOfferEndpoint(router: Router, issuer: VcIssuer, 
         })
       }
       const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
+      const offerMode: CredentialOfferMode = request.body.offerMode
+        ?? opts?.defaultCredentialOfferPayloadMode
+        ?? 'VALUE' // default to existing mode when nothing specified
+
       const client_id: string | undefined = request.body.client_id ?? request.body.original_credential_offer?.client_id
-      const result = await issuer.createCredentialOfferURI({ ...request.body, qrCodeOpts, grants, client_id, credentialConfigIds })
+      const result = await issuer.createCredentialOfferURI({
+        ...request.body,
+        offerMode: offerMode,
+        client_id,
+        ...(offerMode === 'REFERENCE' && { issuerPayloadUri: buildIssuerPayloadUri(request, issuerPayloadPathConst) }),
+        qrCodeOpts,
+        grants
+      })
       const resultResponse: ICreateCredentialOfferURIResponse = result
       if ('session' in resultResponse) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         delete resultResponse.session
       }
-      return response.send(resultResponse)
+      return response.json(resultResponse)
     } catch (e) {
       return sendErrorResponse(
         response,
@@ -450,7 +548,7 @@ export function pushedAuthorizationEndpoint(
 
   const handleHttpStatus400 = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.body) {
-      return res.status(400).send({ error: 'invalid_request', error_description: 'Request body must be present' })
+      return res.status(400).json({ error: 'invalid_request', error_description: 'Request body must be present' })
     }
     const required = ['client_id', 'code_challenge_method', 'code_challenge', 'redirect_uri']
     const conditional = ['authorization_details', 'scope']
@@ -509,12 +607,12 @@ export function pushedAuthorizationEndpoint(
 
 export function getMetadataEndpoints(router: Router, issuer: VcIssuer) {
   const credentialIssuerHandler = (request: Request, response: Response) => {
-    return response.send(issuer.issuerMetadata)
+    return response.json(issuer.issuerMetadata)
   }
   router.get(WellKnownEndpoints.OPENID4VCI_ISSUER, credentialIssuerHandler)
 
   const authorizationServerHandler = (request: Request, response: Response) => {
-    return response.send(issuer.authorizationServerMetadata)
+    return response.json(issuer.authorizationServerMetadata)
   }
   router.get(WellKnownEndpoints.OAUTH_AS, authorizationServerHandler)
 }

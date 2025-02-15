@@ -2,12 +2,18 @@ import {
   AuthorizationRequest,
   ClientMetadata,
   CredentialConfigurationSupportedV1_0_13,
+  CredentialOfferMode,
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
   QRCodeOpts,
-  TxCode,
+  TxCode
 } from '@sphereon/oid4vci-common'
-import { CredentialSupportedBuilderV1_13, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import {
+  CredentialSupportedBuilderV1_13,
+  ITokenEndpointOpts,
+  VcIssuer,
+  VcIssuerBuilder
+} from '@sphereon/oid4vci-issuer'
 import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
 import express, { Express } from 'express'
 
@@ -15,12 +21,14 @@ import {
   accessTokenEndpoint,
   authorizationChallengeEndpoint,
   createCredentialOfferEndpoint,
+  deleteCredentialOfferEndpoint,
   getBasePath,
   getCredentialEndpoint,
   getCredentialOfferEndpoint,
+  getIssuePayloadEndpoint,
   getIssueStatusEndpoint,
   getMetadataEndpoints,
-  pushedAuthorizationEndpoint,
+  pushedAuthorizationEndpoint
 } from './oid4vci-api-functions'
 
 function buildVCIFromEnvironment() {
@@ -89,12 +97,21 @@ export interface IGetCredentialOfferEndpointOpts extends ISingleEndpointOpts {
   baseUrl: string
 }
 
+export interface IDeleteCredentialOfferEndpointOpts extends ISingleEndpointOpts {
+  baseUrl: string
+}
+
 export interface ICreateCredentialOfferEndpointOpts extends ISingleEndpointOpts {
   getOfferPath?: string
   qrCodeOpts?: QRCodeOpts
+  defaultCredentialOfferPayloadMode?: CredentialOfferMode
 }
 
 export interface IGetIssueStatusEndpointOpts extends ISingleEndpointOpts {
+  baseUrl: string | URL
+}
+
+export interface IGetIssuePayloadEndpointOpts extends ISingleEndpointOpts {
   baseUrl: string | URL
 }
 
@@ -118,8 +135,10 @@ export interface IOID4VCIEndpointOpts {
   tokenEndpointOpts?: ITokenEndpointOpts
   notificationOpts?: ISingleEndpointOpts
   createCredentialOfferOpts?: ICreateCredentialOfferEndpointOpts
+  deleteCredentialOfferOpts?: IDeleteCredentialOfferEndpointOpts
   getCredentialOfferOpts?: IGetCredentialOfferEndpointOpts
   getStatusOpts?: IGetIssueStatusEndpointOpts
+  getIssuePayloadOpts?: IGetIssuePayloadEndpointOpts
   parOpts?: ISingleEndpointOpts
   authorizationChallengeOpts?: IAuthorizationChallengeEndpointOpts
 }
@@ -154,8 +173,14 @@ export class OID4VCIServer {
 
     pushedAuthorizationEndpoint(this.router, this.issuer, this.authRequestsData)
     getMetadataEndpoints(this.router, this.issuer)
-    if (opts?.endpointOpts?.createCredentialOfferOpts?.enabled !== false || process.env.CREDENTIAL_OFFER_ENDPOINT_ENABLBED === 'true') {
-      createCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.createCredentialOfferOpts)
+    let issuerPayloadPath: string | undefined
+    if(this.isGetIssuePayloadEndpointEnabled(opts?.endpointOpts?.getIssuePayloadOpts)) {
+      issuerPayloadPath = getIssuePayloadEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.getIssuePayloadOpts, baseUrl: this.baseUrl })
+    }
+
+    if (opts?.endpointOpts?.createCredentialOfferOpts?.enabled !== false || process.env.CREDENTIAL_OFFER_ENDPOINT_ENABLED === 'true') {
+      createCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.createCredentialOfferOpts, issuerPayloadPath)
+      deleteCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.deleteCredentialOfferOpts)
     }
     getCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.getCredentialOfferOpts)
     getCredentialEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.tokenEndpointOpts, baseUrl: this.baseUrl })
@@ -206,6 +231,10 @@ export class OID4VCIServer {
 
   private isStatusEndpointEnabled(statusEndpointOpts?: IGetIssueStatusEndpointOpts) {
     return statusEndpointOpts?.enabled !== false || process.env.STATUS_ENDPOINT_ENABLED !== 'false'
+  }
+
+  private isGetIssuePayloadEndpointEnabled(payloadEndpointOpts?: IGetIssuePayloadEndpointOpts) {
+    return payloadEndpointOpts?.enabled !== false || process.env.STATUS_ENDPOINT_ENABLED !== 'false'
   }
 
   private isAuthorizationChallengeEndpointEnabled(authorizationChallengeEndpointOpts?: IAuthorizationChallengeEndpointOpts) {

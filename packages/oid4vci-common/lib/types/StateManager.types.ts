@@ -1,5 +1,5 @@
 import { AssertedUniformCredentialOffer } from './CredentialIssuance.types';
-import { CredentialDataSupplierInput, NotificationRequest } from './Generic.types';
+import { CredentialDataSupplierInput, NotificationRequest, StatusListOpts } from './Generic.types';
 
 export interface StateType {
   createdAt: number;
@@ -18,19 +18,19 @@ export interface CredentialOfferSession extends StateType {
   issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   authorizationCode?: string;
+  statusLists?: Array<StatusListOpts>;
 }
 
 export enum IssueStatus {
-  OFFER_CREATED = 'OFFER_CREATED',
-  OFFER_URI_RETRIEVED = 'OFFER_URI_RETRIEVED', // This state is optional. as an offer uri is optional
+  OFFER_CREATED = 'OFFER_CREATED', // An offer is created. This is the initial state
   ACCESS_TOKEN_REQUESTED = 'ACCESS_TOKEN_REQUESTED', // Optional state, given the token endpoint could also be on a separate AS
   ACCESS_TOKEN_CREATED = 'ACCESS_TOKEN_CREATED', // Optional state, given the token endpoint could also be on a separate AS
   CREDENTIAL_REQUEST_RECEIVED = 'CREDENTIAL_REQUEST_RECEIVED', // Credential request received. Next state would either be error or issued
-  CREDENTIAL_ISSUED = 'CREDENTIAL_ISSUED',
-  NOTIFICATION_CREDENTIAL_ACCEPTED = 'NOTIFICATION_CREDENTIAL_ACCEPTED',
-  NOTIFICATION_CREDENTIAL_DELETED = 'NOTIFICATION_CREDENTIAL_DELETED',
-  NOTIFICATION_CREDENTIAL_FAILURE = 'NOTIFICATION_CREDENTIAL_FAILURE',
-  ERROR = 'ERROR',
+  CREDENTIAL_ISSUED = 'CREDENTIAL_ISSUED', // The credential iss issued from the issuer's perspective
+  NOTIFICATION_CREDENTIAL_ACCEPTED = 'NOTIFICATION_CREDENTIAL_ACCEPTED', // The holder/user stored the credential in the wallet (If notifications are enabled)
+  NOTIFICATION_CREDENTIAL_DELETED = 'NOTIFICATION_CREDENTIAL_DELETED', // The holder/user did not store the credential in the wallet (If notifications are enabled)
+  NOTIFICATION_CREDENTIAL_FAILURE = 'NOTIFICATION_CREDENTIAL_FAILURE',  // The holder/user encountered an error (If notifications are enabled)
+  ERROR = 'ERROR', // An error occurred
 }
 
 export interface CNonceState extends StateType {
@@ -43,6 +43,7 @@ export interface URIState extends StateType {
   issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   uri: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+  credentialOfferCorrelationId?: string;
 }
 
 export interface IssueStatusResponse {
@@ -51,6 +52,7 @@ export interface IssueStatusResponse {
   status: IssueStatus;
   error?: string;
   clientId?: string;
+  statusLists?: Array<StatusListOpts>
 }
 
 export interface IStateManager<T extends StateType> {

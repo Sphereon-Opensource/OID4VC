@@ -13,7 +13,7 @@ import {
   JWTPayload,
   OpenId4VCIVersion,
   PRE_AUTH_CODE_LITERAL,
-  PRE_AUTH_GRANT_LITERAL,
+  PRE_AUTH_GRANT_LITERAL
 } from '@sphereon/oid4vci-common'
 import { AuthorizationServerMetadataBuilder } from '@sphereon/oid4vci-issuer'
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
@@ -199,6 +199,7 @@ describe('VcIssuer', () => {
     expect(server.issuer).toBeDefined()
     uri = await vcIssuer
       .createCredentialOfferURI({
+        offerMode: 'VALUE',
         grants: {
           authorization_code: {
             issuer_state: issuerState,

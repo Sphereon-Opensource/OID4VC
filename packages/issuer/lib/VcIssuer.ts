@@ -12,6 +12,7 @@ import {
   CredentialEventNames,
   CredentialIssuerMetadataOptsV1_0_13,
   CredentialOfferEventNames,
+  CredentialOfferMode,
   CredentialOfferSession,
   CredentialOfferV1_0_13,
   CredentialRequest,
@@ -35,19 +36,34 @@ import {
   OpenId4VCIVersion,
   PRE_AUTH_GRANT_LITERAL,
   QRCodeOpts,
+  StatusListOpts,
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
   TxCode,
   TYP_ERROR,
-  URIState,
+  URIState
 } from '@sphereon/oid4vci-common'
 import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import ShortUUID from 'short-uuid'
 
-import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
+import {
+  assertValidPinNumber,
+  createCredentialOfferObject,
+  createCredentialOfferURIFromObject,
+  CredentialOfferGrantInput
+} from './functions'
 import { LookupStateManager } from './state-manager'
-import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
+import {
+  CredentialDataSupplier,
+  CredentialDataSupplierArgs,
+  CredentialIssuanceInput,
+  CredentialSignerCallback
+} from './types'
+
 
 import { LOG } from './index'
+
+const shortUUID = ShortUUID()
 
 export class VcIssuer {
   private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_13
@@ -92,11 +108,31 @@ export class VcIssuer {
     this._asClientOpts = args?.asClientOpts
   }
 
-  public getCredentialOfferSessionById(id: string): Promise<CredentialOfferSession> {
+  public async getCredentialOfferSessionById(id: string, lookup?: 'uri' | 'id' | 'preAuthorizedCode'): Promise<CredentialOfferSession> {
     if (!this.uris) {
-      throw Error('Cannot lookup credential offer by id if URI state manager is not set')
+      return Promise.reject(Error('Cannot lookup credential offer by id if URI state manager is not set'))
     }
-    return new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, 'uri').getAsserted(id)
+    if (lookup) {
+      return new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, lookup).getAsserted(id)
+    }
+    const session = await this._credentialOfferSessions.get(id)
+    if (!session) {
+      return Promise.reject(Error(`No session found for id ${id}`))
+    }
+    return session
+  }
+
+  public async deleteCredentialOfferSessionById(id: string, lookup: 'uri' | 'id' = 'id'): Promise<CredentialOfferSession> {
+    const session = await this.getCredentialOfferSessionById(id, lookup)
+    if (session) {
+      if (session.preAuthorizedCode && (await this._credentialOfferSessions.has(session.preAuthorizedCode))) {
+        await this._credentialOfferSessions.delete(session.preAuthorizedCode)
+      }
+      if (session.issuerState && (await this._credentialOfferSessions.has(session.issuerState))) {
+        await this._credentialOfferSessions.delete(session.issuerState)
+      }
+    }
+    return session
   }
 
   public async processNotification({
@@ -124,7 +160,10 @@ export class VcIssuer {
     LOG.info(`Processed notification ${notification} for ${session.notification_id}`)
     return session
   }
+
   public async createCredentialOfferURI(opts: {
+    offerMode: CredentialOfferMode
+    issuerPayloadUri?: string
     grants?: CredentialOfferGrantInput
     client_id?: string
     redirectUri?: string
@@ -135,18 +174,28 @@ export class VcIssuer {
     baseUri?: string
     scheme?: string
     pinLength?: number
-    qrCodeOpts?: QRCodeOpts
+    qrCodeOpts?: QRCodeOpts,
+    statusListOpts?: Array<StatusListOpts>
   }): Promise<CreateCredentialOfferURIResult> {
-    const { credential_configuration_ids } = opts
+    const { offerMode, issuerPayloadUri, credential_configuration_ids, statusListOpts } = opts
+    if (offerMode === 'REFERENCE' && !issuerPayloadUri) {
+      return Promise.reject(Error('issuePayloadPath must bet set for offerMode REFERENCE!'))
+    }
 
     const grants = opts.grants ? { ...opts.grants } : {}
     // for backwards compat, would be better if user sets the prop on the grants directly
     if (opts.pinLength !== undefined) {
-      const preAuth = grants[PRE_AUTH_GRANT_LITERAL]
-      if (preAuth && preAuth.tx_code) {
-        preAuth.tx_code.length = opts.pinLength
+      if (grants[PRE_AUTH_GRANT_LITERAL]) {
+        grants[PRE_AUTH_GRANT_LITERAL].tx_code = {
+          ...grants[PRE_AUTH_GRANT_LITERAL].tx_code,
+          length: grants[PRE_AUTH_GRANT_LITERAL].tx_code?.length ?? opts.pinLength,
+        }
       }
     }
+    if (grants[PRE_AUTH_GRANT_LITERAL]?.tx_code && !grants[PRE_AUTH_GRANT_LITERAL]?.tx_code?.length) {
+      grants[PRE_AUTH_GRANT_LITERAL].tx_code.length = 4
+    }
+
 
     const baseUri = opts?.baseUri ?? this.defaultCredentialOfferBaseUri
     const credentialOfferObject = createCredentialOfferObject(this._issuerMetadata, {
@@ -176,17 +225,21 @@ export class VcIssuer {
     }
     const createdAt = +new Date()
     const lastUpdatedAt = createdAt
-    if (opts?.credentialOfferUri) {
+    if (offerMode === 'REFERENCE') {
       if (!this.uris) {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
-      await this.uris.set(opts.credentialOfferUri, {
-        uri: opts.credentialOfferUri,
+      const credentialOfferCorrelationId = shortUUID.generate()// TODO allow to be supplied
+      credentialOfferObject.credential_offer_uri = opts.credentialOfferUri ?? `${issuerPayloadUri?.replace(':id', credentialOfferCorrelationId)}` // TODO how is this going to work with auth code flow?
+      await this.uris.set(credentialOfferCorrelationId, {
+        uri: credentialOfferObject.credential_offer_uri,
         createdAt: createdAt,
         preAuthorizedCode,
         issuerState,
+        credentialOfferCorrelationId
       })
     }
+
 
     const credentialOffer = await toUniformCredentialOfferRequest(
       {
@@ -211,6 +264,7 @@ export class VcIssuer {
       ...(userPin && { txCode: userPin }), // We used to use userPin according to older specs. We map these onto txCode now. If both are used, txCode in the end wins, even if they are different
       ...(opts.credentialDataSupplierInput && { credentialDataSupplierInput: opts.credentialDataSupplierInput }),
       credentialOffer,
+      statusLists: statusListOpts
     }
 
     if (preAuthorizedCode) {
@@ -221,7 +275,7 @@ export class VcIssuer {
       await this.credentialOfferSessions.set(issuerState, session)
     }
 
-    const uri = createCredentialOfferURIFromObject(credentialOffer, { ...opts, baseUri })
+    const uri = createCredentialOfferURIFromObject(credentialOffer, offerMode, { ...opts, baseUri })
     let qrCodeDataUri: string | undefined
     if (opts.qrCodeOpts) {
       const { AwesomeQR } = await import('awesome-qr')
@@ -307,6 +361,7 @@ export class VcIssuer {
       let credential: CredentialIssuanceInput | undefined
       let format: OID4VCICredentialFormat | undefined = credentialRequest.format
       let signerCallback: CredentialSignerCallback | undefined = opts.credentialSignerCallback
+      const session: CredentialOfferSession | undefined = preAuthorizedCode && preAuthSession ? preAuthSession : authSession
       if (opts.credential) {
         credential = opts.credential
       } else {
@@ -315,7 +370,6 @@ export class VcIssuer {
         if (typeof credentialDataSupplier !== 'function') {
           throw Error('Data supplier is mandatory if no credential is supplied')
         }
-        const session = preAuthorizedCode && preAuthSession ? preAuthSession : authSession
         if (!session) {
           throw Error('Either a preAuth or Auth session is required, none found')
         }
@@ -349,7 +403,9 @@ export class VcIssuer {
           credential.cnf = {
             kid,
           }
-        } else if (jwk) {
+        }
+        // else  TODO temp workaround IATAB2B-57
+          if (jwk) {
           credential.cnf = {
             jwk,
           }
@@ -386,6 +442,7 @@ export class VcIssuer {
           credential,
           jwtVerifyResult,
           issuer,
+          ...(session && {statusLists: session.statusLists})
         },
         signerCallback,
       )
@@ -561,8 +618,8 @@ export class VcIssuer {
         throw Error(TYP_ERROR)
       } else if (!alg) {
         throw Error(ALG_ERROR)
-      } else if (!([kid, jwk, x5c].filter((x) => !!x).length === 1)) {
-        // only 1 is allowed, but need to look into whether jwk and x5c are allowed together
+      } else if (x5c && (kid || jwk)) {
+        // x5c cannot be used together with kid or jwk
         throw Error(KID_JWK_X5C_ERROR)
       } else if (kid && !did) {
         if (!jwk && !x5c) {
@@ -665,6 +722,7 @@ export class VcIssuer {
       jwtVerifyResult: JwtVerifyResult
       format?: OID4VCICredentialFormat
       issuer?: string
+      statusLists?: Array<StatusListOpts>
     },
     issuerCallback?: CredentialSignerCallback,
   ): Promise<W3CVerifiableCredential | CompactSdJwtVc> {
