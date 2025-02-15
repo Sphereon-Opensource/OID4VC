@@ -36,7 +36,7 @@ describe('verify JWT from Request JWT should', () => {
         /invalid_jwt: JWT has expired: exp: 1632272403/,
       )
     } catch (e) {
-      if (e.message.includes('Service Unavailable')) {
+      if (e.message.includes('Service Unavailable') || e.message.includes('503 Service Unavailable')) {
         console.warn('Temporarily skipped due to Service Unavailable')
       } else {
         throw e
@@ -51,7 +51,7 @@ describe('verify JWT from Request JWT should', () => {
         /invalid_jwt: JWT has expired: exp: 1632272403/,
       )
     } catch (e) {
-      if (e.message.includes('Service Unavailable')) {
+      if (e.message.includes('Service Unavailable') || e.message.includes('503 Service Unavailable')) {
         console.warn('Temporarily skipped due to Service Unavailable')
       } else {
         throw e
