@@ -151,8 +151,7 @@ export class VcIssuer {
   }
 
   public async createCredentialOfferURI(opts: {
-    offerMode: CredentialOfferMode
-    issuerPayloadUri?: string
+    offerMode?: CredentialOfferMode
     grants?: CredentialOfferGrantInput
     client_id?: string
     redirectUri?: string
@@ -164,11 +163,12 @@ export class VcIssuer {
     scheme?: string
     pinLength?: number
     qrCodeOpts?: QRCodeOpts
+    correlationId?: string
     statusListOpts?: Array<StatusListOpts>
   }): Promise<CreateCredentialOfferURIResult> {
-    const { offerMode, issuerPayloadUri, credential_configuration_ids, statusListOpts } = opts
-    if (offerMode === 'REFERENCE' && !issuerPayloadUri) {
-      return Promise.reject(Error('issuePayloadPath must bet set for offerMode REFERENCE!'))
+    const { offerMode = 'VALUE', correlationId = shortUUID.generate(), credential_configuration_ids, statusListOpts, credentialOfferUri } = opts
+    if (offerMode === 'REFERENCE' && !credentialOfferUri) {
+      return Promise.reject(Error('credentialOfferUri must be supplied for offerMode REFERENCE!'))
     }
 
     const grants = opts.grants ? { ...opts.grants } : {}
@@ -217,14 +217,19 @@ export class VcIssuer {
       if (!this.uris) {
         throw Error('No URI state manager set, whilst apparently credential offer URIs are being used')
       }
-      const credentialOfferCorrelationId = shortUUID.generate() // TODO allow to be supplied
-      credentialOfferObject.credential_offer_uri = opts.credentialOfferUri ?? `${issuerPayloadUri?.replace(':id', credentialOfferCorrelationId)}` // TODO how is this going to work with auth code flow?
-      await this.uris.set(credentialOfferCorrelationId, {
-        uri: credentialOfferObject.credential_offer_uri,
+
+      const offerUri = opts.credentialOfferUri?.replace(':id', correlationId) // TODO how is this going to work with auth code flow?
+      if (!offerUri) {
+        return Promise.reject(Error('credentialOfferUri must be supplied for offerMode REFERENCE!'))
+      }
+
+      credentialOfferObject.credential_offer_uri = offerUri
+      await this.uris.set(correlationId, {
+        uri: offerUri,
         createdAt: createdAt,
         preAuthorizedCode,
         issuerState,
-        credentialOfferCorrelationId,
+        credentialOfferCorrelationId: correlationId,
       })
     }
 

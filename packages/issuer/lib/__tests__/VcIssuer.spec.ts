@@ -287,7 +287,7 @@ describe('VcIssuer', () => {
       vcIssuer
         .createCredentialOfferURI({
           offerMode: 'REFERENCE',
-          issuerPayloadUri: 'http://issuer-example.com/:id',
+          credentialOfferUri: 'http://issuer-example.com/:id',
           grants: {
             authorization_code: {
               issuer_state: issuerState,
@@ -296,10 +296,9 @@ describe('VcIssuer', () => {
           scheme: 'http',
           baseUri: 'issuer-example.com',
           credential_configuration_ids: ['VerifiableCredential'],
-          credentialOfferUri: 'https://somehost.com/offer-id',
         })
         .then((response) => response.uri),
-    ).resolves.toEqual('http://issuer-example.com?credential_offer_uri=https%3A%2F%2Fsomehost.com%2Foffer-id')
+    ).resolves.toContain('http://issuer-example.com?credential_offer_uri=http%3A%2F%2Fissuer-example.com%2F')
   })
 
   // Of course this doesn't work. The state is part of the proof to begin with
@@ -711,7 +710,7 @@ describe('VcIssuer without did', () => {
   it('should create credential offer uri with REFERENCE mode', async () => {
     const result = await vcIssuer.createCredentialOfferURI({
       offerMode: 'REFERENCE',
-      issuerPayloadUri: 'https://example.com/api/credentials/:id',
+      credentialOfferUri: 'https://example.com/api/credentials/:id',
       grants: {
         authorization_code: {
           issuer_state: issuerState,
@@ -726,7 +725,7 @@ describe('VcIssuer without did', () => {
     expect(result.session.credentialOffer.credential_offer_uri).toMatch(/https:\/\/example\.com\/api\/credentials\/[\w-]+/)
   })
 
-  it('should throw error if issuePayloadPath is missing with REFERENCE mode', async () => {
+  it('should throw error if credential offer Uri is missing with REFERENCE mode', async () => {
     await expect(
       vcIssuer.createCredentialOfferURI({
         offerMode: 'REFERENCE',
@@ -736,13 +735,13 @@ describe('VcIssuer without did', () => {
           },
         },
       }),
-    ).rejects.toThrow('issuePayloadPath must bet set for offerMode REFERENCE!')
+    ).rejects.toThrow('credentialOfferUri must be supplied for offerMode REFERENCE!')
   })
 
   it('should get credential offer session by uri', async () => {
     const result = await vcIssuer.createCredentialOfferURI({
       offerMode: 'REFERENCE',
-      issuerPayloadUri: 'https://example.com/api/credentials/:id',
+      credentialOfferUri: 'https://example.com/api/credentials/:id',
       grants: {
         authorization_code: {
           issuer_state: issuerState,

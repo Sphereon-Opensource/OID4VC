@@ -14,8 +14,9 @@ import {
   PRE_AUTH_GRANT_LITERAL,
   toUniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common';
-import Debug from 'debug';
 import { fetch } from 'cross-fetch';
+import Debug from 'debug';
+
 import { isUrlEncoded } from './functions';
 
 const debug = Debug('sphereon:oid4vci:offer');

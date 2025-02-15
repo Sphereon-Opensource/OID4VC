@@ -20,7 +20,7 @@ import {
   getBasePath,
   getCredentialEndpoint,
   getCredentialOfferEndpoint,
-  getIssuePayloadEndpoint,
+  getCredentialOfferReferenceEndpoint,
   getIssueStatusEndpoint,
   getMetadataEndpoints,
   pushedAuthorizationEndpoint,
@@ -99,7 +99,9 @@ export interface IDeleteCredentialOfferEndpointOpts extends ISingleEndpointOpts 
 export interface ICreateCredentialOfferEndpointOpts extends ISingleEndpointOpts {
   getOfferPath?: string
   qrCodeOpts?: QRCodeOpts
-  defaultCredentialOfferPayloadMode?: CredentialOfferMode
+  baseUrl?: string
+  credentialOfferReferenceBasePath?: string
+  defaultCredentialOfferMode?: CredentialOfferMode
 }
 
 export interface IGetIssueStatusEndpointOpts extends ISingleEndpointOpts {
@@ -170,7 +172,10 @@ export class OID4VCIServer {
     getMetadataEndpoints(this.router, this.issuer)
     let issuerPayloadPath: string | undefined
     if (this.isGetIssuePayloadEndpointEnabled(opts?.endpointOpts?.getIssuePayloadOpts)) {
-      issuerPayloadPath = getIssuePayloadEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.getIssuePayloadOpts, baseUrl: this.baseUrl })
+      issuerPayloadPath = getCredentialOfferReferenceEndpoint(this.router, this.issuer, {
+        ...opts?.endpointOpts?.getIssuePayloadOpts,
+        baseUrl: this.baseUrl,
+      })
     }
 
     if (opts?.endpointOpts?.createCredentialOfferOpts?.enabled !== false || process.env.CREDENTIAL_OFFER_ENDPOINT_ENABLED === 'true') {
