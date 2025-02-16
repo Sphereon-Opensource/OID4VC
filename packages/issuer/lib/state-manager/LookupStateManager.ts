@@ -2,6 +2,42 @@
 
 import { IStateManager, StateType } from '@sphereon/oid4vci-common'
 
+export async function lookupStateManagerMultiGetAsserted<K extends StateType, V extends StateType>(args: {
+  id: string
+  lookups: string[]
+  keyValueMapper: IStateManager<K>
+  valueStateManager: IStateManager<V>
+}) {
+  const value = await lookupStateManagerMultiGet(args)
+  if (value) {
+    return value
+  }
+  return Promise.reject(Error(`no value found for id ${args.id}`))
+}
+export async function lookupStateManagerMultiGet<K extends StateType, V extends StateType>({
+  id,
+  lookups,
+  keyValueMapper,
+  valueStateManager,
+}: {
+  id: string
+  lookups: string[]
+  keyValueMapper: IStateManager<K>
+  valueStateManager: IStateManager<V>
+}) {
+  for (const lookup of lookups) {
+    try {
+      const value = await new LookupStateManager(keyValueMapper, valueStateManager, lookup).get(id)
+      if (value) {
+        return value
+      }
+    } catch (e) {
+      // intentionally ignore the error
+    }
+  }
+  return valueStateManager.get(id)
+}
+
 export class LookupStateManager<K extends StateType, V extends StateType> implements IStateManager<V> {
   constructor(
     private keyValueMapper: IStateManager<K>,

@@ -47,7 +47,7 @@ import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3C
 import ShortUUID from 'short-uuid'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
-import { LookupStateManager, MemoryStates } from './state-manager'
+import { LookupStateManager, lookupStateManagerMultiGetAsserted, MemoryStates } from './state-manager'
 import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
 
 import { LOG } from './index'
@@ -99,14 +99,20 @@ export class VcIssuer {
 
   public async getCredentialOfferSessionById(
     id: string,
-    lookup?: 'uri' | 'preAuthorizedCode' | 'issuerState' | 'correlationId',
+    lookups: Array<'uri' | 'preAuthorizedCode' | 'issuerState' | 'correlationId'> = ['preAuthorizedCode', 'issuerState', 'correlationId'],
   ): Promise<CredentialOfferSession> {
     // preAuth and issuerState can be looked up directly
-    if (lookup && lookup !== 'preAuthorizedCode' && lookup !== 'issuerState') {
+    if (Array.isArray(lookups) && lookups.length > 0) {
       if (!this.uris) {
         return Promise.reject(Error('Cannot lookup credential offer by id if URI state manager is not set'))
       }
-      return new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, lookup).getAsserted(id)
+      return lookupStateManagerMultiGetAsserted({
+        id,
+        keyValueMapper: this._uris,
+        valueStateManager: this._credentialOfferSessions,
+        lookups: ['preAuthorizedCode', 'issuerState', 'correlationId'],
+      })
+      // return new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, lookup).getFromMultiple(id)
     }
     const session = await this._credentialOfferSessions.get(id)
     if (!session) {
@@ -117,11 +123,10 @@ export class VcIssuer {
 
   public async deleteCredentialOfferSessionById(
     id: string,
-    lookup: 'uri' | 'preAuthorizedCode' | 'issuerState' | 'correlationId' = 'correlationId',
+    lookups: Array<'uri' | 'preAuthorizedCode' | 'issuerState' | 'correlationId'> = ['preAuthorizedCode', 'issuerState'],
   ): Promise<CredentialOfferSession> {
-    const session = await this.getCredentialOfferSessionById(id, lookup)
+    const session = await this.getCredentialOfferSessionById(id, lookups)
     if (session) {
-      new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, lookup).delete(id)
       if (session.preAuthorizedCode && (await this._credentialOfferSessions.has(session.preAuthorizedCode))) {
         await this._credentialOfferSessions.delete(session.preAuthorizedCode)
       }

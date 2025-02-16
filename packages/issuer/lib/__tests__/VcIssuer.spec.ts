@@ -752,14 +752,14 @@ describe('VcIssuer without did', () => {
       },
     })
 
-    const session = await vcIssuer.getCredentialOfferSessionById(result.session.preAuthorizedCode!)
+    const session = await vcIssuer.getCredentialOfferSessionById(result.session.preAuthorizedCode!, ['uri'])
 
     expect(session).toBeDefined()
     expect(session.credentialOffer).toEqual(result.session.credentialOffer)
   })
 
   it('should throw error when getting session with invalid uri', async () => {
-    await expect(vcIssuer.getCredentialOfferSessionById('https://example.com/invalid-uri')).rejects.toThrow(/No session found for/)
+    await expect(vcIssuer.getCredentialOfferSessionById('https://example.com/invalid-uri')).rejects.toThrow('no value found for id https://example.com/invalid-uri')
   })
 
   it('should throw error when getting session by uri without uri state manager', async () => {
@@ -774,8 +774,8 @@ describe('VcIssuer without did', () => {
       .withInMemoryCNonceState()
       .build()
 
-    await expect(vcIssuerWithoutUriState.getCredentialOfferSessionById('https://example.com/some-uri', 'uri')).rejects.toThrow(
-      'issuer state or pre-authorized key not found (https://example.com/some-uri)',
+    await expect(vcIssuerWithoutUriState.getCredentialOfferSessionById('https://example.com/some-uri')).rejects.toThrow(
+      'no value found for id https://example.com/some-uri',
     )
   })
 })
