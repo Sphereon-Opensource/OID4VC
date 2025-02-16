@@ -1,12 +1,12 @@
 import {
   AuthorizationRequest,
   ClientMetadata,
+  CreateCredentialOfferURIResult,
   CredentialConfigurationSupportedV1_0_13,
   CredentialOfferMode,
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
   QRCodeOpts,
-  TxCode,
 } from '@sphereon/oid4vci-common'
 import { CredentialSupportedBuilderV1_13, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
@@ -82,11 +82,7 @@ function buildVCIFromEnvironment() {
   return issuerBuilder.build()
 }
 
-export type ICreateCredentialOfferURIResponse = {
-  uri: string
-  userPin?: string
-  txCode?: TxCode
-}
+export type ICreateCredentialOfferURIResponse = Omit<CreateCredentialOfferURIResult, 'session'>
 
 export interface IGetCredentialOfferEndpointOpts extends ISingleEndpointOpts {
   baseUrl: string

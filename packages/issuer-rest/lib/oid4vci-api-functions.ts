@@ -98,7 +98,7 @@ export function getCredentialOfferReferenceEndpoint(router: Router, issuer: VcIs
           error_description: `query parameter 'id' is missing`,
         })
       }
-      const session = await issuer.getCredentialOfferSessionById(id as string, 'id')
+      const session = await issuer.getCredentialOfferSessionById(id as string, 'correlationId')
       if (!session || !session.credentialOffer || session.status !== 'OFFER_CREATED') {
         if (session?.status) {
           LOG.warning(
@@ -404,7 +404,7 @@ export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opt
   router.get(path, async (request: Request, response: Response) => {
     try {
       const { id } = request.params
-      const session = await issuer.getCredentialOfferSessionById(id, 'id')
+      const session = await issuer.getCredentialOfferSessionById(id, 'correlationId')
       if (!session || !session.credentialOffer) {
         return sendErrorResponse(response, 404, {
           error: 'invalid_request',

@@ -229,6 +229,7 @@ export type CredentialDataSupplierInput = any;
 
 export type CreateCredentialOfferURIResult = {
   uri: string;
+  correlationId: string;
   qrCodeDataUri?: string;
   session: CredentialOfferSession;
   userPin?: string;

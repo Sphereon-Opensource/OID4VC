@@ -44,7 +44,7 @@ export interface URIState extends StateType {
   issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
   uri: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
-  credentialOfferCorrelationId?: string;
+  correlationId?: string;
 }
 
 export interface IssueStatusResponse {

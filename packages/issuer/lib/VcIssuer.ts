@@ -47,7 +47,7 @@ import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3C
 import ShortUUID from 'short-uuid'
 
 import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
-import { LookupStateManager } from './state-manager'
+import { LookupStateManager, MemoryStates } from './state-manager'
 import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
 
 import { LOG } from './index'
@@ -63,7 +63,7 @@ export class VcIssuer {
   private readonly _credentialDataSupplier?: CredentialDataSupplier
   private readonly _credentialOfferSessions: IStateManager<CredentialOfferSession>
   private readonly _cNonces: IStateManager<CNonceState>
-  private readonly _uris?: IStateManager<URIState>
+  private readonly _uris: IStateManager<URIState>
   private readonly _cNonceExpiresIn: number
   private readonly _asClientOpts?: ClientMetadata
 
@@ -87,9 +87,9 @@ export class VcIssuer {
     this._issuerMetadata = issuerMetadata
     this._authorizationServerMetadata = authorizationServerMetadata
     this._defaultCredentialOfferBaseUri = args.defaultCredentialOfferBaseUri
-    this._credentialOfferSessions = args.credentialOfferSessions
+    this._credentialOfferSessions = args.credentialOfferSessions ?? new MemoryStates()
+    this._uris = args.uris ?? new MemoryStates()
     this._cNonces = args.cNonces
-    this._uris = args.uris
     this._credentialSignerCallback = args?.credentialSignerCallback
     this._jwtVerifyCallback = args?.jwtVerifyCallback
     this._credentialDataSupplier = args?.credentialDataSupplier
@@ -97,8 +97,12 @@ export class VcIssuer {
     this._asClientOpts = args?.asClientOpts
   }
 
-  public async getCredentialOfferSessionById(id: string, lookup?: 'uri' | 'id' | 'preAuthorizedCode'): Promise<CredentialOfferSession> {
-    if (lookup) {
+  public async getCredentialOfferSessionById(
+    id: string,
+    lookup?: 'uri' | 'preAuthorizedCode' | 'issuerState' | 'correlationId',
+  ): Promise<CredentialOfferSession> {
+    // preAuth and issuerState can be looked up directly
+    if (lookup && lookup !== 'preAuthorizedCode' && lookup !== 'issuerState') {
       if (!this.uris) {
         return Promise.reject(Error('Cannot lookup credential offer by id if URI state manager is not set'))
       }
@@ -111,9 +115,13 @@ export class VcIssuer {
     return session
   }
 
-  public async deleteCredentialOfferSessionById(id: string, lookup: 'uri' | 'id' = 'id'): Promise<CredentialOfferSession> {
+  public async deleteCredentialOfferSessionById(
+    id: string,
+    lookup: 'uri' | 'preAuthorizedCode' | 'issuerState' | 'correlationId' = 'correlationId',
+  ): Promise<CredentialOfferSession> {
     const session = await this.getCredentialOfferSessionById(id, lookup)
     if (session) {
+      new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, lookup).delete(id)
       if (session.preAuthorizedCode && (await this._credentialOfferSessions.has(session.preAuthorizedCode))) {
         await this._credentialOfferSessions.delete(session.preAuthorizedCode)
       }
@@ -214,7 +222,7 @@ export class VcIssuer {
     }
     const createdAt = +new Date()
     const lastUpdatedAt = createdAt
-    const expirationInMs = (opts.sessionLifeTimeInSec ?? 10*60) * 1000
+    const expirationInMs = (opts.sessionLifeTimeInSec ?? 10 * 60) * 1000
     const expiresAt = createdAt + Math.abs(expirationInMs)
     if (offerMode === 'REFERENCE') {
       if (!this.uris) {
@@ -233,7 +241,7 @@ export class VcIssuer {
         expiresAt,
         preAuthorizedCode,
         issuerState,
-        credentialOfferCorrelationId: correlationId,
+        correlationId: correlationId,
       })
     }
 
@@ -264,38 +272,45 @@ export class VcIssuer {
       statusLists: statusListOpts,
     }
 
+    const uri = createCredentialOfferURIFromObject(credentialOffer, offerMode, { ...opts, baseUri })
     if (preAuthorizedCode) {
-      await this.credentialOfferSessions.set(preAuthorizedCode, session)
+      const lookupManager = new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, 'correlationId')
+      await lookupManager.setMapped(preAuthorizedCode, { preAuthorizedCode, uri, createdAt, expiresAt, correlationId, issuerState }, session)
+      // await this.credentialOfferSessions.set(preAuthorizedCode, session)
     }
     // todo: check whether we could have the same value for issuer state and pre auth code if both are supported.
     if (issuerState) {
-      await this.credentialOfferSessions.set(issuerState, session)
+      const lookupManager = new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, 'correlationId')
+      await lookupManager.setMapped(issuerState, { preAuthorizedCode, uri, createdAt, expiresAt, correlationId, issuerState }, session)
+      // await this.credentialOfferSessions.set(issuerState, session)
     }
-
-    const uri = createCredentialOfferURIFromObject(credentialOffer, offerMode, { ...opts, baseUri })
     let qrCodeDataUri: string | undefined
     if (opts.qrCodeOpts) {
       const { AwesomeQR } = await import('awesome-qr')
       const qrCode = new AwesomeQR({ ...opts.qrCodeOpts, text: uri })
       qrCodeDataUri = `data:image/png;base64,${(await qrCode.draw())!.toString('base64')}`
     }
-    EVENTS.emit(CredentialOfferEventNames.OID4VCI_OFFER_CREATED, {
-      eventName: CredentialOfferEventNames.OID4VCI_OFFER_CREATED,
-      id: correlationId,
-      data: uri,
-      initiator: '<unknown>',
-      initiatorType: InitiatorType.EXTERNAL,
-      system: System.OID4VCI,
-      // todo: Issuer
-      subsystem: SubSystem.API,
-    })
-    return {
+    const credentialOfferResult = {
       session,
       uri,
       qrCodeDataUri,
+      correlationId,
       txCode,
       ...(userPin !== undefined && { userPin, pinLength: userPin?.length ?? 0 }),
     }
+    EVENTS.emit(CredentialOfferEventNames.OID4VCI_OFFER_CREATED, {
+      eventName: CredentialOfferEventNames.OID4VCI_OFFER_CREATED,
+      id: correlationId,
+      data: credentialOfferResult,
+      initiator: '<Unknown>',
+      initiatorType: InitiatorType.EXTERNAL,
+      system: System.OID4VCI,
+      issuer: this.issuerMetadata.credential_issuer,
+      subsystem: SubSystem.API,
+      createdAt,
+      expiresAt,
+    })
+    return credentialOfferResult
   }
 
   /**
@@ -755,7 +770,7 @@ export class VcIssuer {
     return this._credentialDataSupplier
   }
 
-  get uris(): IStateManager<URIState> | undefined {
+  get uris(): IStateManager<URIState> {
     return this._uris
   }
 

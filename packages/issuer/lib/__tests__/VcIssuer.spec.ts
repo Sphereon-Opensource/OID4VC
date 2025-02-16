@@ -775,7 +775,7 @@ describe('VcIssuer without did', () => {
       .build()
 
     await expect(vcIssuerWithoutUriState.getCredentialOfferSessionById('https://example.com/some-uri', 'uri')).rejects.toThrow(
-      'Cannot lookup credential offer by id if URI state manager is not set',
+      'issuer state or pre-authorized key not found (https://example.com/some-uri)',
     )
   })
 })
