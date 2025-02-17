@@ -181,7 +181,7 @@ export class OID4VCIServer {
     getCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.getCredentialOfferOpts)
     getCredentialEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.tokenEndpointOpts, baseUrl: this.baseUrl })
     this.assertAccessTokenHandling()
-    if (!this.isTokenEndpointDisabled(opts?.endpointOpts?.tokenEndpointOpts)) {
+    if (!this.isTokenEndpointDisabled(opts?.endpointOpts?.tokenEndpointOpts, opts?.asClientOpts)) {
       accessTokenEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.tokenEndpointOpts, baseUrl: this.baseUrl })
     }
     if (this.isStatusEndpointEnabled(opts?.endpointOpts?.getStatusOpts)) {
