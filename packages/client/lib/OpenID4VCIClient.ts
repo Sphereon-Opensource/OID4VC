@@ -342,6 +342,10 @@ export class OpenID4VCIClient {
 
     if (clientId) {
       this._state.clientId = clientId;
+      if (!asOpts.clientOpts) {
+        asOpts.clientOpts = { clientId };
+      }
+      asOpts.clientOpts.clientId = clientId;
     }
     if (!this._state.accessTokenResponse) {
       const accessTokenClient = this.version() <= OpenId4VCIVersion.VER_1_0_12 ? new AccessTokenClientV1_0_11() : new AccessTokenClient();

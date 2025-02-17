@@ -759,7 +759,9 @@ describe('VcIssuer without did', () => {
   })
 
   it('should throw error when getting session with invalid uri', async () => {
-    await expect(vcIssuer.getCredentialOfferSessionById('https://example.com/invalid-uri')).rejects.toThrow('no value found for id https://example.com/invalid-uri')
+    await expect(vcIssuer.getCredentialOfferSessionById('https://example.com/invalid-uri')).rejects.toThrow(
+      'no value found for id https://example.com/invalid-uri',
+    )
   })
 
   it('should throw error when getting session by uri without uri state manager', async () => {

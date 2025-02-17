@@ -301,8 +301,13 @@ export class OpenID4VCIClientV1_0_11 {
     }
     this.assertIssuerData();
 
+    const asOpts: AuthorizationServerOpts = { ...opts?.asOpts };
     if (clientId) {
       this._state.clientId = clientId;
+      if (!asOpts.clientOpts) {
+        asOpts.clientOpts = { clientId };
+      }
+      asOpts.clientOpts.clientId = clientId;
     }
     if (!this._state.accessTokenResponse) {
       const accessTokenClient = new AccessTokenClientV1_0_11();
@@ -315,7 +320,7 @@ export class OpenID4VCIClientV1_0_11 {
       if (this._state.authorizationRequestOpts?.redirectUri && !redirectUri) {
         redirectUri = this._state.authorizationRequestOpts.redirectUri;
       }
-      const asOpts: AuthorizationServerOpts = { ...opts?.asOpts };
+
       const kid = asOpts.clientOpts?.kid ?? this._state.kid ?? this._state.authorizationRequestOpts?.requestObjectOpts?.kid;
       const clientAssertionType =
         asOpts.clientOpts?.clientAssertionType ??

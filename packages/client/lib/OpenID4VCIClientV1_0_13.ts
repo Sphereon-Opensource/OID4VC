@@ -326,6 +326,10 @@ export class OpenID4VCIClientV1_0_13 {
 
     if (clientId) {
       this._state.clientId = clientId;
+      if (!asOpts.clientOpts) {
+        asOpts.clientOpts = { clientId };
+      }
+      asOpts.clientOpts.clientId = clientId;
     }
     if (!this._state.accessTokenResponse) {
       const accessTokenClient = new AccessTokenClient();
