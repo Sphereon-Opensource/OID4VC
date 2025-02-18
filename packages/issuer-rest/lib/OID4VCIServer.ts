@@ -8,7 +8,7 @@ import {
   OID4VCICredentialFormat,
   QRCodeOpts,
 } from '@sphereon/oid4vci-common'
-import { CredentialSupportedBuilderV1_13, ITokenEndpointOpts, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { CredentialSupportedBuilderV1_13, ITokenEndpointOpts, oidcAccessTokenVerifyCallback, VcIssuer, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
 import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
 import express, { Express } from 'express'
 
@@ -179,7 +179,7 @@ export class OID4VCIServer {
       deleteCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.deleteCredentialOfferOpts)
     }
     getCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.getCredentialOfferOpts)
-    getCredentialEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.tokenEndpointOpts, baseUrl: this.baseUrl })
+    getCredentialEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.tokenEndpointOpts, baseUrl: this.baseUrl, accessTokenVerificationCallback: opts.endpointOpts?.tokenEndpointOpts?.accessTokenVerificationCallback ?? (this._asClientOpts ? oidcAccessTokenVerifyCallback({clientMetadata: this._asClientOpts, credentialIssuer: this._issuer.issuerMetadata.credential_issuer, authorizationServer: this._issuer.issuerMetadata.authorization_servers![0]}) : undefined)})
     this.assertAccessTokenHandling()
     if (!this.isTokenEndpointDisabled(opts?.endpointOpts?.tokenEndpointOpts, opts?.asClientOpts)) {
       accessTokenEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.tokenEndpointOpts, baseUrl: this.baseUrl })
