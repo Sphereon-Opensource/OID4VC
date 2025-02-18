@@ -73,6 +73,7 @@ export async function createSignedAuthRequestWhenNeeded(requestObject: Record<st
     requestObject['request'] = pop.jwt;
   }
 }
+
 function filterSupportedCredentials(
   credentialOffer: CredentialOfferPayloadV1_0_13,
   credentialsSupported?: Record<string, CredentialConfigurationSupportedV1_0_13>,
@@ -200,19 +201,28 @@ export const createAuthorizationRequestUrl = async ({
     authorization_details: JSON.stringify(handleAuthorizationDetails(endpointMetadata, authorizationDetails)),
     ...(redirectUri && { redirect_uri: redirectUri }),
     ...(client_id && { client_id }),
-    ...(credentialOffer?.issuerState && { issuer_state: credentialOffer.issuerState }),
+
+    ...(credentialOffer?.issuerState && {
+      issuer_state: credentialOffer.issuerState,
+    }),
     scope: authorizationRequest.scope,
   };
+
+  if (credentialOffer?.issuerState) {
+    /* We also pass it in as state, as this would allow an external AS without integration to return it back to the wallet */
+    queryObj.state = credentialOffer?.issuerState;
+  }
 
   if (!parEndpoint && parMode === PARMode.REQUIRE) {
     throw Error(`PAR mode is set to required by Authorization Server does not support PAR!`);
   } else if (parEndpoint && parMode !== PARMode.NEVER) {
     debug(`USING PAR with endpoint ${parEndpoint}`);
+
     const parResponse = await formPost<PushedAuthorizationResponse>(
       parEndpoint,
       convertJsonToURI(queryObj, {
         mode: JsonURIMode.X_FORM_WWW_URLENCODED,
-        uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
+        uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state', 'state'],
       }),
       { contentType: 'application/x-www-form-urlencoded', accept: 'application/json' },
     );
@@ -232,7 +242,7 @@ export const createAuthorizationRequestUrl = async ({
   debug(`Object that will become query params: ` + JSON.stringify(queryObj, null, 2));
   const url = convertJsonToURI(queryObj, {
     baseUrl: endpointMetadata.authorization_endpoint,
-    uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
+    uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state', 'state'],
     // arrayTypeProperties: ['authorization_details'],
     mode: JsonURIMode.X_FORM_WWW_URLENCODED,
     // We do not add the version here, as this always needs to be form encoded

@@ -180,7 +180,14 @@ export class VcIssuer {
     statusListOpts?: Array<StatusListOpts>
     sessionLifeTimeInSec?: number
   }): Promise<CreateCredentialOfferURIResult> {
-    const { offerMode = 'VALUE', correlationId = shortUUID.generate(), credential_configuration_ids, statusListOpts, credentialOfferUri, redirectUri } = opts
+    const {
+      offerMode = 'VALUE',
+      correlationId = shortUUID.generate(),
+      credential_configuration_ids,
+      statusListOpts,
+      credentialOfferUri,
+      redirectUri,
+    } = opts
     if (offerMode === 'REFERENCE' && !credentialOfferUri) {
       return Promise.reject(Error('credentialOfferUri must be supplied for offerMode REFERENCE!'))
     }
