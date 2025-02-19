@@ -177,6 +177,7 @@ export interface AuthorizationChallengeCodeResponse {
    * The authorization code issued by the authorization server.
    */
   authorization_code: string;
+  state?: string;
 }
 
 // https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-apps-02.html#name-error-response

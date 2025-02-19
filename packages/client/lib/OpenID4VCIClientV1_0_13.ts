@@ -61,6 +61,7 @@ export interface OpenID4VCIClientStateV1_0_13 {
   pkce: PKCEOpts;
   accessToken?: string;
   authorizationURL?: string;
+  sendIssuerStateIfNoNonce?: boolean;
 }
 
 export class OpenID4VCIClientV1_0_13 {
@@ -459,7 +460,15 @@ export class OpenID4VCIClientV1_0_13 {
           metadata: this.endpointMetadata,
           version: this.version(),
         });
-
+    // If we are in an auth code flow, without a c nonce, we return the issuerState back to the issuer in case it is present
+    const issuerState =
+      this.issuerSupportedFlowTypes().includes(AuthzFlowType.AUTHORIZATION_CODE_FLOW) &&
+      this._state.authorizationCodeResponse &&
+      !this.accessTokenResponse?.c_nonce &&
+      this._state.credentialOffer?.issuerState
+        ? this._state.credentialOffer.issuerState
+        : undefined;
+    requestBuilder.withIssuerState(issuerState);
     requestBuilder.withTokenFromResponse(this.accessTokenResponse);
     requestBuilder.withDeferredCredentialAwait(deferredCredentialAwait ?? false, deferredCredentialIntervalInMS);
     let subjectIssuance: ExperimentalSubjectIssuance | undefined;

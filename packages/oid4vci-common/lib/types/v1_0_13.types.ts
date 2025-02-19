@@ -108,6 +108,9 @@ export type CredentialRequestV1_0_13ResponseEncryption = {
 export interface CredentialRequestV1_0_13Common extends ExperimentalSubjectIssuance {
   credential_response_encryption?: CredentialRequestV1_0_13ResponseEncryption;
   proof?: ProofOfPossession;
+
+  // We allow sending a issuer state back to the credential offer in case an auth code flow is used with an external AS and no nonces are used (not recommended), but does allow to integrate any OIDC server
+  state?: string;
 }
 
 export type CredentialRequestV1_0_13 = CredentialRequestV1_0_13Common &

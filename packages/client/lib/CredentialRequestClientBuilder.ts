@@ -168,6 +168,10 @@ export class CredentialRequestClientBuilder {
     return this;
   }
 
+  public withIssuerState(issuerState?: string): this {
+    this._builder.withIssuerState(issuerState);
+    return this;
+  }
   public withCredentialType(credentialTypes: string | string[]): this {
     this._builder.withCredentialType(credentialTypes);
     return this;

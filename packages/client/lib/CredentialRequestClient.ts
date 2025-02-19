@@ -18,7 +18,7 @@ import {
   UniformCredentialRequest,
   URL_NOT_VALID,
 } from '@sphereon/oid4vci-common';
-import { CredentialFormat, DIDDocument } from '@sphereon/ssi-types';
+import { CredentialFormat } from '@sphereon/ssi-types';
 import Debug from 'debug';
 
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
@@ -41,9 +41,10 @@ export interface CredentialRequestOpts {
   token: string;
   version: OpenId4VCIVersion;
   subjectIssuance?: ExperimentalSubjectIssuance;
+  issuerState?: string;
 }
 
-export type CreateCredentialRequestOpts<DIDDoc = DIDDocument> = {
+export type CreateCredentialRequestOpts = {
   credentialIdentifier?: string;
   credentialTypes?: string | string[];
   context?: string[];
@@ -52,7 +53,7 @@ export type CreateCredentialRequestOpts<DIDDoc = DIDDocument> = {
   version: OpenId4VCIVersion;
 };
 
-export async function buildProof<DIDDoc = DIDDocument>(
+export async function buildProof(
   proofInput: ProofOfPossessionBuilder | ProofOfPossession,
   opts: {
     version: OpenId4VCIVersion;
@@ -101,7 +102,7 @@ export class CredentialRequestClient {
    * like using DPoP together with an authorization code flow. These are however rare, so you should be using the acquireCredentialsUsingProof normally
    * @param opts
    */
-  public async acquireCredentialsWithoutProof<DIDDoc = DIDDocument>(opts: {
+  public async acquireCredentialsWithoutProof(opts: {
     credentialIdentifier?: string;
     credentialTypes?: string | string[];
     context?: string[];
@@ -122,7 +123,7 @@ export class CredentialRequestClient {
     return await this.acquireCredentialsUsingRequestWithoutProof(request, opts.createDPoPOpts);
   }
 
-  public async acquireCredentialsUsingProof<DIDDoc = DIDDocument>(opts: {
+  public async acquireCredentialsUsingProof(opts: {
     proofInput: ProofOfPossessionBuilder | ProofOfPossession;
     credentialIdentifier?: string;
     credentialTypes?: string | string[];
@@ -245,13 +246,11 @@ export class CredentialRequestClient {
     });
   }
 
-  public async createCredentialRequestWithoutProof<DIDDoc = DIDDocument>(
-    opts: CreateCredentialRequestOpts,
-  ): Promise<CredentialRequestWithoutProofV1_0_13> {
+  public async createCredentialRequestWithoutProof(opts: CreateCredentialRequestOpts): Promise<CredentialRequestWithoutProofV1_0_13> {
     return await this.createCredentialRequestImpl(opts);
   }
 
-  public async createCredentialRequest<DIDDoc = DIDDocument>(
+  public async createCredentialRequest(
     opts: CreateCredentialRequestOpts & {
       proofInput: ProofOfPossessionBuilder | ProofOfPossession;
     },
@@ -259,7 +258,7 @@ export class CredentialRequestClient {
     return await this.createCredentialRequestImpl(opts);
   }
 
-  private async createCredentialRequestImpl<DIDDoc = DIDDocument>(
+  private async createCredentialRequestImpl(
     opts: CreateCredentialRequestOpts & {
       proofInput?: ProofOfPossessionBuilder | ProofOfPossession;
     },
@@ -295,6 +294,7 @@ export class CredentialRequestClient {
     if (types.length === 0) {
       throw Error(`Credential type(s) need to be provided`);
     }
+    const issuer_state = this.credentialRequestOpts.issuerState;
 
     // TODO: we should move format specific logic
     if (format === 'jwt_vc_json' || format === 'jwt_vc') {
@@ -303,6 +303,7 @@ export class CredentialRequestClient {
           type: types,
         },
         format,
+        ...(issuer_state && { issuer_state }),
         ...(proof && { proof }),
         ...opts.subjectIssuance,
       };
@@ -313,6 +314,7 @@ export class CredentialRequestClient {
 
       return {
         format,
+        ...(issuer_state && { issuer_state }),
         ...(proof && { proof }),
         ...opts.subjectIssuance,
 
@@ -327,6 +329,7 @@ export class CredentialRequestClient {
       }
       return {
         format,
+        ...(issuer_state && { issuer_state }),
         ...(proof && { proof }),
         vct: types[0],
         ...opts.subjectIssuance,
@@ -337,6 +340,7 @@ export class CredentialRequestClient {
       }
       return {
         format,
+        ...(issuer_state && { issuer_state }),
         ...(proof && { proof }),
         doctype: types[0],
         ...opts.subjectIssuance,

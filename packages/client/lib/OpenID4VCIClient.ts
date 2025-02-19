@@ -455,6 +455,15 @@ export class OpenID4VCIClient {
             version: this.version(),
           });
     }
+    // If we are in an auth code flow, without a c nonce, we return the issuerState back to the issuer in case it is present
+    const issuerState =
+      this.issuerSupportedFlowTypes().includes(AuthzFlowType.AUTHORIZATION_CODE_FLOW) &&
+      this._state.authorizationCodeResponse &&
+      !this.accessTokenResponse?.c_nonce &&
+      this._state.credentialOffer?.issuerState
+        ? this._state.credentialOffer.issuerState
+        : undefined;
+    requestBuilder.withIssuerState(issuerState);
 
     requestBuilder.withTokenFromResponse(this.accessTokenResponse);
     requestBuilder.withDeferredCredentialAwait(deferredCredentialAwait ?? false, deferredCredentialIntervalInMS);

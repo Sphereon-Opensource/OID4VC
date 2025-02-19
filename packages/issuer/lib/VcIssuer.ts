@@ -405,7 +405,7 @@ export class VcIssuer {
         const credentialDataSupplierInput = opts.credentialDataSupplierInput ?? session.credentialDataSupplierInput
 
         const result = await credentialDataSupplier({
-          ...cNonceState,
+          ...(cNonceState ? { ...cNonceState } : { ...authSession }),
           credentialRequest: opts.credentialRequest,
           credentialSupplierConfig: this._issuerMetadata.credential_supplier_config,
           credentialOffer /*todo: clientId: */,
@@ -477,8 +477,10 @@ export class VcIssuer {
         // credential: OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
         throw new Error(CREDENTIAL_MISSING_ERROR)
       }
-      // remove the previous nonce
-      await this.cNonces.delete(cNonceState.cNonce)
+      if (cNonceState) {
+        // remove the previous nonce
+        await this.cNonces.delete(cNonceState.cNonce)
+      }
 
       let notification_id: string | undefined
 
@@ -624,14 +626,24 @@ export class VcIssuer {
 
       const { didDocument, did, jwt } = jwtVerifyResult
       const { header, payload } = jwt
-      const { iss, aud, iat, nonce } = payload
-      if (!nonce) {
+      const { iss, aud, iat, nonce, issuer_state } = payload
+      if (!nonce && !issuer_state) {
         throw Error('No nonce was found in the Proof of Possession')
       }
-      const cNonceState = await this.cNonces.getAsserted(nonce)
-      preAuthorizedCode = cNonceState.preAuthorizedCode
-      issuerState = cNonceState.issuerState
-      const createdAt = cNonceState.createdAt
+      let createdAt: number
+      let cNonceState: CNonceState | undefined
+      if (nonce) {
+        cNonceState = await this.cNonces.getAsserted(nonce)
+        preAuthorizedCode = cNonceState.preAuthorizedCode
+        issuerState = cNonceState.issuerState
+        createdAt = cNonceState.createdAt
+      } else if (issuer_state) {
+        const session = await this._credentialOfferSessions.getAsserted(issuer_state as string)
+        issuerState = issuer_state as string | undefined
+        createdAt = session.createdAt
+      } else {
+        throw Error('No nonce or issuer_state was found in the Proof of Possession')
+      }
       // The verify callback should set the correct values, but let's look at the JWT ourselves to to be sure
       const alg = jwtVerifyResult.alg ?? header.alg
       const kid = jwtVerifyResult.kid ?? header.kid

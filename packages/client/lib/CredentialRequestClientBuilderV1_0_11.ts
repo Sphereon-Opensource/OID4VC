@@ -28,6 +28,7 @@ export class CredentialRequestClientBuilderV1_0_11 {
   token?: string;
   version?: OpenId4VCIVersion;
   subjectIssuance?: ExperimentalSubjectIssuance;
+  issuerState?: string;
 
   public static fromCredentialIssuer({
     credentialIssuer,
@@ -96,6 +97,11 @@ export class CredentialRequestClientBuilderV1_0_11 {
       metadata,
       version: credentialOffer.version,
     });
+  }
+
+  public withIssuerState(issuerState?: string): this {
+    this.issuerState = issuerState;
+    return this;
   }
 
   public withCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadata): this {
