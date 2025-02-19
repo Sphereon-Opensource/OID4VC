@@ -110,7 +110,7 @@ export interface CredentialRequestV1_0_13Common extends ExperimentalSubjectIssua
   proof?: ProofOfPossession;
 
   // We allow sending a issuer state back to the credential offer in case an auth code flow is used with an external AS and no nonces are used (not recommended), but does allow to integrate any OIDC server
-  state?: string;
+  issuer_state?: string;
 }
 
 export type CredentialRequestV1_0_13 = CredentialRequestV1_0_13Common &
