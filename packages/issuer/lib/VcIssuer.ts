@@ -627,7 +627,7 @@ export class VcIssuer {
       const { didDocument, did, jwt } = jwtVerifyResult
       const { header, payload } = jwt
       const { iss, aud, iat, nonce } = payload
-      const issuer_state = ('issuer_state' in credentialRequest && credentialRequest.issuer_state) ? credentialRequest.issuer_state : undefined
+      const issuer_state = 'issuer_state' in credentialRequest && credentialRequest.issuer_state ? credentialRequest.issuer_state : undefined
       if (!nonce && !issuer_state) {
         throw Error('No nonce was found in the Proof of Possession')
       }

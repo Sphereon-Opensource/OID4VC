@@ -7,26 +7,27 @@ import {
   determineSpecVersionFromURI,
   OpenId4VCIVersion,
   PRE_AUTH_GRANT_LITERAL,
-  toUniformCredentialOfferRequest
-} from '@sphereon/oid4vci-common'
-import Debug from 'debug'
-import { constructBaseResponse, handleCredentialOfferUri } from './functions'
+  toUniformCredentialOfferRequest,
+} from '@sphereon/oid4vci-common';
+import Debug from 'debug';
+import { constructBaseResponse, handleCredentialOfferUri } from './functions';
 
 const debug = Debug('sphereon:oid4vci:offer');
 
 export class CredentialOfferClientV1_0_13 {
   public static async fromURI(uri: string, opts?: { resolve?: boolean }): Promise<CredentialOfferRequestWithBaseUrl> {
-    debug(`Credential Offer URI: ${uri}`)
+    debug(`Credential Offer URI: ${uri}`);
     if (!uri.includes('?') || !uri.includes('://')) {
-      debug(`Invalid Credential Offer URI: ${uri}`)
-      throw Error(`Invalid Credential Offer Request`)
+      debug(`Invalid Credential Offer URI: ${uri}`);
+      throw Error(`Invalid Credential Offer Request`);
     }
-    const scheme = uri.split('://')[0]
-    const baseUrl = uri.split('?')[0]
-    const version = determineSpecVersionFromURI(uri)
-    let credentialOffer: CredentialOffer
-    if (uri.includes('credential_offer_uri')) { // FIXME deduplicate
-      credentialOffer = await handleCredentialOfferUri(uri) as CredentialOfferV1_0_13
+    const scheme = uri.split('://')[0];
+    const baseUrl = uri.split('?')[0];
+    const version = determineSpecVersionFromURI(uri);
+    let credentialOffer: CredentialOffer;
+    if (uri.includes('credential_offer_uri')) {
+      // FIXME deduplicate
+      credentialOffer = (await handleCredentialOfferUri(uri)) as CredentialOfferV1_0_13;
     } else {
       credentialOffer = convertURIToJsonObject(uri, {
         // It must have the '=' sign after credential_offer otherwise the uri will get split at openid_credential_offer
@@ -37,18 +38,18 @@ export class CredentialOfferClientV1_0_13 {
       }) as CredentialOfferV1_0_13;
     }
     if (credentialOffer?.credential_offer_uri === undefined && !credentialOffer?.credential_offer) {
-      throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri) // cannot be reached since convertURIToJsonObject will check the params
+      throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri); // cannot be reached since convertURIToJsonObject will check the params
     }
 
     const request = await toUniformCredentialOfferRequest(credentialOffer, {
       ...opts,
-      version
-    })
+      version,
+    });
 
     return {
       ...constructBaseResponse(request, scheme, baseUrl),
-      userPinRequired: !!request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code ?? false
-    }
+      userPinRequired: !!request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code ?? false,
+    };
   }
 
   public static toURI(

@@ -102,7 +102,9 @@ export function getCredentialOfferReferenceEndpoint(router: Router, issuer: VcIs
       let session
       try {
         session = await issuer.getCredentialOfferSessionById(id as string)
-      } catch (e) { /* will crash with 500 instead of 404 if we do not catch */ }
+      } catch (e) {
+        /* will crash with 500 instead of 404 if we do not catch */
+      }
 
       if (!session || !session.credentialOffer || session.status !== 'OFFER_CREATED') {
         if (session?.status) {

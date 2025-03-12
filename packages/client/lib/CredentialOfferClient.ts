@@ -12,12 +12,10 @@ import {
   PRE_AUTH_GRANT_LITERAL,
   toUniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common';
-import { fetch } from 'cross-fetch';
 import Debug from 'debug';
+import { constructBaseResponse, handleCredentialOfferUri } from './functions';
 
-import { LOG } from './types'
-import { fetch } from 'cross-fetch'
-import { constructBaseResponse, handleCredentialOfferUri, isUrlEncoded } from './functions'
+import { LOG } from './types';
 
 const debug = Debug('sphereon:oid4vci:offer');
 
@@ -45,7 +43,7 @@ export class CredentialOfferClient {
       };
     } else {
       if (uri.includes('credential_offer_uri')) {
-        credentialOffer = await handleCredentialOfferUri(uri) as CredentialOfferV1_0_11 | CredentialOfferV1_0_13
+        credentialOffer = (await handleCredentialOfferUri(uri)) as CredentialOfferV1_0_11 | CredentialOfferV1_0_13;
       } else {
         credentialOffer = convertURIToJsonObject(uri, {
           // It must have the '=' sign after credential_offer otherwise the uri will get split at openid_credential_offer
@@ -54,22 +52,22 @@ export class CredentialOfferClient {
         }) as CredentialOfferV1_0_11 | CredentialOfferV1_0_13;
       }
       if (credentialOffer?.credential_offer_uri === undefined && !credentialOffer?.credential_offer) {
-        throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri) // cannot be reached since convertURIToJsonObject will check the params
+        throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri); // cannot be reached since convertURIToJsonObject will check the params
       }
     }
 
     const request = await toUniformCredentialOfferRequest(credentialOffer, {
       ...opts,
-      version
-    })
+      version,
+    });
 
     return {
       ...constructBaseResponse(request, scheme, baseUrl),
       userPinRequired:
         request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.user_pin_required ??
         !!request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code ??
-        false
-    }
+        false,
+    };
   }
 
   public static toURI(
