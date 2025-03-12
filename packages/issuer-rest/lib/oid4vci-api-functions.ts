@@ -98,7 +98,12 @@ export function getCredentialOfferReferenceEndpoint(router: Router, issuer: VcIs
           error_description: `query parameter 'id' is missing`,
         })
       }
-      const session = await issuer.getCredentialOfferSessionById(id as string)
+
+      let session
+      try {
+        session = await issuer.getCredentialOfferSessionById(id as string)
+      } catch (e) { /* will crash with 500 instead of 404 if we do not catch */ }
+
       if (!session || !session.credentialOffer || session.status !== 'OFFER_CREATED') {
         if (session?.status) {
           LOG.warning(
