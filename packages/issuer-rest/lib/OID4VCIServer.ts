@@ -131,6 +131,7 @@ export interface IAuthorizationChallengeEndpointOpts extends ISingleEndpointOpts
 }
 
 export interface IOID4VCIEndpointOpts {
+  trustProxy?: boolean | Array<string>
   tokenEndpointOpts?: ITokenEndpointOpts
   notificationOpts?: ISingleEndpointOpts
   createCredentialOfferOpts?: ICreateCredentialOfferEndpointOpts
