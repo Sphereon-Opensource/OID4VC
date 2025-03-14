@@ -175,7 +175,7 @@ export type JWTVerifyCallback = (args: { jwt: string; kid?: string }) => Promise
 export interface JwtVerifyResult {
   jwt: Jwt;
   kid?: string;
-  alg: string;
+  alg?: string;
   did?: string;
   didDocument?: Record<string, unknown>;
   x5c?: string[];

@@ -398,9 +398,9 @@ describe('VcIssuer', () => {
       const stateManager = new MemoryStates<CredentialOfferSession>()
       testVcIssuer = new VcIssuerBuilder()
         .withAuthorizationMetadata(authorizationServerMetadata)
-        .withCredentialEndpoint('http://localhost:4000/credential-endpoint')
-        .withDefaultCredentialOfferBaseUri('http://localhost:4000')
-        .withCredentialIssuer('http://localhost:4000')
+        .withCredentialEndpoint('http://localhost:4321/credential-endpoint')
+        .withDefaultCredentialOfferBaseUri('http://localhost:4321')
+        .withCredentialIssuer('http://localhost:4321')
         .withIssuerDisplay({ name: 'test issuer', locale: 'en-US' })
         .withCredentialConfigurationsSupported({})
         .withCredentialOfferStateManager(stateManager)
@@ -436,7 +436,7 @@ describe('VcIssuer', () => {
         )
         .build()
 
-      testExpressSupport = ExpressBuilder.fromServerOpts({ startListening: false, port: 4000, hostname: 'localhost' }).build({
+      testExpressSupport = ExpressBuilder.fromServerOpts({ startListening: false, port: 4321, hostname: 'localhost' }).build({
         startListening: false,
       })
 
@@ -445,8 +445,8 @@ describe('VcIssuer', () => {
       }
 
       const endpointOpts = {
-        getIssuePayloadOpts: { enabled: true, baseUrl: 'http://localhost:4000' },
-        createCredentialOfferOpts: { enabled: true, baseUrl: 'http://localhost:4000' },
+        getIssuePayloadOpts: { enabled: true, baseUrl: 'http://localhost:4321' },
+        createCredentialOfferOpts: { enabled: true, baseUrl: 'http://localhost:4321' },
         tokenEndpointOpts: {
           accessTokenSignerCallback: dummyAccessTokenSignerCallback,
         },
@@ -454,7 +454,7 @@ describe('VcIssuer', () => {
 
       testServer = new OID4VCIServer(testExpressSupport, {
         issuer: testVcIssuer,
-        baseUrl: 'http://localhost:4000',
+        baseUrl: 'http://localhost:4321',
         endpointOpts,
       })
       testExpressSupport.start()
