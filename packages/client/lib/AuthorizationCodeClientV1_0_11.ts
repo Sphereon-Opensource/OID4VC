@@ -4,7 +4,7 @@ import {
   CodeChallengeMethod,
   convertJsonToURI,
   CreateRequestObjectMode,
-  CredentialOfferFormat,
+  CredentialOfferFormatV1_0_11,
   CredentialOfferPayloadV1_0_11,
   CredentialOfferRequestWithBaseUrl,
   CredentialsSupportedLegacy,
@@ -47,7 +47,7 @@ export const createAuthorizationRequestUrlV1_0_11 = async ({
     if (!credentialOffer) {
       throw Error('Please provide a scope or authorization_details if no credential offer is present');
     }
-    const creds: (CredentialOfferFormat | string)[] = (credentialOffer.credential_offer as CredentialOfferPayloadV1_0_11).credentials;
+    const creds: (CredentialOfferFormatV1_0_11 | string)[] = (credentialOffer.credential_offer as CredentialOfferPayloadV1_0_11).credentials;
 
     // FIXME: complains about VCT for sd-jwt
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -9,7 +9,7 @@ export function isStringNullOrEmpty(key: string) {
   return !key || !key.length
 }
 
-export function removeNullUndefined(data: unknown) {
+export function removeNullUndefined<T>(data: T): T {
   if (!data) {
     return data
   }
@@ -22,5 +22,5 @@ export function removeNullUndefined(data: unknown) {
     return [key, value]
   })
   //transform the key-value pairs back to an object.
-  return Object.fromEntries(clean)
+  return Object.fromEntries(clean) as T
 }

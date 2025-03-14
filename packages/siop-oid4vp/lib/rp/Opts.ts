@@ -48,10 +48,14 @@ export const createRequestOptsFromBuilderOrExistingOpts = (opts: { builder?: RPB
   return createRequestOpts
 }
 
-export const createVerifyResponseOptsFromBuilderOrExistingOpts = (opts: { builder?: RPBuilder; verifyOpts?: VerifyAuthorizationResponseOpts }) => {
+export const createVerifyResponseOptsFromBuilderOrExistingOpts = (opts: {
+  builder?: RPBuilder
+  verifyOpts?: VerifyAuthorizationResponseOpts
+}): Partial<VerifyAuthorizationResponseOpts> => {
   return opts.builder
     ? {
         hasher: opts.builder.hasher ?? defaultHasher,
+        //        correlationId: uuidv4(), We can't set a correlationId here, it will no longer check functions like  this.sessionManager.getCorrelationIdByNonce(resNonce, false)
         verifyJwtCallback: opts.builder.verifyJwtCallback,
         verification: {
           presentationVerificationCallback: opts.builder.presentationVerificationCallback,

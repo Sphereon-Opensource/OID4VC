@@ -26,18 +26,19 @@ const debug = Debug('sphereon:openid4vci:common');
  *    If exists, verifies the ProofOfPossession
  *  - proofOfPossessionCallbackArgs: ProofOfPossessionCallbackArgs
  *    arguments needed for signing ProofOfPossession
- * @param callbacks:
  *    - proofOfPossessionCallback: JWTSignerCallback
  *      Mandatory to create (sign) ProofOfPossession
  *    - proofOfPossessionVerifierCallback?: JWTVerifyCallback
  *      If exists, verifies the ProofOfPossession
+ * @param popMode
+ * @param callbacks
  * @param jwtProps
  * @param existingJwt
  *  - Optional, clientId of the party requesting the credential
  */
-export const createProofOfPossession = async <DIDDoc>(
+export const createProofOfPossession = async <DIDDoc extends object = never>(
   popMode: PoPMode,
-  callbacks: ProofOfPossessionCallbacks<DIDDoc>,
+  callbacks: ProofOfPossessionCallbacks,
   jwtProps?: JwtProps,
   existingJwt?: Jwt,
 ): Promise<ProofOfPossession> => {
@@ -87,10 +88,10 @@ export const extractBearerToken = (authorizationHeader?: string): string | undef
   return authorizationHeader ? /Bearer (.*)/i.exec(authorizationHeader)?.[1] : undefined;
 };
 
-export const validateJWT = async (
+export const validateJWT = async <DIDDoc extends object = never>(
   jwt?: string,
-  opts?: { kid?: string; accessTokenVerificationCallback?: JWTVerifyCallback<never> },
-): Promise<JwtVerifyResult<any>> => {
+  opts?: { kid?: string; accessTokenVerificationCallback?: JWTVerifyCallback },
+): Promise<JwtVerifyResult> => {
   if (!jwt) {
     throw Error('No JWT was supplied');
   }
@@ -145,8 +146,8 @@ const createJWT = (mode: PoPMode, jwtProps?: JwtProps, existingJwt?: Jwt): Jwt =
   const now = +new Date();
   const jwtPayload: Partial<JWTPayload> = {
     ...(aud && { aud }),
-    iat: jwt.payload?.iat ?? Math.round(now / 1000 - 60), // Let's ensure we subtract 60 seconds for potential time offsets
-    exp: jwt.payload?.exp ?? Math.round(now / 1000 + 10 * 60),
+    iat: jwt.payload?.iat ?? Math.floor(now / 1000) - 60, // Let's ensure we subtract 60 seconds for potential time offsets
+    exp: jwt.payload?.exp ?? Math.floor(now / 1000) + 10 * 60,
     nonce,
     ...(client_id && { client_id }),
     ...(iss && { iss }),

@@ -62,8 +62,8 @@ export class CredentialRequestClientV1_0_11 {
     this._credentialRequestOpts = { ...builder };
   }
 
-  public async acquireCredentialsUsingProof<DIDDoc>(opts: {
-    proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
+  public async acquireCredentialsUsingProof(opts: {
+    proofInput: ProofOfPossessionBuilder | ProofOfPossession;
     credentialTypes?: string | string[];
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
@@ -125,7 +125,7 @@ export class CredentialRequestClientV1_0_11 {
 
     return {
       ...response,
-      params: { ...(nextDPoPNonce && { dpop: { dpopNonce: nextDPoPNonce } }) },
+      ...(nextDPoPNonce && { params: { dpop: { dpopNonce: nextDPoPNonce } } }),
     };
   }
 
@@ -153,8 +153,8 @@ export class CredentialRequestClientV1_0_11 {
     });
   }
 
-  public async createCredentialRequest<DIDDoc>(opts: {
-    proofInput: ProofOfPossessionBuilder<DIDDoc> | ProofOfPossession;
+  public async createCredentialRequest(opts: {
+    proofInput: ProofOfPossessionBuilder | ProofOfPossession;
     credentialTypes?: string | string[];
     context?: string[];
     format?: CredentialFormat | OID4VCICredentialFormat;
@@ -214,6 +214,16 @@ export class CredentialRequestClientV1_0_11 {
         format,
         proof,
         vct: types[0],
+      };
+    } else if (format === 'mso_mdoc') {
+      if (types.length > 1) {
+        throw Error(`Only a single credential type is supported for ${format}`);
+      }
+
+      return {
+        format,
+        proof,
+        doctype: types[0],
       };
     }
 

@@ -4,17 +4,18 @@ import {
   DidJwtVerifier,
   getDidJwtVerifier,
   getDigestAlgorithmFromJwkThumbprintUri,
+  getJwtVerifierWithContext as getJwtVerifierWithContextCommon,
   getX5cVerifier,
   JWK,
   JwkJwtVerifier as JwkJwtVerifierBase,
   JwtHeader,
   JwtPayload,
+  JwtType,
   OpenIdFederationJwtVerifier,
+  parseJWT,
   VerifyJwtCallbackBase,
   X5cJwtVerifier,
 } from '@sphereon/oid4vc-common'
-import { getJwtVerifierWithContext as getJwtVerifierWithContextCommon } from '@sphereon/oid4vc-common'
-import { JwtType, parseJWT } from '@sphereon/oid4vc-common'
 
 import SIOPErrors from './Errors'
 import { RequestObjectPayload } from './SIOP.types'
@@ -80,7 +81,7 @@ export const getRequestObjectJwtVerifier = async (
   const clientIdScheme = jwt.payload.client_id_scheme
   const clientId = jwt.payload.client_id
 
-  if (!clientIdScheme) {
+  if (!clientIdScheme || jwt.header.alg === 'none') {
     return getJwtVerifierWithContext(jwt, { type })
   }
 
@@ -95,10 +96,14 @@ export const getRequestObjectJwtVerifier = async (
   } else if (clientIdScheme === 'redirect_uri') {
     if (jwt.payload.redirect_uri && jwt.payload.redirect_uri !== clientId) {
       throw new Error(SIOPErrors.INVALID_CLIENT_ID_MUST_MATCH_REDIRECT_URI)
+    } else if (jwt.payload.response_uri && jwt.payload.response_uri !== clientId) {
+      throw new Error(SIOPErrors.INVALID_CLIENT_ID_MUST_MATCH_RESPONSE_URI)
     }
-    if (options.raw.split('.').length > 2) {
-      throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' JWT must not not be signed.`)
-    }
+
+    /*const parts = options.raw.split('.')  this can be signed and execution can't even be here when alg = none 
+    if (parts.length > 2 && parts[2]) {
+      throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' JWT must not be signed`)
+    }*/
     return getJwtVerifierWithContext(jwt, { type })
   } else if (clientIdScheme === 'verifier_attestation') {
     const verifierAttestationSubtype = 'verifier-attestation+jwt'
@@ -121,6 +126,8 @@ export const getRequestObjectJwtVerifier = async (
       !attestationPayload.exp ||
       typeof attestationPayload.exp !== 'number' ||
       typeof attestationPayload.cnf !== 'object' ||
+      !attestationPayload.cnf ||
+      !('jwk' in attestationPayload.cnf) ||
       typeof attestationPayload.cnf['jwk'] !== 'object'
     ) {
       throw new Error(SIOPErrors.BAD_VERIFIER_ATTESTATION)
@@ -144,13 +151,13 @@ export const getRequestObjectJwtVerifier = async (
     }
     // The iss claim value of the Verifier Attestation JWT MUST identify a party the Wallet trusts for issuing Verifier Attestation JWTs.
     // If the Wallet cannot establish trust, it MUST refuse the request.
-    return { method: 'jwk', type, jwk: attestationPayload.cnf['jwk'] as JWK, alg: jwk.alg ?? attestationHeader.alg }
+    return { method: 'jwk', type, jwk: attestationPayload.cnf['jwk'] as JWK, alg }
   } else if (clientIdScheme === 'entity_id') {
-    if (!clientId.startsWith('http')) {
+    const entityId = jwt.payload.entity_id
+    if (!entityId || !entityId.startsWith('https')) {
       throw new Error(SIOPErrors.INVALID_REQUEST_OBJECT_ENTITY_ID_SCHEME_CLIENT_ID)
     }
-
-    return { method: 'openid-federation', type, entityId: clientId }
+    return { method: 'openid-federation', type, entityId }
   }
 
   throw new Error(SIOPErrors.INVALID_CLIENT_ID_SCHEME)

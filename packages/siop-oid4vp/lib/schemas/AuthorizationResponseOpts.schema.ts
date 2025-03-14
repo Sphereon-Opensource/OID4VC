@@ -30,6 +30,14 @@ export const AuthorizationResponseOptsSchemaObj = {
         "responseMode": {
           "$ref": "#/definitions/ResponseMode"
         },
+        "responseType": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResponseType"
+          },
+          "minItems": 1,
+          "maxItems": 1
+        },
         "expiresIn": {
           "type": "number"
         },
@@ -44,6 +52,12 @@ export const AuthorizationResponseOptsSchemaObj = {
         },
         "presentationExchange": {
           "$ref": "#/definitions/PresentationExchangeResponseOpts"
+        },
+        "dcqlResponse": {
+          "$ref": "#/definitions/DcqlResponseOpts"
+        },
+        "isFirstParty": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -440,6 +454,33 @@ export const AuthorizationResponseOptsSchemaObj = {
               ]
             },
             "clientName": {
+              "type": "string"
+            },
+            "clientUri": {
+              "type": "string"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "contacts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tosUri": {
+              "type": "string"
+            },
+            "policyUri": {
+              "type": "string"
+            },
+            "jwks": {
+              "$ref": "#/definitions/JWKS"
+            },
+            "softwareId": {
+              "type": "string"
+            },
+            "softwareVersion": {
               "type": "string"
             },
             "tokenEndpointAuthMethod": {
@@ -848,6 +889,33 @@ export const AuthorizationResponseOptsSchemaObj = {
               ]
             },
             "clientName": {
+              "type": "string"
+            },
+            "clientUri": {
+              "type": "string"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "contacts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tosUri": {
+              "type": "string"
+            },
+            "policyUri": {
+              "type": "string"
+            },
+            "jwks": {
+              "$ref": "#/definitions/JWKS"
+            },
+            "softwareId": {
+              "type": "string"
+            },
+            "softwareVersion": {
               "type": "string"
             },
             "tokenEndpointAuthMethod": {
@@ -1350,7 +1418,10 @@ export const AuthorizationResponseOptsSchemaObj = {
         "form_post",
         "post",
         "direct_post",
-        "query"
+        "query",
+        "direct_post.jwt",
+        "query.jwt",
+        "fragment.jwt"
       ]
     },
     "GrantType": {
@@ -1383,6 +1454,117 @@ export const AuthorizationResponseOptsSchemaObj = {
         "aggregated",
         "distributed"
       ]
+    },
+    "JWKS": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JWK"
+          }
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "additionalProperties": false
+    },
+    "JWK": {
+      "type": "object",
+      "properties": {
+        "kty": {
+          "type": "string"
+        },
+        "crv": {
+          "type": "string"
+        },
+        "x": {
+          "type": "string"
+        },
+        "y": {
+          "type": "string"
+        },
+        "e": {
+          "type": "string"
+        },
+        "n": {
+          "type": "string"
+        },
+        "alg": {
+          "type": "string"
+        },
+        "d": {
+          "type": "string"
+        },
+        "dp": {
+          "type": "string"
+        },
+        "dq": {
+          "type": "string"
+        },
+        "ext": {
+          "type": "boolean"
+        },
+        "k": {
+          "type": "string"
+        },
+        "key_ops": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "kid": {
+          "type": "string"
+        },
+        "oth": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "d": {
+                "type": "string"
+              },
+              "r": {
+                "type": "string"
+              },
+              "t": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "p": {
+          "type": "string"
+        },
+        "q": {
+          "type": "string"
+        },
+        "qi": {
+          "type": "string"
+        },
+        "use": {
+          "type": "string"
+        },
+        "x5c": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "x5t": {
+          "type": "string"
+        },
+        "x5t#S256": {
+          "type": "string"
+        },
+        "x5u": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
     },
     "Format": {
       "type": "object",
@@ -1422,6 +1604,9 @@ export const AuthorizationResponseOptsSchemaObj = {
         },
         "vc+sd-jwt": {
           "$ref": "#/definitions/SdJwtObject"
+        },
+        "mso_mdoc": {
+          "$ref": "#/definitions/MsoMdocObject"
         }
       },
       "additionalProperties": false
@@ -1494,6 +1679,21 @@ export const AuthorizationResponseOptsSchemaObj = {
           }
         }
       },
+      "additionalProperties": false
+    },
+    "MsoMdocObject": {
+      "type": "object",
+      "properties": {
+        "alg": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "alg"
+      ],
       "additionalProperties": false
     },
     "IdTokenType": {
@@ -1605,18 +1805,10 @@ export const AuthorizationResponseOptsSchemaObj = {
         "issuer": {
           "type": "string",
           "description": "The issuer jwt\n\nThis value will be used as the iss value of the issue jwt. It is also used as the client_id. And will also be set as the redirect_uri\n\nIt must match an entry in the x5c certificate leaf entry dnsName / uriName"
-        },
-        "clientIdScheme": {
-          "type": "string",
-          "enum": [
-            "x509_san_dns",
-            "x509_san_uri"
-          ]
         }
       },
       "required": [
         "alg",
-        "clientIdScheme",
         "issuer",
         "method",
         "x5c"
@@ -1656,102 +1848,6 @@ export const AuthorizationResponseOptsSchemaObj = {
       ],
       "additionalProperties": false
     },
-    "JWK": {
-      "type": "object",
-      "properties": {
-        "kty": {
-          "type": "string"
-        },
-        "crv": {
-          "type": "string"
-        },
-        "x": {
-          "type": "string"
-        },
-        "y": {
-          "type": "string"
-        },
-        "e": {
-          "type": "string"
-        },
-        "n": {
-          "type": "string"
-        },
-        "alg": {
-          "type": "string"
-        },
-        "d": {
-          "type": "string"
-        },
-        "dp": {
-          "type": "string"
-        },
-        "dq": {
-          "type": "string"
-        },
-        "ext": {
-          "type": "boolean"
-        },
-        "k": {
-          "type": "string"
-        },
-        "key_ops": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "kid": {
-          "type": "string"
-        },
-        "oth": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "d": {
-                "type": "string"
-              },
-              "r": {
-                "type": "string"
-              },
-              "t": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "p": {
-          "type": "string"
-        },
-        "q": {
-          "type": "string"
-        },
-        "qi": {
-          "type": "string"
-        },
-        "use": {
-          "type": "string"
-        },
-        "x5c": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "x5t": {
-          "type": "string"
-        },
-        "x5t#S256": {
-          "type": "string"
-        },
-        "x5u": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": {}
-    },
     "JwtIssuerCustom": {
       "type": "object",
       "properties": {
@@ -1782,6 +1878,9 @@ export const AuthorizationResponseOptsSchemaObj = {
               },
               {
                 "$ref": "#/definitions/CompactSdJwtVc"
+              },
+              {
+                "$ref": "#/definitions/MdocOid4vpMdocVpToken"
               }
             ]
           }
@@ -1928,6 +2027,9 @@ export const AuthorizationResponseOptsSchemaObj = {
         "jwt": {
           "type": "string"
         },
+        "mso_mdoc": {
+          "type": "string"
+        },
         "nonce": {
           "type": "string"
         },
@@ -1958,7 +2060,9 @@ export const AuthorizationResponseOptsSchemaObj = {
         "JcsEd25519Signature2020",
         "BbsBlsSignatureProof2020",
         "BbsBlsBoundSignatureProof2020",
-        "JwtProof2020"
+        "JwtProof2020",
+        "SdJwtProof2024",
+        "MsoMdocProof2024"
       ]
     },
     "IProofPurpose": {
@@ -2163,8 +2267,7 @@ export const AuthorizationResponseOptsSchemaObj = {
       "required": [
         "id",
         "type"
-      ],
-      "additionalProperties": false
+      ]
     },
     "CompactJWT": {
       "type": "string",
@@ -2228,6 +2331,9 @@ export const AuthorizationResponseOptsSchemaObj = {
       "type": "string",
       "description": "Represents a selective disclosure JWT vc in compact form."
     },
+    "MdocOid4vpMdocVpToken": {
+      "type": "string"
+    },
     "VPTokenLocation": {
       "type": "string",
       "enum": [
@@ -2235,6 +2341,29 @@ export const AuthorizationResponseOptsSchemaObj = {
         "id_token",
         "token_response"
       ]
+    },
+    "DcqlResponseOpts": {
+      "type": "object",
+      "properties": {
+        "dcqlPresentation": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "dcqlPresentation"
+      ],
+      "additionalProperties": false
     }
   }
 };

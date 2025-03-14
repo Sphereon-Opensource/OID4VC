@@ -9,7 +9,7 @@ import {
 import nock from 'nock';
 
 import { OpenID4VCIClientV1_0_13 } from '..';
-import { createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilder } from '../../../issuer';
+import { AuthorizationServerMetadataBuilder, createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilder } from '../../../issuer';
 
 export const UNIT_TEST_TIMEOUT = 30000;
 
@@ -27,8 +27,19 @@ const issuerMetadata = new IssuerMetadataBuilderV1_13()
   } as CredentialConfigurationSupportedV1_0_13)
   .build();
 
+const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
+  .withIssuer(issuerMetadata.credential_issuer)
+  .withCredentialEndpoint(issuerMetadata.credential_endpoint)
+  .withTokenEndpoint(issuerMetadata.token_endpoint!)
+  .withAuthorizationEndpoint('https://token-endpoint.example.com/authorize')
+  .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
+  .withResponseTypesSupported(['code', 'token', 'id_token'])
+  .withScopesSupported(['openid', 'abcdef'])
+  .build();
+
 const vcIssuer = new VcIssuerBuilder()
   .withIssuerMetadata(issuerMetadata)
+  .withAuthorizationMetadata(authorizationServerMetadata)
   .withInMemoryCNonceState()
   .withInMemoryCredentialOfferState()
   .withInMemoryCredentialOfferURIState()
@@ -68,6 +79,7 @@ describe('sd-jwt vc', () => {
     'succeed with a full flow',
     async () => {
       const offerUri = await vcIssuer.createCredentialOfferURI({
+        offerMode: 'VALUE',
         grants: {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             tx_code: {
@@ -85,7 +97,7 @@ describe('sd-jwt vc', () => {
       nock(vcIssuer.issuerMetadata.credential_issuer).get('/.well-known/oauth-authorization-server').reply(404);
 
       expect(offerUri.uri).toEqual(
-        'openid-credential-offer://?credential_offer=%7B%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22123%22%2C%22tx_code%22%3A%7B%22input_mode%22%3A%22text%22%2C%22length%22%3A3%7D%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredential%22%5D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%7D',
+        'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22tx_code%22%3A%7B%22input_mode%22%3A%22text%22%2C%22length%22%3A3%7D%2C%22pre-authorized_code%22%3A%22123%22%7D%7D%7D',
       );
 
       const client = await OpenID4VCIClientV1_0_13.fromURI({
@@ -171,6 +183,7 @@ describe('sd-jwt vc', () => {
     'succeed with a full flow without did',
     async () => {
       const offerUri = await vcIssuer.createCredentialOfferURI({
+        offerMode: 'VALUE',
         grants: {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             tx_code: {
@@ -188,7 +201,7 @@ describe('sd-jwt vc', () => {
       nock(vcIssuer.issuerMetadata.credential_issuer).get('/.well-known/oauth-authorization-server').reply(404);
 
       expect(offerUri.uri).toEqual(
-        'openid-credential-offer://?credential_offer=%7B%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22123%22%2C%22tx_code%22%3A%7B%22input_mode%22%3A%22text%22%2C%22length%22%3A3%7D%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredential%22%5D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%7D',
+        'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22tx_code%22%3A%7B%22input_mode%22%3A%22text%22%2C%22length%22%3A3%7D%2C%22pre-authorized_code%22%3A%22123%22%7D%7D%7D',
       );
 
       const client = await OpenID4VCIClientV1_0_13.fromURI({

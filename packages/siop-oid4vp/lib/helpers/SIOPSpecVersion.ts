@@ -29,7 +29,8 @@ function isID1Payload(authorizationRequest: AuthorizationRequestPayload) {
     !authorizationRequest.client_metadata_uri &&
     !authorizationRequest.client_metadata &&
     !authorizationRequest.presentation_definition &&
-    !authorizationRequest.presentation_definition_uri
+    !authorizationRequest.presentation_definition_uri &&
+    !authorizationRequest.dcql_query
   )
 }
 
@@ -37,6 +38,7 @@ export const authorizationRequestVersionDiscovery = (authorizationRequest: Autho
   const versions = []
   const authorizationRequestCopy: AuthorizationRequestPayload = JSON.parse(JSON.stringify(authorizationRequest))
   const vd13Validation = AuthorizationRequestPayloadVD12OID4VPD20Schema(authorizationRequestCopy)
+
   if (vd13Validation) {
     if (
       !authorizationRequestCopy.registration_uri &&

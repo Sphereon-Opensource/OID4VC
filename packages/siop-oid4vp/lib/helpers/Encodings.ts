@@ -14,10 +14,11 @@ export function decodeUriAsJson(uri: string) {
   }
   const parts = parse(queryString, { plainObjects: true, depth: 10, parameterLimit: 5000, ignoreQueryPrefix: true })
 
-  const descriptors = parts?.claims?.['vp_token']?.presentation_definition?.['input_descriptors']
+  const vpToken = (parts?.claims as { [key: string]: any })?.['vp_token']
+  const descriptors = vpToken?.presentation_definition?.['input_descriptors'] // FIXME?
   if (descriptors && Array.isArray(descriptors)) {
     // Whenever we have a [{'uri': 'str1'}, 'uri': 'str2'] qs changes this to {uri: ['str1','str2']} which means schema validation fails. So we have to fix that
-    parts.claims['vp_token'].presentation_definition['input_descriptors'] = descriptors.map((descriptor: InputDescriptorV1) => {
+    vpToken.presentation_definition['input_descriptors'] = descriptors.map((descriptor: InputDescriptorV1) => {
       if (Array.isArray(descriptor.schema)) {
         descriptor.schema = descriptor.schema.flatMap((val) => {
           if (typeof val === 'string') {
@@ -32,7 +33,7 @@ export function decodeUriAsJson(uri: string) {
     })
   }
 
-  const json = {}
+  const json: Record<string, any> = {}
   for (const key in parts) {
     const value = parts[key]
     if (!value) {
@@ -56,7 +57,7 @@ export function decodeUriAsJson(uri: string) {
   return JSON.parse(JSON.stringify(json))
 }
 
-export function encodeJsonAsURI(json: unknown, _opts?: { arraysWithIndex?: string[] }): string {
+export function encodeJsonAsURI(json: Record<string, unknown>, _opts?: { arraysWithIndex?: string[] }): string {
   if (typeof json === 'string') {
     return encodeJsonAsURI(JSON.parse(json))
   }
@@ -100,4 +101,9 @@ export function fromBase64(base64: string): string {
 
 export function base64urlEncodeBuffer(buf: { toString: (arg0: 'base64') => string }): string {
   return fromBase64(buf.toString('base64'))
+}
+
+export function base64urlToString(base64url: string): string {
+  const uint8array = ua8.fromString(base64url, 'base64url')
+  return ua8.toString(uint8array, 'ascii')
 }

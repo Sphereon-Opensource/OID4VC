@@ -2,15 +2,18 @@ import { EventEmitter } from 'events'
 
 import { IPresentationDefinition } from '@sphereon/pex'
 import { Hasher } from '@sphereon/ssi-types'
+import { DcqlQuery } from 'dcql'
 
 import { PropertyTarget, PropertyTargets } from '../authorization-request'
 import { PresentationVerificationCallback } from '../authorization-response'
-import { CreateJwtCallback, VerifyJwtCallback } from '../types'
 import {
   AuthorizationRequestPayload,
+  ClientIdScheme,
   ClientMetadataOpts,
+  CreateJwtCallback,
   ObjectBy,
   PassBy,
+  RequestAud,
   RequestObjectPayload,
   ResponseIss,
   ResponseMode,
@@ -18,6 +21,7 @@ import {
   RevocationVerification,
   RevocationVerificationCallback,
   SupportedVersion,
+  VerifyJwtCallback,
 } from '../types'
 
 import { assignIfAuth, assignIfRequestObject, isTarget, isTargetOrNoTargets } from './Opts'
@@ -34,11 +38,14 @@ export class RPBuilder {
   supportedVersions: SupportedVersion[]
   eventEmitter?: EventEmitter
   sessionManager?: IRPSessionManager
+  _responseRedirectUri?: string
   private _authorizationRequestPayload: Partial<AuthorizationRequestPayload> = {}
   private _requestObjectPayload: Partial<RequestObjectPayload> = {}
 
   clientMetadata?: ClientMetadataOpts = undefined
   clientId: string
+  entityId: string
+  clientIdScheme: string
 
   hasher: Hasher
 
@@ -74,9 +81,29 @@ export class RPBuilder {
     return this
   }
 
+  withClientIdScheme(clientIdScheme: ClientIdScheme, targets?: PropertyTargets): RPBuilder {
+    this._authorizationRequestPayload.client_id_scheme = assignIfAuth({ propertyValue: clientIdScheme, targets }, false)
+    this._requestObjectPayload.client_id_scheme = assignIfRequestObject({ propertyValue: clientIdScheme, targets }, true)
+    this.clientIdScheme = clientIdScheme
+    return this
+  }
+
+  withEntityId(entityId: string, targets?: PropertyTargets): RPBuilder {
+    this._authorizationRequestPayload.entity_id = assignIfAuth({ propertyValue: entityId, targets }, false)
+    this._requestObjectPayload.entity_id = assignIfRequestObject({ propertyValue: entityId, targets }, true)
+    this.entityId = entityId
+    return this
+  }
+
   withIssuer(issuer: ResponseIss, targets?: PropertyTargets): RPBuilder {
     this._authorizationRequestPayload.iss = assignIfAuth({ propertyValue: issuer, targets }, false)
     this._requestObjectPayload.iss = assignIfRequestObject({ propertyValue: issuer, targets }, true)
+    return this
+  }
+
+  withAudience(issuer: RequestAud, targets?: PropertyTargets): RPBuilder {
+    this._authorizationRequestPayload.aud = assignIfAuth({ propertyValue: issuer, targets }, false)
+    this._requestObjectPayload.aud = assignIfRequestObject({ propertyValue: issuer, targets }, true)
     return this
   }
 
@@ -116,6 +143,17 @@ export class RPBuilder {
   withRedirectUri(redirectUri: string, targets?: PropertyTargets): RPBuilder {
     this._authorizationRequestPayload.redirect_uri = assignIfAuth({ propertyValue: redirectUri, targets }, false)
     this._requestObjectPayload.redirect_uri = assignIfRequestObject({ propertyValue: redirectUri, targets }, true)
+    return this
+  }
+
+  withResponseRedirectUri(responseRedirectUri: string): RPBuilder {
+    this._responseRedirectUri = responseRedirectUri
+    return this
+  }
+
+  withResponseUri(redirectUri: string, targets?: PropertyTargets): RPBuilder {
+    this._authorizationRequestPayload.response_uri = assignIfAuth({ propertyValue: redirectUri, targets }, false)
+    this._requestObjectPayload.response_uri = assignIfRequestObject({ propertyValue: redirectUri, targets }, true)
     return this
   }
 
@@ -192,7 +230,43 @@ export class RPBuilder {
     return this
   }
 
-  withPresentationDefinition(definitionOpts: { definition: IPresentationDefinition; definitionUri?: string }, targets?: PropertyTargets): RPBuilder {
+  withDcqlQuery(dcqlQuery: DcqlQuery | string, targets?: PropertyTargets): RPBuilder {
+    if (this.getSupportedRequestVersion() >= SupportedVersion.SIOPv2_D12_OID4VP_D20) {
+      this._authorizationRequestPayload.dcql_query = assignIfAuth(
+        {
+          propertyValue: typeof dcqlQuery === 'string' ? dcqlQuery : JSON.stringify(dcqlQuery),
+          targets,
+        },
+        false,
+      )
+      this._requestObjectPayload.dcql_query = assignIfRequestObject(
+        {
+          propertyValue: typeof dcqlQuery === 'string' ? dcqlQuery : JSON.stringify(dcqlQuery),
+          targets,
+        },
+        true,
+      )
+
+      // FIXME SPRIND-144 we need to find a way in the config to select dcql vs PD without breaking OID4VC-DEMO
+      this._authorizationRequestPayload.presentation_definition = undefined
+      this._authorizationRequestPayload.presentation_definition_uri = undefined
+      this._requestObjectPayload.presentation_definition = undefined
+      this._requestObjectPayload.presentation_definition_uri = undefined
+    }
+    return this
+  }
+
+  withPresentationDefinition(
+    definitionOpts: {
+      definition: IPresentationDefinition
+      definitionUri?: string
+    },
+    targets?: PropertyTargets,
+  ): RPBuilder {
+    if (this._authorizationRequestPayload.dcql_query) {
+      return this
+    }
+
     const { definition, definitionUri } = definitionOpts
 
     if (this.getSupportedRequestVersion() < SupportedVersion.SIOPv2_D11) {

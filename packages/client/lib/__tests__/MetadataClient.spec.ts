@@ -1,4 +1,9 @@
-import { getIssuerFromCredentialOfferPayload, PRE_AUTH_GRANT_LITERAL, WellKnownEndpoints } from '@sphereon/oid4vci-common';
+import {
+  AuthorizationServerMetadata,
+  getIssuerFromCredentialOfferPayload,
+  PRE_AUTH_GRANT_LITERAL,
+  WellKnownEndpoints,
+} from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
@@ -95,7 +100,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404);
 
     await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Authorization Sever https://auth.research.identiproof.io did not provide a token_endpoint',
+      'Authorization Server https://auth.research.identiproof.io did not provide a token_endpoint',
     );
   });
 
@@ -299,6 +304,23 @@ describe.skip('Metadataclient with SpruceId should', () => {
 });
 
 describe('Metadataclient with Credenco should', () => {
+  beforeEach(() => {
+    const mockData = getMockData('credenco');
+    if (!mockData?.metadata?.openid4vci_metadata) {
+      throw new Error('Credenco mock data not found or invalid structure');
+    }
+    nock('https://mijnkvk.acc.credenco.com').get('/.well-known/openid-credential-issuer').reply(200, mockData.metadata.openid4vci_metadata);
+    nock('https://mijnkvk.acc.credenco.com').get('/.well-known/openid-configuration').reply(404);
+    const authMetadata: AuthorizationServerMetadata = {
+      authorization_endpoint: 'https://mijnkvk.acc.credenco.com',
+      'pre-authorized_grant_anonymous_access_supported': true,
+      issuer: 'https://issuer.research.identiproof.io',
+      token_endpoint: 'https://mijnkvk.acc.credenco.com/token',
+      response_types_supported: ['token'],
+    };
+    nock('https://mijnkvk.acc.credenco.com').get('/.well-known/oauth-authorization-server').reply(200, JSON.stringify(authMetadata));
+  });
+
   it('succeed without OID4VCI and with OIDC metadata', async () => {
     const metadata = await MetadataClient.retrieveAllMetadata('https://mijnkvk.acc.credenco.com/');
     expect(metadata.credential_endpoint).toEqual('https://mijnkvk.acc.credenco.com/credential');

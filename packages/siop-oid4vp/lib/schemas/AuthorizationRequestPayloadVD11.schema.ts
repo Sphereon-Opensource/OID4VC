@@ -219,10 +219,10 @@ export const AuthorizationRequestPayloadVD11SchemaObj = {
         },
         "logo_uri": {
           "anyOf": [
-            {},
             {
               "type": "string"
-            }
+            },
+            {}
           ]
         },
         "client_purpose": {
@@ -308,6 +308,9 @@ export const AuthorizationRequestPayloadVD11SchemaObj = {
         },
         "vc+sd-jwt": {
           "$ref": "#/definitions/SdJwtObject"
+        },
+        "mso_mdoc": {
+          "$ref": "#/definitions/MsoMdocObject"
         }
       },
       "additionalProperties": false
@@ -382,6 +385,21 @@ export const AuthorizationRequestPayloadVD11SchemaObj = {
       },
       "additionalProperties": false
     },
+    "MsoMdocObject": {
+      "type": "object",
+      "properties": {
+        "alg": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "alg"
+      ],
+      "additionalProperties": false
+    },
     "ResponseMode": {
       "type": "string",
       "enum": [
@@ -389,7 +407,10 @@ export const AuthorizationRequestPayloadVD11SchemaObj = {
         "form_post",
         "post",
         "direct_post",
-        "query"
+        "query",
+        "direct_post.jwt",
+        "query.jwt",
+        "fragment.jwt"
       ]
     },
     "ClaimPayloadCommon": {
@@ -678,9 +699,6 @@ export const AuthorizationRequestPayloadVD11SchemaObj = {
           "type": "string"
         }
       },
-      "required": [
-        "type"
-      ],
       "additionalProperties": false
     },
     "OneOfNumberStringBoolean": {
@@ -843,6 +861,9 @@ export const AuthorizationRequestPayloadVD11SchemaObj = {
         "predicate": {
           "$ref": "#/definitions/Optionality"
         },
+        "intent_to_retain": {
+          "type": "boolean"
+        },
         "name": {
           "type": "string"
         },
@@ -910,18 +931,15 @@ export const AuthorizationRequestPayloadVD11SchemaObj = {
           "type": "string"
         },
         "contains": {
-          "$ref": "#/definitions/FilterV2Base"
+          "$ref": "#/definitions/FilterV2"
         },
         "items": {
-          "$ref": "#/definitions/FilterV2BaseItems"
+          "$ref": "#/definitions/FilterV2Items"
         }
       },
-      "required": [
-        "type"
-      ],
       "additionalProperties": false
     },
-    "FilterV2Base": {
+    "FilterV2Items": {
       "type": "object",
       "properties": {
         "const": {
@@ -976,78 +994,12 @@ export const AuthorizationRequestPayloadVD11SchemaObj = {
           "type": "string"
         },
         "contains": {
-          "$ref": "#/definitions/FilterV2Base"
+          "$ref": "#/definitions/FilterV2"
         },
         "items": {
-          "$ref": "#/definitions/FilterV2BaseItems"
+          "$ref": "#/definitions/FilterV2Items"
         }
       },
-      "additionalProperties": false
-    },
-    "FilterV2BaseItems": {
-      "type": "object",
-      "properties": {
-        "const": {
-          "$ref": "#/definitions/OneOfNumberStringBoolean"
-        },
-        "enum": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/OneOfNumberStringBoolean"
-          }
-        },
-        "exclusiveMinimum": {
-          "$ref": "#/definitions/OneOfNumberString"
-        },
-        "exclusiveMaximum": {
-          "$ref": "#/definitions/OneOfNumberString"
-        },
-        "format": {
-          "type": "string"
-        },
-        "formatMaximum": {
-          "type": "string"
-        },
-        "formatMinimum": {
-          "type": "string"
-        },
-        "formatExclusiveMaximum": {
-          "type": "string"
-        },
-        "formatExclusiveMinimum": {
-          "type": "string"
-        },
-        "minLength": {
-          "type": "number"
-        },
-        "maxLength": {
-          "type": "number"
-        },
-        "minimum": {
-          "$ref": "#/definitions/OneOfNumberString"
-        },
-        "maximum": {
-          "$ref": "#/definitions/OneOfNumberString"
-        },
-        "not": {
-          "type": "object"
-        },
-        "pattern": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string"
-        },
-        "contains": {
-          "$ref": "#/definitions/FilterV2Base"
-        },
-        "items": {
-          "$ref": "#/definitions/FilterV2BaseItems"
-        }
-      },
-      "required": [
-        "type"
-      ],
       "additionalProperties": false
     }
   }

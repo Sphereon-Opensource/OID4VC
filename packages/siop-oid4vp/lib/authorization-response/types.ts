@@ -1,9 +1,25 @@
 import { JwtIssuer } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition, PresentationSignCallBackParams } from '@sphereon/pex'
 import { Format } from '@sphereon/pex-models'
-import { CompactSdJwtVc, Hasher, PresentationSubmission, W3CVerifiablePresentation } from '@sphereon/ssi-types'
+import {
+  CompactSdJwtVc,
+  Hasher,
+  MdocOid4vpIssuerSigned,
+  MdocOid4vpMdocVpToken,
+  PresentationSubmission,
+  W3CVerifiablePresentation,
+} from '@sphereon/ssi-types'
+import { DcqlQuery } from 'dcql'
 
-import { ResponseMode, ResponseRegistrationOpts, ResponseURIType, SupportedVersion, VerifiablePresentationWithFormat, Verification } from '../types'
+import {
+  ResponseMode,
+  ResponseRegistrationOpts,
+  ResponseType,
+  ResponseURIType,
+  SupportedVersion,
+  VerifiablePresentationWithFormat,
+  Verification,
+} from '../types'
 import { CreateJwtCallback } from '../types/VpJwtIssuer'
 import { VerifyJwtCallback } from '../types/VpJwtVerifier'
 
@@ -19,12 +35,15 @@ export interface AuthorizationResponseOpts {
   createJwtCallback: CreateJwtCallback
   jwtIssuer?: JwtIssuer
   responseMode?: ResponseMode
+  responseType?: [ResponseType]
   // did: string;
   expiresIn?: number
   accessToken?: string
   tokenType?: string
   refreshToken?: string
   presentationExchange?: PresentationExchangeResponseOpts
+  dcqlResponse?: DcqlResponseOpts
+  isFirstParty?: boolean
 }
 
 export interface PresentationExchangeResponseOpts {
@@ -36,20 +55,27 @@ export interface PresentationExchangeResponseOpts {
     selectedCredentials: W3CVerifiableCredential[]
   }[],*/
 
-  verifiablePresentations: Array<W3CVerifiablePresentation | CompactSdJwtVc>
+  verifiablePresentations: Array<W3CVerifiablePresentation | CompactSdJwtVc | MdocOid4vpMdocVpToken>
   vpTokenLocation?: VPTokenLocation
   presentationSubmission?: PresentationSubmission
   restrictToFormats?: Format
   restrictToDIDMethods?: string[]
 }
 
-export interface PresentationExchangeRequestOpts {
-  presentationVerificationCallback?: PresentationVerificationCallback
+export interface DcqlResponseOpts {
+  dcqlPresentation: Record<string, Record<string, unknown> | string>
 }
 
 export interface PresentationDefinitionPayloadOpts {
   presentation_definition?: IPresentationDefinition
   presentation_definition_uri?: string
+  dcql_query?: never
+}
+
+export interface DcqlQueryPayloadOpts {
+  dcql_query?: string
+  presentation_definition?: never
+  presentation_definition_uri?: never
 }
 
 export interface PresentationDefinitionWithLocation {
@@ -78,8 +104,8 @@ export enum VPTokenLocation {
 export type PresentationVerificationResult = { verified: boolean; reason?: string }
 
 export type PresentationVerificationCallback = (
-  args: W3CVerifiablePresentation | CompactSdJwtVc,
-  presentationSubmission: PresentationSubmission,
+  args: W3CVerifiablePresentation | CompactSdJwtVc | MdocOid4vpIssuerSigned,
+  presentationSubmission?: PresentationSubmission,
 ) => Promise<PresentationVerificationResult>
 
 export type PresentationSignCallback = (args: PresentationSignCallBackParams) => Promise<W3CVerifiablePresentation | CompactSdJwtVc>
@@ -92,6 +118,7 @@ export interface VerifyAuthorizationResponseOpts {
   nonce?: string // To verify the response against the supplied nonce
   state?: string // To verify the response against the supplied state
   presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[] // The presentation definitions to match against VPs in the response
+  dcqlQuery?: DcqlQuery
   audience?: string // The audience/redirect_uri
   restrictToFormats?: Format // Further restrict to certain VC formats, not expressed in the presentation definition
   restrictToDIDMethods?: string[]

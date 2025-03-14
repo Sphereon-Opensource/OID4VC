@@ -35,7 +35,6 @@ describe('AccessTokenClient should', () => {
 
       const body: AccessTokenResponse = {
         access_token: 'ey6546.546654.64565',
-        authorization_pending: false,
         c_nonce: 'c_nonce2022101300',
         c_nonce_expires_in: 2022101300,
         interval: 2022101300,
@@ -188,7 +187,6 @@ describe('AccessTokenClient should', () => {
 
       const body: AccessTokenResponse = {
         access_token: 'ey6546.546654.64565',
-        authorization_pending: false,
         c_nonce: 'c_nonce2022101300',
         c_nonce_expires_in: 2022101300,
         interval: 2022101300,

@@ -102,7 +102,7 @@ describe('OID4VCI-Client using Mattr issuer should', () => {
     const authResponse = await op.createAuthorizationResponse(verifiedAuthRequest, {
       issuer: didStr,
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         presentationSubmission: verifiablePresentationResult.presentationSubmission,
       },
       correlationId,
@@ -135,7 +135,8 @@ describe('OID4VCI-Client using Mattr issuer should', () => {
 
     const correlationId = 'test'
 
-    const verifiedAuthRequest = await AuthorizationRequest.verify(authorizeRequestUri, {
+    const authorizationRequest = await AuthorizationRequest.fromUriOrJwt(offer.authorizeRequestUri)
+    const verifiedAuthRequest = await authorizationRequest.verify({
       correlationId,
       verifyJwtCallback: getVerifyJwtCallback(getResolver()),
       verification: {},
@@ -163,7 +164,7 @@ describe('OID4VCI-Client using Mattr issuer should', () => {
           alg: SigningAlgo.EDDSA,
         },
         presentationExchange: {
-          verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+          verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
           presentationSubmission: verifiablePresentationResult.presentationSubmission,
         },
         createJwtCallback: getCreateJwtCallback({
@@ -253,6 +254,5 @@ async function presentationSignCalback(args: PresentationSignCallBackParams): Pr
     .setExpirationTime('2h')
     .sign(importedJwk)
 
-  console.log(`VP: ${jwt}`)
   return jwt
 }

@@ -6,6 +6,7 @@ import {
   CredentialSupplierConfig,
   JwtVerifyResult,
   OID4VCICredentialFormat,
+  StatusListOpts,
   UniformCredentialRequest,
 } from '@sphereon/oid4vci-common'
 import {
@@ -16,7 +17,7 @@ import {
   W3CVerifiableCredential,
 } from '@sphereon/ssi-types'
 
-export type CredentialSignerCallback<T extends object> = (opts: {
+export type CredentialSignerCallback = (opts: {
   credentialRequest: CredentialRequest
   credential: CredentialIssuanceInput
   format?: OID4VCICredentialFormat
@@ -24,7 +25,8 @@ export type CredentialSignerCallback<T extends object> = (opts: {
    * We use object since we don't want to expose the DID Document TS type to too many interfaces.
    * An implementation that wants to look into the DIDDoc would have to do a cast in the signer callback implementation
    */
-  jwtVerifyResult: JwtVerifyResult<T>
+  jwtVerifyResult: JwtVerifyResult
+  statusLists?: Array<StatusListOpts>
 }) => Promise<W3CVerifiableCredential | CompactSdJwtVc>
 
 export interface CredentialDataSupplierArgs extends CNonceState {
@@ -40,7 +42,7 @@ export type CredentialIssuanceInput = ICredential | (SdJwtDecodedVerifiableCrede
 export interface CredentialDataSupplierResult {
   credential: CredentialIssuanceInput
   format?: OID4VCICredentialFormat
-  signCallback?: CredentialSignerCallback<any> // If the data supplier wants to actually sign directly
+  signCallback?: CredentialSignerCallback // If the data supplier wants to actually sign directly
 }
 
 export type CredentialDataSupplier = (args: CredentialDataSupplierArgs) => Promise<CredentialDataSupplierResult>

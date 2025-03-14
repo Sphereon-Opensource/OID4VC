@@ -72,3 +72,8 @@ export interface JWK {
 }
 
 // export declare type ECCurve = 'P-256' | 'secp256k1' | 'P-384' | 'P-521';
+
+export type DecryptCompact = (input: {
+  jwk: { kid: string }
+  jwe: string
+}) => Promise<{ plaintext: string; protectedHeader: Record<string, unknown> & { alg: string; enc: string } }>

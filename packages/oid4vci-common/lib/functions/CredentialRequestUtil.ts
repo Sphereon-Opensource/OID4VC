@@ -35,6 +35,8 @@ export function getTypesFromRequest(credentialRequest: CredentialRequest, opts?:
     }
   } else if (credentialRequest.format === 'vc+sd-jwt' && 'vct' in credentialRequest) {
     types = [credentialRequest.vct];
+  } else if (credentialRequest.format === 'mso_mdoc' && 'doctype' in credentialRequest) {
+    types = [credentialRequest.doctype];
   }
 
   if (!types || types.length === 0) {

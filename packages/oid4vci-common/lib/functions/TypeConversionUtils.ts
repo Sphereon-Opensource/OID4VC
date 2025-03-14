@@ -1,10 +1,18 @@
-import { AuthorizationDetails, CredentialOfferPayload, UniformCredentialOfferPayload, UniformCredentialOfferRequest, VCI_LOG_COMMON } from '../index';
+import {
+  AuthorizationDetails,
+  CredentialConfigurationSupportedMsoMdocV1_0_13,
+  CredentialOfferPayload,
+  CredentialSupportedMsoMdoc,
+  UniformCredentialOfferPayload,
+  UniformCredentialOfferRequest,
+  VCI_LOG_COMMON,
+} from '../index';
 import {
   CredentialConfigurationSupported,
   CredentialConfigurationSupportedSdJwtVcV1_0_13,
   CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13,
   CredentialDefinitionJwtVcJsonV1_0_13,
-  CredentialOfferFormat,
+  CredentialOfferFormatV1_0_11,
   CredentialsSupportedLegacy,
   CredentialSupportedSdJwtVc,
   JsonLdIssuerCredentialDefinition,
@@ -12,7 +20,13 @@ import {
 
 export function isW3cCredentialSupported(
   supported: CredentialConfigurationSupported | CredentialsSupportedLegacy,
-): supported is Exclude<CredentialConfigurationSupported, CredentialConfigurationSupportedSdJwtVcV1_0_13 | CredentialSupportedSdJwtVc> {
+): supported is Exclude<
+  CredentialConfigurationSupported,
+  | CredentialConfigurationSupportedMsoMdocV1_0_13
+  | CredentialSupportedMsoMdoc
+  | CredentialConfigurationSupportedSdJwtVcV1_0_13
+  | CredentialSupportedSdJwtVc
+> {
   return ['jwt_vc_json', 'jwt_vc_json-ld', 'ldp_vc', 'jwt_vc'].includes(supported.format);
 }
 
@@ -27,7 +41,7 @@ export const getNumberOrUndefined = (input?: string): number | undefined => {
 export function getTypesFromObject(
   subject:
     | CredentialConfigurationSupported
-    | CredentialOfferFormat
+    | CredentialOfferFormatV1_0_11
     | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13
     | CredentialDefinitionJwtVcJsonV1_0_13
     | JsonLdIssuerCredentialDefinition
@@ -49,7 +63,9 @@ export function getTypesFromObject(
   } else if ('type' in subject && subject.type) {
     return Array.isArray(subject.type) ? subject.type : [subject.type];
   } else if ('vct' in subject && subject.vct) {
-    return [subject.vct];
+    return [subject.vct as string];
+  } else if ('doctype' in subject && subject.doctype) {
+    return [subject.doctype as string];
   }
   VCI_LOG_COMMON.warning('Could not deduce credential types. Probably a failure down the line will happen!');
   return undefined;
@@ -104,6 +120,8 @@ export function getTypesFromCredentialSupported(
     types = getTypesFromObject(credentialSupported) ?? [];
   } else if (credentialSupported.format === 'vc+sd-jwt') {
     types = [credentialSupported.vct];
+  } else if (credentialSupported.format === 'mso_mdoc') {
+    types = [credentialSupported.doctype];
   }
 
   if (!types || types.length === 0) {

@@ -1,7 +1,42 @@
 // noinspection ES6MissingAwait
 
-import { IStateManager } from '@sphereon/oid4vci-common'
-import { StateType } from '@sphereon/oid4vci-common/dist/types/StateManager.types'
+import { IStateManager, StateType } from '@sphereon/oid4vci-common'
+
+export async function lookupStateManagerMultiGetAsserted<K extends StateType, V extends StateType>(args: {
+  id: string
+  lookups: string[]
+  keyValueMapper: IStateManager<K>
+  valueStateManager: IStateManager<V>
+}) {
+  const value = await lookupStateManagerMultiGet(args)
+  if (value) {
+    return value
+  }
+  return Promise.reject(Error(`no value found for id ${args.id}`))
+}
+export async function lookupStateManagerMultiGet<K extends StateType, V extends StateType>({
+  id,
+  lookups,
+  keyValueMapper,
+  valueStateManager,
+}: {
+  id: string
+  lookups: string[]
+  keyValueMapper: IStateManager<K>
+  valueStateManager: IStateManager<V>
+}) {
+  for (const lookup of lookups) {
+    try {
+      const value = await new LookupStateManager(keyValueMapper, valueStateManager, lookup).get(id)
+      if (value) {
+        return value
+      }
+    } catch (e) {
+      // intentionally ignore the error
+    }
+  }
+  return valueStateManager.get(id)
+}
 
 export class LookupStateManager<K extends StateType, V extends StateType> implements IStateManager<V> {
   constructor(
@@ -32,9 +67,11 @@ export class LookupStateManager<K extends StateType, V extends StateType> implem
 
   private async assertedValueId(key: string): Promise<string> {
     const prop = this.lookup
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const valueId = await this.keyValueMapper.getAsserted(key).then((keyState) => (prop in keyState ? keyState[prop] : undefined))
+    const valueId = await this.keyValueMapper
+      .getAsserted(key)
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      .then((keyState) => (keyState && prop in keyState ? keyState[prop] : undefined))
     if (typeof valueId !== 'string') {
       throw Error('no value id could be derived for key' + key)
     }
@@ -42,15 +79,20 @@ export class LookupStateManager<K extends StateType, V extends StateType> implem
   }
 
   private async valueId(key: string): Promise<string | undefined> {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return (await this.keyValueMapper.get(key).then((keyState) => (prop in keyState ? keyState[prop] : undefined))) as string
+    const prop = this.lookup
+    return (
+      (await this.keyValueMapper
+        .get(key)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        .then((keyState) => (keyState && prop in keyState ? keyState[prop] : undefined))) as string
+    )
   }
 
   async delete(id: string): Promise<boolean> {
     return await this.assertedValueId(id).then(async (value) => {
       await this.keyValueMapper.delete(id)
-      return this.valueStateManager.delete(value)
+      return await this.valueStateManager.delete(value)
     })
   }
 
@@ -63,13 +105,18 @@ export class LookupStateManager<K extends StateType, V extends StateType> implem
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async set(id: string, stateValue: V): Promise<void> {
-    throw Error(`Please use the set method that accepts both and id, value and object`)
+  async set(_id: string, _stateValue: V): Promise<void> {
+    throw Error(`Please use the setMappedMethod that accepts both and id, value and object`)
   }
 
-  async setMapped(id: string, keyValue: K, stateValue: V): Promise<void> {
-    await this.keyValueMapper.set(id, keyValue)
-    await this.valueStateManager.set(id, stateValue)
+  async setMapped(valueKey: string, keyObject: K, stateValue: V): Promise<void> {
+    const keys = keyObject as any
+    if (!(this.lookup in keys) || !keys[this.lookup]) {
+      return Promise.reject(new Error(`keyValue ${keyObject} does not contain the lookup property ${this.lookup}`))
+    }
+    const key = keys[this.lookup]
+    await this.keyValueMapper.set(key, keyObject)
+    await this.valueStateManager.set(valueKey, stateValue)
   }
 
   async getAsserted(id: string): Promise<V> {

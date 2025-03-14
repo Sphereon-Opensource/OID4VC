@@ -1,4 +1,4 @@
-import { JWK } from 'common/dist';
+import { JWK } from '@sphereon/oid4vc-common';
 
 import { ExperimentalSubjectIssuance } from '../experimental/holder-vci';
 
@@ -7,6 +7,8 @@ import {
   AlgValue,
   CommonCredentialRequest,
   CredentialDataSupplierInput,
+  CredentialOfferMode,
+  CredentialRequestMsoMdoc,
   CredentialRequestSdJwtVc,
   CredentialsSupportedDisplay,
   CredentialSupplierConfig,
@@ -17,22 +19,22 @@ import {
   OID4VCICredentialFormat,
   ProofTypesSupported,
   ResponseEncryption,
+  StatusListOpts,
 } from './Generic.types';
 import { QRCodeOpts } from './QRCode.types';
 import { AuthorizationServerMetadata, AuthorizationServerType, EndpointMetadata } from './ServerMetadata';
 
 export interface IssuerMetadataV1_0_13 {
-  issuer?: string;
   credential_configurations_supported: Record<string, CredentialConfigurationSupportedV1_0_13>; // REQUIRED. A JSON object containing a list of key value pairs, where the key is a string serving as an abstract identifier of the Credential. This identifier is RECOMMENDED to be collision resistant - it can be globally unique, but does not have to be when naming conflicts are unlikely to arise in a given use case. The value is a JSON object. The JSON object MUST conform to the structure of the Section 11.2.1.
   credential_issuer: string; // A Credential Issuer is identified by a case sensitive URL using the https scheme that contains scheme, host and, optionally, port number and path components, but no query or fragment components.
   credential_endpoint: string; // REQUIRED. URL of the OP's Credential Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components.
   authorization_servers?: string[];
-  batch_credential_endpoint?: string;
   deferred_credential_endpoint?: string;
   notification_endpoint?: string;
   credential_response_encryption?: ResponseEncryption;
   token_endpoint?: string;
   display?: MetadataDisplay[];
+  authorization_challenge_endpoint?: string;
 
   [x: string]: unknown;
 }
@@ -53,6 +55,7 @@ export type CredentialConfigurationSupportedV1_0_13 = CredentialConfigurationSup
     | CredentialConfigurationSupportedSdJwtVcV1_0_13
     | CredentialConfigurationSupportedJwtVcJsonV1_0_13
     | CredentialConfigurationSupportedJwtVcJsonLdAndLdpVcV1_0_13
+    | CredentialConfigurationSupportedMsoMdocV1_0_13
   );
 
 // Base type covering credential configurations supported
@@ -70,6 +73,15 @@ export interface CredentialConfigurationSupportedSdJwtVcV1_0_13 extends Credenti
   format: 'vc+sd-jwt';
 
   vct: string;
+  claims?: IssuerCredentialSubject;
+
+  order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
+}
+
+export interface CredentialConfigurationSupportedMsoMdocV1_0_13 extends CredentialConfigurationSupportedCommonV1_0_13 {
+  format: 'mso_mdoc';
+
+  doctype: string;
   claims?: IssuerCredentialSubject;
 
   order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
@@ -96,6 +108,9 @@ export type CredentialRequestV1_0_13ResponseEncryption = {
 export interface CredentialRequestV1_0_13Common extends ExperimentalSubjectIssuance {
   credential_response_encryption?: CredentialRequestV1_0_13ResponseEncryption;
   proof?: ProofOfPossession;
+
+  // We allow sending a issuer state back to the credential offer in case an auth code flow is used with an external AS and no nonces are used (not recommended), but does allow to integrate any OIDC server
+  issuer_state?: string;
 }
 
 export type CredentialRequestV1_0_13 = CredentialRequestV1_0_13Common &
@@ -103,6 +118,19 @@ export type CredentialRequestV1_0_13 = CredentialRequestV1_0_13Common &
     | CredentialRequestJwtVcJsonV1_0_13
     | CredentialRequestJwtVcJsonLdAndLdpVcV1_0_13
     | CredentialRequestSdJwtVc
+    | CredentialRequestMsoMdoc
+    | CredentialRequestV1_0_13CredentialIdentifier
+  );
+
+/**
+ * Normally a proof always needs to be present. There are exceptions for certain issuers doing strong user binding part of presentation flows
+ */
+export type CredentialRequestWithoutProofV1_0_13 = Omit<CredentialRequestV1_0_13Common, 'proof'> &
+  (
+    | CredentialRequestJwtVcJsonV1_0_13
+    | CredentialRequestJwtVcJsonLdAndLdpVcV1_0_13
+    | CredentialRequestSdJwtVc
+    | CredentialRequestMsoMdoc
     | CredentialRequestV1_0_13CredentialIdentifier
   );
 
@@ -127,12 +155,20 @@ export interface CredentialOfferV1_0_13 {
   credential_offer_uri?: string;
 }
 
-export interface CredentialOfferRESTRequest extends CredentialOfferV1_0_13 {
+export interface CredentialOfferRESTRequest extends Partial<CredentialOfferPayloadV1_0_13> {
+  redirectUri?: string;
   baseUri?: string;
   scheme?: string;
+  // auth_session?: string; Would be a nice extension to support, to allow external systems to determine what the auth_session value should be
+  // @Deprecated use tx_code in the grant object
+  correlationId?: string;
+  sessionLifeTimeInSec?: number;
   pinLength?: number;
   qrCodeOpts?: QRCodeOpts;
+  client_id?: string;
   credentialDataSupplierInput?: CredentialDataSupplierInput;
+  statusListOpts?: Array<StatusListOpts>;
+  offerMode?: CredentialOfferMode;
 }
 
 export interface CredentialOfferPayloadV1_0_13 {
@@ -179,11 +215,34 @@ export interface CredentialIssuerMetadataOptsV1_0_13 {
   authorization_servers?: string[]; // OPTIONAL. Array of strings that identify the OAuth 2.0 Authorization Servers (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
   signed_metadata?: string; // OPTIONAL. String that is a signed JWT. This JWT contains Credential Issuer metadata parameters as claims.
   display?: MetadataDisplay[]; //  An array of objects, where each object contains display properties of a Credential Issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
+  authorization_challenge_endpoint?: string; // OPTIONAL URL of the Credential Issuer's Authorization Challenge Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components. Described on https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-apps-02.html#name-authorization-challenge-end
 
   //todo: these two are not mentioned in the spec
   token_endpoint?: string;
   credential_supplier_config?: CredentialSupplierConfig;
 }
+
+// These can be used be a reducer
+export const credentialIssuerMetadataFieldNames: Array<keyof CredentialIssuerMetadataOptsV1_0_13> = [
+  // Required fields
+  'credential_issuer',
+  'credential_configurations_supported',
+  'credential_endpoint',
+
+  // Optional fields from CredentialIssuerMetadataOpts
+  'batch_credential_endpoint',
+  'deferred_credential_endpoint',
+  'notification_endpoint',
+  'credential_response_encryption',
+  'authorization_servers',
+  'token_endpoint',
+  'display',
+  'credential_supplier_config',
+
+  // Optional fields from v1.0.13
+  'credential_identifiers_supported',
+  'signed_metadata',
+] as const;
 
 export interface EndpointMetadataResultV1_0_13 extends EndpointMetadata {
   // The EndpointMetadata are snake-case so they can easily be used in payloads/JSON.

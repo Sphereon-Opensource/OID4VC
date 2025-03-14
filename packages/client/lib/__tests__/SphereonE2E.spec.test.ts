@@ -155,7 +155,7 @@ describe('ismapolis bug report #63, https://github.com/Sphereon-Opensource/OID4V
         .sign(edPrivateKey);
     }
 
-    const callbacks: ProofOfPossessionCallbacks<never> = {
+    const callbacks: ProofOfPossessionCallbacks = {
       signCallback: signCallback,
     };
 

@@ -1,6 +1,6 @@
 import { SubjectIdentifierType, SubjectSyntaxTypesSupportedValues } from '@sphereon/did-auth-siop'
 import { getUniResolver, UniResolver } from '@sphereon/did-uni-client'
-import { DIDResolutionOptions, DIDResolutionResult, ParsedDID, Resolvable, Resolver } from 'did-resolver'
+import { DIDResolutionOptions, DIDResolutionResult, ParsedDID, Resolvable, Resolver, ResolverRegistry } from 'did-resolver'
 
 import { DIDDocument, ResolveOpts } from '../types'
 
@@ -21,7 +21,7 @@ export function getResolver(opts: ResolveOpts): Resolvable {
   }
 
   const uniResolvers: {
-    [p: string]: (did: string, _parsed: ParsedDID, _didResolver: Resolver, _options: DIDResolutionOptions) => Promise<DIDResolutionResult>
+    [p: string]: (did: string, _parsed: ParsedDID, _didResolver: Resolvable, _options: DIDResolutionOptions) => Promise<DIDResolutionResult>
   }[] = []
   if (opts.subjectSyntaxTypesSupported.indexOf(SubjectIdentifierType.DID) === -1) {
     const specificDidMethods = opts.subjectSyntaxTypesSupported.filter((sst) => sst.includes('did:'))
@@ -65,7 +65,7 @@ export function getResolverUnion(
   }
   const fallbackResolver: Resolvable = customResolver ? customResolver : new UniResolver()
   const uniResolvers: {
-    [p: string]: (did: string, _parsed: ParsedDID, _didResolver: Resolver, _options: DIDResolutionOptions) => Promise<DIDResolutionResult>
+    [p: string]: (did: string, _parsed: ParsedDID, _didResolver: Resolvable, _options: DIDResolutionOptions) => Promise<DIDResolutionResult>
   }[] = []
   const subjectTypes: string[] = []
   if (subjectSyntaxTypesSupported) {
@@ -78,13 +78,18 @@ export function getResolverUnion(
   }
   const specificDidMethods = subjectTypes.filter((sst) => !!sst && sst.startsWith('did:'))
   specificDidMethods.forEach((dm) => {
-    let methodResolver
+    let methodResolver: ResolverRegistry | Resolvable | undefined
     if (!resolverMap.has(dm) || resolverMap.get(dm) === null) {
       methodResolver = getUniResolver(getMethodFromDid(dm))
+      if (methodResolver) {
+        uniResolvers.push(methodResolver)
+      }
     } else {
       methodResolver = resolverMap.get(dm)
+      if (methodResolver) {
+        uniResolvers.push({ [dm]: methodResolver.resolve })
+      }
     }
-    uniResolvers.push(methodResolver)
   })
   return subjectTypes.indexOf(SubjectSyntaxTypesSupportedValues.DID.valueOf()) !== -1
     ? new Resolver(...{ fallbackResolver, ...uniResolvers })
@@ -113,5 +118,5 @@ export async function resolveDidDocument(did: string, opts?: ResolveOpts): Promi
     // todo: This looks like a bug. It seems that sometimes we get back a DID document directly instead of a did resolution results
     return result as unknown as DIDDocument
   }
-  return result.didDocument
+  return result.didDocument as DIDDocument
 }

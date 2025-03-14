@@ -3,7 +3,7 @@ import { uuidv4 } from '@sphereon/oid4vc-common'
 import { CreateAuthorizationRequestOpts, createPresentationDefinitionClaimsProperties } from '../authorization-request'
 import { createRequestRegistration } from '../authorization-request/RequestRegistration'
 import { getNonce, getState, removeNullUndefined } from '../helpers'
-import { RequestObjectPayload, ResponseMode, ResponseType, Scope, SIOPErrors, SupportedVersion } from '../types'
+import { RequestObjectPayload, ResponseMode, ResponseType, SIOPErrors, SupportedVersion } from '../types'
 
 import { assertValidRequestObjectOpts } from './Opts'
 
@@ -18,7 +18,7 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
 
   const state = getState(payload.state)
   const registration = await createRequestRegistration(opts.clientMetadata, opts)
-  const claims = createPresentationDefinitionClaimsProperties(payload.claims)
+  const claims = await createPresentationDefinitionClaimsProperties(payload.claims)
 
   const metadataKey = opts.version >= SupportedVersion.SIOPv2_D11.valueOf() ? 'client_metadata' : 'registration'
   const clientId = payload.client_id ?? registration.payload[metadataKey]?.client_id
@@ -28,14 +28,16 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
   const iat = payload.iat ?? now
   const nbf = payload.nbf ?? iat
   const exp = payload.exp ?? iat + validInSec
+  const aud = payload.aud
   const jti = payload.jti ?? uuidv4()
 
   return removeNullUndefined({
     response_type: payload.response_type ?? ResponseType.ID_TOKEN,
-    scope: payload.scope ?? Scope.OPENID,
+    scope: payload.scope,
     //TODO implement /.well-known/openid-federation support in the OP side to resolve the client_id (URL) and retrieve the metadata
-    client_id: clientId,
-    client_id_scheme: opts.requestObject.payload.client_id_scheme,
+    client_id_scheme: payload.client_id_scheme,
+    ...(clientId && { client_id: clientId }),
+    ...(payload.entity_id && { entity_id: payload.entity_id }),
     ...(payload.redirect_uri && { redirect_uri: payload.redirect_uri }),
     ...(payload.response_uri && { response_uri: payload.response_uri }),
     response_mode: payload.response_mode ?? ResponseMode.DIRECT_POST,
@@ -45,12 +47,15 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
     state,
     ...registration.payload,
     claims,
-    presentation_definition_uri: payload.presentation_definition_uri,
-    presentation_definition: payload.presentation_definition,
+    ...(payload.presentation_definition_uri && { presentation_definition_uri: payload.presentation_definition_uri }),
+    ...(payload.presentation_definition && { presentation_definition: payload.presentation_definition }),
+    ...(payload.dcql_query && { dcql_query: payload.dcql_query }),
+    client_metadata: payload.client_metadata,
     iat,
     nbf,
     exp,
     jti,
+    aud,
   })
 }
 

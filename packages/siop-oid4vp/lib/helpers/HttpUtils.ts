@@ -61,7 +61,7 @@ const siopFetch = async <T>(
   if (!url || url.toLowerCase().startsWith('did:')) {
     throw Error(`Invalid URL supplied. Expected a http(s) URL. Recieved: ${url}`)
   }
-  const headers = opts?.customHeaders ? opts.customHeaders : {}
+  const headers: Record<string, any> = opts?.customHeaders ? opts.customHeaders : {}
   if (opts?.bearerToken) {
     headers['Authorization'] = `Bearer ${opts.bearerToken}`
   }
@@ -87,7 +87,7 @@ const siopFetch = async <T>(
   const textResponseBody = await clonedResponse.text()
 
   const isJSONResponse =
-    (accept === 'application/json' || origResponse.headers['Content-Type'] === 'application/json') && textResponseBody.trim().startsWith('{')
+    (accept === 'application/json' || origResponse.headers.get('Content-Type') === 'application/json') && textResponseBody.trim().startsWith('{')
   const responseBody = isJSONResponse ? JSON.parse(textResponseBody) : textResponseBody
 
   if (success || opts?.exceptionOnHttpErrorStatus) {
@@ -131,7 +131,7 @@ export const fetchByReferenceOrUseByValue = async <T>(referenceURI: string, valu
       response = await getWithUrl(referenceURI, textResponse)
     } catch (e) {
       console.log(e)
-      throw new Error(`${SIOPErrors.REG_PASS_BY_REFERENCE_INCORRECTLY}: ${e.message}, URL: ${referenceURI}`)
+      throw new Error(`${SIOPErrors.REG_PASS_BY_REFERENCE_INCORRECTLY}: ${(e as Error).message}, URL: ${referenceURI}`)
     }
   }
   return response

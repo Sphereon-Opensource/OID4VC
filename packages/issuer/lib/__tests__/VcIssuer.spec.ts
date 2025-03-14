@@ -10,10 +10,10 @@ import {
   STATE_MISSING_ERROR,
 } from '@sphereon/oid4vci-common'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
-import { DIDDocument } from 'did-resolver'
 
 import { VcIssuer } from '../VcIssuer'
 import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../builder'
+import { AuthorizationServerMetadataBuilder } from '../builder/AuthorizationServerMetadataBuilder'
 import { MemoryStates } from '../state-manager'
 
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
@@ -48,8 +48,18 @@ const verifiableCredential_withoutDid = {
   },
 }
 
+const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
+  .withIssuer(IDENTIPROOF_ISSUER_URL)
+  .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
+  .withTokenEndpoint('http://localhost:3456/test/token')
+  .withAuthorizationEndpoint('https://token-endpoint.example.com/authorize')
+  .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
+  .withResponseTypesSupported(['code', 'token', 'id_token'])
+  .withScopesSupported(['openid', 'abcdef'])
+  .build()
+
 describe('VcIssuer', () => {
-  let vcIssuer: VcIssuer<DIDDocument>
+  let vcIssuer: VcIssuer
   const issuerState = 'previously-created-state'
   const clientId = 'sphereon:wallet'
   const preAuthorizedCode = 'test_code'
@@ -117,10 +127,11 @@ describe('VcIssuer', () => {
         },
       },
     })
-    vcIssuer = new VcIssuerBuilder<DIDDocument>()
+    vcIssuer = new VcIssuerBuilder()
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
+      .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',
@@ -156,6 +167,7 @@ describe('VcIssuer', () => {
 
   it.skip('should create credential offer', async () => {
     const { uri, ...rest } = await vcIssuer.createCredentialOfferURI({
+      offerMode: 'VALUE',
       grants: {
         authorization_code: {
           issuer_state: issuerState,
@@ -274,6 +286,8 @@ describe('VcIssuer', () => {
     await expect(
       vcIssuer
         .createCredentialOfferURI({
+          offerMode: 'REFERENCE',
+          credentialOfferUri: 'http://issuer-example.com/:id',
           grants: {
             authorization_code: {
               issuer_state: issuerState,
@@ -282,10 +296,9 @@ describe('VcIssuer', () => {
           scheme: 'http',
           baseUri: 'issuer-example.com',
           credential_configuration_ids: ['VerifiableCredential'],
-          credentialOfferUri: 'https://somehost.com/offer-id',
         })
         .then((response) => response.uri),
-    ).resolves.toEqual('http://issuer-example.com?credential_offer_uri=https://somehost.com/offer-id')
+    ).resolves.toContain('http://issuer-example.com?credential_offer_uri=http%3A%2F%2Fissuer-example.com%2F')
   })
 
   // Of course this doesn't work. The state is part of the proof to begin with
@@ -448,7 +461,7 @@ describe('VcIssuer', () => {
 })
 
 describe('VcIssuer without did', () => {
-  let vcIssuer: VcIssuer<DIDDocument>
+  let vcIssuer: VcIssuer
   const issuerState = 'previously-created-state'
   const clientId = 'sphereon:wallet'
   const preAuthorizedCode = 'test_code'
@@ -516,10 +529,11 @@ describe('VcIssuer without did', () => {
         },
       },
     })
-    vcIssuer = new VcIssuerBuilder<DIDDocument>()
+    vcIssuer = new VcIssuerBuilder()
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
+      .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',
@@ -691,5 +705,79 @@ describe('VcIssuer without did', () => {
         },
       }),
     ).rejects.toThrow(Error(ALG_ERROR))
+  })
+
+  it('should create credential offer uri with REFERENCE mode', async () => {
+    const result = await vcIssuer.createCredentialOfferURI({
+      offerMode: 'REFERENCE',
+      credentialOfferUri: 'https://example.com/api/credentials/:id',
+      grants: {
+        authorization_code: {
+          issuer_state: issuerState,
+        },
+      },
+      scheme: 'http',
+      baseUri: 'issuer-example.com',
+    })
+
+    expect(result.uri).toMatch(/http:\/\/issuer-example\.com\?credential_offer_uri=https%3A%2F%2Fexample\.com%2Fapi%2Fcredentials%2F[\w-]+/)
+    expect(result.session).toBeDefined()
+    expect(result.session.credentialOffer.credential_offer_uri).toMatch(/https:\/\/example\.com\/api\/credentials\/[\w-]+/)
+  })
+
+  it('should throw error if credential offer Uri is missing with REFERENCE mode', async () => {
+    await expect(
+      vcIssuer.createCredentialOfferURI({
+        offerMode: 'REFERENCE',
+        grants: {
+          authorization_code: {
+            issuer_state: issuerState,
+          },
+        },
+      }),
+    ).rejects.toThrow('credentialOfferUri must be supplied for offerMode REFERENCE!')
+  })
+
+  it('should get credential offer session by uri', async () => {
+    const result = await vcIssuer.createCredentialOfferURI({
+      offerMode: 'REFERENCE',
+      credentialOfferUri: 'https://example.com/api/credentials/:id',
+      grants: {
+        authorization_code: {
+          issuer_state: issuerState,
+        },
+        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+          'pre-authorized_code': 'preAuthCode',
+        },
+      },
+    })
+
+    const session = await vcIssuer.getCredentialOfferSessionById(result.session.preAuthorizedCode!, ['uri'])
+
+    expect(session).toBeDefined()
+    expect(session.credentialOffer).toEqual(result.session.credentialOffer)
+  })
+
+  it('should throw error when getting session with invalid uri', async () => {
+    await expect(vcIssuer.getCredentialOfferSessionById('https://example.com/invalid-uri')).rejects.toThrow(
+      'no value found for id https://example.com/invalid-uri',
+    )
+  })
+
+  it('should throw error when getting session by uri without uri state manager', async () => {
+    // Create issuer without URI state manager
+    const vcIssuerWithoutUriState = new VcIssuerBuilder()
+      .withAuthorizationServers('https://authorization-server')
+      .withCredentialEndpoint('https://credential-endpoint')
+      .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
+      .withAuthorizationMetadata(authorizationServerMetadata)
+      .withCredentialConfigurationsSupported({})
+      .withCredentialOfferStateManager(new MemoryStates<CredentialOfferSession>())
+      .withInMemoryCNonceState()
+      .build()
+
+    await expect(vcIssuerWithoutUriState.getCredentialOfferSessionById('https://example.com/some-uri')).rejects.toThrow(
+      'no value found for id https://example.com/some-uri',
+    )
   })
 })

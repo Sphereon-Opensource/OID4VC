@@ -3,6 +3,8 @@ import { PresentationSignCallBackParams } from '@sphereon/pex'
 import { IProofType } from '@sphereon/ssi-types'
 import * as jose from 'jose'
 import { KeyLike } from 'jose'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import nock from 'nock'
 import * as u8a from 'uint8arrays'
 
@@ -143,7 +145,7 @@ describe('RP using test vectors', () => {
     const authRequest = await createAuthRequest()
     const uri = await authRequest.uri()
     expect(uri.encodedUri).toEqual(
-      'openid-vc://?request_uri=https%3A%2F%2Fexample%2Fservice%2Fapi%2Fv1%2Fpresentation-request%2F649d8c3c-f5ac-41bd-9c19-5804ea1b8fe9',
+      'openid-vc://?request_uri=https%3A%2F%2Fexample%2Fservice%2Fapi%2Fv1%2Fpresentation-request%2F649d8c3c-f5ac-41bd-9c19-5804ea1b8fe9&client_id=did%3Aion%3AEiBAA99TAezxKRc2wuuBnr4zzGsS2YcsOA4IPQV0KY64Xg%3AeyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJrZXktMSIsInB1YmxpY0tleUp3ayI6eyJjcnYiOiJFZDI1NTE5Iiwia3R5IjoiT0tQIiwieCI6IkdnWkdUZzhlQ2E3bFYyOE1MOUpUbUJVdms3RFlCYmZSS1dMaHc2NUpvMXMiLCJraWQiOiJrZXktMSJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiJdLCJ0eXBlIjoiSnNvbldlYktleTIwMjAifV19fV0sInVwZGF0ZUNvbW1pdG1lbnQiOiJFaURKV0Z2WUJ5Qzd2azA2MXAzdHYwd29WSTk5MTFQTGgwUVp4cWpZM2Y4MVFRIn0sInN1ZmZpeERhdGEiOnsiZGVsdGFIYXNoIjoiRWlBX1RvVlNBZDBTRWxOU2VrQ1k1UDVHZ01KQy1MTVpFY2ZSV2ZqZGNaYXJFQSIsInJlY292ZXJ5Q29tbWl0bWVudCI6IkVpRDN0ZTV4eFliemJod0pYdEUwZ2tZV3Z3MlZ2VFB4MU9la0RTcXduZzRTWmcifX0',
     )
   })
   it('should get presentation definition', async () => {
@@ -193,20 +195,22 @@ describe('RP using test vectors', () => {
     const authRequest = await createAuthRequest()
     const presentationDefinitions = await authRequest.getPresentationDefinitions()
 
-    const verified = await authorizationResponse.verify({
-      correlationId: '1234',
-      verifyJwtCallback: verifyJwtCallback,
-      audience:
-        'did:ion:EiBWe9RtHT7VZ-Juff8OnnJAyFJtCokcYHx1CQkFtpl7pw:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJrZXktMSIsInB1YmxpY0tleUp3ayI6eyJjcnYiOiJFZDI1NTE5Iiwia3R5IjoiT0tQIiwieCI6IkNfT1VKeEg2aUljQzZYZE5oN0ptQy1USFhBVmFYbnZ1OU9FRVo4dHE5TkkiLCJraWQiOiJrZXktMSJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiJdLCJ0eXBlIjoiSnNvbldlYktleTIwMjAifV19fV0sInVwZGF0ZUNvbW1pdG1lbnQiOiJFaUNYTkJqSWZMVGZOV0NHMFQ2M2VaYmJEZFZoSmJUTjgtSmZlaUx4dW1oZW53In0sInN1ZmZpeERhdGEiOnsiZGVsdGFIYXNoIjoiRWlCZVZ5RXBDb0NPeXJ6VDhDSHlvQW1acU1CT1o0VTZqcm1sdUt1SjlxS0pkZyIsInJlY292ZXJ5Q29tbWl0bWVudCI6IkVpQnhkcHlyamlVSFZ1akNRWTBKMkhBUFFYZnNwWFBKYWluV21mV3RNcFhneFEifX0',
-      verification: {
-        presentationVerificationCallback,
-        revocationOpts: {
-          revocationVerification: RevocationVerification.NEVER,
+    // Will throw an error because the path_nested is actually wrong. Should be $.vp.verifiableCredential[0], but is $.verifiableCredential[0]
+    await expect(
+      authorizationResponse.verify({
+        correlationId: '1234',
+        verifyJwtCallback: verifyJwtCallback,
+        audience:
+          'did:ion:EiBWe9RtHT7VZ-Juff8OnnJAyFJtCokcYHx1CQkFtpl7pw:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJrZXktMSIsInB1YmxpY0tleUp3ayI6eyJjcnYiOiJFZDI1NTE5Iiwia3R5IjoiT0tQIiwieCI6IkNfT1VKeEg2aUljQzZYZE5oN0ptQy1USFhBVmFYbnZ1OU9FRVo4dHE5TkkiLCJraWQiOiJrZXktMSJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiJdLCJ0eXBlIjoiSnNvbldlYktleTIwMjAifV19fV0sInVwZGF0ZUNvbW1pdG1lbnQiOiJFaUNYTkJqSWZMVGZOV0NHMFQ2M2VaYmJEZFZoSmJUTjgtSmZlaUx4dW1oZW53In0sInN1ZmZpeERhdGEiOnsiZGVsdGFIYXNoIjoiRWlCZVZ5RXBDb0NPeXJ6VDhDSHlvQW1acU1CT1o0VTZqcm1sdUt1SjlxS0pkZyIsInJlY292ZXJ5Q29tbWl0bWVudCI6IkVpQnhkcHlyamlVSFZ1akNRWTBKMkhBUFFYZnNwWFBKYWluV21mV3RNcFhneFEifX0',
+        verification: {
+          presentationVerificationCallback,
+          revocationOpts: {
+            revocationVerification: RevocationVerification.NEVER,
+          },
         },
-      },
-      presentationDefinitions,
-    })
-    expect(verified).toBeDefined()
+        presentationDefinitions,
+      }),
+    ).rejects.toThrowError()
   })
 })
 
@@ -220,7 +224,8 @@ describe('OP using test vectors', () => {
     expect(result).toBeDefined()
   })
 
-  it('should use test vector auth response', async () => {
+  // Disabled for now as the value for the path_nested in the id token is actually invalid
+  xit('should use test vector auth response', async () => {
     const authorizationResponse = await AuthorizationResponse.fromPayload(TestVectors.authorizationResponsePayload)
 
     expect(authorizationResponse.payload.vp_token).toBeDefined()
@@ -237,7 +242,7 @@ describe('OP using test vectors', () => {
               path_nested: {
                 format: 'jwt_vc',
                 id: 'VerifiedEmployeeVC',
-                path: '$.verifiableCredential[0]',
+                path: '$.verifiableCredential[0]', // <-- This is actually incorrect in older versions of the lib. Should be $.vp.verifiableCredential[0]
               },
             },
           ],
@@ -302,7 +307,7 @@ describe('OP using test vectors', () => {
     )
     await op.createAuthorizationResponse(result, {
       presentationExchange: {
-        verifiablePresentations: [verifiablePresentationResult.verifiablePresentation],
+        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         presentationSubmission: TestVectors.presentation_submission,
         vpTokenLocation: VPTokenLocation.ID_TOKEN,
       },
@@ -352,10 +357,10 @@ class TestVectors {
     kid: 'key-1',
     x: 'GgZGTg8eCa7lV28ML9JTmBUvk7DYBbfRKWLhw65Jo1s',
   }
-  public static issuerKey
-  public static issuerPrivateKey
-  public static issuerPublicKey
-  public static issuerHexPrivateKey
+  public static issuerKey: KeyLike
+  public static issuerPrivateKey: string
+  public static issuerPublicKey: string
+  public static issuerHexPrivateKey: string
 
   public static holderJwk = {
     kty: 'OKP',
@@ -367,10 +372,10 @@ class TestVectors {
   public static holderDID =
     'did:ion:EiAeM6No9kdpos6_ehBUDh4RINY4USDMh-QdWksmsI3WkA:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJrZXktMSIsInB1YmxpY0tleUp3ayI6eyJjcnYiOiJFZDI1NTE5Iiwia3R5IjoiT0tQIiwieCI6IncwNk9WN2U2blR1cnQ2RzlWcFZYeEl3WW55amZ1cHhlR3lLQlMtYmxxdmciLCJraWQiOiJrZXktMSJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiJdLCJ0eXBlIjoiSnNvbldlYktleTIwMjAifV19fV0sInVwZGF0ZUNvbW1pdG1lbnQiOiJFaUFSNGRVQmxqNWNGa3dMdkpTWUYzVExjLV81MWhDX2xZaGxXZkxWZ29seTRRIn0sInN1ZmZpeERhdGEiOnsiZGVsdGFIYXNoIjoiRWlEcVJyWU5fV3JTakFQdnlFYlJQRVk4WVhPRmNvT0RTZExUTWItM2FKVElGQSIsInJlY292ZXJ5Q29tbWl0bWVudCI6IkVpQUwyMFdYakpQQW54WWdQY1U5RV9POE1OdHNpQk00QktpaVNwT3ZFTWpVOUEifX0'
   public static holderKID = `${TestVectors.holderDID}#key-1`
-  public static holderKey
-  public static holderPrivateKey
-  public static holderPublicKey
-  public static holderHexPrivateKey
+  public static holderKey: KeyLike
+  public static holderPrivateKey: string
+  public static holderPublicKey: string
+  public static holderHexPrivateKey: string
 
   public static verifierJwk = {
     kty: 'OKP',

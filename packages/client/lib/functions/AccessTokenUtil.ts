@@ -36,8 +36,8 @@ export const createJwtBearerClientAssertion = async (
         sub: clientId,
         aud: credentialIssuer,
         jti: uuidv4(),
-        exp: Date.now() / 1000 + 60,
-        iat: Date.now() / 1000 - 60,
+        exp: Math.floor(Date.now()) / 1000 + 60,
+        iat: Math.floor(Date.now()) / 1000 - 60,
       },
     };
     const pop = await ProofOfPossessionBuilder.fromJwt({

@@ -1,4 +1,4 @@
-import { NotificationErrorResponse, NotificationRequest, NotificationResult, post } from '@sphereon/oid4vci-common';
+import { NotificationErrorResponse, NotificationRequest, NotificationResponseResult, post } from '@sphereon/oid4vci-common';
 
 import { CredentialRequestOpts } from '../CredentialRequestClient';
 import { LOG } from '../types';
@@ -7,7 +7,7 @@ export async function sendNotification(
   credentialRequestOpts: Partial<CredentialRequestOpts>,
   request: NotificationRequest,
   accessToken?: string,
-): Promise<NotificationResult> {
+): Promise<NotificationResponseResult> {
   LOG.info(`Sending status notification event '${request.event}' for id ${request.notification_id}`);
   if (!credentialRequestOpts.notificationEndpoint) {
     throw Error(`Cannot send notification when no notification endpoint is provided`);

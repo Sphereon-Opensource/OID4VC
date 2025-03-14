@@ -9,7 +9,7 @@ export const TYP_ERROR = 'Typ must be "openid4vci-proof+jwt"';
 export const ALG_ERROR = `Algorithm is a required field, you are free to use the signing algorithm of your choice or one of the following: ${Object.keys(
   Alg,
 ).join(', ')}`;
-export const KID_JWK_X5C_ERROR = 'Only one must be present: kid, jwk or x5c';
+export const KID_JWK_X5C_ERROR = 'Only one must be present: x5c should not present when kid and/or jwk is already present';
 export const KID_DID_NO_DID_ERROR = 'A DID value needs to be returned when kid is present';
 export const DID_NO_DIDDOC_ERROR = 'A DID Document needs to be resolved when a DID is encountered';
 export const AUD_ERROR = 'aud must be the URL of the credential issuer';

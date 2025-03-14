@@ -11,15 +11,24 @@ import {
   STATE_MISSING_ERROR,
   URIState,
 } from '@sphereon/oid4vci-common'
-import { VcIssuer } from '@sphereon/oid4vci-issuer'
+import { AuthorizationServerMetadataBuilder, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
-import { DIDDocument } from 'did-resolver'
 import { Express } from 'express'
 import * as jose from 'jose'
 import requests from 'supertest'
 
 import { OID4VCIServer } from '../OID4VCIServer'
+
+const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
+  .withIssuer('test-issuer')
+  .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
+  .withTokenEndpoint('http://localhost:3456/test/token')
+  .withAuthorizationEndpoint('https://token-endpoint.example.com/authorize')
+  .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
+  .withResponseTypesSupported(['code', 'token', 'id_token'])
+  .withScopesSupported(['openid', 'abcdef'])
+  .build()
 
 describe('OID4VCIServer', () => {
   let app: Express
@@ -92,10 +101,10 @@ describe('OID4VCIServer', () => {
     await credentialOfferSessions.set(preAuthorizedCode2, credentialOfferState2)
     await credentialOfferSessions.set(preAuthorizedCode3, credentialOfferState3)
 
-    const vcIssuer: VcIssuer<DIDDocument> = new VcIssuer<DIDDocument>(
+    const vcIssuer: VcIssuer = new VcIssuer(
       {
         // authorization_server: 'https://authorization-server',
-        credential_endpoint: 'http://localhost:9000',
+        credential_endpoint: 'http://localhost:9001',
         credential_issuer: 'https://credential-issuer',
         display: [{ name: 'example issuer', locale: 'en-US' }],
         credential_configurations_supported: {
@@ -131,6 +140,7 @@ describe('OID4VCIServer', () => {
           },
         },
       } as CredentialIssuerMetadataOptsV1_0_13,
+      authorizationServerMetadata,
       {
         cNonceExpiresIn: 300,
         credentialOfferSessions,
@@ -141,12 +151,12 @@ describe('OID4VCIServer', () => {
 
     expressSupport = ExpressBuilder.fromServerOpts({
       startListening: false,
-      port: 9000,
+      port: 9001,
       hostname: '0.0.0.0',
     }).build({ startListening: false })
     const vcIssuerServer = new OID4VCIServer(expressSupport, {
       issuer: vcIssuer,
-      baseUrl: 'http://localhost:9000',
+      baseUrl: 'http://localhost:9001',
       endpointOpts: {
         tokenEndpointOpts: {
           accessTokenSignerCallback: signerCallback,
@@ -179,7 +189,6 @@ describe('OID4VCIServer', () => {
       expires_in: 300,
       c_nonce: expect.any(String),
       c_nonce_expires_in: 300,
-      authorization_pending: false,
       interval: 300,
     })
   })

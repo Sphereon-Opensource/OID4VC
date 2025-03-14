@@ -1,5 +1,4 @@
-import { AuthorizationRequestPayload, IDTokenPayload, JwtIssuerWithContext, RequestObjectPayload } from '@sphereon/did-auth-siop'
-import { JwtVerifier } from '@sphereon/did-auth-siop'
+import { AuthorizationRequestPayload, IDTokenPayload, JwtIssuerWithContext, JwtVerifier, RequestObjectPayload } from '@sphereon/did-auth-siop'
 import { JwtHeader, JwtPayload } from '@sphereon/oid4vc-common'
 import { Resolvable } from 'did-resolver'
 
@@ -22,8 +21,14 @@ export const verfiyDidJwtAdapter = async (
     if (jwtVerifier.type === 'request-object' && (jwt.payload as JwtPayload & { client_id?: string }).client_id?.startsWith('did:')) {
       const authorizationRequestPayload = jwt.payload as AuthorizationRequestPayload
       if (options.verification?.checkLinkedDomain && options.verification.checkLinkedDomain != CheckLinkedDomain.NEVER) {
+        if (!authorizationRequestPayload.client_id) {
+          return Promise.reject(Error('missing client_id from AuthorizationRequestPayload'))
+        }
         await validateLinkedDomainWithDid(authorizationRequestPayload.client_id, options.verification)
       } else if (!options.verification?.checkLinkedDomain && options.verification.wellknownDIDVerifyCallback) {
+        if (!authorizationRequestPayload.client_id) {
+          return Promise.reject(Error('missing client_id from AuthorizationRequestPayload'))
+        }
         await validateLinkedDomainWithDid(authorizationRequestPayload.client_id, options.verification)
       }
     }

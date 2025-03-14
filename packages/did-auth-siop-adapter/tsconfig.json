@@ -12,6 +12,9 @@
   "references": [
     {
       "path": "../common"
+    },
+    {
+      "path": "../siop-oid4vp"
     }
   ]
 }

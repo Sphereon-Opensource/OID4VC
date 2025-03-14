@@ -1,5 +1,5 @@
 import { CommonAuthorizationRequest } from './Authorization.types';
-import { CredentialOfferFormat } from './Generic.types';
+import { CredentialOfferFormatV1_0_11 } from './Generic.types';
 
 export interface CredentialOfferV1_0_09 {
   credential_offer: CredentialOfferPayloadV1_0_09;
@@ -20,7 +20,7 @@ export interface CredentialOfferPayloadV1_0_09 {
    * credentials_supported Credential Issuer metadata parameter.
    * When processing, the Wallet MUST resolve this string value to the respective object.
    */
-  credentials: (CredentialOfferFormat | string)[];
+  credentials: (CredentialOfferFormatV1_0_11 | string)[];
   'pre-authorized_code'?: string; //CONDITIONAL the code representing the issuer's authorization for the Wallet to obtain Credentials of a certain type. This code MUST be short-lived and single-use. MUST be present in a pre-authorized code flow.
   user_pin_required?: boolean | string; //OPTIONAL Boolean value specifying whether the issuer expects presentation of a user PIN along with the Token Request in a pre-authorized code flow. Default is false.
   op_state?: string; //(JWT) OPTIONAL String value created by the Credential Issuer and opaque to the Wallet that is used to bind the subsequent authentication request with the Credential Issuer to a context set up during previous steps

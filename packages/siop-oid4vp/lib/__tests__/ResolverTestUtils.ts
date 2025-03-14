@@ -1,6 +1,5 @@
 import { getUniResolver } from '@sphereon/did-uni-client'
-import { Resolvable, Resolver, ResolverRegistry } from 'did-resolver'
-import { DIDDocument as DIFDIDDocument } from 'did-resolver'
+import { DIDDocument as DIFDIDDocument, Resolvable, Resolver, ResolverRegistry } from 'did-resolver'
 
 import { SIOPErrors } from '..'
 

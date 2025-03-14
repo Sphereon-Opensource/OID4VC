@@ -23,6 +23,8 @@
     "node": ">=18"
   },
   "resolutions": {
+    "@sphereon/ssi-types": "^0.32.1-next.161",
+    "dcql": "0.2.19",
     "node-fetch": "2.6.12"
   },
   "prettier": {
@@ -35,7 +37,6 @@
     "@types/debug": "^4.1.12",
     "@types/jest": "^29.5.12",
     "@types/node": "^18.19.39",
-    "codecov": "^3.8.3",
     "jest": "^29.7.0",
     "lerna": "^8.1.6",
     "lerna-changelog": "^2.2.0",
@@ -48,10 +49,13 @@
   "keywords": [
     "Sphereon",
     "Verifiable Credentials",
+    "ARF",
+    "EUIDW",
     "OpenID",
     "SIOP",
+    "SIOPv2",
     "Self Issued OpenID Provider",
-    "OPenId for Verifiable Presentations",
+    "OpenId for Verifiable Presentations",
     "OpenID for Verifiable Credential Issuance",
     "OAuth2",
     "SSI",

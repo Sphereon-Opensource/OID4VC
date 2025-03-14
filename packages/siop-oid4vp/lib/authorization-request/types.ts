@@ -1,7 +1,7 @@
 import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { Hasher } from '@sphereon/ssi-types'
 
-import { PresentationDefinitionPayloadOpts } from '../authorization-response'
+import { DcqlQueryPayloadOpts, PresentationDefinitionPayloadOpts } from '../authorization-response'
 import { RequestObjectOpts } from '../request-object'
 import {
   ClientIdScheme,
@@ -19,7 +19,7 @@ import { VerifyJwtCallback } from '../types/VpJwtVerifier'
 
 export interface ClaimPayloadOptsVID1 extends ClaimPayloadCommonOpts {
   id_token?: IdTokenClaimPayload
-  vp_token?: PresentationDefinitionPayloadOpts
+  vp_token?: PresentationDefinitionPayloadOpts | DcqlQueryPayloadOpts
 }
 
 export interface ClaimPayloadCommonOpts {
@@ -42,6 +42,7 @@ export interface RequestObjectPayloadOpts<CT extends ClaimPayloadCommonOpts> {
   claims?: CT // from openid-connect-self-issued-v2-1_0-ID1 look at https://openid.net/specs/openid-connect-core-1_0.html#Claims
   nonce?: string // An optional nonce, will be generated if not provided
   state?: string // An optional state, will be generated if not provided
+  aud?: string // The audience of the request
   authorization_endpoint?: string
   response_mode?: ResponseMode // How the URI should be returned. This is not being used by the library itself, allows an implementor to make a decision
   response_types_supported?: ResponseType[] | ResponseType
@@ -55,7 +56,6 @@ export interface RequestObjectPayloadOpts<CT extends ClaimPayloadCommonOpts> {
 
 interface AuthorizationRequestCommonOpts<CT extends ClaimPayloadCommonOpts> {
   // Yes, this includes common payload properties both at the payload level as well as in the requestObject.payload property. That is to support OAuth2 with or without a signed OpenID requestObject
-
   version: SupportedVersion
   clientMetadata?: ClientMetadataOpts // this maps to 'registration' for older SIOPv2 specs! OPTIONAL. This parameter is used by the RP to provide information about itself to a Self-Issued OP that would normally be provided to an OP during Dynamic RP Registration, as specified in {#rp-registration-parameter}.
   payload?: AuthorizationRequestPayloadOpts<CT>

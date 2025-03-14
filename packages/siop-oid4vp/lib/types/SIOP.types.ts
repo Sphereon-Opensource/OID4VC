@@ -1,17 +1,19 @@
 // noinspection JSUnusedGlobalSymbols
-
-import { SigningAlgo } from '@sphereon/oid4vc-common'
+import { JarmClientMetadata } from '@sphereon/jarm'
+import { DynamicRegistrationClientMetadata, JWKS, SigningAlgo } from '@sphereon/oid4vc-common'
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import {
   AdditionalClaims,
   CompactSdJwtVc,
   IPresentation,
   IVerifiablePresentation,
+  MdocOid4vpMdocVpToken,
   PresentationSubmission,
   W3CVerifiableCredential,
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
+import { DcqlQuery } from 'dcql'
 
 import { AuthorizationRequest, CreateAuthorizationRequestOpts, PropertyTargets, VerifyAuthorizationRequestOpts } from '../authorization-request'
 import {
@@ -21,10 +23,12 @@ import {
   PresentationVerificationCallback,
   VerifyAuthorizationResponseOpts,
 } from '../authorization-response'
+import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 
 import { JWTPayload, VerifiedJWT } from './index'
+
 export const DEFAULT_EXPIRATION_TIME = 10 * 60
 
 // https://openid.net/specs/openid-connect-core-1_0.html#RequestObject
@@ -34,6 +38,8 @@ export interface RequestObjectPayload extends RequestCommonPayload, JWTPayload {
   response_type: ResponseType | string // REQUIRED. Constant string value id_token.
   client_id: string // REQUIRED. RP's identifier at the Self-Issued OP.
   client_id_scheme?: ClientIdScheme // The client_id_scheme enables deployments of this specification to use different mechanisms to obtain and validate metadata of the Verifier beyond the scope of [RFC6749]. The term client_id_scheme is used since the Verifier is acting as an OAuth 2.0 Client.
+  entity_id?: string // OPTIONAL for OIDF
+  client_metadata: ClientMetadataOpts
   redirect_uri?: string // REQUIRED before OID4VP v18, now optional because of response_uri. URI to which the Self-Issued OP Response will be sent
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
   nonce: string
@@ -95,10 +101,11 @@ export interface AuthorizationRequestPayloadVD12OID4VPD20
   presentation_definition_uri?: string
   client_id_scheme?: ClientIdSchemeOID4VPD20
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
+  dcql_query?: string
 }
 
 export type ClientIdSchemeOID4VPD18 = 'pre-registered' | 'redirect_uri' | 'entity_id' | 'did'
-export type ClientIdSchemeOID4VPD20 = ClientIdSchemeOID4VPD18 | 'x509_san_dns' | 'x509_san_uri' | 'verifier_attestation'
+export type ClientIdSchemeOID4VPD20 = ClientIdSchemeOID4VPD18 | 'x509_san_dns' | 'x509_san_uri' | 'entity_id' | 'verifier_attestation'
 export type ClientIdScheme = ClientIdSchemeOID4VPD18 | ClientIdSchemeOID4VPD20
 
 // https://openid.bitbucket.io/connect/openid-connect-self-issued-v2-1_0.html#section-10
@@ -136,6 +143,7 @@ export interface VerifiedAuthorizationRequest extends Partial<VerifiedJWT> {
   requestObject?: RequestObject // The Request object
   registrationMetadataPayload: RPRegistrationMetadataPayload
   presentationDefinitions?: PresentationDefinitionWithLocation[] // The optional presentation definition objects that the RP requests
+  dcqlQuery?: DcqlQuery
   verifyOpts: VerifyAuthorizationRequestOpts // The verification options for the authentication request
   versions: SupportedVersion[]
 }
@@ -161,6 +169,8 @@ export interface IDTokenPayload extends JWTPayload {
   }
 }
 
+export type EncodedDcqlQueryVpToken = string
+
 export interface AuthorizationResponsePayload {
   access_token?: string
   token_type?: string
@@ -168,9 +178,15 @@ export interface AuthorizationResponsePayload {
   expires_in?: number
   state?: string
   id_token?: string
-  vp_token?: Array<W3CVerifiablePresentation | CompactSdJwtVc> | W3CVerifiablePresentation | CompactSdJwtVc
+  vp_token?:
+    | Array<W3CVerifiablePresentation | CompactSdJwtVc | MdocOid4vpMdocVpToken>
+    | W3CVerifiablePresentation
+    | CompactSdJwtVc
+    | MdocOid4vpMdocVpToken
+    | EncodedDcqlQueryVpToken
   presentation_submission?: PresentationSubmission
   verifiedData?: IPresentation | AdditionalClaims
+  is_first_party?: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }
@@ -183,6 +199,7 @@ export interface IdTokenClaimPayload {
 export interface VpTokenClaimPayload {
   presentation_definition?: PresentationDefinitionV1 | PresentationDefinitionV2
   presentation_definition_uri?: string
+  dcql_query?: string
 }
 
 export interface ClaimPayloadCommon {
@@ -208,9 +225,9 @@ export interface RequestStateInfo {
   client_id: string // RP ID
 
   // sub: string
-  nonce: string
-  state: string
-  iat: number
+  nonce?: string
+  state?: string
+  iat?: number
 }
 
 interface DiscoveryMetadataCommonOpts {
@@ -266,6 +283,14 @@ interface DiscoveryMetadataOptsVID1 extends DiscoveryMetadataCommonOpts {
   client_id?: string // from oidc4vp
   redirectUris?: string[] | string // from oidc4vp
   clientName?: string // from oidc4vp
+  clientUri?: string // from oidc4vp
+  scope?: string // from oidc4vp
+  contacts?: string[] // from oidc4vp
+  tosUri?: string // from oidc4vp
+  policyUri?: string // from oidc4vp
+  jwks?: JWKS // from oidc4vp
+  softwareId?: string // from oidc4vp
+  softwareVersion?: string // from oidc4vp
   tokenEndpointAuthMethod?: string // from oidc4vp
   applicationType?: string // from oidc4vp
   responseTypes?: string // from oidc4vp, also name suggests array
@@ -348,19 +373,13 @@ interface DiscoveryMetadataCommonPayload {
   [x: string]: any
 }
 
-interface DiscoveryMetadataPayloadVID1 extends DiscoveryMetadataCommonPayload {
+interface DiscoveryMetadataPayloadVID1 extends DynamicRegistrationClientMetadata, DiscoveryMetadataCommonPayload {
   client_id?: string
-  redirect_uris?: string[]
-  client_name?: string
-  token_endpoint_auth_method?: string
   application_type?: string
-  response_types?: string
-  grant_types?: string
   vp_formats?: Format
 }
 
 interface JWT_VCDiscoveryMetadataPayload extends DiscoveryMetadataPayloadVID1 {
-  logo_uri?: string
   client_purpose?: string
 }
 
@@ -374,7 +393,7 @@ export type DiscoveryMetadataPayload = DiscoveryMetadataPayloadVID1 | JWT_VCDisc
 export type DiscoveryMetadataOpts = (JWT_VCDiscoveryMetadataOpts | DiscoveryMetadataOptsVID1 | DiscoveryMetadataOptsVD11) &
   DiscoveryMetadataCommonOpts
 
-export type ClientMetadataOpts = RPRegistrationMetadataOpts & ClientMetadataProperties
+export type ClientMetadataOpts = RPRegistrationMetadataOpts & ClientMetadataProperties & JarmClientMetadata & JwksMetadataParams
 
 export type ResponseRegistrationOpts = DiscoveryMetadataOpts & ClientMetadataProperties
 
@@ -395,7 +414,6 @@ export type RPRegistrationMetadataOpts = Partial<
     | 'clientPurpose'
   >
 > & {
-  client_id_scheme?: ClientIdScheme
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }
@@ -455,12 +473,14 @@ export enum VerifiablePresentationTypeFormat {
   JWT_VP = 'jwt_vp',
   LDP_VP = 'ldp_vp',
   SD_JWT_VC = 'vc+sd-jwt',
+  MSO_MDOC = 'mso_mdoc',
 }
 
 export enum VerifiableCredentialTypeFormat {
   LDP_VC = 'ldp_vc',
   JWT_VC = 'jwt_vc',
   SD_JWT_VC = 'vc+sd-jwt',
+  MSO_MDOC = 'mso_mdoc',
 }
 
 export enum EncSymmetricAlgorithmCode {
@@ -499,11 +519,17 @@ export interface VerifiedIDToken {
   verifyOpts: VerifyAuthorizationResponseOpts
 }
 
+export interface VerifiedOpenID4VPSubmissionDcql {
+  dcqlQuery: DcqlQuery
+  presentation: { [credentialQueryId: string]: WrappedVerifiablePresentation }
+  nonce?: string
+}
+
 export interface VerifiedOpenID4VPSubmission {
   submissionData: PresentationSubmission
   presentationDefinitions: PresentationDefinitionWithLocation[]
   presentations: WrappedVerifiablePresentation[]
-  nonce: string
+  nonce?: string
 }
 
 export interface VerifiedAuthorizationResponse {
@@ -512,6 +538,7 @@ export interface VerifiedAuthorizationResponse {
   authorizationResponse: AuthorizationResponse
 
   oid4vpSubmission?: VerifiedOpenID4VPSubmission
+  oid4vpSubmissionDcql?: VerifiedOpenID4VPSubmissionDcql
 
   nonce?: string
   state: string
@@ -533,6 +560,10 @@ export enum ResponseMode {
   // See https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-response-mode-direct_post
   DIRECT_POST = 'direct_post',
   QUERY = 'query',
+
+  DIRECT_POST_JWT = 'direct_post.jwt',
+  QUERY_JWT = 'query.jwt',
+  FRAGMENT_JWT = 'fragment.jwt',
 }
 
 export enum ProtocolFlow {
@@ -634,6 +665,10 @@ export enum ResponseIss {
   JWT_VC_PRESENTATION_V1 = 'https://self-issued.me/v2/openid-vc',
 }
 
+export enum RequestAud {
+  SELF_ISSUED_V2 = 'https://self-issued.me/v2',
+}
+
 export const isRequestOpts = (object: CreateAuthorizationRequestOpts | AuthorizationResponseOpts): object is CreateAuthorizationRequestOpts =>
   'requestBy' in object
 
@@ -701,3 +736,5 @@ export enum ContentType {
   FORM_URL_ENCODED = 'application/x-www-form-urlencoded',
   UTF_8 = 'UTF-8',
 }
+
+export { JarmClientMetadata }

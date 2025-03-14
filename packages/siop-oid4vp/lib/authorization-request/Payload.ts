@@ -1,6 +1,6 @@
 import { PEX } from '@sphereon/pex'
 
-import { getNonce, removeNullUndefined } from '../helpers'
+import { getNonce, getWithUrl, removeNullUndefined } from '../helpers'
 import { RequestObject } from '../request-object'
 import { isTarget, isTargetOrNoTargets } from '../rp/Opts'
 import { RPRegistrationMetadataPayloadSchema } from '../schemas'
@@ -17,13 +17,24 @@ import {
 import { createRequestRegistration } from './RequestRegistration'
 import { ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts, PropertyTarget } from './types'
 
-export const createPresentationDefinitionClaimsProperties = (opts: ClaimPayloadOptsVID1): ClaimPayloadVID1 => {
-  if (!opts || !opts.vp_token || (!opts.vp_token.presentation_definition && !opts.vp_token.presentation_definition_uri)) {
+export const createPresentationDefinitionClaimsProperties = async (opts: ClaimPayloadOptsVID1): Promise<ClaimPayloadVID1> => {
+  if (
+    !opts ||
+    !opts.vp_token ||
+    (!opts.vp_token.presentation_definition && !opts.vp_token.presentation_definition_uri && !opts.vp_token.dcql_query)
+  ) {
     return undefined
   }
-  const discoveryResult = PEX.definitionVersionDiscovery(opts.vp_token.presentation_definition)
-  if (discoveryResult.error) {
-    throw new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID)
+
+  let presentationDef = opts.vp_token.presentation_definition
+  if (!presentationDef && opts.vp_token.presentation_definition_uri) {
+    presentationDef = await getWithUrl(opts.vp_token.presentation_definition_uri, false)
+  }
+  if (presentationDef) {
+    const discoveryResult = PEX.definitionVersionDiscovery(presentationDef)
+    if (discoveryResult.error) {
+      return Promise.reject(new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID))
+    }
   }
 
   return {
@@ -34,6 +45,7 @@ export const createPresentationDefinitionClaimsProperties = (opts: ClaimPayloadO
         ...(opts.vp_token.presentation_definition_uri && { presentation_definition_uri: opts.vp_token.presentation_definition_uri }),
       },
     }),
+    ...(opts.vp_token.dcql_query && { vp_token: { dcql_query: opts.vp_token.dcql_query } }),
   }
 }
 
@@ -45,9 +57,10 @@ export const createAuthorizationRequestPayload = async (
   const state = payload?.state ?? undefined
   const nonce = payload?.nonce ? getNonce(state, payload.nonce) : undefined
   // TODO: if opts['registration] throw Error to get rid of test code using that key
-  const clientMetadata = opts['registration'] ? opts['registration'] : (opts.clientMetadata as ClientMetadataOpts)
+  const clientMetadata = opts['registration'] ?? (opts.clientMetadata as ClientMetadataOpts)
   const registration = await createRequestRegistration(clientMetadata, opts)
-  const claims = opts.version >= SupportedVersion.SIOPv2_ID1 ? opts.payload.claims : createPresentationDefinitionClaimsProperties(opts.payload.claims)
+  const claims =
+    opts.version >= SupportedVersion.SIOPv2_ID1 ? opts.payload.claims : await createPresentationDefinitionClaimsProperties(opts.payload.claims)
   const isRequestTarget = isTargetOrNoTargets(PropertyTarget.AUTHORIZATION_REQUEST, opts.requestObject.targets)
   const isRequestByValue = opts.requestObject.passBy === PassBy.VALUE
 
@@ -59,6 +72,7 @@ export const createAuthorizationRequestPayload = async (
   const authRequestPayload = {
     ...payload,
     //TODO implement /.well-known/openid-federation support in the OP side to resolve the client_id (URL) and retrieve the metadata
+    ...(clientMetadata.client_id && { client_id: clientMetadata.client_id }),
     ...(isRequestTarget && opts.requestObject.passBy === PassBy.REFERENCE ? { request_uri: opts.requestObject.reference_uri } : {}),
     ...(isRequestTarget && isRequestByValue && { request }),
     ...(nonce && { nonce }),

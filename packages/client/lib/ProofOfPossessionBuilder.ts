@@ -14,9 +14,9 @@ import {
   Typ,
 } from '@sphereon/oid4vci-common';
 
-export class ProofOfPossessionBuilder<DIDDoc> {
+export class ProofOfPossessionBuilder<DIDDoc = never> {
   private readonly proof?: ProofOfPossession;
-  private readonly callbacks?: ProofOfPossessionCallbacks<DIDDoc>;
+  private readonly callbacks?: ProofOfPossessionCallbacks;
   private readonly version: OpenId4VCIVersion;
   private readonly mode: PoPMode = 'pop';
 
@@ -40,7 +40,7 @@ export class ProofOfPossessionBuilder<DIDDoc> {
     mode = 'pop',
   }: {
     proof?: ProofOfPossession;
-    callbacks?: ProofOfPossessionCallbacks<DIDDoc>;
+    callbacks?: ProofOfPossessionCallbacks;
     accessTokenResponse?: AccessTokenResponse;
     jwt?: Jwt;
     version: OpenId4VCIVersion;
@@ -60,49 +60,49 @@ export class ProofOfPossessionBuilder<DIDDoc> {
     }
   }
 
-  static manual<DIDDoc>({
+  static manual({
     jwt,
     callbacks,
     version,
     mode = 'JWT',
   }: {
     jwt?: Jwt;
-    callbacks: ProofOfPossessionCallbacks<DIDDoc>;
+    callbacks: ProofOfPossessionCallbacks;
     version: OpenId4VCIVersion;
     mode?: PoPMode;
-  }): ProofOfPossessionBuilder<DIDDoc> {
+  }): ProofOfPossessionBuilder {
     return new ProofOfPossessionBuilder({ callbacks, jwt, version, mode });
   }
 
-  static fromJwt<DIDDoc>({
+  static fromJwt({
     jwt,
     callbacks,
     version,
     mode = 'pop',
   }: {
     jwt: Jwt;
-    callbacks: ProofOfPossessionCallbacks<DIDDoc>;
+    callbacks: ProofOfPossessionCallbacks;
     version: OpenId4VCIVersion;
     mode?: PoPMode;
-  }): ProofOfPossessionBuilder<DIDDoc> {
+  }): ProofOfPossessionBuilder {
     return new ProofOfPossessionBuilder({ callbacks, jwt, version, mode });
   }
 
-  static fromAccessTokenResponse<DIDDoc>({
+  static fromAccessTokenResponse({
     accessTokenResponse,
     callbacks,
     version,
     mode = 'pop',
   }: {
     accessTokenResponse: AccessTokenResponse;
-    callbacks: ProofOfPossessionCallbacks<DIDDoc>;
+    callbacks: ProofOfPossessionCallbacks;
     version: OpenId4VCIVersion;
     mode?: PoPMode;
-  }): ProofOfPossessionBuilder<DIDDoc> {
+  }): ProofOfPossessionBuilder {
     return new ProofOfPossessionBuilder({ callbacks, accessTokenResponse, version, mode });
   }
 
-  static fromProof<DIDDoc>(proof: ProofOfPossession, version: OpenId4VCIVersion): ProofOfPossessionBuilder<DIDDoc> {
+  static fromProof(proof: ProofOfPossession, version: OpenId4VCIVersion): ProofOfPossessionBuilder {
     return new ProofOfPossessionBuilder({ proof, version });
   }
 

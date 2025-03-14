@@ -8,13 +8,12 @@ import {
   CredentialOfferV1_0_11,
   CredentialOfferV1_0_13,
   determineSpecVersionFromURI,
-  getClientIdFromCredentialOfferPayload,
   OpenId4VCIVersion,
-  PRE_AUTH_CODE_LITERAL,
   PRE_AUTH_GRANT_LITERAL,
   toUniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
+import { constructBaseResponse, handleCredentialOfferUri } from './functions';
 
 import { LOG } from './types';
 
@@ -43,13 +42,17 @@ export class CredentialOfferClient {
         credential_offer: credentialOfferPayload,
       };
     } else {
-      credentialOffer = convertURIToJsonObject(uri, {
-        // It must have the '=' sign after credential_offer otherwise the uri will get split at openid_credential_offer
-        arrayTypeProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['credential_offer='],
-        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['credential_offer='],
-      }) as CredentialOfferV1_0_11 | CredentialOfferV1_0_13;
+      if (uri.includes('credential_offer_uri')) {
+        credentialOffer = (await handleCredentialOfferUri(uri)) as CredentialOfferV1_0_11 | CredentialOfferV1_0_13;
+      } else {
+        credentialOffer = convertURIToJsonObject(uri, {
+          // It must have the '=' sign after credential_offer otherwise the uri will get split at openid_credential_offer
+          arrayTypeProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['credential_offer='],
+          requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['credential_offer='],
+        }) as CredentialOfferV1_0_11 | CredentialOfferV1_0_13;
+      }
       if (credentialOffer?.credential_offer_uri === undefined && !credentialOffer?.credential_offer) {
-        throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri);
+        throw Error('Either a credential_offer or credential_offer_uri should be present in ' + uri); // cannot be reached since convertURIToJsonObject will check the params
       }
     }
 
@@ -57,25 +60,13 @@ export class CredentialOfferClient {
       ...opts,
       version,
     });
-    const clientId = getClientIdFromCredentialOfferPayload(request.credential_offer);
-    const grants = request.credential_offer?.grants;
 
     return {
-      scheme,
-      baseUrl,
-      ...(clientId && { clientId }),
-      ...request,
-      ...(grants?.authorization_code?.issuer_state && { issuerState: grants.authorization_code.issuer_state }),
-      ...(grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL] && {
-        preAuthorizedCode: grants[PRE_AUTH_GRANT_LITERAL][PRE_AUTH_CODE_LITERAL],
-      }),
+      ...constructBaseResponse(request, scheme, baseUrl),
       userPinRequired:
         request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.user_pin_required ??
         !!request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code ??
         false,
-      ...(request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code && {
-        txCode: request.credential_offer.grants[PRE_AUTH_GRANT_LITERAL].tx_code,
-      }),
     };
   }
 

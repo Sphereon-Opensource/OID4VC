@@ -17,7 +17,9 @@ import {
 export type InputCharSet = 'numeric' | 'text';
 export type KeyProofType = 'jwt' | 'cwt' | 'ldp_vp';
 
-export type PoPMode = 'pop' | 'JWT'; // Proof of posession, or regular JWT
+export type PoPMode = 'pop' | 'JWT'; // Proof of possession, or regular JWT
+
+export type CredentialOfferMode = 'VALUE' | 'REFERENCE';
 
 /**
  * Important Note: please be aware that these Common interfaces are based on versions v1_0.11 and v1_0.09
@@ -29,7 +31,7 @@ export interface ImageInfo {
   [key: string]: unknown;
 }
 
-export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'vc+sd-jwt' | 'jwt_vc'; // jwt_vc is added for backwards compat /*| 'mso_mdoc'*/; // we do not support mdocs at this point
+export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'vc+sd-jwt' | 'jwt_vc' | 'mso_mdoc'; // jwt_vc is added for backwards compat
 
 export interface NameAndLocale {
   name?: string; // REQUIRED. String value of a display name for the Credential.
@@ -67,6 +69,7 @@ export interface CredentialIssuerMetadataOpts {
   authorization_server?: string; // OPTIONAL. Identifier of the OAuth 2.0 Authorization Server (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].
   token_endpoint?: string;
   notification_endpoint?: string;
+  authorization_challenge_endpoint?: string; // OPTIONAL URL of the Credential Issuer's Authorization Challenge Endpoint. This URL MUST use the https scheme and MAY contain port, path and query parameter components. Described on https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-apps-02.html#name-authorization-challenge-end
   display?: MetadataDisplay[]; //  An array of objects, where each object contains display properties of a Credential Issuer for a certain language. Below is a non-exhaustive list of valid parameters that MAY be included:
   credential_supplier_config?: CredentialSupplierConfig;
 }
@@ -164,12 +167,22 @@ export interface CredentialSupportedSdJwtVc extends CommonCredentialSupported {
   order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
 }
 
+export interface CredentialSupportedMsoMdoc extends CommonCredentialSupported {
+  format: 'mso_mdoc';
+
+  doctype: string;
+  claims?: IssuerCredentialSubject;
+
+  order?: string[]; //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
+}
+
 export type CredentialConfigurationSupported =
   | CredentialConfigurationSupportedV1_0_13
-  | (CommonCredentialSupported & (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc));
+  | (CommonCredentialSupported &
+      (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedMsoMdoc));
 
 export type CredentialsSupportedLegacy = CommonCredentialSupported &
-  (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc);
+  (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedMsoMdoc);
 
 export interface CommonCredentialOfferFormat {
   format: OID4VCICredentialFormat | string;
@@ -196,8 +209,18 @@ export interface CredentialOfferFormatSdJwtVc extends CommonCredentialOfferForma
   claims?: IssuerCredentialSubject;
 }
 
-export type CredentialOfferFormat = CommonCredentialOfferFormat &
-  (CredentialOfferFormatJwtVcJsonLdAndLdpVc | CredentialOfferFormatJwtVcJson | CredentialOfferFormatSdJwtVc);
+// NOTE: the sd-jwt format is added to oid4vci in a later draft version than currently
+// supported, so there's no defined offer format. However, based on the request structure
+// we support sd-jwt for older drafts of oid4vci as well
+export interface CredentialOfferFormatMsoMdoc extends CommonCredentialOfferFormat {
+  format: 'mso_mdoc';
+
+  doctype: string;
+  claims?: IssuerCredentialSubject;
+}
+
+export type CredentialOfferFormatV1_0_11 = CommonCredentialOfferFormat &
+  (CredentialOfferFormatJwtVcJsonLdAndLdpVc | CredentialOfferFormatJwtVcJson | CredentialOfferFormatSdJwtVc | CredentialOfferFormatMsoMdoc);
 
 /**
  * Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
@@ -206,6 +229,7 @@ export type CredentialDataSupplierInput = any;
 
 export type CreateCredentialOfferURIResult = {
   uri: string;
+  correlationId: string;
   qrCodeDataUri?: string;
   session: CredentialOfferSession;
   userPin?: string;
@@ -249,6 +273,12 @@ export interface CredentialRequestSdJwtVc extends CommonCredentialRequest {
   claims?: IssuerCredentialSubject;
 }
 
+export interface CredentialRequestMsoMdoc extends CommonCredentialRequest {
+  format: 'mso_mdoc';
+  doctype: string;
+  claims?: IssuerCredentialSubject;
+}
+
 export interface CommonCredentialResponse extends ExperimentalSubjectIssuance {
   // format: string;  TODO do we still need this for previous version support?
   credential?: W3CVerifiableCredential;
@@ -288,7 +318,7 @@ export interface IssuerCredentialSubject {
 
 export interface Grant {
   authorization_code?: GrantAuthorizationCode;
-  'urn:ietf:params:oauth:grant-type:pre-authorized_code'?: GrantUrnIetf;
+  [PRE_AUTH_GRANT_LITERAL]?: GrantUrnIetf;
 }
 
 export interface GrantAuthorizationCode {
@@ -390,11 +420,18 @@ export interface NotificationRequest {
 
 export type NotificationError = 'invalid_notification_id' | 'invalid_notification_request';
 
-export type NotificationResult = {
+export type NotificationResponseResult = {
   error: boolean;
   response?: NotificationErrorResponse;
 };
 
 export interface NotificationErrorResponse {
   error: NotificationError | string;
+}
+
+export interface StatusListOpts {
+  statusListId?: string; // Explicit status list to use. Determines the id from the credentialStatus object in the VC itself or uses the default otherwise
+  statusListCorrelationId?: string;
+  statusListIndex?: number;
+  statusEntryCorrelationId?: string; // An id to use for correlation. Can be the credential id, but also a business identifier. Will only be used for lookups/management
 }

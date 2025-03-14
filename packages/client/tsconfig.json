@@ -11,6 +11,9 @@
   "references": [
     {
       "path": "../common"
+    },
+    {
+      "path": "../oid4vci-common"
     }
   ]
 }

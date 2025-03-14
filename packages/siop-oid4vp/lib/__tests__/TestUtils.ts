@@ -1,10 +1,19 @@
-import crypto from 'crypto'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import crypto, { createHash } from 'crypto'
 
+import { digest, ES256, generateSalt } from '@sd-jwt/crypto-nodejs'
+import { SDJwtVcInstance } from '@sd-jwt/sd-jwt-vc'
 import { JwtPayload, parseJWT, SigningAlgo, uuidv4 } from '@sphereon/oid4vc-common'
-import { IProofType } from '@sphereon/ssi-types'
+import { PartialSdJwtDecodedVerifiableCredential } from '@sphereon/pex/dist/main/lib'
+import { IProofType, SdJwtVcKbJwtPayload } from '@sphereon/ssi-types'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import base58 from 'bs58'
 import { ethers } from 'ethers'
 import { exportJWK, importJWK, JWK, SignJWT } from 'jose'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import moment from 'moment'
 
 import {
@@ -13,6 +22,7 @@ import {
   DiscoveryMetadataPayload,
   KeyCurve,
   KeyType,
+  PresentationSignCallback,
   ResponseIss,
   ResponseType,
   RPRegistrationMetadataPayload,
@@ -274,4 +284,72 @@ export const metadata: {
   verify() {
     return assertValidMetadata(this.opMetadata, this.rpMetadata)
   },
+}
+
+export const pexHasher = (data: string) => createHash('sha256').update(data).digest()
+
+export const sdJwtVcPresentationSignCallback: PresentationSignCallback = async (_args) => {
+  const presentation = _args.presentation as PartialSdJwtDecodedVerifiableCredential
+
+  // In real life scenario, the KB-JWT must be signed
+  // As the KB-JWT is a normal JWT, the user does not need an sd-jwt implementation in the presentation sign callback
+  // NOTE: should the presentation just be the KB-JWT header + payload instead of the whole decoded SD JWT?
+  expect(presentation.kbJwt).toEqual({
+    header: {
+      typ: 'kb+jwt',
+    },
+    payload: {
+      sd_hash: expect.any(String),
+      iat: expect.any(Number),
+      nonce: expect.any(String),
+    },
+  })
+
+  const createSignerVerifier = async () => {
+    const { privateKey, publicKey } = await ES256.generateKeyPair()
+    return {
+      signer: await ES256.getSigner(privateKey),
+      verifier: await ES256.getVerifier(publicKey),
+    }
+  }
+
+  const { signer, verifier } = await createSignerVerifier()
+
+  const sdjwt = new SDJwtVcInstance({
+    signer,
+    signAlg: ES256.alg,
+    verifier,
+    hasher: digest,
+    saltGenerator: generateSalt,
+    kbSigner: signer,
+    kbSignAlg: ES256.alg,
+    kbVerifier: verifier,
+  })
+
+  const claims = {
+    license: {
+      number: 10,
+    },
+    user: {
+      name: 'John',
+      date_of_birth: '01/01/1970',
+    },
+  }
+
+  const kbPayload: Omit<SdJwtVcKbJwtPayload, 'sd_hash'> = presentation.kbJwt.payload
+
+  presentation.compactSdJwtVc = await sdjwt.present<typeof claims>(
+    presentation.compactSdJwtVc,
+    {
+      user: { name: true },
+      license: { number: true },
+    },
+    {
+      kb: {
+        payload: kbPayload,
+      },
+    },
+  )
+
+  return presentation.compactSdJwtVc
 }

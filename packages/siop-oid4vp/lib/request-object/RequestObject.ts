@@ -1,9 +1,9 @@
-import { JwtIssuer, parseJWT } from '@sphereon/oid4vc-common'
+import { JwtHeader, JwtIssuer, parseJWT } from '@sphereon/oid4vc-common'
 
 import { ClaimPayloadCommonOpts, ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts } from '../authorization-request'
 import { assertValidAuthorizationRequestOpts } from '../authorization-request/Opts'
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
-import { AuthorizationRequestPayload, JwtIssuerWithContext, RequestObjectJwt, RequestObjectPayload, ResponseMode, SIOPErrors } from '../types'
+import { AuthorizationRequestPayload, JwtIssuerWithContext, RequestObjectJwt, RequestObjectPayload, SIOPErrors } from '../types'
 
 import { assertValidRequestObjectOpts } from './Opts'
 import { assertValidRequestObjectPayload, createRequestObjectPayload } from './Payload'
@@ -37,11 +37,11 @@ export class RequestObject {
    * part of the URI and which become part of the Request Object. If you generate a URI based upon the result of this class,
    * the URI will be constructed based on the Request Object only!
    */
-  public static async fromOpts(authorizationRequestOpts: CreateAuthorizationRequestOpts) {
+  public static async fromOpts(authorizationRequestOpts: CreateAuthorizationRequestOpts): Promise<RequestObject> {
     assertValidAuthorizationRequestOpts(authorizationRequestOpts)
     const createJwtCallback = authorizationRequestOpts.requestObject.createJwtCallback // We copy the signature separately as it can contain a function, which would be removed in the merge function below
-    const jwtIssuer = authorizationRequestOpts.requestObject.jwtIssuer // We copy the signature separately as it can contain a function, which would be removed in the merge function below
-    const requestObjectOpts = RequestObject.mergeOAuth2AndOpenIdProperties(authorizationRequestOpts)
+    const jwtIssuer: JwtIssuer = authorizationRequestOpts.requestObject.jwtIssuer // We copy the signature separately as it can contain a function, which would be removed in the merge function below
+    const requestObjectOpts: RequestObjectOpts<ClaimPayloadCommonOpts> = RequestObject.mergeOAuth2AndOpenIdProperties(authorizationRequestOpts)
     const mergedOpts = {
       ...authorizationRequestOpts,
       requestObject: { ...authorizationRequestOpts.requestObject, ...requestObjectOpts, createJwtCallback, jwtIssuer },
@@ -49,17 +49,20 @@ export class RequestObject {
     return new RequestObject(mergedOpts, await createRequestObjectPayload(mergedOpts))
   }
 
-  public static async fromJwt(requestObjectJwt: RequestObjectJwt) {
+  public static async fromJwt(requestObjectJwt: RequestObjectJwt): Promise<RequestObject | undefined> {
     return requestObjectJwt ? new RequestObject(undefined, undefined, requestObjectJwt) : undefined
   }
 
-  public static async fromPayload(requestObjectPayload: RequestObjectPayload, authorizationRequestOpts: CreateAuthorizationRequestOpts) {
+  public static async fromPayload(
+    requestObjectPayload: RequestObjectPayload,
+    authorizationRequestOpts: CreateAuthorizationRequestOpts,
+  ): Promise<RequestObject> {
     return new RequestObject(authorizationRequestOpts, requestObjectPayload)
   }
 
   public static async fromAuthorizationRequestPayload(payload: AuthorizationRequestPayload): Promise<RequestObject | undefined> {
     const requestObjectJwt =
-      payload.request || payload.request_uri ? await fetchByReferenceOrUseByValue(payload.request_uri, payload.request, true) : undefined
+      (payload.request ?? payload.request_uri) ? await fetchByReferenceOrUseByValue(payload.request_uri as string, payload.request, true) : undefined
     return requestObjectJwt ? await RequestObject.fromJwt(requestObjectJwt) : undefined
   }
 
@@ -74,6 +77,7 @@ export class RequestObject {
       if (this.payload.registration_uri) {
         delete this.payload.registration
       }
+
       assertValidRequestObjectPayload(this.payload)
 
       const jwtIssuer: JwtIssuerWithContext = this.opts.jwtIssuer
@@ -87,20 +91,14 @@ export class RequestObject {
         this.payload.iss = this.payload.iss ?? did
         this.payload.sub = this.payload.sub ?? did
         this.payload.client_id = this.payload.client_id ?? did
+        this.payload.client_id_scheme = 'did'
 
         const header = { kid: jwtIssuer.didUrl, alg: jwtIssuer.alg, typ: 'JWT' }
         this.jwt = await this.opts.createJwtCallback(jwtIssuer, { header, payload: this.payload })
       } else if (jwtIssuer.method === 'x5c') {
         this.payload.iss = jwtIssuer.issuer
-        this.payload.client_id = jwtIssuer.issuer
 
-        if (this.opts.payload.response_mode !== ResponseMode.DIRECT_POST) {
-          this.payload.redirect_uri = jwtIssuer.issuer
-        }
-
-        this.payload.client_id_scheme = jwtIssuer.clientIdScheme
-
-        const header = { x5c: jwtIssuer.x5c, typ: 'JWT' }
+        const header = { x5c: jwtIssuer.x5c, typ: 'JWT', alg: jwtIssuer.alg }
         this.jwt = await this.opts.createJwtCallback(jwtIssuer, { header, payload: this.payload })
       } else if (jwtIssuer.method === 'jwk') {
         if (!this.payload.client_id) {
@@ -116,12 +114,12 @@ export class RequestObject {
     return this.jwt
   }
 
-  public async getPayload(): Promise<RequestObjectPayload | undefined> {
+  public getPayload(): RequestObjectPayload | undefined {
     if (!this.payload) {
       if (!this.jwt) {
         return undefined
       }
-      this.payload = removeNullUndefined(parseJWT(this.jwt).payload) as RequestObjectPayload
+      this.payload = removeNullUndefined(parseJWT<JwtHeader, RequestObjectPayload>(this.jwt).payload)
       this.removeRequestProperties()
       if (this.payload.registration_uri) {
         delete this.payload.registration

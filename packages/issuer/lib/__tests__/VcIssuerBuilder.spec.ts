@@ -1,7 +1,17 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
 import { CredentialConfigurationSupportedV1_0_13, IssuerCredentialSubjectDisplay, IssueStatus, TokenErrorResponse } from '@sphereon/oid4vci-common'
 
-import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../index'
+import { AuthorizationServerMetadataBuilder, CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../index'
+
+const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
+  .withIssuer('https://credential-issuer')
+  .withCredentialEndpoint('https://credential-endpoint')
+  .withTokenEndpoint('https://token-endpoint')
+  .withAuthorizationEndpoint('https://token-endpoint/authorize')
+  .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
+  .withResponseTypesSupported(['code', 'token', 'id_token'])
+  .withScopesSupported(['openid', 'abcdef'])
+  .build()
 
 describe('VcIssuer builder should', () => {
   it('generate a VcIssuer', () => {
@@ -32,6 +42,7 @@ describe('VcIssuer builder should', () => {
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer('https://credential-issuer')
+      .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',
@@ -120,6 +131,7 @@ describe('VcIssuer builder should', () => {
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer('https://credential-issuer')
+      .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',
@@ -179,6 +191,7 @@ describe('VcIssuer builder should', () => {
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer('https://credential-issuer')
+      .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
         locale: 'en-US',

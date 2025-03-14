@@ -1,6 +1,7 @@
 import { JwtHeader as jwtDecodeJwtHeader, JwtPayload as jwtDecodePayload } from 'jwt-decode';
 
 import { JWK } from '.';
+
 export type JwtHeader = jwtDecodeJwtHeader & {
   alg?: string;
   x5c?: string[];

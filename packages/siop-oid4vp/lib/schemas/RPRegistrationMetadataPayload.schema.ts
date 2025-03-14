@@ -103,10 +103,10 @@ export const RPRegistrationMetadataPayloadSchemaObj = {
         },
         "logo_uri": {
           "anyOf": [
-            {},
             {
               "type": "string"
-            }
+            },
+            {}
           ]
         },
         "client_purpose": {
@@ -192,6 +192,9 @@ export const RPRegistrationMetadataPayloadSchemaObj = {
         },
         "vc+sd-jwt": {
           "$ref": "#/definitions/SdJwtObject"
+        },
+        "mso_mdoc": {
+          "$ref": "#/definitions/MsoMdocObject"
         }
       },
       "additionalProperties": false
@@ -264,6 +267,21 @@ export const RPRegistrationMetadataPayloadSchemaObj = {
           }
         }
       },
+      "additionalProperties": false
+    },
+    "MsoMdocObject": {
+      "type": "object",
+      "properties": {
+        "alg": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "alg"
+      ],
       "additionalProperties": false
     }
   }

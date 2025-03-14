@@ -1,6 +1,10 @@
 import {
+  AuthorizationServerMetadata,
+  ClientMetadata,
+  ClientResponseType,
   CNonceState,
   CredentialConfigurationSupportedV1_0_13,
+  CredentialIssuerMetadataOptsV1_0_13,
   CredentialOfferSession,
   IssuerMetadata,
   IssuerMetadataV1_0_13,
@@ -11,17 +15,19 @@ import {
   TxCode,
   URIState,
 } from '@sphereon/oid4vci-common'
-import { CredentialIssuerMetadataOptsV1_0_13 } from '@sphereon/oid4vci-common/dist/types/v1_0_13.types'
 
 import { VcIssuer } from '../VcIssuer'
+import { oidcAccessTokenVerifyCallback } from '../functions'
 import { MemoryStates } from '../state-manager'
 import { CredentialDataSupplier, CredentialSignerCallback } from '../types'
 
 import { IssuerMetadataBuilderV1_13 } from './IssuerMetadataBuilderV1_13'
 
-export class VcIssuerBuilder<DIDDoc extends object> {
+export class VcIssuerBuilder {
   issuerMetadataBuilder?: IssuerMetadataBuilderV1_13
   issuerMetadata: Partial<CredentialIssuerMetadataOptsV1_0_13> = {}
+  authorizationServerMetadata: Partial<AuthorizationServerMetadata> = {}
+  asClientOpts?: ClientMetadata
   txCode?: TxCode
   defaultCredentialOfferBaseUri?: string
   userPinRequired?: boolean
@@ -29,8 +35,8 @@ export class VcIssuerBuilder<DIDDoc extends object> {
   credentialOfferStateManager?: IStateManager<CredentialOfferSession>
   credentialOfferURIManager?: IStateManager<URIState>
   cNonceStateManager?: IStateManager<CNonceState>
-  credentialSignerCallback?: CredentialSignerCallback<DIDDoc>
-  jwtVerifyCallback?: JWTVerifyCallback<DIDDoc>
+  credentialSignerCallback?: CredentialSignerCallback
+  jwtVerifyCallback?: JWTVerifyCallback
   credentialDataSupplier?: CredentialDataSupplier
 
   public withIssuerMetadata(issuerMetadata: IssuerMetadata) {
@@ -38,6 +44,27 @@ export class VcIssuerBuilder<DIDDoc extends object> {
       throw new Error('IssuerMetadata should be from type v1_0_13 or higher.')
     }
     this.issuerMetadata = issuerMetadata as IssuerMetadataV1_0_13
+    return this
+  }
+
+  public withASClientMetadata(clientMetadata: ClientMetadata): this {
+    this.asClientOpts = clientMetadata
+    return this
+  }
+
+  public withASClientMetadataParams({
+    client_id,
+    client_secret,
+    redirect_uris,
+    response_types,
+    ...other
+  }: { client_id: string; client_secret?: string; redirect_uris?: string[]; response_types?: ClientResponseType[] } & ClientMetadata): this {
+    this.asClientOpts = { ...other, client_id, client_secret, redirect_uris, response_types }
+    return this
+  }
+
+  public withAuthorizationMetadata(authorizationServerMetadata: AuthorizationServerMetadata) {
+    this.authorizationServerMetadata = authorizationServerMetadata
     return this
   }
 
@@ -140,12 +167,12 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     return this
   }
 
-  public withCredentialSignerCallback(cb: CredentialSignerCallback<DIDDoc>): this {
+  public withCredentialSignerCallback(cb: CredentialSignerCallback): this {
     this.credentialSignerCallback = cb
     return this
   }
 
-  public withJWTVerifyCallback(verifyCallback: JWTVerifyCallback<DIDDoc>): this {
+  public withJWTVerifyCallback(verifyCallback: JWTVerifyCallback): this {
     this.jwtVerifyCallback = verifyCallback
     return this
   }
@@ -155,12 +182,18 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     return this
   }
 
-  public build(): VcIssuer<DIDDoc> {
+  public build(): VcIssuer {
     if (!this.credentialOfferStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
     if (!this.cNonceStateManager) {
       throw new Error(TokenErrorResponse.invalid_request)
+    }
+    if (Object.keys(this.issuerMetadata).length === 0) {
+      throw new Error('issuerMetadata not set')
+    }
+    if (Object.keys(this.authorizationServerMetadata).length === 0) {
+      throw new Error('authorizationServerMetadata not set')
     }
 
     const builder = this.issuerMetadataBuilder?.build()
@@ -171,7 +204,19 @@ export class VcIssuerBuilder<DIDDoc extends object> {
     if (!metadata.credential_endpoint || !metadata.credential_issuer || !this.issuerMetadata.credential_configurations_supported) {
       throw new Error(TokenErrorResponse.invalid_request)
     }
-    return new VcIssuer(metadata as IssuerMetadataV1_0_13, {
+    if (this.asClientOpts && typeof this.jwtVerifyCallback !== 'function') {
+      if (!this.issuerMetadata.credential_issuer) {
+        throw Error('issuerMetadata.credential_issuer is required when using asClientOpts')
+      } else if (!this.issuerMetadata.authorization_servers) {
+        throw Error('issuerMetadata.authorization_servers is required when using asClientOpts')
+      }
+      this.jwtVerifyCallback = oidcAccessTokenVerifyCallback({
+        clientMetadata: this.asClientOpts,
+        credentialIssuer: this.issuerMetadata.credential_issuer,
+        authorizationServer: this.issuerMetadata.authorization_servers[0],
+      })
+    }
+    return new VcIssuer(metadata as IssuerMetadataV1_0_13, this.authorizationServerMetadata as AuthorizationServerMetadata, {
       //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
       ...(this.txCode && { txCode: this.txCode }),
       defaultCredentialOfferBaseUri: this.defaultCredentialOfferBaseUri,
@@ -182,6 +227,7 @@ export class VcIssuerBuilder<DIDDoc extends object> {
       cNonces: this.cNonceStateManager,
       cNonceExpiresIn: this.cNonceExpiresIn,
       uris: this.credentialOfferURIManager,
+      asClientOpts: this.asClientOpts,
     })
   }
 }

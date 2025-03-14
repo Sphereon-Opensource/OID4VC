@@ -1,3 +1,5 @@
+import { DcqlPresentation } from 'dcql'
+
 import { AuthorizationRequest } from '../authorization-request'
 import { IDToken } from '../id-token'
 import { RequestObject } from '../request-object'
@@ -18,18 +20,22 @@ export const createResponsePayload = async (
   }
 
   // If state was in request, it must be in response
-  const state: string | undefined = await authorizationRequest.getMergedProperty('state')
+  const state: string | undefined = authorizationRequest.getMergedProperty('state')
 
   const responsePayload: AuthorizationResponsePayload = {
-    ...(responseOpts.accessToken && { access_token: responseOpts.accessToken }),
+    ...(responseOpts.accessToken && { access_token: responseOpts.accessToken, expires_in: responseOpts.expiresIn || 3600 }),
     ...(responseOpts.tokenType && { token_type: responseOpts.tokenType }),
     ...(responseOpts.refreshToken && { refresh_token: responseOpts.refreshToken }),
-    expires_in: responseOpts.expiresIn || 3600,
+    ...(responseOpts.isFirstParty && { is_first_party: responseOpts.isFirstParty }),
     state,
   }
 
   // vp tokens
-  await putPresentationSubmissionInLocation(authorizationRequest, responsePayload, responseOpts, idTokenPayload)
+  if (responseOpts.dcqlResponse) {
+    responsePayload.vp_token = DcqlPresentation.encode(responseOpts.dcqlResponse.dcqlPresentation as DcqlPresentation)
+  } else {
+    await putPresentationSubmissionInLocation(authorizationRequest, responsePayload, responseOpts, idTokenPayload)
+  }
   if (idTokenPayload) {
     const idToken = await IDToken.fromIDTokenPayload(idTokenPayload, responseOpts)
     responsePayload.id_token = await idToken.jwt(responseOpts.jwtIssuer)

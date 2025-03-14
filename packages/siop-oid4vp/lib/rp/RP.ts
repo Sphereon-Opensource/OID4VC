@@ -1,7 +1,14 @@
 import { EventEmitter } from 'events'
 
-import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
+import {
+  jarmAuthResponseDirectPostJwtValidate,
+  JarmAuthResponseParams,
+  JarmDirectPostJwtAuthResponseValidationContext,
+  JarmDirectPostJwtResponseParams,
+} from '@sphereon/jarm'
+import { decodeProtectedHeader, JwtIssuer } from '@sphereon/oid4vc-common'
 import { Hasher } from '@sphereon/ssi-types'
+import { DcqlQuery } from 'dcql'
 
 import {
   AuthorizationRequest,
@@ -13,14 +20,22 @@ import {
   URI,
 } from '../authorization-request'
 import { mergeVerificationOpts } from '../authorization-request/Opts'
-import { AuthorizationResponse, PresentationDefinitionWithLocation, VerifyAuthorizationResponseOpts } from '../authorization-response'
-import { getNonce, getState } from '../helpers'
-import { PassBy } from '../types'
+import {
+  AuthorizationResponse,
+  extractPresentationsFromDcqlVpToken,
+  extractPresentationsFromVpToken,
+  PresentationDefinitionWithLocation,
+  VerifyAuthorizationResponseOpts,
+} from '../authorization-response'
+import { base64urlToString, getNonce, getState } from '../helpers'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
   AuthorizationResponsePayload,
+  DecryptCompact,
+  PassBy,
   RegisterEventListener,
+  RequestObjectPayload,
   ResponseURIType,
   SIOPErrors,
   SupportedVersion,
@@ -41,6 +56,7 @@ export class RP {
   private readonly _verifyResponseOptions: Partial<VerifyAuthorizationResponseOpts>
   private readonly _eventEmitter?: EventEmitter
   private readonly _sessionManager?: IRPSessionManager
+  private readonly _responseRedirectUri?: string
 
   private constructor(opts: {
     builder?: RPBuilder
@@ -52,6 +68,7 @@ export class RP {
     this._verifyResponseOptions = { ...createVerifyResponseOptsFromBuilderOrExistingOpts(opts) }
     this._eventEmitter = opts.builder?.eventEmitter
     this._sessionManager = opts.builder?.sessionManager
+    this._responseRedirectUri = opts.builder?._responseRedirectUri
   }
 
   public static fromRequestOpts(opts: CreateAuthorizationRequestOpts): RP {
@@ -104,21 +121,21 @@ export class RP {
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
-    return await URI.fromOpts(authorizationRequestOpts)
-      .then(async (uri: URI) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
-          correlationId: opts.correlationId,
-          subject: await AuthorizationRequest.fromOpts(authorizationRequestOpts),
-        })
-        return uri
+    try {
+      const uri = await URI.fromOpts(authorizationRequestOpts)
+      const authRequest = await AuthorizationRequest.fromOpts(authorizationRequestOpts)
+      this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
+        correlationId: opts.correlationId,
+        subject: authRequest,
       })
-      .catch((error: Error) => {
-        void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_FAILED, {
-          correlationId: opts.correlationId,
-          error,
-        })
-        throw error
+      return uri
+    } catch (error) {
+      this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_FAILED, {
+        correlationId: opts.correlationId,
+        error,
       })
+      throw error
+    }
   }
 
   public async signalAuthRequestRetrieved(opts: { correlationId: string; error?: Error }) {
@@ -133,6 +150,55 @@ export class RP {
     })
   }
 
+  static async processJarmAuthorizationResponse(
+    response: string,
+    opts: {
+      decryptCompact: DecryptCompact
+      getAuthRequestPayload: (input: JarmDirectPostJwtResponseParams | JarmAuthResponseParams) => Promise<{
+        authRequestParams: RequestObjectPayload
+      }>
+      hasher?: Hasher
+    },
+  ) {
+    const { decryptCompact, getAuthRequestPayload, hasher } = opts
+
+    const getParams = getAuthRequestPayload as JarmDirectPostJwtAuthResponseValidationContext['openid4vp']['authRequest']['getParams']
+
+    const validatedResponse = await jarmAuthResponseDirectPostJwtValidate(
+      { response },
+      {
+        openid4vp: { authRequest: { getParams } },
+        jwe: { decryptCompact },
+      },
+    )
+
+    const presentations = validatedResponse.authRequestParams.dcql_query
+      ? extractPresentationsFromDcqlVpToken(validatedResponse.authResponseParams.vp_token as string, { hasher })
+      : extractPresentationsFromVpToken(validatedResponse.authResponseParams.vp_token, { hasher })
+
+    const mdocVerifiablePresentations = (Array.isArray(presentations) ? presentations : [presentations]).filter((p) => p.format === 'mso_mdoc')
+
+    if (mdocVerifiablePresentations.length) {
+      if (validatedResponse.type !== 'encrypted') {
+        throw new Error(`Cannot verify mdoc request nonce. Response should be 'encrypted' but is '${validatedResponse.type}'`)
+      }
+      const requestParamsNonce = validatedResponse.authRequestParams.nonce
+
+      const jweProtectedHeader = decodeProtectedHeader(response) as { apv?: string; apu?: string }
+      const apv = jweProtectedHeader.apv
+      if (!apv) {
+        throw new Error(`Missing required apv parameter in the protected header of the jarm response.`)
+      }
+
+      const requestNonce = base64urlToString(apv)
+      if (!requestParamsNonce || requestParamsNonce !== requestNonce) {
+        throw new Error(`Invalid request nonce found in the jarm protected Header. Expected '${requestParamsNonce}' received '${requestNonce}'`)
+      }
+    }
+
+    return validatedResponse
+  }
+
   public async verifyAuthorizationResponse(
     authorizationResponsePayload: AuthorizationResponsePayload,
     opts?: {
@@ -143,17 +209,18 @@ export class RP {
       nonce?: string
       verification?: Verification
       presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[]
+      dcqlQuery?: DcqlQuery
     },
   ): Promise<VerifiedAuthorizationResponse> {
-    const state = opts?.state || this.verifyResponseOptions.state
-    let correlationId: string | undefined = opts?.correlationId || state
+    const state = opts?.state ?? authorizationResponsePayload.state
+    let correlationId: string | undefined = opts?.correlationId ?? (await this.sessionManager.getCorrelationIdByState(state, true))
     let authorizationResponse: AuthorizationResponse
     try {
       authorizationResponse = await AuthorizationResponse.fromPayload(authorizationResponsePayload)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       void this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_RECEIVED_FAILED, {
-        correlationId: correlationId ?? uuidv4(), // correlation id cannot be derived from state in payload possible, hence a uuid as fallback
+        correlationId,
         subject: authorizationResponsePayload,
         error,
       })
@@ -193,6 +260,16 @@ export class RP {
 
   get verifyResponseOptions(): Partial<VerifyAuthorizationResponseOpts> {
     return this._verifyResponseOptions
+  }
+
+  public getResponseRedirectUri(mappings?: Record<string, string>): string | undefined {
+    if (!this._responseRedirectUri) {
+      return undefined
+    }
+    if (!mappings) {
+      return this._responseRedirectUri
+    }
+    return Object.entries(mappings).reduce((uri, [key, value]) => uri.replace(`:${key}`, value), this._responseRedirectUri)
   }
 
   private newAuthorizationRequestOpts(opts: {
@@ -307,6 +384,7 @@ export class RP {
       verification?: Verification
       audience?: string
       presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[]
+      dcqlQuery?: DcqlQuery
     },
   ): Promise<VerifyAuthorizationResponseOpts> {
     let correlationId = opts?.correlationId ?? this._verifyResponseOptions.correlationId
@@ -332,11 +410,26 @@ export class RP {
       }
       const requestState = await this.sessionManager.getRequestStateByCorrelationId(correlationId, false)
       if (requestState) {
-        const reqNonce: string = await requestState.request.getMergedProperty('nonce')
-        const reqState: string = await requestState.request.getMergedProperty('state')
+        const reqNonce: string = requestState.request.getMergedProperty('nonce')
+        const reqState: string = requestState.request.getMergedProperty('state')
         nonce = nonce ?? reqNonce
         state = state ?? reqState
       }
+    }
+
+    const hasPD =
+      (this._verifyResponseOptions.presentationDefinitions !== undefined && this._verifyResponseOptions.presentationDefinitions !== null) ||
+      (Array.isArray(this._verifyResponseOptions.presentationDefinitions) && this._verifyResponseOptions.presentationDefinitions.length > 0) ||
+      (opts.presentationDefinitions !== undefined && opts.presentationDefinitions !== null) ||
+      (Array.isArray(opts.presentationDefinitions) && opts.presentationDefinitions.length > 0)
+    const hasDcql =
+      (this._verifyResponseOptions.dcqlQuery !== undefined && this._verifyResponseOptions.dcqlQuery !== null) ||
+      (opts.dcqlQuery !== undefined && opts.dcqlQuery !== null)
+
+    if (hasPD && hasDcql) {
+      throw Error(`Only Presentation Definitions or DCQL is required`)
+    } else if (!hasPD && !hasDcql) {
+      throw Error(`Either a Presentation Definition or DCQL is required`)
     }
 
     return {
@@ -348,14 +441,27 @@ export class RP {
       state,
       nonce,
       verification: mergeVerificationOpts(this._verifyResponseOptions, opts),
-      presentationDefinitions: opts?.presentationDefinitions ?? this._verifyResponseOptions.presentationDefinitions,
+      ...(opts?.presentationDefinitions &&
+        !opts?.dcqlQuery && {
+          presentationDefinitions: this._verifyResponseOptions.presentationDefinitions ?? opts?.presentationDefinitions,
+        }),
+      ...(opts?.dcqlQuery /*&&
+        !opts?.presentationDefinitions */ && {
+        // FIXME presentationDefinitions will be there until we fix the OID4VC-DEMO, it wants a PD purpose field for the screens
+
+        dcqlQuery: this._verifyResponseOptions.dcqlQuery ?? opts?.dcqlQuery,
+      }),
     }
   }
 
-  private async emitEvent(
+  private emitEvent(
     type: AuthorizationEvents,
-    payload: { correlationId: string; subject?: AuthorizationRequest | AuthorizationResponse | AuthorizationResponsePayload; error?: Error },
-  ): Promise<void> {
+    payload: {
+      correlationId: string
+      subject?: AuthorizationRequest | AuthorizationResponse | AuthorizationResponsePayload
+      error?: Error
+    },
+  ): void {
     if (this._eventEmitter) {
       try {
         this._eventEmitter.emit(type, new AuthorizationEvent(payload))

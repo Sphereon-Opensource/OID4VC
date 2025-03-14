@@ -8,6 +8,7 @@ import {
   CredentialConfigurationSupportedV1_0_13,
   CredentialOfferSession,
   IssuerCredentialSubjectDisplay,
+  IssueStatus,
   Jwt,
   JWTHeader,
   JWTPayload,
@@ -15,6 +16,7 @@ import {
   PRE_AUTH_CODE_LITERAL,
   PRE_AUTH_GRANT_LITERAL,
 } from '@sphereon/oid4vci-common'
+import { AuthorizationServerMetadataBuilder } from '@sphereon/oid4vci-issuer'
 import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
 import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
 import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
@@ -22,6 +24,7 @@ import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
+import requests from 'supertest'
 
 import { OID4VCIServer } from '../OID4VCIServer'
 
@@ -47,13 +50,23 @@ interface KeyPair {
 jest.setTimeout(15000)
 
 describe('VcIssuer', () => {
-  let vcIssuer: VcIssuer<DIDDocument>
-  let server: OID4VCIServer<DIDDocument>
+  let vcIssuer: VcIssuer
+  let server: OID4VCIServer
   let accessToken: AccessTokenResponse
   const issuerState = 'previously-created-state'
   // const clientId = 'sphereon:wallet'
   const preAuthorizedCode = 'test_code'
 
+  const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
+    .withIssuer(ISSUER_URL)
+    .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
+    .withTokenEndpoint('http://localhost:3456/test/token')
+    .withAuthorizationEndpoint('https://token-endpoint.example.com/authorize')
+    .withAuthorizationChallengeEndpoint('http://localhost:3456/test/authorize-challenge')
+    .withTokenEndpointAuthMethodsSupported(['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'])
+    .withResponseTypesSupported(['code', 'token', 'id_token'])
+    .withScopesSupported(['openid', 'abcdef'])
+    .build()
   /*const preAuthorizedCode1 = 'SplxlOBeZQQYbYS6WxSbIA1'
   const preAuthorizedCode2 = 'SplxlOBeZQQYbYS6WxSbIA2'
   const preAuthorizedCode3 = 'SplxlOBeZQQYbYS6WxSbIA3'
@@ -104,8 +117,8 @@ describe('VcIssuer', () => {
       credentialSubject: {},
     }
 
-    vcIssuer = new VcIssuerBuilder<DIDDocument>()
-      // .withAuthorizationServer('https://authorization-server')
+    vcIssuer = new VcIssuerBuilder()
+      .withAuthorizationMetadata(authorizationServerMetadata)
       .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')
       .withDefaultCredentialOfferBaseUri('http://localhost:3456/test')
       .withCredentialIssuer(ISSUER_URL)
@@ -188,6 +201,7 @@ describe('VcIssuer', () => {
     expect(server.issuer).toBeDefined()
     uri = await vcIssuer
       .createCredentialOfferURI({
+        offerMode: 'VALUE',
         grants: {
           authorization_code: {
             issuer_state: issuerState,
@@ -205,7 +219,7 @@ describe('VcIssuer', () => {
       })
       .then((response) => response.uri)
     expect(uri).toEqual(
-      'http://localhost:3456/test?credential_offer=%7B%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%2C%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22tx_code%22%3A%7B%22input_mode%22%3A%22text%22%2C%22length%22%3A4%7D%7D%7D%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%7D',
+      'http://localhost:3456/test?credential_offer=%7B%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22tx_code%22%3A%7B%22input_mode%22%3A%22text%22%2C%22length%22%3A4%7D%7D%2C%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%7D%7D',
     )
   })
 
@@ -255,15 +269,24 @@ describe('VcIssuer', () => {
 
   it('should retrieve server metadata', async () => {
     await expect(client.retrieveServerMetadata()).resolves.toEqual({
-      authorizationServerMetadata: undefined,
+      authorizationServerMetadata: {
+        authorization_challenge_endpoint: 'http://localhost:3456/test/authorize-challenge',
+        authorization_endpoint: 'https://token-endpoint.example.com/authorize',
+        credential_endpoint: 'http://localhost:3456/test/credential-endpoint',
+        issuer: 'http://localhost:3456/test',
+        response_types_supported: ['code', 'token', 'id_token'],
+        scopes_supported: ['openid', 'abcdef'],
+        token_endpoint: 'http://localhost:3456/test/token',
+        token_endpoint_auth_methods_supported: ['none', 'client_secret_basic', 'client_secret_jwt', 'client_secret_post'],
+      },
       authorizationServerType: 'OID4VCI',
-      authorization_endpoint: undefined,
+      authorization_challenge_endpoint: 'http://localhost:3456/test/authorize-challenge',
+      authorization_endpoint: 'https://token-endpoint.example.com/authorize',
       deferred_credential_endpoint: undefined,
       authorization_server: 'http://localhost:3456/test',
       credentialIssuerMetadata: {
         credential_endpoint: 'http://localhost:3456/test/credential-endpoint',
         credential_issuer: 'http://localhost:3456/test',
-        token_endpoint: 'http://localhost:3456/test/token',
         credential_configurations_supported: {
           UniversityDegree_JWT: {
             credential_definition: {
@@ -298,6 +321,7 @@ describe('VcIssuer', () => {
       token_endpoint: 'http://localhost:3456/test/token',
     })
   })
+
   it('should get state on server side', async () => {
     const preAuthCode = client.credentialOffer!.credential_offer.grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL]
     expect(preAuthCode).toBeDefined()
@@ -362,6 +386,173 @@ describe('VcIssuer', () => {
         type: ['VerifiableCredential'],
       },
       format: 'jwt_vc_json',
+    })
+  })
+
+  describe('Credential Offer Endpoints', () => {
+    let testServer: OID4VCIServer
+    let testExpressSupport: ExpressSupport
+    let testVcIssuer: VcIssuer
+
+    beforeAll(async () => {
+      const stateManager = new MemoryStates<CredentialOfferSession>()
+      testVcIssuer = new VcIssuerBuilder()
+        .withAuthorizationMetadata(authorizationServerMetadata)
+        .withCredentialEndpoint('http://localhost:4321/credential-endpoint')
+        .withDefaultCredentialOfferBaseUri('http://localhost:4321')
+        .withCredentialIssuer('http://localhost:4321')
+        .withIssuerDisplay({ name: 'test issuer', locale: 'en-US' })
+        .withCredentialConfigurationsSupported({})
+        .withCredentialOfferStateManager(stateManager)
+        .withInMemoryCNonceState()
+        .withInMemoryCredentialOfferURIState()
+        .withCredentialDataSupplier(() =>
+          Promise.resolve({
+            format: 'ldp_vc',
+            credential: {
+              '@context': ['https://www.w3.org/2018/credentials/v1'],
+              type: ['VerifiableCredential'],
+              issuer: 'did:example:123',
+              issuanceDate: new Date().toISOString(),
+              credentialSubject: {},
+            },
+          }),
+        )
+        .withCredentialSignerCallback(() =>
+          Promise.resolve({
+            '@context': ['https://www.w3.org/2018/credentials/v1'],
+            type: ['VerifiableCredential'],
+            issuer: 'did:example:123',
+            issuanceDate: new Date().toISOString(),
+            credentialSubject: {},
+            proof: {
+              type: 'Ed25519Signature2018',
+              created: new Date().toISOString(),
+              proofPurpose: 'assertionMethod',
+              verificationMethod: 'did:example:123#key-1',
+              jws: 'dummy-jws',
+            },
+          }),
+        )
+        .build()
+
+      testExpressSupport = ExpressBuilder.fromServerOpts({ startListening: false, port: 4321, hostname: 'localhost' }).build({
+        startListening: false,
+      })
+
+      const dummyAccessTokenSignerCallback = async (jwt: Jwt, kid?: string): Promise<string> => {
+        return 'dummy-signed-token'
+      }
+
+      const endpointOpts = {
+        getIssuePayloadOpts: { enabled: true, baseUrl: 'http://localhost:4321' },
+        createCredentialOfferOpts: { enabled: true, baseUrl: 'http://localhost:4321' },
+        tokenEndpointOpts: {
+          accessTokenSignerCallback: dummyAccessTokenSignerCallback,
+        },
+      }
+
+      testServer = new OID4VCIServer(testExpressSupport, {
+        issuer: testVcIssuer,
+        baseUrl: 'http://localhost:4321',
+        endpointOpts,
+      })
+      testExpressSupport.start()
+    })
+
+    afterAll(async () => {
+      await testExpressSupport.stop()
+    })
+
+    it('should return error when credential offer session not found in getIssuePayloadEndpoint', async () => {
+      const res = await requests(testServer.app).get('/credential-offers/nonexistent')
+      expect(res.statusCode).toEqual(404)
+      const actual = JSON.parse(res.text)
+      expect(actual).toEqual({
+        error: 'invalid_request',
+        error_description: 'Credential offer nonexistent not found',
+      })
+    })
+
+    it('should return credential offer when session exists in getIssuePayloadEndpoint', async () => {
+      const dummySession: CredentialOfferSession = {
+        notification_id: '123',
+        createdAt: Date.now(),
+        lastUpdatedAt: Date.now(),
+        status: IssueStatus.OFFER_CREATED,
+        preAuthorizedCode: 'test-session',
+        credentialOffer: {
+          credential_offer: {
+            credential_issuer: 'test_issuer',
+            grants: { authorization_code: { issuer_state: 'dummy' } },
+            credential_configuration_ids: ['UniversityDegree_JWT'],
+          },
+        },
+      }
+
+      await testVcIssuer.credentialOfferSessions.set('test-session', dummySession)
+      await testVcIssuer.uris!.set('test-session', {
+        uri: 'https://dummy.com',
+        createdAt: new Date().getTime(),
+        preAuthorizedCode: 'test-session',
+        issuerState: 'dummy',
+      })
+      const res = await requests(testServer.app).get('/credential-offers/test-session')
+      expect(res.statusCode).toEqual(200)
+      const actual = JSON.parse(res.text)
+      expect(actual).toEqual(dummySession.credentialOffer.credential_offer)
+    })
+
+    it('should use default offerMode VALUE when not provided in createCredentialOfferEndpoint', async () => {
+      const createOfferMock = jest.fn().mockResolvedValue({ uri: 'dummy-uri' })
+      testVcIssuer.createCredentialOfferURI = createOfferMock
+      const requestBody = {
+        original_credential_offer: { version: OpenId4VCIVersion.VER_1_0_13 },
+        grants: { authorization_code: { issuer_state: 'state' } },
+        credential_configuration_ids: ['dummy'],
+      }
+      const res = await requests(testServer.app).post('/webapp/credential-offers').send(requestBody)
+      expect(res.statusCode).toEqual(200)
+      expect(createOfferMock).toHaveBeenCalled()
+      const args = createOfferMock.mock.calls[0][0]
+      expect(args.offerMode).toEqual('VALUE')
+    })
+
+    it('should include issuerPayloadUri when offerMode is REFERENCE and forwarded headers are provided', async () => {
+      const createOfferMock = jest.fn().mockResolvedValue({ uri: 'dummy-uri' })
+      testVcIssuer.createCredentialOfferURI = createOfferMock
+      const requestBody = {
+        original_credential_offer: { version: OpenId4VCIVersion.VER_1_0_13 },
+        grants: { authorization_code: { issuer_state: 'state' } },
+        credential_configuration_ids: ['dummy'],
+        offerMode: 'REFERENCE',
+      }
+      const res = await requests(testServer.app)
+        .post('/webapp/credential-offers')
+        .set('x-forwarded-proto', 'http')
+        .set('x-forwarded-host', 'example.com')
+        .set('x-forwarded-port', '8080')
+        .set('x-forwarded-prefix', '/prefix')
+        .send(requestBody)
+      expect(res.statusCode).toEqual(200)
+      expect(createOfferMock).toHaveBeenCalled()
+      const args = createOfferMock.mock.calls[0][0]
+      expect(args.offerMode).toEqual('REFERENCE')
+      expect(args.credentialOfferUri).toContain('http://example.com:8080')
+      expect(args.credentialOfferUri).toContain('/prefix')
+    })
+
+    it('should return error when createCredentialOfferURI throws an error', async () => {
+      testVcIssuer.createCredentialOfferURI = jest.fn().mockRejectedValue(new Error('Test error'))
+      const requestBody = {
+        original_credential_offer: { version: OpenId4VCIVersion.VER_1_0_13 },
+        grants: { authorization_code: { issuer_state: 'state' } },
+        credential_configuration_ids: ['dummy'],
+      }
+      const res = await requests(testServer.app).post('/webapp/credential-offers').send(requestBody)
+      expect(res.statusCode).toEqual(500)
+      const actual = JSON.parse(res.text)
+      expect(actual.error_description).toEqual('Test error')
     })
   })
 })

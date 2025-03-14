@@ -44,7 +44,6 @@ const mockedVC =
 // Access token mocks
 const mockedAccessTokenResponse: AccessTokenResponse = {
   access_token: 'ey6546.546654.64565',
-  authorization_pending: false,
   c_nonce: 'c_nonce2022101300',
   c_nonce_expires_in: 2025101300,
   interval: 2025101300,
@@ -69,7 +68,6 @@ describe('OID4VCI-Client should', () => {
   // Access token mocks
   const mockedAccessTokenResponse: AccessTokenResponse = {
     access_token: 'ey6546.546654.64565',
-    authorization_pending: false,
     c_nonce: 'c_nonce2022101300',
     c_nonce_expires_in: 2025101300,
     interval: 2025101300,
@@ -168,7 +166,6 @@ describe('OID4VCI-Client should', () => {
       });
     nock(IDENTIPROOF_ISSUER_URL).post('/token').reply(200, {
       access_token: 'ey6546.546654.64565',
-      authorization_pending: false,
       c_nonce: 'c_nonce2022101300',
       c_nonce_expires_in: 2025101300,
       interval: 2025101300,
@@ -198,7 +195,7 @@ describe('OID4VCI-Client should', () => {
 
     const credentialResponse = await client.acquireCredentials({
       credentialIdentifier: 'OpenBadgeCredential',
-      format: 'jwt_vc_json-ld',
+      // format: 'jwt_vc_json-ld',
       proofCallbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },

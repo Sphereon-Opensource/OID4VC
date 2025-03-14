@@ -1,7 +1,10 @@
 import {
+  AuthorizationChallengeCodeResponse,
+  AuthorizationChallengeRequestOpts,
   AuthorizationDetails,
   AuthorizationRequestOpts,
   CodeChallengeMethod,
+  CommonAuthorizationChallengeRequest,
   convertJsonToURI,
   CreateRequestObjectMode,
   CredentialConfigurationSupportedV1_0_13,
@@ -10,12 +13,15 @@ import {
   CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
+  EndpointMetadata,
   EndpointMetadataResultV1_0_13,
   formPost,
+  IssuerOpts,
   isW3cCredentialSupported,
   JsonURIMode,
   Jwt,
   OpenId4VCIVersion,
+  OpenIDResponse,
   PARMode,
   PKCEOpts,
   PushedAuthorizationResponse,
@@ -24,6 +30,7 @@ import {
 } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
 
+import { MetadataClient } from './MetadataClient';
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
 
 const debug = Debug('sphereon:oid4vci');
@@ -66,6 +73,7 @@ export async function createSignedAuthRequestWhenNeeded(requestObject: Record<st
     requestObject['request'] = pop.jwt;
   }
 }
+
 function filterSupportedCredentials(
   credentialOffer: CredentialOfferPayloadV1_0_13,
   credentialsSupported?: Record<string, CredentialConfigurationSupportedV1_0_13>,
@@ -148,8 +156,9 @@ export const createAuthorizationRequestUrl = async ({
 
       // SD-JWT VC
       const vct = cred.format === 'vc+sd-jwt' ? cred.vct : undefined;
+      const doctype = cred.format === 'mso_mdoc' ? cred.doctype : undefined;
 
-      // W3C credentials
+      // W3C credentials have a credential definition, the rest does not
       let credential_definition: undefined | Partial<CredentialDefinitionJwtVcJsonV1_0_13 | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13> =
         undefined;
       if (isW3cCredentialSupported(cred)) {
@@ -171,6 +180,7 @@ export const createAuthorizationRequestUrl = async ({
         ...(credential_configuration_id && { credential_configuration_id }),
         ...(format && { format }),
         ...(vct && { vct, claims: cred.claims ? removeDisplayAndValueTypes(cred.claims) : undefined }),
+        ...(doctype && { doctype, claims: cred.claims ? removeDisplayAndValueTypes(cred.claims) : undefined }),
       } as AuthorizationDetails;
     });
     if (!authorizationDetails || authorizationDetails.length === 0) {
@@ -191,19 +201,28 @@ export const createAuthorizationRequestUrl = async ({
     authorization_details: JSON.stringify(handleAuthorizationDetails(endpointMetadata, authorizationDetails)),
     ...(redirectUri && { redirect_uri: redirectUri }),
     ...(client_id && { client_id }),
-    ...(credentialOffer?.issuerState && { issuer_state: credentialOffer.issuerState }),
+
+    ...(credentialOffer?.issuerState && {
+      issuer_state: credentialOffer.issuerState,
+    }),
     scope: authorizationRequest.scope,
   };
+
+  if (credentialOffer?.issuerState) {
+    /* We also pass it in as state, as this would allow an external AS without integration to return it back to the wallet */
+    queryObj.state = credentialOffer?.issuerState;
+  }
 
   if (!parEndpoint && parMode === PARMode.REQUIRE) {
     throw Error(`PAR mode is set to required by Authorization Server does not support PAR!`);
   } else if (parEndpoint && parMode !== PARMode.NEVER) {
     debug(`USING PAR with endpoint ${parEndpoint}`);
+
     const parResponse = await formPost<PushedAuthorizationResponse>(
       parEndpoint,
       convertJsonToURI(queryObj, {
         mode: JsonURIMode.X_FORM_WWW_URLENCODED,
-        uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
+        uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state', 'state'],
       }),
       { contentType: 'application/x-www-form-urlencoded', accept: 'application/json' },
     );
@@ -223,7 +242,7 @@ export const createAuthorizationRequestUrl = async ({
   debug(`Object that will become query params: ` + JSON.stringify(queryObj, null, 2));
   const url = convertJsonToURI(queryObj, {
     baseUrl: endpointMetadata.authorization_endpoint,
-    uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state'],
+    uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state', 'state'],
     // arrayTypeProperties: ['authorization_details'],
     mode: JsonURIMode.X_FORM_WWW_URLENCODED,
     // We do not add the version here, as this always needs to be form encoded
@@ -269,4 +288,73 @@ const handleLocations = (endpointMetadata: EndpointMetadataResultV1_0_13, author
     }
   }
   return authorizationDetails;
+};
+
+export const acquireAuthorizationChallengeAuthCode = async (
+  opts: AuthorizationChallengeRequestOpts,
+): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse>> => {
+  const { metadata } = opts;
+
+  const issuer = opts.credentialIssuer ?? (opts?.metadata?.issuer as string);
+  if (!issuer) {
+    throw Error('Issuer required at this point');
+  }
+
+  const issuerOpts = {
+    issuer,
+  };
+
+  return await acquireAuthorizationChallengeAuthCodeUsingRequest({
+    authorizationChallengeRequest: await createAuthorizationChallengeRequest(opts),
+    metadata,
+    issuerOpts,
+  });
+};
+
+export const acquireAuthorizationChallengeAuthCodeUsingRequest = async (opts: {
+  authorizationChallengeRequest: CommonAuthorizationChallengeRequest;
+  metadata?: EndpointMetadata;
+  issuerOpts?: IssuerOpts;
+}): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse>> => {
+  const { authorizationChallengeRequest, issuerOpts } = opts;
+  const metadata = opts?.metadata
+    ? opts?.metadata
+    : issuerOpts?.fetchMetadata
+      ? await MetadataClient.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
+      : undefined;
+  const authorizationChallengeCodeUrl = metadata?.authorization_challenge_endpoint;
+
+  if (!authorizationChallengeCodeUrl) {
+    return Promise.reject(Error('Cannot determine authorization challenge endpoint URL'));
+  }
+
+  const response = await sendAuthorizationChallengeRequest(authorizationChallengeCodeUrl, authorizationChallengeRequest);
+
+  return response;
+};
+
+export const createAuthorizationChallengeRequest = async (opts: AuthorizationChallengeRequestOpts): Promise<CommonAuthorizationChallengeRequest> => {
+  const { clientId, issuerState, authSession, scope, codeChallenge, codeChallengeMethod, presentationDuringIssuanceSession } = opts;
+
+  const request: CommonAuthorizationChallengeRequest = {
+    client_id: clientId,
+    issuer_state: issuerState,
+    auth_session: authSession,
+    scope,
+    code_challenge: codeChallenge,
+    code_challenge_method: codeChallengeMethod,
+    presentation_during_issuance_session: presentationDuringIssuanceSession,
+  };
+
+  return request;
+};
+
+export const sendAuthorizationChallengeRequest = async (
+  authorizationChallengeCodeUrl: string,
+  authorizationChallengeRequest: CommonAuthorizationChallengeRequest,
+  opts?: { headers?: Record<string, string> },
+): Promise<OpenIDResponse<AuthorizationChallengeCodeResponse>> => {
+  return await formPost(authorizationChallengeCodeUrl, convertJsonToURI(authorizationChallengeRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }), {
+    customHeaders: opts?.headers ? opts.headers : undefined,
+  });
 };

@@ -412,10 +412,10 @@ export function determineGrantTypes(
 
   const types: GrantTypes[] = [];
   if (grants) {
-    if (grants.authorization_code) {
+    if ('authorization_code' in grants) {
       types.push(GrantTypes.AUTHORIZATION_CODE);
     }
-    if (grants[PRE_AUTH_GRANT_LITERAL] && grants[PRE_AUTH_GRANT_LITERAL][PRE_AUTH_CODE_LITERAL]) {
+    if (PRE_AUTH_GRANT_LITERAL in grants) {
       types.push(GrantTypes.PRE_AUTHORIZED_CODE);
     }
   }

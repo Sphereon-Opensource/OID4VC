@@ -27,6 +27,7 @@ export class CredentialRequestClientBuilderV1_0_13 {
   token?: string;
   version?: OpenId4VCIVersion;
   subjectIssuance?: ExperimentalSubjectIssuance;
+  issuerState?: string;
 
   public static fromCredentialIssuer({
     credentialIssuer,
@@ -86,6 +87,7 @@ export class CredentialRequestClientBuilderV1_0_13 {
     if (ids.length && ids.length === 1) {
       builder.withCredentialIdentifier(ids[0]);
     }
+
     return builder;
   }
 
@@ -96,11 +98,13 @@ export class CredentialRequestClientBuilderV1_0_13 {
     credentialOffer: CredentialOfferRequestWithBaseUrl;
     metadata?: EndpointMetadata;
   }): CredentialRequestClientBuilderV1_0_13 {
-    return CredentialRequestClientBuilderV1_0_13.fromCredentialOfferRequest({
+    const builder = CredentialRequestClientBuilderV1_0_13.fromCredentialOfferRequest({
       request: credentialOffer,
       metadata,
       version: credentialOffer.version,
     });
+
+    return builder;
   }
 
   public withCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadataV1_0_13): this {
@@ -110,6 +114,11 @@ export class CredentialRequestClientBuilderV1_0_13 {
 
   public withCredentialEndpoint(credentialEndpoint: string): this {
     this.credentialEndpoint = credentialEndpoint;
+    return this;
+  }
+
+  public withIssuerState(issuerState?: string): this {
+    this.issuerState = issuerState;
     return this;
   }
 

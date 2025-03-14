@@ -1,11 +1,19 @@
-import { Hasher } from '@sphereon/ssi-types'
+import { CredentialMapper, Hasher, WrappedVerifiablePresentation } from '@sphereon/ssi-types'
+import { DcqlPresentation } from 'dcql'
 
 import { AuthorizationRequest, VerifyAuthorizationRequestOpts } from '../authorization-request'
 import { assertValidVerifyAuthorizationRequestOpts } from '../authorization-request/Opts'
 import { IDToken } from '../id-token'
 import { AuthorizationResponsePayload, ResponseType, SIOPErrors, VerifiedAuthorizationRequest, VerifiedAuthorizationResponse } from '../types'
 
-import { assertValidVerifiablePresentations, extractPresentationsFromAuthorizationResponse, verifyPresentations } from './OpenID4VP'
+import { Dcql } from './Dcql'
+import {
+  assertValidVerifiablePresentations,
+  extractNonceFromWrappedVerifiablePresentation,
+  extractPresentationsFromDcqlVpToken,
+  extractPresentationsFromVpToken,
+  verifyPresentations,
+} from './OpenID4VP'
 import { assertValidResponseOpts } from './Opts'
 import { createResponsePayload } from './Payload'
 import { AuthorizationResponseOpts, PresentationDefinitionWithLocation, VerifyAuthorizationResponseOpts } from './types'
@@ -118,10 +126,14 @@ export class AuthorizationResponse {
       authorizationRequest,
     })
 
-    if (hasVpToken) {
-      const wrappedPresentations = await extractPresentationsFromAuthorizationResponse(response, {
-        hasher: verifyOpts.hasher,
-      })
+    if (!hasVpToken) return response
+
+    if (responseOpts.presentationExchange) {
+      const wrappedPresentations = response.payload.vp_token
+        ? extractPresentationsFromVpToken(response.payload.vp_token, {
+            hasher: verifyOpts.hasher,
+          })
+        : []
 
       await assertValidVerifiablePresentations({
         presentationDefinitions,
@@ -132,6 +144,16 @@ export class AuthorizationResponse {
           hasher: verifyOpts.hasher,
         },
       })
+    } else if (verifiedAuthorizationRequest.dcqlQuery) {
+      await Dcql.assertValidDcqlPresentationResult(
+        responseOpts.dcqlResponse.dcqlPresentation as DcqlPresentation,
+        verifiedAuthorizationRequest.dcqlQuery,
+        {
+          hasher: verifyOpts.hasher,
+        },
+      )
+    } else {
+      throw new Error('vp_token is present, but no presentation definitions or dcql query provided')
     }
 
     return response
@@ -148,19 +170,30 @@ export class AuthorizationResponse {
     }
 
     const verifiedIdToken = await this.idToken?.verify(verifyOpts)
-    const oid4vp = await verifyPresentations(this, verifyOpts)
+    if (this.payload.vp_token && !verifyOpts.presentationDefinitions && !verifyOpts.dcqlQuery) {
+      return Promise.reject(Error('vp_token is present, but no presentation definitions or dcql query provided'))
+    }
+
+    const emptyPresentationDefinitions = Array.isArray(verifyOpts.presentationDefinitions) && verifyOpts.presentationDefinitions.length === 0
+    if (!this.payload.vp_token && ((verifyOpts.presentationDefinitions && !emptyPresentationDefinitions) || verifyOpts.dcqlQuery)) {
+      return Promise.reject(Error('Presentation definitions or dcql query provided, but no vp_token present'))
+    }
+
+    const oid4vp = this.payload.vp_token ? await verifyPresentations(this, verifyOpts) : undefined
 
     // Gather all nonces
     const allNonces = new Set<string>()
-    if (oid4vp) allNonces.add(oid4vp.nonce)
+    if (oid4vp && (oid4vp.dcql?.nonce || oid4vp.presentationExchange?.nonce)) allNonces.add(oid4vp.dcql?.nonce ?? oid4vp.presentationExchange?.nonce)
     if (verifiedIdToken) allNonces.add(verifiedIdToken.payload.nonce)
     if (merged.nonce) allNonces.add(merged.nonce)
 
+    // We only verify the nonce if there is one. We handle the case if the nonce is undefined
+    // but it should be defined elsewhere. So if the nonce is undefined we don't have to verify it
     const firstNonce = Array.from(allNonces)[0]
-    if (allNonces.size !== 1 || typeof firstNonce !== 'string') {
+    if (allNonces.size > 1) {
       throw new Error('both id token and VPs in vp token if present must have a nonce, and all nonces must be the same')
     }
-    if (verifyOpts.nonce && firstNonce !== verifyOpts.nonce) {
+    if (verifyOpts.nonce && firstNonce && firstNonce !== verifyOpts.nonce) {
       throw Error(SIOPErrors.BAD_NONCE)
     }
 
@@ -176,7 +209,8 @@ export class AuthorizationResponse {
       state,
       correlationId: verifyOpts.correlationId,
       ...(this.idToken && { idToken: verifiedIdToken }),
-      ...(oid4vp && { oid4vpSubmission: oid4vp }),
+      ...(oid4vp?.presentationExchange && { oid4vpSubmission: oid4vp.presentationExchange }),
+      ...(oid4vp?.dcql && { oid4vpSubmissionDcql: oid4vp.dcql }),
     }
   }
 
@@ -196,21 +230,38 @@ export class AuthorizationResponse {
     return this._idToken
   }
 
-  public async getMergedProperty<T>(key: string, opts?: { consistencyCheck?: boolean; hasher?: Hasher }): Promise<T | undefined> {
-    const merged = await this.mergedPayloads(opts)
+  public getMergedProperty<T>(key: string, opts?: { consistencyCheck?: boolean; hasher?: Hasher }): T | undefined {
+    const merged = this.mergedPayloads(opts) // FIXME this is really bad, expensive...
     return merged[key] as T
   }
 
-  public async mergedPayloads(opts?: { consistencyCheck?: boolean; hasher?: Hasher }): Promise<AuthorizationResponsePayload> {
+  public mergedPayloads(opts?: { consistencyCheck?: boolean; hasher?: Hasher }): AuthorizationResponsePayload {
     let nonce: string | undefined = this._payload.nonce
     if (this._payload?.vp_token) {
-      const presentations = await extractPresentationsFromAuthorizationResponse(this, opts)
-      // We do not verify them, as that is done elsewhere. So we simply can take the first nonce
-      if (!nonce) {
-        nonce = presentations[0].decoded.nonce
+      let presentations: WrappedVerifiablePresentation | WrappedVerifiablePresentation[]
+
+      try {
+        presentations = extractPresentationsFromDcqlVpToken(this._payload.vp_token as string, opts)
+      } catch (e) {
+        presentations = extractPresentationsFromVpToken(this._payload.vp_token, opts)
       }
+
+      if (!presentations || (Array.isArray(presentations) && presentations.length === 0)) {
+        return Promise.reject(Error('missing presentation(s)'))
+      }
+      const presentationsArray = Array.isArray(presentations) ? presentations : [presentations]
+
+      // We do not verify them, as that is done elsewhere. So we simply can take the first nonce
+      nonce = presentationsArray
+        // FIXME toWrappedVerifiablePresentation() does not extract the nonce yet from mdocs.
+        // However the nonce is validated as part of the mdoc verification process (using the session transcript bytes)
+        // Once it is available we can also test it here, but it will be verified elsewhre as well
+        .filter((presentation) => !CredentialMapper.isWrappedMdocPresentation(presentation))
+        .map(extractNonceFromWrappedVerifiablePresentation)
+        .find((nonce) => nonce !== undefined)
     }
-    const idTokenPayload = await this.idToken?.payload()
+
+    const idTokenPayload = this.idToken?.payload()
     if (opts?.consistencyCheck !== false && idTokenPayload) {
       Object.entries(idTokenPayload).forEach((entry) => {
         if (typeof entry[0] === 'string' && this.payload[entry[0]] && this.payload[entry[0]] !== entry[1]) {
@@ -219,7 +270,7 @@ export class AuthorizationResponse {
       })
     }
     if (!nonce && this._idToken) {
-      nonce = (await this._idToken.payload()).nonce
+      nonce = idTokenPayload.nonce
     }
 
     return { ...this.payload, ...idTokenPayload, nonce }

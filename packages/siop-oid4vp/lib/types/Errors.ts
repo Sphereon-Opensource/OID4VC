@@ -1,6 +1,7 @@
 enum SIOPErrors {
   // todo: INVALID_REQUEST mapping onto response conforming to spec
   INVALID_CLIENT_ID_MUST_MATCH_REDIRECT_URI = `Invalid request object payload. The redirect_uri must match the client_id with client_id_scheme 'redirect_uri'.`,
+  INVALID_CLIENT_ID_MUST_MATCH_RESPONSE_URI = `Invalid request object payload. The response_uri must match the client_id with client_id_scheme 'redirect_uri'.`,
   INVALID_REQUEST = 'The request contained invalid or conflicting parameters',
   AUTH_REQUEST_EXPECTS_VP = 'authentication request expects a verifiable presentation in the response',
   AUTH_REQUEST_DOESNT_EXPECT_VP = "authentication request doesn't expect a verifiable presentation in the response",
@@ -27,7 +28,7 @@ enum SIOPErrors {
   MISSING_ATTESTATION_JWT_WITH_CLIENT_ID_SCHEME_ATTESTATION = `Missing jwt header jwt with client_id_scheme 'verifier_attestation'.`,
   MISSING_ATTESTATION_JWT_TYP = `Attestation JWT missing typ 'verifier-attestation+jwt'.`,
   INVALID_CLIENT_ID_SCHEME = 'Invalid client_id_scheme.',
-  INVALID_REQUEST_OBJECT_ENTITY_ID_SCHEME_CLIENT_ID = `Request Object uses client_id_scheme 'entity_id', but the client_id is not a string.`,
+  INVALID_REQUEST_OBJECT_ENTITY_ID_SCHEME_CLIENT_ID = `Request Object uses client_id_scheme 'entity_id', but the entity_id is missing or not an https endpoint.`,
   EXPIRED = 'The token has expired',
   INVALID_AUDIENCE = 'Audience is invalid. Should be a string value.',
   NO_AUDIENCE = 'No audience found in JWT payload or not configured',
@@ -37,7 +38,7 @@ enum SIOPErrors {
   REFERENCE_URI_NO_PAYLOAD = 'referenceUri specified, but object to host there is not present',
   NO_SELF_ISSUED_ISS = 'The Response Token Issuer Claim (iss) MUST start with https://self-isued.me/v2',
   REGISTRATION_NOT_SET = 'Registration metadata not set.',
-  REQUEST_CLAIMS_PRESENTATION_DEFINITION_BY_REF_AND_VALUE_NON_EXCLUSIVE = "Request claims can't have both 'presentation_definition' and 'presentation_definition_uri'",
+  REQUEST_CLAIMS_PRESENTATION_NON_EXCLUSIVE = "Request claims can't have multiple of 'presentation_definition', 'presentation_definition_uri' and 'dcql_query",
   REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID = 'Presentation definition in the request claims is not valid',
   REQUEST_OBJECT_TYPE_NOT_SET = 'Request object type is not set.',
   RESPONSE_OPTS_PRESENTATIONS_SUBMISSION_IS_NOT_VALID = 'presentation_submission object inside the response opts vp should be valid',
@@ -51,6 +52,7 @@ enum SIOPErrors {
   VERIFY_BAD_PARAMS = 'Verify bad parameters',
   VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID = 'The signature of the verifiable presentation is not valid',
   VERIFIABLE_PRESENTATION_VERIFICATION_FUNCTION_MISSING = 'The verifiable presentation verification function is missing',
+  PRESENTATION_SUBMISSION_DEFINITION_ID_DOES_NOT_MATCHING_DEFINITION_ID = "The 'definition_id' in the presentation submission does not match the id of the presentation definition.",
 }
 
 export default SIOPErrors
