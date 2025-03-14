@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.17.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.16.0...v0.17.0) (2025-03-14)
+
+### Bug Fixes
+
+- changes for oid4vc conformance tests ([aa56dbf](https://github.com/Sphereon-Opensource/OID4VCI/commit/aa56dbfc49b46fc559f4e4d2affcb20ddd91a525))
+- client_id_scheme & default scope handling ([c559618](https://github.com/Sphereon-Opensource/OID4VCI/commit/c559618a3ef78e50a312757de02cfa1468493e82))
+- Fix for when credential_configuration_ids is being used together with credentials_supported ([f696867](https://github.com/Sphereon-Opensource/OID4VCI/commit/f6968677ccd10c2ce8eb8484443971102547e8a2))
+- fix single vp_token being send is an array ([e496ca2](https://github.com/Sphereon-Opensource/OID4VCI/commit/e496ca259319f2f6fa327cf0efe71e0a8f0dc5f1))
+- jwk thumbprint digest ([c9220ee](https://github.com/Sphereon-Opensource/OID4VCI/commit/c9220ee04e3e0a1ae07cf61a46f23df86e81f0ad))
+- session and state to correlationId mapping bugfixes ([c9b4d6f](https://github.com/Sphereon-Opensource/OID4VCI/commit/c9b4d6f8df62a11d6235d75bee63deb352f66926))
+- update deps ([ca61afe](https://github.com/Sphereon-Opensource/OID4VCI/commit/ca61afe183f8387e591a17dbb9de894c1f1aad0e))
+
+### Features
+
+- add jarm package ([4cb9259](https://github.com/Sphereon-Opensource/OID4VCI/commit/4cb9259a5bb015a8ffca63d2873cc0baae2b1b8e))
+- added DynamicRegistrationClientMetadata type and extended existing metadata for issuer and rp ([97b8779](https://github.com/Sphereon-Opensource/OID4VCI/commit/97b87795b893eaede336387af9a209338da00213))
+- Expose DPoP support also to main clients, instead of only to the access token client and credential request client ([e2cc7f6](https://github.com/Sphereon-Opensource/OID4VCI/commit/e2cc7f6abf553a705786d9c3fdc9aa28e53cac1c))
+
 # [0.16.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.15.1...v0.16.0) (2024-08-02)
 
 ### Bug Fixes

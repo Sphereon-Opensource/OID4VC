@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/jarm",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Sphereon JARM",
   "source": "lib/index.ts",
   "main": "dist/index.js",
@@ -10,8 +10,8 @@
     "build:clean": "tsc --build --clean && tsc --build"
   },
   "dependencies": {
-    "valibot": "^0.42.1",
-    "@sphereon/oid4vc-common": "workspace:*"
+    "@sphereon/oid4vc-common": "workspace:*",
+    "valibot": "^0.42.1"
   },
   "devDependencies": {
     "typescript": "5.5.3"

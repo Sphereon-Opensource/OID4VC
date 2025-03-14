@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.17.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.16.0...v0.17.0) (2025-03-14)
+
+### Bug Fixes
+
+- access token client_id not always set ([4b09936](https://github.com/Sphereon-Opensource/OID4VCI/commit/4b09936ab1488eb1155f874deeb11e0afa9f5a01))
+- client_id_scheme & default scope handling ([c559618](https://github.com/Sphereon-Opensource/OID4VCI/commit/c559618a3ef78e50a312757de02cfa1468493e82))
+- Fix for when credential_configuration_ids is being used together with credentials_supported ([f696867](https://github.com/Sphereon-Opensource/OID4VCI/commit/f6968677ccd10c2ce8eb8484443971102547e8a2))
+- Fix for when credential_configuration_ids is being used together with credentials_supported ([c9ff2fc](https://github.com/Sphereon-Opensource/OID4VCI/commit/c9ff2fc9579c80e108efa2b7fe5ca860e23c1117))
+- fix single vp_token being send is an array ([e496ca2](https://github.com/Sphereon-Opensource/OID4VCI/commit/e496ca259319f2f6fa327cf0efe71e0a8f0dc5f1))
+- format ([688fb6d](https://github.com/Sphereon-Opensource/OID4VCI/commit/688fb6d81c414b865fcef6ae2a1fe9b40c5d1782))
+- offer creation improvements ([a0f5326](https://github.com/Sphereon-Opensource/OID4VCI/commit/a0f53268bbf356d5c58eadf5dc29a5c91189a264))
+- session and state to correlationId mapping bugfixes ([c9b4d6f](https://github.com/Sphereon-Opensource/OID4VCI/commit/c9b4d6f8df62a11d6235d75bee63deb352f66926))
+- update deps ([ca61afe](https://github.com/Sphereon-Opensource/OID4VCI/commit/ca61afe183f8387e591a17dbb9de894c1f1aad0e))
+
+### Features
+
+- add aud/response_uri to request object, and client_id to the request ([400df29](https://github.com/Sphereon-Opensource/OID4VCI/commit/400df29061a93b46149ab1744998b592e36b399f))
+- Add expiration to offers ([bbd8d7e](https://github.com/Sphereon-Opensource/OID4VCI/commit/bbd8d7e08b2061048d7d4439eb6af5f4890bd61f))
+- Add support for mDL / mdoc to the OID4VCI client ([6556cc0](https://github.com/Sphereon-Opensource/OID4VCI/commit/6556cc0bf7c8cb11907684fbecb6d9464e0e53f2))
+- added DynamicRegistrationClientMetadata type and extended existing metadata for issuer and rp ([97b8779](https://github.com/Sphereon-Opensource/OID4VCI/commit/97b87795b893eaede336387af9a209338da00213))
+- added support for first party applications ([9c273b9](https://github.com/Sphereon-Opensource/OID4VCI/commit/9c273b94a5373f9949b0d717e151e9f378307a3f))
+- Allow REST API and client to set client_id and other params ([16a7a2c](https://github.com/Sphereon-Opensource/OID4VCI/commit/16a7a2cdcd83711c8362c40e138235581fce8963))
+- Expose DPoP support also to main clients, instead of only to the access token client and credential request client ([e2cc7f6](https://github.com/Sphereon-Opensource/OID4VCI/commit/e2cc7f6abf553a705786d9c3fdc9aa28e53cac1c))
+- Improvements to by reference offers. Also allow setting a correlationId on an offer ([1020d26](https://github.com/Sphereon-Opensource/OID4VCI/commit/1020d266634e0b12e54f66c37cd5470789940087))
+- MWALL-715 Create notification endpoint logic in Issuer ([2dff0df](https://github.com/Sphereon-Opensource/OID4VCI/commit/2dff0df4f3d9c0943b9e93ea2c9666fab43747c2))
+- OID4VCI Rest API session improvements and delete endpoint ([0936d5d](https://github.com/Sphereon-Opensource/OID4VCI/commit/0936d5d67b9baa392396dd5fa632df3106524aa0))
+- Pass in issuer_state to regular state in auth code flow, so we get a better integration with any external OIDC solution ([5b1178d](https://github.com/Sphereon-Opensource/OID4VCI/commit/5b1178dc2770e2dc6c9fd2fe98c5fe40ddb937b1))
+- Pass in issuer_state to regular state in auth code flow, so we get a better integration with any external OIDC solution ([09cbd0d](https://github.com/Sphereon-Opensource/OID4VCI/commit/09cbd0d62014b6e0c8a5d367f5f95d040e5d67c4))
+
 # [0.16.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.15.1...v0.16.0) (2024-08-02)
 
 ### Bug Fixes

@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.17.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.16.0...v0.17.0) (2025-03-14)
+
+### Bug Fixes
+
+- add a test file to jarm ([1309fb7](https://github.com/Sphereon-Opensource/OID4VCI/commit/1309fb791b4757a339e1d2bc263191a6f89e518c))
+- feedback ([b119275](https://github.com/Sphereon-Opensource/OID4VCI/commit/b1192751c7d72890bfb4d7822c10f39e24830422))
+- session and state to correlationId mapping bugfixes ([c9b4d6f](https://github.com/Sphereon-Opensource/OID4VCI/commit/c9b4d6f8df62a11d6235d75bee63deb352f66926))
+
+### Features
+
+- add jarm package ([4cb9259](https://github.com/Sphereon-Opensource/OID4VCI/commit/4cb9259a5bb015a8ffca63d2873cc0baae2b1b8e))
+- add jarm package ([9d6f07a](https://github.com/Sphereon-Opensource/OID4VCI/commit/9d6f07a2e5ec282b1ffe6716786c80394395598d))
+- mso mdoc handling ([d88df4f](https://github.com/Sphereon-Opensource/OID4VCI/commit/d88df4fc9f4a704f9c4cf208a0b302dca4fc2d29))
+- validate jarm metadata ([348d5bc](https://github.com/Sphereon-Opensource/OID4VCI/commit/348d5bc05224afd54bfda03960a7599817fbc9d7))
+
 # [0.16.0](https://github.com/Sphereon-Opensource/OID4VCI/compare/v0.15.1...v0.16.0) (2024-08-02)
 
 ### Bug Fixes
