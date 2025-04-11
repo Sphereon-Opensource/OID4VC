@@ -1,5 +1,7 @@
 import { InputDescriptorV1 } from '@sphereon/pex-models'
 import { parse, stringify } from 'qs'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import * as ua8 from 'uint8arrays'
 
 import { SIOPErrors } from '../types'

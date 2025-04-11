@@ -1,5 +1,5 @@
-import { JWK, JwtHeader, JwtPayload, SigningAlgo } from '..';
-
+import { JWK } from './Jwk.types';
+import { JwtHeader, JwtPayload, SigningAlgo } from './Jwt.types';
 import { JwtProtectionMethod, JwtType } from './jwtUtils';
 
 export interface JwtVerifierBase {

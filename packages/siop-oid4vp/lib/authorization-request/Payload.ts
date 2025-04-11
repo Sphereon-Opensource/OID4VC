@@ -23,7 +23,7 @@ export const createPresentationDefinitionClaimsProperties = async (opts: ClaimPa
     !opts.vp_token ||
     (!opts.vp_token.presentation_definition && !opts.vp_token.presentation_definition_uri && !opts.vp_token.dcql_query)
   ) {
-    return undefined
+    return Promise.reject(new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID))
   }
 
   let presentationDef = opts.vp_token.presentation_definition
@@ -55,19 +55,25 @@ export const createAuthorizationRequestPayload = async (
 ): Promise<AuthorizationRequestPayload> => {
   const payload = opts.payload
   const state = payload?.state ?? undefined
-  const nonce = payload?.nonce ? getNonce(state, payload.nonce) : undefined
+  const nonce = payload?.nonce ? getNonce(state ?? payload.nonce, payload.nonce) : undefined
   // TODO: if opts['registration] throw Error to get rid of test code using that key
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const clientMetadata = opts['registration'] ?? (opts.clientMetadata as ClientMetadataOpts)
   const registration = await createRequestRegistration(clientMetadata, opts)
-  const claims =
-    opts.version >= SupportedVersion.SIOPv2_ID1 ? opts.payload.claims : await createPresentationDefinitionClaimsProperties(opts.payload.claims)
+
+  const claims = opts.payload?.claims
+    ? opts.version >= SupportedVersion.SIOPv2_ID1
+      ? opts.payload.claims
+      : await createPresentationDefinitionClaimsProperties(opts.payload.claims)
+    : undefined
   const isRequestTarget = isTargetOrNoTargets(PropertyTarget.AUTHORIZATION_REQUEST, opts.requestObject.targets)
   const isRequestByValue = opts.requestObject.passBy === PassBy.VALUE
 
   if (isRequestTarget && isRequestByValue && !requestObject) {
     throw Error(SIOPErrors.NO_JWT)
   }
-  const request = isRequestByValue ? await requestObject.toJwt() : undefined
+  const request = isRequestByValue && requestObject ? await requestObject.toJwt() : undefined
 
   const authRequestPayload = {
     ...payload,
@@ -77,7 +83,11 @@ export const createAuthorizationRequestPayload = async (
     ...(isRequestTarget && isRequestByValue && { request }),
     ...(nonce && { nonce }),
     ...(state && { state }),
-    ...(registration.payload && isTarget(PropertyTarget.AUTHORIZATION_REQUEST, registration.clientMetadataOpts.targets) ? registration.payload : {}),
+    ...(registration.payload &&
+    registration.clientMetadataOpts.targets &&
+    isTarget(PropertyTarget.AUTHORIZATION_REQUEST, registration.clientMetadataOpts.targets)
+      ? registration.payload
+      : {}),
     ...(claims && { claims }),
   }
 

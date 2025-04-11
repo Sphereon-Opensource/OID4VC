@@ -23,7 +23,7 @@ import {
   VcIssuer,
   VcIssuerBuilder,
 } from '@sphereon/oid4vci-issuer'
-import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer/dist/types'
+import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'

@@ -25,7 +25,206 @@ export const AuthorizationResponseOptsSchemaObj = {
           "$ref": "#/definitions/CreateJwtCallback"
         },
         "jwtIssuer": {
-          "$ref": "#/definitions/JwtIssuer"
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "const": "did"
+                },
+                "options": {
+                  "type": "object",
+                  "additionalProperties": {},
+                  "description": "Additional options for the issuance context"
+                },
+                "didUrl": {
+                  "type": "string"
+                },
+                "alg": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "alg",
+                "didUrl",
+                "method"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "const": "x5c"
+                },
+                "options": {
+                  "type": "object",
+                  "additionalProperties": {},
+                  "description": "Additional options for the issuance context"
+                },
+                "alg": {
+                  "type": "string"
+                },
+                "x5c": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Array of base64-encoded certificate strings in the DER-format.\n\nThe certificate containing the public key corresponding to the key used to digitally sign the JWS MUST be the first certificate."
+                },
+                "issuer": {
+                  "type": "string",
+                  "description": "The issuer jwt\n\nThis value will be used as the iss value of the issue jwt. It is also used as the client_id. And will also be set as the redirect_uri\n\nIt must match an entry in the x5c certificate leaf entry dnsName / uriName"
+                }
+              },
+              "required": [
+                "alg",
+                "issuer",
+                "method",
+                "x5c"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "const": "jwk"
+                },
+                "options": {
+                  "type": "object",
+                  "additionalProperties": {},
+                  "description": "Additional options for the issuance context"
+                },
+                "alg": {
+                  "type": "string"
+                },
+                "jwk": {
+                  "type": "object",
+                  "properties": {
+                    "kty": {
+                      "type": "string"
+                    },
+                    "crv": {
+                      "type": "string"
+                    },
+                    "x": {
+                      "type": "string"
+                    },
+                    "y": {
+                      "type": "string"
+                    },
+                    "e": {
+                      "type": "string"
+                    },
+                    "n": {
+                      "type": "string"
+                    },
+                    "alg": {
+                      "type": "string"
+                    },
+                    "d": {
+                      "type": "string"
+                    },
+                    "dp": {
+                      "type": "string"
+                    },
+                    "dq": {
+                      "type": "string"
+                    },
+                    "ext": {
+                      "type": "boolean"
+                    },
+                    "k": {
+                      "type": "string"
+                    },
+                    "key_ops": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "kid": {
+                      "type": "string"
+                    },
+                    "oth": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "d": {
+                            "type": "string"
+                          },
+                          "r": {
+                            "type": "string"
+                          },
+                          "t": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "p": {
+                      "type": "string"
+                    },
+                    "q": {
+                      "type": "string"
+                    },
+                    "qi": {
+                      "type": "string"
+                    },
+                    "use": {
+                      "type": "string"
+                    },
+                    "x5c": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "x5t": {
+                      "type": "string"
+                    },
+                    "x5t#S256": {
+                      "type": "string"
+                    },
+                    "x5u": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "required": [
+                "alg",
+                "jwk",
+                "method"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "const": "custom"
+                },
+                "options": {
+                  "type": "object",
+                  "additionalProperties": {},
+                  "description": "Additional options for the issuance context"
+                }
+              },
+              "required": [
+                "method"
+              ],
+              "additionalProperties": false
+            }
+          ]
         },
         "responseMode": {
           "$ref": "#/definitions/ResponseMode"
@@ -156,11 +355,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -169,11 +382,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -239,11 +466,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -265,11 +506,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -278,11 +533,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -304,11 +573,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -343,11 +626,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -475,7 +772,112 @@ export const AuthorizationResponseOptsSchemaObj = {
               "type": "string"
             },
             "jwks": {
-              "$ref": "#/definitions/JWKS"
+              "type": "object",
+              "properties": {
+                "keys": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kty": {
+                        "type": "string"
+                      },
+                      "crv": {
+                        "type": "string"
+                      },
+                      "x": {
+                        "type": "string"
+                      },
+                      "y": {
+                        "type": "string"
+                      },
+                      "e": {
+                        "type": "string"
+                      },
+                      "n": {
+                        "type": "string"
+                      },
+                      "alg": {
+                        "type": "string"
+                      },
+                      "d": {
+                        "type": "string"
+                      },
+                      "dp": {
+                        "type": "string"
+                      },
+                      "dq": {
+                        "type": "string"
+                      },
+                      "ext": {
+                        "type": "boolean"
+                      },
+                      "k": {
+                        "type": "string"
+                      },
+                      "key_ops": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "kid": {
+                        "type": "string"
+                      },
+                      "oth": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "d": {
+                              "type": "string"
+                            },
+                            "r": {
+                              "type": "string"
+                            },
+                            "t": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "p": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string"
+                      },
+                      "qi": {
+                        "type": "string"
+                      },
+                      "use": {
+                        "type": "string"
+                      },
+                      "x5c": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "x5t": {
+                        "type": "string"
+                      },
+                      "x5t#S256": {
+                        "type": "string"
+                      },
+                      "x5u": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": {}
+                  }
+                }
+              },
+              "required": [
+                "keys"
+              ],
+              "additionalProperties": false
             },
             "softwareId": {
               "type": "string"
@@ -591,11 +993,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -604,11 +1020,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -674,11 +1104,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -700,11 +1144,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -713,11 +1171,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -739,11 +1211,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -778,11 +1264,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -910,7 +1410,112 @@ export const AuthorizationResponseOptsSchemaObj = {
               "type": "string"
             },
             "jwks": {
-              "$ref": "#/definitions/JWKS"
+              "type": "object",
+              "properties": {
+                "keys": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kty": {
+                        "type": "string"
+                      },
+                      "crv": {
+                        "type": "string"
+                      },
+                      "x": {
+                        "type": "string"
+                      },
+                      "y": {
+                        "type": "string"
+                      },
+                      "e": {
+                        "type": "string"
+                      },
+                      "n": {
+                        "type": "string"
+                      },
+                      "alg": {
+                        "type": "string"
+                      },
+                      "d": {
+                        "type": "string"
+                      },
+                      "dp": {
+                        "type": "string"
+                      },
+                      "dq": {
+                        "type": "string"
+                      },
+                      "ext": {
+                        "type": "boolean"
+                      },
+                      "k": {
+                        "type": "string"
+                      },
+                      "key_ops": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "kid": {
+                        "type": "string"
+                      },
+                      "oth": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "d": {
+                              "type": "string"
+                            },
+                            "r": {
+                              "type": "string"
+                            },
+                            "t": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "p": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string"
+                      },
+                      "qi": {
+                        "type": "string"
+                      },
+                      "use": {
+                        "type": "string"
+                      },
+                      "x5c": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "x5t": {
+                        "type": "string"
+                      },
+                      "x5t#S256": {
+                        "type": "string"
+                      },
+                      "x5u": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": {}
+                  }
+                }
+              },
+              "required": [
+                "keys"
+              ],
+              "additionalProperties": false
             },
             "softwareId": {
               "type": "string"
@@ -1020,11 +1625,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -1033,11 +1652,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -1103,11 +1736,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -1129,11 +1776,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -1142,11 +1803,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -1168,11 +1843,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -1207,11 +1896,25 @@ export const AuthorizationResponseOptsSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -1401,16 +2104,6 @@ export const AuthorizationResponseOptsSchemaObj = {
         "pairwise"
       ]
     },
-    "SigningAlgo": {
-      "type": "string",
-      "enum": [
-        "EdDSA",
-        "RS256",
-        "PS256",
-        "ES256",
-        "ES256K"
-      ]
-    },
     "ResponseMode": {
       "type": "string",
       "enum": [
@@ -1454,117 +2147,6 @@ export const AuthorizationResponseOptsSchemaObj = {
         "aggregated",
         "distributed"
       ]
-    },
-    "JWKS": {
-      "type": "object",
-      "properties": {
-        "keys": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/JWK"
-          }
-        }
-      },
-      "required": [
-        "keys"
-      ],
-      "additionalProperties": false
-    },
-    "JWK": {
-      "type": "object",
-      "properties": {
-        "kty": {
-          "type": "string"
-        },
-        "crv": {
-          "type": "string"
-        },
-        "x": {
-          "type": "string"
-        },
-        "y": {
-          "type": "string"
-        },
-        "e": {
-          "type": "string"
-        },
-        "n": {
-          "type": "string"
-        },
-        "alg": {
-          "type": "string"
-        },
-        "d": {
-          "type": "string"
-        },
-        "dp": {
-          "type": "string"
-        },
-        "dq": {
-          "type": "string"
-        },
-        "ext": {
-          "type": "boolean"
-        },
-        "k": {
-          "type": "string"
-        },
-        "key_ops": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "kid": {
-          "type": "string"
-        },
-        "oth": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "d": {
-                "type": "string"
-              },
-              "r": {
-                "type": "string"
-              },
-              "t": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "p": {
-          "type": "string"
-        },
-        "q": {
-          "type": "string"
-        },
-        "qi": {
-          "type": "string"
-        },
-        "use": {
-          "type": "string"
-        },
-        "x5c": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "x5t": {
-          "type": "string"
-        },
-        "x5t#S256": {
-          "type": "string"
-        },
-        "x5u": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": {}
     },
     "Format": {
       "type": "object",
@@ -1714,157 +2296,12 @@ export const AuthorizationResponseOptsSchemaObj = {
       ]
     },
     "CreateJwtCallback": {
-      "$ref": "#/definitions/CreateJwtCallback%3CJwtIssuerWithContext%3E"
-    },
-    "CreateJwtCallback<JwtIssuerWithContext>": {
       "properties": {
         "isFunction": {
           "type": "boolean",
           "const": true
         }
       }
-    },
-    "JwtIssuer": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/JwtIssuerDid"
-        },
-        {
-          "$ref": "#/definitions/JwtIssuerX5c"
-        },
-        {
-          "$ref": "#/definitions/JwtIssuerJwk"
-        },
-        {
-          "$ref": "#/definitions/JwtIssuerCustom"
-        }
-      ]
-    },
-    "JwtIssuerDid": {
-      "type": "object",
-      "properties": {
-        "method": {
-          "type": "string",
-          "const": "did"
-        },
-        "options": {
-          "type": "object",
-          "additionalProperties": {},
-          "description": "Additional options for the issuance context"
-        },
-        "didUrl": {
-          "type": "string"
-        },
-        "alg": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/SigningAlgo"
-            },
-            {
-              "type": "string"
-            }
-          ]
-        }
-      },
-      "required": [
-        "alg",
-        "didUrl",
-        "method"
-      ],
-      "additionalProperties": false
-    },
-    "JwtIssuerX5c": {
-      "type": "object",
-      "properties": {
-        "method": {
-          "type": "string",
-          "const": "x5c"
-        },
-        "options": {
-          "type": "object",
-          "additionalProperties": {},
-          "description": "Additional options for the issuance context"
-        },
-        "alg": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/SigningAlgo"
-            },
-            {
-              "type": "string"
-            }
-          ]
-        },
-        "x5c": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Array of base64-encoded certificate strings in the DER-format.\n\nThe certificate containing the public key corresponding to the key used to digitally sign the JWS MUST be the first certificate."
-        },
-        "issuer": {
-          "type": "string",
-          "description": "The issuer jwt\n\nThis value will be used as the iss value of the issue jwt. It is also used as the client_id. And will also be set as the redirect_uri\n\nIt must match an entry in the x5c certificate leaf entry dnsName / uriName"
-        }
-      },
-      "required": [
-        "alg",
-        "issuer",
-        "method",
-        "x5c"
-      ],
-      "additionalProperties": false
-    },
-    "JwtIssuerJwk": {
-      "type": "object",
-      "properties": {
-        "method": {
-          "type": "string",
-          "const": "jwk"
-        },
-        "options": {
-          "type": "object",
-          "additionalProperties": {},
-          "description": "Additional options for the issuance context"
-        },
-        "alg": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/SigningAlgo"
-            },
-            {
-              "type": "string"
-            }
-          ]
-        },
-        "jwk": {
-          "$ref": "#/definitions/JWK"
-        }
-      },
-      "required": [
-        "alg",
-        "jwk",
-        "method"
-      ],
-      "additionalProperties": false
-    },
-    "JwtIssuerCustom": {
-      "type": "object",
-      "properties": {
-        "method": {
-          "type": "string",
-          "const": "custom"
-        },
-        "options": {
-          "type": "object",
-          "additionalProperties": {},
-          "description": "Additional options for the issuance context"
-        }
-      },
-      "required": [
-        "method"
-      ],
-      "additionalProperties": false
     },
     "PresentationExchangeResponseOpts": {
       "type": "object",

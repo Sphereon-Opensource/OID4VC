@@ -1,5 +1,9 @@
 import { defaultHasher } from '@sphereon/oid4vc-common';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import * as u8a from 'uint8arrays';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { SupportedEncodings } from 'uint8arrays/to-string';
 
 import { CodeChallengeMethod } from '../types';

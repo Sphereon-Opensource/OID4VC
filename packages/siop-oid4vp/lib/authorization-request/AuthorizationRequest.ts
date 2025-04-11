@@ -70,6 +70,9 @@ export class AuthorizationRequest {
       opts.requestObject.passBy !== PassBy.NONE ? (requestObject ? requestObject : await RequestObject.fromOpts(opts)) : undefined
     // opts?.payload was removed before, but it's not clear atm why opts?.payload was removed
     const requestPayload = opts?.payload ? await createAuthorizationRequestPayload(opts, requestObjectArg) : undefined
+    if (!requestPayload) {
+      return Promise.reject(Error('No request payload'))
+    }
     return new AuthorizationRequest(requestPayload, requestObjectArg, opts)
   }
 
@@ -124,7 +127,7 @@ export class AuthorizationRequest {
     const jwt = await this.requestObjectJwt()
     const parsedJwt = jwt ? parseJWT(jwt) : undefined
 
-    if (parsedJwt) {
+    if (parsedJwt && jwt) {
       requestObjectPayload = parsedJwt.payload as RequestObjectPayload
 
       const jwtVerifier = await getRequestObjectJwtVerifier({ ...parsedJwt, payload: requestObjectPayload }, { raw: jwt })
@@ -159,13 +162,14 @@ export class AuthorizationRequest {
     }
 
     const registrationPropertyKey = mergedPayload['registration'] || mergedPayload['registration_uri'] ? 'registration' : 'client_metadata'
-    let registrationMetadataPayload: RPRegistrationMetadataPayload
+    let registrationMetadataPayload: RPRegistrationMetadataPayload | undefined = undefined
     if (mergedPayload[registrationPropertyKey] || mergedPayload[`${registrationPropertyKey}_uri`]) {
       registrationMetadataPayload = await fetchByReferenceOrUseByValue(
         mergedPayload[`${registrationPropertyKey}_uri`],
         mergedPayload[registrationPropertyKey],
       )
-      assertValidRPRegistrationMedataPayload(registrationMetadataPayload)
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      assertValidRPRegistrationMedataPayload(registrationMetadataPayload!)
       // TODO: We need to do something with the metadata probably
     } /*else { // this makes test mattr.launchpad.spec.ts fail why was this check added?
       return Promise.reject(Error(`could not fetch registrationMetadataPayload due to missing payload key ${registrationPropertyKey}`))
@@ -208,6 +212,9 @@ export class AuthorizationRequest {
 
     const dcqlQuery = await Dcql.findValidDcqlQuery(mergedPayload)
 
+    if (!registrationMetadataPayload) {
+      return Promise.reject(Error('No registration metadata payload'))
+    }
     return {
       jwt,
       payload: parsedJwt?.payload,
@@ -242,6 +249,9 @@ export class AuthorizationRequest {
       throw Error(SIOPErrors.BAD_PARAMS)
     }
     const requestObject = await RequestObject.fromJwt(jwt)
+    if (!requestObject) {
+      return Promise.reject(Error('Could not create request object from jwt'))
+    }
     const payload: AuthorizationRequestPayload = { ...(await requestObject.getPayload()) } as AuthorizationRequestPayload
     // Although this was a RequestObject we instantiate it as AuthzRequest and then copy in the JWT as the request Object
     payload.request = jwt
@@ -258,17 +268,17 @@ export class AuthorizationRequest {
   }
 
   public async toStateInfo(): Promise<RequestStateInfo> {
-    const requestObject = await this.requestObject.getPayload()
+    const requestObject = await this.requestObject?.getPayload()
     return {
-      client_id: this.options.clientMetadata.client_id,
-      iat: requestObject.iat ?? this.payload.iat,
-      nonce: requestObject.nonce ?? this.payload.nonce,
+      client_id: this.options?.clientMetadata?.client_id,
+      iat: requestObject?.iat ?? this.payload.iat,
+      nonce: requestObject?.nonce ?? this.payload.nonce,
       state: this.payload.state,
     }
   }
 
   public async containsResponseType(singleType: ResponseType | string): Promise<boolean> {
-    const responseType: string = this.getMergedProperty('response_type')
+    const responseType: string | undefined = this.getMergedProperty('response_type')
     return responseType?.includes(singleType) === true
   }
 

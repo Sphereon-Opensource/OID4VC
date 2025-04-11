@@ -1,5 +1,3 @@
-'use strict';
-
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
 const MAX_BYTES = 65536;
@@ -33,7 +31,7 @@ if (crypto && crypto.getRandomValues) {
   module.exports = oldBrowser;
 }
 
-function randomBytes(size) {
+export const randomBytes = (size) => {
   // phantomjs needs to throw
   if (size > MAX_UINT32) throw new Error('requested too many random bytes');
 
@@ -55,7 +53,4 @@ function randomBytes(size) {
     }
   }
   return Uint8Array.from(bytes);
-}
-
-// eslint-disable-next-line no-undef
-module.exports = { randomBytes };
+};

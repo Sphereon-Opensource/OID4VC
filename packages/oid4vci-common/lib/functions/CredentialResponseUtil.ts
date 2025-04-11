@@ -17,7 +17,7 @@ function assertNonFatalError(credentialResponse: OpenIDResponse<CredentialRespon
 
 export function isDeferredCredentialIssuancePending(credentialResponse: OpenIDResponse<CredentialResponse>) {
   if (isDeferredCredentialResponse(credentialResponse)) {
-    return !!credentialResponse?.successBody?.transaction_id ?? !!credentialResponse?.successBody?.acceptance_token;
+    return credentialResponse?.successBody?.transaction_id ?? !!credentialResponse?.successBody?.acceptance_token;
   }
   if (credentialResponse.origResponse.status === 400 && credentialResponse.errorBody?.error) {
     if (credentialResponse.errorBody.error === 'issuance_pending') {

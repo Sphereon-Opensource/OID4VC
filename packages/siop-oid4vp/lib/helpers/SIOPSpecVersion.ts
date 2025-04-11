@@ -2,7 +2,7 @@ import { AuthorizationRequestPayloadVD11Schema, AuthorizationRequestPayloadVID1S
 import {
   AuthorizationRequestPayloadVD12OID4VPD18Schema,
   AuthorizationRequestPayloadVD12OID4VPD20Schema,
-} from '../schemas/validation/schemaValidation'
+} from '../schemas/validation/schemaValidation.cjs'
 import { AuthorizationRequestPayload, ResponseMode, SupportedVersion } from '../types'
 import errors from '../types/Errors'
 

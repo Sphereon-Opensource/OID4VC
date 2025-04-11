@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsup --config ../../tsup.config.ts --tsconfig ../../tsconfig.tsup.json",
     "build:clean": "tsc --build --clean && tsc --build"
   },
   "dependencies": {
@@ -14,10 +14,10 @@
     "valibot": "^0.42.1"
   },
   "devDependencies": {
-    "typescript": "5.5.3"
+    "typescript": "5.8.3"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "files": [
     "lib/**/*",

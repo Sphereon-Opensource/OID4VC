@@ -1,11 +1,9 @@
+import { HasherSync, IIssuerId } from '@sphereon/ssi-types'
 import { EventEmitter } from 'events'
-
-import { Hasher, IIssuerId } from '@sphereon/ssi-types'
 
 import { PropertyTargets } from '../authorization-request'
 import { PresentationSignCallback } from '../authorization-response'
-import { ResponseIss, ResponseMode, ResponseRegistrationOpts, SupportedVersion, VerifyJwtCallback } from '../types'
-import { CreateJwtCallback } from '../types/VpJwtIssuer'
+import { CreateJwtCallback, ResponseIss, ResponseMode, ResponseRegistrationOpts, SupportedVersion, VerifyJwtCallback } from '../types'
 
 import { OP } from './OP'
 
@@ -20,9 +18,9 @@ export class OPBuilder {
   supportedVersions?: SupportedVersion[]
   eventEmitter?: EventEmitter
 
-  hasher?: Hasher
+  hasher?: HasherSync
 
-  withHasher(hasher: Hasher): OPBuilder {
+  withHasher(hasher: HasherSync): OPBuilder {
     this.hasher = hasher
 
     return this

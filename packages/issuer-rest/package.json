@@ -2,27 +2,38 @@
   "name": "@sphereon/oid4vci-issuer-server",
   "version": "0.17.0",
   "description": "OpenID 4 Verifiable Credential Issuance Server",
-  "source": "lib/index.ts",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "require": {
+      "types": "./dist/index.d.cts",
+      "require": "./dist/index.cjs"
+    }
+  },
   "scripts": {
     "start": "ts-node lib/OID4VCIServer.ts",
-    "build": "tsc",
+    "build": "tsup --config ../../tsup.config.ts --tsconfig ../../tsconfig.tsup.json",
     "build:clean": "tsc --build --clean && tsc --build"
   },
   "dependencies": {
     "@sphereon/oid4vc-common": "workspace:*",
     "@sphereon/oid4vci-common": "workspace:*",
     "@sphereon/oid4vci-issuer": "workspace:*",
-    "@sphereon/ssi-express-support": "^0.32.1-next.161",
-    "@sphereon/ssi-types": "^0.32.1-next.161",
+    "@sphereon/ssi-express-support": "^0.33",
+    "@sphereon/ssi-types": "^0.33",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv-flow": "^3.3.0",
     "express": "^4.19.2",
     "http-terminator": "^3.2.0",
-    "typescript": "5.4.5"
+    "typescript": "5.8.3"
   },
   "devDependencies": {
     "@digitalcredentials/did-method-key": "^2.0.3",
@@ -53,7 +64,7 @@
     "awesome-qr": false
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "files": [
     "lib/**/*",

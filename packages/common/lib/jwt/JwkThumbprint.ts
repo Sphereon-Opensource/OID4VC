@@ -1,9 +1,11 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import * as u8a from 'uint8arrays';
 
 import { defaultHasher } from '../hasher';
 import { DigestAlgorithm } from '../types';
 
-import { JWK } from '.';
+import { JWK } from './Jwk.types';
 
 const check = (value: unknown, description: string) => {
   if (typeof value !== 'string' || !value) {

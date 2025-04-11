@@ -1,9 +1,10 @@
 import { jwtDecode } from 'jwt-decode';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import * as u8a from 'uint8arrays';
 import { v4 as uuidv4 } from 'uuid';
 
 import { defaultHasher } from '../hasher';
-
 import {
   calculateJwkThumbprint,
   CreateJwtCallback,
@@ -16,7 +17,7 @@ import {
   parseJWT,
   SigningAlgo,
   VerifyJwtCallbackBase,
-} from './../jwt';
+} from '../jwt';
 
 export const dpopTokenRequestNonceError = 'use_dpop_nonce';
 

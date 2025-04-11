@@ -64,7 +64,7 @@ export class CredentialOfferClientV1_0_11 {
       ...(grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL] && {
         preAuthorizedCode: grants[PRE_AUTH_GRANT_LITERAL][PRE_AUTH_CODE_LITERAL],
       }),
-      userPinRequired: !!request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.user_pin_required ?? false,
+      userPinRequired: !!(request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.user_pin_required ?? false),
     };
   }
 

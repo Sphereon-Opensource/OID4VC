@@ -2,14 +2,25 @@
   "name": "@sphereon/did-auth-siop",
   "version": "0.17.0",
   "description": "Self Issued OpenID V2 (SIOPv2) and OpenID 4 Verifiable Presentations (OID4VP)",
-  "source": "lib/index.ts",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "require": {
+      "types": "./dist/index.d.cts",
+      "require": "./dist/index.cjs"
+    }
+  },
   "scripts": {
-    "build": "pnpm build:schemaGenerator && tsc",
+    "build": "pnpm build:schemaGenerator && tsup --config ../../tsup.config.ts --tsconfig tsconfig.tsup.json",
     "build:clean": "pnpm build:schemaGenerator && tsc --build --clean && tsc --build",
     "build:main": "tsc -p tsconfig.build.json",
-    "build:schemaGenerator": "node --loader=tsimp/loader ./lib/generator/schemaGenerator.ts",
+    "build:schemaGenerator": "tsx lib/generator/schemaGenerator.cts",
     "clean": "rimraf dist coverage",
     "uninstall": "rimraf dist coverage node_modules"
   },
@@ -19,7 +30,7 @@
     "@sphereon/oid4vc-common": "workspace:*",
     "@sphereon/pex": "5.0.0-unstable.28",
     "@sphereon/pex-models": "^2.3.2",
-    "@sphereon/ssi-types": "^0.32.1-next.161",
+    "@sphereon/ssi-types": "^0.33",
     "cross-fetch": "^4.0.0",
     "dcql": "0.2.19",
     "debug": "^4.3.5",
@@ -81,15 +92,15 @@
     "ts-interface-checker": "^1.0.2",
     "ts-jest": "^29.1.2",
     "ts-json-schema-generator": "1.5.0",
-    "tsimp": "^2.0.11",
-    "typescript": "5.4.5"
+    "tsx": "^4.19.3",
+    "typescript": "5.8.3"
   },
   "resolutions": {
     "isomorphic-webcrypto": "npm:@sphereon/isomorphic-webcrypto@^2.4.1-unstable.0",
     "esline/**/strip-ansi": "6.0.1"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20.6"
   },
   "files": [
     "lib/**/*",

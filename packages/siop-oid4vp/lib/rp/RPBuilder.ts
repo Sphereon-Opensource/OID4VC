@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 
 import { IPresentationDefinition } from '@sphereon/pex'
-import { Hasher } from '@sphereon/ssi-types'
+import { HasherSync } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
 
 import { PropertyTarget, PropertyTargets } from '../authorization-request'
@@ -21,7 +21,7 @@ import {
   RevocationVerification,
   RevocationVerificationCallback,
   SupportedVersion,
-  VerifyJwtCallback,
+  VerifyJwtCallback
 } from '../types'
 
 import { assignIfAuth, assignIfRequestObject, isTarget, isTargetOrNoTargets } from './Opts'
@@ -47,7 +47,7 @@ export class RPBuilder {
   entityId: string
   clientIdScheme: string
 
-  hasher: Hasher
+  hasher: HasherSync
 
   private constructor(supportedRequestVersion?: SupportedVersion) {
     if (supportedRequestVersion) {
@@ -68,7 +68,7 @@ export class RPBuilder {
     return this
   }
 
-  withHasher(hasher: Hasher): RPBuilder {
+  withHasher(hasher: HasherSync): RPBuilder {
     this.hasher = hasher
 
     return this

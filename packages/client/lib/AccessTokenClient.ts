@@ -179,7 +179,7 @@ export class AccessTokenClient {
     const issuer = getIssuerFromCredentialOfferPayload(requestPayload);
 
     const grantDetails = requestPayload.grants?.[PRE_AUTH_GRANT_LITERAL];
-    const isPinRequired = !!grantDetails?.tx_code ?? false;
+    const isPinRequired = !!(grantDetails?.tx_code ?? false);
 
     LOG.warning(`Pin required for issuer ${issuer}: ${isPinRequired}`);
     return {

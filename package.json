@@ -20,12 +20,13 @@
     "publish:unstable": "lerna publish --conventional-prerelease --force-publish --canary --no-git-tag-version --include-merged-tags --preid unstable --pre-dist-tag unstable --yes --registry https://registry.npmjs.org"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "resolutions": {
-    "@sphereon/ssi-types": "^0.32.1-next.161",
+    "@sphereon/ssi-types": "^0.33",
     "dcql": "0.2.19",
-    "node-fetch": "2.6.12"
+    "node-fetch": "2.6.12",
+    "typescript": "5.8.3"
   },
   "prettier": {
     "endOfLine": "auto",
@@ -34,6 +35,8 @@
     "printWidth": 150
   },
   "devDependencies": {
+    "tsup": "^8.4.0",
+    "@swc/core": "^1.11.18",
     "@types/debug": "^4.1.12",
     "@types/jest": "^29.5.12",
     "@types/node": "^18.19.39",
@@ -44,7 +47,7 @@
     "prettier": "^3.3.2",
     "rimraf": "^5.0.8",
     "ts-jest": "^29.1.5",
-    "typescript": "5.4.5"
+    "typescript": "5.8.3"
   },
   "keywords": [
     "Sphereon",

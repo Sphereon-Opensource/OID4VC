@@ -1,6 +1,6 @@
+// https://www.rfc-editor.org/rfc/rfc7591.html#section-2
 import { JWKS } from '../jwt';
 
-// https://www.rfc-editor.org/rfc/rfc7591.html#section-2
 export interface DynamicRegistrationClientMetadata {
   redirect_uris?: string[];
   token_endpoint_auth_method?: string;

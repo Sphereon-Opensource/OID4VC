@@ -1,5 +1,5 @@
 import { dpopTokenRequestNonceError } from '@sphereon/oid4vc-common';
-import { OpenIDResponse } from 'oid4vci-common';
+import { OpenIDResponse } from '@sphereon/oid4vci-common';
 
 export type RetryRequestWithDPoPNonce = { ok: true; dpopNonce: string } | { ok: false };
 

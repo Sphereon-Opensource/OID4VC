@@ -1,14 +1,13 @@
-import { EventEmitter } from 'events'
-
 import {
   jarmAuthResponseDirectPostJwtValidate,
   JarmAuthResponseParams,
   JarmDirectPostJwtAuthResponseValidationContext,
-  JarmDirectPostJwtResponseParams,
+  JarmDirectPostJwtResponseParams
 } from '@sphereon/jarm'
 import { decodeProtectedHeader, JwtIssuer } from '@sphereon/oid4vc-common'
-import { Hasher } from '@sphereon/ssi-types'
+import { HasherSync } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
+import { EventEmitter } from 'events'
 
 import {
   AuthorizationRequest,
@@ -17,7 +16,7 @@ import {
   PropertyTarget,
   RequestObjectPayloadOpts,
   RequestPropertyWithTargets,
-  URI,
+  URI
 } from '../authorization-request'
 import { mergeVerificationOpts } from '../authorization-request/Opts'
 import {
@@ -25,7 +24,7 @@ import {
   extractPresentationsFromDcqlVpToken,
   extractPresentationsFromVpToken,
   PresentationDefinitionWithLocation,
-  VerifyAuthorizationResponseOpts,
+  VerifyAuthorizationResponseOpts
 } from '../authorization-response'
 import { base64urlToString, getNonce, getState } from '../helpers'
 import {
@@ -40,7 +39,7 @@ import {
   SIOPErrors,
   SupportedVersion,
   Verification,
-  VerifiedAuthorizationResponse,
+  VerifiedAuthorizationResponse
 } from '../types'
 
 import { createRequestOptsFromBuilderOrExistingOpts, createVerifyResponseOptsFromBuilderOrExistingOpts, isTargetOrNoTargets } from './Opts'
@@ -157,7 +156,7 @@ export class RP {
       getAuthRequestPayload: (input: JarmDirectPostJwtResponseParams | JarmAuthResponseParams) => Promise<{
         authRequestParams: RequestObjectPayload
       }>
-      hasher?: Hasher
+      hasher?: HasherSync
     },
   ) {
     const { decryptCompact, getAuthRequestPayload, hasher } = opts
@@ -203,7 +202,7 @@ export class RP {
     authorizationResponsePayload: AuthorizationResponsePayload,
     opts?: {
       correlationId?: string
-      hasher?: Hasher
+      hasher?: HasherSync
       audience?: string
       state?: string
       nonce?: string
@@ -378,7 +377,7 @@ export class RP {
     authorizationResponse: AuthorizationResponse,
     opts: {
       correlationId: string
-      hasher?: Hasher
+      hasher?: HasherSync
       state?: string
       nonce?: string
       verification?: Verification

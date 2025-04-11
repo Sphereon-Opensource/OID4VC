@@ -72,11 +72,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -85,11 +99,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -155,11 +183,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -182,11 +224,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -195,11 +251,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -222,11 +292,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -262,11 +346,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -395,7 +493,112 @@ export const DiscoveryMetadataPayloadSchemaObj = {
               "type": "string"
             },
             "jwks": {
-              "$ref": "#/definitions/JWKS"
+              "type": "object",
+              "properties": {
+                "keys": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kty": {
+                        "type": "string"
+                      },
+                      "crv": {
+                        "type": "string"
+                      },
+                      "x": {
+                        "type": "string"
+                      },
+                      "y": {
+                        "type": "string"
+                      },
+                      "e": {
+                        "type": "string"
+                      },
+                      "n": {
+                        "type": "string"
+                      },
+                      "alg": {
+                        "type": "string"
+                      },
+                      "d": {
+                        "type": "string"
+                      },
+                      "dp": {
+                        "type": "string"
+                      },
+                      "dq": {
+                        "type": "string"
+                      },
+                      "ext": {
+                        "type": "boolean"
+                      },
+                      "k": {
+                        "type": "string"
+                      },
+                      "key_ops": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "kid": {
+                        "type": "string"
+                      },
+                      "oth": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "d": {
+                              "type": "string"
+                            },
+                            "r": {
+                              "type": "string"
+                            },
+                            "t": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "p": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string"
+                      },
+                      "qi": {
+                        "type": "string"
+                      },
+                      "use": {
+                        "type": "string"
+                      },
+                      "x5c": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "x5t": {
+                        "type": "string"
+                      },
+                      "x5t#S256": {
+                        "type": "string"
+                      },
+                      "x5u": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": {}
+                  }
+                }
+              },
+              "required": [
+                "keys"
+              ],
+              "additionalProperties": false
             },
             "software_id": {
               "type": "string"
@@ -481,11 +684,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -494,11 +711,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -564,11 +795,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -591,11 +836,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -604,11 +863,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -631,11 +904,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -671,11 +958,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -804,7 +1105,112 @@ export const DiscoveryMetadataPayloadSchemaObj = {
               "type": "string"
             },
             "jwks": {
-              "$ref": "#/definitions/JWKS"
+              "type": "object",
+              "properties": {
+                "keys": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kty": {
+                        "type": "string"
+                      },
+                      "crv": {
+                        "type": "string"
+                      },
+                      "x": {
+                        "type": "string"
+                      },
+                      "y": {
+                        "type": "string"
+                      },
+                      "e": {
+                        "type": "string"
+                      },
+                      "n": {
+                        "type": "string"
+                      },
+                      "alg": {
+                        "type": "string"
+                      },
+                      "d": {
+                        "type": "string"
+                      },
+                      "dp": {
+                        "type": "string"
+                      },
+                      "dq": {
+                        "type": "string"
+                      },
+                      "ext": {
+                        "type": "boolean"
+                      },
+                      "k": {
+                        "type": "string"
+                      },
+                      "key_ops": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "kid": {
+                        "type": "string"
+                      },
+                      "oth": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "d": {
+                              "type": "string"
+                            },
+                            "r": {
+                              "type": "string"
+                            },
+                            "t": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "p": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string"
+                      },
+                      "qi": {
+                        "type": "string"
+                      },
+                      "use": {
+                        "type": "string"
+                      },
+                      "x5c": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "x5t": {
+                        "type": "string"
+                      },
+                      "x5t#S256": {
+                        "type": "string"
+                      },
+                      "x5u": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": {}
+                  }
+                }
+              },
+              "required": [
+                "keys"
+              ],
+              "additionalProperties": false
             },
             "software_id": {
               "type": "string"
@@ -893,11 +1299,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -906,11 +1326,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -976,11 +1410,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -1003,11 +1451,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -1016,11 +1478,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -1043,11 +1519,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -1083,11 +1573,25 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/SigningAlgo"
+                    "type": "string",
+                    "enum": [
+                      "EdDSA",
+                      "RS256",
+                      "PS256",
+                      "ES256",
+                      "ES256K"
+                    ]
                   }
                 },
                 {
-                  "$ref": "#/definitions/SigningAlgo"
+                  "type": "string",
+                  "enum": [
+                    "EdDSA",
+                    "RS256",
+                    "PS256",
+                    "ES256",
+                    "ES256K"
+                  ]
                 }
               ]
             },
@@ -1236,16 +1740,6 @@ export const DiscoveryMetadataPayloadSchemaObj = {
         "pairwise"
       ]
     },
-    "SigningAlgo": {
-      "type": "string",
-      "enum": [
-        "EdDSA",
-        "RS256",
-        "PS256",
-        "ES256",
-        "ES256K"
-      ]
-    },
     "ResponseMode": {
       "type": "string",
       "enum": [
@@ -1289,117 +1783,6 @@ export const DiscoveryMetadataPayloadSchemaObj = {
         "aggregated",
         "distributed"
       ]
-    },
-    "JWKS": {
-      "type": "object",
-      "properties": {
-        "keys": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/JWK"
-          }
-        }
-      },
-      "required": [
-        "keys"
-      ],
-      "additionalProperties": false
-    },
-    "JWK": {
-      "type": "object",
-      "properties": {
-        "kty": {
-          "type": "string"
-        },
-        "crv": {
-          "type": "string"
-        },
-        "x": {
-          "type": "string"
-        },
-        "y": {
-          "type": "string"
-        },
-        "e": {
-          "type": "string"
-        },
-        "n": {
-          "type": "string"
-        },
-        "alg": {
-          "type": "string"
-        },
-        "d": {
-          "type": "string"
-        },
-        "dp": {
-          "type": "string"
-        },
-        "dq": {
-          "type": "string"
-        },
-        "ext": {
-          "type": "boolean"
-        },
-        "k": {
-          "type": "string"
-        },
-        "key_ops": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "kid": {
-          "type": "string"
-        },
-        "oth": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "d": {
-                "type": "string"
-              },
-              "r": {
-                "type": "string"
-              },
-              "t": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "p": {
-          "type": "string"
-        },
-        "q": {
-          "type": "string"
-        },
-        "qi": {
-          "type": "string"
-        },
-        "use": {
-          "type": "string"
-        },
-        "x5c": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "x5t": {
-          "type": "string"
-        },
-        "x5t#S256": {
-          "type": "string"
-        },
-        "x5u": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": {}
     },
     "Format": {
       "type": "object",

@@ -18,7 +18,9 @@ export const assertValidAuthorizationRequestOpts = (opts: CreateAuthorizationReq
     throw new Error(SIOPErrors.BAD_PARAMS)
   }
   assertValidRequestObjectOpts(opts.requestObject, false)
-  assertValidRequestRegistrationOpts(opts['registration'] ? opts['registration'] : opts.clientMetadata)
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  assertValidRequestRegistrationOpts(opts['registration'] ?? opts.clientMetadata)
 }
 
 export const mergeVerificationOpts = (

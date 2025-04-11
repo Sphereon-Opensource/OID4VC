@@ -13,8 +13,8 @@ import {
   toUniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
-import { constructBaseResponse, handleCredentialOfferUri } from './functions';
 
+import { constructBaseResponse, handleCredentialOfferUri } from './functions';
 import { LOG } from './types';
 
 const debug = Debug('sphereon:oid4vci:offer');

@@ -10,6 +10,7 @@ import {
   toUniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common';
 import Debug from 'debug';
+
 import { constructBaseResponse, handleCredentialOfferUri } from './functions';
 
 const debug = Debug('sphereon:oid4vci:offer');
@@ -48,7 +49,7 @@ export class CredentialOfferClientV1_0_13 {
 
     return {
       ...constructBaseResponse(request, scheme, baseUrl),
-      userPinRequired: !!request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code ?? false,
+      userPinRequired: !!(request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code ?? false),
     };
   }
 

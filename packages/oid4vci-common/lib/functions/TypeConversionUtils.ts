@@ -59,9 +59,9 @@ export function getTypesFromObject(
         | JsonLdIssuerCredentialDefinition,
     );
   } else if ('types' in subject && subject.types) {
-    return Array.isArray(subject.types) ? subject.types : [subject.types];
+    return Array.isArray(subject.types) ? subject.types : [subject.types as string];
   } else if ('type' in subject && subject.type) {
-    return Array.isArray(subject.type) ? subject.type : [subject.type];
+    return Array.isArray(subject.type) ? subject.type : [subject.type as string];
   } else if ('vct' in subject && subject.vct) {
     return [subject.vct as string];
   } else if ('doctype' in subject && subject.doctype) {

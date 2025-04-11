@@ -1,11 +1,11 @@
 {
-  "extends": "../tsconfig-base.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "lib",
-    "outDir": "dist",
-    "declarationDir": "dist",
-    "moduleResolution": "Node",
-    "esModuleInterop": true,
+    //    "rootDir": "lib",
+    //    "outDir": "dist",
+    //    "declarationDir": "dist",
+    //    "moduleResolution": "Node",
+    //    "esModuleInterop": true,
     "strict": false,
     "noImplicitReturns": true
   },
@@ -13,6 +13,6 @@
     {
       "path": "../common"
     }
-  ],
-  "exclude": ["**/__tests__/**/*", "**/dist/**/*", "**/coverage/**/*"]
+  ]
+  //  "exclude": ["**/__tests__/**/*", "**/dist/**/*", "**/coverage/**/*"]
 }

@@ -1,6 +1,6 @@
 import { jwtDecode } from 'jwt-decode';
 
-import { JwtHeader, JwtPayload } from '..';
+import { JwtHeader, JwtPayload } from './Jwt.types';
 
 export type JwtType = 'id-token' | 'request-object' | 'verifier-attestation' | 'dpop';
 
