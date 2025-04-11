@@ -1,15 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import * as didKeyDriver from '@digitalcredentials/did-method-key'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { Ed25519Signature2020 } from '@digitalcredentials/ed25519-signature-2020'
 import { Ed25519VerificationKey2020 } from '@digitalcredentials/ed25519-verification-key-2020'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { securityLoader } from '@digitalcredentials/security-document-loader'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import vc from '@digitalcredentials/vc'
 import { CredentialRequest, CredentialRequestV1_0_11 } from '@sphereon/oid4vci-common'
 import { CredentialIssuanceInput } from '@sphereon/oid4vci-issuer'

@@ -1,5 +1,6 @@
-import { HasherSync, IIssuerId } from '@sphereon/ssi-types'
 import { EventEmitter } from 'events'
+
+import { HasherSync, IIssuerId } from '@sphereon/ssi-types'
 
 import { PropertyTargets } from '../authorization-request'
 import { PresentationSignCallback } from '../authorization-response'

@@ -13,7 +13,7 @@ import {
   Scope,
   SubjectType,
   SupportedVersion,
-  Verification
+  Verification,
 } from '../types'
 import { VerifyJwtCallback } from '../types/VpJwtVerifier'
 

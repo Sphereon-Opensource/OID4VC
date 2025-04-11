@@ -12,7 +12,7 @@ import {
   extractNonceFromWrappedVerifiablePresentation,
   extractPresentationsFromDcqlVpToken,
   extractPresentationsFromVpToken,
-  verifyPresentations
+  verifyPresentations,
 } from './OpenID4VP'
 import { assertValidResponseOpts } from './Opts'
 import { createResponsePayload } from './Payload'

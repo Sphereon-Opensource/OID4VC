@@ -11,7 +11,6 @@
     "fix:lint": "eslint . --fix --ext .ts",
     "fix:prettier": "prettier --write \"{packages,__tests__,!dist}/**/*.{ts,tsx,js,json,md,yml}\"",
     "build": "pnpm -r --stream build",
-    "build:clean": "lerna clean -y && pnpm install && lerna run build:clean --concurrency 1",
     "test:ci": "jest --config=jest.json && jest --config=packages/siop-oid4vp/jest.json",
     "test": "jest --verbose --config=jest.json --coverage=true --detectOpenHandles && jest --verbose --config=packages/siop-oid4vp/jest.json --coverage=true --detectOpenHandles",
     "clean": "rimraf --glob **/dist **/coverage **/pnpm-lock.yaml packages/**/node_modules node_modules packages/**/tsconfig.tsbuildinfo",
@@ -20,7 +19,7 @@
     "publish:unstable": "lerna publish --conventional-prerelease --force-publish --canary --no-git-tag-version --include-merged-tags --preid unstable --pre-dist-tag unstable --yes --registry https://registry.npmjs.org"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.6"
   },
   "resolutions": {
     "@sphereon/ssi-types": "^0.33",

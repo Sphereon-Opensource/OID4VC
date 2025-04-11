@@ -8,7 +8,7 @@ import { SupportedEncodings } from 'uint8arrays/to-string';
 
 import { CodeChallengeMethod } from '../types';
 
-import { randomBytes } from './randomBytes';
+import { randomBytes } from './randomBytes.cjs';
 
 export const CODE_VERIFIER_DEFAULT_LENGTH = 128;
 export const NONCE_LENGTH = 32;

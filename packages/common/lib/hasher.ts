@@ -1,8 +1,8 @@
-import { HasherSync } from '@sphereon/ssi-types'
-import sha from 'sha.js'
+import { HasherSync } from '@sphereon/ssi-types';
+import sha from 'sha.js';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import * as u8a from 'uint8arrays'
+import * as u8a from 'uint8arrays';
 
 const supportedAlgorithms = ['sha256', 'sha384', 'sha512'] as const;
 type SupportedAlgorithms = (typeof supportedAlgorithms)[number];

@@ -1,4 +1,4 @@
-import { randomBytes } from './randomBytes.js';
+import { randomBytes } from './randomBytes.cjs';
 
 export * from './CredentialRequestUtil';
 export * from './CredentialResponseUtil';

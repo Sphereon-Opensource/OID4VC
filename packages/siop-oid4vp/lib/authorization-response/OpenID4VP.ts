@@ -4,11 +4,12 @@ import { Format } from '@sphereon/pex-models'
 import {
   CompactSdJwtVc,
   CredentialMapper,
-  Hasher, HasherSync,
+  Hasher,
+  HasherSync,
   IVerifiablePresentation,
   PresentationSubmission,
   W3CVerifiablePresentation,
-  WrappedVerifiablePresentation
+  WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
 import { DcqlPresentation, DcqlQuery } from 'dcql'
 

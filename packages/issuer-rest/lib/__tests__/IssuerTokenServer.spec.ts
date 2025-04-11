@@ -12,7 +12,7 @@ import {
   URIState,
 } from '@sphereon/oid4vci-common'
 import { AuthorizationServerMetadataBuilder, VcIssuer } from '@sphereon/oid4vci-issuer'
-import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
+import { MemoryStates } from '@sphereon/oid4vci-issuer'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { Express } from 'express'
 import * as jose from 'jose'

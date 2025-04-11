@@ -1,13 +1,14 @@
+import { EventEmitter } from 'events'
+
 import {
   jarmAuthResponseDirectPostJwtValidate,
   JarmAuthResponseParams,
   JarmDirectPostJwtAuthResponseValidationContext,
-  JarmDirectPostJwtResponseParams
+  JarmDirectPostJwtResponseParams,
 } from '@sphereon/jarm'
 import { decodeProtectedHeader, JwtIssuer } from '@sphereon/oid4vc-common'
 import { HasherSync } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
-import { EventEmitter } from 'events'
 
 import {
   AuthorizationRequest,
@@ -16,7 +17,7 @@ import {
   PropertyTarget,
   RequestObjectPayloadOpts,
   RequestPropertyWithTargets,
-  URI
+  URI,
 } from '../authorization-request'
 import { mergeVerificationOpts } from '../authorization-request/Opts'
 import {
@@ -24,7 +25,7 @@ import {
   extractPresentationsFromDcqlVpToken,
   extractPresentationsFromVpToken,
   PresentationDefinitionWithLocation,
-  VerifyAuthorizationResponseOpts
+  VerifyAuthorizationResponseOpts,
 } from '../authorization-response'
 import { base64urlToString, getNonce, getState } from '../helpers'
 import {
@@ -39,7 +40,7 @@ import {
   SIOPErrors,
   SupportedVersion,
   Verification,
-  VerifiedAuthorizationResponse
+  VerifiedAuthorizationResponse,
 } from '../types'
 
 import { createRequestOptsFromBuilderOrExistingOpts, createVerifyResponseOptsFromBuilderOrExistingOpts, isTargetOrNoTargets } from './Opts'

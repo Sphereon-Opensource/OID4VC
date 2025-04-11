@@ -21,7 +21,7 @@ import {
   RevocationVerification,
   RevocationVerificationCallback,
   SupportedVersion,
-  VerifyJwtCallback
+  VerifyJwtCallback,
 } from '../types'
 
 import { assignIfAuth, assignIfRequestObject, isTarget, isTargetOrNoTargets } from './Opts'

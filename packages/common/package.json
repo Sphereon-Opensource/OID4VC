@@ -17,8 +17,7 @@
     }
   },
   "scripts": {
-    "build": "tsup --config ../../tsup.config.ts --tsconfig ../../tsconfig.tsup.json",
-    "build:clean": "tsc --build --clean && tsc --build"
+    "build": "tsup --config ../../tsup.config.ts --tsconfig ../../tsconfig.tsup.json"
   },
   "dependencies": {
     "@sphereon/ssi-types": "^0.33",

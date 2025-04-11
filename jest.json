@@ -22,7 +22,7 @@
     "\\.tsx?$": [
       "ts-jest",
       {
-        "tsconfig": "./packages/tsconfig-base.json"
+        "tsconfig": "./tsconfig.base.json"
       }
     ]
   },

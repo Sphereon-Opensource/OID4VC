@@ -7,7 +7,7 @@ import {
   MdocOid4vpIssuerSigned,
   MdocOid4vpMdocVpToken,
   PresentationSubmission,
-  W3CVerifiablePresentation
+  W3CVerifiablePresentation,
 } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
 
@@ -18,7 +18,7 @@ import {
   ResponseURIType,
   SupportedVersion,
   VerifiablePresentationWithFormat,
-  Verification
+  Verification,
 } from '../types'
 import { CreateJwtCallback } from '../types/VpJwtIssuer'
 import { VerifyJwtCallback } from '../types/VpJwtVerifier'
