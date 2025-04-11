@@ -23,13 +23,6 @@ if (!crypto) {
   }
 }
 
-if (crypto && crypto.getRandomValues) {
-  // eslint-disable-next-line no-undef
-  module.exports = randomBytes;
-} else {
-  // eslint-disable-next-line no-undef
-  module.exports = oldBrowser;
-}
 
 export const randomBytes = (size) => {
   // phantomjs needs to throw
@@ -54,3 +47,13 @@ export const randomBytes = (size) => {
   }
   return Uint8Array.from(bytes);
 };
+
+
+
+if (crypto && crypto.getRandomValues) {
+  // eslint-disable-next-line no-undef
+  module.exports = randomBytes;
+} else {
+  // eslint-disable-next-line no-undef
+  module.exports = oldBrowser;
+}

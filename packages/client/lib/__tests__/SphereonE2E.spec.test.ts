@@ -7,6 +7,7 @@ import * as didts from '@transmute/did-key.js';
 import { fetch } from 'cross-fetch';
 import debug from 'debug';
 import { importJWK, JWK, SignJWT } from 'jose';
+import { describe, expect, it } from 'vitest';
 
 import { OpenID4VCIClientV1_0_11 } from '..';
 

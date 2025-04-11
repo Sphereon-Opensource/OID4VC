@@ -100,7 +100,7 @@ export const getRequestObjectJwtVerifier = async (
       throw new Error(SIOPErrors.INVALID_CLIENT_ID_MUST_MATCH_RESPONSE_URI)
     }
 
-    /*const parts = options.raw.split('.')  this can be signed and execution can't even be here when alg = none 
+    /*const parts = options.raw.split('.')  this can be signed and execution can't even be here when alg = none
     if (parts.length > 2 && parts[2]) {
       throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' JWT must not be signed`)
     }*/
@@ -145,7 +145,7 @@ export const getRequestObjectJwtVerifier = async (
     }
 
     const jwk = attestationPayload.cnf['jwk'] as JWK
-    const alg = jwk.alg ?? attestationHeader.alg
+    const alg = jwk.alg ?? attestationHeader.alg ?? jwt.header.alg
     if (!alg) {
       throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' JWT header is missing alg.`)
     }

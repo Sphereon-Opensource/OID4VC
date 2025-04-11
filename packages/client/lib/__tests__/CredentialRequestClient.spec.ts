@@ -1,6 +1,5 @@
 // Walt uses a self signed cert
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 import { KeyObject } from 'crypto';
 
 import {
@@ -19,6 +18,7 @@ import * as jose from 'jose';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { CredentialOfferClient, MetadataClient, ProofOfPossessionBuilder } from '..';
 import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder';
@@ -219,7 +219,7 @@ describe('Credential Request Client with different issuers ', () => {
   });
 
   // Missing the issuer required property
-  xit('should create correct CredentialRequest for uniissuer', async () => {
+  it.skip('should create correct CredentialRequest for uniissuer', async () => {
     const IRR_URI =
       'https://oidc4vc.uniissuer.io/?credential_type=OpenBadgeCredential&pre-authorized_code=0ApoI8rxVmdQ44RIpuDbFIURIIkOhyek&user_pin_required=false';
     const credentialOffer = await (

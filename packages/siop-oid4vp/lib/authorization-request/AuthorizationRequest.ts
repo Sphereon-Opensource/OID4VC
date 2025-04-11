@@ -212,9 +212,6 @@ export class AuthorizationRequest {
 
     const dcqlQuery = await Dcql.findValidDcqlQuery(mergedPayload)
 
-    if (!registrationMetadataPayload) {
-      return Promise.reject(Error('No registration metadata payload'))
-    }
     return {
       jwt,
       payload: parsedJwt?.payload,

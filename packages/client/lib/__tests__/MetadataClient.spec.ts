@@ -7,6 +7,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { CredentialOfferClientV1_0_11 } from '../CredentialOfferClientV1_0_11';
 import { MetadataClient } from '../MetadataClient';
@@ -25,7 +26,6 @@ import {
   WALT_OID4VCI_METADATA,
 } from './MetadataMocks';
 import { getMockData } from './data/VciDataFixtures';
-
 //todo: skipping this. it was written for pre v13 version and we have to do some modifications to make it work
 describe('MetadataClient with IdentiProof Issuer should', () => {
   beforeAll(() => {

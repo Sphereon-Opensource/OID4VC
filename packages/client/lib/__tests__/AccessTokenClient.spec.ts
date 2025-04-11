@@ -2,6 +2,7 @@ import { AccessTokenRequest, AccessTokenResponse, GrantTypes, PRE_AUTH_CODE_LITE
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { AccessTokenClient } from '../AccessTokenClient';
 

@@ -8,6 +8,7 @@ import { fetch } from 'cross-fetch';
 import debug from 'debug';
 import { base64url, importJWK, JWK, SignJWT } from 'jose';
 import * as u8a from 'uint8arrays';
+import { describe, expect, it } from 'vitest';
 
 import { OpenID4VCIClientV1_0_11 } from '..';
 

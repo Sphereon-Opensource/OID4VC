@@ -2,6 +2,7 @@ import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { PEX } from '@sphereon/pex'
 import { PresentationDefinitionV2 } from '@sphereon/pex-models'
 import { OriginalVerifiableCredential } from '@sphereon/ssi-types'
+import { describe, expect, it } from 'vitest'
 
 import {
   OP,
@@ -23,8 +24,6 @@ import {
 import { getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
 import { mockedGetEnterpriseAuthToken, pexHasher, sdJwtVcPresentationSignCallback, WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
-
-jest.setTimeout(30000)
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 

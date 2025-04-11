@@ -9,6 +9,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { createCredentialOfferURIFromObject } from '../../../issuer/lib';
 import { OpenID4VCIClient } from '../OpenID4VCIClient';
@@ -36,7 +37,7 @@ describe('OpenID4VCIClient should', () => {
   it('should successfully construct an authorization request url', async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    client._state.endpointMetadata?.credentialIssuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client._state.endpointMetadata.credentialIssuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
     const url = await client.createAuthorizationRequestUrl({
       authorizationRequest: {
         scope: 'openid TestCredential',
@@ -98,7 +99,7 @@ describe('OpenID4VCIClient should', () => {
   it('create an authorization request url with authorization_details array property', async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    client._state.endpointMetadata?.credentialIssuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client._state.endpointMetadata.credentialIssuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
 
     await expect(
       client.createAuthorizationRequestUrl({
@@ -134,7 +135,7 @@ describe('OpenID4VCIClient should', () => {
   it('create an authorization request url with authorization_details object property', async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    client._state.endpointMetadata?.credentialIssuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client._state.endpointMetadata.credentialIssuerMetadata.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
 
     await expect(
       client.createAuthorizationRequestUrl({
@@ -245,7 +246,7 @@ describe('should successfully handle isEbsi function', () => {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    client._state.endpointMetadata?.credentialIssuerMetadata = {
+    client._state.endpointMetadata.credentialIssuerMetadata = {
       credentials_supported: {
         TestCredential: {
           trust_framework: {

@@ -2,6 +2,7 @@ import { Alg, Jwt } from '@sphereon/oid4vci-common';
 import { CredentialMapper } from '@sphereon/ssi-types';
 import { fetch } from 'cross-fetch';
 import { importJWK, JWK, SignJWT } from 'jose';
+import { describe, expect, it } from 'vitest';
 
 import { OpenID4VCIClientV1_0_11 } from '..';
 

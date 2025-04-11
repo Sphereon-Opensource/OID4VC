@@ -12,7 +12,7 @@
     "plugin:import/typescript",
     "prettier"
   ],
-  "globals": { "BigInt": true, "console": true, "WebAssembly": true },
+  "globals": { "BigInt": true, "console": true, "WebAssembly": true, "vitest": true },
   "rules": {
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "eslint-comments/disable-enable-pair": [

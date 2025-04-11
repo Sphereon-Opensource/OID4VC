@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { determineSpecVersionFromOffer, determineSpecVersionFromURI, getClientIdFromCredentialOfferPayload } from '../functions';
 import { CredentialOfferPayload, CredentialOfferPayloadV1_0_11, OpenId4VCIVersion } from '../types';
 

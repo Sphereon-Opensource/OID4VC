@@ -2,6 +2,7 @@ import { OpenId4VCIVersion } from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
+import { describe, expect, it } from 'vitest';
 
 import { CredentialOfferClient } from '../CredentialOfferClient';
 import { CredentialOfferClientV1_0_11 } from '../CredentialOfferClientV1_0_11';

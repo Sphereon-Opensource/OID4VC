@@ -4,6 +4,7 @@ import { defaultHasher, SigningAlgo } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition } from '@sphereon/pex'
 import { decodeSdJwtVc, OriginalVerifiableCredential } from '@sphereon/ssi-types'
 import { DcqlCredential, DcqlQuery } from 'dcql'
+import { describe, expect, it } from 'vitest'
 
 import {
   InMemoryRPSessionManager,
@@ -34,8 +35,6 @@ import {
   VERIFIERZ_PURPOSE_TO_VERIFY,
   VERIFIERZ_PURPOSE_TO_VERIFY_NL,
 } from './data/mockedData'
-
-jest.setTimeout(30000)
 
 type Json =
   | string

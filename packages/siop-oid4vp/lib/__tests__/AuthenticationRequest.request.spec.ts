@@ -4,6 +4,7 @@ import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition } from '@sphereon/pex'
 import { IProofType } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
+import { describe, expect, it } from 'vitest'
 
 import {
   CreateAuthorizationRequestOpts,

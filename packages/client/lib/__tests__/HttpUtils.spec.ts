@@ -1,4 +1,5 @@
 import { isValidURL } from '@sphereon/oid4vci-common';
+import { describe, expect, it } from 'vitest';
 
 describe('httputils.isValidURL', () => {
   it('Should return true for http://localhost', () => {

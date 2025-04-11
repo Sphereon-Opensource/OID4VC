@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { createDPoP, getCreateDPoPOptions, verifyDPoP } from '../dpop';
 
 describe('dpop', () => {

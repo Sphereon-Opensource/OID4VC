@@ -2,6 +2,7 @@ import { PARMode, WellKnownEndpoints } from '@sphereon/oid4vci-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { OpenID4VCIClientV1_0_11 } from '../OpenID4VCIClientV1_0_11';
 

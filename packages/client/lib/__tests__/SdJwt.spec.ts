@@ -7,6 +7,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { OpenID4VCIClientV1_0_13 } from '..';
 import { AuthorizationServerMetadataBuilder, createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilder } from '../../../issuer';

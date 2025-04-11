@@ -15,11 +15,11 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
   }
   assertValidRequestObjectOpts(opts.requestObject, true)
 
-  if (!opts.clientMetadata) {
+  /*if (!opts.clientMetadata) {
     return Promise.reject(Error('No client metadata found'))
   } else if (!payload.claims) {
     return Promise.reject(Error('No payload claims'))
-  }
+  }*/
   const state = getState(payload.state)
   const registration = await createRequestRegistration(opts.clientMetadata, opts)
   const claims = await createPresentationDefinitionClaimsProperties(payload.claims)

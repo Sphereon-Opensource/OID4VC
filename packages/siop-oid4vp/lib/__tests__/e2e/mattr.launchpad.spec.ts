@@ -6,6 +6,7 @@ import { fetch } from 'cross-fetch'
 import { DIDDocument, DIDResolutionResult } from 'did-resolver'
 import { importJWK, JWK, SignJWT } from 'jose'
 import * as u8a from 'uint8arrays'
+import { describe, expect, it, test } from 'vitest'
 
 import { AuthorizationRequest, AuthorizationResponse, OP, PresentationDefinitionWithLocation, PresentationExchange, SupportedVersion } from '../..'
 import { getCreateJwtCallback, getVerifyJwtCallback } from '../DidJwtTestUtils'

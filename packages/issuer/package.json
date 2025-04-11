@@ -40,8 +40,7 @@
   },
   "devDependencies": {
     "@sphereon/oid4vci-client": "workspace:*",
-    "@types/jest": "^29.5.12",
-    "@types/node": "^18.19.39",
+    "@types/node": "^20.17.30",
     "@types/uuid": "^9.0.8",
     "did-resolver": "^4.1.0",
     "typescript": "5.8.3"

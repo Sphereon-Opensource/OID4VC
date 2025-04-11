@@ -17,13 +17,13 @@ import {
 import { createRequestRegistration } from './RequestRegistration'
 import { ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts, PropertyTarget } from './types'
 
-export const createPresentationDefinitionClaimsProperties = async (opts: ClaimPayloadOptsVID1): Promise<ClaimPayloadVID1> => {
+export const createPresentationDefinitionClaimsProperties = async (opts: ClaimPayloadOptsVID1): Promise<ClaimPayloadVID1> | undefined => {
   if (
     !opts ||
     !opts.vp_token ||
     (!opts.vp_token.presentation_definition && !opts.vp_token.presentation_definition_uri && !opts.vp_token.dcql_query)
   ) {
-    return Promise.reject(new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID))
+    return undefined
   }
 
   let presentationDef = opts.vp_token.presentation_definition

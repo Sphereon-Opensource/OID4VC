@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    {
+      "path": "packages/common"
+    },
+    {
+      "path": "packages/issuer"
+    },
+    {
+      "path": "packages/client"
+    },
+    {
+      "path": "packages/issuer-rest"
+    },
+    {
+      "path": "packages/callback-example"
+    },
+    {
+      "path": "packages/siop-oid4vp"
+    },
+    {
+      "path": "packages/did-auth-siop-adapter"
+    },
+    {
+      "path": "packages/jarm"
+    }
+  ]
+}

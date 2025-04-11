@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { getTypesFromCredentialSupported } from '../functions';
 import { CredentialConfigurationSupportedV1_0_13 } from '../types';
 

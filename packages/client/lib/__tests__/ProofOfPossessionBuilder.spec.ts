@@ -2,6 +2,7 @@ import { KeyObject } from 'crypto';
 
 import { Alg, JWS_NOT_VALID, Jwt, NO_JWT_PROVIDED, OpenId4VCIVersion, PROOF_CANT_BE_CONSTRUCTED, ProofOfPossession } from '@sphereon/oid4vci-common';
 import * as jose from 'jose';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import { ProofOfPossessionBuilder } from '..';
 

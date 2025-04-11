@@ -7,6 +7,7 @@ import { KeyLike } from 'jose'
 // @ts-ignore
 import nock from 'nock'
 import * as u8a from 'uint8arrays'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
   AuthorizationRequest,
@@ -225,7 +226,7 @@ describe('OP using test vectors', () => {
   })
 
   // Disabled for now as the value for the path_nested in the id token is actually invalid
-  xit('should use test vector auth response', async () => {
+  it.skip('should use test vector auth response', async () => {
     const authorizationResponse = await AuthorizationResponse.fromPayload(TestVectors.authorizationResponsePayload)
 
     expect(authorizationResponse.payload.vp_token).toBeDefined()

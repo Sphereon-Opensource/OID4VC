@@ -1,5 +1,5 @@
 import { AuthzFlowType, CredentialOfferPayload } from '@sphereon/oid4vci-common';
-
+import { describe, expect, it } from 'vitest';
 //todo: this file is just testing v9, we probably want to add v11 tests here as well
 describe('Authorization Flow Type determination', () => {
   it('should return authorization code flow type with a single credential_type', () => {

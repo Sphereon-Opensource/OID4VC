@@ -10,11 +10,14 @@ import { IProofType, SdJwtVcKbJwtPayload } from '@sphereon/ssi-types'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import base58 from 'bs58'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { ethers } from 'ethers'
 import { exportJWK, importJWK, JWK, SignJWT } from 'jose'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import moment from 'moment'
+import { expect } from 'vitest'
 
 import {
   assertValidMetadata,

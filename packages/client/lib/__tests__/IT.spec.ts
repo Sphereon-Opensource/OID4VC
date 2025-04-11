@@ -12,6 +12,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { AccessTokenClient, AccessTokenClientV1_0_11, OpenID4VCIClient, OpenID4VCIClientV1_0_13, ProofOfPossessionBuilder } from '..';
 import { CredentialOfferClient } from '../CredentialOfferClient';

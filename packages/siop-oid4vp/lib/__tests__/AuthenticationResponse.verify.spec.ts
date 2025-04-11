@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest'
+
 import { IDToken, VerifyAuthorizationResponseOpts } from '..'
 import SIOPErrors from '../types/Errors'
 

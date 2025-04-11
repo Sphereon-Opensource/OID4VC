@@ -1,4 +1,5 @@
 import { PEX } from '@sphereon/pex'
+import { describe, expect, it } from 'vitest'
 
 import { anyDef, VCs } from './fixtures'
 

@@ -18,15 +18,16 @@ import {
 } from '@sphereon/oid4vci-common'
 import {
   AuthorizationServerMetadataBuilder,
+  CredentialDataSupplierResult,
   CredentialSupportedBuilderV1_13,
   MemoryStates,
   VcIssuer,
   VcIssuerBuilder,
 } from '@sphereon/oid4vci-issuer'
-import { CredentialDataSupplierResult } from '@sphereon/oid4vci-issuer'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { generateDid, getIssuerCallbackV1_0_11, getIssuerCallbackV1_0_13, verifyCredential } from '../IssuerCallback'
 

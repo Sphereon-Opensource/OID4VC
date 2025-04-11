@@ -1,5 +1,6 @@
 import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { IProofType } from '@sphereon/ssi-types'
+import { describe, expect, it } from 'vitest'
 
 import {
   CreateAuthorizationRequestOpts,

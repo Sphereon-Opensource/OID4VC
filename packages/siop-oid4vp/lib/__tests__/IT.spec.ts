@@ -6,6 +6,7 @@ import { CredentialMapper, IPresentation, IProofType, IVerifiableCredential, W3C
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock'
+import { describe, expect, it } from 'vitest'
 
 import { InMemoryRPSessionManager } from '..'
 import {
@@ -40,8 +41,6 @@ import {
   VERIFIERZ_PURPOSE_TO_VERIFY,
   VERIFIERZ_PURPOSE_TO_VERIFY_NL,
 } from './data/mockedData'
-
-jest.setTimeout(30000)
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 const EXAMPLE_REFERENCE_URL = 'https://rp.acme.com/siop/jwts'

@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { convertURIToJsonObject } from '../functions';
 
 import { UNIT_TEST_TIMEOUT } from './CredentialOfferUtil.spec';
