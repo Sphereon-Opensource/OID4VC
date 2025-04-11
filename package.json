@@ -12,8 +12,8 @@
     "fix:lint": "eslint . --fix --ext .ts",
     "fix:prettier": "prettier --write \"{packages,__tests__,!dist}/**/*.{ts,tsx,js,json,md,yml}\"",
     "build": "pnpm -r --stream build",
-    "test:ci": "vitest run --config ./vitest.config.ts",
-    "test": "vitest run --config ./vitest.config.ts",
+    "test:ci": "vitest run --config ./vitest.config.ts --coverage",
+    "test": "vitest run --config ./vitest.config.ts --coverage",
     "clean": "rimraf --glob **/dist **/coverage **/pnpm-lock.yaml packages/**/node_modules node_modules packages/**/tsconfig.tsbuildinfo",
     "publish:latest": "lerna publish --conventional-commits --include-merged-tags --create-release github --yes --dist-tag latest --registry https://registry.npmjs.org",
     "publish:next": "lerna publish --conventional-prerelease --force-publish --canary --no-git-tag-version --include-merged-tags --preid next --pre-dist-tag next --yes --registry https://registry.npmjs.org",
@@ -45,6 +45,7 @@
     "prettier": "^3.3.2",
     "rimraf": "^5.0.8",
     "vitest": "^3.1.1",
+    "@vitest/coverage-v8": "^3.1.1",
     "typescript": "5.8.3"
   },
   "keywords": [
