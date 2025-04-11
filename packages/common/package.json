@@ -17,7 +17,8 @@
     }
   },
   "scripts": {
-    "build": "tsup --config ../../tsup.config.ts --tsconfig ../../tsconfig.tsup.json"
+    "build": "tsup --config ../../tsup.config.ts --tsconfig ../../tsconfig.tsup.json",
+    "test": "vitest run --config ../../vitest.config.ts --coverage"
   },
   "dependencies": {
     "@sphereon/ssi-types": "^0.33",
