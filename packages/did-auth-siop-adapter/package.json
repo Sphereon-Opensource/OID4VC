@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/did-auth-siop-adapter",
-  "version": "0.18.1",
+  "version": "0.18.2",
   "description": "Self Issued OpenID V2 (SIOPv2) and OpenID 4 Verifiable Presentations (OID4VP) did adapter",
   "type": "module",
   "main": "./dist/index.cjs",
