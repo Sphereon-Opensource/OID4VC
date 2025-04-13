@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-client",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "description": "OpenID for Verifiable Credential Issuance (OpenID4VCI) client",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -37,7 +37,6 @@
     "@transmute/did-key.js": "^0.3.0-unstable.10",
     "@trust/keyto": "^2.0.0-alpha1",
     "@types/node": "^20.17.30",
-    "vitest": "^3.1.1",
     "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
@@ -55,7 +54,8 @@
     "ts-node": "^10.9.2",
     "typescript": "5.8.3",
     "uint8arrays": "3.1.1",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "vitest": "^3.1.1"
   },
   "engines": {
     "node": ">=20"
