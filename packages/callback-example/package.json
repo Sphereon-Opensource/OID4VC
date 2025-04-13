@@ -46,7 +46,7 @@
     "node": ">=20.6"
   },
   "files": [
-    "dist/**/*"
+    "dist"
   ],
   "keywords": [
     "Sphereon",
@@ -61,8 +61,5 @@
   ],
   "author": "Sphereon",
   "license": "Apache-2.0",
-  "private": true,
-  "publishConfig": {
-    "access": "public"
-  }
+  "private": true
 }
