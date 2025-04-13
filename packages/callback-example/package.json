@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/callback",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "OpenID 4 Verifiable Credential Issuance issuer callback example",
   "type": "module",
   "main": "./dist/index.cjs",
