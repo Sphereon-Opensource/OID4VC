@@ -19,3 +19,4 @@ packages/siop-oid4vp/lib/generator/*
 /packages/siop-oid4vp/lib/schemas/validation/schemaValidation.cjs
 
 .env
+/.turbo/
