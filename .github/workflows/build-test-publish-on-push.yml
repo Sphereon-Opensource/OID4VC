@@ -92,5 +92,5 @@ jobs:
 
       - name: publish @unstable when on unstable branch
         if: startsWith(github.ref, 'refs/heads/feat')
-        run: npx auto shipit
+        run: lerna publish --conventional-prerelease --force-publish --canary --sync-dist-version --no-git-tag-version --include-merged-tags --preid $PRE_ID --pre-dist-tag unstable --yes --throttle-size 75 --registry https://registry.npmjs.org
 
