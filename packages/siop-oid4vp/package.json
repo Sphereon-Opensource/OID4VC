@@ -98,8 +98,7 @@
     "node": ">=20.6"
   },
   "files": [
-    "lib/**/*",
-    "dist/**/*"
+    "dist"
   ],
   "keywords": [
     "Sphereon",

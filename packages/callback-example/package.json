@@ -43,10 +43,9 @@
     "uuid": "^9.0.0"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=20.6"
   },
   "files": [
-    "lib/**/*",
     "dist/**/*"
   ],
   "keywords": [
@@ -62,7 +61,7 @@
   ],
   "author": "Sphereon",
   "license": "Apache-2.0",
-  "private": false,
+  "private": true,
   "publishConfig": {
     "access": "public"
   }

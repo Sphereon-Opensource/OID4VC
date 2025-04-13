@@ -30,8 +30,7 @@
     "node": ">=20"
   },
   "files": [
-    "lib/**/*",
-    "dist/**/*"
+    "dist"
   ],
   "prettier": {
     "singleQuote": true,

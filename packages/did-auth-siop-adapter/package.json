@@ -36,7 +36,6 @@
     "node": ">=20"
   },
   "files": [
-    "lib/**/*",
     "dist/**/*"
   ],
   "keywords": [
