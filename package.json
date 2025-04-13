@@ -74,7 +74,7 @@
     "OID4VCI",
     "OID4VP"
   ],
-  "repository": "Sphereon-OpenSource/OID4VCI",
+  "repository": "https://github.com/Sphereon-Opensource/OID4VC",
   "auto": {
     "plugins": [
       "npm",
