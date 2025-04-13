@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-workspace",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "OpenID for Verifiable Credentials",
   "author": "Sphereon",
   "license": "Apache-2.0",
