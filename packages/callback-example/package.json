@@ -1,5 +1,5 @@
 {
-  "name": "@sphereon/oid4vci-callback-example",
+  "name": "@sphereon/callback",
   "version": "0.18.0",
   "description": "OpenID 4 Verifiable Credential Issuance issuer callback example",
   "type": "module",
@@ -61,5 +61,5 @@
   ],
   "author": "Sphereon",
   "license": "Apache-2.0",
-  "private": false
+  "private": true
 }
