@@ -27,8 +27,8 @@
     "build": "tsup --config ../../tsup.config.ts --tsconfig ../../tsconfig.tsup.json"
   },
   "dependencies": {
-    "@sphereon/oid4vc-common": "workspace:*",
-    "@sphereon/oid4vci-common": "workspace:*",
+    "@sphereon/oid4vc-common": "workspace:^",
+    "@sphereon/oid4vci-common": "workspace:^",
     "@sphereon/ssi-types": "^0.33",
     "cross-fetch": "^4.1.0",
     "debug": "^4.4.0"

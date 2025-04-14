@@ -21,8 +21,8 @@
     "build": "tsup --config ../../tsup.config.ts --tsconfig ../../tsconfig.tsup.json"
   },
   "dependencies": {
-    "@sphereon/oid4vc-common": "workspace:*",
-    "@sphereon/oid4vci-common": "workspace:*",
+    "@sphereon/oid4vc-common": "workspace:^",
+    "@sphereon/oid4vci-common": "workspace:^",
     "@sphereon/ssi-express-support": "^0.33",
     "@sphereon/ssi-types": "^0.33",
     "short-uuid": "^4.2.2",
@@ -40,7 +40,7 @@
     "awesome-qr": false
   },
   "devDependencies": {
-    "@sphereon/oid4vci-client": "workspace:*",
+    "@sphereon/oid4vci-client": "workspace:^",
     "@types/node": "^20.17.30",
     "@types/uuid": "^9.0.8",
     "did-resolver": "^4.1.0",

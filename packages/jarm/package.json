@@ -21,7 +21,7 @@
     "build": "tsup --config ../../tsup.config.ts --tsconfig ../../tsconfig.tsup.json"
   },
   "dependencies": {
-    "@sphereon/oid4vc-common": "workspace:*",
+    "@sphereon/oid4vc-common": "workspace:^",
     "valibot": "^0.42.1"
   },
   "devDependencies": {

@@ -22,7 +22,8 @@
     "publish:unstable": "lerna publish --conventional-prerelease --force-publish --canary --no-git-tag-version --include-merged-tags --preid unstable --pre-dist-tag unstable --yes --registry https://registry.npmjs.org"
   },
   "engines": {
-    "node": ">=20.6"
+    "node": ">=20.6",
+    "pnpm": ">=10"
   },
   "resolutions": {
     "@sphereon/ssi-types": "^0.33",
@@ -70,8 +71,5 @@
     "OID4VCI",
     "OID4VP"
   ],
-  "repository": "https://github.com/Sphereon-Opensource/OID4VC",
-  "auto": {
-    "plugins": ["npm", ["conventional-commits", { "defaultReleaseType": "patch" }], "released"]
-  }
+  "repository": "https://github.com/Sphereon-Opensource/OID4VC"
 }
