@@ -2,6 +2,7 @@
   "name": "@sphereon/jarm",
   "version": "0.18.2",
   "description": "Sphereon JARM",
+  "source": "./src/index.ts",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -30,7 +31,10 @@
     "node": ">=20"
   },
   "files": [
-    "dist"
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE.md"
   ],
   "prettier": {
     "singleQuote": true,

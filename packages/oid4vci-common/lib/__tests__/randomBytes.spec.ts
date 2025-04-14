@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { randomBytes } from '../functions';
+import randomBytes from '../functions/randomBytes.cjs';
 
 import { UNIT_TEST_TIMEOUT } from './CredentialOfferUtil.spec';
 

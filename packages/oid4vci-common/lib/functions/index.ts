@@ -1,5 +1,3 @@
-import { randomBytes } from './randomBytes.cjs';
-
 export * from './CredentialRequestUtil';
 export * from './CredentialResponseUtil';
 export * from './CredentialOfferUtil';
@@ -10,5 +8,4 @@ export * from './FormatUtils';
 export * from './HttpUtils';
 export * from './ProofUtil';
 export * from './AuthorizationResponseUtil';
-export { randomBytes };
 export * from './RandomUtils';

@@ -2,6 +2,7 @@
   "name": "@sphereon/oid4vc-common",
   "version": "0.18.2",
   "description": "OpenID 4 Verifiable Credentials Common",
+  "source": "./src/index.ts",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -23,12 +24,10 @@
   "dependencies": {
     "@sphereon/ssi-types": "^0.33",
     "jwt-decode": "^4.0.0",
-    "sha.js": "^2.4.11",
-    "uint8arrays": "3.1.1",
+    "uint8arrays": "^5.1.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@types/sha.js": "^2.4.4",
     "@types/uuid": "^9.0.1",
     "typescript": "5.8.3"
   },
@@ -36,7 +35,10 @@
     "node": ">=20"
   },
   "files": [
-    "dist"
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE.md"
   ],
   "prettier": {
     "singleQuote": true,

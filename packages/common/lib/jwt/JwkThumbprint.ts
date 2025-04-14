@@ -1,6 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import * as u8a from 'uint8arrays';
+import { toString } from 'uint8arrays';
 
 import { defaultHasher } from '../hasher';
 import { DigestAlgorithm } from '../types';
@@ -46,7 +44,7 @@ export async function calculateJwkThumbprint(jwk: JWK, digestAlgorithm?: DigestA
     default:
       throw Error('"kty" (Key Type) Parameter missing or unsupported');
   }
-  return u8a.toString(defaultHasher(JSON.stringify(components), algorithm), 'base64url');
+  return toString(defaultHasher(JSON.stringify(components), algorithm), 'base64url');
 }
 
 export async function getDigestAlgorithmFromJwkThumbprintUri(uri: string): Promise<DigestAlgorithm> {

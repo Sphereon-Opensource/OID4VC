@@ -7,7 +7,7 @@ import { from } from '@trust/keyto';
 import { fetch } from 'cross-fetch';
 import debug from 'debug';
 import { base64url, importJWK, JWK, SignJWT } from 'jose';
-import * as u8a from 'uint8arrays';
+import { fromString, toString } from 'uint8arrays';
 import { describe, expect, it } from 'vitest';
 
 import { OpenID4VCIClientV1_0_11 } from '..';
@@ -33,7 +33,7 @@ const privateKey = from(jwk, 'jwk').toString('blk', 'private');
 const publicKey = from(jwk, 'jwk').toString('blk', 'public');
 console.log(`Private key: ${privateKey}`);
 console.log(`Public key: ${publicKey}`);
-console.log(`Private key (b64): ${base64url.encode(u8a.fromString(privateKey, 'base16'))}`);
+console.log(`Private key (b64): ${base64url.encode(fromString(privateKey, 'base16'))}`);
 console.log(`JWK (private 2) ${JSON.stringify(toJwk(privateKey, 'Secp256r1', { isPrivateKey: true }))}`);
 console.log(`JWK (public  2) ${JSON.stringify(toJwk(publicKey, 'Secp256r1', { isPrivateKey: false }))}`);
 

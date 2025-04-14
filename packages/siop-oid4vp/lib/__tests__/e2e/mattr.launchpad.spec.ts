@@ -5,7 +5,7 @@ import * as ed25519 from '@transmute/did-key-ed25519'
 import { fetch } from 'cross-fetch'
 import { DIDDocument, DIDResolutionResult } from 'did-resolver'
 import { importJWK, JWK, SignJWT } from 'jose'
-import * as u8a from 'uint8arrays'
+import { fromString } from 'uint8arrays'
 import { describe, expect, it, test } from 'vitest'
 
 import { AuthorizationRequest, AuthorizationResponse, OP, PresentationDefinitionWithLocation, PresentationExchange, SupportedVersion } from '../..'
@@ -67,7 +67,7 @@ const getResolver = () => {
 
 describe('OID4VCI-Client using Mattr issuer should', () => {
   async function testWithOp(format: string | string[]) {
-    const did = await generateCustomDid({ seed: u8a.fromString(hexPrivateKey, 'base16') })
+    const did = await generateCustomDid({ seed: fromString(hexPrivateKey, 'base16') })
     expect(did).toBeDefined()
     expect(did.didDocument).toBeDefined()
 
@@ -124,7 +124,7 @@ describe('OID4VCI-Client using Mattr issuer should', () => {
   }
 
   async function testWithPayloads(format: string | string[]) {
-    const did = await generateCustomDid({ seed: u8a.fromString(hexPrivateKey, 'base16') })
+    const did = await generateCustomDid({ seed: fromString(hexPrivateKey, 'base16') })
     expect(did).toBeDefined()
     expect(did.didDocument).toBeDefined()
 

@@ -24,7 +24,7 @@ if (!crypto) {
 }
 
 
-export const randomBytes = (size) => {
+function randomBytes(size){
   // phantomjs needs to throw
   if (size > MAX_UINT32) throw new Error('requested too many random bytes');
 
@@ -49,11 +49,5 @@ export const randomBytes = (size) => {
 };
 
 
-
-if (crypto && crypto.getRandomValues) {
-  // eslint-disable-next-line no-undef
-  module.exports = randomBytes;
-} else {
-  // eslint-disable-next-line no-undef
-  module.exports = oldBrowser;
-}
+// eslint-disable-next-line no-undef
+module.exports = randomBytes;

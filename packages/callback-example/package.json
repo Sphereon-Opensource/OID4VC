@@ -2,6 +2,7 @@
   "name": "@sphereon/callback",
   "version": "0.18.2",
   "description": "OpenID 4 Verifiable Credential Issuance issuer callback example",
+  "source": "./src/index.ts",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -46,7 +47,10 @@
     "node": ">=20.6"
   },
   "files": [
-    "dist"
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE.md"
   ],
   "keywords": [
     "Sphereon",

@@ -1,20 +1,20 @@
 import { defaultHasher } from '@sphereon/oid4vc-common';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import * as u8a from 'uint8arrays';
+import { toString } from 'uint8arrays';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { SupportedEncodings } from 'uint8arrays/to-string';
 
 import { CodeChallengeMethod } from '../types';
 
-import { randomBytes } from './randomBytes.cjs';
+import randomBytes from './randomBytes.cjs';
 
 export const CODE_VERIFIER_DEFAULT_LENGTH = 128;
 export const NONCE_LENGTH = 32;
 
 export const generateRandomString = (length: number, encoding?: SupportedEncodings): string => {
-  return u8a.toString(randomBytes(length), encoding).slice(0, length);
+  return toString(randomBytes(length), encoding).slice(0, length);
 };
 
 export const generateNonce = (length?: number): string => {
@@ -30,7 +30,7 @@ export const createCodeChallenge = (codeVerifier: string, codeChallengeMethod?: 
   if (codeChallengeMethod === CodeChallengeMethod.plain) {
     return codeVerifier;
   } else if (!codeChallengeMethod || codeChallengeMethod === CodeChallengeMethod.S256) {
-    return u8a.toString(defaultHasher(codeVerifier, 'sha256'), 'base64url');
+    return toString(defaultHasher(codeVerifier, 'sha256'), 'base64url');
   } else {
     // Just a precaution if a new method would be introduced
     throw Error(`code challenge method ${codeChallengeMethod} not implemented`);
