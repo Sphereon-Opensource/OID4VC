@@ -80,13 +80,11 @@ export class LookupStateManager<K extends StateType, V extends StateType> implem
 
   private async valueId(key: string): Promise<string | undefined> {
     const prop = this.lookup
-    return (
-      (await this.keyValueMapper
-        .get(key)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        .then((keyState) => (keyState && prop in keyState ? keyState[prop] : undefined))) as string
-    )
+    return (await this.keyValueMapper
+      .get(key)
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      .then((keyState) => (keyState && prop in keyState ? keyState[prop] : undefined))) as string
   }
 
   async delete(id: string): Promise<boolean> {

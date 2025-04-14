@@ -1,4 +1,4 @@
-import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, JsonURIMode, OpenId4VCIVersion, SearchValue } from '../types';
+import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, JsonURIMode, OpenId4VCIVersion, SearchValue } from '../types'
 
 /**
  * @type {(json: {[s:string]: never} | ArrayLike<never> | string | object, opts?: EncodeJsonAsURIOpts)} encodes a Json object into a URI
@@ -12,7 +12,7 @@ import { BAD_PARAMS, DecodeURIAsJsonOpts, EncodeJsonAsURIOpts, JsonURIMode, Open
 export function convertJsonToURI(
   json:
     | {
-        [s: string]: never;
+        [s: string]: never
       }
     | ArrayLike<never>
     | string
@@ -20,64 +20,64 @@ export function convertJsonToURI(
   opts?: EncodeJsonAsURIOpts,
 ): string {
   if (typeof json === 'string') {
-    return convertJsonToURI(JSON.parse(json), opts);
+    return convertJsonToURI(JSON.parse(json), opts)
   }
 
-  const results = [];
+  const results = []
 
   function encodeAndStripWhitespace(key: string): string {
-    return encodeURIComponent(key.replace(' ', ''));
+    return encodeURIComponent(key.replace(' ', ''))
   }
 
-  let components: string;
+  let components: string
   if ((opts?.version && opts.version > OpenId4VCIVersion.VER_1_0_08 && !opts.mode) || opts?.mode === JsonURIMode.JSON_STRINGIFY) {
     // v11 changed from encoding every param to a encoded json object with a credential_offer param key
-    components = encodeAndStripWhitespace(JSON.stringify(json));
+    components = encodeAndStripWhitespace(JSON.stringify(json))
   } else {
     // version 8 or lower, or mode is x-form-www-urlencoded
     for (const [key, value] of Object.entries(json)) {
       if (!value) {
-        continue;
+        continue
       }
       //Skip properties that are not of URL type
       if (!opts?.uriTypeProperties?.includes(key)) {
-        results.push(`${key}=${value}`);
-        continue;
+        results.push(`${key}=${value}`)
+        continue
       }
       if (opts?.arrayTypeProperties?.includes(key) && Array.isArray(value)) {
-        results.push(value.map((v) => `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(v, /\./g)}`).join('&'));
-        continue;
+        results.push(value.map((v) => `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(v, /\./g)}`).join('&'))
+        continue
       }
-      const isBool = typeof value == 'boolean';
-      const isNumber = typeof value == 'number';
-      const isString = typeof value == 'string';
-      let encoded;
+      const isBool = typeof value == 'boolean'
+      const isNumber = typeof value == 'number'
+      const isString = typeof value == 'string'
+      let encoded
       if (isBool || isNumber) {
-        encoded = `${encodeAndStripWhitespace(key)}=${value}`;
+        encoded = `${encodeAndStripWhitespace(key)}=${value}`
       } else if (isString) {
-        encoded = `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(value, /\./g)}`;
+        encoded = `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(value, /\./g)}`
       } else {
-        encoded = `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(JSON.stringify(value), /\./g)}`;
+        encoded = `${encodeAndStripWhitespace(key)}=${customEncodeURIComponent(JSON.stringify(value), /\./g)}`
       }
-      results.push(encoded);
+      results.push(encoded)
     }
-    components = results.join('&');
+    components = results.join('&')
   }
   if (opts?.baseUrl) {
     if (opts.baseUrl.endsWith('=')) {
       if (opts.param) {
-        throw Error('Cannot combine param with an url ending in =');
+        throw Error('Cannot combine param with an url ending in =')
       }
-      return `${opts.baseUrl}${components}`;
+      return `${opts.baseUrl}${components}`
     } else if (!opts.baseUrl.includes('?')) {
-      return `${opts.baseUrl}?${opts.param ? opts.param + '=' : ''}${components}`;
+      return `${opts.baseUrl}?${opts.param ? opts.param + '=' : ''}${components}`
     } else if (opts.baseUrl.endsWith('?')) {
-      return `${opts.baseUrl}${opts.param ? opts.param + '=' : ''}${components}`;
+      return `${opts.baseUrl}${opts.param ? opts.param + '=' : ''}${components}`
     } else {
-      return `${opts.baseUrl}${opts.param ? '&' + opts.param : ''}=${components}`;
+      return `${opts.baseUrl}${opts.param ? '&' + opts.param : ''}=${components}`
     }
   }
-  return components;
+  return components
 }
 
 /**
@@ -90,43 +90,43 @@ export function convertJsonToURI(
  */
 export function convertURIToJsonObject(uri: string, opts?: DecodeURIAsJsonOpts): unknown {
   if (!uri || (opts?.requiredProperties && !opts.requiredProperties?.every((p) => uri.includes(p)))) {
-    throw new Error(BAD_PARAMS);
+    throw new Error(BAD_PARAMS)
   }
 
-  const uriComponents = getURIComponentsAsArray(uri, opts?.arrayTypeProperties);
-  return decodeJsonProperties(uriComponents);
+  const uriComponents = getURIComponentsAsArray(uri, opts?.arrayTypeProperties)
+  return decodeJsonProperties(uriComponents)
 }
 
 export function decodeJsonProperties(parts: string[] | string[][]): unknown {
-  const result: { [s: string]: unknown } | ArrayLike<unknown> = {};
+  const result: { [s: string]: unknown } | ArrayLike<unknown> = {}
   for (const key in parts) {
-    const value = parts[key];
+    const value = parts[key]
     if (!value) {
-      continue;
+      continue
     }
     if (Array.isArray(value)) {
-      result[decodeURIComponent(key)] = value.map((v) => decodeURIComponent(v));
-      continue;
+      result[decodeURIComponent(key)] = value.map((v) => decodeURIComponent(v))
+      continue
     }
 
-    const isBool = typeof value == 'boolean';
-    const isNumber = typeof value == 'number';
-    const isString = typeof value == 'string';
-    const isObject = typeof value == 'object';
+    const isBool = typeof value == 'boolean'
+    const isNumber = typeof value == 'number'
+    const isString = typeof value == 'string'
+    const isObject = typeof value == 'object'
     if (isBool || isNumber) {
-      result[decodeURIComponent(key)] = value;
+      result[decodeURIComponent(key)] = value
     } else if (isString) {
-      const decoded = decodeURIComponent(value);
+      const decoded = decodeURIComponent(value)
       if (decoded.startsWith('{') && decoded.endsWith('}')) {
-        result[decodeURIComponent(key)] = JSON.parse(decoded);
+        result[decodeURIComponent(key)] = JSON.parse(decoded)
       } else {
-        result[decodeURIComponent(key)] = decoded;
+        result[decodeURIComponent(key)] = decoded
       }
     } else if (isObject) {
-      result[decodeURIComponent(key)] = decodeJsonProperties(value);
+      result[decodeURIComponent(key)] = decodeJsonProperties(value)
     }
   }
-  return result;
+  return result
 }
 
 /**
@@ -135,25 +135,25 @@ export function decodeJsonProperties(parts: string[] | string[][]): unknown {
  * @param {string[]} [arrayTypes] array of string containing array like keys
  */
 export function getURIComponentsAsArray(uri: string, arrayTypes?: string[]): string[] | string[][] {
-  const parts = uri.includes('?') ? uri.split('?')[1] : uri.includes('://') ? uri.split('://')[1] : uri;
-  const json: string[] | string[][] = [];
-  const dict: string[] = parts.split('&');
+  const parts = uri.includes('?') ? uri.split('?')[1] : uri.includes('://') ? uri.split('://')[1] : uri
+  const json: string[] | string[][] = []
+  const dict: string[] = parts.split('&')
   for (const entry of dict) {
-    const pair: string[] = entry.split('=');
-    const p0: any = pair[0];
-    const p1: any = pair[1];
+    const pair: string[] = entry.split('=')
+    const p0: any = pair[0]
+    const p1: any = pair[1]
     if (arrayTypes?.includes(p0)) {
-      const key = json[p0];
+      const key = json[p0]
       if (Array.isArray(key)) {
-        key.push(p1);
+        key.push(p1)
       } else {
-        json[p0] = [p1];
+        json[p0] = [p1]
       }
-      continue;
+      continue
     }
-    json[p0] = p1;
+    json[p0] = p1
   }
-  return json;
+  return json
 }
 
 /**
@@ -164,5 +164,5 @@ export function getURIComponentsAsArray(uri: string, arrayTypes?: string[]): str
 function customEncodeURIComponent(uriComponent: string, searchValue: SearchValue): string {
   // -_.!~*'() are not escaped because they are considered safe.
   // Add them to the regex as you need
-  return encodeURIComponent(uriComponent).replace(searchValue, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+  return encodeURIComponent(uriComponent).replace(searchValue, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)
 }

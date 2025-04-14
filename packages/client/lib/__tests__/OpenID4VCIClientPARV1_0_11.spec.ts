@@ -1,46 +1,46 @@
-import { PARMode, WellKnownEndpoints } from '@sphereon/oid4vci-common';
+import { PARMode, WellKnownEndpoints } from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import nock from 'nock';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import nock from 'nock'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { OpenID4VCIClientV1_0_11 } from '../OpenID4VCIClientV1_0_11';
+import { OpenID4VCIClientV1_0_11 } from '../OpenID4VCIClientV1_0_11'
 
-const MOCK_URL = 'https://server.example.com/';
+const MOCK_URL = 'https://server.example.com/'
 describe('OpenID4VCIClientV1_0_11', () => {
-  let client: OpenID4VCIClientV1_0_11;
+  let client: OpenID4VCIClientV1_0_11
 
   beforeEach(async () => {
-    nock(MOCK_URL).get(/.*/).reply(200, {});
-    nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {});
-    nock(MOCK_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {});
-    nock(`${MOCK_URL}`).post('/v1/auth/par').reply(201, { request_uri: 'test_uri', expires_in: 90 });
+    nock(MOCK_URL).get(/.*/).reply(200, {})
+    nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {})
+    nock(MOCK_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {})
+    nock(`${MOCK_URL}`).post('/v1/auth/par').reply(201, { request_uri: 'test_uri', expires_in: 90 })
     client = await OpenID4VCIClientV1_0_11.fromURI({
       createAuthorizationRequestURL: false,
       clientId: 'test-client',
       uri: 'openid-initiate-issuance://?issuer=https://server.example.com&credential_type=TestCredential',
-    });
-  });
+    })
+  })
 
   afterEach(() => {
-    nock.cleanAll();
-  });
+    nock.cleanAll()
+  })
 
   it('should successfully retrieve the authorization code using PAR', async () => {
-    client.endpointMetadata.credentialIssuerMetadata!.pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`;
-    client.endpointMetadata.credentialIssuerMetadata!.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client.endpointMetadata.credentialIssuerMetadata!.pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`
+    client.endpointMetadata.credentialIssuerMetadata!.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`
     const actual = await client.createAuthorizationRequestUrl({
       authorizationRequest: {
         parMode: PARMode.REQUIRE,
         scope: 'openid TestCredential',
         redirectUri: 'http://localhost:8881/cb',
       },
-    });
-    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri');
-  });
+    })
+    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri')
+  })
 
   it('should fail when pushed_authorization_request_endpoint is not present', async () => {
-    client.endpointMetadata.credentialIssuerMetadata!.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client.endpointMetadata.credentialIssuerMetadata!.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`
     await expect(() =>
       client.createAuthorizationRequestUrl({
         authorizationRequest: {
@@ -49,8 +49,8 @@ describe('OpenID4VCIClientV1_0_11', () => {
           redirectUri: 'http://localhost:8881/cb',
         },
       }),
-    ).rejects.toThrow(Error('PAR mode is set to required by Authorization Server does not support PAR!'));
-  });
+    ).rejects.toThrow(Error('PAR mode is set to required by Authorization Server does not support PAR!'))
+  })
 
   it('should fail when authorization_details and scope are not present', async () => {
     await expect(() =>
@@ -60,12 +60,12 @@ describe('OpenID4VCIClientV1_0_11', () => {
           redirectUri: 'http://localhost:8881/cb',
         },
       }),
-    ).rejects.toThrow('Could not create authorization details from credential offer. Please pass in explicit details');
-  });
+    ).rejects.toThrow('Could not create authorization details from credential offer. Please pass in explicit details')
+  })
 
   it('should not fail when only authorization_details is present', async () => {
-    client.endpointMetadata.credentialIssuerMetadata!.pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`;
-    client.endpointMetadata.credentialIssuerMetadata!.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client.endpointMetadata.credentialIssuerMetadata!.pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`
+    client.endpointMetadata.credentialIssuerMetadata!.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`
     const actual = await client.createAuthorizationRequestUrl({
       authorizationRequest: {
         parMode: PARMode.REQUIRE,
@@ -81,26 +81,26 @@ describe('OpenID4VCIClientV1_0_11', () => {
         ],
         redirectUri: 'http://localhost:8881/cb',
       },
-    });
-    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri');
-  });
+    })
+    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri')
+  })
 
   it('should not fail when only scope is present', async () => {
-    client.endpointMetadata.credentialIssuerMetadata!.pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`;
-    client.endpointMetadata.credentialIssuerMetadata!.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client.endpointMetadata.credentialIssuerMetadata!.pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`
+    client.endpointMetadata.credentialIssuerMetadata!.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`
     const actual = await client.createAuthorizationRequestUrl({
       authorizationRequest: {
         parMode: PARMode.REQUIRE,
         scope: 'openid TestCredential',
         redirectUri: 'http://localhost:8881/cb',
       },
-    });
-    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri');
-  });
+    })
+    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri')
+  })
 
   it('should not fail when both authorization_details and scope are present', async () => {
-    client.endpointMetadata.credentialIssuerMetadata!.pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`;
-    client.endpointMetadata.credentialIssuerMetadata!.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`;
+    client.endpointMetadata.credentialIssuerMetadata!.pushed_authorization_request_endpoint = `${MOCK_URL}v1/auth/par`
+    client.endpointMetadata.credentialIssuerMetadata!.authorization_endpoint = `${MOCK_URL}v1/auth/authorize`
     const actual = await client.createAuthorizationRequestUrl({
       authorizationRequest: {
         parMode: PARMode.REQUIRE,
@@ -117,7 +117,7 @@ describe('OpenID4VCIClientV1_0_11', () => {
         scope: 'openid TestCredential',
         redirectUri: 'http://localhost:8881/cb',
       },
-    });
-    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri');
-  });
-});
+    })
+    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri')
+  })
+})

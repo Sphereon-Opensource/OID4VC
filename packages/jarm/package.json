@@ -30,16 +30,7 @@
   "engines": {
     "node": ">=20"
   },
-  "files": [
-    "src",
-    "dist",
-    "README.md",
-    "LICENSE.md"
-  ],
-  "prettier": {
-    "singleQuote": true,
-    "printWidth": 150
-  },
+  "files": ["src", "dist", "README.md", "LICENSE.md"],
   "keywords": [
     "Sphereon",
     "Verifiable Credentials",

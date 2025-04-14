@@ -76,10 +76,6 @@
     "did-jwt": "6.11.6",
     "did-resolver": "^4.1.0",
     "dotenv": "^16.3.1",
-    "eslint": "^8.34.0",
-    "eslint-config-prettier": "^8.6.0",
-    "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-import": "^2.27.5",
     "ethers": "^6.10.0",
     "jose": "^4.15.5",
     "moment": "^2.30.1",
@@ -98,12 +94,7 @@
   "engines": {
     "node": ">=20.6"
   },
-  "files": [
-    "src",
-    "dist",
-    "README.md",
-    "LICENSE.md"
-  ],
+  "files": ["src", "dist", "README.md", "LICENSE.md"],
   "keywords": [
     "Sphereon",
     "SSI",

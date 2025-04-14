@@ -1,48 +1,43 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-	"vcs": { "enabled": false, "clientKind": "git", "useIgnoreFile": false },
-	"files": { "ignoreUnknown": false, "ignore": [] },
-	"formatter": {
-		"enabled": true,
-		"useEditorconfig": true,
-		"formatWithErrors": false,
-		"indentStyle": "space",
-		"indentWidth": 2,
-		"lineEnding": "lf",
-		"lineWidth": 150,
-		"attributePosition": "auto",
-		"bracketSpacing": true,
-		"ignore": [
-			"**/dist",
-			"**/coverage",
-			"**/*/node_modules",
-			"packages/siop-oid4vp/lib/schemas"
-		]
-	},
-	"organizeImports": { "enabled": true },
-	"linter": {
-		"enabled": true,
-		"rules": { "recommended": false },
-		"ignore": ["**/node_modules", "**/dist", "**/coverage", "**/jest.js"]
-	},
-	"javascript": {
-		"formatter": {
-			"jsxQuoteStyle": "double",
-			"quoteProperties": "asNeeded",
-			"trailingCommas": "all",
-			"semicolons": "asNeeded",
-			"arrowParentheses": "always",
-			"bracketSameLine": false,
-			"quoteStyle": "single",
-			"attributePosition": "auto",
-			"bracketSpacing": true
-		},
-		"globals": ["BigInt", "vitest", "WebAssembly", "console"]
-	},
-	"overrides": [
-		{
-			"include": ["**/__tests__/**/*.ts"],
-			"linter": { "rules": { "style": { "noNonNullAssertion": "off" } } }
-		}
-	]
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": { "enabled": false, "clientKind": "git", "useIgnoreFile": false },
+  "files": { "ignoreUnknown": false, "ignore": [] },
+  "formatter": {
+    "enabled": true,
+    "useEditorconfig": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 150,
+    "attributePosition": "auto",
+    "bracketSpacing": true,
+    "ignore": ["**/dist", "**/coverage", "**/*/node_modules", "packages/siop-oid4vp/lib/schemas", "**/*tsconfig*", "**/schemaValidation.*js"]
+  },
+  "organizeImports": { "enabled": true },
+  "linter": {
+    "enabled": true,
+    "rules": { "recommended": false },
+    "ignore": ["**/node_modules", "**/dist", "**/coverage", "**/jest.js", "**/*tsconfig*", "**/schemaValidation.*js"]
+  },
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "all",
+      "semicolons": "asNeeded",
+      "arrowParentheses": "always",
+      "bracketSameLine": false,
+      "quoteStyle": "single",
+      "attributePosition": "auto",
+      "bracketSpacing": true
+    },
+    "globals": ["BigInt", "vitest", "WebAssembly", "console"]
+  },
+  "overrides": [
+    {
+      "include": ["**/__tests__/**/*.ts"],
+      "linter": { "rules": { "style": { "noNonNullAssertion": "off" } } }
+    }
+  ]
 }

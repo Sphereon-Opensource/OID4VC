@@ -1,1 +1,1 @@
-export * from './DynamicClientRegistration.types';
+export * from './DynamicClientRegistration.types'

@@ -1,6 +1,6 @@
-import { EventManager } from '@sphereon/ssi-types';
+import { EventManager } from '@sphereon/ssi-types'
 
-export type EventNames = CredentialOfferEventNames | NotificationStatusEventNames | LogEvents | CredentialEventNames;
+export type EventNames = CredentialOfferEventNames | NotificationStatusEventNames | LogEvents | CredentialEventNames
 
 export enum CredentialOfferEventNames {
   OID4VCI_OFFER_CREATED = 'OID4VCI_OFFER_CREATED',
@@ -17,5 +17,5 @@ export enum NotificationStatusEventNames {
   OID4VCI_NOTIFICATION_PROCESSED = 'OID4VCI_NOTIFICATION_PROCESSED',
   OID4VCI_NOTIFICATION_ERROR = 'OID4VCI_NOTIFICATION_ERROR',
 }
-export type LogEvents = 'oid4vciLog';
-export const EVENTS = EventManager.instance();
+export type LogEvents = 'oid4vciLog'
+export const EVENTS = EventManager.instance()

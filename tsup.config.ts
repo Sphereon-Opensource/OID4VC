@@ -8,7 +8,7 @@ export default defineConfig({
   format: ['esm', 'cjs'],
   tsconfig: '../../tsconfig.tsup.json',
   dts: true,
-  target: ["es2022"],
+  target: ['es2022'],
 
   experimentalDts: false,
   // onSuccess: "tsc --emitDeclarationOnly",

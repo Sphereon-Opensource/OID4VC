@@ -4,10 +4,10 @@ import {
   CredentialRequestJwtVcJsonLdAndLdpVc,
   CredentialRequestSdJwtVc,
   Grant,
-} from './Generic.types';
+} from './Generic.types'
 
 export type CredentialRequestV1_0_12 = CommonCredentialRequest &
-  (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc);
+  (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc)
 
 export interface CredentialOfferPayloadV1_0_12 {
   /**
@@ -15,7 +15,7 @@ export interface CredentialOfferPayloadV1_0_12 {
    * obtain one or more Credentials. The Wallet uses it to obtain the Credential Issuer's Metadata following the steps
    * defined in Section 11.2.2.
    */
-  credential_issuer: string;
+  credential_issuer: string
 
   /**
    *  REQUIRED. Array of unique strings that each identify one of the keys in the name/value pairs stored in
@@ -24,7 +24,7 @@ export interface CredentialOfferPayloadV1_0_12 {
    *  in Section 11.2.3. For example, these string values can be used to obtain scope values to be used in
    *  the Authorization Request.
    */
-  credential_configurations: string[];
+  credential_configurations: string[]
   /**
    * OPTIONAL. A JSON object indicating to the Wallet the Grant Types the Credential Issuer's AS is prepared
    * to process for this credential offer. Every grant is represented by a key and an object.
@@ -33,10 +33,10 @@ export interface CredentialOfferPayloadV1_0_12 {
    * If grants is not present or empty, the Wallet MUST determine the Grant Types the Credential Issuer's AS supports
    * using the respective metadata. When multiple grants are present, it's at the Wallet's discretion which one to use.
    */
-  grants?: Grant;
+  grants?: Grant
 
   /**
    * Some implementations might include a client_id in the offer. For instance EBSI in a same-device flow. (Cross-device tucks it in the state JWT)
    */
-  client_id?: string;
+  client_id?: string
 }

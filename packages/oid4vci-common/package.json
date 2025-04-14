@@ -31,23 +31,13 @@
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
-    "@types/jest": "^29.5.12",
     "@types/uuid": "^9.0.1",
     "typescript": "5.8.3"
   },
   "engines": {
     "node": ">=20"
   },
-  "files": [
-    "src",
-    "dist",
-    "README.md",
-    "LICENSE.md"
-  ],
-  "prettier": {
-    "singleQuote": true,
-    "printWidth": 150
-  },
+  "files": ["src", "dist", "README.md", "LICENSE.md"],
   "keywords": [
     "Sphereon",
     "Verifiable Credentials",

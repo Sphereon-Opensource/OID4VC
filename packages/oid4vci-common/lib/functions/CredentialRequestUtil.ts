@@ -5,14 +5,14 @@ import {
   CredentialRequestV1_0_13,
   OpenId4VCIVersion,
   UniformCredentialRequest,
-} from '../types';
+} from '../types'
 
-import { getFormatForVersion } from './FormatUtils';
+import { getFormatForVersion } from './FormatUtils'
 
 export function getTypesFromRequest(credentialRequest: CredentialRequest, opts?: { filterVerifiableCredential: boolean }) {
-  let types: string[] = [];
+  let types: string[] = []
   if ('credential_identifier' in credentialRequest && credentialRequest.credential_identifier) {
-    throw Error(`Cannot get types from request when it contains a credential_identifier`);
+    throw Error(`Cannot get types from request when it contains a credential_identifier`)
   } else if (
     credentialRequest.format === 'jwt_vc_json-ld' ||
     credentialRequest.format === 'ldp_vc' ||
@@ -23,29 +23,29 @@ export function getTypesFromRequest(credentialRequest: CredentialRequest, opts?:
       types =
         'types' in credentialRequest.credential_definition
           ? credentialRequest.credential_definition.types
-          : credentialRequest.credential_definition.type;
+          : credentialRequest.credential_definition.type
     }
 
     if ('type' in credentialRequest && Array.isArray(credentialRequest.type)) {
-      types = credentialRequest.type;
+      types = credentialRequest.type
     }
 
     if ('types' in credentialRequest && Array.isArray(credentialRequest.types)) {
-      types = credentialRequest.types;
+      types = credentialRequest.types
     }
   } else if (credentialRequest.format === 'vc+sd-jwt' && 'vct' in credentialRequest) {
-    types = [credentialRequest.vct];
+    types = [credentialRequest.vct]
   } else if (credentialRequest.format === 'mso_mdoc' && 'doctype' in credentialRequest) {
-    types = [credentialRequest.doctype];
+    types = [credentialRequest.doctype]
   }
 
   if (!types || types.length === 0) {
-    throw Error('Could not deduce types from credential request');
+    throw Error('Could not deduce types from credential request')
   }
   if (opts?.filterVerifiableCredential) {
-    return types.filter((type) => type !== 'VerifiableCredential');
+    return types.filter((type) => type !== 'VerifiableCredential')
   }
-  return types;
+  return types
 }
 
 export function getCredentialRequestForVersion(
@@ -54,17 +54,17 @@ export function getCredentialRequestForVersion(
 ): UniformCredentialRequest | CredentialRequestV1_0_08 | CredentialRequestV1_0_11 | CredentialRequestV1_0_13 {
   if (version === OpenId4VCIVersion.VER_1_0_08) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const draft8Format = getFormatForVersion(credentialRequest.format!, version);
-    const types = getTypesFromRequest(credentialRequest, { filterVerifiableCredential: true });
+    const draft8Format = getFormatForVersion(credentialRequest.format!, version)
+    const types = getTypesFromRequest(credentialRequest, { filterVerifiableCredential: true })
 
     if (credentialRequest.credential_subject_issuance) {
-      throw Error('Experimental subject issuance is not supported for older versions of the spec');
+      throw Error('Experimental subject issuance is not supported for older versions of the spec')
     }
     return {
       format: draft8Format,
       proof: credentialRequest.proof,
       type: types[0],
-    } satisfies CredentialRequestV1_0_08;
+    } satisfies CredentialRequestV1_0_08
     /* } else if (version === OpenId4VCIVersion.VER_1_0_11) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -75,5 +75,5 @@ export function getCredentialRequestForVersion(
     } as CredentialRequestV1_0_11;*/
   }
 
-  return credentialRequest;
+  return credentialRequest
 }

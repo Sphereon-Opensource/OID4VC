@@ -1,4 +1,4 @@
-import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereon/oid4vc-common';
+import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereon/oid4vc-common'
 import {
   acquireDeferredCredential,
   CredentialRequestV1_0_13,
@@ -17,83 +17,83 @@ import {
   ProofOfPossession,
   UniformCredentialRequest,
   URL_NOT_VALID,
-} from '@sphereon/oid4vci-common';
-import { CredentialFormat } from '@sphereon/ssi-types';
-import Debug from 'debug';
+} from '@sphereon/oid4vci-common'
+import { CredentialFormat } from '@sphereon/ssi-types'
+import Debug from 'debug'
 
-import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11';
-import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13';
-import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder';
-import { shouldRetryResourceRequestWithDPoPNonce } from './functions/dpopUtil';
+import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11'
+import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13'
+import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
+import { shouldRetryResourceRequestWithDPoPNonce } from './functions/dpopUtil'
 
-const debug = Debug('sphereon:oid4vci:credential');
+const debug = Debug('sphereon:oid4vci:credential')
 
 export interface CredentialRequestOpts {
-  deferredCredentialAwait?: boolean;
-  deferredCredentialIntervalInMS?: number;
-  credentialEndpoint: string;
-  notificationEndpoint?: string;
-  deferredCredentialEndpoint?: string;
-  credentialTypes?: string[];
-  credentialIdentifier?: string;
-  format?: CredentialFormat | OID4VCICredentialFormat;
-  proof: ProofOfPossession;
-  token: string;
-  version: OpenId4VCIVersion;
-  subjectIssuance?: ExperimentalSubjectIssuance;
-  issuerState?: string;
+  deferredCredentialAwait?: boolean
+  deferredCredentialIntervalInMS?: number
+  credentialEndpoint: string
+  notificationEndpoint?: string
+  deferredCredentialEndpoint?: string
+  credentialTypes?: string[]
+  credentialIdentifier?: string
+  format?: CredentialFormat | OID4VCICredentialFormat
+  proof: ProofOfPossession
+  token: string
+  version: OpenId4VCIVersion
+  subjectIssuance?: ExperimentalSubjectIssuance
+  issuerState?: string
 }
 
 export type CreateCredentialRequestOpts = {
-  credentialIdentifier?: string;
-  credentialTypes?: string | string[];
-  context?: string[];
-  format?: CredentialFormat | OID4VCICredentialFormat;
-  subjectIssuance?: ExperimentalSubjectIssuance;
-  version: OpenId4VCIVersion;
-};
+  credentialIdentifier?: string
+  credentialTypes?: string | string[]
+  context?: string[]
+  format?: CredentialFormat | OID4VCICredentialFormat
+  subjectIssuance?: ExperimentalSubjectIssuance
+  version: OpenId4VCIVersion
+}
 
 export async function buildProof(
   proofInput: ProofOfPossessionBuilder | ProofOfPossession,
   opts: {
-    version: OpenId4VCIVersion;
-    cNonce?: string;
+    version: OpenId4VCIVersion
+    cNonce?: string
   },
 ) {
   if ('proof_type' in proofInput) {
     if (opts.cNonce) {
-      throw Error(`Cnonce param is only supported when using a Proof of possession builder`);
+      throw Error(`Cnonce param is only supported when using a Proof of possession builder`)
     }
-    return await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession, opts.version).build();
+    return await ProofOfPossessionBuilder.fromProof(proofInput as ProofOfPossession, opts.version).build()
   }
   if (opts.cNonce) {
-    proofInput.withAccessTokenNonce(opts.cNonce);
+    proofInput.withAccessTokenNonce(opts.cNonce)
   }
-  return await proofInput.build();
+  return await proofInput.build()
 }
 
 export class CredentialRequestClient {
-  private readonly _credentialRequestOpts: Partial<CredentialRequestOpts>;
-  private _isDeferred = false;
+  private readonly _credentialRequestOpts: Partial<CredentialRequestOpts>
+  private _isDeferred = false
 
   get credentialRequestOpts(): CredentialRequestOpts {
-    return this._credentialRequestOpts as CredentialRequestOpts;
+    return this._credentialRequestOpts as CredentialRequestOpts
   }
 
   public isDeferred(): boolean {
-    return this._isDeferred;
+    return this._isDeferred
   }
 
   public getCredentialEndpoint(): string {
-    return this.credentialRequestOpts.credentialEndpoint;
+    return this.credentialRequestOpts.credentialEndpoint
   }
 
   public getDeferredCredentialEndpoint(): string | undefined {
-    return this.credentialRequestOpts.deferredCredentialEndpoint;
+    return this.credentialRequestOpts.deferredCredentialEndpoint
   }
 
   public constructor(builder: CredentialRequestClientBuilderV1_0_13 | CredentialRequestClientBuilderV1_0_11) {
-    this._credentialRequestOpts = { ...builder };
+    this._credentialRequestOpts = { ...builder }
   }
 
   /**
@@ -103,14 +103,14 @@ export class CredentialRequestClient {
    * @param opts
    */
   public async acquireCredentialsWithoutProof(opts: {
-    credentialIdentifier?: string;
-    credentialTypes?: string | string[];
-    context?: string[];
-    format?: CredentialFormat | OID4VCICredentialFormat;
-    subjectIssuance?: ExperimentalSubjectIssuance;
-    createDPoPOpts?: CreateDPoPClientOpts;
+    credentialIdentifier?: string
+    credentialTypes?: string | string[]
+    context?: string[]
+    format?: CredentialFormat | OID4VCICredentialFormat
+    subjectIssuance?: ExperimentalSubjectIssuance
+    createDPoPOpts?: CreateDPoPClientOpts
   }): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
-    const { credentialIdentifier, credentialTypes, format, context, subjectIssuance } = opts;
+    const { credentialIdentifier, credentialTypes, format, context, subjectIssuance } = opts
 
     const request = await this.createCredentialRequestWithoutProof({
       credentialTypes,
@@ -119,20 +119,20 @@ export class CredentialRequestClient {
       version: this.version(),
       credentialIdentifier,
       subjectIssuance,
-    });
-    return await this.acquireCredentialsUsingRequestWithoutProof(request, opts.createDPoPOpts);
+    })
+    return await this.acquireCredentialsUsingRequestWithoutProof(request, opts.createDPoPOpts)
   }
 
   public async acquireCredentialsUsingProof(opts: {
-    proofInput: ProofOfPossessionBuilder | ProofOfPossession;
-    credentialIdentifier?: string;
-    credentialTypes?: string | string[];
-    context?: string[];
-    format?: CredentialFormat | OID4VCICredentialFormat;
-    subjectIssuance?: ExperimentalSubjectIssuance;
-    createDPoPOpts?: CreateDPoPClientOpts;
+    proofInput: ProofOfPossessionBuilder | ProofOfPossession
+    credentialIdentifier?: string
+    credentialTypes?: string | string[]
+    context?: string[]
+    format?: CredentialFormat | OID4VCICredentialFormat
+    subjectIssuance?: ExperimentalSubjectIssuance
+    createDPoPOpts?: CreateDPoPClientOpts
   }): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
-    const { credentialIdentifier, credentialTypes, proofInput, format, context, subjectIssuance } = opts;
+    const { credentialIdentifier, credentialTypes, proofInput, format, context, subjectIssuance } = opts
 
     const request = await this.createCredentialRequest({
       proofInput,
@@ -142,22 +142,22 @@ export class CredentialRequestClient {
       version: this.version(),
       credentialIdentifier,
       subjectIssuance,
-    });
-    return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOpts);
+    })
+    return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOpts)
   }
 
   public async acquireCredentialsUsingRequestWithoutProof(
     uniformRequest: UniformCredentialRequest,
     createDPoPOpts?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
-    return await this.acquireCredentialsUsingRequestImpl(uniformRequest, createDPoPOpts);
+    return await this.acquireCredentialsUsingRequestImpl(uniformRequest, createDPoPOpts)
   }
 
   public async acquireCredentialsUsingRequest(
     uniformRequest: UniformCredentialRequest,
     createDPoPOpts?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
-    return await this.acquireCredentialsUsingRequestImpl(uniformRequest, createDPoPOpts);
+    return await this.acquireCredentialsUsingRequestImpl(uniformRequest, createDPoPOpts)
   }
 
   private async acquireCredentialsUsingRequestImpl(
@@ -165,76 +165,76 @@ export class CredentialRequestClient {
     createDPoPOpts?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
-      throw new Error('Versions below v1.0.13 (draft 13) are not supported by the V13 credential request client.');
+      throw new Error('Versions below v1.0.13 (draft 13) are not supported by the V13 credential request client.')
     }
-    const request: CredentialRequestV1_0_13 = getCredentialRequestForVersion(uniformRequest, this.version()) as CredentialRequestV1_0_13;
-    const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint;
+    const request: CredentialRequestV1_0_13 = getCredentialRequestForVersion(uniformRequest, this.version()) as CredentialRequestV1_0_13
+    const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint
     if (!isValidURL(credentialEndpoint)) {
-      debug(`Invalid credential endpoint: ${credentialEndpoint}`);
-      throw new Error(URL_NOT_VALID);
+      debug(`Invalid credential endpoint: ${credentialEndpoint}`)
+      throw new Error(URL_NOT_VALID)
     }
-    debug(`Acquiring credential(s) from: ${credentialEndpoint}`);
-    debug(`request\n: ${JSON.stringify(request, null, 2)}`);
-    const requestToken: string = this.credentialRequestOpts.token;
+    debug(`Acquiring credential(s) from: ${credentialEndpoint}`)
+    debug(`request\n: ${JSON.stringify(request, null, 2)}`)
+    const requestToken: string = this.credentialRequestOpts.token
 
-    let dPoP = createDPoPOpts ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, credentialEndpoint, { accessToken: requestToken })) : undefined;
+    let dPoP = createDPoPOpts ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, credentialEndpoint, { accessToken: requestToken })) : undefined
 
     let response = (await post(credentialEndpoint, JSON.stringify(request), {
       bearerToken: requestToken,
       ...(dPoP && { customHeaders: { dpop: dPoP } }),
     })) as OpenIDResponse<CredentialResponse> & {
-      access_token: string;
-    };
+      access_token: string
+    }
 
-    let nextDPoPNonce = createDPoPOpts?.jwtPayloadProps.nonce;
-    const retryWithNonce = shouldRetryResourceRequestWithDPoPNonce(response);
+    let nextDPoPNonce = createDPoPOpts?.jwtPayloadProps.nonce
+    const retryWithNonce = shouldRetryResourceRequestWithDPoPNonce(response)
     if (retryWithNonce.ok && createDPoPOpts) {
-      createDPoPOpts.jwtPayloadProps.nonce = retryWithNonce.dpopNonce;
-      dPoP = await createDPoP(getCreateDPoPOptions(createDPoPOpts, credentialEndpoint, { accessToken: requestToken }));
+      createDPoPOpts.jwtPayloadProps.nonce = retryWithNonce.dpopNonce
+      dPoP = await createDPoP(getCreateDPoPOptions(createDPoPOpts, credentialEndpoint, { accessToken: requestToken }))
 
       response = (await post(credentialEndpoint, JSON.stringify(request), {
         bearerToken: requestToken,
         ...(createDPoPOpts && { customHeaders: { dpop: dPoP } }),
       })) as OpenIDResponse<CredentialResponse> & {
-        access_token: string;
-      };
+        access_token: string
+      }
 
-      const successDPoPNonce = response.origResponse.headers.get('DPoP-Nonce');
-      nextDPoPNonce = successDPoPNonce ?? retryWithNonce.dpopNonce;
+      const successDPoPNonce = response.origResponse.headers.get('DPoP-Nonce')
+      nextDPoPNonce = successDPoPNonce ?? retryWithNonce.dpopNonce
     }
 
-    this._isDeferred = isDeferredCredentialResponse(response);
+    this._isDeferred = isDeferredCredentialResponse(response)
     if (this.isDeferred() && this.credentialRequestOpts.deferredCredentialAwait && response.successBody) {
-      response = await this.acquireDeferredCredential(response.successBody, { bearerToken: this.credentialRequestOpts.token });
+      response = await this.acquireDeferredCredential(response.successBody, { bearerToken: this.credentialRequestOpts.token })
     }
-    response.access_token = requestToken;
+    response.access_token = requestToken
 
     if ((uniformRequest.credential_subject_issuance && response.successBody) || response.successBody?.credential_subject_issuance) {
       if (JSON.stringify(uniformRequest.credential_subject_issuance) !== JSON.stringify(response.successBody?.credential_subject_issuance)) {
-        throw Error('Subject signing was requested, but issuer did not provide the options in its response');
+        throw Error('Subject signing was requested, but issuer did not provide the options in its response')
       }
     }
-    debug(`Credential endpoint ${credentialEndpoint} response:\r\n${JSON.stringify(response, null, 2)}`);
+    debug(`Credential endpoint ${credentialEndpoint} response:\r\n${JSON.stringify(response, null, 2)}`)
 
     return {
       ...response,
       ...(nextDPoPNonce && { params: { dpop: { dpopNonce: nextDPoPNonce } } }),
-    };
+    }
   }
 
   public async acquireDeferredCredential(
     response: Pick<CredentialResponse, 'transaction_id' | 'acceptance_token' | 'c_nonce'>,
     opts?: {
-      bearerToken?: string;
+      bearerToken?: string
     },
   ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
-    const transactionId = response.transaction_id;
-    const bearerToken = response.acceptance_token ?? opts?.bearerToken;
-    const deferredCredentialEndpoint = this.getDeferredCredentialEndpoint();
+    const transactionId = response.transaction_id
+    const bearerToken = response.acceptance_token ?? opts?.bearerToken
+    const deferredCredentialEndpoint = this.getDeferredCredentialEndpoint()
     if (!deferredCredentialEndpoint) {
-      throw Error(`No deferred credential endpoint supplied.`);
+      throw Error(`No deferred credential endpoint supplied.`)
     } else if (!bearerToken) {
-      throw Error(`No bearer token present and refresh for defered endpoint not supported yet`);
+      throw Error(`No bearer token present and refresh for defered endpoint not supported yet`)
       // todo updated bearer token with new c_nonce
     }
     return await acquireDeferredCredential({
@@ -243,58 +243,58 @@ export class CredentialRequestClient {
       deferredCredentialEndpoint,
       deferredCredentialAwait: this.credentialRequestOpts.deferredCredentialAwait,
       deferredCredentialIntervalInMS: this.credentialRequestOpts.deferredCredentialIntervalInMS,
-    });
+    })
   }
 
   public async createCredentialRequestWithoutProof(opts: CreateCredentialRequestOpts): Promise<CredentialRequestWithoutProofV1_0_13> {
-    return await this.createCredentialRequestImpl(opts);
+    return await this.createCredentialRequestImpl(opts)
   }
 
   public async createCredentialRequest(
     opts: CreateCredentialRequestOpts & {
-      proofInput: ProofOfPossessionBuilder | ProofOfPossession;
+      proofInput: ProofOfPossessionBuilder | ProofOfPossession
     },
   ): Promise<CredentialRequestV1_0_13> {
-    return await this.createCredentialRequestImpl(opts);
+    return await this.createCredentialRequestImpl(opts)
   }
 
   private async createCredentialRequestImpl(
     opts: CreateCredentialRequestOpts & {
-      proofInput?: ProofOfPossessionBuilder | ProofOfPossession;
+      proofInput?: ProofOfPossessionBuilder | ProofOfPossession
     },
   ): Promise<CredentialRequestV1_0_13> {
-    const { proofInput, credentialIdentifier: credential_identifier } = opts;
-    let proof: ProofOfPossession | undefined = undefined;
+    const { proofInput, credentialIdentifier: credential_identifier } = opts
+    let proof: ProofOfPossession | undefined = undefined
     if (proofInput) {
-      proof = await buildProof(proofInput, opts);
+      proof = await buildProof(proofInput, opts)
     }
     if (credential_identifier) {
       if (opts.format || opts.credentialTypes || opts.context) {
-        throw Error(`You cannot mix credential_identifier with format, credential types and/or context`);
+        throw Error(`You cannot mix credential_identifier with format, credential types and/or context`)
       }
       return {
         credential_identifier,
         ...(proof && { proof }),
-      };
+      }
     }
-    const formatSelection = opts.format ?? this.credentialRequestOpts.format;
+    const formatSelection = opts.format ?? this.credentialRequestOpts.format
 
     if (!formatSelection) {
-      throw Error(`Format of credential to be issued is missing`);
+      throw Error(`Format of credential to be issued is missing`)
     }
-    const format = getUniformFormat(formatSelection);
+    const format = getUniformFormat(formatSelection)
     const typesSelection =
       opts?.credentialTypes && (typeof opts.credentialTypes === 'string' || opts.credentialTypes.length > 0)
         ? opts.credentialTypes
-        : this.credentialRequestOpts.credentialTypes;
+        : this.credentialRequestOpts.credentialTypes
     if (!typesSelection) {
-      throw Error(`Credential type(s) need to be provided`);
+      throw Error(`Credential type(s) need to be provided`)
     }
-    const types = Array.isArray(typesSelection) ? typesSelection : [typesSelection];
+    const types = Array.isArray(typesSelection) ? typesSelection : [typesSelection]
     if (types.length === 0) {
-      throw Error(`Credential type(s) need to be provided`);
+      throw Error(`Credential type(s) need to be provided`)
     }
-    const issuer_state = this.credentialRequestOpts.issuerState;
+    const issuer_state = this.credentialRequestOpts.issuerState
 
     // TODO: we should move format specific logic
     if (format === 'jwt_vc_json' || format === 'jwt_vc') {
@@ -306,10 +306,10 @@ export class CredentialRequestClient {
         ...(issuer_state && { issuer_state }),
         ...(proof && { proof }),
         ...opts.subjectIssuance,
-      };
+      }
     } else if (format === 'jwt_vc_json-ld' || format === 'ldp_vc') {
       if (this.version() >= OpenId4VCIVersion.VER_1_0_12 && !opts.context) {
-        throw Error('No @context value present, but it is required');
+        throw Error('No @context value present, but it is required')
       }
 
       return {
@@ -322,10 +322,10 @@ export class CredentialRequestClient {
           type: types,
           '@context': opts.context as string[],
         },
-      };
+      }
     } else if (format === 'vc+sd-jwt') {
       if (types.length > 1) {
-        throw Error(`Only a single credential type is supported for ${format}`);
+        throw Error(`Only a single credential type is supported for ${format}`)
       }
       return {
         format,
@@ -333,10 +333,10 @@ export class CredentialRequestClient {
         ...(proof && { proof }),
         vct: types[0],
         ...opts.subjectIssuance,
-      };
+      }
     } else if (format === 'mso_mdoc') {
       if (types.length > 1) {
-        throw Error(`Only a single credential type is supported for ${format}`);
+        throw Error(`Only a single credential type is supported for ${format}`)
       }
       return {
         format,
@@ -344,13 +344,13 @@ export class CredentialRequestClient {
         ...(proof && { proof }),
         doctype: types[0],
         ...opts.subjectIssuance,
-      };
+      }
     }
 
-    throw new Error(`Unsupported credential format: ${format}`);
+    throw new Error(`Unsupported credential format: ${format}`)
   }
 
   private version(): OpenId4VCIVersion {
-    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_13;
+    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_13
   }
 }

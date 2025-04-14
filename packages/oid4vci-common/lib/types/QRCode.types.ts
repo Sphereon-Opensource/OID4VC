@@ -7,8 +7,8 @@ export interface ComponentOptions {
      * Scale factor for data/ECC dots.
      * @default 1
      */
-    scale?: number;
-  };
+    scale?: number
+  }
 
   /**
    * Component options for timing patterns.
@@ -18,14 +18,14 @@ export interface ComponentOptions {
      * Scale factor for timing patterns.
      * @default 1
      */
-    scale?: number;
+    scale?: number
 
     /**
      * Protector for timing patterns.
      * @default false
      */
-    protectors?: boolean;
-  };
+    protectors?: boolean
+  }
 
   /**
    * Component options for alignment patterns.
@@ -35,14 +35,14 @@ export interface ComponentOptions {
      * Scale factor for alignment patterns.
      * @default 1
      */
-    scale?: number;
+    scale?: number
 
     /**
      * Protector for alignment patterns.
      * @default false
      */
-    protectors?: boolean;
-  };
+    protectors?: boolean
+  }
 
   /**
    * Component options for alignment pattern on the bottom-right corner.
@@ -52,14 +52,14 @@ export interface ComponentOptions {
      * Scale factor for alignment pattern on the bottom-right corner.
      * @default 1
      */
-    scale?: number;
+    scale?: number
 
     /**
      * Protector for alignment pattern on the bottom-right corner.
      * @default true
      */
-    protectors?: boolean;
-  };
+    protectors?: boolean
+  }
 }
 
 export interface QRCodeOpts {
@@ -68,14 +68,14 @@ export interface QRCodeOpts {
    *
    * @defaultValue 400
    */
-  size?: number;
+  size?: number
 
   /**
    * Size of margins around the QR code body in pixel.
    *
    * @defaultValue 20
    */
-  margin?: number;
+  margin?: number
 
   /**
    * Error correction level of the QR code.
@@ -86,7 +86,7 @@ export interface QRCodeOpts {
    *
    * @defaultValue 0
    */
-  correctLevel?: number;
+  correctLevel?: number
 
   /**
    * **This is an advanced option.**
@@ -99,7 +99,7 @@ export interface QRCodeOpts {
    *
    * For more information, please refer to [https://en.wikiversity.org/wiki/Reed%E2%80%93Solomon_codes_for_coders#Masking](https://en.wikiversity.org/wiki/Reed%E2%80%93Solomon_codes_for_coders#Masking).
    */
-  maskPattern?: number;
+  maskPattern?: number
 
   /**
    * **This is an advanced option.**
@@ -110,14 +110,14 @@ export interface QRCodeOpts {
    *
    * For more information, please refer to [https://www.qrcode.com/en/about/version.html](https://www.qrcode.com/en/about/version.html).
    */
-  version?: number;
+  version?: number
 
   /**
    * Options to control components in the QR code.
    *
    * @deafultValue undefined
    */
-  components?: ComponentOptions;
+  components?: ComponentOptions
 
   /**
    * Color of the blocks on the QR code.
@@ -128,7 +128,7 @@ export interface QRCodeOpts {
    *
    * @defaultValue "#000000"
    */
-  colorDark?: string;
+  colorDark?: string
 
   /**
    * Color of the empty areas on the QR code.
@@ -139,14 +139,14 @@ export interface QRCodeOpts {
    *
    * @defaultValue "#ffffff"
    */
-  colorLight?: string;
+  colorLight?: string
 
   /**
    * Automatically calculate the _colorLight_ value from the QR code's background.
    *
    * @defaultValue true
    */
-  autoColor?: boolean;
+  autoColor?: boolean
 
   /**
    * Background image to be used in the QR code.
@@ -155,7 +155,7 @@ export interface QRCodeOpts {
    *
    * @defaultValue undefined
    */
-  backgroundImage?: string | Buffer;
+  backgroundImage?: string | Buffer
 
   /**
    * Color of the dimming mask above the background image.
@@ -166,21 +166,21 @@ export interface QRCodeOpts {
    *
    * @defaultValue "rgba(0, 0, 0, 0)"
    */
-  backgroundDimming?: string;
+  backgroundDimming?: string
 
   /**
    * GIF background image to be used in the QR code.
    *
    * @defaultValue undefined
    */
-  gifBackground?: ArrayBuffer;
+  gifBackground?: ArrayBuffer
 
   /**
    * Use a white margin instead of a transparent one which reveals the background of the QR code on margins.
    *
    * @defaultValue true
    */
-  whiteMargin?: boolean;
+  whiteMargin?: boolean
 
   /**
    * Logo image to be displayed at the center of the QR code.
@@ -191,28 +191,28 @@ export interface QRCodeOpts {
    *
    * @defaultValue undefined
    */
-  logoImage?: string | Buffer;
+  logoImage?: string | Buffer
 
   /**
    * Ratio of the logo size to the QR code size.
    *
    * @defaultValue 0.2
    */
-  logoScale?: number;
+  logoScale?: number
 
   /**
    * Size of margins around the logo image in pixels.
    *
    * @defaultValue 6
    */
-  logoMargin?: number;
+  logoMargin?: number
 
   /**
    * Corner radius of the logo image in pixels.
    *
    * @defaultValue 8
    */
-  logoCornerRadius?: number;
+  logoCornerRadius?: number
 
   /**
    * @deprecated
@@ -223,5 +223,5 @@ export interface QRCodeOpts {
    *
    * @deafultValue 0.4
    */
-  dotScale?: number;
+  dotScale?: number
 }

@@ -1,23 +1,23 @@
-import { JWK } from './Jwk.types';
-import { JwtHeader, JwtPayload, SigningAlgo } from './Jwt.types';
-import { JwtProtectionMethod, JwtType } from './jwtUtils';
+import { JWK } from './Jwk.types'
+import { JwtHeader, JwtPayload, SigningAlgo } from './Jwt.types'
+import { JwtProtectionMethod, JwtType } from './jwtUtils'
 
 export interface JwtVerifierBase {
-  type: JwtType;
-  method: JwtProtectionMethod;
+  type: JwtType
+  method: JwtProtectionMethod
 }
 
 export interface DidJwtVerifier extends JwtVerifierBase {
-  method: 'did';
+  method: 'did'
 
-  alg: SigningAlgo | string;
-  didUrl: string;
+  alg: SigningAlgo | string
+  didUrl: string
 }
 
 export interface X5cJwtVerifier extends JwtVerifierBase {
-  method: 'x5c';
+  method: 'x5c'
 
-  alg: SigningAlgo | string;
+  alg: SigningAlgo | string
 
   /**
    *
@@ -25,69 +25,69 @@ export interface X5cJwtVerifier extends JwtVerifierBase {
    *
    * The certificate containing the public key corresponding to the key used to digitally sign the JWS MUST be the first certificate.
    */
-  x5c: Array<string>;
+  x5c: Array<string>
 
   /**
    * The jwt issuer
    */
-  issuer: string;
+  issuer: string
 }
 
 export interface OpenIdFederationJwtVerifier extends JwtVerifierBase {
-  method: 'openid-federation';
+  method: 'openid-federation'
 
   /**
    * The OpenId federation Entity
    */
-  entityId: string;
+  entityId: string
 }
 
 export interface JwkJwtVerifier extends JwtVerifierBase {
-  method: 'jwk';
-  alg: SigningAlgo | string;
+  method: 'jwk'
+  alg: SigningAlgo | string
 
-  jwk: JWK;
+  jwk: JWK
 }
 
 export interface CustomJwtVerifier extends JwtVerifierBase {
-  method: 'custom';
+  method: 'custom'
 }
 
-export type JwtVerifier = DidJwtVerifier | X5cJwtVerifier | CustomJwtVerifier | JwkJwtVerifier | OpenIdFederationJwtVerifier;
+export type JwtVerifier = DidJwtVerifier | X5cJwtVerifier | CustomJwtVerifier | JwkJwtVerifier | OpenIdFederationJwtVerifier
 
 export const getDidJwtVerifier = (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): DidJwtVerifier => {
-  const { type } = options;
-  if (!jwt.header.kid) throw new Error(`Received an invalid JWT. Missing kid header.`);
-  if (!jwt.header.alg) throw new Error(`Received an invalid JWT. Missing alg header.`);
+  const { type } = options
+  if (!jwt.header.kid) throw new Error(`Received an invalid JWT. Missing kid header.`)
+  if (!jwt.header.alg) throw new Error(`Received an invalid JWT. Missing alg header.`)
 
   if (!jwt.header.kid.includes('#')) {
-    throw new Error(`Received an invalid JWT.. '${type}' contains an invalid kid header.`);
+    throw new Error(`Received an invalid JWT.. '${type}' contains an invalid kid header.`)
   }
-  return { method: 'did', didUrl: jwt.header.kid, type: type, alg: jwt.header.alg };
-};
+  return { method: 'did', didUrl: jwt.header.kid, type: type, alg: jwt.header.alg }
+}
 
 const getIssuer = (type: JwtType, payload: JwtPayload): string => {
   // For 'request-object' the `iss` value is not required so we map the issuer to client_id
   if (type === 'request-object') {
     if (!payload.client_id) {
-      throw new Error('Missing required field client_id in request object JWT');
+      throw new Error('Missing required field client_id in request object JWT')
     }
-    return payload.client_id as string;
+    return payload.client_id as string
   }
 
   if (typeof payload.iss !== 'string') {
-    throw new Error(`Received an invalid JWT. '${type}' contains an invalid iss claim or it is missing.`);
+    throw new Error(`Received an invalid JWT. '${type}' contains an invalid iss claim or it is missing.`)
   }
-  return payload.iss;
-};
+  return payload.iss
+}
 
 export const getX5cVerifier = (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): X5cJwtVerifier => {
-  const { type } = options;
-  if (!jwt.header.x5c) throw new Error(`Received an invalid JWT. Missing x5c header.`);
-  if (!jwt.header.alg) throw new Error(`Received an invalid JWT. Missing alg header.`);
+  const { type } = options
+  if (!jwt.header.x5c) throw new Error(`Received an invalid JWT. Missing x5c header.`)
+  if (!jwt.header.alg) throw new Error(`Received an invalid JWT. Missing alg header.`)
 
   if (!Array.isArray(jwt.header.x5c) || jwt.header.x5c.length === 0 || !jwt.header.x5c.every((cert) => typeof cert === 'string')) {
-    throw new Error(`Received an invalid JWT.. '${type}' contains an invalid x5c header.`);
+    throw new Error(`Received an invalid JWT.. '${type}' contains an invalid x5c header.`)
   }
 
   return {
@@ -96,35 +96,35 @@ export const getX5cVerifier = (jwt: { header: JwtHeader; payload: JwtPayload }, 
     issuer: getIssuer(type, jwt.payload),
     type: type,
     alg: jwt.header.alg,
-  };
-};
+  }
+}
 
 export const getJwkVerifier = async (jwt: { header: JwtHeader; payload: JwtPayload }, options: { type: JwtType }): Promise<JwkJwtVerifier> => {
-  const { type } = options;
-  if (!jwt.header.jwk) throw new Error(`Received an invalid JWT.  Missing jwk header.`);
-  if (!jwt.header.alg) throw new Error(`Received an invalid JWT. Missing alg header.`);
+  const { type } = options
+  if (!jwt.header.jwk) throw new Error(`Received an invalid JWT.  Missing jwk header.`)
+  if (!jwt.header.alg) throw new Error(`Received an invalid JWT. Missing alg header.`)
 
   if (typeof jwt.header.jwk !== 'object') {
-    throw new Error(`Received an invalid JWT. '${type}' contains an invalid jwk header.`);
+    throw new Error(`Received an invalid JWT. '${type}' contains an invalid jwk header.`)
   }
 
-  return { method: 'jwk', type, jwk: jwt.header.jwk, alg: jwt.header.alg };
-};
+  return { method: 'jwk', type, jwk: jwt.header.jwk, alg: jwt.header.alg }
+}
 
 export const getJwtVerifierWithContext = async (
   jwt: { header: JwtHeader; payload: JwtPayload },
   options: { type: JwtType },
 ): Promise<JwtVerifier> => {
-  const { header, payload } = jwt;
+  const { header, payload } = jwt
 
-  if (header.kid?.startsWith('did:')) return getDidJwtVerifier({ header, payload }, options);
-  else if (jwt.header.x5c) return getX5cVerifier({ header, payload }, options);
-  else if (jwt.header.jwk) return getJwkVerifier({ header, payload }, options);
+  if (header.kid?.startsWith('did:')) return getDidJwtVerifier({ header, payload }, options)
+  else if (jwt.header.x5c) return getX5cVerifier({ header, payload }, options)
+  else if (jwt.header.jwk) return getJwkVerifier({ header, payload }, options)
 
-  return { method: 'custom', type: options.type };
-};
+  return { method: 'custom', type: options.type }
+}
 
 export type VerifyJwtCallbackBase<T extends JwtVerifier> = (
   jwtVerifier: T,
   jwt: { header: JwtHeader; payload: JwtPayload; raw: string },
-) => Promise<boolean>;
+) => Promise<boolean>
