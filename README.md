@@ -5,7 +5,7 @@
   <br>
 </h1>
 
-[![CI](https://github.com/Sphereon-Opensource/OID4VCI/actions/workflows/build-test-on-pr.yml/badge.svg)](https://github.com/Sphereon-Opensource/OID4VCI/actions/workflows/build-test-on-pr.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/OID4VCI/branch/develop/graph/badge.svg)](https://codecov.io/gh/Sphereon-Opensource/OID4VCI) [![NPM Version](https://img.shields.io/npm/v/@sphereon/oid4vci-client.svg)](https://npm.im/@sphereon/oid4vci-client)
+[![CI](https://github.com/Sphereon-Opensource/OID4VC/actions/workflows/build-test-on-pr.yml/badge.svg)](https://github.com/Sphereon-Opensource/OID4VC/actions/workflows/build-test-on-pr.yml) [![codecov](https://codecov.io/gh/Sphereon-Opensource/OID4VC/branch/develop/graph/badge.svg)](https://codecov.io/gh/Sphereon-Opensource/OID4VC) [![NPM Version](https://img.shields.io/npm/v/@sphereon/oid4vci-client.svg)](https://npm.im/@sphereon/oid4vci-client)
 
 _IMPORTANT the packages are still in an early development stage, which means that breaking changes are to be expected_
 
@@ -57,7 +57,7 @@ authenticate first.
 
 The below diagram shows the steps involved in the pre-authorized code flow. Note that inner wallet functionalities (like
 saving VCs) are out of scope for this library. Also This library doesn't include any functionalities of a VC Issuer
-![Flow diagram](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Sphereon-Opensource/OID4VCI-client/develop/docs/preauthorized-code-flow.puml)
+![Flow diagram](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Sphereon-Opensource/OID4VC-client/develop/docs/preauthorized-code-flow.puml)
 
 # OpenID for VP Flows
 

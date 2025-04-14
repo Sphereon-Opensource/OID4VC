@@ -455,7 +455,7 @@ export function getTypesFromOfferV1_0_11(credentialOffer: CredentialOfferPayload
   const types = credentialOffer.credentials.reduce<string[]>((prev, curr) => {
     // FIXME returning the string value is wrong (as it's an id), but just matching the current behavior of this library
     // The credential_type (from draft 8) and the actual 'type' value in a VC (from draft 11) are mixed up
-    // Fix for this here: https://github.com/Sphereon-Opensource/OID4VCI/pull/54
+    // Fix for this here: https://github.com/Sphereon-Opensource/OID4VC/pull/54
     if (typeof curr === 'string') {
       return [...prev, curr]
     } else if (curr.format === 'jwt_vc_json-ld' || curr.format === 'ldp_vc') {

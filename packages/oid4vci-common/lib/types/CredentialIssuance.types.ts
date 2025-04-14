@@ -109,7 +109,7 @@ export interface ProofOfPossessionCallbacks {
  * Signature algorithms.
  *
  * TODO: Move towards string literal unions and string type, given we do not provide signature/key implementations in this library to begin with
- * @See: https://github.com/Sphereon-Opensource/OID4VCI/issues/88
+ * @See: https://github.com/Sphereon-Opensource/OID4VC/issues/88
  */
 export enum Alg {
   EdDSA = 'EdDSA',
