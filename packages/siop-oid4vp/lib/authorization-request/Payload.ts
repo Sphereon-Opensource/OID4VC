@@ -17,7 +17,7 @@ import {
 import { createRequestRegistration } from './RequestRegistration'
 import { ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts, PropertyTarget } from './types'
 
-export const createPresentationDefinitionClaimsProperties = async (opts: ClaimPayloadOptsVID1): Promise<ClaimPayloadVID1> | undefined => {
+export const createPresentationDefinitionClaimsProperties = async (opts: ClaimPayloadOptsVID1): Promise<ClaimPayloadVID1 | undefined> => {
   if (
     !opts ||
     !opts.vp_token ||

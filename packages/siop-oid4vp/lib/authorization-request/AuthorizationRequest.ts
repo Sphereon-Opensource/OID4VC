@@ -224,7 +224,7 @@ export class AuthorizationRequest {
       verifyOpts: opts,
       dcqlQuery,
       presentationDefinitions,
-      registrationMetadataPayload,
+      registrationMetadataPayload: registrationMetadataPayload!,
       requestObject: this.requestObject,
       authorizationRequestPayload: this.payload,
       versions: await this.getSupportedVersionsFromPayload(),

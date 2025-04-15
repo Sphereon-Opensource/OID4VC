@@ -29,7 +29,7 @@ export class URI implements AuthorizationRequestURI {
   private readonly _encodingFormat: UrlEncodingFormat
   // private _requestObjectBy: ObjectBy;
 
-  private _registrationMetadataPayload: RPRegistrationMetadataPayload
+  private _registrationMetadataPayload: RPRegistrationMetadataPayload | undefined
 
   private constructor({ scheme, encodedUri, encodingFormat, authorizationRequestPayload, requestObjectJwt }: Partial<AuthorizationRequestURI>) {
     this._scheme = scheme

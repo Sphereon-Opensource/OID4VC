@@ -8,6 +8,7 @@ export default defineConfig({
   tsconfig: '../../tsconfig.tsup.json',
   dts: true,
   target: ['es2022'],
+  cjsInterop: true,
 
   experimentalDts: false,
   // onSuccess: "tsc --emitDeclarationOnly",
@@ -16,5 +17,6 @@ export default defineConfig({
   splitting: false,
   outDir: 'dist',
   clean: true,
+  platform: 'neutral',
   skipNodeModulesBundle: false,
 })
