@@ -1,7 +1,7 @@
-import { appendFragmentParams, appendQueryParams } from '../utils.js'
-import type { JarmResponseMode, Openid4vpJarmResponseMode } from '../v-response-mode-registry.js'
-import { getJarmDefaultResponseMode, validateResponseMode } from '../v-response-mode-registry.js'
-import type { ResponseTypeOut } from '../v-response-type-registry.js'
+import { appendFragmentParams, appendQueryParams } from '../utils'
+import type { JarmResponseMode, Openid4vpJarmResponseMode } from '../v-response-mode-registry'
+import { getJarmDefaultResponseMode, validateResponseMode } from '../v-response-mode-registry'
+import type { ResponseTypeOut } from '../v-response-type-registry'
 
 interface JarmAuthResponseSendInput {
   authRequestParams: {

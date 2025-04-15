@@ -5,8 +5,6 @@ import { Alg, Jwt, ProofOfPossessionCallbacks } from '@sphereon/oid4vci-common'
 import { CredentialMapper } from '@sphereon/ssi-types'
 import * as didts from '@transmute/did-key.js'
 import { fetch } from 'cross-fetch'
-import pkg from 'debug'
-const { debug: Debug } = pkg
 import { importJWK, JWK, SignJWT } from 'jose'
 import { describe, expect, it } from 'vitest'
 
@@ -121,7 +119,6 @@ async function proofOfPossessionCallbackFunction(args: Jwt, kid?: string): Promi
 describe('ismapolis bug report #63, https://github.com/Sphereon-Opensource/OID4VC-demo/issues/63, should', () => {
   // Sphereon infra is not working currently
   it.skip('work as expected provided a correct JWT is supplied', async () => {
-    debug.enable('*')
     const { uri } = await getCredentialOffer('jwt_vc_json')
     const client = await OpenID4VCIClientV1_0_11.fromURI({ uri: uri, clientId: 'test-clientID' })
     const metadata = await client.retrieveServerMetadata()

@@ -12,13 +12,13 @@
     "lineWidth": 150,
     "attributePosition": "auto",
     "bracketSpacing": true,
-    "ignore": ["**/dist", "**/coverage", "**/*/node_modules", "packages/siop-oid4vp/lib/schemas", "**/*tsconfig*", "**/schemaValidation.*js"]
+    "ignore": ["**/dist/*", "**/coverage/*", "**/*/node_modules", "packages/siop-oid4vp/lib/schemas", "**/*tsconfig*", "**/schemaValidation.*js"]
   },
   "organizeImports": { "enabled": true },
   "linter": {
     "enabled": true,
     "rules": { "recommended": false },
-    "ignore": ["**/node_modules", "**/dist", "**/coverage", "**/jest.js", "**/*tsconfig*", "**/schemaValidation.*js"]
+    "ignore": ["**/node_modules", "**/dist/*", "**/coverage/*", "**/jest.js", "**/*tsconfig*", "**/schemaValidation.*js"]
   },
   "javascript": {
     "formatter": {

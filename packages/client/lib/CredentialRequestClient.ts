@@ -18,16 +18,14 @@ import {
   UniformCredentialRequest,
   URL_NOT_VALID,
 } from '@sphereon/oid4vci-common'
-import { CredentialFormat } from '@sphereon/ssi-types'
-import pkg from 'debug'
-const { debug: Debug } = pkg
+import { CredentialFormat, Loggers } from '@sphereon/ssi-types'
 
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11'
 import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
 import { shouldRetryResourceRequestWithDPoPNonce } from './functions/dpopUtil'
 
-const debug = Debug('sphereon:oid4vci:credential')
+const logger = Loggers.DEFAULT.get('sphereon:oid4vci:credential')
 
 export interface CredentialRequestOpts {
   deferredCredentialAwait?: boolean
@@ -171,11 +169,11 @@ export class CredentialRequestClient {
     const request: CredentialRequestV1_0_13 = getCredentialRequestForVersion(uniformRequest, this.version()) as CredentialRequestV1_0_13
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint
     if (!isValidURL(credentialEndpoint)) {
-      debug(`Invalid credential endpoint: ${credentialEndpoint}`)
+      logger.debug(`Invalid credential endpoint: ${credentialEndpoint}`)
       throw new Error(URL_NOT_VALID)
     }
-    debug(`Acquiring credential(s) from: ${credentialEndpoint}`)
-    debug(`request\n: ${JSON.stringify(request, null, 2)}`)
+    logger.debug(`Acquiring credential(s) from: ${credentialEndpoint}`)
+    logger.debug(`request\n: ${JSON.stringify(request, null, 2)}`)
     const requestToken: string = this.credentialRequestOpts.token
 
     let dPoP = createDPoPOpts ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, credentialEndpoint, { accessToken: requestToken })) : undefined
@@ -215,7 +213,7 @@ export class CredentialRequestClient {
         throw Error('Subject signing was requested, but issuer did not provide the options in its response')
       }
     }
-    debug(`Credential endpoint ${credentialEndpoint} response:\r\n${JSON.stringify(response, null, 2)}`)
+    logger.debug(`Credential endpoint ${credentialEndpoint} response:\r\n${JSON.stringify(response, null, 2)}`)
 
     return {
       ...response,

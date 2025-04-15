@@ -1,6 +1,5 @@
 import { BaseJWK, JWK } from '@sphereon/oid4vc-common'
-import pkg from 'debug'
-const { debug: Debug } = pkg
+import { Loggers } from '@sphereon/ssi-types'
 import { jwtDecode } from 'jwt-decode'
 
 import { PoPMode, VCI_LOG_COMMON } from '..'
@@ -17,7 +16,7 @@ import {
   Typ,
 } from '../types'
 
-const debug = Debug('sphereon:openid4vci:common')
+const logger = Loggers.DEFAULT.get('sphereon:oid4vci:common')
 
 /**
  *
@@ -44,7 +43,7 @@ export const createProofOfPossession = async <DIDDoc extends object = never>(
   existingJwt?: Jwt,
 ): Promise<ProofOfPossession> => {
   if (!callbacks.signCallback) {
-    debug(`no jwt signer callback or arguments supplied!`)
+    logger.debug(`no jwt signer callback or arguments supplied!`)
     throw new Error(BAD_PARAMS)
   }
 
@@ -58,15 +57,15 @@ export const createProofOfPossession = async <DIDDoc extends object = never>(
   try {
     partiallyValidateJWS(jwt)
     if (callbacks.verifyCallback) {
-      debug(`Calling supplied verify callback....`)
+      logger.debug(`Calling supplied verify callback....`)
       await callbacks.verifyCallback({ jwt, kid: jwtPayload.header.kid })
-      debug(`Supplied verify callback return success result`)
+      logger.debug(`Supplied verify callback return success result`)
     }
   } catch {
-    debug(`JWS was not valid`)
+    logger.debug(`JWS was not valid`)
     throw new Error(JWS_NOT_VALID)
   }
-  debug(`Proof of Possession JWT:\r\n${jwt}`)
+  logger.debug(`Proof of Possession JWT:\r\n${jwt}`)
   return proof
 }
 

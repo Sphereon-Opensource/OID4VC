@@ -26,8 +26,7 @@ import {
 import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
-
-import { JWTPayload, VerifiedJWT } from './index'
+import { JWTPayload, VerifiedJWT } from './JWT.types'
 
 export const DEFAULT_EXPIRATION_TIME = 10 * 60
 

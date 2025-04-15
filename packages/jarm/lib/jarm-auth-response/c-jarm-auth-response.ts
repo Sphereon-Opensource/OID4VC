@@ -1,10 +1,10 @@
 import * as v from 'valibot'
 
-import { vJarmResponseMode, vOpenid4vpJarmResponseMode } from '../v-response-mode-registry.js'
-import { vResponseType } from '../v-response-type-registry.js'
+import { vJarmResponseMode, vOpenid4vpJarmResponseMode } from '../v-response-mode-registry'
+import { vResponseType } from '../v-response-type-registry'
 
-import type { JarmAuthResponseParams } from './v-jarm-auth-response-params.js'
-import type { JarmDirectPostJwtResponseParams } from './v-jarm-direct-post-jwt-auth-response-params.js'
+import type { JarmAuthResponseParams } from './v-jarm-auth-response-params'
+import type { JarmDirectPostJwtResponseParams } from './v-jarm-direct-post-jwt-auth-response-params'
 
 export const vAuthRequestParams = v.looseObject({
   state: v.optional(v.string()),

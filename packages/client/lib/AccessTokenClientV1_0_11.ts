@@ -24,15 +24,13 @@ import {
   toUniformCredentialOfferRequest,
   UniformCredentialOfferPayload,
 } from '@sphereon/oid4vci-common'
-import { ObjectUtils } from '@sphereon/ssi-types'
-import pkg from 'debug'
-const { debug: Debug } = pkg
+import { Loggers, ObjectUtils } from '@sphereon/ssi-types'
 
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13'
 import { createJwtBearerClientAssertion } from './functions'
 import { shouldRetryTokenRequestWithDPoPNonce } from './functions/dpopUtil'
 
-const debug = Debug('sphereon:oid4vci:token')
+const logger = Loggers.DEFAULT.get('sphereon:oid4vci:token')
 
 export class AccessTokenClientV1_0_11 {
   public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse, DPoPResponseParams>> {
@@ -185,39 +183,39 @@ export class AccessTokenClientV1_0_11 {
     if (requestPayload.grants?.[PRE_AUTH_GRANT_LITERAL]) {
       isPinRequired = requestPayload.grants[PRE_AUTH_GRANT_LITERAL]?.user_pin_required ?? false
     }
-    debug(`Pin required for issuer ${issuer}: ${isPinRequired}`)
+    logger.debug(`Pin required for issuer ${issuer}: ${isPinRequired}`)
     return isPinRequired
   }
 
   private assertNumericPin(isPinRequired?: boolean, pin?: string): void {
     if (isPinRequired) {
       if (!pin || !/^\d{1,8}$/.test(pin)) {
-        debug(`Pin is not 1 to 8 digits long`)
+        logger.debug(`Pin is not 1 to 8 digits long`)
         throw new Error('A valid pin consisting of maximal 8 numeric characters must be present.')
       }
     } else if (pin) {
-      debug(`Pin set, whilst not required`)
+      logger.debug(`Pin set, whilst not required`)
       throw new Error('Cannot set a pin, when the pin is not required.')
     }
   }
 
   private assertNonEmptyPreAuthorizedCode(accessTokenRequest: AccessTokenRequest): void {
     if (!accessTokenRequest[PRE_AUTH_CODE_LITERAL]) {
-      debug(`No pre-authorized code present, whilst it is required`)
+      logger.debug(`No pre-authorized code present, whilst it is required`)
       throw new Error('Pre-authorization must be proven by presenting the pre-authorized code. Code must be present.')
     }
   }
 
   private assertNonEmptyCodeVerifier(accessTokenRequest: AccessTokenRequest): void {
     if (!accessTokenRequest.code_verifier) {
-      debug('No code_verifier present, whilst it is required')
+      logger.debug('No code_verifier present, whilst it is required')
       throw new Error('Authorization flow requires the code_verifier to be present')
     }
   }
 
   private assertNonEmptyCode(accessTokenRequest: AccessTokenRequest): void {
     if (!accessTokenRequest.code) {
-      debug('No code present, whilst it is required')
+      logger.debug('No code present, whilst it is required')
       throw new Error('Authorization flow requires the code to be present')
     }
   }
@@ -273,7 +271,7 @@ export class AccessTokenClientV1_0_11 {
     if (!url || !ObjectUtils.isString(url)) {
       throw new Error('No authorization server token URL present. Cannot acquire access token')
     }
-    debug(`Token endpoint determined to be ${url}`)
+    logger.debug(`Token endpoint determined to be ${url}`)
     return url
   }
 
@@ -290,7 +288,7 @@ export class AccessTokenClientV1_0_11 {
   }
 
   private throwNotSupportedFlow(): void {
-    debug(`Only pre-authorized or authorization code flows supported.`)
+    logger.debug(`Only pre-authorized or authorization code flows supported.`)
     throw new Error('Only pre-authorized-code or authorization code flows are supported')
   }
 }

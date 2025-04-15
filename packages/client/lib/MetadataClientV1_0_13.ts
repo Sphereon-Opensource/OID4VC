@@ -10,12 +10,10 @@ import {
   OpenIDResponse,
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
-import pkg from 'debug'
-const { debug: Debug } = pkg
+import { Loggers } from '@sphereon/ssi-types'
 
 import { retrieveWellknown } from './functions'
-
-const debug = Debug('sphereon:oid4vci:metadata')
+const logger = Loggers.DEFAULT.get('sphereon:oid4vci:metadata')
 
 export class MetadataClientV1_0_13 {
   /**
@@ -57,7 +55,7 @@ export class MetadataClientV1_0_13 {
     const oid4vciResponse = await MetadataClientV1_0_13.retrieveOpenID4VCIServerMetadata(issuer, { errorOnNotFound: false }) // We will handle errors later, given we will also try other metadata locations
     let credentialIssuerMetadata = oid4vciResponse?.successBody
     if (credentialIssuerMetadata) {
-      debug(`Issuer ${issuer} OID4VCI well-known server metadata\r\n${JSON.stringify(credentialIssuerMetadata)}`)
+      logger.debug(`Issuer ${issuer} OID4VCI well-known server metadata\r\n${JSON.stringify(credentialIssuerMetadata)}`)
       credential_endpoint = credentialIssuerMetadata.credential_endpoint
       deferred_credential_endpoint = credentialIssuerMetadata.deferred_credential_endpoint
       if (credentialIssuerMetadata.token_endpoint) {
@@ -79,7 +77,7 @@ export class MetadataClientV1_0_13 {
     )
     let authMetadata = response.successBody
     if (authMetadata) {
-      debug(`Issuer ${issuer} has OpenID Connect Server metadata in well-known location`)
+      logger.debug(`Issuer ${issuer} has OpenID Connect Server metadata in well-known location`)
       authorizationServerType = 'OIDC'
     } else {
       // Now let's do OAuth2
@@ -96,7 +94,7 @@ export class MetadataClientV1_0_13 {
       if (!authorizationServerType) {
         authorizationServerType = 'OAuth 2.0'
       }
-      debug(`Issuer ${issuer} has ${authorizationServerType} Server metadata in well-known location`)
+      logger.debug(`Issuer ${issuer} has ${authorizationServerType} Server metadata in well-known location`)
       if (!authMetadata.authorization_endpoint) {
         console.warn(
           `Issuer ${issuer} of type ${authorizationServerType} has no authorization_endpoint! Will use ${authorization_endpoint}. This only works for pre-authorized flows`,
@@ -123,7 +121,7 @@ export class MetadataClientV1_0_13 {
       token_endpoint = authMetadata.token_endpoint
       if (authMetadata.credential_endpoint) {
         if (credential_endpoint && authMetadata.credential_endpoint !== credential_endpoint) {
-          debug(
+          logger.debug(
             `Credential issuer has a different credential_endpoint (${credential_endpoint}) from the Authorization Server (${authMetadata.credential_endpoint}). Will use the issuer value`,
           )
         } else {
@@ -132,7 +130,7 @@ export class MetadataClientV1_0_13 {
       }
       if (authMetadata.deferred_credential_endpoint) {
         if (deferred_credential_endpoint && authMetadata.deferred_credential_endpoint !== deferred_credential_endpoint) {
-          debug(
+          logger.debug(
             `Credential issuer has a different deferred_credential_endpoint (${deferred_credential_endpoint}) from the Authorization Server (${authMetadata.deferred_credential_endpoint}). Will use the issuer value`,
           )
         } else {
@@ -142,10 +140,10 @@ export class MetadataClientV1_0_13 {
     }
 
     if (!authorization_endpoint) {
-      debug(`Issuer ${issuer} does not expose authorization_endpoint, so only pre-auth will be supported`)
+      logger.debug(`Issuer ${issuer} does not expose authorization_endpoint, so only pre-auth will be supported`)
     }
     if (!token_endpoint) {
-      debug(`Issuer ${issuer} does not have a token_endpoint listed in well-known locations!`)
+      logger.debug(`Issuer ${issuer} does not have a token_endpoint listed in well-known locations!`)
       if (opts?.errorOnNotFound) {
         throw Error(`Could not deduce the token_endpoint for ${issuer}`)
       } else {
@@ -153,7 +151,7 @@ export class MetadataClientV1_0_13 {
       }
     }
     if (!credential_endpoint) {
-      debug(`Issuer ${issuer} does not have a credential_endpoint listed in well-known locations!`)
+      logger.debug(`Issuer ${issuer} does not have a credential_endpoint listed in well-known locations!`)
       if (opts?.errorOnNotFound) {
         throw Error(`Could not deduce the credential endpoint for ${issuer}`)
       } else {
@@ -165,7 +163,7 @@ export class MetadataClientV1_0_13 {
       // Apparently everything worked out and the issuer is exposing everything in oAuth2/OIDC well-knowns. Spec is vague about this situation, but we can support it
       credentialIssuerMetadata = authMetadata as CredentialIssuerMetadataV1_0_13
     }
-    debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`)
+    logger.debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`)
     return {
       issuer,
       token_endpoint,

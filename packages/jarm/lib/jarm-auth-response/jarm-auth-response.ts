@@ -1,11 +1,13 @@
 import { decodeProtectedHeader, isJwe, isJws } from '@sphereon/oid4vc-common'
 import * as v from 'valibot'
 
-import type { JarmDirectPostJwtResponseParams } from '../index.js'
-
-import type { AuthRequestParams, JarmDirectPostJwtAuthResponseValidationContext } from './c-jarm-auth-response.js'
-import { vJarmAuthResponseErrorParams } from './v-jarm-auth-response-params.js'
-import { jarmAuthResponseDirectPostValidateParams, vJarmDirectPostJwtParams } from './v-jarm-direct-post-jwt-auth-response-params.js'
+import type { AuthRequestParams, JarmDirectPostJwtAuthResponseValidationContext } from './c-jarm-auth-response'
+import { vJarmAuthResponseErrorParams } from './v-jarm-auth-response-params'
+import {
+  jarmAuthResponseDirectPostValidateParams,
+  JarmDirectPostJwtResponseParams,
+  vJarmDirectPostJwtParams,
+} from './v-jarm-direct-post-jwt-auth-response-params'
 
 export interface JarmDirectPostJwtAuthResponseValidation {
   /**

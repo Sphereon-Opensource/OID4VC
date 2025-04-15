@@ -1,8 +1,7 @@
 // tsup.config.ts
 // import * as path from 'node:path'
 import { defineConfig } from 'tsup'
-// import * as path from 'path'
-// import { esbuildDecorators } from "@anatine/esbuild-decorators";
+
 export default defineConfig({
   entry: ['lib/index.ts'],
   format: ['esm', 'cjs'],
@@ -17,8 +16,5 @@ export default defineConfig({
   splitting: false,
   outDir: 'dist',
   clean: true,
-  skipNodeModulesBundle: true,
-  // esbuildPlugins: [
-  //   esbuildDecorators({tsconfig: '../../tsconfig.base.json', force: true}),
-  // ],
+  skipNodeModulesBundle: false,
 })

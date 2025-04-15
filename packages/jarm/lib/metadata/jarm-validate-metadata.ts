@@ -5,9 +5,9 @@ import {
   vJarmClientMetadataEncrypt,
   vJarmClientMetadataSign,
   vJarmClientMetadataSignEncrypt,
-} from '../metadata/v-jarm-client-metadata.js'
-import { vJarmServerMetadata } from '../metadata/v-jarm-server-metadata.js'
-import { assertValueSupported } from '../utils.js'
+} from '../metadata/v-jarm-client-metadata'
+import { vJarmServerMetadata } from '../metadata/v-jarm-server-metadata'
+import { assertValueSupported } from '../utils'
 
 export const vJarmAuthResponseValidateMetadataInput = v.object({
   client_metadata: vJarmClientMetadata,

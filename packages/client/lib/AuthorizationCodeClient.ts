@@ -28,13 +28,12 @@ import {
   RequestObjectOpts,
   ResponseType,
 } from '@sphereon/oid4vci-common'
-import pkg from 'debug'
-const { debug: Debug } = pkg
+import { Loggers } from '@sphereon/ssi-types'
 
 import { MetadataClient } from './MetadataClient'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
 
-const debug = Debug('sphereon:oid4vci')
+const logger = Loggers.DEFAULT.get('sphereon:oid4vci')
 
 export async function createSignedAuthRequestWhenNeeded(requestObject: Record<string, any>, opts: RequestObjectOpts & { aud?: string }) {
   if (opts.requestObjectMode === CreateRequestObjectMode.REQUEST_URI) {
@@ -217,7 +216,7 @@ export const createAuthorizationRequestUrl = async ({
   if (!parEndpoint && parMode === PARMode.REQUIRE) {
     throw Error(`PAR mode is set to required by Authorization Server does not support PAR!`)
   } else if (parEndpoint && parMode !== PARMode.NEVER) {
-    debug(`USING PAR with endpoint ${parEndpoint}`)
+    logger.debug(`USING PAR with endpoint ${parEndpoint}`)
 
     const parResponse = await formPost<PushedAuthorizationResponse>(
       parEndpoint,
@@ -232,15 +231,15 @@ export const createAuthorizationRequestUrl = async ({
         throw Error(`PAR error: ${parResponse.origResponse.statusText}`)
       }
 
-      debug('Falling back to regular request URI, since PAR failed', JSON.stringify(parResponse.errorBody))
+      logger.debug('Falling back to regular request URI, since PAR failed', JSON.stringify(parResponse.errorBody))
     } else {
-      debug(`PAR response: ${JSON.stringify(parResponse.successBody, null, 2)}`)
+      logger.debug(`PAR response: ${JSON.stringify(parResponse.successBody, null, 2)}`)
       queryObj = { /*response_type: ResponseType.AUTH_CODE,*/ client_id, request_uri: parResponse.successBody.request_uri }
     }
   }
   await createSignedAuthRequestWhenNeeded(queryObj, { ...requestObjectOpts, aud: endpointMetadata.authorization_server })
 
-  debug(`Object that will become query params: ` + JSON.stringify(queryObj, null, 2))
+  logger.debug(`Object that will become query params: ` + JSON.stringify(queryObj, null, 2))
   const url = convertJsonToURI(queryObj, {
     baseUrl: endpointMetadata.authorization_endpoint,
     uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state', 'state'],
@@ -248,7 +247,7 @@ export const createAuthorizationRequestUrl = async ({
     mode: JsonURIMode.X_FORM_WWW_URLENCODED,
     // We do not add the version here, as this always needs to be form encoded
   })
-  debug(`Authorization Request URL: ${url}`)
+  logger.debug(`Authorization Request URL: ${url}`)
   return url
 }
 

@@ -175,7 +175,7 @@ export const extractDcqlPresentationFromDcqlVpToken = (
   const dcqlPresentation = Object.fromEntries(
     Object.entries(DcqlPresentation.parse(vpToken)).map(([credentialQueryId, vp]) => [
       credentialQueryId,
-      CredentialMapper.toWrappedVerifiablePresentation(vp as W3CVerifiablePresentation | CompactSdJwtVc | string, { hasher: opts.hasher }),
+      CredentialMapper.toWrappedVerifiablePresentation(vp as W3CVerifiablePresentation | CompactSdJwtVc | string, { hasher: opts?.hasher }),
     ]),
   )
 
@@ -275,7 +275,7 @@ export const putPresentationSubmissionInLocation = async (
   const submissionData =
     resOpts.presentationExchange.presentationSubmission ??
     (await createPresentationSubmission(resOpts.presentationExchange.verifiablePresentations, {
-      presentationDefinitions: await authorizationRequest.getPresentationDefinitions(),
+      presentationDefinitions: (await authorizationRequest.getPresentationDefinitions()) as PresentationDefinitionWithLocation[],
     }))
 
   const location =
@@ -373,7 +373,7 @@ export const assertValidVerifiablePresentations = async (args: {
     ((Array.isArray(presentationsArray) && presentationsArray.length > 0) || !Array.isArray(presentationsArray))
   ) {
     return Promise.reject(Error(SIOPErrors.AUTH_REQUEST_DOESNT_EXPECT_VP))
-  } else if (args.presentationDefinitions && !args.opts.presentationSubmission) {
+  } else if (args.presentationDefinitions && !args?.opts?.presentationSubmission) {
     return Promise.reject(Error(`No presentation submission present. Please use presentationSubmission opt argument!`))
   } else if (args.presentationDefinitions && presentationsArray) {
     await PresentationExchange.validatePresentationsAgainstDefinitions(

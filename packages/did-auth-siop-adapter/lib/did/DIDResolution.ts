@@ -4,7 +4,7 @@ import { DIDResolutionOptions, DIDResolutionResult, ParsedDID, Resolvable, Resol
 
 import { DIDDocument, ResolveOpts } from '../types'
 
-import { getMethodFromDid, toSIOPRegistrationDidMethod } from './index'
+import { getMethodFromDid, toSIOPRegistrationDidMethod } from '.'
 
 export function getResolver(opts: ResolveOpts): Resolvable {
   if (opts && typeof opts.resolver === 'object') {

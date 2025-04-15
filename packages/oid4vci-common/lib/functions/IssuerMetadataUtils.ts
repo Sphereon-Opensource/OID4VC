@@ -1,4 +1,4 @@
-import { getTypesFromObject, isW3cCredentialSupported, VCI_LOG_COMMON } from '../index'
+import { VCI_LOG_COMMON } from '../index'
 import {
   AuthorizationServerMetadata,
   CredentialConfigurationSupported,
@@ -11,7 +11,7 @@ import {
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
 } from '../types'
-
+import { getTypesFromObject, isW3cCredentialSupported } from './TypeConversionUtils'
 export function getSupportedCredentials(opts?: {
   issuerMetadata?: CredentialIssuerMetadata | IssuerMetadata
   version: OpenId4VCIVersion

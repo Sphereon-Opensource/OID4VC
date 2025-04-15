@@ -1,8 +1,7 @@
-import pkg from 'debug'
-const { debug: Debug } = pkg
+import { Loggers } from '@sphereon/ssi-types'
 import { jwtDecode, JwtPayload } from 'jwt-decode'
+import { VCI_LOG_COMMON } from '../index'
 
-import { PRE_AUTH_CODE_LITERAL, PRE_AUTH_GRANT_LITERAL, VCI_LOG_COMMON } from '../index'
 import {
   AssertedUniformCredentialOffer,
   AuthzFlowType,
@@ -17,6 +16,8 @@ import {
   GrantTypes,
   OpenId4VCIVersion,
   OpenIDResponse,
+  PRE_AUTH_CODE_LITERAL,
+  PRE_AUTH_GRANT_LITERAL,
   UniformCredentialOffer,
   UniformCredentialOfferPayload,
   UniformCredentialOfferRequest,
@@ -24,7 +25,7 @@ import {
 
 import { getJson } from './HttpUtils'
 
-const debug = Debug('sphereon:oid4vci:offer')
+const logger = Loggers.DEFAULT.get('sphereon:oid4vci:offer')
 
 export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
   let version = determineSpecVersionFromScheme(uri, OpenId4VCIVersion.VER_UNKNOWN) ?? OpenId4VCIVersion.VER_UNKNOWN
@@ -145,10 +146,10 @@ export function isCredentialOfferVersion(offer: CredentialOfferPayload | Credent
   }
   const version = determineSpecVersionFromOffer(offer)
   if (version.valueOf() < min.valueOf()) {
-    debug(`Credential offer version (${version.valueOf()}) is lower than minimum required version (${min.valueOf()})`)
+    logger.debug(`Credential offer version (${version.valueOf()}) is lower than minimum required version (${min.valueOf()})`)
     return false
   } else if (max && version.valueOf() > max.valueOf()) {
-    debug(`Credential offer version (${version.valueOf()}) is higher than maximum required version (${max.valueOf()})`)
+    logger.debug(`Credential offer version (${version.valueOf()}) is higher than maximum required version (${max.valueOf()})`)
     return false
   }
   return true

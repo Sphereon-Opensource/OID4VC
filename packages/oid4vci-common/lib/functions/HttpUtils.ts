@@ -1,10 +1,9 @@
+import { Loggers } from '@sphereon/ssi-types'
 import { fetch } from 'cross-fetch'
-import pkg from 'debug'
-const { debug: Debug } = pkg
 
 import { Encoding, OpenIDResponse } from '../types'
 
-const debug = Debug('sphereon:openid4vci:http')
+const logger = Loggers.DEFAULT.get('sphereon:openid4vci:http')
 
 export const getJson = async <T>(
   URL: string,
@@ -85,23 +84,23 @@ const openIdFetch = async <T>(
     body,
   }
 
-  debug(`START fetching url: ${url}`)
+  logger.debug(`START fetching url: ${url}`)
   if (body) {
-    debug(`Body:\r\n${typeof body == 'string' ? body : JSON.stringify(body)}`)
+    logger.debug(`Body:\r\n${typeof body == 'string' ? body : JSON.stringify(body)}`)
   }
-  debug(`Headers:\r\n${JSON.stringify(payload.headers)}`)
+  logger.debug(`Headers:\r\n${JSON.stringify(payload.headers)}`)
   const origResponse = await fetch(url, payload)
   const isJSONResponse = accept === 'application/json' || origResponse.headers.get('Content-Type') === 'application/json'
   const success = origResponse && origResponse.status >= 200 && origResponse.status < 400
   const responseText = await origResponse.text()
   const responseBody = isJSONResponse && responseText.includes('{') ? JSON.parse(responseText) : responseText
 
-  debug(`${success ? 'success' : 'error'} status: ${origResponse.status}, body:\r\n${JSON.stringify(responseBody)}`)
+  logger.debug(`${success ? 'success' : 'error'} status: ${origResponse.status}, body:\r\n${JSON.stringify(responseBody)}`)
   if (!success && opts?.exceptionOnHttpErrorStatus) {
     const error = JSON.stringify(responseBody)
     throw new Error(error === '{}' ? '{"error": "not found"}' : error)
   }
-  debug(`END fetching url: ${url}`)
+  logger.debug(`END fetching url: ${url}`)
 
   return {
     origResponse,

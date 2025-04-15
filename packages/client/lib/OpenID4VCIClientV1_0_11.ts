@@ -32,9 +32,7 @@ import {
   ProofOfPossessionCallbacks,
   toAuthorizationResponsePayload,
 } from '@sphereon/oid4vci-common'
-import { CredentialFormat } from '@sphereon/ssi-types'
-import pkg from 'debug'
-const { debug: Debug } = pkg
+import { CredentialFormat, Loggers } from '@sphereon/ssi-types'
 
 import { AccessTokenClientV1_0_11 } from './AccessTokenClientV1_0_11'
 import { acquireAuthorizationChallengeAuthCode } from './AuthorizationCodeClient'
@@ -45,7 +43,7 @@ import { MetadataClientV1_0_11 } from './MetadataClientV1_0_11'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
 import { generateMissingPKCEOpts } from './functions'
 
-const debug = Debug('sphereon:oid4vci')
+const logger = Loggers.DEFAULT.get('sphereon:oid4vci')
 
 export interface OpenID4VCIClientStateV1_0_11 {
   credentialIssuer: string
@@ -119,7 +117,7 @@ export class OpenID4VCIClientV1_0_11 {
     if (!this._state.authorizationRequestOpts) {
       this._state.authorizationRequestOpts = this.syncAuthorizationRequestOpts(authorizationRequest)
     }
-    debug(`Authorization req options: ${JSON.stringify(this._state.authorizationRequestOpts, null, 2)}`)
+    logger.debug(`Authorization req options: ${JSON.stringify(this._state.authorizationRequestOpts, null, 2)}`)
   }
 
   public static async fromCredentialIssuer({
@@ -203,7 +201,7 @@ export class OpenID4VCIClientV1_0_11 {
       (createAuthorizationRequestURL === undefined || createAuthorizationRequestURL)
     ) {
       await client.createAuthorizationRequestUrl({ authorizationRequest, pkce })
-      debug(`Authorization Request URL: ${client._state.authorizationURL}`)
+      logger.debug(`Authorization Request URL: ${client._state.authorizationURL}`)
     }
 
     return client
@@ -270,11 +268,11 @@ export class OpenID4VCIClientV1_0_11 {
     })
 
     if (response.errorBody) {
-      debug(`Authorization code error:\r\n${JSON.stringify(response.errorBody)}`)
+      logger.debug(`Authorization code error:\r\n${JSON.stringify(response.errorBody)}`)
       const error = response.errorBody as AuthorizationChallengeErrorResponse
       return Promise.reject(error)
     } else if (!response.successBody) {
-      debug(`Authorization code error. No success body`)
+      logger.debug(`Authorization code error. No success body`)
       return Promise.reject(
         Error(
           `Retrieving an authorization code token from ${this._state.endpointMetadata?.authorization_challenge_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`,
@@ -355,14 +353,14 @@ export class OpenID4VCIClientV1_0_11 {
       })
 
       if (response.errorBody) {
-        debug(`Access token error:\r\n${JSON.stringify(response.errorBody)}`)
+        logger.debug(`Access token error:\r\n${JSON.stringify(response.errorBody)}`)
         throw Error(
           `Retrieving an access token from ${this._state.endpointMetadata?.token_endpoint} for issuer ${this.getIssuer()} failed with status: ${
             response.origResponse.status
           }`,
         )
       } else if (!response.successBody) {
-        debug(`Access token error. No success body`)
+        logger.debug(`Access token error. No success body`)
         throw Error(
           `Retrieving an access token from ${
             this._state.endpointMetadata?.token_endpoint
@@ -484,14 +482,14 @@ export class OpenID4VCIClientV1_0_11 {
     })
     this._state.dpopResponseParams = response.params
     if (response.errorBody) {
-      debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`)
+      logger.debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`)
       throw Error(
         `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${
           response.origResponse.status
         }`,
       )
     } else if (!response.successBody) {
-      debug(`Credential request error. No success body`)
+      logger.debug(`Credential request error. No success body`)
       throw Error(
         `Retrieving a credential from ${
           this._state.endpointMetadata?.credential_endpoint

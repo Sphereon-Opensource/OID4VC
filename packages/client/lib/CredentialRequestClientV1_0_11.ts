@@ -16,16 +16,14 @@ import {
   UniformCredentialRequest,
   URL_NOT_VALID,
 } from '@sphereon/oid4vci-common'
-import { CredentialFormat } from '@sphereon/ssi-types'
-import pkg from 'debug'
-const { debug: Debug } = pkg
+import { CredentialFormat, Loggers } from '@sphereon/ssi-types'
 
 import { buildProof } from './CredentialRequestClient'
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
 import { shouldRetryResourceRequestWithDPoPNonce } from './functions/dpopUtil'
 
-const debug = Debug('sphereon:oid4vci:credential')
+const logger = Loggers.DEFAULT.get('sphereon:oid4vci:credential')
 
 export interface CredentialRequestOptsV1_0_11 {
   deferredCredentialAwait?: boolean
@@ -83,11 +81,11 @@ export class CredentialRequestClientV1_0_11 {
     const request = getCredentialRequestForVersion(uniformRequest, this.version())
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint
     if (!isValidURL(credentialEndpoint)) {
-      debug(`Invalid credential endpoint: ${credentialEndpoint}`)
+      logger.debug(`Invalid credential endpoint: ${credentialEndpoint}`)
       throw new Error(URL_NOT_VALID)
     }
-    debug(`Acquiring credential(s) from: ${credentialEndpoint}`)
-    debug(`request\n: ${JSON.stringify(request, null, 2)}`)
+    logger.debug(`Acquiring credential(s) from: ${credentialEndpoint}`)
+    logger.debug(`request\n: ${JSON.stringify(request, null, 2)}`)
     const requestToken: string = this.credentialRequestOpts.token
 
     let dPoP = createDPoPOpts ? await createDPoP(getCreateDPoPOptions(createDPoPOpts, credentialEndpoint, { accessToken: requestToken })) : undefined
@@ -122,7 +120,7 @@ export class CredentialRequestClientV1_0_11 {
     }
     response.access_token = requestToken
 
-    debug(`Credential endpoint ${credentialEndpoint} response:\r\n${JSON.stringify(response, null, 2)}`)
+    logger.debug(`Credential endpoint ${credentialEndpoint} response:\r\n${JSON.stringify(response, null, 2)}`)
 
     return {
       ...response,

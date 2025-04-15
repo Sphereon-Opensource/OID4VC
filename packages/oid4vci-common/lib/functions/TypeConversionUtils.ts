@@ -1,21 +1,19 @@
+import { VCI_LOG_COMMON } from '../index'
 import {
   AuthorizationDetails,
-  CredentialConfigurationSupportedMsoMdocV1_0_13,
-  CredentialOfferPayload,
-  CredentialSupportedMsoMdoc,
-  UniformCredentialOfferPayload,
-  UniformCredentialOfferRequest,
-  VCI_LOG_COMMON,
-} from '../index'
-import {
   CredentialConfigurationSupported,
+  CredentialConfigurationSupportedMsoMdocV1_0_13,
   CredentialConfigurationSupportedSdJwtVcV1_0_13,
   CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13,
   CredentialDefinitionJwtVcJsonV1_0_13,
   CredentialOfferFormatV1_0_11,
+  CredentialOfferPayload,
   CredentialsSupportedLegacy,
+  CredentialSupportedMsoMdoc,
   CredentialSupportedSdJwtVc,
   JsonLdIssuerCredentialDefinition,
+  UniformCredentialOfferPayload,
+  UniformCredentialOfferRequest,
 } from '../types'
 
 export function isW3cCredentialSupported(

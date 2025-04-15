@@ -9,18 +9,17 @@ import {
   PRE_AUTH_GRANT_LITERAL,
   toUniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common'
-import pkg from 'debug'
-const { debug: Debug } = pkg
+import { Loggers } from '@sphereon/ssi-types'
 
 import { constructBaseResponse, handleCredentialOfferUri } from './functions'
 
-const debug = Debug('sphereon:oid4vci:offer')
+const logger = Loggers.DEFAULT.get('sphereon:oid4vci:offer')
 
 export class CredentialOfferClientV1_0_13 {
   public static async fromURI(uri: string, opts?: { resolve?: boolean }): Promise<CredentialOfferRequestWithBaseUrl> {
-    debug(`Credential Offer URI: ${uri}`)
+    logger.debug(`Credential Offer URI: ${uri}`)
     if (!uri.includes('?') || !uri.includes('://')) {
-      debug(`Invalid Credential Offer URI: ${uri}`)
+      logger.debug(`Invalid Credential Offer URI: ${uri}`)
       throw Error(`Invalid Credential Offer Request`)
     }
     const scheme = uri.split('://')[0]
@@ -60,7 +59,7 @@ export class CredentialOfferClientV1_0_13 {
       version?: OpenId4VCIVersion
     },
   ): string {
-    debug(`Credential Offer Request with base URL: ${JSON.stringify(requestWithBaseUrl)}`)
+    logger.debug(`Credential Offer Request with base URL: ${JSON.stringify(requestWithBaseUrl)}`)
     const version = opts?.version ?? requestWithBaseUrl.version
     let baseUrl = requestWithBaseUrl.baseUrl.includes(requestWithBaseUrl.scheme)
       ? requestWithBaseUrl.baseUrl

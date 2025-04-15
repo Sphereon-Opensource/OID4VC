@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import type { ResponseTypeOut } from './v-response-type-registry.js'
+import type { ResponseTypeOut } from './v-response-type-registry'
 
 export const vJarmResponseMode = v.picklist(['jwt', 'query.jwt', 'fragment.jwt', 'form_post.jwt'])
 export type JarmResponseMode = v.InferInput<typeof vJarmResponseMode>

@@ -1,7 +1,6 @@
 import { CredentialOfferPayloadV1_0_11, CredentialOfferPayloadV1_0_13, PRE_AUTH_CODE_LITERAL, PRE_AUTH_GRANT_LITERAL } from '@sphereon/oid4vci-common'
 import { describe, expect, it } from 'vitest'
-
-import { createCredentialOfferObject, createCredentialOfferURI, createCredentialOfferURIv1_0_11 } from '../index'
+import { createCredentialOfferObject, createCredentialOfferURI, createCredentialOfferURIv1_0_11 } from '../functions'
 
 describe('CredentialOfferUtils should', () => {
   it('create a deeplink from credentialOffer object', () => {

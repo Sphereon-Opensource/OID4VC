@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { vJarmAuthResponseParams } from './v-jarm-auth-response-params.js'
+import { vJarmAuthResponseParams } from './v-jarm-auth-response-params'
 
 export const vJarmDirectPostJwtParams = v.looseObject({
   ...v.omit(vJarmAuthResponseParams, ['iss', 'aud', 'exp']).entries,

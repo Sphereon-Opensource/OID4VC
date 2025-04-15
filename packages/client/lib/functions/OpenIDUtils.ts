@@ -1,8 +1,7 @@
 import { getJson, OpenIDResponse, WellKnownEndpoints } from '@sphereon/oid4vci-common'
-import pkg from 'debug'
-const { debug: Debug } = pkg
+import { Loggers } from '@sphereon/ssi-types'
 
-const debug = Debug('sphereon:openid4vci:openid-utils')
+const logger = Loggers.DEFAULT.get('sphereon:openid4vci:openid-utils')
 /**
  * Allows to retrieve information from a well-known location
  *
@@ -20,7 +19,7 @@ export const retrieveWellknown = async <T>(
   })
   if (result.origResponse.status >= 400) {
     // We only get here when error on not found is false
-    debug(`host ${host} with endpoint type ${endpointType} status: ${result.origResponse.status}, ${result.origResponse.statusText}`)
+    logger.debug(`host ${host} with endpoint type ${endpointType} status: ${result.origResponse.status}, ${result.origResponse.statusText}`)
   }
   return result
 }

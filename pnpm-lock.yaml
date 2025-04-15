@@ -16147,7 +16147,7 @@ snapshots:
 
   log-symbols@4.1.0:
     dependencies:
-      chalk: 4.1.2
+      chalk: 4.1.0
       is-unicode-supported: 0.1.0
 
   logkitty@0.7.1:
@@ -16688,11 +16688,11 @@ snapshots:
 
   minipass-flush@1.0.5:
     dependencies:
-      minipass: 3.1.6
+      minipass: 3.3.6
 
   minipass-pipeline@1.2.4:
     dependencies:
-      minipass: 3.1.6
+      minipass: 3.3.6
 
   minipass-sized@1.0.3:
     dependencies:
