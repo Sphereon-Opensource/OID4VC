@@ -28,7 +28,8 @@ import {
   RequestObjectOpts,
   ResponseType,
 } from '@sphereon/oid4vci-common'
-import Debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 
 import { MetadataClient } from './MetadataClient'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'

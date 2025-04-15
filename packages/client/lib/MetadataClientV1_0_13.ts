@@ -10,7 +10,8 @@ import {
   OpenIDResponse,
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
-import Debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 
 import { retrieveWellknown } from './functions'
 

@@ -1,5 +1,6 @@
 import { BaseJWK, JWK } from '@sphereon/oid4vc-common'
-import Debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 import { jwtDecode } from 'jwt-decode'
 
 import { PoPMode, VCI_LOG_COMMON } from '..'

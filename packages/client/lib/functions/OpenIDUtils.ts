@@ -1,5 +1,6 @@
 import { getJson, OpenIDResponse, WellKnownEndpoints } from '@sphereon/oid4vci-common'
-import Debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 
 const debug = Debug('sphereon:openid4vci:openid-utils')
 /**

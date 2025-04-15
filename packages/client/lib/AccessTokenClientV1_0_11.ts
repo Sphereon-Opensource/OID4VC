@@ -25,7 +25,8 @@ import {
   UniformCredentialOfferPayload,
 } from '@sphereon/oid4vci-common'
 import { ObjectUtils } from '@sphereon/ssi-types'
-import Debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13'
 import { createJwtBearerClientAssertion } from './functions'

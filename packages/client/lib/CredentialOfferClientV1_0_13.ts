@@ -9,7 +9,8 @@ import {
   PRE_AUTH_GRANT_LITERAL,
   toUniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common'
-import Debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 
 import { constructBaseResponse, handleCredentialOfferUri } from './functions'
 

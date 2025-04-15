@@ -1,4 +1,5 @@
-import Debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 import { jwtDecode, JwtPayload } from 'jwt-decode'
 
 import { PRE_AUTH_CODE_LITERAL, PRE_AUTH_GRANT_LITERAL, VCI_LOG_COMMON } from '../index'

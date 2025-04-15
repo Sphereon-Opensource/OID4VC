@@ -15,7 +15,8 @@ import {
   OpenIDResponse,
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
-import Debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 
 import { MetadataClientV1_0_11 } from './MetadataClientV1_0_11'
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13'

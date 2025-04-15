@@ -33,7 +33,8 @@ import {
   toAuthorizationResponsePayload,
 } from '@sphereon/oid4vci-common'
 import { CredentialFormat } from '@sphereon/ssi-types'
-import Debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 
 import { AccessTokenClient } from './AccessTokenClient'
 import { acquireAuthorizationChallengeAuthCode, createAuthorizationRequestUrl } from './AuthorizationCodeClient'

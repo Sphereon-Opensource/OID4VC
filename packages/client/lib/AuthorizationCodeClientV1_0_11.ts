@@ -16,7 +16,8 @@ import {
   PushedAuthorizationResponse,
   ResponseType,
 } from '@sphereon/oid4vci-common'
-import Debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 
 import { createSignedAuthRequestWhenNeeded } from './AuthorizationCodeClient'
 

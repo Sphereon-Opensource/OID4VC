@@ -17,7 +17,8 @@ import {
   URL_NOT_VALID,
 } from '@sphereon/oid4vci-common'
 import { CredentialFormat } from '@sphereon/ssi-types'
-import Debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 
 import { buildProof } from './CredentialRequestClient'
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11'

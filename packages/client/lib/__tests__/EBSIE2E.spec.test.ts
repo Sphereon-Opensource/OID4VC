@@ -5,7 +5,8 @@ import { CredentialMapper } from '@sphereon/ssi-types'
 //@ts-ignore
 import { from } from '@trust/keyto'
 import { fetch } from 'cross-fetch'
-import debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 import { base64url, importJWK, JWK, SignJWT } from 'jose'
 import { fromString, toString } from 'uint8arrays'
 import { describe, expect, it } from 'vitest'

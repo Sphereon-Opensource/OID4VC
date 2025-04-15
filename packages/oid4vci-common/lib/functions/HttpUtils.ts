@@ -1,5 +1,6 @@
 import { fetch } from 'cross-fetch'
-import Debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 
 import { Encoding, OpenIDResponse } from '../types'
 

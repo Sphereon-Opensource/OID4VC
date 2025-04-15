@@ -5,7 +5,8 @@ import { Alg, Jwt, ProofOfPossessionCallbacks } from '@sphereon/oid4vci-common'
 import { CredentialMapper } from '@sphereon/ssi-types'
 import * as didts from '@transmute/did-key.js'
 import { fetch } from 'cross-fetch'
-import debug from 'debug'
+import pkg from 'debug'
+const { debug: Debug } = pkg
 import { importJWK, JWK, SignJWT } from 'jose'
 import { describe, expect, it } from 'vitest'
 
