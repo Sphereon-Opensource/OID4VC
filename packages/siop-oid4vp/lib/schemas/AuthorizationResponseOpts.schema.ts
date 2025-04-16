@@ -2311,13 +2311,543 @@ export const AuthorizationResponseOptsSchemaObj = {
           "items": {
             "anyOf": [
               {
-                "$ref": "#/definitions/W3CVerifiablePresentation"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "proof": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "created": {
+                                "type": "string"
+                              },
+                              "proofPurpose": {
+                                "type": "string"
+                              },
+                              "verificationMethod": {
+                                "type": "string"
+                              },
+                              "challenge": {
+                                "type": "string"
+                              },
+                              "domain": {
+                                "type": "string"
+                              },
+                              "proofValue": {
+                                "type": "string"
+                              },
+                              "jws": {
+                                "type": "string"
+                              },
+                              "jwt": {
+                                "type": "string"
+                              },
+                              "mso_mdoc": {
+                                "type": "string"
+                              },
+                              "nonce": {
+                                "type": "string"
+                              },
+                              "requiredRevealStatements": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "created",
+                              "proofPurpose",
+                              "verificationMethod"
+                            ]
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string"
+                                },
+                                "created": {
+                                  "type": "string"
+                                },
+                                "proofPurpose": {
+                                  "type": "string"
+                                },
+                                "verificationMethod": {
+                                  "type": "string"
+                                },
+                                "challenge": {
+                                  "type": "string"
+                                },
+                                "domain": {
+                                  "type": "string"
+                                },
+                                "proofValue": {
+                                  "type": "string"
+                                },
+                                "jws": {
+                                  "type": "string"
+                                },
+                                "jwt": {
+                                  "type": "string"
+                                },
+                                "mso_mdoc": {
+                                  "type": "string"
+                                },
+                                "nonce": {
+                                  "type": "string"
+                                },
+                                "requiredRevealStatements": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "created",
+                                "proofPurpose",
+                                "verificationMethod"
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "@context": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "did": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "did": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "type": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        ]
+                      },
+                      "verifiableCredential": {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "proof": {
+                                  "anyOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "type": "string"
+                                        },
+                                        "created": {
+                                          "type": "string"
+                                        },
+                                        "proofPurpose": {
+                                          "type": "string"
+                                        },
+                                        "verificationMethod": {
+                                          "type": "string"
+                                        },
+                                        "challenge": {
+                                          "type": "string"
+                                        },
+                                        "domain": {
+                                          "type": "string"
+                                        },
+                                        "proofValue": {
+                                          "type": "string"
+                                        },
+                                        "jws": {
+                                          "type": "string"
+                                        },
+                                        "jwt": {
+                                          "type": "string"
+                                        },
+                                        "mso_mdoc": {
+                                          "type": "string"
+                                        },
+                                        "nonce": {
+                                          "type": "string"
+                                        },
+                                        "requiredRevealStatements": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string"
+                                          }
+                                        }
+                                      },
+                                      "required": [
+                                        "type",
+                                        "created",
+                                        "proofPurpose",
+                                        "verificationMethod"
+                                      ]
+                                    },
+                                    {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "properties": {
+                                          "type": {
+                                            "type": "string"
+                                          },
+                                          "created": {
+                                            "type": "string"
+                                          },
+                                          "proofPurpose": {
+                                            "type": "string"
+                                          },
+                                          "verificationMethod": {
+                                            "type": "string"
+                                          },
+                                          "challenge": {
+                                            "type": "string"
+                                          },
+                                          "domain": {
+                                            "type": "string"
+                                          },
+                                          "proofValue": {
+                                            "type": "string"
+                                          },
+                                          "jws": {
+                                            "type": "string"
+                                          },
+                                          "jwt": {
+                                            "type": "string"
+                                          },
+                                          "mso_mdoc": {
+                                            "type": "string"
+                                          },
+                                          "nonce": {
+                                            "type": "string"
+                                          },
+                                          "requiredRevealStatements": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "string"
+                                            }
+                                          }
+                                        },
+                                        "required": [
+                                          "type",
+                                          "created",
+                                          "proofPurpose",
+                                          "verificationMethod"
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                },
+                                "@context": {
+                                  "anyOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "did": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "array",
+                                      "items": {
+                                        "anyOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "name": {
+                                                "type": "string"
+                                              },
+                                              "did": {
+                                                "type": "string"
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "type": "string"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                },
+                                "type": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "credentialSchema": {
+                                  "anyOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "type": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "array",
+                                      "items": {
+                                        "anyOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "id": {
+                                                "type": "string"
+                                              },
+                                              "type": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "id"
+                                            ],
+                                            "additionalProperties": false
+                                          },
+                                          {
+                                            "type": "string"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                },
+                                "issuer": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "issuanceDate": {
+                                  "type": "string"
+                                },
+                                "credentialSubject": {
+                                  "anyOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ]
+                                },
+                                "expirationDate": {
+                                  "type": "string"
+                                },
+                                "id": {
+                                  "type": "string"
+                                },
+                                "credentialStatus": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                },
+                                "description": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@context",
+                                "credentialSubject",
+                                "issuanceDate",
+                                "issuer",
+                                "proof",
+                                "type"
+                              ]
+                            },
+                            {
+                              "type": "string",
+                              "description": "Represents a Json Web Token in compact form."
+                            }
+                          ],
+                          "description": "Represents a signed Verifiable Credential (includes proof), in either JSON, compact JWT or compact SD-JWT VC format. See  {@link  https://www.w3.org/TR/vc-data-model/#credentials VC data model }  See  {@link  https://www.w3.org/TR/vc-data-model/#proof-formats proof formats }"
+                        }
+                      },
+                      "presentation_submission": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "A UUID or some other unique ID to identify this Presentation Submission"
+                          },
+                          "definition_id": {
+                            "type": "string",
+                            "description": "A UUID or some other unique ID to identify this Presentation Definition"
+                          },
+                          "descriptor_map": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "description": "ID to identify the descriptor from Presentation Definition Input Descriptor it coresponds to."
+                                },
+                                "path": {
+                                  "type": "string",
+                                  "description": "The path where the verifiable credential is located in the presentation submission json"
+                                },
+                                "path_nested": {
+                                  "$ref": "#/definitions/interface-1279223537-8074-8564-1279223537-0-591201317389438"
+                                },
+                                "format": {
+                                  "type": "string",
+                                  "description": "The Proof or JWT algorith that the proof is in"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "path",
+                                "format"
+                              ],
+                              "additionalProperties": false,
+                              "description": "descriptor map laying out the structure of the presentation submission."
+                            },
+                            "description": "List of descriptors of how the claims are being mapped to presentation definition"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "definition_id",
+                          "descriptor_map"
+                        ],
+                        "additionalProperties": false,
+                        "description": "It expresses how the inputs are presented as proofs to a Verifier."
+                      },
+                      "holder": {
+                        "type": "string"
+                      },
+                      "verifier": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "@context",
+                      "proof"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "description": "Represents a Json Web Token in compact form."
+                  }
+                ],
+                "description": "Represents a signed Verifiable Presentation (includes proof), in either JSON or compact JWT format. See  {@link  https://www.w3.org/TR/vc-data-model/#presentations VC data model }  See  {@link  https://www.w3.org/TR/vc-data-model/#proof-formats proof formats }"
               },
               {
-                "$ref": "#/definitions/CompactSdJwtVc"
+                "type": "string",
+                "description": "Represents a selective disclosure JWT vc in compact form."
               },
               {
-                "$ref": "#/definitions/MdocOid4vpMdocVpToken"
+                "type": "string"
               }
             ]
           }
@@ -2326,7 +2856,55 @@ export const AuthorizationResponseOptsSchemaObj = {
           "$ref": "#/definitions/VPTokenLocation"
         },
         "presentationSubmission": {
-          "$ref": "#/definitions/PresentationSubmission"
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "A UUID or some other unique ID to identify this Presentation Submission"
+            },
+            "definition_id": {
+              "type": "string",
+              "description": "A UUID or some other unique ID to identify this Presentation Definition"
+            },
+            "descriptor_map": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "ID to identify the descriptor from Presentation Definition Input Descriptor it coresponds to."
+                  },
+                  "path": {
+                    "type": "string",
+                    "description": "The path where the verifiable credential is located in the presentation submission json"
+                  },
+                  "path_nested": {
+                    "$ref": "#/definitions/interface-1279223537-8074-8564-1279223537-0-591201317389438"
+                  },
+                  "format": {
+                    "type": "string",
+                    "description": "The Proof or JWT algorith that the proof is in"
+                  }
+                },
+                "required": [
+                  "id",
+                  "path",
+                  "format"
+                ],
+                "additionalProperties": false,
+                "description": "descriptor map laying out the structure of the presentation submission."
+              },
+              "description": "List of descriptors of how the claims are being mapped to presentation definition"
+            }
+          },
+          "required": [
+            "id",
+            "definition_id",
+            "descriptor_map"
+          ],
+          "additionalProperties": false,
+          "description": "It expresses how the inputs are presented as proofs to a Verifier."
         },
         "restrictToFormats": {
           "$ref": "#/definitions/Format"
@@ -2343,401 +2921,7 @@ export const AuthorizationResponseOptsSchemaObj = {
       ],
       "additionalProperties": false
     },
-    "W3CVerifiablePresentation": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/IVerifiablePresentation"
-        },
-        {
-          "$ref": "#/definitions/CompactJWT"
-        }
-      ],
-      "description": "Represents a signed Verifiable Presentation (includes proof), in either JSON or compact JWT format. See  {@link  https://www.w3.org/TR/vc-data-model/#presentations VC data model }  See  {@link  https://www.w3.org/TR/vc-data-model/#proof-formats proof formats }"
-    },
-    "IVerifiablePresentation": {
-      "type": "object",
-      "properties": {
-        "proof": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/IProof"
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/IProof"
-              }
-            }
-          ]
-        },
-        "id": {
-          "type": "string"
-        },
-        "@context": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/ICredentialContextType"
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/ICredentialContextType"
-              }
-            }
-          ]
-        },
-        "type": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          ]
-        },
-        "verifiableCredential": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/W3CVerifiableCredential"
-          }
-        },
-        "presentation_submission": {
-          "$ref": "#/definitions/PresentationSubmission"
-        },
-        "holder": {
-          "type": "string"
-        },
-        "verifier": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "@context",
-        "proof"
-      ]
-    },
-    "IProof": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/IProofType"
-            },
-            {
-              "type": "string"
-            }
-          ]
-        },
-        "created": {
-          "type": "string"
-        },
-        "proofPurpose": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/IProofPurpose"
-            },
-            {
-              "type": "string"
-            }
-          ]
-        },
-        "verificationMethod": {
-          "type": "string"
-        },
-        "challenge": {
-          "type": "string"
-        },
-        "domain": {
-          "type": "string"
-        },
-        "proofValue": {
-          "type": "string"
-        },
-        "jws": {
-          "type": "string"
-        },
-        "jwt": {
-          "type": "string"
-        },
-        "mso_mdoc": {
-          "type": "string"
-        },
-        "nonce": {
-          "type": "string"
-        },
-        "requiredRevealStatements": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "type",
-        "created",
-        "proofPurpose",
-        "verificationMethod"
-      ]
-    },
-    "IProofType": {
-      "type": "string",
-      "enum": [
-        "Ed25519Signature2018",
-        "Ed25519Signature2020",
-        "EcdsaSecp256k1Signature2019",
-        "EcdsaSecp256k1RecoverySignature2020",
-        "JsonWebSignature2020",
-        "RsaSignature2018",
-        "GpgSignature2020",
-        "JcsEd25519Signature2020",
-        "BbsBlsSignatureProof2020",
-        "BbsBlsBoundSignatureProof2020",
-        "JwtProof2020",
-        "SdJwtProof2024",
-        "MsoMdocProof2024"
-      ]
-    },
-    "IProofPurpose": {
-      "type": "string",
-      "enum": [
-        "verificationMethod",
-        "assertionMethod",
-        "authentication",
-        "keyAgreement",
-        "contactAgreement",
-        "capabilityInvocation",
-        "capabilityDelegation"
-      ]
-    },
-    "ICredentialContextType": {
-      "anyOf": [
-        {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "did": {
-              "type": "string"
-            }
-          }
-        },
-        {
-          "type": "string"
-        }
-      ]
-    },
-    "W3CVerifiableCredential": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/IVerifiableCredential"
-        },
-        {
-          "$ref": "#/definitions/CompactJWT"
-        }
-      ],
-      "description": "Represents a signed Verifiable Credential (includes proof), in either JSON, compact JWT or compact SD-JWT VC format. See  {@link  https://www.w3.org/TR/vc-data-model/#credentials VC data model }  See  {@link  https://www.w3.org/TR/vc-data-model/#proof-formats proof formats }"
-    },
-    "IVerifiableCredential": {
-      "type": "object",
-      "properties": {
-        "proof": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/IProof"
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/IProof"
-              }
-            }
-          ]
-        },
-        "@context": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/ICredentialContextType"
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/ICredentialContextType"
-              }
-            }
-          ]
-        },
-        "type": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "credentialSchema": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/ICredentialSchemaType"
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/ICredentialSchemaType"
-              }
-            }
-          ]
-        },
-        "issuer": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/IIssuerId"
-            },
-            {
-              "$ref": "#/definitions/IIssuer"
-            }
-          ]
-        },
-        "issuanceDate": {
-          "type": "string"
-        },
-        "credentialSubject": {
-          "anyOf": [
-            {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                }
-              }
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          ]
-        },
-        "expirationDate": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "credentialStatus": {
-          "$ref": "#/definitions/ICredentialStatus"
-        },
-        "description": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "@context",
-        "credentialSubject",
-        "issuanceDate",
-        "issuer",
-        "proof",
-        "type"
-      ]
-    },
-    "ICredentialSchemaType": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/ICredentialSchema"
-        },
-        {
-          "type": "string"
-        }
-      ]
-    },
-    "ICredentialSchema": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id"
-      ],
-      "additionalProperties": false
-    },
-    "IIssuerId": {
-      "type": "string"
-    },
-    "IIssuer": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id"
-      ]
-    },
-    "ICredentialStatus": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "type"
-      ]
-    },
-    "CompactJWT": {
-      "type": "string",
-      "description": "Represents a Json Web Token in compact form."
-    },
-    "PresentationSubmission": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "A UUID or some other unique ID to identify this Presentation Submission"
-        },
-        "definition_id": {
-          "type": "string",
-          "description": "A UUID or some other unique ID to identify this Presentation Definition"
-        },
-        "descriptor_map": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Descriptor"
-          },
-          "description": "List of descriptors of how the claims are being mapped to presentation definition"
-        }
-      },
-      "required": [
-        "id",
-        "definition_id",
-        "descriptor_map"
-      ],
-      "additionalProperties": false,
-      "description": "It expresses how the inputs are presented as proofs to a Verifier."
-    },
-    "Descriptor": {
+    "interface-1279223537-8074-8564-1279223537-0-591201317389438": {
       "type": "object",
       "properties": {
         "id": {
@@ -2749,7 +2933,7 @@ export const AuthorizationResponseOptsSchemaObj = {
           "description": "The path where the verifiable credential is located in the presentation submission json"
         },
         "path_nested": {
-          "$ref": "#/definitions/Descriptor"
+          "$ref": "#/definitions/interface-1279223537-8074-8564-1279223537-0-591201317389438"
         },
         "format": {
           "type": "string",
@@ -2763,13 +2947,6 @@ export const AuthorizationResponseOptsSchemaObj = {
       ],
       "additionalProperties": false,
       "description": "descriptor map laying out the structure of the presentation submission."
-    },
-    "CompactSdJwtVc": {
-      "type": "string",
-      "description": "Represents a selective disclosure JWT vc in compact form."
-    },
-    "MdocOid4vpMdocVpToken": {
-      "type": "string"
     },
     "VPTokenLocation": {
       "type": "string",
