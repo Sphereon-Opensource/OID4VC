@@ -1,7 +1,7 @@
 import { defaultHasher } from '@sphereon/oid4vc-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { toString } from 'uint8arrays'
+import { toString } from 'uint8arrays/to-string'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { SupportedEncodings } from 'uint8arrays/to-string'

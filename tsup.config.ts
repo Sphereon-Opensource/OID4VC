@@ -8,15 +8,15 @@ export default defineConfig({
   tsconfig: '../../tsconfig.tsup.json',
   dts: true,
   target: ['es2022'],
+  platform: 'neutral',
   cjsInterop: true,
-
   experimentalDts: false,
-  // onSuccess: "tsc --emitDeclarationOnly",
+  external: ['whatwg-fetch', 'crypto', 'stream'],
+  // onSuccess: "tsc --emitDeclarationOnly"
   shims: true,
   sourcemap: true,
   splitting: false,
   outDir: 'dist',
   clean: true,
-  platform: 'neutral',
   skipNodeModulesBundle: false,
 })

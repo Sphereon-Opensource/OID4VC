@@ -6,7 +6,13 @@ import { KeyLike } from 'jose'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock'
-import { fromString, toString } from 'uint8arrays'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { fromString } from 'uint8arrays/from-string'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { toString } from 'uint8arrays/to-string'
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {

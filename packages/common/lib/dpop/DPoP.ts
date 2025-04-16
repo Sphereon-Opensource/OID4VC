@@ -1,7 +1,11 @@
 import { jwtDecode } from 'jwt-decode'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { fromString, toString } from 'uint8arrays'
+import { fromString } from 'uint8arrays/from-string'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { toString } from 'uint8arrays/to-string'
+
 import { v4 as uuidv4 } from 'uuid'
 
 import { defaultHasher } from '../hasher'

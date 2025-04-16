@@ -1,4 +1,6 @@
-import { toString } from 'uint8arrays'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { toString } from 'uint8arrays/to-string'
 
 import { defaultHasher } from '../hasher'
 import { DigestAlgorithm } from '../types'

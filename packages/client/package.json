@@ -34,7 +34,7 @@
     "debug": "^4.4.0"
   },
   "devDependencies": {
-    "@sphereon/ssi-sdk-ext.key-utils": "^0.23.0",
+    "@sphereon/ssi-sdk-ext.key-utils": "^0.28.1-feature.esm.cjs.8",
     "@transmute/did-key.js": "^0.3.0-unstable.10",
     "@trust/keyto": "^2.0.0-alpha1",
     "@types/node": "^20.17.30",
@@ -48,7 +48,7 @@
     "open-cli": "^7.2.0",
     "ts-node": "^10.9.2",
     "typescript": "5.8.3",
-    "uint8arrays": "^5.1.0",
+    "uint8arrays": "^3.1.1",
     "uuid": "^9.0.1",
     "vitest": "^3.1.1"
   },

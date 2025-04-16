@@ -5,7 +5,10 @@ import * as ed25519 from '@transmute/did-key-ed25519'
 import { fetch } from 'cross-fetch'
 import { DIDDocument, DIDResolutionResult } from 'did-resolver'
 import { importJWK, JWK, SignJWT } from 'jose'
-import { fromString } from 'uint8arrays'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { fromString } from 'uint8arrays/from-string'
+
 import { describe, expect, it, test } from 'vitest'
 
 import { AuthorizationRequest, AuthorizationResponse, OP, PresentationDefinitionWithLocation, PresentationExchange, SupportedVersion } from '../..'

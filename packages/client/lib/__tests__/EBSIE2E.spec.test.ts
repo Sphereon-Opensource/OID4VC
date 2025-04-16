@@ -8,7 +8,8 @@ import { fetch } from 'cross-fetch'
 import pkg from 'debug'
 const { debug: Debug } = pkg
 import { base64url, importJWK, JWK, SignJWT } from 'jose'
-import { fromString, toString } from 'uint8arrays'
+// @ts-ignore
+import { fromString } from 'uint8arrays/from-string'
 import { describe, expect, it } from 'vitest'
 
 import { OpenID4VCIClientV1_0_11 } from '..'
