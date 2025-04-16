@@ -1,10 +1,8 @@
 import { jwtDecode } from 'jwt-decode'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { fromString } from 'uint8arrays/from-string'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { toString } from 'uint8arrays/to-string'
+import * as u8a from 'uint8arrays'
+const { toString } = u8a
 
 import { v4 as uuidv4 } from 'uuid'
 

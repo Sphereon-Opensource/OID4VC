@@ -7,7 +7,8 @@ import { DIDDocument, DIDResolutionResult } from 'did-resolver'
 import { importJWK, JWK, SignJWT } from 'jose'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { fromString } from 'uint8arrays/from-string'
+import * as u8a from 'uint8arrays'
+const { fromString } = u8a
 
 import { describe, expect, it, test } from 'vitest'
 

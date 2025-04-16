@@ -8,10 +8,8 @@ import { KeyLike } from 'jose'
 import nock from 'nock'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { fromString } from 'uint8arrays/from-string'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { toString } from 'uint8arrays/to-string'
+import * as u8a from 'uint8arrays'
+const { fromString, toString } = u8a
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
