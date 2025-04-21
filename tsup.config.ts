@@ -11,12 +11,12 @@ export default defineConfig({
   platform: 'neutral',
   cjsInterop: true,
   experimentalDts: false,
-  external: ['whatwg-fetch', 'crypto', 'stream'],
+  // external: ['whatwg-fetch', 'crypto', 'stream'],
   // onSuccess: "tsc --emitDeclarationOnly"
   shims: true,
   sourcemap: true,
   splitting: false,
   outDir: 'dist',
   clean: true,
-  skipNodeModulesBundle: false,
+  skipNodeModulesBundle: true,
 })

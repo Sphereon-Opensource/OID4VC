@@ -31,7 +31,7 @@
     "@sphereon/oid4vc-common": "workspace:^",
     "@sphereon/pex": "5.0.0-unstable.28",
     "@sphereon/pex-models": "^2.3.2",
-    "@sphereon/ssi-types": "0.33.1-feature.vcdm2.tsup.18",
+    "@sphereon/ssi-types": "0.33.1-feature.vcdm2.tsup.25",
     "cross-fetch": "^4.0.0",
     "dcql": "0.2.19",
     "debug": "^4.4.0",
