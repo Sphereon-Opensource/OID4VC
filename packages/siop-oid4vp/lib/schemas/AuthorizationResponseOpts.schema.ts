@@ -2797,7 +2797,7 @@ export const AuthorizationResponseOptsSchemaObj = {
                                   "description": "The path where the verifiable credential is located in the presentation submission json"
                                 },
                                 "path_nested": {
-                                  "$ref": "#/definitions/interface-575587443-8074-8564-575587443-0-591201317389438"
+                                  "$ref": "#/definitions/interface-2011259945-6983-7473-2011259945-0-610221317389438"
                                 },
                                 "format": {
                                   "type": "string",
@@ -2880,7 +2880,7 @@ export const AuthorizationResponseOptsSchemaObj = {
                     "description": "The path where the verifiable credential is located in the presentation submission json"
                   },
                   "path_nested": {
-                    "$ref": "#/definitions/interface-575587443-8074-8564-575587443-0-591201317389438"
+                    "$ref": "#/definitions/interface-2011259945-6983-7473-2011259945-0-610221317389438"
                   },
                   "format": {
                     "type": "string",
@@ -2921,7 +2921,7 @@ export const AuthorizationResponseOptsSchemaObj = {
       ],
       "additionalProperties": false
     },
-    "interface-575587443-8074-8564-575587443-0-591201317389438": {
+    "interface-2011259945-6983-7473-2011259945-0-610221317389438": {
       "type": "object",
       "properties": {
         "id": {
@@ -2933,7 +2933,7 @@ export const AuthorizationResponseOptsSchemaObj = {
           "description": "The path where the verifiable credential is located in the presentation submission json"
         },
         "path_nested": {
-          "$ref": "#/definitions/interface-575587443-8074-8564-575587443-0-591201317389438"
+          "$ref": "#/definitions/interface-2011259945-6983-7473-2011259945-0-610221317389438"
         },
         "format": {
           "type": "string",

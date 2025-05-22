@@ -29,7 +29,7 @@
   "dependencies": {
     "@sphereon/oid4vc-common": "workspace:^",
     "@sphereon/oid4vci-common": "workspace:^",
-    "@sphereon/ssi-types": "0.33.1-feature.vcdm2.tsup.25",
+    "@sphereon/ssi-types": "0.33.1-next.73",
     "cross-fetch": "^4.1.0",
     "debug": "^4.4.0"
   },
