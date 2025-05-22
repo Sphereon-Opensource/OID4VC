@@ -144,11 +144,25 @@ export const AuthorizationRequestPayloadVD12OID4VPD20SchemaObj = {
             {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/SigningAlgo"
+                "type": "string",
+                "enum": [
+                  "EdDSA",
+                  "RS256",
+                  "PS256",
+                  "ES256",
+                  "ES256K"
+                ]
               }
             },
             {
-              "$ref": "#/definitions/SigningAlgo"
+              "type": "string",
+              "enum": [
+                "EdDSA",
+                "RS256",
+                "PS256",
+                "ES256",
+                "ES256K"
+              ]
             }
           ]
         },
@@ -157,11 +171,25 @@ export const AuthorizationRequestPayloadVD12OID4VPD20SchemaObj = {
             {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/SigningAlgo"
+                "type": "string",
+                "enum": [
+                  "EdDSA",
+                  "RS256",
+                  "PS256",
+                  "ES256",
+                  "ES256K"
+                ]
               }
             },
             {
-              "$ref": "#/definitions/SigningAlgo"
+              "type": "string",
+              "enum": [
+                "EdDSA",
+                "RS256",
+                "PS256",
+                "ES256",
+                "ES256K"
+              ]
             }
           ]
         },
@@ -243,16 +271,6 @@ export const AuthorizationRequestPayloadVD12OID4VPD20SchemaObj = {
           ]
         }
       }
-    },
-    "SigningAlgo": {
-      "type": "string",
-      "enum": [
-        "EdDSA",
-        "RS256",
-        "PS256",
-        "ES256",
-        "ES256K"
-      ]
     },
     "ResponseType": {
       "type": "string",

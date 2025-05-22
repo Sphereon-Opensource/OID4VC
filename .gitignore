@@ -15,4 +15,8 @@
 *.log
 packages/siop-oid4vp/lib/schemas/validation/schemaValidation.js
 packages/siop-oid4vp/lib/generator/*
-!packages/siop-oid4vp/lib/generator/schemaGenerator.ts
+!packages/siop-oid4vp/lib/generator/schemaGenerator.cts
+/packages/siop-oid4vp/lib/schemas/validation/schemaValidation.cjs
+
+.env
+/.turbo/

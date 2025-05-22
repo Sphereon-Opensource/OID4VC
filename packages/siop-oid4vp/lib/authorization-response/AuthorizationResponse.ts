@@ -1,4 +1,4 @@
-import { CredentialMapper, Hasher, WrappedVerifiablePresentation } from '@sphereon/ssi-types'
+import { CredentialMapper, HasherSync, WrappedVerifiablePresentation } from '@sphereon/ssi-types'
 import { DcqlPresentation } from 'dcql'
 
 import { AuthorizationRequest, VerifyAuthorizationRequestOpts } from '../authorization-request'
@@ -230,12 +230,12 @@ export class AuthorizationResponse {
     return this._idToken
   }
 
-  public getMergedProperty<T>(key: string, opts?: { consistencyCheck?: boolean; hasher?: Hasher }): T | undefined {
+  public getMergedProperty<T>(key: string, opts?: { consistencyCheck?: boolean; hasher?: HasherSync }): T | undefined {
     const merged = this.mergedPayloads(opts) // FIXME this is really bad, expensive...
     return merged[key] as T
   }
 
-  public mergedPayloads(opts?: { consistencyCheck?: boolean; hasher?: Hasher }): AuthorizationResponsePayload {
+  public mergedPayloads(opts?: { consistencyCheck?: boolean; hasher?: HasherSync }): AuthorizationResponsePayload {
     let nonce: string | undefined = this._payload.nonce
     if (this._payload?.vp_token) {
       let presentations: WrappedVerifiablePresentation | WrappedVerifiablePresentation[]

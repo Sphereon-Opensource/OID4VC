@@ -1,22 +1,24 @@
-import { JWK, JwtHeader, JwtPayload, JwtProtectionMethod, SigningAlgo } from '..';
+import { JWK } from './Jwk.types'
+import { JwtHeader, JwtPayload, SigningAlgo } from './Jwt.types'
+import { JwtProtectionMethod } from './jwtUtils'
 
 export interface JwtIssuerBase {
-  method: JwtProtectionMethod;
+  method: JwtProtectionMethod
   /**
    * Additional options for the issuance context
    */
-  options?: Record<string, unknown>;
+  options?: Record<string, unknown>
 }
 
 export interface JwtIssuerDid extends JwtIssuerBase {
-  method: 'did';
-  didUrl: string;
-  alg: SigningAlgo | string;
+  method: 'did'
+  didUrl: string
+  alg: SigningAlgo | string
 }
 
 export interface JwtIssuerX5c extends JwtIssuerBase {
-  method: 'x5c';
-  alg: SigningAlgo | string;
+  method: 'x5c'
+  alg: SigningAlgo | string
 
   /**
    *
@@ -24,7 +26,7 @@ export interface JwtIssuerX5c extends JwtIssuerBase {
    *
    * The certificate containing the public key corresponding to the key used to digitally sign the JWS MUST be the first certificate.
    */
-  x5c: Array<string>;
+  x5c: Array<string>
 
   /**
    * The issuer jwt
@@ -35,26 +37,26 @@ export interface JwtIssuerX5c extends JwtIssuerBase {
    *
    * It must match an entry in the x5c certificate leaf entry dnsName / uriName
    */
-  issuer: string;
+  issuer: string
 }
 
 export interface JwtIssuerJwk extends JwtIssuerBase {
-  method: 'jwk';
-  alg: SigningAlgo | string;
-  jwk: JWK;
+  method: 'jwk'
+  alg: SigningAlgo | string
+  jwk: JWK
 }
 
 export interface JwtIssuerCustom extends JwtIssuerBase {
-  method: 'custom';
+  method: 'custom'
 }
 
-export type JwtIssuer = JwtIssuerDid | JwtIssuerX5c | JwtIssuerJwk | JwtIssuerCustom;
+export type JwtIssuer = JwtIssuerDid | JwtIssuerX5c | JwtIssuerJwk | JwtIssuerCustom
 
 export interface JwtIssuanceContextBase {
-  type: string;
+  type: string
 }
 
 export type CreateJwtCallback<T extends JwtIssuer & JwtIssuanceContextBase> = (
   jwtIssuer: T,
   jwt: { header: JwtHeader; payload: JwtPayload },
-) => Promise<string>;
+) => Promise<string>

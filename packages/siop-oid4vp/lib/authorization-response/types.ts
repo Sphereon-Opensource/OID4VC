@@ -3,7 +3,7 @@ import { IPresentationDefinition, PresentationSignCallBackParams } from '@sphere
 import { Format } from '@sphereon/pex-models'
 import {
   CompactSdJwtVc,
-  Hasher,
+  HasherSync,
   MdocOid4vpIssuerSigned,
   MdocOid4vpMdocVpToken,
   PresentationSubmission,
@@ -114,7 +114,7 @@ export interface VerifyAuthorizationResponseOpts {
   correlationId: string
   verification: Verification
   verifyJwtCallback: VerifyJwtCallback
-  hasher?: Hasher
+  hasher?: HasherSync
   nonce?: string // To verify the response against the supplied nonce
   state?: string // To verify the response against the supplied state
   presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[] // The presentation definitions to match against VPs in the response

@@ -1,7 +1,7 @@
-import { getJson, OpenIDResponse, WellKnownEndpoints } from '@sphereon/oid4vci-common';
-import Debug from 'debug';
+import { getJson, OpenIDResponse, WellKnownEndpoints } from '@sphereon/oid4vci-common'
+import { Loggers } from '@sphereon/ssi-types'
 
-const debug = Debug('sphereon:openid4vci:openid-utils');
+const logger = Loggers.DEFAULT.get('sphereon:openid4vci:openid-utils')
 /**
  * Allows to retrieve information from a well-known location
  *
@@ -16,10 +16,10 @@ export const retrieveWellknown = async <T>(
 ): Promise<OpenIDResponse<T>> => {
   const result: OpenIDResponse<T> = await getJson(`${host.endsWith('/') ? host.slice(0, -1) : host}${endpointType}`, {
     exceptionOnHttpErrorStatus: opts?.errorOnNotFound,
-  });
+  })
   if (result.origResponse.status >= 400) {
     // We only get here when error on not found is false
-    debug(`host ${host} with endpoint type ${endpointType} status: ${result.origResponse.status}, ${result.origResponse.statusText}`);
+    logger.debug(`host ${host} with endpoint type ${endpointType} status: ${result.origResponse.status}, ${result.origResponse.statusText}`)
   }
-  return result;
-};
+  return result
+}

@@ -1,31 +1,35 @@
 {
   "name": "@sphereon/oid4vci-workspace",
-  "version": "0.11.0",
+  "version": "0.18.0",
   "description": "OpenID for Verifiable Credentials",
   "author": "Sphereon",
   "license": "Apache-2.0",
   "private": true,
+  "packageManager": "pnpm@10.8.1",
+  "workspaces": ["packages/*"],
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "fix": "pnpm run-s fix:*",
-    "fix:lint": "eslint . --fix --ext .ts",
-    "fix:prettier": "prettier --write \"{packages,__tests__,!dist}/**/*.{ts,tsx,js,json,md,yml}\"",
-    "build": "pnpm -r --stream build",
-    "build:clean": "lerna clean -y && pnpm install && lerna run build:clean --concurrency 1",
-    "test:ci": "jest --config=jest.json && jest --config=packages/siop-oid4vp/jest.json",
-    "test": "jest --verbose --config=jest.json --coverage=true --detectOpenHandles && jest --verbose --config=packages/siop-oid4vp/jest.json --coverage=true --detectOpenHandles",
-    "clean": "rimraf --glob **/dist **/coverage **/pnpm-lock.yaml packages/**/node_modules node_modules packages/**/tsconfig.tsbuildinfo",
+    "fix:lint": "biome lint --error-on-warnings",
+    "fix:prettier": "biome format --write",
+    "build": "turbo run build",
+    "test:ci": "vitest run --config ./vitest.config.ts --coverage",
+    "test": "turbo run test:vitest",
+    "test:vitest": "vitest run --config ./vitest.config.ts --coverage",
+    "clean": "rimraf --glob **/dist **/.turbo **/.tsup **/coverage **/pnpm-lock.yaml packages/**/node_modules node_modules packages/**/tsconfig.tsbuildinfo",
     "publish:latest": "lerna publish --conventional-commits --include-merged-tags --create-release github --yes --dist-tag latest --registry https://registry.npmjs.org",
     "publish:next": "lerna publish --conventional-prerelease --force-publish --canary --no-git-tag-version --include-merged-tags --preid next --pre-dist-tag next --yes --registry https://registry.npmjs.org",
     "publish:unstable": "lerna publish --conventional-prerelease --force-publish --canary --no-git-tag-version --include-merged-tags --preid unstable --pre-dist-tag unstable --yes --registry https://registry.npmjs.org"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20.6",
+    "pnpm": ">=10"
   },
   "resolutions": {
-    "@sphereon/ssi-types": "^0.32.1-next.161",
-    "dcql": "0.2.19",
-    "node-fetch": "2.6.12"
+    "@sphereon/ssi-types": "0.33.1-next.73",
+    "dcql": "0.2.22",
+    "node-fetch": "2.6.12",
+    "typescript": "5.8.3"
   },
   "prettier": {
     "endOfLine": "auto",
@@ -34,17 +38,18 @@
     "printWidth": 150
   },
   "devDependencies": {
+    "@swc/core": "^1.11.18",
     "@types/debug": "^4.1.12",
-    "@types/jest": "^29.5.12",
-    "@types/node": "^18.19.39",
-    "jest": "^29.7.0",
-    "lerna": "^8.1.6",
-    "lerna-changelog": "^2.2.0",
+    "@types/node": "^20.17.30",
+    "@vitest/coverage-v8": "^3.1.1",
     "npm-run-all": "^4.1.5",
-    "prettier": "^3.3.2",
+    "@biomejs/biome": "^1.9.4",
     "rimraf": "^5.0.8",
-    "ts-jest": "^29.1.5",
-    "typescript": "5.4.5"
+    "lerna": "^8.2.2",
+    "tsup": "^8.4.0",
+    "turbo": "^2.5.0",
+    "typescript": "5.8.3",
+    "vitest": "^3.1.1"
   },
   "keywords": [
     "Sphereon",
@@ -65,5 +70,6 @@
     "OIDC4VP",
     "OID4VCI",
     "OID4VP"
-  ]
+  ],
+  "repository": "https://github.com/Sphereon-Opensource/OID4VC"
 }

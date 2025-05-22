@@ -1,1 +1,1 @@
-export type DigestAlgorithm = 'sha256' | 'sha384' | 'sha512';
+export type DigestAlgorithm = 'sha256' | 'sha384' | 'sha512'

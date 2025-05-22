@@ -17,14 +17,17 @@ import {
   PRE_AUTH_GRANT_LITERAL,
 } from '@sphereon/oid4vci-common'
 import { AuthorizationServerMetadataBuilder } from '@sphereon/oid4vci-issuer'
-import { VcIssuer } from '@sphereon/oid4vci-issuer/dist/VcIssuer'
-import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '@sphereon/oid4vci-issuer/dist/builder'
-import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
+import { VcIssuer } from '@sphereon/oid4vci-issuer'
+import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '@sphereon/oid4vci-issuer'
+import { MemoryStates } from '@sphereon/oid4vci-issuer'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import requests from 'supertest'
+import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
 import { OID4VCIServer } from '../OID4VCIServer'
 
@@ -46,8 +49,6 @@ interface KeyPair {
   publicKey: KeyObject
   privateKey: KeyObject
 }
-
-jest.setTimeout(15000)
 
 describe('VcIssuer', () => {
   let vcIssuer: VcIssuer
@@ -72,7 +73,7 @@ describe('VcIssuer', () => {
   const preAuthorizedCode3 = 'SplxlOBeZQQYbYS6WxSbIA3'
 */
   beforeAll(async () => {
-    jest.clearAllMocks()
+    vitest.clearAllMocks()
 
     const { privateKey, publicKey } = await jose.generateKeyPair('ES256')
     subjectKeypair = { publicKey: publicKey as KeyObject, privateKey: privateKey as KeyObject }
@@ -189,7 +190,7 @@ describe('VcIssuer', () => {
   })
 
   afterAll(async () => {
-    jest.clearAllMocks()
+    vitest.clearAllMocks()
     await server.stop()
     // await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
@@ -199,6 +200,8 @@ describe('VcIssuer', () => {
   let client: OpenID4VCIClientV1_0_13
   it('should create credential offer', async () => {
     expect(server.issuer).toBeDefined()
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     uri = await vcIssuer
       .createCredentialOfferURI({
         offerMode: 'VALUE',
@@ -217,7 +220,7 @@ describe('VcIssuer', () => {
         credential_configuration_ids: ['UniversityDegree_JWT'],
         scheme: 'http',
       })
-      .then((response) => response.uri)
+      .then((response: any) => response.uri)
     expect(uri).toEqual(
       'http://localhost:3456/test?credential_offer=%7B%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A3456%2Ftest%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegree_JWT%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22test_code%22%2C%22tx_code%22%3A%7B%22input_mode%22%3A%22text%22%2C%22length%22%3A4%7D%7D%2C%22authorization_code%22%3A%7B%22issuer_state%22%3A%22previously-created-state%22%7D%7D%7D',
     )
@@ -504,7 +507,7 @@ describe('VcIssuer', () => {
     })
 
     it('should use default offerMode VALUE when not provided in createCredentialOfferEndpoint', async () => {
-      const createOfferMock = jest.fn().mockResolvedValue({ uri: 'dummy-uri' })
+      const createOfferMock = vitest.fn().mockResolvedValue({ uri: 'dummy-uri' })
       testVcIssuer.createCredentialOfferURI = createOfferMock
       const requestBody = {
         original_credential_offer: { version: OpenId4VCIVersion.VER_1_0_13 },
@@ -519,7 +522,7 @@ describe('VcIssuer', () => {
     })
 
     it('should include issuerPayloadUri when offerMode is REFERENCE and forwarded headers are provided', async () => {
-      const createOfferMock = jest.fn().mockResolvedValue({ uri: 'dummy-uri' })
+      const createOfferMock = vitest.fn().mockResolvedValue({ uri: 'dummy-uri' })
       testVcIssuer.createCredentialOfferURI = createOfferMock
       const requestBody = {
         original_credential_offer: { version: OpenId4VCIVersion.VER_1_0_13 },
@@ -543,7 +546,7 @@ describe('VcIssuer', () => {
     })
 
     it('should return error when createCredentialOfferURI throws an error', async () => {
-      testVcIssuer.createCredentialOfferURI = jest.fn().mockRejectedValue(new Error('Test error'))
+      testVcIssuer.createCredentialOfferURI = vitest.fn().mockRejectedValue(new Error('Test error'))
       const requestBody = {
         original_credential_offer: { version: OpenId4VCIVersion.VER_1_0_13 },
         grants: { authorization_code: { issuer_state: 'state' } },

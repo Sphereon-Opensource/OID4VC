@@ -7,24 +7,24 @@ export enum TokenErrorResponse {
 }
 
 export class TokenError extends Error {
-  private readonly _statusCode: number;
-  private readonly _responseError: TokenErrorResponse;
+  private readonly _statusCode: number
+  private readonly _responseError: TokenErrorResponse
   constructor(statusCode: number, responseError: TokenErrorResponse, message: string) {
-    super(message);
-    this._statusCode = statusCode;
-    this._responseError = responseError;
+    super(message)
+    this._statusCode = statusCode
+    this._responseError = responseError
 
     // 👇️ because we are extending a built-in class
-    Object.setPrototypeOf(this, TokenError.prototype);
+    Object.setPrototypeOf(this, TokenError.prototype)
   }
   get statusCode(): number {
-    return this._statusCode;
+    return this._statusCode
   }
   get responseError(): TokenErrorResponse {
-    return this._responseError;
+    return this._responseError
   }
 
   getDescription() {
-    return this.message;
+    return this.message
   }
 }

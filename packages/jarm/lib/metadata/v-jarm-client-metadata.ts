@@ -1,4 +1,4 @@
-import * as v from 'valibot';
+import * as v from 'valibot'
 
 export const vJarmClientMetadataSign = v.object({
   authorization_signed_response_alg: v.pipe(
@@ -10,7 +10,7 @@ export const vJarmClientMetadataSign = v.object({
 
   authorization_encrypted_response_alg: v.optional(v.never()),
   authorization_encrypted_response_enc: v.optional(v.never()),
-});
+})
 
 export const vJarmClientMetadataEncrypt = v.object({
   authorization_signed_response_alg: v.optional(v.never()),
@@ -27,16 +27,16 @@ export const vJarmClientMetadataEncrypt = v.object({
       'JWE enc algorithm JWA. If both signing and encryption are requested, the response will be signed then encrypted with the provided algorithm.',
     ),
   ),
-});
+})
 
 export const vJarmClientMetadataSignEncrypt = v.object({
   ...v.pick(vJarmClientMetadataSign, ['authorization_signed_response_alg']).entries,
   ...v.pick(vJarmClientMetadataEncrypt, ['authorization_encrypted_response_alg', 'authorization_encrypted_response_enc']).entries,
-});
+})
 
 /**
  * Clients may register their public encryption keys using the jwks_uri or jwks metadata parameters.
  */
-export const vJarmClientMetadata = v.union([vJarmClientMetadataSign, vJarmClientMetadataEncrypt, vJarmClientMetadataSignEncrypt]);
+export const vJarmClientMetadata = v.union([vJarmClientMetadataSign, vJarmClientMetadataEncrypt, vJarmClientMetadataSignEncrypt])
 
-export type JarmClientMetadata = v.InferInput<typeof vJarmClientMetadata>;
+export type JarmClientMetadata = v.InferInput<typeof vJarmClientMetadata>

@@ -14,7 +14,7 @@ import {
   PresentationExchangeResponseOpts,
 } from '../authorization-response'
 import { encodeJsonAsURI, post } from '../helpers'
-import { extractJwksFromJwksMetadata, JwksMetadataParams } from '../helpers/ExtractJwks'
+import { extractJwksFromJwksMetadata, JwksMetadataParams } from '../helpers'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
 import {
   AuthorizationEvent,

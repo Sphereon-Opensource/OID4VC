@@ -13,7 +13,7 @@ import {
   VerifiedAuthorizationRequest,
   VerifiedIDToken,
 } from '../types'
-import { JwtIssuerWithContext } from '../types/VpJwtIssuer'
+import { JwtIssuerWithContext } from '../types'
 
 import { createIDTokenPayload } from './Payload'
 

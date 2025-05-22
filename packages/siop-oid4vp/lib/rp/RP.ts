@@ -7,7 +7,7 @@ import {
   JarmDirectPostJwtResponseParams,
 } from '@sphereon/jarm'
 import { decodeProtectedHeader, JwtIssuer } from '@sphereon/oid4vc-common'
-import { Hasher } from '@sphereon/ssi-types'
+import { HasherSync } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
 
 import {
@@ -157,7 +157,7 @@ export class RP {
       getAuthRequestPayload: (input: JarmDirectPostJwtResponseParams | JarmAuthResponseParams) => Promise<{
         authRequestParams: RequestObjectPayload
       }>
-      hasher?: Hasher
+      hasher?: HasherSync
     },
   ) {
     const { decryptCompact, getAuthRequestPayload, hasher } = opts
@@ -203,7 +203,7 @@ export class RP {
     authorizationResponsePayload: AuthorizationResponsePayload,
     opts?: {
       correlationId?: string
-      hasher?: Hasher
+      hasher?: HasherSync
       audience?: string
       state?: string
       nonce?: string
@@ -378,7 +378,7 @@ export class RP {
     authorizationResponse: AuthorizationResponse,
     opts: {
       correlationId: string
-      hasher?: Hasher
+      hasher?: HasherSync
       state?: string
       nonce?: string
       verification?: Verification

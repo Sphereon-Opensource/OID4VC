@@ -1,1 +1,1 @@
-export * from './jarm-auth-response-send.js';
+export * from './jarm-auth-response-send'

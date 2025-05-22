@@ -1,4 +1,4 @@
-import * as v from 'valibot';
+import * as v from 'valibot'
 
 /**
  * Authorization servers SHOULD publish the supported algorithms for signing and encrypting the JWT of an authorization response by utilizing OAuth 2.0 Authorization Server Metadata [RFC8414] parameters.
@@ -24,6 +24,6 @@ export const vJarmServerMetadata = v.object({
       'JSON array containing a list of the JWE [RFC7516] encryption algorithms (enc values) JWA [RFC7518] supported by the authorization endpoint to encrypt the response.',
     ),
   ),
-});
+})
 
-export type JarmServerMetadata = v.InferInput<typeof vJarmServerMetadata>;
+export type JarmServerMetadata = v.InferInput<typeof vJarmServerMetadata>

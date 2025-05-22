@@ -1,1 +1,1 @@
-export * from './DPoP';
+export * from './DPoP'

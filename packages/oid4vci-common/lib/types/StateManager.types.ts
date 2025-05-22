@@ -1,26 +1,26 @@
-import { AssertedUniformCredentialOffer } from './CredentialIssuance.types';
-import { CredentialDataSupplierInput, NotificationRequest, StatusListOpts } from './Generic.types';
+import { AssertedUniformCredentialOffer } from './CredentialIssuance.types'
+import { CredentialDataSupplierInput, NotificationRequest, StatusListOpts } from './Generic.types'
 
 export interface StateType {
-  createdAt: number;
-  expiresAt?: number;
+  createdAt: number
+  expiresAt?: number
 }
 
 export interface CredentialOfferSession extends StateType {
-  clientId?: string;
-  credentialOffer: AssertedUniformCredentialOffer;
-  credentialDataSupplierInput?: CredentialDataSupplierInput; // Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
-  txCode?: string; // in here we only store the txCode, previously < V13 this was the userPin. We map the userPin onto this value
-  status: IssueStatus;
-  error?: string;
-  lastUpdatedAt: number;
-  notification_id: string;
-  notification?: NotificationRequest;
-  issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
-  preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
-  authorizationCode?: string;
-  redirectUri?: string;
-  statusLists?: Array<StatusListOpts>;
+  clientId?: string
+  credentialOffer: AssertedUniformCredentialOffer
+  credentialDataSupplierInput?: CredentialDataSupplierInput // Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
+  txCode?: string // in here we only store the txCode, previously < V13 this was the userPin. We map the userPin onto this value
+  status: IssueStatus
+  error?: string
+  lastUpdatedAt: number
+  notification_id: string
+  notification?: NotificationRequest
+  issuerState?: string //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+  preAuthorizedCode?: string //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+  authorizationCode?: string
+  redirectUri?: string
+  statusLists?: Array<StatusListOpts>
 }
 
 export enum IssueStatus {
@@ -36,44 +36,44 @@ export enum IssueStatus {
 }
 
 export interface CNonceState extends StateType {
-  cNonce: string;
-  issuerState?: string;
-  preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+  cNonce: string
+  issuerState?: string
+  preAuthorizedCode?: string //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
 }
 
 export interface URIState extends StateType {
-  issuerState?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
-  preAuthorizedCode?: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
-  uri: string; //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
-  correlationId?: string;
+  issuerState?: string //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+  preAuthorizedCode?: string //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+  uri: string //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
+  correlationId?: string
 }
 
 export interface IssueStatusResponse {
-  createdAt: number;
-  lastUpdatedAt: number;
-  expiresAt?: number;
-  status: IssueStatus;
-  error?: string;
-  clientId?: string;
-  statusLists?: Array<StatusListOpts>;
+  createdAt: number
+  lastUpdatedAt: number
+  expiresAt?: number
+  status: IssueStatus
+  error?: string
+  clientId?: string
+  statusLists?: Array<StatusListOpts>
 }
 
 export interface IStateManager<T extends StateType> {
-  set(id: string, stateValue: T): Promise<void>;
+  set(id: string, stateValue: T): Promise<void>
 
-  get(id: string): Promise<T | undefined>;
+  get(id: string): Promise<T | undefined>
 
-  has(id: string): Promise<boolean>;
+  has(id: string): Promise<boolean>
 
-  delete(id: string): Promise<boolean>;
+  delete(id: string): Promise<boolean>
 
-  clearExpired(timestamp?: number): Promise<void>; // clears all expired states compared against timestamp if provided, otherwise current timestamp
+  clearExpired(timestamp?: number): Promise<void> // clears all expired states compared against timestamp if provided, otherwise current timestamp
 
-  clearAll(): Promise<void>; // clears all states
+  clearAll(): Promise<void> // clears all states
 
-  getAsserted(id: string): Promise<T>;
+  getAsserted(id: string): Promise<T>
 
-  startCleanupRoutine(timeout?: number): Promise<void>;
+  startCleanupRoutine(timeout?: number): Promise<void>
 
-  stopCleanupRoutine(): Promise<void>;
+  stopCleanupRoutine(): Promise<void>
 }

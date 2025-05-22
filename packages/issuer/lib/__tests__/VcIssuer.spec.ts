@@ -10,10 +10,10 @@ import {
   STATE_MISSING_ERROR,
 } from '@sphereon/oid4vci-common'
 import { IProofPurpose, IProofType } from '@sphereon/ssi-types'
+import { afterAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import { VcIssuer } from '../VcIssuer'
-import { CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../builder'
-import { AuthorizationServerMetadataBuilder } from '../builder/AuthorizationServerMetadataBuilder'
+import { AuthorizationServerMetadataBuilder, CredentialSupportedBuilderV1_13, VcIssuerBuilder } from '../builder'
 import { MemoryStates } from '../state-manager'
 
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
@@ -64,10 +64,10 @@ describe('VcIssuer', () => {
   const clientId = 'sphereon:wallet'
   const preAuthorizedCode = 'test_code'
 
-  const jwtVerifyCallback: jest.Mock = jest.fn()
+  const jwtVerifyCallback = vitest.fn()
 
   beforeEach(async () => {
-    jest.clearAllMocks()
+    vitest.clearAllMocks()
     const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
       .withCredentialSigningAlgValuesSupported('ES256K')
       .withCryptographicBindingMethod('did')
@@ -161,7 +161,7 @@ describe('VcIssuer', () => {
   })
 
   afterAll(async () => {
-    jest.clearAllMocks()
+    vitest.clearAllMocks()
     // await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 
@@ -466,10 +466,10 @@ describe('VcIssuer without did', () => {
   const clientId = 'sphereon:wallet'
   const preAuthorizedCode = 'test_code'
 
-  const jwtVerifyCallback: jest.Mock = jest.fn()
+  const jwtVerifyCallback = vitest.fn()
 
   beforeEach(async () => {
-    jest.clearAllMocks()
+    vitest.clearAllMocks()
     const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
       .withCredentialSigningAlgValuesSupported('ES256K')
       .withCryptographicBindingMethod('jwk')
@@ -563,7 +563,7 @@ describe('VcIssuer without did', () => {
   })
 
   afterAll(async () => {
-    jest.clearAllMocks()
+    vitest.clearAllMocks()
     // await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 

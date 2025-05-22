@@ -1,4 +1,5 @@
 import { parseJWT, SigningAlgo } from '@sphereon/oid4vc-common'
+import { describe, expect, it } from 'vitest'
 
 import { PassBy, ResponseType, RevocationVerification, RP, Scope, SubjectType, SupportedVersion } from '../..'
 import { internalSignature } from '../DidJwtTestUtils'

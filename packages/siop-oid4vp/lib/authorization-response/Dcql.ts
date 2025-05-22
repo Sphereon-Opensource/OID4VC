@@ -1,4 +1,4 @@
-import { Hasher } from '@sphereon/ssi-types'
+import { HasherSync } from '@sphereon/ssi-types'
 import { DcqlMdocCredential, DcqlPresentation, DcqlPresentationResult, DcqlQuery, DcqlSdJwtVcCredential } from 'dcql'
 
 import { extractDataFromPath } from '../helpers'
@@ -43,7 +43,7 @@ export class Dcql {
     record: DcqlPresentation | string,
     dcqlQuery: DcqlQuery,
     opts: {
-      hasher?: Hasher
+      hasher?: HasherSync
     },
   ) => {
     const dcqlPresentation = Object.fromEntries(
@@ -79,7 +79,7 @@ export class Dcql {
     record: DcqlPresentation | string,
     dcqlQuery: DcqlQuery,
     opts: {
-      hasher?: Hasher
+      hasher?: HasherSync
     },
   ) => {
     const result = Dcql.getDcqlPresentationResult(record, dcqlQuery, opts)

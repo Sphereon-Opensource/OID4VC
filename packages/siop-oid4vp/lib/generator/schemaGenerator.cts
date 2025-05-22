@@ -61,7 +61,7 @@ function writeSchema(config: any): Schema {
 function generateValidationCode(schemas: Schema[]) {
   const ajv = new Ajv({ schemas, code: { source: true, lines: true, esm: false }, allowUnionTypes: true, strict: false })
   const moduleCode = standaloneCode(ajv)
-  fs.writeFileSync(path.join(__dirname, '../schemas/validation/schemaValidation.js'), moduleCode)
+  fs.writeFileSync(path.join(__dirname, '../schemas/validation/schemaValidation.cjs'), moduleCode)
 }
 
 function correctSchema(schemaString: string) {

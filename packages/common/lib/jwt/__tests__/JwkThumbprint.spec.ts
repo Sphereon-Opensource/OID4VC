@@ -1,4 +1,6 @@
-import { calculateJwkThumbprint } from '../JwkThumbprint';
+import { describe, expect, test } from 'vitest'
+
+import { calculateJwkThumbprint } from '../JwkThumbprint'
 
 describe('JwkThumbprint', () => {
   test('correctly calculates jwk thumbprint', async () => {
@@ -11,6 +13,6 @@ describe('JwkThumbprint', () => {
         alg: 'RS256',
         kid: '2011-04-29',
       }),
-    ).toEqual('NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs');
-  });
-});
+    ).toEqual('NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs')
+  })
+})

@@ -1,4 +1,3 @@
-// noinspection JSUnusedGlobalSymbols
 import { JarmClientMetadata } from '@sphereon/jarm'
 import { DynamicRegistrationClientMetadata, JWKS, SigningAlgo } from '@sphereon/oid4vc-common'
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
@@ -26,8 +25,7 @@ import {
 import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
-
-import { JWTPayload, VerifiedJWT } from './index'
+import { JWTPayload, VerifiedJWT } from './JWT.types'
 
 export const DEFAULT_EXPIRATION_TIME = 10 * 60
 
@@ -736,5 +734,3 @@ export enum ContentType {
   FORM_URL_ENCODED = 'application/x-www-form-urlencoded',
   UTF_8 = 'UTF-8',
 }
-
-export { JarmClientMetadata }

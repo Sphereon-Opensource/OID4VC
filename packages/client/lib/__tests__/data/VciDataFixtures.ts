@@ -4,66 +4,66 @@ import {
   IssuerMetadataV1_0_08,
   IssuerMetadataV1_0_13,
   PRE_AUTH_GRANT_LITERAL,
-} from '@sphereon/oid4vci-common';
-import { ICredentialStatus, W3CVerifiableCredential } from '@sphereon/ssi-types';
+} from '@sphereon/oid4vci-common'
+import { ICredentialStatus, W3CVerifiableCredential } from '@sphereon/ssi-types'
 
 export function getMockData(issuerName: string): IssuerMockData | null {
   if (issuerName in mockData) {
-    return mockData[issuerName];
+    return mockData[issuerName]
   }
-  return null;
+  return null
 }
 
 export interface VciMockDataStructure {
-  [issuerName: string]: IssuerMockData;
+  [issuerName: string]: IssuerMockData
 }
 
 export interface IssuerMockData {
   metadata: {
-    issuer?: string;
-    token_endpoint: string;
-    credential_endpoint: string;
-    openid4vci_metadata: IssuerMetadataV1_0_08 | IssuerMetadataV1_0_13;
-  };
+    issuer?: string
+    token_endpoint: string
+    credential_endpoint: string
+    openid4vci_metadata: IssuerMetadataV1_0_08 | IssuerMetadataV1_0_13
+  }
   auth: {
-    url: string;
-    method?: string;
+    url: string
+    method?: string
     request: {
-      client_id: string;
-      grant_type: 'urn:ietf:params:oauth:grant-type:pre-authorized_code' | 'authorization_code' | 'password';
-      'pre-authorized_code'?: string;
-    };
+      client_id: string
+      grant_type: 'urn:ietf:params:oauth:grant-type:pre-authorized_code' | 'authorization_code' | 'password'
+      'pre-authorized_code'?: string
+    }
     response: {
-      access_token: string;
-      token_type: string;
-      expires_in: number;
-      c_nonce?: string;
-      c_nonce_expires_in?: number;
-      refresh_token?: string;
-      id_token?: string;
-      scope?: string;
-    };
-  };
+      access_token: string
+      token_type: string
+      expires_in: number
+      c_nonce?: string
+      c_nonce_expires_in?: number
+      refresh_token?: string
+      id_token?: string
+      scope?: string
+    }
+  }
   credential: {
-    url: string;
-    deeplink: string;
+    url: string
+    deeplink: string
     request: {
-      types?: [string];
-      type?: string;
-      format: 'jwt_vc' | 'ldp_vc' | 'jwt_vc_json-ld' | string;
+      types?: [string]
+      type?: string
+      format: 'jwt_vc' | 'ldp_vc' | 'jwt_vc_json-ld' | string
       proof: {
-        proof_type: 'jwt' | string;
-        jwt: string;
-      };
-    };
+        proof_type: 'jwt' | string
+        jwt: string
+      }
+    }
     response: {
-      format?: 'jwt_vc' | 'w3cvc-jsonld' | string;
-      credential: W3CVerifiableCredential;
-      acceptance_token?: string;
-      c_nonce?: string;
-      c_nonce_expires_in?: number;
-    };
-  };
+      format?: 'jwt_vc' | 'w3cvc-jsonld' | string
+      credential: W3CVerifiableCredential
+      acceptance_token?: string
+      c_nonce?: string
+      c_nonce_expires_in?: number
+    }
+  }
 }
 
 const mockData: VciMockDataStructure = {
@@ -1428,4 +1428,4 @@ const mockData: VciMockDataStructure = {
     // @ts-ignore
     credential: {},
   },
-};
+}

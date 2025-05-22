@@ -1,3 +1,19 @@
 prefer-workspace-packages: true
+
+# We are using workspace: protocol in packages
+linkWorkspacePackages: false
+
 packages:
-  - 'packages/*'
+  - packages/*
+
+ignoredBuiltDependencies:
+  - '@mattrglobal/node-bbs-signatures'
+
+onlyBuiltDependencies:
+  - '@biomejs/biome'
+  - '@sphereon/pex'
+  - '@swc/core'
+  - canvas
+  - esbuild
+  - nx
+  - secp256k1

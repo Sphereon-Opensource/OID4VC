@@ -1,5 +1,5 @@
 import { SigningAlgo } from '@sphereon/oid4vc-common'
-import { Hasher } from '@sphereon/ssi-types'
+import { HasherSync } from '@sphereon/ssi-types'
 
 import { DcqlQueryPayloadOpts, PresentationDefinitionPayloadOpts } from '../authorization-response'
 import { RequestObjectOpts } from '../request-object'
@@ -78,7 +78,7 @@ export interface VerifyAuthorizationRequestOpts {
   nonce?: string // If provided the nonce in the request needs to match
   state?: string // If provided the state in the request needs to match
   supportedVersions?: SupportedVersion[]
-  hasher?: Hasher
+  hasher?: HasherSync
 }
 
 /**

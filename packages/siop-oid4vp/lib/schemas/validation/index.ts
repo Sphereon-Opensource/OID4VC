@@ -3,7 +3,7 @@ import {
   AuthorizationRequestPayloadVID1Schema,
   AuthorizationResponseOptsSchema,
   RPRegistrationMetadataPayloadSchema
-} from './schemaValidation.js'
+} from './schemaValidation.cjs'
 
 export {
   AuthorizationRequestPayloadVID1Schema,

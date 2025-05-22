@@ -1,9 +1,9 @@
+import { Loggers } from '@sphereon/ssi-types'
 import { fetch } from 'cross-fetch'
-import Debug from 'debug'
 
 import { ContentType, SIOPErrors, SIOPResonse } from '../types'
 
-const debug = Debug('sphereon:siopv2:http')
+const logger = Loggers.DEFAULT.get('sphereon:siopv2:http')
 
 export const getJson = async <T>(
   URL: string,
@@ -76,11 +76,11 @@ const siopFetch = async <T>(
     body,
   }
 
-  debug(`START fetching url: ${url}`)
+  logger.debug(`START fetching url: ${url}`)
   if (body) {
-    debug(`Body:\r\n${JSON.stringify(body)}`)
+    logger.debug(`Body:\r\n${JSON.stringify(body)}`)
   }
-  debug(`Headers:\r\n${JSON.stringify(payload.headers)}`)
+  logger.debug(`Headers:\r\n${JSON.stringify(payload.headers)}`)
   const origResponse = await fetch(url, payload)
   const clonedResponse = origResponse.clone()
   const success = origResponse && origResponse.status >= 200 && origResponse.status < 400
@@ -91,7 +91,7 @@ const siopFetch = async <T>(
   const responseBody = isJSONResponse ? JSON.parse(textResponseBody) : textResponseBody
 
   if (success || opts?.exceptionOnHttpErrorStatus) {
-    debug(`${success ? 'success' : 'error'} status: ${clonedResponse.status}, body:\r\n${JSON.stringify(responseBody)}`)
+    logger.debug(`${success ? 'success' : 'error'} status: ${clonedResponse.status}, body:\r\n${JSON.stringify(responseBody)}`)
   } else {
     console.warn(`${success ? 'success' : 'error'} status: ${clonedResponse.status}, body:\r\n${JSON.stringify(responseBody)}`)
   }
@@ -100,7 +100,7 @@ const siopFetch = async <T>(
     const error = JSON.stringify(responseBody)
     throw new Error(error === '{}' ? '{"error": "not found"}' : error)
   }
-  debug(`END fetching url: ${url}`)
+  logger.debug(`END fetching url: ${url}`)
 
   return {
     origResponse,

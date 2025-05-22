@@ -39,7 +39,7 @@ authenticate first.
 The below diagram shows the steps involved in the pre-authorized code flow. Note that wallet inner functionalities (like
 saving VCs) are out of scope for this library.
 
-![Flow diagram](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Sphereon-Opensource/OID4VCI-client/develop/docs/preauthorized-code-flow.puml)
+![Flow diagram](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Sphereon-Opensource/OID4VC-client/develop/docs/preauthorized-code-flow.puml)
 
 # OpenID4VCI Client
 

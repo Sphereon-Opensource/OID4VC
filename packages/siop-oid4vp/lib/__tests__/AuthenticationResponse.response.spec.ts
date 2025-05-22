@@ -9,6 +9,7 @@ import {
   OriginalVerifiableCredential,
 } from '@sphereon/ssi-types'
 import { DcqlCredential, DcqlPresentation, DcqlQuery, DcqlQueryResult } from 'dcql'
+import { describe, expect, it, vitest } from 'vitest'
 
 import {
   AuthorizationResponse,
@@ -42,8 +43,6 @@ import {
   VERIFIERZ_PURPOSE_TO_VERIFY,
   VERIFIERZ_PURPOSE_TO_VERIFY_NL,
 } from './data/mockedData'
-
-jest.setTimeout(30000)
 
 const EXAMPLE_REFERENCE_URL = 'https://rp.acme.com/siop/jwts'
 const HEX_KEY = 'f857544a9d1097e242ff0b287a7e6e90f19cf973efe2317f2a4678739664420f'
@@ -201,13 +200,13 @@ describe('create JWT from Request JWT should', () => {
       responseMode: ResponseMode.POST,
     }
 
-    jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
-    jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
+    vitest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
+    vitest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
     const requestObject = await RequestObject.fromOpts(requestOpts)
     const jwt = await requestObject.toJwt()
     if (!jwt) throw new Error('JWT is undefined')
-    jest.useRealTimers()
+    vitest.useRealTimers()
     await expect(AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)).rejects.toThrow(/invalid_jwt: JWT has expired: exp: /)
   })
 

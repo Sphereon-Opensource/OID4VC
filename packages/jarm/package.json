@@ -1,32 +1,36 @@
 {
   "name": "@sphereon/jarm",
-  "version": "0.17.0",
+  "version": "0.18.2",
   "description": "Sphereon JARM",
-  "source": "lib/index.ts",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "source": "./src/index.ts",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "require": {
+      "types": "./dist/index.d.cts",
+      "require": "./dist/index.cjs"
+    }
+  },
   "scripts": {
-    "build": "tsc",
-    "build:clean": "tsc --build --clean && tsc --build"
+    "build": "tsup --config ../../tsup.config.ts --tsconfig ../../tsconfig.tsup.json"
   },
   "dependencies": {
-    "@sphereon/oid4vc-common": "workspace:*",
+    "@sphereon/oid4vc-common": "workspace:^",
     "valibot": "^0.42.1"
   },
   "devDependencies": {
-    "typescript": "5.5.3"
+    "typescript": "5.8.3"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
-  "files": [
-    "lib/**/*",
-    "dist/**/*"
-  ],
-  "prettier": {
-    "singleQuote": true,
-    "printWidth": 150
-  },
+  "files": ["src", "dist", "README.md", "LICENSE.md"],
   "keywords": [
     "Sphereon",
     "Verifiable Credentials",

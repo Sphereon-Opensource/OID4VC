@@ -1,8 +1,8 @@
-import { CommonAuthorizationRequest } from './Authorization.types';
-import { CredentialOfferFormatV1_0_11 } from './Generic.types';
+import { CommonAuthorizationRequest } from './Authorization.types'
+import { CredentialOfferFormatV1_0_11 } from './Generic.types'
 
 export interface CredentialOfferV1_0_09 {
-  credential_offer: CredentialOfferPayloadV1_0_09;
+  credential_offer: CredentialOfferPayloadV1_0_09
 }
 
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-09.html#name-issuance-initiation-request
@@ -10,7 +10,7 @@ export interface CredentialOfferPayloadV1_0_09 {
   /**
    * REQUIRED. The URL of the Credential Issuer, the Wallet is requested to obtain one or more Credentials from.
    */
-  issuer: string;
+  issuer: string
   /**
    * REQUIRED. A JSON array, where every entry is a JSON object or a JSON string. If the entry is an object,
    * the object contains the data related to a certain credential type the Wallet MAY request.
@@ -20,17 +20,17 @@ export interface CredentialOfferPayloadV1_0_09 {
    * credentials_supported Credential Issuer metadata parameter.
    * When processing, the Wallet MUST resolve this string value to the respective object.
    */
-  credentials: (CredentialOfferFormatV1_0_11 | string)[];
-  'pre-authorized_code'?: string; //CONDITIONAL the code representing the issuer's authorization for the Wallet to obtain Credentials of a certain type. This code MUST be short-lived and single-use. MUST be present in a pre-authorized code flow.
-  user_pin_required?: boolean | string; //OPTIONAL Boolean value specifying whether the issuer expects presentation of a user PIN along with the Token Request in a pre-authorized code flow. Default is false.
-  op_state?: string; //(JWT) OPTIONAL String value created by the Credential Issuer and opaque to the Wallet that is used to bind the subsequent authentication request with the Credential Issuer to a context set up during previous steps
+  credentials: (CredentialOfferFormatV1_0_11 | string)[]
+  'pre-authorized_code'?: string //CONDITIONAL the code representing the issuer's authorization for the Wallet to obtain Credentials of a certain type. This code MUST be short-lived and single-use. MUST be present in a pre-authorized code flow.
+  user_pin_required?: boolean | string //OPTIONAL Boolean value specifying whether the issuer expects presentation of a user PIN along with the Token Request in a pre-authorized code flow. Default is false.
+  op_state?: string //(JWT) OPTIONAL String value created by the Credential Issuer and opaque to the Wallet that is used to bind the subsequent authentication request with the Credential Issuer to a context set up during previous steps
 }
 
 export interface AuthorizationRequestV1_0_09 extends CommonAuthorizationRequest {
-  op_state?: string;
+  op_state?: string
 }
 
 // todo https://sphereon.atlassian.net/browse/VDX-185
 export function isAuthorizationRequestV1_0_09(request: CommonAuthorizationRequest): boolean {
-  return request && 'op_state' in request;
+  return request && 'op_state' in request
 }

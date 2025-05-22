@@ -9,18 +9,24 @@ import { assertValidRequestObjectOpts } from './Opts'
 
 export const createRequestObjectPayload = async (opts: CreateAuthorizationRequestOpts): Promise<RequestObjectPayload | undefined> => {
   assertValidRequestObjectOpts(opts.requestObject, false)
-  if (!opts.requestObject?.payload) {
+  const payload = opts.requestObject.payload
+  if (!payload) {
     return undefined // No request object apparently
   }
   assertValidRequestObjectOpts(opts.requestObject, true)
 
-  const payload = opts.requestObject.payload
-
+  /*if (!opts.clientMetadata) {
+    return Promise.reject(Error('No client metadata found'))
+  } else if (!payload.claims) {
+    return Promise.reject(Error('No payload claims'))
+  }*/
   const state = getState(payload.state)
   const registration = await createRequestRegistration(opts.clientMetadata, opts)
   const claims = await createPresentationDefinitionClaimsProperties(payload.claims)
 
   const metadataKey = opts.version >= SupportedVersion.SIOPv2_D11.valueOf() ? 'client_metadata' : 'registration'
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const clientId = payload.client_id ?? registration.payload[metadataKey]?.client_id
 
   const now = Math.round(new Date().getTime() / 1000)
@@ -59,7 +65,10 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
   })
 }
 
-export const assertValidRequestObjectPayload = (verPayload: RequestObjectPayload): void => {
+export const assertValidRequestObjectPayload = (verPayload: RequestObjectPayload | undefined): void => {
+  if (!verPayload) {
+    throw Error("Request object payload can't be undefined")
+  }
   if (verPayload['registration_uri'] && verPayload['registration']) {
     throw new Error(`${SIOPErrors.REG_OBJ_N_REG_URI_CANT_BE_SET_SIMULTANEOUSLY}`)
   }

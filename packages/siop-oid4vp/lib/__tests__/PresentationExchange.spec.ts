@@ -4,6 +4,7 @@ import { PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pe
 import { CredentialMapper, IPresentation, IProofType, IVerifiableCredential } from '@sphereon/ssi-types'
 import { W3CVerifiablePresentation } from '@sphereon/ssi-types/src/types/w3c-vc'
 import nock from 'nock'
+import { describe, expect, it } from 'vitest'
 
 import {
   AuthorizationRequestPayload,

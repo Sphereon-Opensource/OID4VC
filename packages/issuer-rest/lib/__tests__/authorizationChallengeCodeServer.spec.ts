@@ -6,11 +6,11 @@ import {
   CredentialOfferSession,
   IssueStatus,
 } from '@sphereon/oid4vci-common'
-import { AuthorizationServerMetadataBuilder, VcIssuer } from '@sphereon/oid4vci-issuer'
-import { MemoryStates } from '@sphereon/oid4vci-issuer/dist/state-manager'
+import { AuthorizationServerMetadataBuilder, MemoryStates, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { ExpressBuilder, ExpressSupport } from '@sphereon/ssi-express-support'
 import { Express } from 'express'
 import requests from 'supertest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { OID4VCIServer } from '../OID4VCIServer'
 

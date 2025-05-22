@@ -6,7 +6,12 @@ import { KeyLike } from 'jose'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import * as u8a from 'uint8arrays'
+const { fromString, toString } = u8a
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
   AuthorizationRequest,
@@ -225,7 +230,7 @@ describe('OP using test vectors', () => {
   })
 
   // Disabled for now as the value for the path_nested in the id token is actually invalid
-  xit('should use test vector auth response', async () => {
+  it.skip('should use test vector auth response', async () => {
     const authorizationResponse = await AuthorizationResponse.fromPayload(TestVectors.authorizationResponsePayload)
 
     expect(authorizationResponse.payload.vp_token).toBeDefined()
@@ -395,18 +400,18 @@ class TestVectors {
 
   public static async init() {
     TestVectors.issuerKey = (await jose.importJWK(TestVectors.issuerJwk, 'EdDSA', true)) as KeyLike
-    TestVectors.issuerPrivateKey = u8a.toString(u8a.fromString(TestVectors.issuerJwk.d, 'base64url'), 'hex')
-    TestVectors.issuerPublicKey = u8a.toString(u8a.fromString(TestVectors.issuerJwk.x, 'base64url'), 'hex')
+    TestVectors.issuerPrivateKey = toString(fromString(TestVectors.issuerJwk.d, 'base64url'), 'hex')
+    TestVectors.issuerPublicKey = toString(fromString(TestVectors.issuerJwk.x, 'base64url'), 'hex')
     TestVectors.issuerHexPrivateKey = `${TestVectors.issuerPrivateKey}${TestVectors.issuerPublicKey}`
 
     TestVectors.holderKey = (await jose.importJWK(TestVectors.holderJwk, 'EdDSA', true)) as KeyLike
-    TestVectors.holderPrivateKey = u8a.toString(u8a.fromString(TestVectors.holderJwk.d, 'base64url'), 'hex')
-    TestVectors.holderPublicKey = u8a.toString(u8a.fromString(TestVectors.holderJwk.x, 'base64url'), 'hex')
+    TestVectors.holderPrivateKey = toString(fromString(TestVectors.holderJwk.d, 'base64url'), 'hex')
+    TestVectors.holderPublicKey = toString(fromString(TestVectors.holderJwk.x, 'base64url'), 'hex')
     TestVectors.holderHexPrivateKey = `${TestVectors.holderPrivateKey}${TestVectors.holderPublicKey}`
 
     TestVectors.verifierKey = (await jose.importJWK(TestVectors.verifierJwk, 'EdDSA', true)) as KeyLike
-    TestVectors.verifierPrivateKey = u8a.toString(u8a.fromString(TestVectors.verifierJwk.d, 'base64url'), 'hex')
-    TestVectors.verifierPublicKey = u8a.toString(u8a.fromString(TestVectors.verifierJwk.x, 'base64url'), 'hex')
+    TestVectors.verifierPrivateKey = toString(fromString(TestVectors.verifierJwk.d, 'base64url'), 'hex')
+    TestVectors.verifierPublicKey = toString(fromString(TestVectors.verifierJwk.x, 'base64url'), 'hex')
     TestVectors.verifierHexPrivateKey = `${TestVectors.verifierPrivateKey}${TestVectors.verifierPublicKey}`
   }
 
