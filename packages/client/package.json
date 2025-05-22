@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-client",
-  "version": "0.18.2",
+  "version": "0.19.0",
   "description": "OpenID for Verifiable Credential Issuance (OpenID4VCI) client",
   "source": "./src/index.ts",
   "type": "module",
@@ -55,7 +55,12 @@
   "engines": {
     "node": ">=20"
   },
-  "files": ["src", "dist", "README.md", "LICENSE.md"],
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE.md"
+  ],
   "keywords": [
     "Sphereon",
     "Verifiable Credentials",

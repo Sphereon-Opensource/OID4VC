@@ -1,31 +1,22 @@
-# v0.18.0 (Mon Apr 14 2025)
-
-#### 🚀 Enhancement
-
-- feat: Add intuit/auto for release management ([@nklomp](https://github.com/nklomp))
-- feat: move from jest to vitest ([@nklomp](https://github.com/nklomp))
-- feat: Project is now ESM by default, bundled as CJS as well ([@nklomp](https://github.com/nklomp))
-
-#### 🐛 Bug Fix
-
-- chore: update version ([@nklomp](https://github.com/nklomp))
-- chore: update deps ([@nklomp](https://github.com/nklomp))
-- chore: pnpm version fix ([@nklomp](https://github.com/nklomp))
-- chore: add coverage ([@nklomp](https://github.com/nklomp))
-- chore: fixes for project is now ESM by default, bundled as CJS as well ([@nklomp](https://github.com/nklomp))
-- chore(ci): merge main into develop (next) ([@github-actions[bot]](https://github.com/github-actions[bot]))
-
-#### Authors: 2
-
-- [@github-actions[bot]](https://github.com/github-actions[bot])
-- Niels Klomp ([@nklomp](https://github.com/nklomp))
-
----
-
 # Change Log
 
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# [0.19.0](https://github.com/Sphereon-Opensource/OID4VC/compare/v0.17.0...v0.19.0) (2025-05-22)
+
+
+### Features
+
+* add biome ([b8ff6cb](https://github.com/Sphereon-Opensource/OID4VC/commit/b8ff6cb8c7ca78acfc2dffab080ac03ea24ee8d5))
+* add biome ([d92e50e](https://github.com/Sphereon-Opensource/OID4VC/commit/d92e50eb349a07f6c76d012ece5e88473b2406c5))
+* Add intuit/auto for release management ([088b085](https://github.com/Sphereon-Opensource/OID4VC/commit/088b08578a236c0b23cfcb3eedd7bbf39c772ee7))
+* move from jest to vitest ([6188f4a](https://github.com/Sphereon-Opensource/OID4VC/commit/6188f4a58493429d9ec2581eb587d61e5d91ad64))
+* Project is now ESM by default, bundled as CJS as well ([af84cc5](https://github.com/Sphereon-Opensource/OID4VC/commit/af84cc5d0d775d9e76ce49695fd7b0b67d98a9dd))
+
+
+
+
 
 # [0.17.0](https://github.com/Sphereon-Opensource/OID4VC/compare/v0.16.0...v0.17.0) (2025-03-14)
 
