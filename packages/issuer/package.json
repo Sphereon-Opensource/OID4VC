@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-issuer",
-  "version": "0.18.2",
+  "version": "0.19.0",
   "description": "OpenID 4 Verifiable Credential Issuance issuer REST endpoints",
   "source": "./src/index.ts",
   "type": "module",
@@ -49,7 +49,12 @@
   "engines": {
     "node": ">=20"
   },
-  "files": ["src", "dist", "README.md", "LICENSE.md"],
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE.md"
+  ],
   "keywords": [
     "Sphereon",
     "Verifiable Credentials",
