@@ -32,7 +32,7 @@ import { shouldRetryTokenRequestWithDPoPNonce } from './functions/dpopUtil'
 
 const logger = Loggers.DEFAULT.get('sphereon:oid4vci:token')
 
-export class AccessTokenClientV1_0_11 {
+export class AccessTokenClientV1_0_11 { // TODO rename to v13 or v16?
   public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse, DPoPResponseParams>> {
     const { asOpts, pin, codeVerifier, code, redirectUri, metadata, createDPoPOpts } = opts
 

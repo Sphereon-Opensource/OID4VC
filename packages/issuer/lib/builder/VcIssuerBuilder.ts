@@ -41,7 +41,7 @@ export class VcIssuerBuilder {
 
   public withIssuerMetadata(issuerMetadata: IssuerMetadata) {
     if (!issuerMetadata.credential_configurations_supported) {
-      throw new Error('IssuerMetadata should be from type v1_0_13 or higher.')
+      throw new Error('IssuerMetadata should be from type v1_0_15 or higher.')
     }
     this.issuerMetadata = issuerMetadata as IssuerMetadataV1_0_13
     return this

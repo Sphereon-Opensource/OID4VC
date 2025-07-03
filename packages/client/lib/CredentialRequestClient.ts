@@ -16,12 +16,13 @@ import {
   post,
   ProofOfPossession,
   UniformCredentialRequest,
-  URL_NOT_VALID,
+  URL_NOT_VALID
 } from '@sphereon/oid4vci-common'
 import { CredentialFormat, Loggers } from '@sphereon/ssi-types'
 
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11'
 import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13'
+import { CredentialRequestClientBuilderV1_0_15 } from './CredentialRequestClientBuilderV1_0_15'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
 import { shouldRetryResourceRequestWithDPoPNonce } from './functions/dpopUtil'
 
@@ -57,7 +58,7 @@ export async function buildProof(
   opts: {
     version: OpenId4VCIVersion
     cNonce?: string
-  },
+  }
 ) {
   if ('proof_type' in proofInput) {
     if (opts.cNonce) {
@@ -91,7 +92,7 @@ export class CredentialRequestClient {
     return this.credentialRequestOpts.deferredCredentialEndpoint
   }
 
-  public constructor(builder: CredentialRequestClientBuilderV1_0_13 | CredentialRequestClientBuilderV1_0_11) {
+  public constructor(builder: CredentialRequestClientBuilderV1_0_15 | CredentialRequestClientBuilderV1_0_13 | CredentialRequestClientBuilderV1_0_11) {
     this._credentialRequestOpts = { ...builder }
   }
 
@@ -117,7 +118,7 @@ export class CredentialRequestClient {
       format,
       version: this.version(),
       credentialIdentifier,
-      subjectIssuance,
+      subjectIssuance
     })
     return await this.acquireCredentialsUsingRequestWithoutProof(request, opts.createDPoPOpts)
   }
@@ -140,28 +141,28 @@ export class CredentialRequestClient {
       format,
       version: this.version(),
       credentialIdentifier,
-      subjectIssuance,
+      subjectIssuance
     })
     return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOpts)
   }
 
   public async acquireCredentialsUsingRequestWithoutProof(
     uniformRequest: UniformCredentialRequest,
-    createDPoPOpts?: CreateDPoPClientOpts,
+    createDPoPOpts?: CreateDPoPClientOpts
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     return await this.acquireCredentialsUsingRequestImpl(uniformRequest, createDPoPOpts)
   }
 
   public async acquireCredentialsUsingRequest(
     uniformRequest: UniformCredentialRequest,
-    createDPoPOpts?: CreateDPoPClientOpts,
+    createDPoPOpts?: CreateDPoPClientOpts
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     return await this.acquireCredentialsUsingRequestImpl(uniformRequest, createDPoPOpts)
   }
 
   private async acquireCredentialsUsingRequestImpl(
     uniformRequest: UniformCredentialRequest & { proof?: ProofOfPossession },
-    createDPoPOpts?: CreateDPoPClientOpts,
+    createDPoPOpts?: CreateDPoPClientOpts
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
       throw new Error('Versions below v1.0.13 (draft 13) are not supported by the V13 credential request client.')
@@ -180,7 +181,7 @@ export class CredentialRequestClient {
 
     let response = (await post(credentialEndpoint, JSON.stringify(request), {
       bearerToken: requestToken,
-      ...(dPoP && { customHeaders: { dpop: dPoP } }),
+      ...(dPoP && { customHeaders: { dpop: dPoP } })
     })) as OpenIDResponse<CredentialResponse> & {
       access_token: string
     }
@@ -193,7 +194,7 @@ export class CredentialRequestClient {
 
       response = (await post(credentialEndpoint, JSON.stringify(request), {
         bearerToken: requestToken,
-        ...(createDPoPOpts && { customHeaders: { dpop: dPoP } }),
+        ...(createDPoPOpts && { customHeaders: { dpop: dPoP } })
       })) as OpenIDResponse<CredentialResponse> & {
         access_token: string
       }
@@ -217,7 +218,7 @@ export class CredentialRequestClient {
 
     return {
       ...response,
-      ...(nextDPoPNonce && { params: { dpop: { dpopNonce: nextDPoPNonce } } }),
+      ...(nextDPoPNonce && { params: { dpop: { dpopNonce: nextDPoPNonce } } })
     }
   }
 
@@ -225,7 +226,7 @@ export class CredentialRequestClient {
     response: Pick<CredentialResponse, 'transaction_id' | 'acceptance_token' | 'c_nonce'>,
     opts?: {
       bearerToken?: string
-    },
+    }
   ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const transactionId = response.transaction_id
     const bearerToken = response.acceptance_token ?? opts?.bearerToken
@@ -241,7 +242,7 @@ export class CredentialRequestClient {
       transactionId,
       deferredCredentialEndpoint,
       deferredCredentialAwait: this.credentialRequestOpts.deferredCredentialAwait,
-      deferredCredentialIntervalInMS: this.credentialRequestOpts.deferredCredentialIntervalInMS,
+      deferredCredentialIntervalInMS: this.credentialRequestOpts.deferredCredentialIntervalInMS
     })
   }
 
@@ -252,7 +253,7 @@ export class CredentialRequestClient {
   public async createCredentialRequest(
     opts: CreateCredentialRequestOpts & {
       proofInput: ProofOfPossessionBuilder | ProofOfPossession
-    },
+    }
   ): Promise<CredentialRequestV1_0_13> {
     return await this.createCredentialRequestImpl(opts)
   }
@@ -260,7 +261,7 @@ export class CredentialRequestClient {
   private async createCredentialRequestImpl(
     opts: CreateCredentialRequestOpts & {
       proofInput?: ProofOfPossessionBuilder | ProofOfPossession
-    },
+    }
   ): Promise<CredentialRequestV1_0_13> {
     const { proofInput, credentialIdentifier: credential_identifier } = opts
     let proof: ProofOfPossession | undefined = undefined
@@ -273,7 +274,7 @@ export class CredentialRequestClient {
       }
       return {
         credential_identifier,
-        ...(proof && { proof }),
+        ...(proof && { proof })
       }
     }
     const formatSelection = opts.format ?? this.credentialRequestOpts.format
@@ -299,12 +300,12 @@ export class CredentialRequestClient {
     if (format === 'jwt_vc_json' || format === 'jwt_vc') {
       return {
         credential_definition: {
-          type: types,
+          type: types
         },
         format,
         ...(issuer_state && { issuer_state }),
         ...(proof && { proof }),
-        ...opts.subjectIssuance,
+        ...opts.subjectIssuance
       }
     } else if (format === 'jwt_vc_json-ld' || format === 'ldp_vc') {
       if (this.version() >= OpenId4VCIVersion.VER_1_0_12 && !opts.context) {
@@ -319,8 +320,8 @@ export class CredentialRequestClient {
 
         credential_definition: {
           type: types,
-          '@context': opts.context as string[],
-        },
+          '@context': opts.context as string[]
+        }
       }
     } else if (format === 'vc+sd-jwt') {
       if (types.length > 1) {
@@ -331,7 +332,7 @@ export class CredentialRequestClient {
         ...(issuer_state && { issuer_state }),
         ...(proof && { proof }),
         vct: types[0],
-        ...opts.subjectIssuance,
+        ...opts.subjectIssuance
       }
     } else if (format === 'mso_mdoc') {
       if (types.length > 1) {
@@ -342,7 +343,7 @@ export class CredentialRequestClient {
         ...(issuer_state && { issuer_state }),
         ...(proof && { proof }),
         doctype: types[0],
-        ...opts.subjectIssuance,
+        ...opts.subjectIssuance
       }
     }
 

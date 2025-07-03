@@ -7,16 +7,16 @@ import {
   CNonceState,
   CreateCredentialOfferURIResult,
   CREDENTIAL_MISSING_ERROR,
-  CredentialConfigurationSupportedV1_0_13,
+  CredentialConfigurationSupportedV1_0_15,
   CredentialDataSupplierInput,
   CredentialEventNames,
-  CredentialIssuerMetadataOptsV1_0_13,
+  CredentialIssuerMetadataOptsV1_0_15,
   CredentialOfferEventNames,
   CredentialOfferMode,
   CredentialOfferSession,
-  CredentialOfferV1_0_13,
+  CredentialOfferV1_0_15,
   CredentialRequest,
-  CredentialRequestV1_0_13,
+  CredentialRequestV1_0_15,
   CredentialResponse,
   DID_NO_DIDDOC_ERROR,
   EVENTS,
@@ -55,7 +55,7 @@ import { LOG } from './index'
 const shortUUID = ShortUUID()
 
 export class VcIssuer {
-  private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_13
+  private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_15
   private readonly _authorizationServerMetadata: AuthorizationServerMetadata
   private readonly _defaultCredentialOfferBaseUri?: string
   private readonly _credentialSignerCallback?: CredentialSignerCallback
@@ -68,7 +68,7 @@ export class VcIssuer {
   private readonly _asClientOpts?: ClientMetadata
 
   constructor(
-    issuerMetadata: CredentialIssuerMetadataOptsV1_0_13,
+    issuerMetadata: CredentialIssuerMetadataOptsV1_0_15,
     authorizationServerMetadata: AuthorizationServerMetadata,
     args: {
       txCode?: TxCode
@@ -261,9 +261,9 @@ export class VcIssuer {
       {
         credential_offer: credentialOfferObject.credential_offer,
         credential_offer_uri: credentialOfferObject.credential_offer_uri,
-      } as CredentialOfferV1_0_13,
+      } as CredentialOfferV1_0_15,
       {
-        version: OpenId4VCIVersion.VER_1_0_13,
+        version: OpenId4VCIVersion.VER_1_0_15,
         resolve: false, // We are creating the object, so do not resolve
       },
     )
@@ -350,7 +350,7 @@ export class VcIssuer {
     /*if (!('credential_identifier' in opts.credentialRequest)) {
       throw new Error('credential request should be of spec version 1.0.13 or above')
     }*/
-    const credentialRequest = opts.credentialRequest as CredentialRequestV1_0_13
+    const credentialRequest = opts.credentialRequest as CredentialRequestV1_0_15
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
     try {
@@ -737,7 +737,7 @@ export class VcIssuer {
       return false
     }
     for (const credentialSupported of Object.values(
-      this._issuerMetadata['credential_configurations_supported'] as Record<string, CredentialConfigurationSupportedV1_0_13>,
+      this._issuerMetadata['credential_configurations_supported'] as Record<string, CredentialConfigurationSupportedV1_0_15>,
     )) {
       if (!Array.isArray(requestFormat) && credentialSupported.format === requestFormat) {
         return true

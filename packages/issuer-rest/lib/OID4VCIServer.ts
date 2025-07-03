@@ -2,7 +2,7 @@ import {
   AuthorizationRequest,
   ClientMetadata,
   CreateCredentialOfferURIResult,
-  CredentialConfigurationSupportedV1_0_13,
+  CredentialConfigurationSupportedV1_0_15,
   CredentialOfferMode,
   IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
@@ -33,7 +33,7 @@ import {
 } from './oid4vci-api-functions'
 
 function buildVCIFromEnvironment() {
-  const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+  const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_15> = new CredentialSupportedBuilderV1_13()
     .withCredentialSigningAlgValuesSupported(process.env.credential_signing_alg_values_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
     .withFormat(process.env.credential_supported_format as unknown as OID4VCICredentialFormat)
