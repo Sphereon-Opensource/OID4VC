@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@sphereon/oid4vc-common": "workspace:^",
-    "@sphereon/ssi-types": "0.33.1-next.73",
+    "@sphereon/ssi-types": "0.34.1-next.3",
     "cross-fetch": "^4.1.0",
     "debug": "^4.4.0",
     "jwt-decode": "^4.0.0",
@@ -37,12 +37,7 @@
   "engines": {
     "node": ">=20"
   },
-  "files": [
-    "src",
-    "dist",
-    "README.md",
-    "LICENSE.md"
-  ],
+  "files": ["src", "dist", "README.md", "LICENSE.md"],
   "keywords": [
     "Sphereon",
     "Verifiable Credentials",

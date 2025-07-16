@@ -356,7 +356,7 @@ describe('Credential Offer Client error handling', () => {
 
     nock('https://test.example.com').get('/offer').reply(404, 'Not Found')
 
-    await expect(CredentialOfferClient.fromURI(IRR_URI)).rejects.toMatch(
+    await expect(CredentialOfferClient.fromURI(IRR_URI)).rejects.toThrow(
       /the credential offer URI endpoint call was not successful. http code 404 - reason Not Found/,
     )
   })
@@ -366,7 +366,7 @@ describe('Credential Offer Client error handling', () => {
 
     nock('https://test.example.com').get('/offer').reply(200, 'plain text response', { 'Content-Type': 'text/plain' })
 
-    await expect(CredentialOfferClient.fromURI(IRR_URI)).rejects.toMatch(
+    await expect(CredentialOfferClient.fromURI(IRR_URI)).rejects.toThrow(
       'the credential offer URI endpoint did not return content type application/json',
     )
   })

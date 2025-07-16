@@ -20,11 +20,13 @@ export async function handleCredentialOfferUri(uri: string) {
   const response = await fetch(decodedUri)
 
   if (!(response && response.status >= 200 && response.status < 400)) {
-    return Promise.reject(`the credential offer URI endpoint call was not successful. http code ${response.status} - reason ${response.statusText}`)
+    return Promise.reject(
+      Error(`the credential offer URI endpoint call was not successful. http code ${response.status} - reason ${response.statusText}`),
+    )
   }
 
   if (response.headers.get('Content-Type')?.startsWith('application/json') === false) {
-    return Promise.reject('the credential offer URI endpoint did not return content type application/json')
+    return Promise.reject(Error('the credential offer URI endpoint did not return content type application/json'))
   }
 
   return {
