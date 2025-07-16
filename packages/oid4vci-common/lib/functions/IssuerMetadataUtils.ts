@@ -97,9 +97,12 @@ export function getSupportedCredential(opts?: {
     } else {
       credentialConfigurationsV11 = (issuerMetadata?.credentials_supported as Array<CredentialConfigurationSupported>) ?? []
     }
-  } else {
+  } else if(version == OpenId4VCIVersion.VER_1_0_13) {
     credentialConfigurationsV13 =
       (issuerMetadata?.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_13>) ?? {}
+  } else {
+    credentialConfigurationsV15 =
+      (issuerMetadata?.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_15>) ?? {}
   }
   if (!issuerMetadata || (!issuerMetadata.credential_configurations_supported && !issuerMetadata.credentials_supported)) {
     VCI_LOG_COMMON.warning(`No credential issuer metadata or supported credentials found for issuer}`)
@@ -108,7 +111,7 @@ export function getSupportedCredential(opts?: {
     } else if (version >= OpenId4VCIVersion.VER_1_0_15) {
       return credentialConfigurationsV15!
     } else {
-      return credentialConfigurationsV13!
+      return credentialConfigurationsV15!
     }
   }
 
@@ -139,7 +142,21 @@ export function getSupportedCredential(opts?: {
     return isTypeMatch && isFormatMatch ? config : undefined
   }
 
-  if (credentialConfigurationsV13) {
+  if (credentialConfigurationsV15) {
+    return Object.entries(credentialConfigurationsV15).reduce(
+      (filteredConfigs, [id, config]) => {
+        if (filterMatchingConfig(config)) {
+          filteredConfigs[id] = config
+          // Added to enable support < 13. We basically assign the
+          if (!config.id) {
+            config.id = id
+          }
+        }
+        return filteredConfigs
+      },
+      {} as Record<string, CredentialConfigurationSupportedV1_0_15>
+    )
+  } else if (credentialConfigurationsV13) {
     return Object.entries(credentialConfigurationsV13).reduce(
       (filteredConfigs, [id, config]) => {
         if (filterMatchingConfig(config)) {
@@ -151,7 +168,7 @@ export function getSupportedCredential(opts?: {
         }
         return filteredConfigs
       },
-      {} as Record<string, CredentialConfigurationSupportedV1_0_13>,
+      {} as Record<string, CredentialConfigurationSupportedV1_0_13>
     )
   } else if (credentialConfigurationsV11) {
     return credentialConfigurationsV11.filter((config) => filterMatchingConfig(config))

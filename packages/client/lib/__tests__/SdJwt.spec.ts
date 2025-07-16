@@ -1,8 +1,7 @@
 import {
   AccessTokenRequest,
   CredentialConfigurationSupportedSdJwtVcV1_0_15,
-  CredentialConfigurationSupportedV1_0_15,
-  CredentialSupportedSdJwtVc,
+  CredentialConfigurationSupportedV1_0_15
 } from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -10,9 +9,16 @@ import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { OpenID4VCIClientV1_0_15 } from '..'
-import { AuthorizationServerMetadataBuilder, createAccessTokenResponse, IssuerMetadataBuilderV1_15, VcIssuerBuilder } from '../../../issuer'
+import {
+  AuthorizationServerMetadataBuilder,
+  createAccessTokenResponse,
+  IssuerMetadataBuilderV1_15,
+  VcIssuerBuilder
+} from '../../../issuer'
+import { vi } from 'vitest'
 
 export const UNIT_TEST_TIMEOUT = 30000
+
 
 const alg = 'ES256'
 const jwk = { kty: 'EC', crv: 'P-256', x: 'zQOowIC1gWJtdddB5GAt4lau6Lt8Ihy771iAfam-1pc', y: 'cjD_7o3gdQ1vgiQy3_sMGs7WrwCMU9FQYimA3HxnMlw' }
@@ -104,6 +110,7 @@ describe('sd-jwt vc', () => {
       const client = await OpenID4VCIClientV1_0_15.fromURI({
         uri: offerUri.uri,
       })
+      vi.spyOn(client, 'acquireNonce').mockResolvedValue('mocked-nonce')
 
       expect(client.credentialOffer?.credential_offer).toEqual({
         credential_issuer: 'https://example.com',
@@ -119,7 +126,7 @@ describe('sd-jwt vc', () => {
         },
       })
 
-      const supported = client.getCredentialsSupported(false, 'dc+sd-jwt')
+      const supported = client.getCredentialsSupported(false)
       expect(supported).toEqual({ SdJwtCredentialId: { format: 'dc+sd-jwt', id: 'SdJwtCredentialId', vct: 'SdJwtCredentialId' } })
 
       const offered = supported['SdJwtCredentialId'] as CredentialConfigurationSupportedSdJwtVcV1_0_15
@@ -159,7 +166,7 @@ describe('sd-jwt vc', () => {
 
       const credentials = await client.acquireCredentials({
         credentialIdentifier: offered.vct,
-        format: 'dc+sd-jwt',
+        //format: 'dc+sd-jwt',
         alg,
         jwk,
         proofCallbacks: {
@@ -208,6 +215,7 @@ describe('sd-jwt vc', () => {
       const client = await OpenID4VCIClientV1_0_15.fromURI({
         uri: offerUri.uri,
       })
+      vi.spyOn(client, 'acquireNonce').mockResolvedValue('mocked-nonce')
 
       expect(client.credentialOffer?.credential_offer).toEqual({
         credential_issuer: 'https://example.com',
