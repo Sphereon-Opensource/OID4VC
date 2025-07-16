@@ -8,10 +8,9 @@ import {
   AuthorizationChallengeErrorResponse,
   AuthorizationRequest,
   CommonAuthorizationChallengeRequest,
-  CredentialIssuerMetadataOptsV1_0_13,
+  CredentialIssuerMetadataOptsV1_0_15,
   CredentialOfferMode,
-  CredentialOfferRESTRequest,
-  CredentialRequestV1_0_13,
+  CredentialOfferRESTRequest, CredentialRequestV1_0_15,
   determineGrantTypes,
   determineSpecVersionFromOffer,
   EVENTS,
@@ -29,7 +28,7 @@ import {
   trimEnd,
   trimStart,
   validateJWT,
-  WellKnownEndpoints,
+  WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
@@ -42,7 +41,7 @@ import {
   ICreateCredentialOfferEndpointOpts,
   ICreateCredentialOfferURIResponse,
   IGetCredentialOfferEndpointOpts,
-  IGetIssueStatusEndpointOpts,
+  IGetIssueStatusEndpointOpts
 } from './OID4VCIServer'
 import { validateRequestBody } from './expressUtils'
 
@@ -134,7 +133,7 @@ export function getCredentialOfferReferenceEndpoint(router: Router, issuer: VcIs
   return path
 }
 
-function isExternalAS(issuerMetadata: CredentialIssuerMetadataOptsV1_0_13) {
+function isExternalAS(issuerMetadata: CredentialIssuerMetadataOptsV1_0_15) {
   return issuerMetadata.authorization_servers?.some((as) => !as.includes(issuerMetadata.credential_issuer))
 }
 
@@ -294,7 +293,7 @@ export function getCredentialEndpoint(
   LOG.log(`[OID4VCI] getCredential endpoint enabled at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
     try {
-      const credentialRequest = request.body as CredentialRequestV1_0_13
+      const credentialRequest = request.body as CredentialRequestV1_0_15
       LOG.log(`credential request received`, credentialRequest)
       try {
         const jwt = extractBearerToken(request.header('Authorization'))

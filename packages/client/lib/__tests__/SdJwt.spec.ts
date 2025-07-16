@@ -1,7 +1,7 @@
 import {
   AccessTokenRequest,
-  CredentialConfigurationSupportedSdJwtVcV1_0_13,
-  CredentialConfigurationSupportedV1_0_13,
+  CredentialConfigurationSupportedSdJwtVcV1_0_15,
+  CredentialConfigurationSupportedV1_0_15,
   CredentialSupportedSdJwtVc,
 } from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -9,23 +9,23 @@ import {
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { OpenID4VCIClientV1_0_13 } from '..'
-import { AuthorizationServerMetadataBuilder, createAccessTokenResponse, IssuerMetadataBuilderV1_13, VcIssuerBuilder } from '../../../issuer'
+import { OpenID4VCIClientV1_0_15 } from '..'
+import { AuthorizationServerMetadataBuilder, createAccessTokenResponse, IssuerMetadataBuilderV1_15, VcIssuerBuilder } from '../../../issuer'
 
 export const UNIT_TEST_TIMEOUT = 30000
 
 const alg = 'ES256'
 const jwk = { kty: 'EC', crv: 'P-256', x: 'zQOowIC1gWJtdddB5GAt4lau6Lt8Ihy771iAfam-1pc', y: 'cjD_7o3gdQ1vgiQy3_sMGs7WrwCMU9FQYimA3HxnMlw' }
 
-const issuerMetadata = new IssuerMetadataBuilderV1_13()
+const issuerMetadata = new IssuerMetadataBuilderV1_15()
   .withCredentialIssuer('https://example.com')
   .withCredentialEndpoint('https://credential-endpoint.example.com')
   .withTokenEndpoint('https://token-endpoint.example.com')
   .addCredentialConfigurationsSupported('SdJwtCredentialId', {
-    format: 'vc+sd-jwt',
+    format: 'dc+sd-jwt',
     vct: 'SdJwtCredentialId',
     id: 'SdJwtCredentialId',
-  } as CredentialConfigurationSupportedV1_0_13)
+  } as CredentialConfigurationSupportedV1_0_15)
   .build()
 
 const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
@@ -101,7 +101,7 @@ describe('sd-jwt vc', () => {
         'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22tx_code%22%3A%7B%22input_mode%22%3A%22text%22%2C%22length%22%3A3%7D%2C%22pre-authorized_code%22%3A%22123%22%7D%7D%7D',
       )
 
-      const client = await OpenID4VCIClientV1_0_13.fromURI({
+      const client = await OpenID4VCIClientV1_0_15.fromURI({
         uri: offerUri.uri,
       })
 
@@ -119,10 +119,10 @@ describe('sd-jwt vc', () => {
         },
       })
 
-      const supported = client.getCredentialsSupported('vc+sd-jwt')
-      expect(supported).toEqual({ SdJwtCredentialId: { format: 'vc+sd-jwt', id: 'SdJwtCredentialId', vct: 'SdJwtCredentialId' } })
+      const supported = client.getCredentialsSupported(false, 'dc+sd-jwt')
+      expect(supported).toEqual({ SdJwtCredentialId: { format: 'dc+sd-jwt', id: 'SdJwtCredentialId', vct: 'SdJwtCredentialId' } })
 
-      const offered = supported['SdJwtCredentialId'] as CredentialConfigurationSupportedSdJwtVcV1_0_13
+      const offered = supported['SdJwtCredentialId'] as CredentialConfigurationSupportedSdJwtVcV1_0_15
 
       nock(issuerMetadata.token_endpoint as string)
         .post('/')
@@ -159,7 +159,7 @@ describe('sd-jwt vc', () => {
 
       const credentials = await client.acquireCredentials({
         credentialIdentifier: offered.vct,
-        // format: 'vc+sd-jwt',
+        format: 'dc+sd-jwt',
         alg,
         jwk,
         proofCallbacks: {
@@ -174,7 +174,7 @@ describe('sd-jwt vc', () => {
         c_nonce: 'new-c-nonce',
         c_nonce_expires_in: 300,
         credential: 'sd-jwt',
-        // format: 'vc+sd-jwt',
+        // format: 'dc+sd-jwt',
       })
     },
     UNIT_TEST_TIMEOUT,
@@ -205,7 +205,7 @@ describe('sd-jwt vc', () => {
         'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fexample.com%22%2C%22credential_configuration_ids%22%3A%5B%22SdJwtCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22tx_code%22%3A%7B%22input_mode%22%3A%22text%22%2C%22length%22%3A3%7D%2C%22pre-authorized_code%22%3A%22123%22%7D%7D%7D',
       )
 
-      const client = await OpenID4VCIClientV1_0_13.fromURI({
+      const client = await OpenID4VCIClientV1_0_15.fromURI({
         uri: offerUri.uri,
       })
 
@@ -223,10 +223,10 @@ describe('sd-jwt vc', () => {
         },
       })
 
-      const supported = client.getCredentialsSupported('vc+sd-jwt')
-      expect(supported).toEqual({ SdJwtCredentialId: { format: 'vc+sd-jwt', id: 'SdJwtCredentialId', vct: 'SdJwtCredentialId' } })
+      const supported = client.getCredentialsSupported(false, 'dc+sd-jwt')
+      expect(supported).toEqual({ SdJwtCredentialId: { format: 'dc+sd-jwt', id: 'SdJwtCredentialId', vct: 'SdJwtCredentialId' } })
 
-      const offered = supported['SdJwtCredentialId'] as CredentialSupportedSdJwtVc
+      const offered = supported['SdJwtCredentialId'] as CredentialConfigurationSupportedSdJwtVcV1_0_15
 
       nock(issuerMetadata.token_endpoint as string)
         .post('/')
@@ -263,7 +263,7 @@ describe('sd-jwt vc', () => {
 
       const credentials = await client.acquireCredentials({
         credentialIdentifier: offered.vct,
-        // format: 'vc+sd-jwt',
+        format: 'dc+sd-jwt',
         alg,
         jwk,
         proofCallbacks: {
@@ -278,7 +278,7 @@ describe('sd-jwt vc', () => {
         c_nonce: 'new-c-nonce',
         c_nonce_expires_in: 300,
         credential: 'sd-jwt',
-        // format: 'vc+sd-jwt',
+        // format: 'dc+sd-jwt',
       })
     },
     UNIT_TEST_TIMEOUT,

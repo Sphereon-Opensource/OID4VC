@@ -1,4 +1,4 @@
-import { AuthzFlowType, CredentialOfferPayloadV1_0_13, CredentialOfferRequestWithBaseUrl, PRE_AUTH_GRANT_LITERAL } from '@sphereon/oid4vci-common'
+import { AuthzFlowType, CredentialOfferPayloadV1_0_15, CredentialOfferRequestWithBaseUrl, PRE_AUTH_GRANT_LITERAL } from '@sphereon/oid4vci-common'
 
 export const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
 export const IDENTIPROOF_AS_URL = 'https://auth.research.identiproof.io'
@@ -31,7 +31,7 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
         },
       },
     },
-  } as CredentialOfferPayloadV1_0_13,
+  } as CredentialOfferPayloadV1_0_15,
   original_credential_offer: {
     credential_issuer: 'https://jff.walt.id/issuer-api/oidc/',
     credential_configuration_ids: ['OpenBadgeCredential'],
@@ -42,7 +42,7 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
         tx_code: { description: 'Please provide the one-time code that was sent via e-mail', input_mode: 'numeric', length: 4 },
       },
     },
-  } as CredentialOfferPayloadV1_0_13,
+  } as CredentialOfferPayloadV1_0_15,
   preAuthorizedCode:
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
   scheme: 'openid-credential-offer',

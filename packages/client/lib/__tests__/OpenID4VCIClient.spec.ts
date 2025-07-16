@@ -1,6 +1,6 @@
 import {
   CodeChallengeMethod,
-  CredentialOfferPayloadV1_0_13,
+  CredentialOfferPayloadV1_0_15,
   determineSpecVersionFromOffer,
   determineSpecVersionFromURI,
   OpenId4VCIVersion,
@@ -268,7 +268,7 @@ it('determine to be version 13', async () => {
     },
     credential_configuration_ids: ['Omzetbelasting'],
     credential_issuer: 'https://example.com',
-  } satisfies CredentialOfferPayloadV1_0_13
+  } satisfies CredentialOfferPayloadV1_0_15
   const offerUri = createCredentialOfferURIFromObject({ credential_offer: offer }, 'VALUE')
 
   expect(determineSpecVersionFromOffer(offer)).toEqual(OpenId4VCIVersion.VER_1_0_13)

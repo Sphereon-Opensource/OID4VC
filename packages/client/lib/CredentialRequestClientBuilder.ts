@@ -16,7 +16,7 @@ import { CredentialOfferClient } from './CredentialOfferClient'
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11'
 import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13'
 import { CredentialRequestClientBuilderV1_0_15 } from './CredentialRequestClientBuilderV1_0_15'
-import { CredentialIssuerMetadataV1_0_15 } from '@sphereon/oid4vci-common/dist'
+import { CredentialIssuerMetadataV1_0_15 } from '@sphereon/oid4vci-common'
 
 type CredentialRequestClientBuilderVersionSpecific =
   CredentialRequestClientBuilderV1_0_11
@@ -163,8 +163,10 @@ export class CredentialRequestClientBuilder {
     return this
   }
 
-  public withDeferredCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadata | CredentialIssuerMetadataV1_0_13): this {
-    if (isV1_0_13(this._builder)) {
+  public withDeferredCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadata | CredentialIssuerMetadataV1_0_13 | CredentialIssuerMetadataV1_0_15): this {
+    if (isV1_0_15(this._builder)) {
+      this._builder.withDeferredCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadataV1_0_15)
+    } else if (isV1_0_13(this._builder)) {
       this._builder.withDeferredCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadataV1_0_13)
     } else {
       this._builder.withDeferredCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadata)
@@ -201,7 +203,9 @@ export class CredentialRequestClientBuilder {
   }
 
   public withFormat(format: CredentialFormat | OID4VCICredentialFormat): this {
-    this._builder.withFormat(format)
+    if ('withFormat' in this._builder) { // Removed in v15
+      this._builder.withFormat(format)
+    }
     return this
   }
 

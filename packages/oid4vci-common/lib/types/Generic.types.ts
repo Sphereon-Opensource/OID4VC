@@ -13,6 +13,7 @@ import {
   EndpointMetadataResultV1_0_13,
   IssuerMetadataV1_0_13,
 } from './v1_0_13.types'
+import { CredentialConfigurationSupportedV1_0_15, IssuerMetadataV1_0_15 } from './v1_0_15.types'
 
 export type InputCharSet = 'numeric' | 'text'
 export type KeyProofType = 'jwt' | 'cwt' | 'ldp_vp'
@@ -31,7 +32,17 @@ export interface ImageInfo {
   [key: string]: unknown
 }
 
-export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'vc+sd-jwt' | 'jwt_vc' | 'mso_mdoc' // jwt_vc is added for backwards compat
+export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'dc+sd-jwt' | 'vc+sd-jwt' | 'jwt_vc' | 'mso_mdoc' // jwt_vc & vc+sd-jwt are added for backwards compat
+
+export const supportedOID4VCICredentialFormat: readonly (OID4VCICredentialFormat | string)[] = [
+  'jwt_vc_json',
+  'jwt_vc_json-ld',
+  'ldp_vc',
+  'dc+sd-jwt',
+  'vc+sd-jwt',
+  'jwt_vc',
+  'mso_mdoc'
+]
 
 export interface NameAndLocale {
   name?: string // REQUIRED. String value of a display name for the Credential.
@@ -177,6 +188,7 @@ export interface CredentialSupportedMsoMdoc extends CommonCredentialSupported {
 }
 
 export type CredentialConfigurationSupported =
+  | CredentialConfigurationSupportedV1_0_15
   | CredentialConfigurationSupportedV1_0_13
   | (CommonCredentialSupported &
       (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedMsoMdoc))
@@ -407,7 +419,7 @@ export const PRE_AUTH_GRANT_LITERAL = 'urn:ietf:params:oauth:grant-type:pre-auth
 
 export type EndpointMetadataResult = EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11
 
-export type IssuerMetadata = IssuerMetadataV1_0_13 | IssuerMetadataV1_0_08
+export type IssuerMetadata = IssuerMetadataV1_0_15 | IssuerMetadataV1_0_13 | IssuerMetadataV1_0_08
 
 export type NotificationEventType = 'credential_accepted' | 'credential_failure' | 'credential_deleted'
 

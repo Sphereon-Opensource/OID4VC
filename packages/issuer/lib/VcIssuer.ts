@@ -7,7 +7,6 @@ import {
   CNonceState,
   CreateCredentialOfferURIResult,
   CREDENTIAL_MISSING_ERROR,
-  CredentialConfigurationSupportedV1_0_15,
   CredentialDataSupplierInput,
   CredentialEventNames,
   CredentialIssuerMetadataOptsV1_0_15,
@@ -41,14 +40,31 @@ import {
   toUniformCredentialOfferRequest,
   TxCode,
   TYP_ERROR,
-  URIState,
+  URIState
 } from '@sphereon/oid4vci-common'
-import { CompactSdJwtVc, CredentialMapper, InitiatorType, SubSystem, System, W3CVerifiableCredential } from '@sphereon/ssi-types'
+import {
+  CompactSdJwtVc,
+  CredentialMapper,
+  InitiatorType,
+  SubSystem,
+  System,
+  W3CVerifiableCredential
+} from '@sphereon/ssi-types'
 import ShortUUID from 'short-uuid'
 
-import { assertValidPinNumber, createCredentialOfferObject, createCredentialOfferURIFromObject, CredentialOfferGrantInput } from './functions'
+import {
+  assertValidPinNumber,
+  createCredentialOfferObject,
+  createCredentialOfferURIFromObject,
+  CredentialOfferGrantInput
+} from './functions'
 import { LookupStateManager, lookupStateManagerMultiGetAsserted, MemoryStates } from './state-manager'
-import { CredentialDataSupplier, CredentialDataSupplierArgs, CredentialIssuanceInput, CredentialSignerCallback } from './types'
+import {
+  CredentialDataSupplier,
+  CredentialDataSupplierArgs,
+  CredentialIssuanceInput,
+  CredentialSignerCallback
+} from './types'
 
 import { LOG } from './index'
 
@@ -354,14 +370,20 @@ export class VcIssuer {
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
     try {
-      if (!('credential_identifier' in credentialRequest) && !credentialRequest.format) {
-        throw new Error('credential request should either have a credential_identifier or format and type')
+      if (!('credential_identifier' in credentialRequest) && !('credential_configuration_id' in credentialRequest)) {
+        throw new Error('credential request should have either credential_identifier or credential_configuration_id')
       }
-      if (credentialRequest.format && !this.isMetadataSupportCredentialRequestFormat(credentialRequest.format)) {
-        throw new Error(TokenErrorResponse.invalid_request)
+
+      // Validate the credential_configuration_id exists in metadata if used
+      if ('credential_configuration_id' in credentialRequest && credentialRequest.credential_configuration_id) {
+        if (!this._issuerMetadata.credential_configurations_supported?.[credentialRequest.credential_configuration_id]) {
+          throw new Error(TokenErrorResponse.invalid_request)
+        }
       }
+      let format = this.lookupCredentialFormat(credentialRequest)
       const validated = await this.validateCredentialRequestProof({
         ...opts,
+        format,
         tokenExpiresIn: opts.tokenExpiresIn ?? 180,
       })
       preAuthorizedCode = validated.preAuthorizedCode
@@ -384,7 +406,7 @@ export class VcIssuer {
         throw Error(`Either a credential needs to be supplied or a credentialDataSupplier`)
       }
       let credential: CredentialIssuanceInput | undefined
-      let format: OID4VCICredentialFormat | undefined = credentialRequest.format
+
       let signerCallback: CredentialSignerCallback | undefined = opts.credentialSignerCallback
       const session: CredentialOfferSession | undefined = preAuthorizedCode && preAuthSession ? preAuthSession : authSession
       if (opts.credential) {
@@ -521,6 +543,18 @@ export class VcIssuer {
     }
   }
 
+  private lookupCredentialFormat(credentialRequest: CredentialRequestV1_0_15) : OID4VCICredentialFormat | undefined {
+    let format: OID4VCICredentialFormat | undefined
+
+    if ('credential_configuration_id' in credentialRequest && credentialRequest.credential_configuration_id) {
+      const credentialConfig = this._issuerMetadata.credential_configurations_supported?.[credentialRequest.credential_configuration_id]
+      format = credentialConfig?.format as OID4VCICredentialFormat
+    } else if ('credential_identifier' in credentialRequest) {
+      throw Error('TODO')// TODO need to check how to get this, we need a lookup for this
+    }
+    return format
+  }
+
   private async updateSession({
     preAuthorizedCode,
     error,
@@ -597,10 +631,12 @@ export class VcIssuer {
 
   private async validateCredentialRequestProof({
     credentialRequest,
+    format,
     jwtVerifyCallback,
     tokenExpiresIn,
   }: {
-    credentialRequest: CredentialRequest
+    credentialRequest: CredentialRequest,
+    format?: OID4VCICredentialFormat,
     tokenExpiresIn: number // expiration duration in seconds
     // grants?: Grant,
     clientId?: string
@@ -611,8 +647,8 @@ export class VcIssuer {
 
     const supportedIssuanceFormats = ['jwt_vc_json', 'jwt_vc_json-ld', 'vc+sd-jwt', 'ldp_vc', 'mso_mdoc']
     try {
-      if (credentialRequest.format && !supportedIssuanceFormats.includes(credentialRequest.format)) {
-        throw Error(`Format ${credentialRequest.format} not supported yet`)
+      if (format && !supportedIssuanceFormats.includes(format)) {
+        throw Error(`Format ${format} not supported yet`)
       } else if (typeof this._jwtVerifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
         throw new Error(JWT_VERIFY_CONFIG_ERROR)
       } else if (!credentialRequest.proof) {
@@ -730,27 +766,6 @@ export class VcIssuer {
       await this.updateSession({ preAuthorizedCode, issuerState, error })
       throw error
     }
-  }
-
-  private isMetadataSupportCredentialRequestFormat(requestFormat: string | string[]): boolean {
-    if (!this._issuerMetadata.credential_configurations_supported) {
-      return false
-    }
-    for (const credentialSupported of Object.values(
-      this._issuerMetadata['credential_configurations_supported'] as Record<string, CredentialConfigurationSupportedV1_0_15>,
-    )) {
-      if (!Array.isArray(requestFormat) && credentialSupported.format === requestFormat) {
-        return true
-      } else if (Array.isArray(requestFormat)) {
-        for (const format of requestFormat as string[]) {
-          if (credentialSupported.format === format) {
-            return true
-          }
-        }
-      }
-    }
-
-    return false
   }
 
   private async issueCredentialImpl(

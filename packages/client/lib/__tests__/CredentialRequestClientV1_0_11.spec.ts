@@ -17,7 +17,7 @@ import * as jose from 'jose'
 import nock from 'nock'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { CredentialOfferClientV1_0_11, CredentialRequestClientBuilderV1_0_11, MetadataClientV1_0_13, ProofOfPossessionBuilder } from '..'
+import { CredentialOfferClientV1_0_11, CredentialRequestClientBuilderV1_0_11, MetadataClientV1_0_15, ProofOfPossessionBuilder } from '..'
 
 import {
   IDENTIPROOF_ISSUER_URL,
@@ -274,7 +274,7 @@ describe('Credential Request Client with Walt.id ', () => {
     const credentialOffer = await CredentialOfferClientV1_0_11.fromURI(WALT_IRR_URI)
 
     const request = credentialOffer.credential_offer
-    const metadata = await MetadataClientV1_0_13.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(request) as string)
+    const metadata = await MetadataClientV1_0_15.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(request) as string)
     expect(metadata.credential_endpoint).toEqual(WALT_OID4VCI_METADATA.credential_endpoint)
     expect(metadata.token_endpoint).toEqual(WALT_OID4VCI_METADATA.token_endpoint)
 

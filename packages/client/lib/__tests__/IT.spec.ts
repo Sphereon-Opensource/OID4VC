@@ -1,7 +1,7 @@
 import {
   AccessTokenResponse,
   Alg,
-  CredentialOfferPayloadV1_0_13,
+  CredentialOfferPayloadV1_0_15,
   CredentialOfferRequestWithBaseUrl,
   Jwt,
   OpenId4VCIVersion,
@@ -14,7 +14,7 @@ import {
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { AccessTokenClient, AccessTokenClientV1_0_11, OpenID4VCIClient, OpenID4VCIClientV1_0_13, ProofOfPossessionBuilder } from '..'
+import { AccessTokenClient, AccessTokenClientV1_0_11, OpenID4VCIClient, OpenID4VCIClientV1_0_15, ProofOfPossessionBuilder } from '..'
 import { CredentialOfferClient } from '../CredentialOfferClient'
 import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder'
 
@@ -51,7 +51,7 @@ const mockedAccessTokenResponse: AccessTokenResponse = {
   token_type: 'Bearer',
 }
 
-const INITIATE_QR_V1_0_13 =
+const INITIATE_QR_V1_0_15 =
   'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22:%22https://issuer.research.identiproof.io%22,%22credential_configuration_ids%22:%5B%22OpenBadgeCredentialUrl%22%5D,%22grants%22:%7B%22urn:ietf:params:oauth:grant-type:pre-authorized_code%22:%7B%22pre-authorized_code%22:%22oaKazRN8I0IbtZ0C7JuMn5%22,%22tx_code%22:%7B%22input_mode%22:%22text%22,%22length%22:22,%22description%22:%22Please%20enter%20the%20serial%20number%20of%20your%20physical%20drivers%20license%22%7D%7D%7D%7D'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -179,7 +179,7 @@ describe('OID4VCI-Client should', () => {
         format: 'jwt-vc',
         credential: mockedVC,
       })
-    const client = await OpenID4VCIClientV1_0_13.fromURI({
+    const client = await OpenID4VCIClientV1_0_15.fromURI({
       uri: HTTPS_OFFER_QR_PRE_AUTHORIZED_v13,
       kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1',
       alg: Alg.ES256,
@@ -295,10 +295,10 @@ describe('OID4VCI-Client should', () => {
     'succeed with a full flow without the client v1_0_13',
     async () => {
       /* Convert the URI into an object */
-      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_13)
+      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_15)
       const preAuthorizedCode = 'oaKazRN8I0IbtZ0C7JuMn5'
       expect(credentialOffer.baseUrl).toEqual('openid-credential-offer://')
-      expect((credentialOffer.credential_offer as CredentialOfferPayloadV1_0_13).credential_configuration_ids).toEqual(['OpenBadgeCredentialUrl'])
+      expect((credentialOffer.credential_offer as CredentialOfferPayloadV1_0_15).credential_configuration_ids).toEqual(['OpenBadgeCredentialUrl'])
       expect(credentialOffer.original_credential_offer.grants).toEqual({
         'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
           'pre-authorized_code': preAuthorizedCode,
@@ -395,7 +395,7 @@ describe('OIDVCI-Client for v1_0_13 should', () => {
     'succeed with a full flow without the client and without did',
     async () => {
       /* Convert the URI into an object */
-      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_13)
+      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_15)
 
       expect(credentialOffer.baseUrl).toEqual('openid-credential-offer://')
       expect(credentialOffer.original_credential_offer).toEqual({

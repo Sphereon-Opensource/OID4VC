@@ -11,7 +11,7 @@ import {
   AuthorizationServerOpts,
   AuthzFlowType,
   CodeChallengeMethod,
-  CredentialConfigurationSupportedV1_0_15,
+  CredentialConfigurationSupportedV1_0_15, CredentialOfferPayloadV1_0_15,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponseV1_0_15,
   DefaultURISchemes,
@@ -428,7 +428,7 @@ export class OpenID4VCIClientV1_0_15 {
     credentialTypes?: string | string[]
     context?: string[]
     proofCallbacks: ProofOfPossessionCallbacks
-    format?: CredentialFormat | OID4VCICredentialFormat
+    format: CredentialFormat | OID4VCICredentialFormat
     kid?: string
     jwk?: JWK
     alg?: Alg | string
@@ -595,7 +595,8 @@ export class OpenID4VCIClientV1_0_15 {
     if (!this.credentialOffer) {
       return []
     }
-    return this.credentialOffer.credential_offer?.credential_configuration_ids ?? []
+
+    return (this.credentialOffer.credential_offer as CredentialOfferPayloadV1_0_15 | undefined)?.credential_configuration_ids ?? []
   }
 
   issuerSupportedFlowTypes(): AuthzFlowType[] {

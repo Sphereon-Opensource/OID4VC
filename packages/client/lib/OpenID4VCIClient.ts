@@ -12,6 +12,7 @@ import {
   AuthzFlowType,
   CodeChallengeMethod,
   CredentialConfigurationSupported,
+  CredentialConfigurationSupportedV1_0_13,
   CredentialConfigurationSupportedV1_0_15,
   CredentialOfferPayloadV1_0_08,
   CredentialOfferPayloadV1_0_11,
@@ -22,6 +23,7 @@ import {
   determineVersionsFromIssuerMetadata,
   DPoPResponseParams,
   EndpointMetadataResultV1_0_11,
+  EndpointMetadataResultV1_0_13,
   EndpointMetadataResultV1_0_15,
   ExperimentalSubjectIssuance,
   getClientIdFromCredentialOfferPayload,
@@ -36,7 +38,7 @@ import {
   OpenId4VCIVersion,
   PKCEOpts,
   ProofOfPossessionCallbacks,
-  toAuthorizationResponsePayload,
+  toAuthorizationResponsePayload
 } from '@sphereon/oid4vci-common'
 import { CredentialFormat, Loggers } from '@sphereon/ssi-types'
 
@@ -54,10 +56,11 @@ import { OpenID4VCIClientStateV1_0_11 } from './OpenID4VCIClientV1_0_11'
 import { OpenID4VCIClientStateV1_0_13 } from './OpenID4VCIClientV1_0_13'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
 import { generateMissingPKCEOpts, sendNotification } from './functions'
+import { OpenID4VCIClientStateV1_0_15 } from './OpenID4VCIClientV1_0_15'
 
 const logger = Loggers.DEFAULT.get('sphereon:oid4vci')
 
-export type OpenID4VCIClientState = OpenID4VCIClientStateV1_0_11 | OpenID4VCIClientStateV1_0_13
+export type OpenID4VCIClientState = OpenID4VCIClientStateV1_0_11 | OpenID4VCIClientStateV1_0_13 | OpenID4VCIClientStateV1_0_15
 
 export type EndpointMetadataResult = EndpointMetadataResultV1_0_11 | EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_15
 
@@ -411,7 +414,7 @@ export class OpenID4VCIClient {
     credentialTypes: string | string[]
     context?: string[]
     proofCallbacks: ProofOfPossessionCallbacks
-    format?: CredentialFormat | OID4VCICredentialFormat
+    format: CredentialFormat | OID4VCICredentialFormat
     kid?: string
     jwk?: JWK
     alg?: Alg | string
@@ -429,7 +432,7 @@ export class OpenID4VCIClient {
     if (jwk) this._state.jwk = jwk
     if (kid) this._state.kid = kid
 
-    let requestBuilder: CredentialRequestClientBuilderV1_0_13 | CredentialRequestClientBuilderV1_0_11
+    let requestBuilder: CredentialRequestClientBuilderV1_0_15 | CredentialRequestClientBuilderV1_0_13 | CredentialRequestClientBuilderV1_0_11
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
       requestBuilder = this.credentialOffer
         ? CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({
@@ -560,7 +563,7 @@ export class OpenID4VCIClient {
   getCredentialsSupported(
     restrictToInitiationTypes?: boolean,
     format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
-  ): Record<string, CredentialConfigurationSupportedV1_0_15> | Array<CredentialConfigurationSupported> {
+  ): Record<string, CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0_13> | Array<CredentialConfigurationSupported> {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),

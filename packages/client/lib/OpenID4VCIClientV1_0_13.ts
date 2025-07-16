@@ -29,8 +29,8 @@ import {
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PKCEOpts,
-  ProofOfPossessionCallbacks,
-  toAuthorizationResponsePayload,
+  ProofOfPossessionCallbacks, supportedOID4VCICredentialFormat,
+  toAuthorizationResponsePayload
 } from '@sphereon/oid4vci-common'
 import { CredentialFormat, Loggers } from '@sphereon/ssi-types'
 
@@ -382,7 +382,7 @@ export class OpenID4VCIClientV1_0_13 {
     credentialIdentifier?: string
     credentialTypes?: string | string[]
     context?: string[]
-    format?: CredentialFormat | OID4VCICredentialFormat
+    format: CredentialFormat | OID4VCICredentialFormat
     kid?: string
     jwk?: JWK
     alg?: Alg | string
@@ -399,7 +399,7 @@ export class OpenID4VCIClientV1_0_13 {
     credentialTypes?: string | string[]
     context?: string[]
     proofCallbacks: ProofOfPossessionCallbacks
-    format?: CredentialFormat | OID4VCICredentialFormat
+    format: CredentialFormat | OID4VCICredentialFormat
     kid?: string
     jwk?: JWK
     alg?: Alg | string
@@ -430,7 +430,7 @@ export class OpenID4VCIClientV1_0_13 {
     credentialTypes?: string | string[]
     context?: string[]
     proofCallbacks?: ProofOfPossessionCallbacks
-    format?: CredentialFormat | OID4VCICredentialFormat
+    format: CredentialFormat | OID4VCICredentialFormat
     kid?: string
     jwk?: JWK
     alg?: Alg | string
@@ -573,7 +573,12 @@ export class OpenID4VCIClientV1_0_13 {
           credentialIdentifier,
           subjectIssuance,
         })
-    const response = await credentialRequestClient.acquireCredentialsUsingRequest(request, createDPoPOpts)
+
+    if(!supportedOID4VCICredentialFormat.includes(format)) { // Check so we can cast format as OID4VCICredentialFormat
+      return Promise.reject(Error(`Unsupported credential format: ${format}`))
+    }
+
+    const response = await credentialRequestClient.acquireCredentialsUsingRequest(request, format as OID4VCICredentialFormat, createDPoPOpts)
     this._state.dpopResponseParams = response.params
     if (response.errorBody) {
       logger.debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`)

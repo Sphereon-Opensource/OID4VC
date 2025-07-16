@@ -2,7 +2,7 @@ import {
   CredentialSupportedFormatV1_0_08,
   IssuerCredentialSubjectDisplay,
   IssuerMetadataV1_0_08,
-  IssuerMetadataV1_0_13,
+  IssuerMetadataV1_0_15,
   PRE_AUTH_GRANT_LITERAL,
 } from '@sphereon/oid4vci-common'
 import { ICredentialStatus, W3CVerifiableCredential } from '@sphereon/ssi-types'
@@ -23,7 +23,7 @@ export interface IssuerMockData {
     issuer?: string
     token_endpoint: string
     credential_endpoint: string
-    openid4vci_metadata: IssuerMetadataV1_0_08 | IssuerMetadataV1_0_13
+    openid4vci_metadata: IssuerMetadataV1_0_08 | IssuerMetadataV1_0_15
   }
   auth: {
     url: string
@@ -1419,7 +1419,7 @@ const mockData: VciMockDataStructure = {
         scopes_supported: ['openid'],
         subject_types_supported: ['public'],
         token_endpoint: 'https://mijnkvk.acc.credenco.com/token',
-      } as IssuerMetadataV1_0_13,
+      } as IssuerMetadataV1_0_15,
     },
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore

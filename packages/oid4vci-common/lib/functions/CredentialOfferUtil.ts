@@ -40,10 +40,11 @@ export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
   version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_11], 'credentials')
   version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_11], 'grants.user_pin_required')
 
-  version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_13], 'credential_configuration_ids')
-  version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_13], 'tx_code')
+  version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_13, OpenId4VCIVersion.VER_1_0_15], 'credential_configuration_ids')
+  version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_13, OpenId4VCIVersion.VER_1_0_15], 'tx_code')
+  version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_15], 'credential_offer_uri ') // This optional so no reliable indicator
   if (version === OpenId4VCIVersion.VER_UNKNOWN) {
-    version = OpenId4VCIVersion.VER_1_0_13
+    version = OpenId4VCIVersion.VER_1_0_15
   }
   return version
 }
@@ -61,7 +62,7 @@ export function determineSpecVersionFromScheme(credentialOfferURI: string, openI
     if (credentialOfferURI.includes('credentials:') || credentialOfferURI.includes('credentials%22')) {
       return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_11], scheme)
     }
-    return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_13], scheme)
+    return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_15], scheme) // There are no solid differences between draft v13 and draft v15, so just default to v15 now
   } else {
     return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_UNKNOWN], scheme)
   }

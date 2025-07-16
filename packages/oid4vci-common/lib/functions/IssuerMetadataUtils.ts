@@ -1,4 +1,4 @@
-import { VCI_LOG_COMMON } from '../index'
+import { CredentialConfigurationSupportedV1_0_15, VCI_LOG_COMMON } from '../index'
 import {
   AuthorizationServerMetadata,
   CredentialConfigurationSupported,
@@ -17,8 +17,8 @@ export function getSupportedCredentials(opts?: {
   version: OpenId4VCIVersion
   types?: string[][]
   format?: OID4VCICredentialFormat | string | (OID4VCICredentialFormat | string)[]
-}): Record<string, CredentialConfigurationSupportedV1_0_13> | Array<CredentialConfigurationSupported> {
-  const { version = OpenId4VCIVersion.VER_1_0_13, types } = opts ?? {}
+}): Record<string, CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0_13> | Array<CredentialConfigurationSupported> {
+  const { version = OpenId4VCIVersion.VER_1_0_15, types } = opts ?? {}
   if (types && Array.isArray(types)) {
     if (version < OpenId4VCIVersion.VER_1_0_13) {
       return types.flatMap((typeSet) => getSupportedCredential({ ...opts, version, types: typeSet }) as Array<CredentialConfigurationSupported>)
@@ -71,11 +71,12 @@ export function getSupportedCredential(opts?: {
   version: OpenId4VCIVersion
   types?: string | string[]
   format?: OID4VCICredentialFormat | string | (OID4VCICredentialFormat | string)[]
-}): Record<string, CredentialConfigurationSupportedV1_0_13> | Array<CredentialConfigurationSupported> {
-  const { issuerMetadata, types, format, version = OpenId4VCIVersion.VER_1_0_13 } = opts ?? {}
+}): Record<string, CredentialConfigurationSupportedV1_0_13> | Record<string, CredentialConfigurationSupportedV1_0_15> | Array<CredentialConfigurationSupported> {
+  const { issuerMetadata, types, format, version = OpenId4VCIVersion.VER_1_0_15 } = opts ?? {}
 
   let credentialConfigurationsV11: Array<CredentialConfigurationSupported> | undefined = undefined
   let credentialConfigurationsV13: Record<string, CredentialConfigurationSupportedV1_0_13> | undefined = undefined
+  let credentialConfigurationsV15: Record<string, CredentialConfigurationSupportedV1_0_15> | undefined = undefined
   if (
     version < OpenId4VCIVersion.VER_1_0_12 ||
     (issuerMetadata?.credential_configurations_supported === undefined && issuerMetadata?.credentials_supported)
@@ -90,6 +91,9 @@ export function getSupportedCredential(opts?: {
         }
         credentialConfigurationsV11?.push(supported as CredentialConfigurationSupported)
       })
+    } else if (version >= OpenId4VCIVersion.VER_1_0_15) {
+      credentialConfigurationsV15 =
+        (issuerMetadata?.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_15>) ?? {}
     } else {
       credentialConfigurationsV11 = (issuerMetadata?.credentials_supported as Array<CredentialConfigurationSupported>) ?? []
     }
@@ -99,8 +103,13 @@ export function getSupportedCredential(opts?: {
   }
   if (!issuerMetadata || (!issuerMetadata.credential_configurations_supported && !issuerMetadata.credentials_supported)) {
     VCI_LOG_COMMON.warning(`No credential issuer metadata or supported credentials found for issuer}`)
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return version < OpenId4VCIVersion.VER_1_0_13 ? credentialConfigurationsV11! : credentialConfigurationsV13!
+    if (version < OpenId4VCIVersion.VER_1_0_13) {
+      return credentialConfigurationsV11!
+    } else if (version >= OpenId4VCIVersion.VER_1_0_15) {
+      return credentialConfigurationsV15!
+    } else {
+      return credentialConfigurationsV13!
+    }
   }
 
   const normalizedTypes: string[] = Array.isArray(types) ? types : types ? [types] : []

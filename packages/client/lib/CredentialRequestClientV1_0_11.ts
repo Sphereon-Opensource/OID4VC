@@ -78,7 +78,10 @@ export class CredentialRequestClientV1_0_11 {
     uniformRequest: UniformCredentialRequest,
     createDPoPOpts?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
-    const request = getCredentialRequestForVersion(uniformRequest, this.version())
+    if (!uniformRequest.format) {
+      return Promise.reject(Error('format is missing from the (legacy v11) credential request'))
+    }
+    const request = getCredentialRequestForVersion(uniformRequest, uniformRequest.format, this.version())
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint
     if (!isValidURL(credentialEndpoint)) {
       logger.debug(`Invalid credential endpoint: ${credentialEndpoint}`)

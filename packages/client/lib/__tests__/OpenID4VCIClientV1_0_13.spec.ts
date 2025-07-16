@@ -4,18 +4,18 @@ import { CodeChallengeMethod, WellKnownEndpoints } from '@sphereon/oid4vci-commo
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { OpenID4VCIClientV1_0_13 } from '../OpenID4VCIClientV1_0_13'
+import { OpenID4VCIClientV1_0_15 } from '../OpenID4VCIClientV1_0_15'
 
 const MOCK_URL = 'https://server.example.com/'
 
-describe('OpenID4VCIClientV1_0_13 should', () => {
-  let client: OpenID4VCIClientV1_0_13
+describe('OpenID4VCIClientV1_0_15 should', () => {
+  let client: OpenID4VCIClientV1_0_15
 
   beforeEach(async () => {
     nock(MOCK_URL).get(/.*/).reply(200, {})
     nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {})
     nock(MOCK_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {})
-    client = await OpenID4VCIClientV1_0_13.fromURI({
+    client = await OpenID4VCIClientV1_0_15.fromURI({
       clientId: 'test-client',
       uri: 'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fserver.example.com%22%2C%22credential_configuration_ids%22%3A%5B%22TestCredential%22%5D%7D',
       createAuthorizationRequestURL: false,
@@ -57,7 +57,7 @@ describe('OpenID4VCIClientV1_0_13 should', () => {
     nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(200, {})
     nock(MOCK_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(200, {})
     // Use a client with issuer only to trigger the error
-    client = await OpenID4VCIClientV1_0_13.fromCredentialIssuer({
+    client = await OpenID4VCIClientV1_0_15.fromCredentialIssuer({
       credentialIssuer: MOCK_URL,
       createAuthorizationRequestURL: false,
       retrieveServerMetadata: false,

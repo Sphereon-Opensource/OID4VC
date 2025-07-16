@@ -25,6 +25,7 @@ import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClient
 import { CredentialRequestClientBuilderV1_0_15 } from './CredentialRequestClientBuilderV1_0_15'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
 import { shouldRetryResourceRequestWithDPoPNonce } from './functions/dpopUtil'
+import { supportedOID4VCICredentialFormat } from '@sphereon/oid4vci-common'
 
 const logger = Loggers.DEFAULT.get('sphereon:oid4vci:credential')
 
@@ -106,7 +107,7 @@ export class CredentialRequestClient {
     credentialIdentifier?: string
     credentialTypes?: string | string[]
     context?: string[]
-    format?: CredentialFormat | OID4VCICredentialFormat
+    format: CredentialFormat | OID4VCICredentialFormat
     subjectIssuance?: ExperimentalSubjectIssuance
     createDPoPOpts?: CreateDPoPClientOpts
   }): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
@@ -120,15 +121,19 @@ export class CredentialRequestClient {
       credentialIdentifier,
       subjectIssuance
     })
-    return await this.acquireCredentialsUsingRequestWithoutProof(request, opts.createDPoPOpts)
+
+    if(!supportedOID4VCICredentialFormat.includes(format)) { // Check so we can cast format as OID4VCICredentialFormat
+      return Promise.reject(Error(`Unsupported credential format: ${format}`))
+    }
+    return await this.acquireCredentialsUsingRequestWithoutProof(request, format as OID4VCICredentialFormat, opts.createDPoPOpts)
   }
 
   public async acquireCredentialsUsingProof(opts: {
     proofInput: ProofOfPossessionBuilder | ProofOfPossession
+    format: CredentialFormat | OID4VCICredentialFormat
     credentialIdentifier?: string
     credentialTypes?: string | string[]
     context?: string[]
-    format?: CredentialFormat | OID4VCICredentialFormat
     subjectIssuance?: ExperimentalSubjectIssuance
     createDPoPOpts?: CreateDPoPClientOpts
   }): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
@@ -143,31 +148,40 @@ export class CredentialRequestClient {
       credentialIdentifier,
       subjectIssuance
     })
-    return await this.acquireCredentialsUsingRequest(request, opts.createDPoPOpts)
+
+    if(!supportedOID4VCICredentialFormat.includes(format)) { // Check so we can cast format as OID4VCICredentialFormat
+      return Promise.reject(Error(`Unsupported credential format: ${format}`))
+    }
+
+    return await this.acquireCredentialsUsingRequest(request, format as OID4VCICredentialFormat, opts.createDPoPOpts)
   }
 
   public async acquireCredentialsUsingRequestWithoutProof(
     uniformRequest: UniformCredentialRequest,
+    format: OID4VCICredentialFormat,
     createDPoPOpts?: CreateDPoPClientOpts
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
-    return await this.acquireCredentialsUsingRequestImpl(uniformRequest, createDPoPOpts)
+    return await this.acquireCredentialsUsingRequestImpl(uniformRequest, format, createDPoPOpts)
   }
 
   public async acquireCredentialsUsingRequest(
     uniformRequest: UniformCredentialRequest,
+    format: OID4VCICredentialFormat,
     createDPoPOpts?: CreateDPoPClientOpts
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
-    return await this.acquireCredentialsUsingRequestImpl(uniformRequest, createDPoPOpts)
+    return await this.acquireCredentialsUsingRequestImpl(uniformRequest, format, createDPoPOpts)
   }
 
   private async acquireCredentialsUsingRequestImpl(
     uniformRequest: UniformCredentialRequest & { proof?: ProofOfPossession },
-    createDPoPOpts?: CreateDPoPClientOpts
+    format: OID4VCICredentialFormat,
+    createDPoPOpts?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
       throw new Error('Versions below v1.0.13 (draft 13) are not supported by the V13 credential request client.')
     }
-    const request: CredentialRequestV1_0_13 = getCredentialRequestForVersion(uniformRequest, this.version()) as CredentialRequestV1_0_13
+
+    const request: CredentialRequestV1_0_13 = getCredentialRequestForVersion(uniformRequest, format, this.version()) as CredentialRequestV1_0_13
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint
     if (!isValidURL(credentialEndpoint)) {
       logger.debug(`Invalid credential endpoint: ${credentialEndpoint}`)

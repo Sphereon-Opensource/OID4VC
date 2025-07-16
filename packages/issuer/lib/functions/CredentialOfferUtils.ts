@@ -2,20 +2,20 @@ import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   AssertedUniformCredentialOffer,
   CredentialIssuerMetadataOpts,
-  CredentialIssuerMetadataOptsV1_0_13,
+  CredentialIssuerMetadataOptsV1_0_15,
   CredentialIssuerMetadataV1_0_11,
   CredentialOfferMode,
   CredentialOfferPayloadV1_0_11,
-  CredentialOfferPayloadV1_0_13,
+  CredentialOfferPayloadV1_0_15,
   CredentialOfferSession,
   CredentialOfferV1_0_13,
   Grant,
   GrantAuthorizationCode,
   GrantUrnIetf,
-  IssuerMetadataV1_0_13,
+  IssuerMetadataV1_0_15,
   PIN_NOT_MATCH_ERROR,
   PRE_AUTH_GRANT_LITERAL,
-  UniformCredentialOffer,
+  UniformCredentialOffer
 } from '@sphereon/oid4vci-common'
 
 export interface CredentialOfferGrantInput {
@@ -80,10 +80,10 @@ function parseCredentialOfferSchemeAndBaseUri(scheme?: string, baseUri?: string,
 }
 
 export function createCredentialOfferObject(
-  issuerMetadata?: CredentialIssuerMetadataOptsV1_0_13,
+  issuerMetadata?: CredentialIssuerMetadataOptsV1_0_15,
   // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
   opts?: {
-    credentialOffer?: CredentialOfferPayloadV1_0_13
+    credentialOffer?: CredentialOfferPayloadV1_0_15
     credentialOfferUri?: string
     grants?: CredentialOfferGrantInput
     client_id?: string
@@ -95,7 +95,7 @@ export function createCredentialOfferObject(
 
   const grants = createCredentialOfferGrants(opts?.grants)
 
-  let credential_offer: CredentialOfferPayloadV1_0_13
+  let credential_offer: CredentialOfferPayloadV1_0_15
   if (opts?.credentialOffer) {
     credential_offer = {
       ...opts.credentialOffer,
@@ -189,10 +189,10 @@ export function createCredentialOfferURIFromObject(
 
 export function createCredentialOfferURI(
   offerMode: CredentialOfferMode,
-  issuerMetadata?: IssuerMetadataV1_0_13,
+  issuerMetadata?: IssuerMetadataV1_0_15,
   // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
   opts?: {
-    credentialOffer?: CredentialOfferPayloadV1_0_13
+    credentialOffer?: CredentialOfferPayloadV1_0_15
     credentialOfferUri?: string
     scheme?: string
     baseUri?: string

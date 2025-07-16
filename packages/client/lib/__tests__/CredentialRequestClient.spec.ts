@@ -4,7 +4,7 @@ import { KeyObject } from 'crypto'
 
 import {
   Alg,
-  CredentialRequestV1_0_13,
+  CredentialRequestV1_0_15,
   EndpointMetadata,
   getCredentialRequestForVersion,
   getIssuerFromCredentialOfferPayload,
@@ -327,10 +327,10 @@ describe('Credential Request Client with different issuers ', () => {
       })
 
     // createCredentialRequest returns uniform format in draft 11
-    const credentialRequest: CredentialRequestV1_0_13 = getCredentialRequestForVersion(
+    const credentialRequest: CredentialRequestV1_0_15 = getCredentialRequestForVersion(
       credentialOffer,
       OpenId4VCIVersion.VER_1_0_13,
-    ) as CredentialRequestV1_0_13
+    ) as CredentialRequestV1_0_15
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
