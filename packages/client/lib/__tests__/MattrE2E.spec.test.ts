@@ -4,7 +4,7 @@ import { fetch } from 'cross-fetch'
 import { importJWK, JWK, SignJWT } from 'jose'
 import { describe, expect, it } from 'vitest'
 
-import { OpenID4VCIClientV1_0_11 } from '..'
+import { OpenID4VCIClientV1_0_15 } from '..'
 
 export const UNIT_TEST_TIMEOUT = 30000
 
@@ -24,7 +24,7 @@ const kid = `${did}#z6Mki5ZwZKN1dBQprfJTikUvkDxrHijiiQngkWviMF5gw2Hv`
 describe.skip('OID4VCI-Client using Mattr issuer should', () => {
   async function test(format: 'ldp_vc' | 'jwt_vc_json') {
     const offer = await getCredentialOffer(format)
-    const client = await OpenID4VCIClientV1_0_11.fromURI({
+    const client = await OpenID4VCIClientV1_0_15.fromURI({
       uri: offer.offerUrl,
       kid,
       alg: Alg.EdDSA,

@@ -176,7 +176,7 @@ export class MetadataClientV1_0_15 {
     }
     logger.debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}, nonce endpoint ${nonce_endpoint}`)
     return {
-      issuer,
+      issuer: issuer,
       token_endpoint,
       credential_endpoint,
       nonce_endpoint, // New in v15

@@ -9,7 +9,7 @@ import {
 import nock from 'nock'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { CredentialOfferClientV1_0_11 } from '../CredentialOfferClientV1_0_11'
+import { CredentialOfferClientV1_0_15 } from '../CredentialOfferClientV1_0_15'
 import { MetadataClient } from '../MetadataClient'
 import { retrieveWellknown } from '../functions/OpenIDUtils'
 
@@ -54,8 +54,9 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404)
 
     const INITIATE_URI =
-      'openid-initiate-issuance://?issuer=https%3A%2F%2Fissuer.research.identiproof.io&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false'
-    const initiation = await CredentialOfferClientV1_0_11.fromURI(INITIATE_URI)
+      'openid-initiate-issuance://?credential_offer=eyJjcmVkZW50aWFsX2lzc3VlciI6Imh0dHBzOi8vaXNzdWVyLnJlc2VhcmNoLmlkZW50aXByb29mLmlvIiwiY3JlZGVudGlhbF9jb25maWd1cmF0aW9uX2lkcyI6WyJPcGVuQmFkZ2VDcmVkZW50aWFsIl0sImdyYW50cyI6eyJ1cm46aWV0ZjpwYXJhbXM6b2F1dGg6Z3JhbnQtdHlwZTpwcmUtYXV0aG9yaXplZF9jb2RlIjp7InByZS1hdXRob3JpemVkX2NvZGUiOiJleUowZVhBaU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuZXlKemRXSWlPaUpoT1RVeVpqVXhOaTFqWVdWbUxUUTRZak10T0RJeFl5MDBPVFJrWXpneU5qbGpaakFpTENKd2NtVXRZWFYwYUc5eWFYcGxaQ0k2ZEhKMVpYMC5ZRTVEbGFsY0xDMkNoR0VnNDdDUURhTjFnVHhiYVFxU2NsSVZxc1NBVUhFIiwidXNlcl9waW5fcmVxdWlyZWQiOmZhbHNlfX19'
+
+    const initiation = await CredentialOfferClientV1_0_15.fromURI(INITIATE_URI)
     const metadata = await MetadataClient.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(initiation.credential_offer) as string)
     expect(metadata.credential_endpoint).toEqual('https://issuer.research.identiproof.io/credential')
     expect(metadata.token_endpoint).toEqual('https://auth.research.identiproof.io/oauth2/token')

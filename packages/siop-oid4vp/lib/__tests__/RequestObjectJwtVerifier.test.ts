@@ -74,7 +74,7 @@ describe('requestObjectJwtVerifier', () => {
       { raw: '' },
     )
 
-    const expectedJwtVerifier: JwtVerifier = { type: 'request-object', method: 'x5c', x5c: [''], issuer: '1234', alg: 'ES256' }
+    const expectedJwtVerifier: JwtVerifier = { type: 'request-object', method: 'x5c', x5c: [''], credential_issuer: '1234', alg: 'ES256' }
     expect(jwtVerifier).toEqual(expectedJwtVerifier)
   })
 

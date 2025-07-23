@@ -271,8 +271,8 @@ it('determine to be version 13', async () => {
   } satisfies CredentialOfferPayloadV1_0_15
   const offerUri = createCredentialOfferURIFromObject({ credential_offer: offer }, 'VALUE')
 
-  expect(determineSpecVersionFromOffer(offer)).toEqual(OpenId4VCIVersion.VER_1_0_13)
-  expect(determineSpecVersionFromURI(offerUri)).toEqual(OpenId4VCIVersion.VER_1_0_13)
+  expect(determineSpecVersionFromOffer(offer)).toEqual(OpenId4VCIVersion.VER_1_0_15)
+  expect(determineSpecVersionFromURI(offerUri)).toEqual(OpenId4VCIVersion.VER_1_0_15)
 })
 it('determine to be version 11', async () => {
   const offerUri =

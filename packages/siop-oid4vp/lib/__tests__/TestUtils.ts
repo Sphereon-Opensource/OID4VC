@@ -240,7 +240,7 @@ export const metadata: {
   verify(): unknown
 } = {
   opMetadata: {
-    issuer: ResponseIss.SELF_ISSUED_V2,
+    credential_issuer: ResponseIss.SELF_ISSUED_V2,
     authorization_endpoint: 'http://test.com',
     subject_syntax_types_supported: ['did:web'],
     id_token_signing_alg_values_supported: undefined,

@@ -147,7 +147,7 @@ export class CredentialRequestClientBuilder {
     return this._builder.version
   }
 
-  public withCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadata | CredentialIssuerMetadataV1_0_13): this {
+  public withCredentialEndpointFromMetadata(metadata: CredentialIssuerMetadata | CredentialIssuerMetadataV1_0_13 | CredentialIssuerMetadataV1_0_15): this {
     if (isV1_0_15(this._builder)) {
       this._builder.withCredentialEndpointFromMetadata(metadata as CredentialIssuerMetadataV1_0_15)
     } else if (isV1_0_13(this._builder)) {

@@ -181,7 +181,7 @@ describe.skip('RP and OP interaction should', () => {
       .withRegistration({
         authorizationEndpoint: 'www.myauthorizationendpoint.com',
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        issuer: ResponseIss.SELF_ISSUED_V2,
+        credential_issuer: ResponseIss.SELF_ISSUED_V2,
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         responseTypesSupported: [ResponseType.ID_TOKEN, ResponseType.VP_TOKEN],
         vpFormats: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
@@ -298,7 +298,7 @@ describe.skip('RP and OP interaction should', () => {
       .withRegistration({
         authorizationEndpoint: 'www.myauthorizationendpoint.com',
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        issuer: ResponseIss.SELF_ISSUED_V2,
+        credential_issuer: ResponseIss.SELF_ISSUED_V2,
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         responseTypesSupported: [ResponseType.ID_TOKEN, ResponseType.VP_TOKEN],
         vpFormats: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
@@ -430,7 +430,7 @@ describe.skip('RP and OP interaction should', () => {
       .withRegistration({
         authorizationEndpoint: 'www.myauthorizationendpoint.com',
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        issuer: ResponseIss.SELF_ISSUED_V2,
+        credential_issuer: ResponseIss.SELF_ISSUED_V2,
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         responseTypesSupported: [ResponseType.ID_TOKEN, ResponseType.VP_TOKEN],
         vpFormats: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },

@@ -95,7 +95,7 @@ describe('Credential Request Client ', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_13,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
       // .withEndpointMetadata(metadata)
       .withKid(kid)
@@ -105,7 +105,7 @@ describe('Credential Request Client ', () => {
       credentialTypes: 'OpenBadgeCredential',
       proofInput: proof,
       format: 'jwt',
-      version: OpenId4VCIVersion.VER_1_0_13,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy()
     expect(credentialRequest.format).toEqual('jwt_vc')
@@ -189,7 +189,7 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialTypes: 'OpenBadgeCredential',
         format: 'jwt_vc',
-        version: OpenId4VCIVersion.VER_1_0_13,
+        version: OpenId4VCIVersion.VER_1_0_15,
       })
     const draft8CredentialRequest = getCredentialRequestForVersion(credentialRequest, OpenId4VCIVersion.VER_1_0_08)
     expect(draft8CredentialRequest).toEqual(getMockData('spruce')?.credential.request)
@@ -236,7 +236,7 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialIdentifier: 'OpenBadgeCredential',
         format: 'jwt_vc',
-        version: OpenId4VCIVersion.VER_1_0_13,
+        version: OpenId4VCIVersion.VER_1_0_15,
       })
     expect(credentialOffer).toEqual(getMockData('uniissuer')?.credential.request)
   })
@@ -323,13 +323,13 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialIdentifier: 'BevoegdheidUittreksel_jwt_vc_json',
         // format: 'ldp_vc',
-        version: OpenId4VCIVersion.VER_1_0_13,
+        version: OpenId4VCIVersion.VER_1_0_15,
       })
 
     // createCredentialRequest returns uniform format in draft 11
     const credentialRequest: CredentialRequestV1_0_15 = getCredentialRequestForVersion(
       credentialOffer,
-      OpenId4VCIVersion.VER_1_0_13,
+      OpenId4VCIVersion.VER_1_0_15,
     ) as CredentialRequestV1_0_15
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

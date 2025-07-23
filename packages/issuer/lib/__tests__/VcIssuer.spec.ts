@@ -144,7 +144,7 @@ describe('VcIssuer', () => {
         Promise.resolve({
           '@context': ['https://www.w3.org/2018/credentials/v1'],
           type: ['VerifiableCredential'],
-          issuer: 'did:key:test',
+          credential_issuer: 'did:key:test',
           issuanceDate: new Date().toISOString(),
           credentialSubject: {},
           proof: {
@@ -546,7 +546,7 @@ describe('VcIssuer without did', () => {
         Promise.resolve({
           '@context': ['https://www.w3.org/2018/credentials/v1'],
           type: ['VerifiableCredential'],
-          issuer: 'test.com',
+          credential_issuer: 'test.com',
           issuanceDate: new Date().toISOString(),
           credentialSubject: {},
           proof: {

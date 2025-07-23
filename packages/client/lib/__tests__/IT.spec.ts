@@ -12,7 +12,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AccessTokenClient, AccessTokenClientV1_0_11, OpenID4VCIClient, OpenID4VCIClientV1_0_15, ProofOfPossessionBuilder } from '..'
 import { CredentialOfferClient } from '../CredentialOfferClient'
@@ -23,7 +23,7 @@ import {
   IDENTIPROOF_AS_URL,
   IDENTIPROOF_ISSUER_URL,
   IDENTIPROOF_OID4VCI_METADATA,
-  IDENTIPROOF_OID4VCI_METADATA_v13,
+  IDENTIPROOF_OID4VCI_METADATA_v15,
 } from './MetadataMocks'
 
 export const UNIT_TEST_TIMEOUT = 30000
@@ -172,7 +172,7 @@ describe('OID4VCI-Client should', () => {
       interval: 2025101300,
       token_type: 'Bearer',
     })
-    nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA_v13))
+    nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA_v15))
     nock(ISSUER_URL)
       .post(/credential/)
       .reply(200, {
@@ -185,6 +185,7 @@ describe('OID4VCI-Client should', () => {
       alg: Alg.ES256,
       clientId: 'test-clientId',
     })
+    vi.spyOn(client, 'acquireNonce').mockResolvedValue('mocked-nonce')
     expect(client.credentialOffer).toBeDefined()
     expect(client.endpointMetadata).toBeDefined()
     expect(client.getIssuer()).toEqual('https://issuer.research.identiproof.io')
@@ -196,7 +197,7 @@ describe('OID4VCI-Client should', () => {
 
     const credentialResponse = await client.acquireCredentials({
       credentialIdentifier: 'OpenBadgeCredential',
-      // format: 'jwt_vc_json-ld',
+      format: 'jwt_vc_json-ld',
       proofCallbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
@@ -236,7 +237,7 @@ describe('OID4VCI-Client should', () => {
   }
 
   it(
-    'succeed with a full flow without the client v1_0_11',
+    'succeed with a full flow without the client v1_0_15',
     async () => {
       /* Convert the URI into an object */
       const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_08)
@@ -439,7 +440,7 @@ describe('OIDVCI-Client for v1_0_13 should', () => {
         callbacks: {
           signCallback: proofOfPossessionCallbackFunction,
         },
-        version: OpenId4VCIVersion.VER_1_0_13,
+        version: OpenId4VCIVersion.VER_1_0_15,
       })
         .withEndpointMetadata({
           issuer: 'https://issuer.research.identiproof.io',

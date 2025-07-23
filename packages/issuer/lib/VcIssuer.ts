@@ -98,7 +98,7 @@ export class VcIssuer {
       credentialDataSupplier?: CredentialDataSupplier
       cNonceExpiresIn?: number | undefined // expiration duration in seconds
       asClientOpts?: ClientMetadata
-    },
+    }
   ) {
     this._issuerMetadata = issuerMetadata
     this._authorizationServerMetadata = authorizationServerMetadata
@@ -115,7 +115,7 @@ export class VcIssuer {
 
   public async getCredentialOfferSessionById(
     id: string,
-    lookups: Array<'uri' | 'preAuthorizedCode' | 'issuerState' | 'correlationId'> = ['preAuthorizedCode', 'issuerState', 'correlationId'],
+    lookups: Array<'uri' | 'preAuthorizedCode' | 'issuerState' | 'correlationId'> = ['preAuthorizedCode', 'issuerState', 'correlationId']
   ): Promise<CredentialOfferSession> {
     // preAuth and issuerState can be looked up directly
     if (Array.isArray(lookups) && lookups.length > 0) {
@@ -126,7 +126,7 @@ export class VcIssuer {
         id,
         keyValueMapper: this._uris,
         valueStateManager: this._credentialOfferSessions,
-        lookups: ['preAuthorizedCode', 'issuerState', 'correlationId'],
+        lookups: ['preAuthorizedCode', 'issuerState', 'correlationId']
       })
       // return new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, lookup).getFromMultiple(id)
     }
@@ -139,7 +139,7 @@ export class VcIssuer {
 
   public async deleteCredentialOfferSessionById(
     id: string,
-    lookups: Array<'uri' | 'preAuthorizedCode' | 'issuerState' | 'correlationId'> = ['preAuthorizedCode', 'issuerState'],
+    lookups: Array<'uri' | 'preAuthorizedCode' | 'issuerState' | 'correlationId'> = ['preAuthorizedCode', 'issuerState']
   ): Promise<CredentialOfferSession> {
     const session = await this.getCredentialOfferSessionById(id, lookups)
     if (session) {
@@ -154,10 +154,10 @@ export class VcIssuer {
   }
 
   public async processNotification({
-    preAuthorizedCode,
-    issuerState,
-    notification,
-  }: {
+                                     preAuthorizedCode,
+                                     issuerState,
+                                     notification
+                                   }: {
     preAuthorizedCode?: string
     issuerState?: string
     notification: NotificationRequest
@@ -202,7 +202,7 @@ export class VcIssuer {
       credential_configuration_ids,
       statusListOpts,
       credentialOfferUri,
-      redirectUri,
+      redirectUri
     } = opts
     if (offerMode === 'REFERENCE' && !credentialOfferUri) {
       return Promise.reject(Error('credentialOfferUri must be supplied for offerMode REFERENCE!'))
@@ -214,7 +214,7 @@ export class VcIssuer {
       if (grants[PRE_AUTH_GRANT_LITERAL]) {
         grants[PRE_AUTH_GRANT_LITERAL].tx_code = {
           ...grants[PRE_AUTH_GRANT_LITERAL].tx_code,
-          length: grants[PRE_AUTH_GRANT_LITERAL].tx_code?.length ?? opts.pinLength,
+          length: grants[PRE_AUTH_GRANT_LITERAL].tx_code?.length ?? opts.pinLength
         }
       }
     }
@@ -228,10 +228,10 @@ export class VcIssuer {
       grants,
       credentialOffer: credential_configuration_ids
         ? {
-            credential_issuer: this._issuerMetadata.credential_issuer,
-            credential_configuration_ids,
-          }
-        : undefined,
+          credential_issuer: this._issuerMetadata.credential_issuer,
+          credential_configuration_ids
+        }
+        : undefined
     })
 
     const preAuthGrant = credentialOfferObject.credential_offer.grants?.[PRE_AUTH_GRANT_LITERAL]
@@ -269,19 +269,19 @@ export class VcIssuer {
         expiresAt,
         preAuthorizedCode,
         issuerState,
-        correlationId: correlationId,
+        correlationId: correlationId
       })
     }
 
     const credentialOffer = await toUniformCredentialOfferRequest(
       {
         credential_offer: credentialOfferObject.credential_offer,
-        credential_offer_uri: credentialOfferObject.credential_offer_uri,
+        credential_offer_uri: credentialOfferObject.credential_offer_uri
       } as CredentialOfferV1_0_15,
       {
         version: OpenId4VCIVersion.VER_1_0_15,
-        resolve: false, // We are creating the object, so do not resolve
-      },
+        resolve: false // We are creating the object, so do not resolve
+      }
     )
 
     const status = IssueStatus.OFFER_CREATED
@@ -298,19 +298,33 @@ export class VcIssuer {
       ...(userPin && { txCode: userPin }), // We used to use userPin according to older specs. We map these onto txCode now. If both are used, txCode in the end wins, even if they are different
       ...(opts.credentialDataSupplierInput && { credentialDataSupplierInput: opts.credentialDataSupplierInput }),
       credentialOffer,
-      statusLists: statusListOpts,
+      statusLists: statusListOpts
     }
 
     const uri = createCredentialOfferURIFromObject(credentialOffer, offerMode, { ...opts, baseUri })
     if (preAuthorizedCode) {
       const lookupManager = new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, 'correlationId')
-      await lookupManager.setMapped(preAuthorizedCode, { preAuthorizedCode, uri, createdAt, expiresAt, correlationId, issuerState }, session)
+      await lookupManager.setMapped(preAuthorizedCode, {
+        preAuthorizedCode,
+        uri,
+        createdAt,
+        expiresAt,
+        correlationId,
+        issuerState
+      }, session)
       // await this.credentialOfferSessions.set(preAuthorizedCode, session)
     }
     // todo: check whether we could have the same value for issuer state and pre auth code if both are supported.
     if (issuerState) {
       const lookupManager = new LookupStateManager<URIState, CredentialOfferSession>(this.uris, this._credentialOfferSessions, 'correlationId')
-      await lookupManager.setMapped(issuerState, { preAuthorizedCode, uri, createdAt, expiresAt, correlationId, issuerState }, session)
+      await lookupManager.setMapped(issuerState, {
+        preAuthorizedCode,
+        uri,
+        createdAt,
+        expiresAt,
+        correlationId,
+        issuerState
+      }, session)
       // await this.credentialOfferSessions.set(issuerState, session)
     }
     let qrCodeDataUri: string | undefined
@@ -325,7 +339,7 @@ export class VcIssuer {
       qrCodeDataUri,
       correlationId,
       txCode,
-      ...(userPin !== undefined && { userPin, pinLength: userPin?.length ?? 0 }),
+      ...(userPin !== undefined && { userPin, pinLength: userPin?.length ?? 0 })
     }
     EVENTS.emit(CredentialOfferEventNames.OID4VCI_OFFER_CREATED, {
       eventName: CredentialOfferEventNames.OID4VCI_OFFER_CREATED,
@@ -337,7 +351,7 @@ export class VcIssuer {
       issuer: this.issuerMetadata.credential_issuer,
       subsystem: SubSystem.API,
       createdAt,
-      expiresAt,
+      expiresAt
     })
     return credentialOfferResult
   }
@@ -384,7 +398,7 @@ export class VcIssuer {
       const validated = await this.validateCredentialRequestProof({
         ...opts,
         format,
-        tokenExpiresIn: opts.tokenExpiresIn ?? 180,
+        tokenExpiresIn: opts.tokenExpiresIn ?? 180
       })
       preAuthorizedCode = validated.preAuthorizedCode
       issuerState = validated.issuerState
@@ -398,7 +412,7 @@ export class VcIssuer {
         cNonce: newcNonce,
         createdAt: +new Date(),
         ...(authSession?.issuerState && { issuerState: authSession.issuerState }),
-        ...(preAuthSession && { preAuthorizedCode: preAuthSession.preAuthorizedCode }),
+        ...(preAuthSession && { preAuthorizedCode: preAuthSession.preAuthorizedCode })
       }
       await this.cNonces.set(newcNonce, newcNonceState)
 
@@ -431,7 +445,7 @@ export class VcIssuer {
           credentialRequest: opts.credentialRequest,
           credentialSupplierConfig: this._issuerMetadata.credential_supplier_config,
           credentialOffer /*todo: clientId: */,
-          ...(credentialDataSupplierInput && { credentialDataSupplierInput }),
+          ...(credentialDataSupplierInput && { credentialDataSupplierInput })
         } as CredentialDataSupplierArgs)
         credential = result.credential
         if (result.format) {
@@ -448,13 +462,13 @@ export class VcIssuer {
       if (CredentialMapper.isSdJwtDecodedCredentialPayload(credential) && (kid || jwk) && !credential.cnf) {
         if (kid) {
           credential.cnf = {
-            kid,
+            kid
           }
         }
         // else  TODO temp workaround IATAB2B-57
         if (jwk) {
           credential.cnf = {
-            jwk,
+            jwk
           }
         }
       } else if (did && !CredentialMapper.isSdJwtDecodedCredentialPayload(credential) && credential.credentialSubject !== undefined) {
@@ -488,10 +502,10 @@ export class VcIssuer {
           format,
           credential,
           jwtVerifyResult,
-          issuer,
-          ...(session && { statusLists: session.statusLists }),
+          issuer: issuer,
+          ...(session && { statusLists: session.statusLists })
         },
-        signerCallback,
+        signerCallback
       )
       // TODO implement acceptance_token (deferred response)
       // TODO update verification accordingly
@@ -524,7 +538,7 @@ export class VcIssuer {
         // format: credentialRequest.format,
         c_nonce: newcNonce,
         c_nonce_expires_in: this._cNonceExpiresIn,
-        ...(notification_id && { notification_id }),
+        ...(notification_id && { notification_id })
       }
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -543,24 +557,29 @@ export class VcIssuer {
     }
   }
 
-  private lookupCredentialFormat(credentialRequest: CredentialRequestV1_0_15) : OID4VCICredentialFormat | undefined {
+  private lookupCredentialFormat(credentialRequest: CredentialRequestV1_0_15): OID4VCICredentialFormat | undefined {
     let format: OID4VCICredentialFormat | undefined
 
     if ('credential_configuration_id' in credentialRequest && credentialRequest.credential_configuration_id) {
       const credentialConfig = this._issuerMetadata.credential_configurations_supported?.[credentialRequest.credential_configuration_id]
       format = credentialConfig?.format as OID4VCICredentialFormat
-    } else if ('credential_identifier' in credentialRequest) {
-      throw Error('TODO')// TODO need to check how to get this, we need a lookup for this
+    } else if ('credential_identifier' in credentialRequest && credentialRequest.credential_identifier) {
+      const credentialIdentifier: any = credentialRequest.credential_identifier
+      const matchedConfig = Object.values(
+        this._issuerMetadata.credential_configurations_supported || {}
+      ).find(config => credentialIdentifier === config.id || credentialIdentifier === config.vct)
+
+      return matchedConfig?.format as OID4VCICredentialFormat
     }
     return format
   }
 
   private async updateSession({
-    preAuthorizedCode,
-    error,
-    issuerState,
-    notification,
-  }: {
+                                preAuthorizedCode,
+                                error,
+                                issuerState,
+                                notification
+                              }: {
     preAuthorizedCode?: string
     issuerState?: string
     error?: unknown
@@ -630,11 +649,11 @@ export class VcIssuer {
     }*/
 
   private async validateCredentialRequestProof({
-    credentialRequest,
-    format,
-    jwtVerifyCallback,
-    tokenExpiresIn,
-  }: {
+                                                 credentialRequest,
+                                                 format,
+                                                 jwtVerifyCallback,
+                                                 tokenExpiresIn
+                                               }: {
     credentialRequest: CredentialRequest,
     format?: OID4VCICredentialFormat,
     tokenExpiresIn: number // expiration duration in seconds
@@ -645,7 +664,7 @@ export class VcIssuer {
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
 
-    const supportedIssuanceFormats = ['jwt_vc_json', 'jwt_vc_json-ld', 'vc+sd-jwt', 'ldp_vc', 'mso_mdoc']
+    const supportedIssuanceFormats = ['jwt_vc_json', 'jwt_vc_json-ld', 'dc+sd-jwt', 'vc+sd-jwt', 'ldp_vc', 'mso_mdoc']
     try {
       if (format && !supportedIssuanceFormats.includes(format)) {
         throw Error(`Format ${format} not supported yet`)
@@ -658,7 +677,7 @@ export class VcIssuer {
       const jwtVerifyResult = jwtVerifyCallback
         ? await jwtVerifyCallback(credentialRequest.proof)
         : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          await this._jwtVerifyCallback!(credentialRequest.proof)
+        await this._jwtVerifyCallback!(credentialRequest.proof)
 
       const { didDocument, did, jwt } = jwtVerifyResult
       const { header, payload } = jwt
@@ -777,7 +796,7 @@ export class VcIssuer {
       issuer?: string
       statusLists?: Array<StatusListOpts>
     },
-    issuerCallback?: CredentialSignerCallback,
+    issuerCallback?: CredentialSignerCallback
   ): Promise<W3CVerifiableCredential | CompactSdJwtVc> {
     if ((!opts.credential && !opts.credentialRequest) || !this._credentialSignerCallback) {
       throw new Error(ISSUER_CONFIG_ERROR)
@@ -793,7 +812,7 @@ export class VcIssuer {
       initiator: opts.issuer ?? '<unknown>',
       initiatorType: InitiatorType.EXTERNAL,
       system: System.OID4VCI,
-      subsystem: SubSystem.VC_ISSUER,
+      subsystem: SubSystem.VC_ISSUER
     })
 
     return credential

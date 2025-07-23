@@ -1,6 +1,6 @@
-import { Loggers } from '@sphereon/ssi-types'
+import { Loggers, ObjectUtils } from '@sphereon/ssi-types'
 import { jwtDecode, JwtPayload } from 'jwt-decode'
-import { VCI_LOG_COMMON } from '../index'
+import { CredentialOfferPayloadV1_0_15, VCI_LOG_COMMON } from '../index'
 
 import {
   AssertedUniformCredentialOffer,
@@ -20,10 +20,11 @@ import {
   PRE_AUTH_GRANT_LITERAL,
   UniformCredentialOffer,
   UniformCredentialOfferPayload,
-  UniformCredentialOfferRequest,
+  UniformCredentialOfferRequest
 } from '../types'
 
 import { getJson } from './HttpUtils'
+import { base64urlToString } from '@sphereon/oid4vc-common'
 
 const logger = Loggers.DEFAULT.get('sphereon:oid4vci:offer')
 
@@ -42,7 +43,7 @@ export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
 
   version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_13, OpenId4VCIVersion.VER_1_0_15], 'credential_configuration_ids')
   version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_13, OpenId4VCIVersion.VER_1_0_15], 'tx_code')
-  version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_15], 'credential_offer_uri ') // This optional so no reliable indicator
+  version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_15], 'credential_offer_uri ') // optional so last resort
   if (version === OpenId4VCIVersion.VER_UNKNOWN) {
     version = OpenId4VCIVersion.VER_1_0_15
   }
@@ -126,7 +127,9 @@ export const getStateFromCredentialOfferPayload = (credentialOffer: CredentialOf
 }
 
 export function determineSpecVersionFromOffer(offer: CredentialOfferPayload | CredentialOffer): OpenId4VCIVersion {
-  if (isCredentialOfferV1_0_13(offer)) {
+  if (isCredentialOfferV1_0_15(offer)) {
+    return OpenId4VCIVersion.VER_1_0_15
+  } else if (isCredentialOfferV1_0_13(offer)) {
     return OpenId4VCIVersion.VER_1_0_13
     // We don't have full support for V12, so let's skip for now
     /*} else if (isCredentialOfferV1_0_12(offer)) {
@@ -235,12 +238,33 @@ function isCredentialOfferV1_0_13(offer: CredentialOfferPayload | CredentialOffe
   return 'credential_offer_uri' in offer
 }
 
+
+function isCredentialOfferV1_0_15(offer: CredentialOfferPayload | CredentialOffer): boolean {
+  if (!offer) {
+    return false
+  }
+
+  // Direct payload
+  if ('credential_issuer' in offer && 'credential_configuration_ids' in offer) {
+    return Array.isArray((offer as any).credential_configuration_ids)
+  }
+
+  // Wrapped in credential_offer
+  if ('credential_offer' in offer && offer['credential_offer']) {
+    return isCredentialOfferV1_0_15((offer as any)['credential_offer'])
+  }
+
+  // Fallback: URI only (credential_offer_uri) – still v15 style but cannot assert without dereferencing.
+  return 'credential_offer_uri' in offer
+}
+
+
 export async function toUniformCredentialOfferRequest(
   offer: CredentialOffer,
   opts?: {
     resolve?: boolean
     version?: OpenId4VCIVersion
-  },
+  }
 ): Promise<UniformCredentialOfferRequest> {
   let version = opts?.version ?? determineSpecVersionFromOffer(offer)
   let originalCredentialOffer = offer.credential_offer
@@ -271,7 +295,7 @@ export async function toUniformCredentialOfferRequest(
     original_credential_offer: originalCredentialOffer,
     ...(credentialOfferURI && { credential_offer_uri: credentialOfferURI }),
     supportedFlows,
-    version,
+    version
   }
 }
 
@@ -284,7 +308,7 @@ export async function assertedUniformCredentialOffer(
   origCredentialOffer: UniformCredentialOffer,
   opts?: {
     resolve?: boolean
-  },
+  }
 ): Promise<AssertedUniformCredentialOffer> {
   const credentialOffer = JSON.parse(JSON.stringify(origCredentialOffer))
   if (credentialOffer.credential_offer_uri && !credentialOffer.credential_offer) {
@@ -313,17 +337,20 @@ export async function resolveCredentialOfferURI(uri?: string): Promise<UniformCr
 }
 
 export function toUniformCredentialOfferPayload(
-  offer: CredentialOfferPayload,
+  rawOffer: CredentialOfferPayload,
   opts?: {
     version?: OpenId4VCIVersion
-  },
+  }
 ): UniformCredentialOfferPayload {
+
+  const offer = normalizeOfferInput<CredentialOfferPayload>(rawOffer)
+
   // todo: create test to check idempotence once a payload is already been made uniform.
   const version = opts?.version ?? determineSpecVersionFromOffer(offer)
   if (version >= OpenId4VCIVersion.VER_1_0_11) {
     const orig = offer as UniformCredentialOfferPayload
     return {
-      ...orig,
+      ...orig
     }
   }
   const grants: Grant = 'grants' in offer ? (offer.grants as Grant) : {}
@@ -332,7 +359,7 @@ export function toUniformCredentialOfferPayload(
     if (offerPayloadAsV8V9.op_state) {
       grants.authorization_code = {
         ...grants.authorization_code,
-        issuer_state: offerPayloadAsV8V9.op_state,
+        issuer_state: offerPayloadAsV8V9.op_state
       }
     }
     let user_pin_required = false
@@ -344,7 +371,7 @@ export function toUniformCredentialOfferPayload(
     if (offerPayloadAsV8V9[PRE_AUTH_CODE_LITERAL]) {
       grants[PRE_AUTH_GRANT_LITERAL] = {
         'pre-authorized_code': offerPayloadAsV8V9[PRE_AUTH_CODE_LITERAL],
-        user_pin_required,
+        user_pin_required
       }
     }
   }
@@ -355,7 +382,7 @@ export function toUniformCredentialOfferPayload(
       // credential_definition: getCredentialsSupported(never, offerPayloadAsV8V9.credentials).map(sup => {credentialSubject: sup.credentialSubject})[0],
       credential_issuer: issuer ?? offerPayloadAsV8V9.issuer,
       credentials: offerPayloadAsV8V9.credentials,
-      grants,
+      grants
     }
   }
   if (version === OpenId4VCIVersion.VER_1_0_08) {
@@ -363,7 +390,7 @@ export function toUniformCredentialOfferPayload(
     return {
       credential_issuer: issuer ?? offerPayloadAsV8V9.issuer,
       credentials: Array.isArray(offerPayloadAsV8V9.credential_type) ? offerPayloadAsV8V9.credential_type : [offerPayloadAsV8V9.credential_type],
-      grants,
+      grants
     } as UniformCredentialOfferPayload
   }
   throw Error(`Could not create uniform payload for version ${version}`)
@@ -371,7 +398,7 @@ export function toUniformCredentialOfferPayload(
 
 export function determineFlowType(
   suppliedOffer: AssertedUniformCredentialOffer | UniformCredentialOfferPayload,
-  version: OpenId4VCIVersion,
+  version: OpenId4VCIVersion
 ): AuthzFlowType[] {
   const payload: UniformCredentialOfferPayload = getCredentialOfferPayload(suppliedOffer)
   const supportedFlows: AuthzFlowType[] = []
@@ -403,8 +430,8 @@ export function determineGrantTypes(
     | AssertedUniformCredentialOffer
     | UniformCredentialOfferPayload
     | ({
-        grants: Grant
-      } & Record<never, never>),
+    grants: Grant
+  } & Record<never, never>)
 ): GrantTypes[] {
   let grants: Grant | undefined
   if ('grants' in offer && offer.grants) {
@@ -430,7 +457,7 @@ function getVersionFromURIParam(
   currentVersion: OpenId4VCIVersion,
   matchingVersion: OpenId4VCIVersion[],
   param: string,
-  allowUpgrade = true,
+  allowUpgrade = true
 ) {
   if (credentialOfferURI.includes(param)) {
     return recordVersion(currentVersion, matchingVersion, param, allowUpgrade)
@@ -450,11 +477,13 @@ function recordVersion(currentVersion: OpenId4VCIVersion, matchingVersion: OpenI
   }
 
   throw new Error(
-    `Invalid param. Some keys have been used from version: ${currentVersion} version while '${key}' is used from version: ${JSON.stringify(matchingVersion)}`,
+    `Invalid param. Some keys have been used from version: ${currentVersion} version while '${key}' is used from version: ${JSON.stringify(matchingVersion)}`
   )
 }
 
-export function getTypesFromOfferV1_0_11(credentialOffer: CredentialOfferPayloadV1_0_11, opts?: { filterVerifiableCredential: boolean }) {
+export function getTypesFromOfferV1_0_11(credentialOffer: CredentialOfferPayloadV1_0_11, opts?: {
+  filterVerifiableCredential: boolean
+}) {
   const types = credentialOffer.credentials.reduce<string[]>((prev, curr) => {
     // FIXME returning the string value is wrong (as it's an id), but just matching the current behavior of this library
     // The credential_type (from draft 8) and the actual 'type' value in a VC (from draft 11) are mixed up
@@ -480,3 +509,33 @@ export function getTypesFromOfferV1_0_11(credentialOffer: CredentialOfferPayload
   }
   return types
 }
+
+
+export function getCredentialConfigurationIdsFromOfferV1_0_15(
+  offer: CredentialOfferPayloadV1_0_15
+): string[] {
+  return offer.credential_configuration_ids ?? []
+}
+
+
+export function normalizeOfferInput<T = any>(input: unknown): T {
+  if (typeof input !== 'string') {
+    return input as T
+  }
+
+  // JWT?
+  if (ObjectUtils.isString(input) && input.startsWith('ey')) {
+    const payload = base64urlToString(input)
+    return JSON.parse(payload) as T
+  }
+
+  // JSON?
+  try {
+    return JSON.parse(input) as T
+  } catch {
+  }
+
+  // Last resort: just return as-is
+  return input as T
+}
+

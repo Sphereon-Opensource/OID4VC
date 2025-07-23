@@ -166,7 +166,7 @@ describe('sd-jwt vc', () => {
 
       const credentials = await client.acquireCredentials({
         credentialIdentifier: offered.vct,
-        //format: 'dc+sd-jwt',
+        format: 'dc+sd-jwt',
         alg,
         jwk,
         proofCallbacks: {

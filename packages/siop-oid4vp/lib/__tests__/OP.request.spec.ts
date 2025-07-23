@@ -94,7 +94,7 @@ describe('OP should', () => {
       clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
       'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       //TODO: fill it up with actual value
-      issuer: ResponseIss.SELF_ISSUED_V2,
+      credential_issuer: ResponseIss.SELF_ISSUED_V2,
       passBy: PassBy.VALUE,
     },
     responseMode: ResponseMode.POST,

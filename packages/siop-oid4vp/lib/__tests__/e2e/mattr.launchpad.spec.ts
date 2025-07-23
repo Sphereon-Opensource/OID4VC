@@ -105,7 +105,7 @@ describe('OID4VCI-Client using Mattr issuer should', () => {
     })
 
     const authResponse = await op.createAuthorizationResponse(verifiedAuthRequest, {
-      issuer: didStr,
+      credential_issuer: didStr,
       presentationExchange: {
         verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
         presentationSubmission: verifiablePresentationResult.presentationSubmission,

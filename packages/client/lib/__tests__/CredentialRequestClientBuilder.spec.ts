@@ -99,7 +99,7 @@ describe('Credential Request Client Builder', () => {
         signCallback: proofOfPossessionCallbackFunction,
         verifyCallback: proofOfPossessionVerifierCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_13,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
       .withClientId('sphereon:wallet')
       .withKid(kid)
@@ -108,7 +108,7 @@ describe('Credential Request Client Builder', () => {
     const credentialRequest = await credReqClient.createCredentialRequest({
       proofInput: proof,
       credentialIdentifier: 'OpenBadgeCredential',
-      version: OpenId4VCIVersion.VER_1_0_13,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
     expect(credentialRequest.proof?.jwt).toContain(partialJWT)
     expect('credential_identifier' in credentialRequest).toBe(true)
@@ -129,7 +129,7 @@ describe('Credential Request Client Builder', () => {
         signCallback: proofOfPossessionCallbackFunction,
         verifyCallback: proofOfPossessionVerifierCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_13,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
       .withClientId('sphereon:wallet')
       .withKid(kid_withoutDid)
@@ -138,7 +138,7 @@ describe('Credential Request Client Builder', () => {
     const credentialRequest = await credReqClient.createCredentialRequest({
       proofInput: proof,
       credentialTypes: 'OpenBadgeCredential',
-      version: OpenId4VCIVersion.VER_1_0_13,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
     expect(credentialRequest.proof?.jwt).toContain(partialJWT_withoutDid)
     if ('types' in credentialRequest) {

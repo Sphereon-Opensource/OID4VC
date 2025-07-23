@@ -179,7 +179,7 @@ describe('VcIssuer', () => {
     }).build({ startListening: false })
 
     server = new OID4VCIServer(expressSupport, {
-      issuer: vcIssuer,
+      credential_issuer: vcIssuer,
       baseUrl: 'http://localhost:3456/test',
       endpointOpts: {
         // serverOpts: { baseUrl: 'http://localhost:3456/test', port: 3456 },
@@ -415,7 +415,7 @@ describe('VcIssuer', () => {
             credential: {
               '@context': ['https://www.w3.org/2018/credentials/v1'],
               type: ['VerifiableCredential'],
-              issuer: 'did:example:123',
+              credential_issuer: 'did:example:123',
               issuanceDate: new Date().toISOString(),
               credentialSubject: {},
             },
@@ -425,7 +425,7 @@ describe('VcIssuer', () => {
           Promise.resolve({
             '@context': ['https://www.w3.org/2018/credentials/v1'],
             type: ['VerifiableCredential'],
-            issuer: 'did:example:123',
+            credential_issuer: 'did:example:123',
             issuanceDate: new Date().toISOString(),
             credentialSubject: {},
             proof: {
@@ -456,7 +456,7 @@ describe('VcIssuer', () => {
       }
 
       testServer = new OID4VCIServer(testExpressSupport, {
-        issuer: testVcIssuer,
+        credential_issuer: testVcIssuer,
         baseUrl: 'http://localhost:4321',
         endpointOpts,
       })

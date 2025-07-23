@@ -5,17 +5,24 @@ import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
 import { CredentialOfferClient } from '../CredentialOfferClient'
-import { CredentialOfferClientV1_0_11 } from '../CredentialOfferClientV1_0_11'
+import { CredentialOfferClientV1_0_15 } from '../CredentialOfferClientV1_0_15'
 
-import { INITIATION_TEST, INITIATION_TEST_HTTPS_URI, INITIATION_TEST_URI } from './MetadataMocks'
+import {
+  INITIATION_TEST, INITIATION_TEST_HTTPS_URI_V1_0_15_AUTH_CODE,
+  INITIATION_TEST_HTTPS_URI_V1_0_15_PRE_AUTH,
+  INITIATION_TEST_URI
+} from './MetadataMocks'
 
 describe('Issuance Initiation', () => {
   it('Should return Issuance Initiation Request with base URL from https URI', async () => {
-    expect(await CredentialOfferClientV1_0_11.fromURI(INITIATION_TEST_HTTPS_URI)).toEqual({
+    expect(await CredentialOfferClientV1_0_15.fromURI(INITIATION_TEST_HTTPS_URI_V1_0_15_AUTH_CODE)).toEqual({
       baseUrl: 'https://server.example.com',
       credential_offer: {
         credential_issuer: 'https://server.example.com',
-        credentials: ['https://did.example.org/healthCard', 'https://did.example.org/driverLicense'],
+        credential_configuration_ids: [
+          'https://did.example.org/healthCard',
+          'https://did.example.org/driverLicense',
+        ],
         grants: {
           authorization_code: {
             issuer_state: 'eyJhbGciOiJSU0Et...FYUaBy',
@@ -24,14 +31,21 @@ describe('Issuance Initiation', () => {
       },
       issuerState: 'eyJhbGciOiJSU0Et...FYUaBy',
       original_credential_offer: {
-        credential_type: ['https://did.example.org/healthCard', 'https://did.example.org/driverLicense'],
-        issuer: 'https://server.example.com',
-        op_state: 'eyJhbGciOiJSU0Et...FYUaBy',
+        credential_configuration_ids: [
+          'https://did.example.org/healthCard',
+          'https://did.example.org/driverLicense'
+        ],
+        'credential_issuer': 'https://server.example.com',
+        'grants': {
+          'authorization_code': {
+            'issuer_state': 'eyJhbGciOiJSU0Et...FYUaBy'
+          }
+        }
       },
       scheme: 'https',
       supportedFlows: ['Authorization Code Flow'],
       userPinRequired: false,
-      version: 1008,
+      version: 1015,
     })
   })
 
@@ -45,12 +59,12 @@ describe('Issuance Initiation', () => {
   })
 
   it('Should return URI from Issuance Initiation Request', async () => {
-    const issuanceInitiationClient = await CredentialOfferClientV1_0_11.fromURI(INITIATION_TEST_HTTPS_URI)
-    expect(CredentialOfferClientV1_0_11.toURI(issuanceInitiationClient)).toEqual(INITIATION_TEST_HTTPS_URI)
+    const issuanceInitiationClient = await CredentialOfferClientV1_0_15.fromURI(INITIATION_TEST_HTTPS_URI_V1_0_15_PRE_AUTH)
+    expect(CredentialOfferClientV1_0_15.toURI(issuanceInitiationClient)).toEqual(INITIATION_TEST_HTTPS_URI_V1_0_15_PRE_AUTH)
   })
 
   it('Should throw error on invalid URI', async () => {
-    const issuanceInitiationURI = INITIATION_TEST_HTTPS_URI.replace('?', '')
+    const issuanceInitiationURI = INITIATION_TEST_HTTPS_URI_V1_0_15_PRE_AUTH.replace('?', '')
     await expect(async () => CredentialOfferClient.fromURI(issuanceInitiationURI)).rejects.toThrowError('Invalid Credential Offer Request')
   })
 
@@ -106,7 +120,7 @@ describe('Issuance Initiation', () => {
     const client = await CredentialOfferClient.fromURI(
       'openid-credential-offer://mijnkvk.acc.credenco.com/?credential_offer_uri=https%3A%2F%2Fmijnkvk.acc.credenco.com%2Fopenid4vc%2FcredentialOffer%3Fid%3D32fc4ebf-9e31-4149-9877-e3c0b602d559',
     )
-    expect(client.version).toEqual(OpenId4VCIVersion.VER_1_0_13)
+    expect(client.version).toEqual(OpenId4VCIVersion.VER_1_0_15)
     expect(client.baseUrl).toEqual('openid-credential-offer://mijnkvk.acc.credenco.com/')
     expect(client.scheme).toEqual('openid-credential-offer')
     expect(client.credential_offer.credential_issuer).toEqual('https://mijnkvk.acc.credenco.com')

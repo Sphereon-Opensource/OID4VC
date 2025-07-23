@@ -7,9 +7,9 @@ import {
   getIssuerFromCredentialOfferPayload,
   Jwt,
   OpenId4VCIVersion,
-  ProofOfPossession,
+  ProofOfPossession, UniformCredentialRequest,
   URL_NOT_VALID,
-  WellKnownEndpoints,
+  WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
 import * as jose from 'jose'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -17,13 +17,13 @@ import * as jose from 'jose'
 import nock from 'nock'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { CredentialOfferClientV1_0_11, CredentialRequestClientBuilderV1_0_11, MetadataClientV1_0_15, ProofOfPossessionBuilder } from '..'
+import { CredentialOfferClientV1_0_15, CredentialRequestClientBuilderV1_0_15, MetadataClientV1_0_15, ProofOfPossessionBuilder } from '..'
 
 import {
   IDENTIPROOF_ISSUER_URL,
   IDENTIPROOF_OID4VCI_METADATA,
   INITIATION_TEST,
-  INITIATION_TEST_V1_0_08,
+  INITIATION_TEST_V1_0_15,
   WALT_OID4VCI_METADATA,
 } from './MetadataMocks'
 import { getMockData } from './data/VciDataFixtures'
@@ -88,9 +88,8 @@ describe('Credential Request Client ', () => {
       error_description: 'This is a mock error message',
     })
 
-    const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({ credentialOffer: INITIATION_TEST_V1_0_08 })
+    const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOffer({ credentialOffer: INITIATION_TEST_V1_0_15 })
       .withCredentialEndpoint(basePath + '/credential')
-      .withFormat('ldp_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build()
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
@@ -98,16 +97,16 @@ describe('Credential Request Client ', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_08,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
       // .withEndpointMetadata(metadata)
       .withClientId('sphereon:wallet')
       .withKid(kid)
       .build()
     expect(credReqClient.getCredentialEndpoint()).toEqual(basePath + '/credential')
-    const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, version: OpenId4VCIVersion.VER_1_0_08 })
+    const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, version: OpenId4VCIVersion.VER_1_0_15 })
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy()
-    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest)
+    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest, credentialRequest.format)
     expect(result?.errorBody?.error).toBe('unsupported_format')
   })
 
@@ -118,9 +117,8 @@ describe('Credential Request Client ', () => {
       error_description: 'This is a mock error message',
     })
 
-    const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({ credentialOffer: INITIATION_TEST_V1_0_08 })
+    const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOffer({ credentialOffer: INITIATION_TEST_V1_0_15 })
       .withCredentialEndpoint(basePath + '/credential')
-      .withFormat('ldp_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build()
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
@@ -128,14 +126,14 @@ describe('Credential Request Client ', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_08,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
       // .withEndpointMetadata(metadata)
       .withClientId('sphereon:wallet')
       .withKid(kid_withoutDid)
       .build()
     expect(credReqClient.getCredentialEndpoint()).toEqual(basePath + '/credential')
-    const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, version: OpenId4VCIVersion.VER_1_0_08 })
+    const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, version: OpenId4VCIVersion.VER_1_0_15 })
     expect(credentialRequest.proof?.jwt?.includes(partialJWT_withoutDid)).toBeTruthy()
     const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest)
     expect(result?.errorBody?.error).toBe('unsupported_format')
@@ -150,9 +148,8 @@ describe('Credential Request Client ', () => {
         format: 'jwt-vc',
         credential: mockedVC,
       })
-    const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOfferRequest({ request: INITIATION_TEST })
+    const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOfferRequest({ request: INITIATION_TEST })
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build()
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
@@ -160,7 +157,7 @@ describe('Credential Request Client ', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_08,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
       // .withEndpointMetadata(metadata)
       .withKid(kid)
@@ -169,7 +166,7 @@ describe('Credential Request Client ', () => {
     const credentialRequest = await credReqClient.createCredentialRequest({
       proofInput: proof,
       format: 'jwt',
-      version: OpenId4VCIVersion.VER_1_0_08,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy()
     expect(credentialRequest.format).toEqual('jwt_vc')
@@ -186,9 +183,8 @@ describe('Credential Request Client ', () => {
         format: 'jwt-vc',
         credential: mockedVC,
       })
-    const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOfferRequest({ request: INITIATION_TEST })
+    const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOfferRequest({ request: INITIATION_TEST })
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build()
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
@@ -196,7 +192,7 @@ describe('Credential Request Client ', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_08,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
       // .withEndpointMetadata(metadata)
       .withKid(kid_withoutDid)
@@ -205,18 +201,17 @@ describe('Credential Request Client ', () => {
     const credentialRequest = await credReqClient.createCredentialRequest({
       proofInput: proof,
       format: 'jwt',
-      version: OpenId4VCIVersion.VER_1_0_08,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
     expect(credentialRequest.proof?.jwt?.includes(partialJWT_withoutDid)).toBeTruthy()
     expect(credentialRequest.format).toEqual('jwt_vc')
-    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest)
+    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest, credentialRequest.format)
     expect(result?.successBody?.credential).toEqual(mockedVC)
   })
 
   it('should fail with invalid url', async () => {
-    const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOfferRequest({ request: INITIATION_TEST })
+    const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOfferRequest({ request: INITIATION_TEST })
       .withCredentialEndpoint('httpsf://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build()
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
@@ -224,21 +219,21 @@ describe('Credential Request Client ', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_08,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
       // .withEndpointMetadata(metadata)
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build()
-    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json', types: ['random'], proof })).rejects.toThrow(
+    const uniformRequest = { format: 'jwt_vc_json', types: ['random'], proof } satisfies UniformCredentialRequest
+    await expect(credReqClient.acquireCredentialsUsingRequest(uniformRequest, 'jwt_vc_json')).rejects.toThrow(
       Error(URL_NOT_VALID),
     )
   })
 
   it('should fail with invalid url without did', async () => {
-    const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOfferRequest({ request: INITIATION_TEST })
+    const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOfferRequest({ request: INITIATION_TEST })
       .withCredentialEndpoint('httpsf://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build()
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
@@ -246,13 +241,13 @@ describe('Credential Request Client ', () => {
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_08,
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
       // .withEndpointMetadata(metadata)
       .withKid(kid_withoutDid)
       .withClientId('sphereon:wallet')
       .build()
-    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json', types: ['random'], proof })).rejects.toThrow(
+    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json', types: ['random'], proof }, 'jwt_vc_json')).rejects.toThrow(
       Error(URL_NOT_VALID),
     )
   })
@@ -271,14 +266,14 @@ describe('Credential Request Client with Walt.id ', () => {
     nock.cleanAll()
     const WALT_IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false'
-    const credentialOffer = await CredentialOfferClientV1_0_11.fromURI(WALT_IRR_URI)
+    const credentialOffer = await CredentialOfferClientV1_0_15.fromURI(WALT_IRR_URI)
 
     const request = credentialOffer.credential_offer
     const metadata = await MetadataClientV1_0_15.retrieveAllMetadata(getIssuerFromCredentialOfferPayload(request) as string)
     expect(metadata.credential_endpoint).toEqual(WALT_OID4VCI_METADATA.credential_endpoint)
     expect(metadata.token_endpoint).toEqual(WALT_OID4VCI_METADATA.token_endpoint)
 
-    const credReqClient = CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({
+    const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOffer({
       credentialOffer,
       metadata,
     }).build()
@@ -298,7 +293,7 @@ describe('Credential Request Client with different issuers ', () => {
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fngi%2Doidc4vci%2Dtest%2Espruceid%2Exyz&credential_type=OpenBadgeCredential&pre-authorized_code=eyJhbGciOiJFUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOlsiT3BlbkJhZGdlQ3JlZGVudGlhbCJdLCJleHAiOiIyMDIzLTA0LTIwVDA5OjA0OjM2WiIsIm5vbmNlIjoibWFibmVpT0VSZVB3V3BuRFFweEt3UnRsVVRFRlhGUEwifQ.qOZRPN8sTv_knhp7WaWte2-aDULaPZX--2i9unF6QDQNUllqDhvxgIHMDCYHCV8O2_Gj-T2x1J84fDMajE3asg&user_pin_required=false'
     const credentialRequest = await (
-      await CredentialRequestClientBuilderV1_0_11.fromURI({
+      await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
         metadata: getMockData('spruce')?.metadata as unknown as EndpointMetadata,
       })
@@ -311,10 +306,10 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialTypes: ['OpenBadgeCredential'],
         format: 'jwt_vc',
-        version: OpenId4VCIVersion.VER_1_0_08,
+        version: OpenId4VCIVersion.VER_1_0_15,
       })
-    const draft8CredentialRequest = getCredentialRequestForVersion(credentialRequest, OpenId4VCIVersion.VER_1_0_08)
-    expect(draft8CredentialRequest).toEqual(getMockData('spruce')?.credential.request)
+    const draft15CredentialRequest = getCredentialRequestForVersion(credentialRequest, 'jwt_vc_json', OpenId4VCIVersion.VER_1_0_15)
+    expect(draft15CredentialRequest).toEqual(getMockData('spruce')?.credential.request)
   })
 
   it('should create correct CredentialRequest for Walt', async () => {
@@ -322,7 +317,7 @@ describe('Credential Request Client with different issuers ', () => {
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Fdefault%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA&user_pin_required=false'
     const credentialOffer = await (
-      await CredentialRequestClientBuilderV1_0_11.fromURI({
+      await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
         metadata: getMockData('walt')?.metadata as unknown as EndpointMetadata,
       })
@@ -335,7 +330,7 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialTypes: ['OpenBadgeCredential'],
         format: 'jwt_vc',
-        version: OpenId4VCIVersion.VER_1_0_08,
+        version: OpenId4VCIVersion.VER_1_0_15,
       })
     expect(credentialOffer).toEqual(getMockData('walt')?.credential.request)
   })
@@ -345,7 +340,7 @@ describe('Credential Request Client with different issuers ', () => {
     const IRR_URI =
       'https://oidc4vc.uniissuer.io/?credential_type=OpenBadgeCredential&pre-authorized_code=0ApoI8rxVmdQ44RIpuDbFIURIIkOhyek&user_pin_required=false'
     const credentialOffer = await (
-      await CredentialRequestClientBuilderV1_0_11.fromURI({
+      await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
         metadata: getMockData('uniissuer')?.metadata as unknown as EndpointMetadata,
       })
@@ -358,7 +353,7 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialTypes: ['OpenBadgeCredential'],
         format: 'jwt_vc',
-        version: OpenId4VCIVersion.VER_1_0_08,
+        version: OpenId4VCIVersion.VER_1_0_15,
       })
     expect(credentialOffer).toEqual(getMockData('uniissuer')?.credential.request)
   })
@@ -367,7 +362,7 @@ describe('Credential Request Client with different issuers ', () => {
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https://launchpad.mattrlabs.com&credential_type=OpenBadgeCredential&pre-authorized_code=g0UCOj6RAN5AwHU6gczm_GzB4_lH6GW39Z0Dl2DOOiO'
     const credentialOffer = await (
-      await CredentialRequestClientBuilderV1_0_11.fromURI({
+      await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
         metadata: getMockData('mattr')?.metadata as unknown as EndpointMetadata,
       })
@@ -380,9 +375,9 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialTypes: ['OpenBadgeCredential'],
         format: 'ldp_vc',
-        version: OpenId4VCIVersion.VER_1_0_08,
+        version: OpenId4VCIVersion.VER_1_0_15,
       })
-    const credentialRequest = getCredentialRequestForVersion(credentialOffer, OpenId4VCIVersion.VER_1_0_08)
+    const credentialRequest = getCredentialRequestForVersion(credentialOffer, 'jwt_vc_json', OpenId4VCIVersion.VER_1_0_15)
     expect(credentialRequest).toEqual(getMockData('mattr')?.credential.request)
   })
 
@@ -390,7 +385,7 @@ describe('Credential Request Client with different issuers ', () => {
     const IRR_URI =
       'openid-initiate-issuance://?issuer=https://oidc4vc.diwala.io&credential_type=OpenBadgeCredential&pre-authorized_code=eyJhbGciOiJIUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOiJPcGVuQmFkZ2VDcmVkZW50aWFsIiwiZXhwIjoxNjgxOTg0NDY3fQ.fEAHKz2nuWfiYHw406iNxr-81pWkNkbi31bWsYSf6Ng'
     const credentialOffer = await (
-      await CredentialRequestClientBuilderV1_0_11.fromURI({
+      await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
         metadata: getMockData('diwala')?.metadata as unknown as EndpointMetadata,
       })
@@ -403,11 +398,11 @@ describe('Credential Request Client with different issuers ', () => {
         },
         credentialTypes: ['OpenBadgeCredential'],
         format: 'ldp_vc',
-        version: OpenId4VCIVersion.VER_1_0_08,
+        version: OpenId4VCIVersion.VER_1_0_15,
       })
 
-    // createCredentialRequest returns uniform format in draft 11
-    const credentialRequest = getCredentialRequestForVersion(credentialOffer, OpenId4VCIVersion.VER_1_0_08)
+    // createCredentialRequest returns uniform format in draft 15
+    const credentialRequest = getCredentialRequestForVersion(credentialOffer, 'ldp_vc', OpenId4VCIVersion.VER_1_0_15)
 
     expect(credentialRequest).toEqual(getMockData('diwala')?.credential.request)
   })

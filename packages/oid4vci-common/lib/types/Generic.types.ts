@@ -13,7 +13,11 @@ import {
   EndpointMetadataResultV1_0_13,
   IssuerMetadataV1_0_13,
 } from './v1_0_13.types'
-import { CredentialConfigurationSupportedV1_0_15, IssuerMetadataV1_0_15 } from './v1_0_15.types'
+import {
+  CredentialConfigurationSupportedV1_0_15,
+  CredentialRequestV1_0_15,
+  IssuerMetadataV1_0_15
+} from './v1_0_15.types'
 
 export type InputCharSet = 'numeric' | 'text'
 export type KeyProofType = 'jwt' | 'cwt' | 'ldp_vp'
@@ -261,7 +265,7 @@ export interface ErrorResponse {
   state?: string
 }
 
-export type UniformCredentialRequest = CredentialRequestV1_0_11 | CredentialRequestV1_0_13
+export type UniformCredentialRequest = CredentialRequestV1_0_11 | CredentialRequestV1_0_13 | CredentialRequestV1_0_15
 
 export interface CommonCredentialRequest extends ExperimentalSubjectIssuance {
   format: OID4VCICredentialFormat /* | OID4VCICredentialFormat[];*/ // for now it seems only one is supported in the spec
