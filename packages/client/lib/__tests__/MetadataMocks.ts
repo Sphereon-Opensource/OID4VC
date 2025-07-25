@@ -1,5 +1,5 @@
 import {
-  AuthzFlowType,
+  AuthzFlowType, CredentialOfferPayloadV1_0_13,
   CredentialOfferPayloadV1_0_15,
   CredentialOfferRequestWithBaseUrl,
   PRE_AUTH_GRANT_LITERAL
@@ -102,6 +102,7 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
   },
   userPinRequired: true // Determined from above tx_code
 }
+
 export const INITIATION_TEST_V1_0_15: CredentialOfferRequestWithBaseUrl = {
   baseUrl: 'openid-initiate-issuance://',
   credential_offer: {

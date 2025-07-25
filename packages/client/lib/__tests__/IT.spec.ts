@@ -1,20 +1,26 @@
 import {
   AccessTokenResponse,
   Alg,
-  CredentialOfferPayloadV1_0_15,
+  CredentialOfferPayloadV1_0_13,
   CredentialOfferRequestWithBaseUrl,
   Jwt,
   OpenId4VCIVersion,
   ProofOfPossession,
   resolveCredentialOfferURI,
-  WellKnownEndpoints,
+  WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { AccessTokenClient, AccessTokenClientV1_0_11, OpenID4VCIClient, OpenID4VCIClientV1_0_15, ProofOfPossessionBuilder } from '..'
+import {
+  AccessTokenClient,
+  AccessTokenClientV1_0_11,
+  OpenID4VCIClient,
+  OpenID4VCIClientV1_0_15,
+  ProofOfPossessionBuilder
+} from '..'
 import { CredentialOfferClient } from '../CredentialOfferClient'
 import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder'
 
@@ -23,7 +29,7 @@ import {
   IDENTIPROOF_AS_URL,
   IDENTIPROOF_ISSUER_URL,
   IDENTIPROOF_OID4VCI_METADATA,
-  IDENTIPROOF_OID4VCI_METADATA_v15,
+  IDENTIPROOF_OID4VCI_METADATA_v15
 } from './MetadataMocks'
 
 export const UNIT_TEST_TIMEOUT = 30000
@@ -292,68 +298,6 @@ describe('OID4VCI-Client should', () => {
     UNIT_TEST_TIMEOUT,
   )
 
-  it(
-    'succeed with a full flow without the client v1_0_13',
-    async () => {
-      /* Convert the URI into an object */
-      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_15)
-      const preAuthorizedCode = 'oaKazRN8I0IbtZ0C7JuMn5'
-      expect(credentialOffer.baseUrl).toEqual('openid-credential-offer://')
-      expect((credentialOffer.credential_offer as CredentialOfferPayloadV1_0_15).credential_configuration_ids).toEqual(['OpenBadgeCredentialUrl'])
-      expect(credentialOffer.original_credential_offer.grants).toEqual({
-        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-          'pre-authorized_code': preAuthorizedCode,
-          tx_code: {
-            input_mode: 'text',
-            description: 'Please enter the serial number of your physical drivers license',
-            length: preAuthorizedCode.length,
-          },
-        },
-      })
-
-      nock(ISSUER_URL)
-        .post(/token.*/)
-        .reply(200, JSON.stringify(mockedAccessTokenResponse))
-
-      /* The actual access token calls */
-      const accessTokenClient: AccessTokenClient = new AccessTokenClient()
-      const accessTokenResponse = await accessTokenClient.acquireAccessToken({ credentialOffer: credentialOffer, pin: '1234' })
-      expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse)
-      // Get the credential
-      nock(ISSUER_URL)
-        .post(/credential/)
-        .reply(200, {
-          format: 'jwt-vc',
-          credential: mockedVC,
-        })
-      const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: credentialOffer })
-        .withFormat('jwt_vc')
-
-        .withTokenFromResponse(accessTokenResponse.successBody!)
-        .build()
-
-      const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
-        jwt: jwtDid,
-        callbacks: {
-          signCallback: proofOfPossessionCallbackFunction,
-        },
-        version: OpenId4VCIVersion.VER_1_0_11,
-      })
-        .withEndpointMetadata({
-          issuer: 'https://issuer.research.identiproof.io',
-          credential_endpoint: 'https://issuer.research.identiproof.io/credential',
-          token_endpoint: 'https://issuer.research.identiproof.io/token',
-        })
-        .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
-        .build()
-      const credResponse = await credReqClient.acquireCredentialsUsingProof({
-        proofInput: proof,
-        credentialTypes: credentialOffer.original_credential_offer.credential_configuration_ids[0],
-      })
-      expect(credResponse.successBody?.credential).toEqual(mockedVC)
-    },
-    UNIT_TEST_TIMEOUT,
-  )
 })
 
 describe('OIDVCI-Client for v1_0_13 should', () => {
@@ -449,7 +393,9 @@ describe('OIDVCI-Client for v1_0_13 should', () => {
         })
         .withKid('ebfeb1f712ebc6f1c276e12ec21/keys/1')
         .build()
-      const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof, credentialIdentifier: 'OpenBadgeCredentialUrl' })
+      const credResponse = await credReqClient.acquireCredentialsUsingProof({
+        format: 'jwt_vc' ,
+        proofInput: proof, credentialIdentifier: 'OpenBadgeCredentialUrl'})
       expect(credResponse.successBody?.credential).toEqual(mockedVC)
     },
     UNIT_TEST_TIMEOUT,

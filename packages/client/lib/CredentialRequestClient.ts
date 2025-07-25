@@ -38,6 +38,7 @@ export interface CredentialRequestOpts {
   deferredCredentialEndpoint?: string
   credentialTypes?: string[]
   credentialIdentifier?: string
+  credentialConfigurationId?: string
   format?: CredentialFormat | OID4VCICredentialFormat
   proof: ProofOfPossession
   token: string
@@ -314,7 +315,7 @@ export class CredentialRequestClient {
       proofInput?: ProofOfPossessionBuilder | ProofOfPossession
     }
   ): Promise<CredentialRequestV1_0_15> {
-    const { proofInput, credentialIdentifier: credential_identifier, credentialConfigurationId } = opts
+    const { proofInput, credentialIdentifier, credentialConfigurationId } = opts
     let proof: ProofOfPossession | undefined = undefined
     if (proofInput) {
       proof = await buildProof(proofInput, opts)
@@ -324,7 +325,7 @@ export class CredentialRequestClient {
     if (this.version() >= OpenId4VCIVersion.VER_1_0_15) {
       const authDetail = findAuthorizationDetail(
         this.credentialRequestOpts.authorizationDetails,
-        credentialConfigurationId ?? credential_identifier
+        credentialConfigurationId ?? credentialIdentifier
       )
 
       const issuer_state = this.credentialRequestOpts.issuerState
@@ -351,10 +352,17 @@ export class CredentialRequestClient {
         }
       }
 
-      const configId = credentialConfigurationId ?? authDetailObj?.credential_configuration_id
+      const configId = credentialConfigurationId ?? authDetailObj?.credential_configuration_id ?? this._credentialRequestOpts.credentialConfigurationId
       if (configId) {
         return {
           credential_configuration_id: configId,
+          ...commonBody
+        }
+      }
+
+      if(credentialIdentifier) {
+        return {
+          credential_identifier: credentialIdentifier,
           ...commonBody
         }
       }
@@ -363,10 +371,10 @@ export class CredentialRequestClient {
     }
 
     // Legacy logic for older versions
-    if (credential_identifier) {
+    if (credentialIdentifier) {
       const proof_obj = proof ? { proof } : {}
       return {
-        credential_identifier,
+        credential_identifier: credentialIdentifier,
         ...proof_obj
       } as CredentialRequestV1_0_15
     }

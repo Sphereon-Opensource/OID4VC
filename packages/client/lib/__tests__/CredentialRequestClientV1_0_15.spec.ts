@@ -32,14 +32,33 @@ const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN'
 const partialJWT_withoutDid = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJlYmZlYjFmNzEyZWJjNmYxYzI3N'
 
 const jwt: Jwt = {
-  header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'JWT' },
-  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
+  header: {
+    alg: Alg.ES256,
+    kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
+    typ: 'openid4vci-proof+jwt' // ← required for v1.0.11+
+  },
+  payload: {
+    iss: 'sphereon:wallet',
+    nonce: 'tZignsnFbp',
+    jti: 'tZignsnFbp223',
+    aud: IDENTIPROOF_ISSUER_URL
+  }
 }
 
 const jwt_withoutDid: Jwt = {
-  header: { alg: Alg.ES256, kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'JWT' },
-  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
+  header: {
+    alg: Alg.ES256,
+    kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1',
+    typ: 'openid4vci-proof+jwt' // ← updated
+  },
+  payload: {
+    iss: 'sphereon:wallet',
+    nonce: 'tZignsnFbp',
+    jti: 'tZignsnFbp223',
+    aud: IDENTIPROOF_ISSUER_URL
+  }
 }
+
 
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
 
@@ -80,6 +99,7 @@ beforeEach(async () => {
 afterEach(async () => {
   nock.cleanAll()
 })
+
 describe('Credential Request Client ', () => {
   it('should get a failed credential response with an unsupported format', async function () {
     const basePath = 'https://sphereonjunit2022101301.com/'
@@ -106,7 +126,7 @@ describe('Credential Request Client ', () => {
     expect(credReqClient.getCredentialEndpoint()).toEqual(basePath + '/credential')
     const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, version: OpenId4VCIVersion.VER_1_0_15 })
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy()
-    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest, credentialRequest.format)
+    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest, 'jwt_vc')
     expect(result?.errorBody?.error).toBe('unsupported_format')
   })
 
@@ -135,7 +155,7 @@ describe('Credential Request Client ', () => {
     expect(credReqClient.getCredentialEndpoint()).toEqual(basePath + '/credential')
     const credentialRequest = await credReqClient.createCredentialRequest({ proofInput: proof, version: OpenId4VCIVersion.VER_1_0_15 })
     expect(credentialRequest.proof?.jwt?.includes(partialJWT_withoutDid)).toBeTruthy()
-    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest)
+    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest, 'jwt_vc')
     expect(result?.errorBody?.error).toBe('unsupported_format')
   })
 
@@ -169,8 +189,7 @@ describe('Credential Request Client ', () => {
       version: OpenId4VCIVersion.VER_1_0_15,
     })
     expect(credentialRequest.proof?.jwt?.includes(partialJWT)).toBeTruthy()
-    expect(credentialRequest.format).toEqual('jwt_vc')
-    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest)
+    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest, 'jwt_vc')
     expect(result?.successBody?.credential).toEqual(mockedVC)
   })
 
@@ -204,8 +223,7 @@ describe('Credential Request Client ', () => {
       version: OpenId4VCIVersion.VER_1_0_15,
     })
     expect(credentialRequest.proof?.jwt?.includes(partialJWT_withoutDid)).toBeTruthy()
-    expect(credentialRequest.format).toEqual('jwt_vc')
-    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest, credentialRequest.format)
+    const result = await credReqClient.acquireCredentialsUsingRequest(credentialRequest, 'jwt_vc')
     expect(result?.successBody?.credential).toEqual(mockedVC)
   })
 
@@ -264,8 +282,19 @@ describe('Credential Request Client with Walt.id ', () => {
 
   it.skip('should have correct metadata endpoints', async function () {
     nock.cleanAll()
-    const WALT_IRR_URI =
-      'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false'
+    const WALT_IRR_URI = `openid-initiate-issuance://?credential_offer=${encodeURIComponent(
+      JSON.stringify({
+        credential_issuer: 'https://jff.walt.id/issuer-api/default/oidc/',
+        credential_configuration_ids: ['OpenBadgeCredential'],
+        grants: {
+          'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+            'pre-authorized_code':
+              'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA',
+            user_pin_required: false
+          }
+        }
+      })
+    )}`
     const credentialOffer = await CredentialOfferClientV1_0_15.fromURI(WALT_IRR_URI)
 
     const request = credentialOffer.credential_offer
@@ -291,7 +320,7 @@ describe('Credential Request Client with different issuers ', () => {
   })
   it('should create correct CredentialRequest for Spruce', async () => {
     const IRR_URI =
-      'openid-initiate-issuance://?issuer=https%3A%2F%2Fngi%2Doidc4vci%2Dtest%2Espruceid%2Exyz&credential_type=OpenBadgeCredential&pre-authorized_code=eyJhbGciOiJFUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOlsiT3BlbkJhZGdlQ3JlZGVudGlhbCJdLCJleHAiOiIyMDIzLTA0LTIwVDA5OjA0OjM2WiIsIm5vbmNlIjoibWFibmVpT0VSZVB3V3BuRFFweEt3UnRsVVRFRlhGUEwifQ.qOZRPN8sTv_knhp7WaWte2-aDULaPZX--2i9unF6QDQNUllqDhvxgIHMDCYHCV8O2_Gj-T2x1J84fDMajE3asg&user_pin_required=false'
+      'openid-initiate-issuance://?credential_offer=eyJjcmVkZW50aWFsX2lzc3VlciI6Imh0dHBzOi8vbmdpLW9pZGM0dmNpLXRlc3Quc3BydWNlaWQueHl6IiwiY3JlZGVudGlhbF9jb25maWd1cmF0aW9uX2lkcyI6WyJPcGVuQmFkZ2VDcmVkZW50aWFsIl0sImdyYW50cyI6eyJ1cm46aWV0ZjpwYXJhbXM6b2F1dGg6Z3JhbnQtdHlwZTpwcmUtYXV0aG9yaXplZF9jb2RlIjp7InByZS1hdXRob3JpemVkX2NvZGUiOiJleUpoYkdjaU9pSkZVekkxTmlKOS5leUpqY21Wa1pXNTBhV0ZzWDNSNWNHVWlPbHNpVDNCbGJrSmhaR2RsUTNKbFpHVnVkR2xoYkNKZExDSmxlSEFpT2lJeU1ESXpMVEEwTFRJd1ZEQTVPakEwT2pNMldpSXNJbTV2Ym1ObElqb2liV0ZpYm1WcFQwVlNaVkIzVjNCdVJGRndlRXQzVW5Sc1ZWUkZSbGhHVUV3aWZRLnFPWlJQTjhzVHZfa25ocDdXYVd0ZTItYURVTGFQWlgtLTJpOXVuRjZRRFFOVWxscURodnhnSUhNRENZSENWOE8yX0dqLVQyeDFKODRmRE1hakUzYXNnIiwidXNlcl9waW5fcmVxdWlyZWQiOmZhbHNlfX19';
     const credentialRequest = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
@@ -314,8 +343,19 @@ describe('Credential Request Client with different issuers ', () => {
 
   it('should create correct CredentialRequest for Walt', async () => {
     nock.cleanAll()
-    const IRR_URI =
-      'openid-initiate-issuance://?issuer=https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Fdefault%2Foidc%2F&credential_type=OpenBadgeCredential&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA&user_pin_required=false'
+    const IRR_URI = `openid-initiate-issuance://?credential_offer=${encodeURIComponent(
+      JSON.stringify({
+        credential_issuer: 'https://jff.walt.id/issuer-api/default/oidc/',
+        credential_configuration_ids: ['OpenBadgeCredential'],
+        grants: {
+          'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+            'pre-authorized_code':
+              'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA',
+            user_pin_required: false
+          }
+        }
+      })
+    )}`
     const credentialOffer = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
@@ -359,8 +399,18 @@ describe('Credential Request Client with different issuers ', () => {
   })
 
   it('should create correct CredentialRequest for mattr', async () => {
-    const IRR_URI =
-      'openid-initiate-issuance://?issuer=https://launchpad.mattrlabs.com&credential_type=OpenBadgeCredential&pre-authorized_code=g0UCOj6RAN5AwHU6gczm_GzB4_lH6GW39Z0Dl2DOOiO'
+    const IRR_URI = `openid-initiate-issuance://?credential_offer=${encodeURIComponent(
+      JSON.stringify({
+        credential_issuer: 'https://launchpad.mattrlabs.com',
+        credential_configuration_ids: ['OpenBadgeCredential'],
+        grants: {
+          'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+            'pre-authorized_code': 'g0UCOj6RAN5AwHU6gczm_GzB4_lH6GW39Z0Dl2DOOiO',
+            user_pin_required: false
+          }
+        }
+      })
+    )}`
     const credentialOffer = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
@@ -382,8 +432,19 @@ describe('Credential Request Client with different issuers ', () => {
   })
 
   it('should create correct CredentialRequest for diwala', async () => {
-    const IRR_URI =
-      'openid-initiate-issuance://?issuer=https://oidc4vc.diwala.io&credential_type=OpenBadgeCredential&pre-authorized_code=eyJhbGciOiJIUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOiJPcGVuQmFkZ2VDcmVkZW50aWFsIiwiZXhwIjoxNjgxOTg0NDY3fQ.fEAHKz2nuWfiYHw406iNxr-81pWkNkbi31bWsYSf6Ng'
+    const IRR_URI = `openid-initiate-issuance://?credential_offer=${encodeURIComponent(
+      JSON.stringify({
+        credential_issuer: 'https://oidc4vc.diwala.io',
+        credential_configuration_ids: ['OpenBadgeCredential'],
+        grants: {
+          'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+            'pre-authorized_code':
+              'eyJhbGciOiJIUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOiJPcGVuQmFkZ2VDcmVkZW50aWFsIiwiZXhwIjoxNjgxOTg0NDY3fQ.fEAHKz2nuWfiYHw406iNxr-81pWkNkbi31bWsYSf6Ng',
+            user_pin_required: false
+          }
+        }
+      })
+    )}`
     const credentialOffer = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,

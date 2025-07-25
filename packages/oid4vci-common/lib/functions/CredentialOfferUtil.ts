@@ -50,23 +50,113 @@ export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
   return version
 }
 
-export function determineSpecVersionFromScheme(credentialOfferURI: string, openId4VCIVersion: OpenId4VCIVersion) {
-  const scheme = getScheme(credentialOfferURI)
-  if (credentialOfferURI.includes(DefaultURISchemes.INITIATE_ISSUANCE)) {
-    return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_08], scheme)
-  }
-  if (credentialOfferURI.includes('credential_offer_uri')) {
-    return undefined
-  }
-  // todo: drop support for v1_0_8. version 11 and version 13 have the same scheme 'openid-credential-offer'
-  else if (credentialOfferURI.includes(DefaultURISchemes.CREDENTIAL_OFFER)) {
-    if (credentialOfferURI.includes('credentials:') || credentialOfferURI.includes('credentials%22')) {
-      return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_11], scheme)
+export function determineSpecVersionFromScheme(
+  credentialOfferURI: string,
+  openId4VCIVersion: OpenId4VCIVersion
+) {
+  const scheme = getScheme(credentialOfferURI);
+
+  const url = toUrlWithDummyBase(credentialOfferURI);
+  const qp = url.searchParams;
+
+  // ----------------- 1) openid-initiate-issuance -----------------
+  if (scheme === DefaultURISchemes.INITIATE_ISSUANCE) {
+    // v15 indicators
+    if (qp.has('credential_offer') || qp.has('credential_offer_uri')) {
+      return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_15], scheme);
     }
-    return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_15], scheme) // There are no solid differences between draft v13 and draft v15, so just default to v15 now
-  } else {
-    return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_UNKNOWN], scheme)
+
+    // legacy (v08) inline params
+    if (qp.has('credential_type') || qp.has('issuer')) {
+      return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_08], scheme);
+    }
+
+    // Could not decide
+    return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_UNKNOWN], scheme);
   }
+
+  // ----------------- 2) openid-credential-offer -----------------
+  if (scheme === DefaultURISchemes.CREDENTIAL_OFFER) {
+    // Indirection URI -> Draft 15 style (can't confirm 11/13 via scheme alone)
+    if (qp.has('credential_offer_uri')) {
+      return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_15], scheme);
+    }
+
+    // Inline payload -> sniff JSON keys
+    const rawParam = getParamValueLoose(qp, 'credential_offer');
+    if (rawParam) {
+      const decoded = tryDecodeOffer(rawParam);
+
+      const version = sniffOfferVersion(decoded);
+      if (version !== OpenId4VCIVersion.VER_UNKNOWN) {
+        return recordVersion(openId4VCIVersion, [version], scheme);
+      }
+    }
+
+    // If we still can't tell, DO NOT default to 15 — stay unknown
+    return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_UNKNOWN], scheme);
+  }
+
+  // ----------------- 3) Unknown scheme -----------------
+  return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_UNKNOWN], scheme);
+}
+
+/* ----------------- helpers ----------------- */
+
+/**
+ * Replace custom "openid-..." schemes with a dummy base so URL() can parse query params.
+ * Make sure to end with '/?' to avoid the "?param" name issue.
+ */
+function toUrlWithDummyBase(uri: string): URL {
+  const normalized = uri.replace(/^openid-[^?]+:\/\//, 'https://dummy/?');
+  return new URL(normalized);
+}
+
+/**
+ * Some runtimes/libraries have bugs that result in the param name being `'?credential_offer'`.
+ * This helper checks both.
+ */
+function getParamValueLoose(qp: URLSearchParams, key: string): string | null {
+  if (qp.has(key)) return qp.get(key);
+  if (qp.has(`?${key}`)) return qp.get(`?${key}`);
+  return null;
+}
+
+/**
+ * Try to decode the inline offer string:
+ *  1) decodeURIComponent if needed,
+ *  2) base64url decode if it looks base64y,
+ * return the final string (JSON) or empty string on failure.
+ */
+function tryDecodeOffer(input: string): string {
+  let candidate = input;
+
+  try { candidate = decodeURIComponent(candidate); } catch {/* ignore */}
+  // Fast check for base64url: only URL-safe chars and no braces
+  if (!/[{}]/.test(candidate) && /^[A-Za-z0-9\-_]+$/.test(candidate)) {
+    try {
+      const b64 = candidate.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(candidate.length / 4) * 4, '=');
+      candidate = atob(b64);
+    } catch {/* ignore */}
+  }
+  return candidate; // may still be encoded JSON but good enough for key sniffing
+}
+
+/**
+ * Look for version-specific keys.
+ * returns one of VER_1_0_11, VER_1_0_13, VER_1_0_15, or VER_UNKNOWN.
+ */
+function sniffOfferVersion(jsonLike: string): OpenId4VCIVersion {
+  if (!jsonLike) return OpenId4VCIVersion.VER_UNKNOWN;
+
+  // Use cheap regex so we don't crash on invalid JSON
+  const has = (k: string) => new RegExp(`"${k}"\\s*:`, 'i').test(jsonLike);
+
+  if (has('credentials')) return OpenId4VCIVersion.VER_1_0_11;
+  if (has('credential_configuration_id')) return OpenId4VCIVersion.VER_1_0_13;
+  if (has('credential_configuration_ids')) return OpenId4VCIVersion.VER_1_0_15;
+
+  return OpenId4VCIVersion.VER_UNKNOWN;
 }
 
 export function getScheme(credentialOfferURI: string) {
@@ -243,6 +333,7 @@ function isCredentialOfferV1_0_15(offer: CredentialOfferPayload | CredentialOffe
   if (!offer) {
     return false
   }
+  offer = normalizeOfferInput(offer);
 
   // Direct payload
   if ('credential_issuer' in offer && 'credential_configuration_ids' in offer) {
@@ -300,6 +391,8 @@ export async function toUniformCredentialOfferRequest(
 }
 
 export function isPreAuthCode(request: UniformCredentialOfferPayload | UniformCredentialOffer) {
+  request = normalizeOfferInput(request);
+
   const payload = 'credential_offer' in request ? request.credential_offer : (request as UniformCredentialOfferPayload)
   return payload?.grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL] !== undefined
 }
@@ -416,6 +509,8 @@ export function determineFlowType(
 }
 
 export function getCredentialOfferPayload(offer: AssertedUniformCredentialOffer | UniformCredentialOfferPayload): UniformCredentialOfferPayload {
+  offer = normalizeOfferInput(offer);
+
   let payload: UniformCredentialOfferPayload
   if ('credential_offer' in offer && offer['credential_offer']) {
     payload = offer.credential_offer
@@ -433,6 +528,8 @@ export function determineGrantTypes(
     grants: Grant
   } & Record<never, never>)
 ): GrantTypes[] {
+  offer = normalizeOfferInput(offer);
+
   let grants: Grant | undefined
   if ('grants' in offer && offer.grants) {
     grants = offer.grants
