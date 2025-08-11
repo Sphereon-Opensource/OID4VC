@@ -54,7 +54,7 @@ describe('OpenID4VCIClientV1_0_15', () => {
         redirectUri: 'http://localhost:8881/cb'
       }
     })
-    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri')
+    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?client_id=test-client&request_uri=test_uri')
   })
 
   it('should fail when pushed_authorization_request_endpoint is not present', async () => {
@@ -100,7 +100,7 @@ describe('OpenID4VCIClientV1_0_15', () => {
         redirectUri: 'http://localhost:8881/cb'
       }
     })
-    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri')
+    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?client_id=test-client&request_uri=test_uri')
   })
 
   it('should not fail when only scope is present', async () => {
@@ -113,7 +113,7 @@ describe('OpenID4VCIClientV1_0_15', () => {
         redirectUri: 'http://localhost:8881/cb'
       }
     })
-    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri')
+    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?client_id=test-client&request_uri=test_uri')
   })
 
   it('should not fail when both authorization_details and scope are present', async () => {

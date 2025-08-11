@@ -670,6 +670,10 @@ export class OpenID4VCIClientV1_0_15 {
     return this._state.dpopResponseParams
   }
 
+  public get state(): OpenID4VCIClientStateV1_0_15 {
+    return this._state
+  }
+
   public getIssuer(): string {
     this.assertIssuerData()
     return this._state.credentialIssuer

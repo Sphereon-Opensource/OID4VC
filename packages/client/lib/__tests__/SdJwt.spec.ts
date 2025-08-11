@@ -27,10 +27,10 @@ const issuerMetadata = new IssuerMetadataBuilderV1_15()
   .withCredentialIssuer('https://example.com')
   .withCredentialEndpoint('https://credential-endpoint.example.com')
   .withTokenEndpoint('https://token-endpoint.example.com')
-  .addCredentialConfigurationsSupported('SdJwtCredentialId', {
+  .addCredentialConfigurationsSupported('SdJwtCredential', {
     format: 'dc+sd-jwt',
-    vct: 'SdJwtCredentialId',
-    id: 'SdJwtCredentialId',
+    vct: 'SdJwtCredential',
+    id: 'SdJwtCredential',
   } as CredentialConfigurationSupportedV1_0_15)
   .build()
 
@@ -127,9 +127,9 @@ describe('sd-jwt vc', () => {
       })
 
       const supported = client.getCredentialsSupported(false)
-      expect(supported).toEqual({ SdJwtCredentialId: { format: 'dc+sd-jwt', id: 'SdJwtCredentialId', vct: 'SdJwtCredentialId' } })
+      expect(supported).toEqual({ SdJwtCredential: { format: 'dc+sd-jwt', id: 'SdJwtCredential', vct: 'SdJwtCredential' } })
 
-      const offered = supported['SdJwtCredentialId'] as CredentialConfigurationSupportedSdJwtVcV1_0_15
+      const offered = supported['SdJwtCredential'] as CredentialConfigurationSupportedSdJwtVcV1_0_15
 
       nock(issuerMetadata.token_endpoint as string)
         .post('/')
@@ -150,7 +150,7 @@ describe('sd-jwt vc', () => {
         .post('/')
         .reply(200, async (_, body) =>
           vcIssuer.issueCredential({
-            credentialRequest: { ...(body as any), credential_identifier: 'SdJwtCredentialId' },
+            credentialRequest: { ...(body as any), credential_identifier: 'SdJwtCredential' },
             credential: {
               vct: 'Hello',
               iss: 'did:example:123',
@@ -232,9 +232,9 @@ describe('sd-jwt vc', () => {
       })
 
       const supported = client.getCredentialsSupported(false, 'dc+sd-jwt')
-      expect(supported).toEqual({ SdJwtCredentialId: { format: 'dc+sd-jwt', id: 'SdJwtCredentialId', vct: 'SdJwtCredentialId' } })
+      expect(supported).toEqual({ SdJwtCredential: { format: 'dc+sd-jwt', id: 'SdJwtCredential', vct: 'SdJwtCredential' } })
 
-      const offered = supported['SdJwtCredentialId'] as CredentialConfigurationSupportedSdJwtVcV1_0_15
+      const offered = supported['SdJwtCredential'] as CredentialConfigurationSupportedSdJwtVcV1_0_15
 
       nock(issuerMetadata.token_endpoint as string)
         .post('/')

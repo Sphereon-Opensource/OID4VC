@@ -120,8 +120,7 @@ describe('Credential Request Client Builder', () => {
   it('should build credential request correctly without did', async () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
-      .withFormat('jwt_vc')
-      .withCredentialType('OpenBadgeCredential')
+      .withCredentialIdentifier('OpenBadgeCredential')
       .build()
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt: jwtv1_0_13_withoutDid,
@@ -137,12 +136,12 @@ describe('Credential Request Client Builder', () => {
     await proofOfPossessionVerifierCallbackFunction({ ...proof, kid: kid_withoutDid })
     const credentialRequest = await credReqClient.createCredentialRequest({
       proofInput: proof,
-      credentialTypes: 'OpenBadgeCredential',
+      credentialIdentifier: 'OpenBadgeCredential',
       version: OpenId4VCIVersion.VER_1_0_15,
     })
     expect(credentialRequest.proof?.jwt).toContain(partialJWT_withoutDid)
-    if ('types' in credentialRequest) {
-      expect(credentialRequest.types).toStrictEqual(['OpenBadgeCredential'])
+    if ('credential_identifier' in credentialRequest) {
+      expect(credentialRequest.credential_identifier).toBe('OpenBadgeCredential')
     }
   })
 

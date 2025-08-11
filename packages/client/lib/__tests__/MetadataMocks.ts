@@ -104,10 +104,10 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
 }
 
 export const INITIATION_TEST_V1_0_15: CredentialOfferRequestWithBaseUrl = {
-  baseUrl: 'openid-initiate-issuance://',
+  baseUrl: 'openid-credential-offer://',
   credential_offer: {
-    credential_issuer: 'https://jff.walt.id/issuer-api/oidc/',
     credential_configuration_ids: ['OpenBadgeCredential'],
+    credential_issuer: 'https://jff.walt.id/issuer-api/oidc/',
     grants: {
       'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
         'pre-authorized_code':
@@ -119,13 +119,17 @@ export const INITIATION_TEST_V1_0_15: CredentialOfferRequestWithBaseUrl = {
   original_credential_offer: {
     credential_configuration_ids: ['OpenBadgeCredential'],
     credential_issuer: 'https://jff.walt.id/issuer-api/oidc/',
-    'pre-authorized_code':
-      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
-    user_pin_required: 'false'
+    grants: {
+      'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+        'pre-authorized_code':
+          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
+        user_pin_required: false
+      }
+    }
   },
   preAuthorizedCode:
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
-  scheme: 'openid-initiate-issuance',
+  scheme: 'openid-credential-offer',
   supportedFlows: [AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW],
   userPinRequired: false,
   version: 1015
@@ -134,8 +138,7 @@ export const INITIATION_TEST_V1_0_15: CredentialOfferRequestWithBaseUrl = {
 
 export const INITIATION_TEST_URI_V1_0_15 =
   'openid-credential-offer://?credential_offer=' +
-  encodeURIComponent(JSON.stringify(INITIATION_TEST_V1_0_15))
-
+  encodeURIComponent(JSON.stringify(INITIATION_TEST_V1_0_15.credential_offer))
 
 export const IDENTIPROOF_AS_METADATA = {
   issuer: 'https://auth.research.identiproof.io',
