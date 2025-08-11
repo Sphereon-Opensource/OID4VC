@@ -4,7 +4,7 @@ import crypto, { createHash } from 'crypto'
 
 import { digest, ES256, generateSalt } from '@sd-jwt/crypto-nodejs'
 import { SDJwtVcInstance } from '@sd-jwt/sd-jwt-vc'
-import { JwtPayload, parseJWT, SigningAlgo, uuidv4 } from '@sphereon/oid4vc-common'
+import { base64ToHexString, JwtPayload, parseJWT, SigningAlgo, uuidv4 } from '@sphereon/oid4vc-common'
 import { PartialSdJwtDecodedVerifiableCredential } from '@sphereon/pex/dist/main/lib'
 import { IProofType, SdJwtVcKbJwtPayload } from '@sphereon/ssi-types'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -21,7 +21,6 @@ import { expect } from 'vitest'
 
 import {
   assertValidMetadata,
-  base64ToHexString,
   DiscoveryMetadataPayload,
   KeyCurve,
   KeyType,
@@ -240,7 +239,7 @@ export const metadata: {
   verify(): unknown
 } = {
   opMetadata: {
-    credential_issuer: ResponseIss.SELF_ISSUED_V2,
+    issuer: ResponseIss.SELF_ISSUED_V2,
     authorization_endpoint: 'http://test.com',
     subject_syntax_types_supported: ['did:web'],
     id_token_signing_alg_values_supported: undefined,

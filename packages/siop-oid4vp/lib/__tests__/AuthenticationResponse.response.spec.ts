@@ -68,7 +68,7 @@ describe('create JWT from Request JWT should', () => {
           proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
         },
       },
-      credential_issuer: ResponseIss.SELF_ISSUED_V2,
+      issuer: ResponseIss.SELF_ISSUED_V2,
 
       passBy: PassBy.REFERENCE,
       reference_uri: EXAMPLE_REFERENCE_URL,
@@ -172,7 +172,7 @@ describe('create JWT from Request JWT should', () => {
       registration: {
         authorizationEndpoint: 'www.myauthorizationendpoint.com',
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        credential_issuer: ResponseIss.SELF_ISSUED_V2,
+        issuer: ResponseIss.SELF_ISSUED_V2,
         responseTypesSupported: [ResponseType.ID_TOKEN],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
         vpFormats: {
@@ -265,7 +265,7 @@ describe('create JWT from Request JWT should', () => {
           registration: {
             authorizationEndpoint: 'www.myauthorizationendpoint.com',
             idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-            credential_issuer: ResponseIss.SELF_ISSUED_V2,
+            issuer: ResponseIss.SELF_ISSUED_V2,
             responseTypesSupported: [ResponseType.ID_TOKEN],
             subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
             vpFormats: {
@@ -403,7 +403,7 @@ describe('create JWT from Request JWT should', () => {
         id: 'https://example.com/credentials/1872',
         type: ['VerifiableCredential', 'IDCardCredential'],
         '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1/IDCardCredential'],
-        credential_issuer: {
+        issuer: {
           id: 'did:example:issuer',
         },
         issuanceDate: '2010-01-01T19:23:24Z',
@@ -438,7 +438,7 @@ describe('create JWT from Request JWT should', () => {
         responseURIType: 'redirect_uri',
         registration: {
           authorizationEndpoint: 'www.myauthorizationendpoint.com',
-          credential_issuer: ResponseIss.SELF_ISSUED_V2,
+          issuer: ResponseIss.SELF_ISSUED_V2,
           responseTypesSupported: [ResponseType.ID_TOKEN],
           passBy: PassBy.REFERENCE,
           reference_uri: EXAMPLE_REFERENCE_URL,
@@ -575,7 +575,7 @@ describe('create JWT from Request JWT should', () => {
       id: 'https://example.com/credentials/1872',
       type: ['VerifiableCredential', 'IDCardCredential'],
       '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1/IDCardCredential'],
-      credential_issuer: {
+      issuer: {
         id: 'did:example:issuer',
       },
       issuanceDate: '2010-01-01T19:23:24Z',
@@ -622,7 +622,7 @@ describe('create JWT from Request JWT should', () => {
       responseURIType: 'redirect_uri',
       registration: {
         authorizationEndpoint: 'www.myauthorizationendpoint.com',
-        credential_issuer: ResponseIss.SELF_ISSUED_V2,
+        issuer: ResponseIss.SELF_ISSUED_V2,
         responseTypesSupported: [ResponseType.ID_TOKEN],
 
         passBy: PassBy.REFERENCE,

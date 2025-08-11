@@ -329,7 +329,7 @@ export class OP {
       ...opts,
       ...(presentationExchange && { presentationExchange }),
       ...(dcqlQuery && { dcqlQuery }),
-      registration: { ...this._createResponseOptions?.registration, credential_issuer: issuer },
+      registration: { ...this._createResponseOptions?.registration, issuer: issuer },
       responseURI,
       responseURIType:
         this._createResponseOptions.responseURIType ?? (version < SupportedVersion.SIOPv2_D12_OID4VP_D18 && responseURI ? 'redirect_uri' : undefined),

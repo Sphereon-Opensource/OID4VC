@@ -6,7 +6,7 @@ import { DiscoveryMetadataOpts, DiscoveryMetadataPayload, ResponseIss, ResponseT
 export const createDiscoveryMetadataPayload = (opts: DiscoveryMetadataOpts): DiscoveryMetadataPayload => {
   const discoveryMetadataPayload: DiscoveryMetadataPayload = {
     authorization_endpoint: opts.authorizationEndpoint || Schema.OPENID,
-    credential_issuer: opts.issuer ?? ResponseIss.SELF_ISSUED_V2,
+    issuer: opts.issuer ?? ResponseIss.SELF_ISSUED_V2,
     response_types_supported: opts.responseTypesSupported ?? ResponseType.ID_TOKEN,
     scopes_supported: opts?.scopesSupported || [Scope.OPENID],
     subject_types_supported: opts?.subjectTypesSupported || [SubjectType.PAIRWISE],

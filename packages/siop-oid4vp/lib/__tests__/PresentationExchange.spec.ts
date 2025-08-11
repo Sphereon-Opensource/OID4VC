@@ -233,7 +233,7 @@ function getVCs(): IVerifiableCredential[] {
       issuanceDate: '2021-11-01T03:05:06T000z',
       id: 'https://example.com/credentials/1872',
       type: ['VerifiableCredential', 'IDCardCredential'],
-      credential_issuer: {
+      issuer: {
         id: 'did:example:issuer',
       },
       credentialSubject: {

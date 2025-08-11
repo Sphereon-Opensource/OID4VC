@@ -58,7 +58,7 @@ describe('EBSI SIOPv2 should', () => {
     expect(verifiedAuthRequest).toBeDefined()
 
     const authResponse = await op.createAuthorizationResponse(verifiedAuthRequest, {
-      credential_issuer: didStr,
+      issuer: didStr,
       correlationId,
       jwtIssuer: {
         method: 'did',
