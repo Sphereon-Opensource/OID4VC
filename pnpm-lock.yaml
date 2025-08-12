@@ -344,6 +344,9 @@ importers:
       did-resolver:
         specifier: ^4.1.0
         version: 4.1.0
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.5.0
       jose:
         specifier: ^4.10.0
         version: 4.15.9
