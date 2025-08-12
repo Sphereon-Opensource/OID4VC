@@ -5,31 +5,30 @@ import { CredentialRequestClientBuilder, ProofOfPossessionBuilder } from '@spher
 import {
   Alg,
   CNonceState,
-  CredentialConfigurationSupportedV1_0_13,
-  CredentialIssuerMetadataV1_0_13,
+  CredentialConfigurationSupportedV1_0_15,
+  CredentialIssuerMetadataV1_0_15,
   CredentialOfferSession,
   CredentialRequest,
-  IssuerCredentialSubjectDisplay,
   IssueStatus,
   Jwt,
   JwtVerifyResult,
   OpenId4VCIVersion,
-  ProofOfPossession,
+  ProofOfPossession
 } from '@sphereon/oid4vci-common'
 import {
   AuthorizationServerMetadataBuilder,
   CredentialDataSupplierResult,
-  CredentialSupportedBuilderV1_13,
+  CredentialSupportedBuilderV1_15,
   MemoryStates,
   VcIssuer,
-  VcIssuerBuilder,
+  VcIssuerBuilder
 } from '@sphereon/oid4vci-issuer'
 import { ICredential, IProofPurpose, IProofType, W3CVerifiableCredential } from '@sphereon/ssi-types'
 import { DIDDocument } from 'did-resolver'
 import * as jose from 'jose'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { generateDid, getIssuerCallbackV1_0_11, getIssuerCallbackV1_0_13, verifyCredential } from '../IssuerCallback'
+import { generateDid, getIssuerCallbackV1_0_11, getIssuerCallbackV1_0_15, verifyCredential } from '../IssuerCallback'
 
 const INITIATION_TEST_URI =
   'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credential_configuration_ids%22:%5B%22UniversityDegreeCredential%22%5D,%22grants%22:%7B%22urn:ietf:params:oauth:grant-type:pre-authorized_code%22:%7B%22pre-authorized_code%22:%22oaKazRN8I0IbtZ0C7JuMn5%22,%22tx_code%22:%7B%22input_mode%22:%22text%22,%22description%22:%22Please%20enter%20the%20serial%20number%20of%20your%20physical%20drivers%20license%22%7D%7D%7D%7D'
@@ -69,7 +68,7 @@ async function verifyCallbackFunction(args: { jwt: string; kid?: string }): Prom
   const did = kid!.split('#')[0]
   const didDocument: DIDDocument = {
     '@context': 'https://www.w3.org/ns/did/v1',
-    id: did,
+    id: did
   }
   const alg = result.protectedHeader.alg
   return {
@@ -79,8 +78,8 @@ async function verifyCallbackFunction(args: { jwt: string; kid?: string }): Prom
     didDocument,
     jwt: {
       header: result.protectedHeader,
-      payload: result.payload,
-    },
+      payload: result.payload
+    }
   }
 }
 
@@ -104,28 +103,42 @@ describe('issuerCallback', () => {
   const clientId = 'sphereon:wallet'
 
   beforeAll(async () => {
-    const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+    const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_15> = new CredentialSupportedBuilderV1_15()
       .withCredentialSigningAlgValuesSupported('ES256K')
       .withCryptographicBindingMethod('did')
       .withFormat('jwt_vc_json')
       .withCredentialName('UniversityDegree_JWT')
       .withCredentialDefinition({
-        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
+        type: ['VerifiableCredential', 'UniversityDegree_JWT']
       })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
         logo: {
           url: 'https://exampleuniversity.com/public/logo.png',
-          alt_text: 'a square logo of a university',
+          alt_text: 'a square logo of a university'
+        },
+        background_color: '#12107c',
+        text_color: '#FFFFFF'
+      })
+      .withCredentialSupportedDisplay({
+        name: 'University Credential',
+        locale: 'en-US',
+        logo: {
+          url: 'https://exampleuniversity.com/public/logo.png',
+          alt_text: 'a square logo of a university'
         },
         background_color: '#12107c',
         text_color: '#FFFFFF',
+        credential_subject: {
+          given_name: [
+            {
+              name: 'given name',
+              locale: 'en-US'
+            }
+          ]
+        }
       })
-      .addCredentialSubjectPropertyDisplay('given_name', {
-        name: 'given name',
-        locale: 'en-US',
-      } as IssuerCredentialSubjectDisplay)
       .build()
     const stateManager = new MemoryStates<CredentialOfferSession>()
     await stateManager.set('existing-state', {
@@ -145,19 +158,19 @@ describe('issuerCallback', () => {
               credential_definition: {
                 types: ['VerifiableCredential'],
                 '@context': ['https://www.w3.org/2018/credentials/v1'],
-                credentialSubject: {},
-              },
-            },
+                credentialSubject: {}
+              }
+            }
           ],
           grants: {
             authorization_code: { issuer_state: 'test_code' },
             'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
               'pre-authorized_code': 'test_code',
-              user_pin_required: true,
-            },
-          },
-        },
-      },
+              user_pin_required: true
+            }
+          }
+        }
+      }
     })
 
     const nonces = new MemoryStates<CNonceState>()
@@ -169,7 +182,7 @@ describe('issuerCallback', () => {
       .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
-        locale: 'en-US',
+        locale: 'en-US'
       })
       .withCredentialConfigurationsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
@@ -181,12 +194,12 @@ describe('issuerCallback', () => {
             credential: {
               '@context': ['https://www.w3.org/2018/credentials/v1'],
               type: ['VerifiableCredential'],
-              credential_issuer: 'did:key:test',
+              issuer: 'did:key:test',
               issuanceDate: new Date().toISOString(),
-              credentialSubject: {},
+              credentialSubject: {}
             },
-            format: 'ldp_vc',
-          }) as Promise<CredentialDataSupplierResult>,
+            format: 'ldp_vc'
+          })
       )
       .withCredentialSignerCallback((opts) =>
         Promise.resolve({
@@ -196,9 +209,9 @@ describe('issuerCallback', () => {
             jwt: 'ye.ye.ye',
             created: new Date().toISOString(),
             proofPurpose: IProofPurpose.assertionMethod,
-            verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
-          },
-        }),
+            verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf'
+          }
+        })
       )
       .build()
   }, 30000)
@@ -213,7 +226,7 @@ describe('issuerCallback', () => {
       type: ['VerifiableCredential'],
       issuer: didKey.didDocument.id,
       credentialSubject: {},
-      issuanceDate: new Date().toISOString(),
+      issuanceDate: new Date().toISOString()
     }
     const vc = await getIssuerCallbackV1_0_11(credential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)({})
     expect(vc).toEqual({
@@ -226,12 +239,12 @@ describe('issuerCallback', () => {
         proofPurpose: 'assertionMethod',
         proofValue: expect.any(String),
         type: 'Ed25519Signature2020',
-        verificationMethod: expect.any(String),
+        verificationMethod: expect.any(String)
       },
-      type: ['VerifiableCredential'],
+      type: ['VerifiableCredential']
     })
     await expect(verifyCredential(vc, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)).resolves.toEqual(
-      expect.objectContaining({ verified: true }),
+      expect.objectContaining({ verified: true })
     )
   })
 
@@ -239,15 +252,15 @@ describe('issuerCallback', () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialEndpointFromMetadata({
-        credential_configurations_supported: { VeriCred: { format: 'jwt_vc_json' } },
-      } as unknown as CredentialIssuerMetadataV1_0_13)
+        credential_configurations_supported: { VeriCred: { format: 'jwt_vc_json' } }
+      } as unknown as CredentialIssuerMetadataV1_0_15)
       .withFormat('jwt_vc_json')
       .withCredentialIdentifier('VeriCred')
       .withToken('token')
 
     const jwt: Jwt = {
       header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21#keys-1', typ: 'openid4vci-proof+jwt' },
-      payload: { iss: 'sphereon:wallet', nonce: 'test_value', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
+      payload: { iss: 'sphereon:wallet', nonce: 'test_value', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL }
     }
 
     const credential: ICredential = {
@@ -255,15 +268,15 @@ describe('issuerCallback', () => {
       type: ['VerifiableCredential'],
       issuer: didKey.didDocument.id,
       credentialSubject: {},
-      issuanceDate: new Date().toISOString(),
+      issuanceDate: new Date().toISOString()
     }
 
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt,
       callbacks: {
-        signCallback: proofOfPossessionCallbackFunction,
+        signCallback: proofOfPossessionCallbackFunction
       },
-      version: OpenId4VCIVersion.VER_1_0_13,
+      version: OpenId4VCIVersion.VER_1_0_15
     })
       .withClientId(clientId)
       .withKid(kid)
@@ -274,23 +287,23 @@ describe('issuerCallback', () => {
       credentialIdentifier: 'VerifiableCredential',
       // format: 'jwt_vc_json',
       proofInput: proof,
-      version: OpenId4VCIVersion.VER_1_0_13,
+      version: OpenId4VCIVersion.VER_1_0_15
     })
 
     expect(credentialRequest).toEqual({
       // format: 'jwt_vc_json',
       proof: {
         jwt: expect.stringContaining('eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDpleGFtcGxlOmViZmViMWY3MTJlYmM2ZjFj'),
-        proof_type: 'jwt',
+        proof_type: 'jwt'
       },
-      credential_identifier: 'VerifiableCredential',
+      credential_identifier: 'VerifiableCredential'
     })
 
     const credentialResponse = await vcIssuer.issueCredential({
       credentialRequest: credentialRequest,
       credential,
       responseCNonce: state,
-      credentialSignerCallback: getIssuerCallbackV1_0_13(credential, credentialRequest, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id),
+      credentialSignerCallback: getIssuerCallbackV1_0_15(credential, credentialRequest, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)
     })
 
     expect(credentialResponse).toEqual({
@@ -300,7 +313,7 @@ describe('issuerCallback', () => {
       credential: {
         '@context': ['https://www.w3.org/2018/credentials/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],
         credentialSubject: {
-          id: 'did:example:ebfeb1f712ebc6f1c276e12ec21',
+          id: 'did:example:ebfeb1f712ebc6f1c276e12ec21'
         },
         issuanceDate: expect.any(String),
         issuer: didKey.didDocument.id,
@@ -309,15 +322,15 @@ describe('issuerCallback', () => {
           proofPurpose: 'assertionMethod',
           proofValue: expect.any(String),
           type: 'Ed25519Signature2020',
-          verificationMethod: expect.stringContaining('did:key:'),
+          verificationMethod: expect.stringContaining('did:key:')
         },
-        type: ['VerifiableCredential'],
-      },
+        type: ['VerifiableCredential']
+      }
       // format: 'jwt_vc_json',
     })
 
     await expect(
-      verifyCredential(credentialResponse.credential as W3CVerifiableCredential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id),
+      verifyCredential(credentialResponse.credential as W3CVerifiableCredential, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)
     ).resolves.toEqual(expect.objectContaining({ verified: true }))
   })
 })
