@@ -211,7 +211,7 @@ describe('issuerCallback', () => {
     const credential: ICredential = {
       '@context': ['https://www.w3.org/2018/credentials/v1'],
       type: ['VerifiableCredential'],
-      credential_issuer: didKey.didDocument.id,
+      issuer: didKey.didDocument.id,
       credentialSubject: {},
       issuanceDate: new Date().toISOString(),
     }
@@ -253,7 +253,7 @@ describe('issuerCallback', () => {
     const credential: ICredential = {
       '@context': ['https://www.w3.org/2018/credentials/v1'],
       type: ['VerifiableCredential'],
-      credential_issuer: didKey.didDocument.id,
+      issuer: didKey.didDocument.id,
       credentialSubject: {},
       issuanceDate: new Date().toISOString(),
     }
