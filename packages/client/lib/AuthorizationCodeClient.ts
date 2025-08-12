@@ -248,7 +248,7 @@ export const createAuthorizationRequestUrl = async ({
   }
   await createSignedAuthRequestWhenNeeded(queryObj, {
     ...requestObjectOpts,
-    aud: endpointMetadata.authorization_server
+    aud: endpointMetadata.authorization_server ?? endpointMetadata.authorizationServerMetadata?.issuer
   })
 
   logger.debug(`Object that will become query params: ` + JSON.stringify(queryObj, null, 2))

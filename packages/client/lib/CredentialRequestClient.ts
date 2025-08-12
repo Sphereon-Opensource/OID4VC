@@ -298,7 +298,7 @@ export class CredentialRequestClient {
     })
   }
 
-  public async createCredentialRequestWithoutProof(opts: CreateCredentialRequestOpts): Promise<CredentialRequestV1_0_15> {
+  public async createCredentialRequestWithoutProof(opts: CreateCredentialRequestOpts): Promise<CredentialRequestV1_0_15 | CredentialRequestV1_0_13> {
     return await this.createCredentialRequestImpl(opts)
   }
 
@@ -306,7 +306,7 @@ export class CredentialRequestClient {
     opts: CreateCredentialRequestOpts & {
       proofInput: ProofOfPossessionBuilder | ProofOfPossession
     }
-  ): Promise<CredentialRequestV1_0_15> {
+  ): Promise<CredentialRequestV1_0_15 | CredentialRequestV1_0_13> {
     return await this.createCredentialRequestImpl(opts)
   }
 
@@ -314,7 +314,7 @@ export class CredentialRequestClient {
     opts: CreateCredentialRequestOpts & {
       proofInput?: ProofOfPossessionBuilder | ProofOfPossession
     }
-  ): Promise<CredentialRequestV1_0_15> {
+  ): Promise<CredentialRequestV1_0_15 | CredentialRequestV1_0_13> {
     const { proofInput, credentialIdentifier, credentialConfigurationId } = opts
     let proof: ProofOfPossession | undefined = undefined
     if (proofInput) {
@@ -376,7 +376,7 @@ export class CredentialRequestClient {
       return {
         credential_identifier: credentialIdentifier,
         ...proof_obj
-      } as CredentialRequestV1_0_15
+      } as CredentialRequestV1_0_13
     }
 
     const formatSelection = opts.format ?? this.credentialRequestOpts.format
@@ -396,20 +396,21 @@ export class CredentialRequestClient {
     }
     const issuer_state = this.credentialRequestOpts.issuerState
 
-    // For older versions, build format-specific requests but cast to v1.0-15 type
-    const baseBody = {
-      ...(issuer_state && { issuer_state }),
-      ...(proof && { proof }),
-      ...opts.subjectIssuance
+    // Add format-specific credential_definition for v13
+    if (formatSelection === 'jwt_vc_json' || formatSelection === 'ldp_vc') {
+      return {
+        format: formatSelection,
+        credential_definition: {
+          type: types,
+          ...(opts.context && { '@context': opts.context })
+        },
+        ...(issuer_state && { issuer_state }),
+        ...(proof && { proof }),
+        ...opts.subjectIssuance
+      } as CredentialRequestV1_0_13
     }
 
-    // Use credential_configuration_id for all formats in legacy mode
-    const configId = credentialConfigurationId ?? 'default'
-
-    return {
-      credential_configuration_id: configId,
-      ...baseBody
-    } as CredentialRequestV1_0_15
+    return Promise.reject(Error(`Format ${formatSelection} is not supported in this protocol version`))
   }
 
   private version(): OpenId4VCIVersion {
