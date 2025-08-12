@@ -73,7 +73,7 @@ describe('OID4VCIServer', () => {
       hostname: '0.0.0.0',
     }).build({ startListening: false })
     const vcIssuerServer = new OID4VCIServer(expressSupport, {
-      credential_issuer: vcIssuer,
+      issuer: vcIssuer,
       baseUrl: 'http://localhost:9000',
       endpointOpts: {
         tokenEndpointOpts: {

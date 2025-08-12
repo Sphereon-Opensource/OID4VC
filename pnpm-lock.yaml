@@ -29,6 +29,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^3.1.1
         version: 3.1.4(vitest@3.1.4(@types/debug@4.1.12)(@types/node@20.17.50)(terser@5.39.2)(tsx@4.19.4)(yaml@2.8.0))
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.5.0
       lerna:
         specifier: ^8.2.2
         version: 8.2.2(@swc/core@1.11.29)(encoding@0.1.13)
@@ -543,7 +546,7 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0
       dotenv:
-        specifier: ^16.3.1
+        specifier: ^16.4.5
         version: 16.5.0
       ethers:
         specifier: ^6.10.0
@@ -2734,6 +2737,7 @@ packages:
 
   '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.26':
     resolution: {integrity: sha512-QXJ6R8ENiZV2rPMbn06cw5JKwqUYN1kzVRbYfONqE1PEXx1noQ4md7uxr2zSczi0ubKkNcbyYDNtIMTZIhGzmQ==}
+    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.2':
     resolution: {integrity: sha512-foFxfLkRwcn/MOp/eht46Q7wsvpQGlO7aowowIIb5Tz9u97kYZ2kz6K2h2ODxWuv5CRA7Q0MY8XUBGE2lfOhOQ==}
@@ -14237,7 +14241,7 @@ snapshots:
 
   dotenv-expand@11.0.7:
     dependencies:
-      dotenv: 16.4.7
+      dotenv: 16.5.0
 
   dotenv-flow@3.3.0:
     dependencies:

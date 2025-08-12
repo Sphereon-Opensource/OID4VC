@@ -50,7 +50,7 @@ export class MetadataClientV1_0_15 {
   }): Promise<EndpointMetadataResultV1_0_15> {
     let token_endpoint: string | undefined
     let credential_endpoint: string | undefined
-    let nonce_endpoint: string | undefined // New in v15
+    let nonce_endpoint: string | undefined
     let deferred_credential_endpoint: string | undefined
     let authorization_endpoint: string | undefined
     let authorization_challenge_endpoint: string | undefined
@@ -61,7 +61,7 @@ export class MetadataClientV1_0_15 {
     if (credentialIssuerMetadata) {
       logger.debug(`Issuer ${issuer} OID4VCI well-known server metadata\r\n${JSON.stringify(credentialIssuerMetadata)}`)
       credential_endpoint = credentialIssuerMetadata.credential_endpoint
-      nonce_endpoint = credentialIssuerMetadata.nonce_endpoint // New in v15
+      nonce_endpoint = credentialIssuerMetadata.nonce_endpoint
       deferred_credential_endpoint = credentialIssuerMetadata.deferred_credential_endpoint
       if (credentialIssuerMetadata.token_endpoint) {
         token_endpoint = credentialIssuerMetadata.token_endpoint
@@ -76,9 +76,7 @@ export class MetadataClientV1_0_15 {
     let response: OpenIDResponse<AuthorizationServerMetadata> = await retrieveWellknown(
       authorization_servers[0],
       WellKnownEndpoints.OPENID_CONFIGURATION,
-      {
-        errorOnNotFound: false
-      }
+      { errorOnNotFound: false }
     )
     let authMetadata = response.successBody
     if (authMetadata) {
@@ -164,28 +162,39 @@ export class MetadataClientV1_0_15 {
       }
     }
 
-    // Add default nonce_endpoint if not provided but required by v15 spec
-    if (!nonce_endpoint) {
-      logger.debug(`Issuer ${issuer} does not have a nonce_endpoint listed in well-known locations. Using default path.`)
-      nonce_endpoint = `${issuer}${issuer.endsWith('/') ? 'nonce' : '/nonce'}`
-    }
+    // We keep nonce_endpoint internally if you rely on it elsewhere, but do not expose it at top-level in v15 result
 
     if (!credentialIssuerMetadata && authMetadata) {
       // Apparently everything worked out and the issuer is exposing everything in oAuth2/OIDC well-knowns. Spec is vague about this situation, but we can support it
       credentialIssuerMetadata = authMetadata as CredentialIssuerMetadataV1_0_15
     }
-    logger.debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}, nonce endpoint ${nonce_endpoint}`)
+
+    // Ensure v15 array form under CI metadata
+    const ci = (credentialIssuerMetadata ?? {}) as Partial<CredentialIssuerMetadataV1_0_15>
+    const ciAuthorizationServers = Array.isArray(ci.authorization_servers) && ci.authorization_servers.length > 0
+      ? ci.authorization_servers
+      : authorization_servers
+
+    const v15CredentialIssuerMetadata: CredentialIssuerMetadataV1_0_15 = {
+      credential_issuer: ci.credential_issuer ?? issuer,
+      credential_endpoint: credential_endpoint as string, // guaranteed above by your defaults
+      authorization_servers: ciAuthorizationServers,
+      credential_configurations_supported: ci.credential_configurations_supported ?? {},
+      display: ci.display ?? [],
+      ...(nonce_endpoint && { nonce_endpoint }),
+      ...(deferred_credential_endpoint && { deferred_credential_endpoint })
+    }
+
+    logger.debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`)
+
+    // Return v15-only fields (no legacy top-level authorization_server/authorization_endpoint and no nonce/deferred at top-level)
     return {
       issuer: issuer,
       token_endpoint,
       credential_endpoint,
-      nonce_endpoint, // New in v15
-      deferred_credential_endpoint,
-      authorization_server: authorization_servers[0],
-      authorization_endpoint,
       authorization_challenge_endpoint,
       authorizationServerType,
-      credentialIssuerMetadata: credentialIssuerMetadata,
+      credentialIssuerMetadata: v15CredentialIssuerMetadata,
       authorizationServerMetadata: authMetadata
     }
   }
