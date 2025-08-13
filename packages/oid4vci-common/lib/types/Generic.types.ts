@@ -15,7 +15,7 @@ import {
 } from './v1_0_13.types'
 import {
   CredentialConfigurationSupportedV1_0_15,
-  CredentialRequestV1_0_15,
+  CredentialRequestV1_0_15, EndpointMetadataResultV1_0_15,
   IssuerMetadataV1_0_15
 } from './v1_0_15.types'
 
@@ -421,7 +421,7 @@ export interface GrantUrnIetf {
 export const PRE_AUTH_CODE_LITERAL = 'pre-authorized_code'
 export const PRE_AUTH_GRANT_LITERAL = 'urn:ietf:params:oauth:grant-type:pre-authorized_code'
 
-export type EndpointMetadataResult = EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11
+export type EndpointMetadataResult = EndpointMetadataResultV1_0_15 | EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11
 
 export type IssuerMetadata = IssuerMetadataV1_0_15 | IssuerMetadataV1_0_13 | IssuerMetadataV1_0_08
 
