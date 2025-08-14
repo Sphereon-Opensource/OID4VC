@@ -1,10 +1,10 @@
 import { AuthorizationRequestPayloadVD11Schema, AuthorizationRequestPayloadVID1Schema } from '../schemas'
 import {
   AuthorizationRequestPayloadVD12OID4VPD18Schema,
-  AuthorizationRequestPayloadVD12OID4VPD20Schema,
+  AuthorizationRequestPayloadVD12OID4VPD20Schema, // TODO we need new schema
 } from '../schemas/validation/schemaValidation.cjs'
 import { AuthorizationRequestPayload, ResponseMode, SupportedVersion } from '../types'
-import errors from '../types/Errors'
+//import errors from '../types/Errors'
 
 const validateJWTVCPresentationProfile = AuthorizationRequestPayloadVID1Schema
 
@@ -24,12 +24,10 @@ function isJWTVC1Payload(authorizationRequest: AuthorizationRequestPayload) {
     'vp_token' in authorizationRequest.claims
   )
 }
-function isID1Payload(authorizationRequest: AuthorizationRequestPayload) {
+function isID1Payload(authorizationRequest: AuthorizationRequestPayload) { // TODO remove function
   return (
-    !authorizationRequest.client_metadata_uri &&
+    //!authorizationRequest.client_metadata_uri &&
     !authorizationRequest.client_metadata &&
-    !authorizationRequest.presentation_definition &&
-    !authorizationRequest.presentation_definition_uri &&
     !authorizationRequest.dcql_query
   )
 }
@@ -83,8 +81,11 @@ export const authorizationRequestVersionDiscovery = (authorizationRequest: Autho
   if (vid1Validation && isID1Payload(authorizationRequest)) {
     versions.push(SupportedVersion.SIOPv2_ID1)
   }
+
   if (versions.length === 0) {
-    throw new Error(errors.SIOP_VERSION_NOT_SUPPORTED)
+    // For now just defaulting to v1 of OID4VP
+    versions.push(SupportedVersion.SIOPv2_V1)
+    //throw new Error(errors.SIOP_VERSION_NOT_SUPPORTED)
   }
   return versions
 }

@@ -1,8 +1,9 @@
-import { SigningAlgo } from '@sphereon/oid4vc-common'
-import { IProofType } from '@sphereon/ssi-types'
+import {SigningAlgo} from '@sphereon/oid4vc-common'
+import {IProofType} from '@sphereon/ssi-types'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import nock from 'nock'
-import { describe, expect, it } from 'vitest'
-
+import {describe, expect, it} from 'vitest'
 import {
   AuthorizationResponseOpts,
   CreateAuthorizationRequestOpts,
@@ -18,10 +19,9 @@ import {
   SupportedVersion,
   VerifyAuthorizationRequestOpts,
 } from '..'
-
-import { getCreateJwtCallback, getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
-import { getResolver } from './ResolverTestUtils'
-import { mockedGetEnterpriseAuthToken, WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
+import {getCreateJwtCallback, getVerifyJwtCallback, internalSignature} from './DidJwtTestUtils'
+import {getResolver} from './ResolverTestUtils'
+import {mockedGetEnterpriseAuthToken, WELL_KNOWN_OPENID_FEDERATION} from './TestUtils'
 import {
   UNIT_TEST_TIMEOUT,
   VERIFIER_LOGO_FOR_CLIENT,
@@ -148,6 +148,7 @@ describe('OP should', () => {
           }),
           payload: {
             redirect_uri: EXAMPLE_REDIRECT_URL,
+            response_mode: ResponseMode.DIRECT_POST,
             client_id: WELL_KNOWN_OPENID_FEDERATION,
             scope: 'test',
             response_type: 'id_token',

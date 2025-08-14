@@ -1,8 +1,17 @@
 import { parseJWT, SigningAlgo } from '@sphereon/oid4vc-common'
 import { describe, expect, it } from 'vitest'
-
-import { PassBy, ResponseType, RevocationVerification, RP, Scope, SubjectType, SupportedVersion } from '../..'
+import {
+    PassBy,
+    PropertyTarget,
+    ResponseType,
+    RevocationVerification,
+    RP,
+    Scope,
+    SubjectType,
+    SupportedVersion
+} from '../..'
 import { internalSignature } from '../DidJwtTestUtils'
+import { DcqlQuery } from 'dcql'
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 // const EXAMPLE_REFERENCE_URL = 'https://rp.acme.com/siop/jwts';
@@ -10,8 +19,23 @@ const HEX_KEY = 'f857544a9d1097e242ff0b287a7e6e90f19cf973efe2317f2a4678739664420
 const DID = 'did:ethr:0x0106a2e985b1E1De9B5ddb4aF6dC9e928F4e99D0'
 const KID = 'did:ethr:0x0106a2e985b1E1De9B5ddb4aF6dC9e928F4e99D0#keys-1'
 
+const dcqlQuery = {
+    credentials: [
+        {
+            id: 'my_credential',
+            format: 'vc+sd-jwt',
+            meta: {
+                vct_values: ['https://high-assurance.com/StateBusinessLicense'],
+            },
+            claims: [{ path: ['license', 'number'] }, { path: ['user', 'name'] }],
+        },
+    ],
+} satisfies DcqlQuery.Input
+
+const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery)
+DcqlQuery.validate(parsedDcqlQuery)
+
 const rp = RP.builder()
-  // .withClientId('test')
   .withRedirectUri(EXAMPLE_REDIRECT_URL)
   .withRequestByValue()
   .withRevocationVerification(RevocationVerification.NEVER)
@@ -27,21 +51,7 @@ const rp = RP.builder()
     subjectTypesSupported: [SubjectType.PAIRWISE],
     subject_syntax_types_supported: ['did:ethr:', 'did:key:', 'did'],
   })
-  .withPresentationDefinition({
-    definition: {
-      id: '1234-1234-1234-1234',
-      input_descriptors: [
-        {
-          id: 'ExampleInputDescriptor',
-          schema: [
-            {
-              uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-            },
-          ],
-        },
-      ],
-    },
-  })
+  .withDcqlQuery(parsedDcqlQuery, [PropertyTarget.REQUEST_OBJECT])
   .build()
 
 describe('Creating an AuthRequest with an RP from builder', () => {
@@ -56,6 +66,6 @@ describe('Creating an AuthRequest with an RP from builder', () => {
 
     const requestObjectJwt = await authRequest.requestObject?.toJwt()
     const { payload } = parseJWT(requestObjectJwt!)
-    await expect(payload.client_id).toEqual(DID)
+    expect(payload.client_id).toEqual(DID)
   })
 })

@@ -16,7 +16,7 @@ export function removeNullUndefined<T>(data: T): T {
   //transform properties into key-values pairs and filter all the empty-values
   const entries = Object.entries(data).filter(([, value]) => value != null)
   //map through all the remaining properties and check if the value is an object.
-  //if value is object, use recursion to remove empty properties
+  //if a value is an object, use recursion to remove empty properties
   const clean = entries.map(([key, v]) => {
     const value = typeof v === 'object' && !Array.isArray(v) ? removeNullUndefined(v) : v
     return [key, value]

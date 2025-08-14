@@ -1,9 +1,9 @@
-import { PEX } from '@sphereon/pex'
-
-import { getNonce, getWithUrl, removeNullUndefined } from '../helpers'
+import { getNonce, removeNullUndefined } from '../helpers'
 import { RequestObject } from '../request-object'
 import { isTarget, isTargetOrNoTargets } from '../rp/Opts'
 import { RPRegistrationMetadataPayloadSchema } from '../schemas'
+import { createRequestRegistration } from './RequestRegistration'
+import { ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts, PropertyTarget } from './types'
 import {
   AuthorizationRequestPayload,
   ClaimPayloadVID1,
@@ -14,38 +14,15 @@ import {
   SupportedVersion,
 } from '../types'
 
-import { createRequestRegistration } from './RequestRegistration'
-import { ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts, PropertyTarget } from './types'
-
+// TODO this can be removed??? // or renamed createClaimsProperties
 export const createPresentationDefinitionClaimsProperties = async (opts: ClaimPayloadOptsVID1): Promise<ClaimPayloadVID1 | undefined> => {
-  if (
-    !opts ||
-    !opts.vp_token ||
-    (!opts.vp_token.presentation_definition && !opts.vp_token.presentation_definition_uri && !opts.vp_token.dcql_query)
-  ) {
+  if (!opts || !opts.vp_token) {
     return undefined
   }
 
-  let presentationDef = opts.vp_token.presentation_definition
-  if (!presentationDef && opts.vp_token.presentation_definition_uri) {
-    presentationDef = await getWithUrl(opts.vp_token.presentation_definition_uri, false)
-  }
-  if (presentationDef) {
-    const discoveryResult = PEX.definitionVersionDiscovery(presentationDef)
-    if (discoveryResult.error) {
-      return Promise.reject(new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID))
-    }
-  }
-
   return {
-    ...(opts.id_token ? { id_token: opts.id_token } : {}),
-    ...((opts.vp_token.presentation_definition || opts.vp_token.presentation_definition_uri) && {
-      vp_token: {
-        ...(!opts.vp_token.presentation_definition_uri && { presentation_definition: opts.vp_token.presentation_definition }),
-        ...(opts.vp_token.presentation_definition_uri && { presentation_definition_uri: opts.vp_token.presentation_definition_uri }),
-      },
-    }),
-    ...(opts.vp_token.dcql_query && { vp_token: { dcql_query: opts.vp_token.dcql_query } }),
+    ...(opts.id_token && { id_token: opts.id_token }),
+    vp_token: { dcql_query: opts.vp_token.dcql_query }
   }
 }
 
@@ -79,15 +56,11 @@ export const createAuthorizationRequestPayload = async (
     ...payload,
     //TODO implement /.well-known/openid-federation support in the OP side to resolve the client_id (URL) and retrieve the metadata
     ...(clientMetadata.client_id && { client_id: clientMetadata.client_id }),
-    ...(isRequestTarget && opts.requestObject.passBy === PassBy.REFERENCE ? { request_uri: opts.requestObject.reference_uri } : {}),
+    ...(isRequestTarget && opts.requestObject.passBy === PassBy.REFERENCE && { request_uri: opts.requestObject.reference_uri }),
     ...(isRequestTarget && isRequestByValue && { request }),
     ...(nonce && { nonce }),
     ...(state && { state }),
-    ...(registration.payload &&
-    registration.clientMetadataOpts.targets &&
-    isTarget(PropertyTarget.AUTHORIZATION_REQUEST, registration.clientMetadataOpts.targets)
-      ? registration.payload
-      : {}),
+    ...(registration.payload && registration.clientMetadataOpts.targets && isTarget(PropertyTarget.AUTHORIZATION_REQUEST, registration.clientMetadataOpts.targets) && { ...registration.payload }),
     ...(claims && { claims }),
   }
 

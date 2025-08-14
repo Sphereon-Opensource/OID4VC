@@ -1,5 +1,7 @@
 import { PresentationDefinitionV1 } from '@sphereon/pex-models'
 
+// TODO remove all this and use dcql
+
 export const anyDef: PresentationDefinitionV1 = {
   id: '1',
   input_descriptors: [

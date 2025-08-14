@@ -3,12 +3,11 @@ import { IProofType } from '@sphereon/ssi-types'
 import Ajv from 'ajv'
 import * as dotenv from 'dotenv'
 import { describe, expect, it } from 'vitest'
-
 import {
   AuthorizationRequest,
   CreateAuthorizationRequestOpts,
   PassBy,
-  RequestObject,
+  RequestObject, ResponseMode,
   ResponseType,
   Scope,
   SubjectType,
@@ -17,7 +16,6 @@ import {
 } from '..'
 import { RPRegistrationMetadataPayloadSchemaObj } from '../schemas'
 import SIOPErrors from '../types/Errors'
-
 import { getCreateJwtCallback, getVerifyJwtCallback } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
 import { metadata, mockedGetEnterpriseAuthToken, WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
@@ -270,6 +268,7 @@ describe('verifyJWT should', () => {
           client_id: WELL_KNOWN_OPENID_FEDERATION,
           scope: 'test',
           response_type: 'id_token',
+          response_mode: ResponseMode.DIRECT_POST,
           state: '12345',
           nonce: '12345',
           request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
@@ -345,6 +344,7 @@ describe('verifyJWT should', () => {
             client_id: WELL_KNOWN_OPENID_FEDERATION,
             scope: 'test',
             response_type: 'id_token',
+            response_mode: ResponseMode.DIRECT_POST,
             state: '12345',
             nonce: '12345',
             request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
@@ -402,7 +402,7 @@ describe('OP and RP communication should', () => {
   it('work if both support the same did methods', () => {
     const actualResult = metadata.verify()
     const expectedResult = {
-      vp_formats: {
+      vp_formats_supported: {
         jwt_vc: { alg: [SigningAlgo.ES256, SigningAlgo.ES256K] },
         ldp_vc: {
           proof_type: ['EcdsaSecp256k1Signature2019', 'EcdsaSecp256k1Signature2019'],
@@ -422,7 +422,7 @@ describe('OP and RP communication should', () => {
     metadata.rpMetadata.subject_syntax_types_supported = ['did:web']
     expect(metadata.verify()).toEqual({
       subject_syntax_types_supported: ['did:web'],
-      vp_formats: {
+      vp_formats_supported: {
         ldp_vc: {
           proof_type: ['EcdsaSecp256k1Signature2019', 'EcdsaSecp256k1Signature2019'],
         },
@@ -438,7 +438,7 @@ describe('OP and RP communication should', () => {
     }
     const result = metadata.verify() as Record<string, unknown>
     expect(result['subject_syntax_types_supported']).toContain('did:web')
-    expect(result['vp_formats']).toStrictEqual({
+    expect(result['vp_formats_supported']).toStrictEqual({
       ldp_vc: {
         proof_type: ['EcdsaSecp256k1Signature2019', 'EcdsaSecp256k1Signature2019'],
       },

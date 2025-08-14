@@ -1,11 +1,9 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
-
 import { CreateAuthorizationRequestOpts, createPresentationDefinitionClaimsProperties } from '../authorization-request'
 import { createRequestRegistration } from '../authorization-request/RequestRegistration'
 import { getNonce, getState, removeNullUndefined } from '../helpers'
-import { RequestObjectPayload, ResponseMode, ResponseType, SIOPErrors, SupportedVersion } from '../types'
-
 import { assertValidRequestObjectOpts } from './Opts'
+import { RequestObjectPayload, ResponseMode, ResponseType, SIOPErrors, SupportedVersion } from '../types'
 
 export const createRequestObjectPayload = async (opts: CreateAuthorizationRequestOpts): Promise<RequestObjectPayload | undefined> => {
   assertValidRequestObjectOpts(opts.requestObject, false)
@@ -53,9 +51,7 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
     state,
     ...registration.payload,
     claims,
-    ...(payload.presentation_definition_uri && { presentation_definition_uri: payload.presentation_definition_uri }),
-    ...(payload.presentation_definition && { presentation_definition: payload.presentation_definition }),
-    ...(payload.dcql_query && { dcql_query: payload.dcql_query }),
+    dcql_query: payload.dcql_query,
     client_metadata: payload.client_metadata,
     iat,
     nbf,

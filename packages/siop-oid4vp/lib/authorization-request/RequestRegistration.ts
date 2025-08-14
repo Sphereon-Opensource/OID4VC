@@ -9,11 +9,7 @@ import {
   SIOPErrors,
   SupportedVersion,
 } from '../types'
-
 import { CreateAuthorizationRequestOpts } from './types'
-
-/*const ajv = new Ajv({ allowUnionTypes: true, strict: false });
-const validateRPRegistrationMetadata = ajv.compile(RPRegistrationMetadataPayloadSchema);*/
 
 export const assertValidRequestRegistrationOpts = (opts: ClientMetadataOpts) => {
   if (!opts) {
@@ -28,25 +24,24 @@ export const assertValidRequestRegistrationOpts = (opts: ClientMetadataOpts) => 
 const createRequestRegistrationPayload = async (
   opts: ClientMetadataOpts,
   metadataPayload: RPRegistrationMetadataPayload,
-  version: SupportedVersion,
+  version: SupportedVersion, // TODO we could remove this
 ): Promise<RequestRegistrationPayloadProperties | RequestClientMetadataPayloadProperties> => {
   assertValidRequestRegistrationOpts(opts)
 
   if (opts.passBy == PassBy.VALUE) {
-    if (version >= SupportedVersion.SIOPv2_D11.valueOf()) {
-      return { client_metadata: removeNullUndefined(metadataPayload) }
-    } else {
+    // if (version >= SupportedVersion.SIOPv2_D11.valueOf()) {
+    //   return { client_metadata: removeNullUndefined(metadataPayload) }
+    // } else {
       return { registration: removeNullUndefined(metadataPayload) }
-    }
+    // }
   } else {
-    if (version >= SupportedVersion.SIOPv2_D11.valueOf()) {
-      return {
-        client_metadata_uri: opts.reference_uri,
-      }
-    } else {
-      return {
-        registration_uri: opts.reference_uri,
-      }
+    // if (version >= SupportedVersion.SIOPv2_D11.valueOf()) {
+    //   return {
+    //     client_metadata_uri: opts.reference_uri, // TODO check SIOP D11 spec
+    //   }
+    // } else {
+      return { registration_uri: opts.reference_uri
+      // }
     }
   }
 }

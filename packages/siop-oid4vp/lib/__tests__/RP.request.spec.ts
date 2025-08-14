@@ -1,7 +1,6 @@
 import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { IProofType } from '@sphereon/ssi-types'
 import { describe, expect, it } from 'vitest'
-
 import {
   CreateAuthorizationRequestOpts,
   PassBy,
@@ -14,7 +13,6 @@ import {
   SubjectType,
   SupportedVersion,
 } from '..'
-
 import { getCreateJwtCallback, getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
 import { WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
@@ -63,7 +61,6 @@ describe('RP OPBuilder should', () => {
           clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
           'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         })
-
         .withCreateJwtCallback(internalSignature('myprivatekye', 'did:example:123', 'did:example:123#key', SigningAlgo.ES256K))
         .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
         .build(),
@@ -74,7 +71,7 @@ describe('RP OPBuilder should', () => {
 describe('RP should', () => {
   it('throw Error when build from request opts without enough params', async () => {
     expect.assertions(1)
-    await expect(() => RP.fromRequestOpts({} as never)).toThrowError(Error)
+    expect(() => RP.fromRequestOpts({} as never)).toThrowError(Error)
   })
   it('return an RP when all request arguments are set', async () => {
     expect.assertions(1)
@@ -146,7 +143,6 @@ describe('RP should', () => {
         },
         passBy: PassBy.REFERENCE,
         reference_uri: EXAMPLE_REFERENCE_URL,
-
         createJwtCallback: getCreateJwtCallback({
           hexPrivateKey: HEX_KEY,
           did: DID,

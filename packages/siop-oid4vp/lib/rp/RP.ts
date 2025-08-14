@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events'
-
 import {
   jarmAuthResponseDirectPostJwtValidate,
   JarmAuthResponseParams,
@@ -9,7 +8,6 @@ import {
 import { decodeProtectedHeader, JwtIssuer } from '@sphereon/oid4vc-common'
 import { HasherSync } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
-
 import {
   AuthorizationRequest,
   ClaimPayloadCommonOpts,
@@ -23,8 +21,6 @@ import { mergeVerificationOpts } from '../authorization-request/Opts'
 import {
   AuthorizationResponse,
   extractPresentationsFromDcqlVpToken,
-  extractPresentationsFromVpToken,
-  PresentationDefinitionWithLocation,
   VerifyAuthorizationResponseOpts,
 } from '../authorization-response'
 import { base64urlToString, getNonce, getState } from '../helpers'
@@ -172,10 +168,7 @@ export class RP {
       },
     )
 
-    const presentations = validatedResponse.authRequestParams.dcql_query
-      ? extractPresentationsFromDcqlVpToken(validatedResponse.authResponseParams.vp_token as string, { hasher })
-      : extractPresentationsFromVpToken(validatedResponse.authResponseParams.vp_token, { hasher })
-
+    const presentations = extractPresentationsFromDcqlVpToken(validatedResponse.authResponseParams.vp_token as string, { hasher })
     const mdocVerifiablePresentations = (Array.isArray(presentations) ? presentations : [presentations]).filter((p) => p.format === 'mso_mdoc')
 
     if (mdocVerifiablePresentations.length) {
@@ -208,8 +201,7 @@ export class RP {
       state?: string
       nonce?: string
       verification?: Verification
-      presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[]
-      dcqlQuery?: DcqlQuery
+      dcqlQuery?: DcqlQuery // TODO required or optional?
     },
   ): Promise<VerifiedAuthorizationResponse> {
     const state = opts?.state ?? authorizationResponsePayload.state
@@ -383,8 +375,7 @@ export class RP {
       nonce?: string
       verification?: Verification
       audience?: string
-      presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[]
-      dcqlQuery?: DcqlQuery
+      dcqlQuery?: DcqlQuery // TODO required or optional?
     },
   ): Promise<VerifyAuthorizationResponseOpts> {
     let correlationId = opts?.correlationId ?? this._verifyResponseOptions.correlationId
@@ -417,21 +408,6 @@ export class RP {
       }
     }
 
-    const hasPD =
-      (this._verifyResponseOptions.presentationDefinitions !== undefined && this._verifyResponseOptions.presentationDefinitions !== null) ||
-      (Array.isArray(this._verifyResponseOptions.presentationDefinitions) && this._verifyResponseOptions.presentationDefinitions.length > 0) ||
-      (opts.presentationDefinitions !== undefined && opts.presentationDefinitions !== null) ||
-      (Array.isArray(opts.presentationDefinitions) && opts.presentationDefinitions.length > 0)
-    const hasDcql =
-      (this._verifyResponseOptions.dcqlQuery !== undefined && this._verifyResponseOptions.dcqlQuery !== null) ||
-      (opts.dcqlQuery !== undefined && opts.dcqlQuery !== null)
-
-    if (hasPD && hasDcql) {
-      throw Error(`Only Presentation Definitions or DCQL is required`)
-    } else if (!hasPD && !hasDcql) {
-      throw Error(`Either a Presentation Definition or DCQL is required`)
-    }
-
     return {
       ...this._verifyResponseOptions,
       verifyJwtCallback: this._verifyResponseOptions.verifyJwtCallback,
@@ -441,16 +417,7 @@ export class RP {
       state,
       nonce,
       verification: mergeVerificationOpts(this._verifyResponseOptions, opts),
-      ...(opts?.presentationDefinitions &&
-        !opts?.dcqlQuery && {
-          presentationDefinitions: this._verifyResponseOptions.presentationDefinitions ?? opts?.presentationDefinitions,
-        }),
-      ...(opts?.dcqlQuery /*&&
-        !opts?.presentationDefinitions */ && {
-        // FIXME presentationDefinitions will be there until we fix the OID4VC-DEMO, it wants a PD purpose field for the screens
-
-        dcqlQuery: this._verifyResponseOptions.dcqlQuery ?? opts?.dcqlQuery,
-      }),
+      dcqlQuery: this._verifyResponseOptions.dcqlQuery ?? opts?.dcqlQuery,
     }
   }
 

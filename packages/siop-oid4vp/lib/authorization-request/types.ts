@@ -1,10 +1,8 @@
 import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { HasherSync } from '@sphereon/ssi-types'
-
-import { DcqlQueryPayloadOpts, PresentationDefinitionPayloadOpts } from '../authorization-response'
+import { DcqlQueryPayloadOpts } from '../authorization-response'
 import { RequestObjectOpts } from '../request-object'
 import {
-  ClientIdScheme,
   ClientMetadataOpts,
   IdTokenClaimPayload,
   ResponseMode,
@@ -14,12 +12,12 @@ import {
   SubjectType,
   SupportedVersion,
   Verification,
+  VerifyJwtCallback
 } from '../types'
-import { VerifyJwtCallback } from '../types/VpJwtVerifier'
 
-export interface ClaimPayloadOptsVID1 extends ClaimPayloadCommonOpts {
+export interface ClaimPayloadOptsVID1 extends ClaimPayloadCommonOpts { // TODO name ClaimPayloadOptsVID1
   id_token?: IdTokenClaimPayload
-  vp_token?: PresentationDefinitionPayloadOpts | DcqlQueryPayloadOpts
+  vp_token?: DcqlQueryPayloadOpts // TODO is vp_token not required?
 }
 
 export interface ClaimPayloadCommonOpts {
@@ -30,21 +28,22 @@ export interface ClaimPayloadCommonOpts {
 export interface AuthorizationRequestPayloadOpts<CT extends ClaimPayloadCommonOpts> extends Partial<RequestObjectPayloadOpts<CT>> {
   request_uri?: string // The Request object payload if provided by reference
   // Note we do not list the request property here, as the lib constructs the value, and we do not want people to pass that value in directly as it will lead to people not understanding why things fail
+  dcql_query?: string // TODO should this be here? ALSO should this be required?
 }
+
 export interface RequestObjectPayloadOpts<CT extends ClaimPayloadCommonOpts> {
   scope: string // from openid-connect-self-issued-v2-1_0-ID1
   response_type: string // from openid-connect-self-issued-v2-1_0-ID1
   client_id: string // from openid-connect-self-issued-v2-1_0-ID1
-  client_id_scheme?: ClientIdScheme
   redirect_uri?: string // from openid-connect-self-issued-v2-1_0-ID1
   response_uri?: string // from openid-connect-self-issued-v2-1_0-D18 // either response uri or redirect uri
   id_token_hint?: string // from openid-connect-self-issued-v2-1_0-ID1
   claims?: CT // from openid-connect-self-issued-v2-1_0-ID1 look at https://openid.net/specs/openid-connect-core-1_0.html#Claims
-  nonce?: string // An optional nonce, will be generated if not provided
-  state?: string // An optional state, will be generated if not provided
+  nonce?: string // An optional nonce, will be generated if not provided // TODO spec says REQUIRED
+  state?: string // An optional state, will be generated if not provided // TODO spec says REQUIRED
   aud?: string // The audience of the request
   authorization_endpoint?: string
-  response_mode?: ResponseMode // How the URI should be returned. This is not being used by the library itself, allows an implementor to make a decision
+  response_mode: ResponseMode // How the URI should be returned. This is not being used by the library itself, allows an implementor to make a decision
   response_types_supported?: ResponseType[] | ResponseType
   scopes_supported?: Scope[] | Scope
   subject_types_supported?: SubjectType[] | SubjectType
@@ -69,7 +68,11 @@ export interface AuthorizationRequestOptsVD11 extends AuthorizationRequestCommon
   idTokenType?: string // OPTIONAL. Space-separated string that specifies the types of ID token the RP wants to obtain, with the values appearing in order of preference. The allowed individual values are subject_signed and attester_signed (see Section 8.2). The default value is attester_signed.
 }
 
-export type CreateAuthorizationRequestOpts = AuthorizationRequestOptsVID1 | AuthorizationRequestOptsVD11
+export interface AuthorizationRequestOptsV1 extends AuthorizationRequestCommonOpts<ClaimPayloadCommonOpts> {
+  idTokenType?: string // OPTIONAL. Space-separated string that specifies the types of ID token the RP wants to obtain, with the values appearing in order of preference. The allowed individual values are subject_signed and attester_signed (see Section 8.2). The default value is attester_signed.
+}
+
+export type CreateAuthorizationRequestOpts = AuthorizationRequestOptsV1 //AuthorizationRequestOptsVID1 | AuthorizationRequestOptsVD11 // TODO we need a final version here
 
 export interface VerifyAuthorizationRequestOpts {
   correlationId: string

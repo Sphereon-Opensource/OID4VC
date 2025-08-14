@@ -1,12 +1,9 @@
 import { DcqlPresentation } from 'dcql'
-
 import { AuthorizationRequest } from '../authorization-request'
 import { IDToken } from '../id-token'
 import { RequestObject } from '../request-object'
-import { AuthorizationRequestPayload, AuthorizationResponsePayload, IDTokenPayload, SIOPErrors } from '../types'
-
-import { putPresentationSubmissionInLocation } from './OpenID4VP'
 import { assertValidResponseOpts } from './Opts'
+import { AuthorizationRequestPayload, AuthorizationResponsePayload, IDTokenPayload, SIOPErrors } from '../types'
 import { AuthorizationResponseOpts } from './types'
 
 export const createResponsePayload = async (
@@ -14,7 +11,7 @@ export const createResponsePayload = async (
   responseOpts: AuthorizationResponseOpts,
   idTokenPayload?: IDTokenPayload,
 ): Promise<AuthorizationResponsePayload | undefined> => {
-  await assertValidResponseOpts(responseOpts)
+  assertValidResponseOpts(responseOpts)
   if (!authorizationRequest) {
     throw new Error(SIOPErrors.NO_REQUEST)
   }
@@ -30,12 +27,10 @@ export const createResponsePayload = async (
     state,
   }
 
-  // vp tokens
-  if (responseOpts.dcqlResponse) {
+  if (responseOpts.dcqlResponse?.dcqlPresentation) { // TODO if required then remove?
     responsePayload.vp_token = DcqlPresentation.encode(responseOpts.dcqlResponse.dcqlPresentation as DcqlPresentation)
-  } else {
-    await putPresentationSubmissionInLocation(authorizationRequest, responsePayload, responseOpts, idTokenPayload)
   }
+
   if (idTokenPayload) {
     const idToken = await IDToken.fromIDTokenPayload(idTokenPayload, responseOpts)
     responsePayload.id_token = await idToken.jwt(responseOpts.jwtIssuer)
@@ -59,6 +54,6 @@ export const mergeOAuth2AndOpenIdInRequestPayload = async (
   if (!requestObj) {
     return payloadCopy
   }
-  const requestObjectPayload = await requestObj.getPayload()
+  const requestObjectPayload = requestObj.getPayload()
   return { ...payloadCopy, ...requestObjectPayload }
 }

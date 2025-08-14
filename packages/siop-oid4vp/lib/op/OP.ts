@@ -1,21 +1,19 @@
-import { EventEmitter } from 'events'
-
-import { jarmAuthResponseSend, JarmClientMetadata, jarmMetadataValidate, JarmServerMetadata } from '@sphereon/jarm'
-import { JwtIssuer, uuidv4 } from '@sphereon/oid4vc-common'
-import { IIssuerId } from '@sphereon/ssi-types'
-
-import { AuthorizationRequest, URI, VerifyAuthorizationRequestOpts } from '../authorization-request'
-import { mergeVerificationOpts } from '../authorization-request/Opts'
+import {EventEmitter} from 'events'
+import {jarmAuthResponseSend, JarmClientMetadata, jarmMetadataValidate, JarmServerMetadata} from '@sphereon/jarm'
+import {JwtIssuer, uuidv4} from '@sphereon/oid4vc-common'
+import {IIssuerId} from '@sphereon/ssi-types'
+import {AuthorizationRequest, URI, VerifyAuthorizationRequestOpts} from '../authorization-request'
+import {mergeVerificationOpts} from '../authorization-request/Opts'
 import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   AuthorizationResponseWithCorrelationId,
-  DcqlResponseOpts,
-  PresentationExchangeResponseOpts,
+  DcqlResponseOpts
 } from '../authorization-response'
-import { encodeJsonAsURI, post } from '../helpers'
-import { extractJwksFromJwksMetadata, JwksMetadataParams } from '../helpers'
-import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
+import {encodeJsonAsURI, extractJwksFromJwksMetadata, JwksMetadataParams, post} from '../helpers'
+import {authorizationRequestVersionDiscovery} from '../helpers/SIOPSpecVersion'
+import {OPBuilder} from './OPBuilder'
+import {createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFromBuilderOrExistingOpts} from './Opts'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
@@ -33,9 +31,6 @@ import {
   Verification,
   VerifiedAuthorizationRequest,
 } from '../types'
-
-import { OPBuilder } from './OPBuilder'
-import { createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFromBuilderOrExistingOpts } from './Opts'
 
 // The OP publishes the formats it supports using the vp_formats_supported metadata parameter as defined above in its "openid-configuration".
 export class OP {
@@ -107,8 +102,7 @@ export class OP {
       audience?: string
       issuer?: ResponseIss | string
       verification?: Verification
-      presentationExchange?: PresentationExchangeResponseOpts
-      dcqlResponse?: DcqlResponseOpts
+      dcqlResponse?: DcqlResponseOpts // TODO should this be REQUIRED?
       isFirstParty?: boolean
     },
   ): Promise<AuthorizationResponseWithCorrelationId> {
@@ -122,7 +116,7 @@ export class OP {
       )
     }
     let version = responseOpts?.version
-    const rpSupportedVersions = authorizationRequestVersionDiscovery(await verifiedAuthorizationRequest.authorizationRequest.mergedPayloads())
+    const rpSupportedVersions = authorizationRequestVersionDiscovery(verifiedAuthorizationRequest.authorizationRequest.mergedPayloads())
     if (version && rpSupportedVersions.length > 0 && !rpSupportedVersions.includes(version)) {
       throw Error(`RP does not support spec version ${version}, supported versions: ${rpSupportedVersions.toString()}`)
     } else if (!version) {
@@ -197,7 +191,7 @@ export class OP {
       return responseMode === ResponseMode.DIRECT_POST_JWT || responseMode === ResponseMode.QUERY_JWT || responseMode === ResponseMode.FRAGMENT_JWT
     }
 
-    const requestObjectPayload = await response.authorizationRequest.requestObject?.getPayload()
+    const requestObjectPayload = response.authorizationRequest.requestObject?.getPayload()
     const responseMode = requestObjectPayload?.response_mode ?? response.options?.responseMode
 
     if (
@@ -264,7 +258,7 @@ export class OP {
       }
     }
 
-    const authResponseAsURI = encodeJsonAsURI(payload, { arraysWithIndex: ['presentation_submission'] })
+    const authResponseAsURI = encodeJsonAsURI(payload, { arraysWithIndex: ['presentation_submission'] }) // TODO dcql
     try {
       const result = await post(responseUri, authResponseAsURI, { contentType: ContentType.FORM_URL_ENCODED, exceptionOnHttpErrorStatus: true })
       await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })
@@ -305,7 +299,6 @@ export class OP {
     version?: SupportedVersion
     issuer?: IIssuerId | ResponseIss
     audience?: string
-    presentationExchange?: PresentationExchangeResponseOpts
     dcqlResponse?: DcqlResponseOpts
   }): AuthorizationResponseOpts {
     const version = opts.version ?? this._createResponseOptions.version
@@ -319,16 +312,13 @@ export class OP {
     if (!issuer) {
       throw Error(`No issuer value present. Either use IDv1, JWT VC Presentation profile version, or provide a DID as issuer value`)
     }
-    // We are taking the whole presentationExchange object from a certain location
-    const presentationExchange = opts.presentationExchange ?? this._createResponseOptions.presentationExchange
     const dcqlQuery = opts.dcqlResponse ?? this._createResponseOptions.dcqlResponse
 
     const responseURI = opts.audience ?? this._createResponseOptions.responseURI
     return {
       ...this._createResponseOptions,
       ...opts,
-      ...(presentationExchange && { presentationExchange }),
-      ...(dcqlQuery && { dcqlQuery }),
+      ...dcqlQuery,
       registration: { ...this._createResponseOptions?.registration, issuer },
       responseURI,
       responseURIType:
@@ -337,15 +327,13 @@ export class OP {
   }
 
   private newVerifyAuthorizationRequestOpts(requestOpts: { correlationId: string; verification?: Verification }): VerifyAuthorizationRequestOpts {
-    const verification: VerifyAuthorizationRequestOpts = {
+    return {
       ...this._verifyRequestOptions,
       verifyJwtCallback: this._verifyRequestOptions.verifyJwtCallback,
       ...requestOpts,
       verification: mergeVerificationOpts(this._verifyRequestOptions, requestOpts),
       correlationId: requestOpts.correlationId,
     }
-
-    return verification
   }
 
   private async emitEvent(

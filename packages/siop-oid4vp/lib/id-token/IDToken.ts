@@ -1,21 +1,20 @@
-import { calculateJwkThumbprintUri, JwtHeader, JwtIssuer, parseJWT } from '@sphereon/oid4vc-common'
-
-import { AuthorizationResponseOpts, VerifyAuthorizationResponseOpts } from '../authorization-response'
-import { assertValidVerifyOpts } from '../authorization-response/Opts'
+import {calculateJwkThumbprintUri, JwtHeader, JwtIssuer, parseJWT} from '@sphereon/oid4vc-common'
+import {AuthorizationResponseOpts, VerifyAuthorizationResponseOpts} from '../authorization-response'
+import {assertValidVerifyOpts} from '../authorization-response/Opts'
 import {
   getJwtVerifierWithContext,
   IDTokenJwt,
   IDTokenPayload,
   JWK,
+  JwtIssuerWithContext,
   JWTPayload,
   ResponseIss,
   SIOPErrors,
   VerifiedAuthorizationRequest,
   VerifiedIDToken,
 } from '../types'
-import { JwtIssuerWithContext } from '../types'
 
-import { createIDTokenPayload } from './Payload'
+import {createIDTokenPayload} from './Payload'
 
 export class IDToken {
   private _header?: JwtHeader
@@ -96,8 +95,7 @@ export class IDToken {
       if (jwtIssuer.method === 'custom') {
         this._jwt = await this.responseOpts.createJwtCallback(jwtIssuer, { header: {}, payload: this._payload })
       } else if (jwtIssuer.method === 'did') {
-        const did = jwtIssuer.didUrl.split('#')[0]
-        this._payload.sub = did
+        this._payload.sub = jwtIssuer.didUrl.split('#')[0]
 
         const issuer = this._responseOpts.registration?.issuer || this._payload.iss
         if (!issuer || !(issuer.includes(ResponseIss.SELF_ISSUED_V2) || issuer === this._payload.sub)) {
@@ -144,7 +142,6 @@ export class IDToken {
   /**
    * Verifies a SIOP ID Response JWT on the RP Side
    *
-   * @param idToken ID token to be validated
    * @param verifyOpts
    */
   public async verify(verifyOpts: VerifyAuthorizationResponseOpts): Promise<VerifiedIDToken> {
@@ -226,7 +223,7 @@ export class IDToken {
   }
 
   public async isSelfIssued(): Promise<boolean> {
-    const payload = await this.payload()
+    const payload = this.payload()
     return payload.iss === ResponseIss.SELF_ISSUED_V2 || (payload.sub !== undefined && payload.sub === payload.iss)
   }
 }

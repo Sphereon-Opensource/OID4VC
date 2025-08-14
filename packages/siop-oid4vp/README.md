@@ -474,7 +474,8 @@ console.log(`RP DID: ${verifiedReq.issuer}`)
 // RP DID: did:ethr:ropsten:0x028360fb95417724cb7dd2ff217b15d6f17fc45e0ffc1b3dce6c2b8dd1e704fa98
 ```
 
-### OP Presentation Exchange
+### OP Presentation Exchange // TODO remove
+// TODO dcql?
 
 The Verified Request object created in the previous step contains a `presentationDefinitions` array property in case the
 OP wants to receive a Verifiable Presentation according to
@@ -487,7 +488,7 @@ See the below sub flow for Presentation Exchange to explain the process:
 
 ![PE Flow diagram](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Sphereon-Opensource/did-auth-siop/develop/docs/presentation-exchange.puml)
 
-#### Create PresentationExchange object
+#### Create PresentationExchange object // TODO remove
 
 If the `presentationDefinitions` array property is present it means the op.verifyAuthorizationRequest already has
 established that the Presentation Definition(s) itself were valid and present. It has populated the
@@ -512,7 +513,7 @@ import { PresentationExchange } from './PresentationExchange'
 import { PresentationDefinition } from '@sphereon/pe-models'
 
 const verifiableCredentials: VerifiableCredential[] = [VC1, VC2, VC3] // This typically comes from your wallet
-const presentationDefs: PresentationDefinition[] = verifiedReq.presentationDefinitions
+const presentationDefs: PresentationDefinition[] = verifiedReq.presentationDefinitions // TODO dcql
 
 if (presentationDefs) {
   const pex = new PresentationExchange({
@@ -776,7 +777,7 @@ metadata if the verification succeeds
 ```typescript
 export interface VerifiedAuthorizationRequestWithJWT extends VerifiedJWT {
     payload: AuthorizationRequestPayload;       // The unsigned Auth Request payload
-    presentationDefinitions?: PresentationDefinitionWithLocation[]; // The optional presentation definition objects that the RP requests
+    presentationDefinitions?: PresentationDefinitionWithLocation[]; // The optional presentation definition objects that the RP requests // TODO dcql
     verifyOpts: VerifyAuthorizationRequestOpts; // The verification options for the Auth Request
 }
 

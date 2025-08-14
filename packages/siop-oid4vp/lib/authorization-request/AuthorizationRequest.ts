@@ -1,12 +1,13 @@
 import { parseJWT } from '@sphereon/oid4vc-common'
 import { DcqlQuery } from 'dcql'
-
-import { PresentationDefinitionWithLocation } from '../authorization-response'
 import { Dcql } from '../authorization-response'
-import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
 import { RequestObject } from '../request-object'
+import { assertValidAuthorizationRequestOpts, assertValidVerifyAuthorizationRequestOpts } from './Opts'
+import { assertValidRPRegistrationMedataPayload, createAuthorizationRequestPayload } from './Payload'
+import { URI } from './URI'
+import { CreateAuthorizationRequestOpts, VerifyAuthorizationRequestOpts } from './types'
 import {
   AuthorizationRequestPayload,
   getJwtVerifierWithContext,
@@ -23,11 +24,6 @@ import {
   SupportedVersion,
   VerifiedAuthorizationRequest,
 } from '../types'
-
-import { assertValidAuthorizationRequestOpts, assertValidVerifyAuthorizationRequestOpts } from './Opts'
-import { assertValidRPRegistrationMedataPayload, createAuthorizationRequestPayload } from './Payload'
-import { URI } from './URI'
-import { CreateAuthorizationRequestOpts, VerifyAuthorizationRequestOpts } from './types'
 
 export class AuthorizationRequest {
   private readonly _requestObject?: RequestObject
@@ -103,7 +99,7 @@ export class AuthorizationRequest {
   }
 
   public async getSupportedVersionsFromPayload(): Promise<SupportedVersion[]> {
-    const mergedPayload = { ...this.payload, ...(await this.requestObject?.getPayload()) }
+    const mergedPayload = { ...this.payload, ...(this.requestObject?.getPayload()) }
     return authorizationRequestVersionDiscovery(mergedPayload)
   }
 
@@ -205,11 +201,6 @@ export class AuthorizationRequest {
     // TODO: we need to verify somewhere that if response_mode is direct_post, that the response_uri may be present,
     // BUT not both redirect_uri and response_uri. What is the best place to do this?
 
-    const presentationDefinitions: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(
-      mergedPayload,
-      await this.getSupportedVersion(),
-    )
-
     const dcqlQuery = await Dcql.findValidDcqlQuery(mergedPayload)
 
     return {
@@ -223,7 +214,6 @@ export class AuthorizationRequest {
       authorizationRequest: this,
       verifyOpts: opts,
       dcqlQuery,
-      presentationDefinitions,
       registrationMetadataPayload: registrationMetadataPayload!,
       requestObject: this.requestObject,
       authorizationRequestPayload: this.payload,
@@ -265,7 +255,7 @@ export class AuthorizationRequest {
   }
 
   public async toStateInfo(): Promise<RequestStateInfo> {
-    const requestObject = await this.requestObject?.getPayload()
+    const requestObject = this.requestObject?.getPayload()
     return {
       client_id: this.options?.clientMetadata?.client_id,
       iat: requestObject?.iat ?? this.payload.iat,
@@ -294,11 +284,7 @@ export class AuthorizationRequest {
     return mergedPayload as RequestObjectPayload
   }
 
-  public async getPresentationDefinitions(version?: SupportedVersion): Promise<PresentationDefinitionWithLocation[] | undefined> {
-    return await PresentationExchange.findValidPresentationDefinitions(await this.mergedPayloads(), version)
-  }
-
   public async getDcqlQuery(): Promise<DcqlQuery | undefined> {
-    return await Dcql.findValidDcqlQuery(await this.mergedPayloads())
+    return await Dcql.findValidDcqlQuery(this.mergedPayloads())
   }
 }

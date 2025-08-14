@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest'
-
 import { IDToken, VerifyAuthorizationResponseOpts } from '..'
 import SIOPErrors from '../types/Errors'
-
 import { getVerifyJwtCallback } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
 

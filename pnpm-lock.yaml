@@ -6,7 +6,7 @@ settings:
 
 overrides:
   '@sphereon/ssi-types': 0.34.1-next.3
-  dcql: 0.2.22
+  dcql: 1.0.1
   node-fetch: 2.6.12
   typescript: 5.8.3
 
@@ -425,8 +425,8 @@ importers:
         specifier: ^4.0.0
         version: 4.1.0(encoding@0.1.13)
       dcql:
-        specifier: 0.2.22
-        version: 0.2.22(typescript@5.8.3)
+        specifier: 1.0.1
+        version: 1.0.1(typescript@5.8.3)
       debug:
         specifier: ^4.4.0
         version: 4.4.1
@@ -2734,6 +2734,7 @@ packages:
 
   '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.26':
     resolution: {integrity: sha512-QXJ6R8ENiZV2rPMbn06cw5JKwqUYN1kzVRbYfONqE1PEXx1noQ4md7uxr2zSczi0ubKkNcbyYDNtIMTZIhGzmQ==}
+    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.2':
     resolution: {integrity: sha512-foFxfLkRwcn/MOp/eht46Q7wsvpQGlO7aowowIIb5Tz9u97kYZ2kz6K2h2ODxWuv5CRA7Q0MY8XUBGE2lfOhOQ==}
@@ -4277,8 +4278,8 @@ packages:
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
 
-  dcql@0.2.22:
-    resolution: {integrity: sha512-4CfuUoJ1/dfj4aOMwCGF3HEHsPpRUyALbst5Dx3qcNkIXNFpVqebKVYd58X9/ZlKN/wWJxPS34S7uQ0fcbzS5A==}
+  dcql@1.0.1:
+    resolution: {integrity: sha512-XZ9VJfvHZwPbeg6O+GvyNi7P5n4L+J0ATCFBUvgn2LXzQPoatHnOt9b7uHHtFWZzxyD5ngLpBCEOteEzKgtIAA==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -14041,7 +14042,7 @@ snapshots:
 
   dayjs@1.11.13: {}
 
-  dcql@0.2.22(typescript@5.8.3):
+  dcql@1.0.1(typescript@5.8.3):
     dependencies:
       valibot: 1.0.0-beta.8(typescript@5.8.3)
     transitivePeerDependencies:

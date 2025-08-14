@@ -1,10 +1,8 @@
 import { HasherSync } from '@sphereon/ssi-types'
 import { DcqlMdocCredential, DcqlPresentation, DcqlPresentationResult, DcqlQuery, DcqlSdJwtVcCredential } from 'dcql'
-
 import { extractDataFromPath } from '../helpers'
-import { AuthorizationRequestPayload, SIOPErrors } from '../types'
-
 import { extractDcqlPresentationFromDcqlVpToken } from './OpenID4VP'
+import { AuthorizationRequestPayload } from '../types'
 
 /**
  * Finds a valid DcqlQuery inside the given AuthenticationRequestPayload
@@ -16,21 +14,11 @@ import { extractDcqlPresentationFromDcqlVpToken } from './OpenID4VP'
 
 export class Dcql {
   static findValidDcqlQuery = async (authorizationRequestPayload: AuthorizationRequestPayload): Promise<DcqlQuery | undefined> => {
-    const dcqlQuery: string[] = extractDataFromPath(authorizationRequestPayload, '$.dcql_query').map((d) => d.value)
-    const definitions = extractDataFromPath(authorizationRequestPayload, '$.presentation_definition')
-    const definitionsFromList = extractDataFromPath(authorizationRequestPayload, '$.presentation_definition[*]')
-    const definitionRefs = extractDataFromPath(authorizationRequestPayload, '$.presentation_definition_uri')
-    const definitionRefsFromList = extractDataFromPath(authorizationRequestPayload, '$.presentation_definition_uri[*]')
-
-    const hasPD = (definitions && definitions.length > 0) || (definitionsFromList && definitionsFromList.length > 0)
-    const hasPdRef = (definitionRefs && definitionRefs.length > 0) || (definitionRefsFromList && definitionRefsFromList.length > 0)
-    const hasDcql = dcqlQuery && dcqlQuery.length > 0
-
-    if ([hasPD, hasPdRef, hasDcql].filter(Boolean).length > 1) {
-      throw new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_NON_EXCLUSIVE)
+    const dcqlQuery: string[] = extractDataFromPath(authorizationRequestPayload ?? {}, '$..dcql_query').map((d) => d.value)
+//.claims?.vp_token
+    if (dcqlQuery.length === 0) {
+      return undefined
     }
-
-    if (dcqlQuery.length === 0) return undefined
 
     if (dcqlQuery.length > 1) {
       throw new Error('Found multiple dcql_query in vp_token. Only one is allowed')
@@ -55,6 +43,7 @@ export class Dcql {
               credential_format: 'mso_mdoc',
               doctype: p.vcs[0].credential.toJson().docType,
               namespaces: p.vcs[0].decoded,
+              cryptographic_holder_binding: true, // TODO
             } satisfies DcqlMdocCredential,
           ]
         } else if (p.format === 'vc+sd-jwt') {
@@ -64,6 +53,7 @@ export class Dcql {
               credential_format: 'vc+sd-jwt',
               vct: p.vcs[0].decoded.vct,
               claims: p.vcs[0].decoded,
+              cryptographic_holder_binding: true, // TODO
             } satisfies DcqlSdJwtVcCredential,
           ]
         } else {

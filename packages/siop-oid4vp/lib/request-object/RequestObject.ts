@@ -1,12 +1,10 @@
 import { JwtHeader, JwtIssuer, parseJWT } from '@sphereon/oid4vc-common'
-
 import { ClaimPayloadCommonOpts, ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts } from '../authorization-request'
 import { assertValidAuthorizationRequestOpts } from '../authorization-request/Opts'
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
-import { AuthorizationRequestPayload, JwtIssuerWithContext, RequestObjectJwt, RequestObjectPayload, SIOPErrors } from '../types'
-
 import { assertValidRequestObjectOpts } from './Opts'
 import { assertValidRequestObjectPayload, createRequestObjectPayload } from './Payload'
+import { AuthorizationRequestPayload, JwtIssuerWithContext, RequestObjectJwt, RequestObjectPayload, SIOPErrors } from '../types'
 import { RequestObjectOpts } from './types'
 
 export class RequestObject {
@@ -135,7 +133,7 @@ export class RequestObject {
     if (this.options) {
       assertValidRequestObjectOpts(this.options, false)
     }
-    assertValidRequestObjectPayload(await this.getPayload())
+    assertValidRequestObjectPayload(this.getPayload())
   }
 
   public get options(): RequestObjectOpts<ClaimPayloadCommonOpts | ClaimPayloadOptsVID1> | undefined {
