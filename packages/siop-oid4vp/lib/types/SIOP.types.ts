@@ -380,6 +380,7 @@ interface DiscoveryMetadataPayloadV1Final extends DynamicRegistrationClientMetad
   vp_formats_supported: Format // from oidc4vp
   id_token_types_supported?: IdTokenType[] | IdTokenType // TODO do we still need this??
   encrypted_response_enc_values_supported?: string[] // from oidc4vp
+  client_id_prefixes_supported?: string[]
 }
 
 export type DiscoveryMetadataPayload = DiscoveryMetadataPayloadVID1 | JWT_VCDiscoveryMetadataPayload | DiscoveryMetadataPayloadVD11 | DiscoveryMetadataPayloadV1Final
