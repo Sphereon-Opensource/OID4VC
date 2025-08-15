@@ -56,14 +56,15 @@ export interface AuthorizationRequestCommonPayload extends RequestCommonPayload,
 
 export type RequestUriMethod = 'get' | 'post'
 
-export type ClientIdentifierPrefixes = // TODO
-    'redirect_uri' |
-    'openid_federation' |
-    'decentralized_identifier' |
-    'verifier_attestation' |
-    'x509_san_dns' |
-    'x509_hash' |
-    'origin'
+export enum ClientIdentifierPrefix {
+  REDIRECT_URI = 'redirect_uri',
+  OPENID_FEDERATION = 'openid_federation',
+  DECENTRALIZED_IDENTIFIER = 'decentralized_identifier',
+  VERIFIER_ATTESTATION = 'verifier_attestation',
+  X509_SAN_DNS = 'x509_san_dns',
+  X509_HASH = 'x509_hash',
+  ORIGIN = 'origin',
+}
 
 export interface RequestCommonPayload extends JWTPayload {
   scope?: string // REQUIRED. As specified in Section 3.1.2 of [OpenID.Core].

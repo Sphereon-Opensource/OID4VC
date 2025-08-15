@@ -51,6 +51,11 @@
     "typescript": "5.8.3",
     "vitest": "^3.1.1"
   },
+  "pnpm": {
+    "patchedDependencies": {
+      "did-jwt@6.11.6": "patches/did-jwt@6.11.6.patch"
+    }
+  },
   "keywords": [
     "Sphereon",
     "Verifiable Credentials",

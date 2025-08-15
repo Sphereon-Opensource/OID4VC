@@ -18,7 +18,8 @@ import {
 } from '@sphereon/oid4vc-common'
 
 import SIOPErrors from './Errors'
-import { RequestObjectPayload } from './SIOP.types'
+import {ClientIdentifierPrefix, RequestObjectPayload} from './SIOP.types'
+import {getClientIdentifierPrefix, removeClientIdentifierPrefix} from '../helpers';
 
 type JwkJwtVerifier =
   | (JwkJwtVerifierBase & {
@@ -78,34 +79,32 @@ export const getRequestObjectJwtVerifier = async (
 ): Promise<JwtVerifier> => {
   const type = 'request-object'
 
-  const clientIdScheme = jwt.payload.client_id_scheme
   const clientId = jwt.payload.client_id
+  const clientIdentifierPrefix = getClientIdentifierPrefix(jwt.payload.client_id)
 
-  if (!clientIdScheme || jwt.header.alg === 'none') {
-    return getJwtVerifierWithContext(jwt, { type })
-  }
-
-  if (clientIdScheme === 'did') {
-    return getDidJwtVerifier(jwt, { type })
-  } else if (clientIdScheme === 'pre-registered') {
+  // If a : character is not present in the Client Identifier, the Wallet MUST treat the Client Identifier as referencing a pre-registered client
+  if (!clientIdentifierPrefix || jwt.header.alg === 'none') {
     // All validations must be done manually
     // The Verifier metadata is obtained using [RFC7591] or through out-of-band mechanisms.
     return getJwtVerifierWithContext(jwt, { type })
-  } else if (clientIdScheme === 'x509_san_dns' || clientIdScheme === 'x509_san_uri') {
+  }
+
+  if (clientIdentifierPrefix === ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER || clientIdentifierPrefix === 'did') { // did is not an official prefix but conflicts with hwo did are formatted, so added here to handle it
+    return getDidJwtVerifier(jwt, { type })
+  } else  if (clientIdentifierPrefix === ClientIdentifierPrefix.X509_SAN_DNS || clientIdentifierPrefix === ClientIdentifierPrefix.X509_HASH) {
     return getX5cVerifier(jwt, { type })
-  } else if (clientIdScheme === 'redirect_uri') {
+  } else if (clientIdentifierPrefix === ClientIdentifierPrefix.REDIRECT_URI) {
     if (jwt.payload.redirect_uri && jwt.payload.redirect_uri !== clientId) {
       throw new Error(SIOPErrors.INVALID_CLIENT_ID_MUST_MATCH_REDIRECT_URI)
     } else if (jwt.payload.response_uri && jwt.payload.response_uri !== clientId) {
       throw new Error(SIOPErrors.INVALID_CLIENT_ID_MUST_MATCH_RESPONSE_URI)
     }
-
     /*const parts = options.raw.split('.')  this can be signed and execution can't even be here when alg = none
     if (parts.length > 2 && parts[2]) {
       throw new Error(`${SIOPErrors.INVALID_JWT} '${type}' JWT must not be signed`)
     }*/
     return getJwtVerifierWithContext(jwt, { type })
-  } else if (clientIdScheme === 'verifier_attestation') {
+  } else if (clientIdentifierPrefix === ClientIdentifierPrefix.VERIFIER_ATTESTATION) {
     const verifierAttestationSubtype = 'verifier-attestation+jwt'
     if (!jwt.header.jwt) {
       throw new Error(SIOPErrors.MISSING_ATTESTATION_JWT_WITH_CLIENT_ID_SCHEME_ATTESTATION)
@@ -120,7 +119,7 @@ export const getRequestObjectJwtVerifier = async (
 
     if (
       attestationHeader.typ !== verifierAttestationSubtype ||
-      attestationPayload.sub !== clientId ||
+      attestationPayload.sub !== removeClientIdentifierPrefix(clientId) ||
       !attestationPayload.iss ||
       typeof attestationPayload.iss !== 'string' ||
       !attestationPayload.exp ||
@@ -152,7 +151,7 @@ export const getRequestObjectJwtVerifier = async (
     // The iss claim value of the Verifier Attestation JWT MUST identify a party the Wallet trusts for issuing Verifier Attestation JWTs.
     // If the Wallet cannot establish trust, it MUST refuse the request.
     return { method: 'jwk', type, jwk: attestationPayload.cnf['jwk'] as JWK, alg }
-  } else if (clientIdScheme === 'entity_id') {
+  } else if (clientIdentifierPrefix === ClientIdentifierPrefix.OPENID_FEDERATION) {
     const entityId = jwt.payload.entity_id
     if (!entityId || !entityId.startsWith('https')) {
       throw new Error(SIOPErrors.INVALID_REQUEST_OBJECT_ENTITY_ID_SCHEME_CLIENT_ID)

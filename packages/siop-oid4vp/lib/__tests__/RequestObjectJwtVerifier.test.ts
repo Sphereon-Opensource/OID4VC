@@ -1,7 +1,8 @@
 import * as dotenv from 'dotenv'
 import {describe, expect, it} from 'vitest'
-import {getRequestObjectJwtVerifier, JwtVerifier, PassBy, SIOPErrors} from '../types'
+import {ClientIdentifierPrefix, getRequestObjectJwtVerifier, JwtVerifier, PassBy, SIOPErrors} from '../types'
 import {DcqlQuery} from 'dcql';
+import {removeClientIdentifierPrefix} from '../helpers';
 
 dotenv.config()
 
@@ -39,13 +40,13 @@ DcqlQuery.validate(parsedDcqlQuery)
 
 describe('requestObjectJwtVerifier', () => {
   it('should throw when an invalid schema is passed', async () => {
-    expect(
+    await expect(
       getRequestObjectJwtVerifier(
         {
           header: {},
           payload: {
               ...baseJwtPayload,
-              client_id_scheme: 'wrong' as never,
+              client_id: `wrong:${baseJwtPayload.client_id}`,
               client_metadata: {
                   passBy: PassBy.REFERENCE
               },
@@ -63,7 +64,7 @@ describe('requestObjectJwtVerifier', () => {
         header: { kid: 'did:example.com#1234', alg: 'ES256' },
         payload: {
             ...baseJwtPayload,
-            client_id_scheme: 'did',
+            client_id: `${ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER}:${baseJwtPayload.client_id}`,
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
@@ -83,7 +84,7 @@ describe('requestObjectJwtVerifier', () => {
         header: {},
         payload: {
             ...baseJwtPayload,
-            client_id_scheme: 'did',
+            client_id: `${ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER}:${baseJwtPayload.client_id}`,
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
@@ -102,7 +103,6 @@ describe('requestObjectJwtVerifier', () => {
         header: {},
         payload: {
             ...baseJwtPayload,
-            client_id_scheme: 'pre-registered',
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
@@ -122,8 +122,8 @@ describe('requestObjectJwtVerifier', () => {
         header: { x5c: [''], alg: 'ES256' },
         payload: {
             ...baseJwtPayload,
+            client_id: `${ClientIdentifierPrefix.X509_SAN_DNS}:${baseJwtPayload.client_id}`,
             iss: '1234',
-            client_id_scheme: 'x509_san_dns',
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
@@ -133,7 +133,7 @@ describe('requestObjectJwtVerifier', () => {
       { raw: '' },
     )
 
-    const expectedJwtVerifier: JwtVerifier = { type: 'request-object', method: 'x5c', x5c: [''], issuer: '1234', alg: 'ES256' }
+    const expectedJwtVerifier: JwtVerifier = { type: 'request-object', method: 'x5c', x5c: [''], issuer: 'x509_san_dns:1234', alg: 'ES256' }
     expect(jwtVerifier).toEqual(expectedJwtVerifier)
   })
 
@@ -143,7 +143,7 @@ describe('requestObjectJwtVerifier', () => {
         header: { alg: 'ES256' },
         payload: {
             ...baseJwtPayload,
-            client_id_scheme: 'x509_san_dns',
+            client_id: `${ClientIdentifierPrefix.X509_SAN_DNS}:${baseJwtPayload.client_id}`,
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
@@ -162,7 +162,7 @@ describe('requestObjectJwtVerifier', () => {
         header: {},
         payload: {
             ...baseJwtPayload,
-            client_id_scheme: 'verifier_attestation',
+            client_id: `${ClientIdentifierPrefix.VERIFIER_ATTESTATION}:${baseJwtPayload.client_id}`,
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
@@ -184,8 +184,7 @@ describe('requestObjectJwtVerifier', () => {
         header: { jwt: attestationJwt, typ: 'verifier-attestation+jwt', alg: 'ES256' },
         payload: {
             ...baseJwtPayload,
-            client_id: 'client_id',
-            client_id_scheme: 'verifier_attestation',
+            client_id: `${ClientIdentifierPrefix.VERIFIER_ATTESTATION}:client_id`,
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
