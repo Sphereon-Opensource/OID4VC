@@ -97,19 +97,19 @@ export class RequestObject {
         this.payload.sub = this.payload.sub ?? did
         this.payload.client_id = `${ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER}:${this.payload.client_id ?? did}`
 
-        const header = { kid: jwtIssuer.didUrl, alg: jwtIssuer.alg, typ: 'JWT' }
+        const header = { kid: jwtIssuer.didUrl, alg: jwtIssuer.alg, typ: 'oauth-authz-req+jwt' }
         this.jwt = await this.opts.createJwtCallback(jwtIssuer, { header, payload: this.payload })
       } else if (jwtIssuer.method === 'x5c') {
         this.payload.iss = jwtIssuer.issuer
 
-        const header = { x5c: jwtIssuer.x5c, typ: 'JWT', alg: jwtIssuer.alg }
+        const header = { x5c: jwtIssuer.x5c, typ: 'oauth-authz-req+jwt', alg: jwtIssuer.alg }
         this.jwt = await this.opts.createJwtCallback(jwtIssuer, { header, payload: this.payload })
       } else if (jwtIssuer.method === 'jwk') {
         if (!this.payload.client_id) {
           throw new Error('Please provide a client_id for the RP')
         }
 
-        const header = { jwk: jwtIssuer.jwk, typ: 'JWT', alg: jwtIssuer.jwk.alg as string }
+        const header = { jwk: jwtIssuer.jwk, typ: 'oauth-authz-req+jwt', alg: jwtIssuer.jwk.alg as string }
         this.jwt = await this.opts.createJwtCallback(jwtIssuer, { header, payload: this.payload })
       } else {
         throw new Error(`JwtIssuer method '${(jwtIssuer as JwtIssuer).method}' not implemented`)
