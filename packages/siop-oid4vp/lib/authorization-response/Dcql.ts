@@ -1,7 +1,14 @@
 import { HasherSync } from '@sphereon/ssi-types'
-import { DcqlMdocCredential, DcqlPresentation, DcqlPresentationResult, DcqlQuery, DcqlSdJwtVcCredential } from 'dcql'
+import {
+  DcqlMdocCredential,
+  DcqlPresentation,
+  DcqlPresentationResult,
+  DcqlQuery,
+  DcqlSdJwtVcCredential,
+  DcqlW3cVcCredential
+} from 'dcql'
 import { extractDataFromPath } from '../helpers'
-import { extractDcqlPresentationFromDcqlVpToken } from './OpenID4VP'
+import { extractDcqlPresentationFromDcqlVpToken, hasCryptographicHolderBinding } from './OpenID4VP'
 import { AuthorizationRequestPayload } from '../types'
 
 /**
@@ -36,29 +43,67 @@ export class Dcql {
   ) => {
     const dcqlPresentation = Object.fromEntries(
       Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
-        if (p.format === 'mso_mdoc') {
-          return [
-            queryId,
-            {
-              credential_format: 'mso_mdoc',
-              doctype: p.vcs[0].credential.toJson().docType,
-              namespaces: p.vcs[0].decoded,
-              cryptographic_holder_binding: true, // TODO
-            } satisfies DcqlMdocCredential,
-          ]
-        } else if (p.format === 'vc+sd-jwt') {
-          return [
-            queryId,
-            {
-              credential_format: 'vc+sd-jwt',
-              vct: p.vcs[0].decoded.vct,
+        switch (p.format) {
+          case 'mso_mdoc':
+            return [queryId, {
+                credential_format: p.format,
+                doctype: p.vcs[0].credential.toJson().docType,
+                namespaces: p.vcs[0].decoded,
+                cryptographic_holder_binding: hasCryptographicHolderBinding(p.format, p.vcs[0])
+              } satisfies DcqlMdocCredential
+            ]
+          case 'vc+sd-jwt':
+            return [queryId, {
+                credential_format: p.format,
+                vct: p.vcs[0].decoded.vct,
+                claims: p.vcs[0].decoded,
+                cryptographic_holder_binding: hasCryptographicHolderBinding(p.format, p.vcs[0])
+              } satisfies DcqlSdJwtVcCredential
+            ]
+          case 'jwt_vp':
+            return [queryId, {
+              credential_format: 'jwt_vc_json',
               claims: p.vcs[0].decoded,
-              cryptographic_holder_binding: true, // TODO
-            } satisfies DcqlSdJwtVcCredential,
-          ]
-        } else {
-          throw new Error('DcqlPresentation atm only supports mso_mdoc and vc+sd-jwt')
+              cryptographic_holder_binding: hasCryptographicHolderBinding('jwt_vc_json', p.vcs[0]),
+              type: p.vcs[0].credential.type
+            } satisfies DcqlW3cVcCredential
+            ]
+          case 'ldp_vp':
+            return [queryId, {
+              credential_format: 'ldp_vc',
+              claims: p.vcs[0].decoded,
+              cryptographic_holder_binding: hasCryptographicHolderBinding('ldp_vc', p.vcs[0]),
+              type: p.vcs[0].credential.type
+            } satisfies DcqlW3cVcCredential
+            ]
+          default:
+            const format: string = (p as any).format;
+            throw new Error(`Unknown DcqlPresentation format ${format}`)
         }
+
+        // if (p.format === 'mso_mdoc') {
+        //   return [
+        //     queryId,
+        //     {
+        //       credential_format: 'mso_mdoc',
+        //       doctype: p.vcs[0].credential.toJson().docType,
+        //       namespaces: p.vcs[0].decoded,
+        //       cryptographic_holder_binding: true, // TODO
+        //     } satisfies DcqlMdocCredential,
+        //   ]
+        // } else if (p.format === 'vc+sd-jwt') {
+        //   return [
+        //     queryId,
+        //     {
+        //       credential_format: 'vc+sd-jwt',
+        //       vct: p.vcs[0].decoded.vct,
+        //       claims: p.vcs[0].decoded,
+        //       cryptographic_holder_binding: true, // TODO
+        //     } satisfies DcqlSdJwtVcCredential,
+        //   ]
+        // } else {
+        //   throw new Error('DcqlPresentation atm only supports mso_mdoc and vc+sd-jwt')
+        // }
       }),
     )
 

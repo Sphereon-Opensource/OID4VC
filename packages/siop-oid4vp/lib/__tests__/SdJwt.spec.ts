@@ -1,23 +1,24 @@
 import { EventEmitter } from 'events'
 import { defaultHasher, SigningAlgo } from '@sphereon/oid4vc-common'
-import {decodeSdJwtVc} from '@sphereon/ssi-types'
+import {CredentialMapper, decodeSdJwtVc} from '@sphereon/ssi-types'
 import {DcqlCredential, DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlSdJwtVcCredential} from 'dcql'
 import { describe, expect, it } from 'vitest'
 import {
-  InMemoryRPSessionManager,
-  Json,
-  OP,
-  PassBy,
-  PresentationVerificationCallback,
-  PropertyTarget,
-  ResponseIss,
-  ResponseMode,
-  ResponseType,
-  RevocationVerification,
-  RP,
-  Scope,
-  SubjectType,
-  SupportedVersion,
+    hasCryptographicHolderBinding,
+    InMemoryRPSessionManager,
+    Json,
+    OP,
+    PassBy,
+    PresentationVerificationCallback,
+    PropertyTarget,
+    ResponseIss,
+    ResponseMode,
+    ResponseType,
+    RevocationVerification,
+    RP,
+    Scope,
+    SubjectType,
+    SupportedVersion,
 } from '../'
 import { getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
@@ -79,6 +80,7 @@ const dcqlQuery = {
         vct_values: ['https://high-assurance.com/StateBusinessLicense'],
       },
       claims: [{ path: ['license', 'number'] }, { path: ['user', 'name'] }],
+      require_cryptographic_holder_binding: false
     },
   ],
 } satisfies DcqlQuery.Input
@@ -90,10 +92,10 @@ const dcqlCredential = {
     credential_format: 'vc+sd-jwt',
     vct: SD_JWT_VC.decodedPayload.vct,
     claims: SD_JWT_VC.decodedPayload,
-    cryptographic_holder_binding: true,
+    cryptographic_holder_binding: hasCryptographicHolderBinding('vc+sd-jwt', CredentialMapper.toWrappedVerifiableCredential(SD_JWT_VC.compactJwtVc)),
 } satisfies DcqlSdJwtVcCredential
-// skip
-describe('RP and OP interaction should', () => {
+
+describe.skip('RP and OP interaction should', () => {
   // FIXME SDK-45 Uniresolver failing
   it('succeed when calling with DCQL query and right DCQL presentation', async () => {
     const opMock = await mockedGetEnterpriseAuthToken('OP')

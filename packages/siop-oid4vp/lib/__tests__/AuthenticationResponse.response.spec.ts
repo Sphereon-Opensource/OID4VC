@@ -306,6 +306,7 @@ describe('create JWT from Request JWT should', () => {
           claims: [
             { path: ['given_name'], values: ['John'] }
           ],
+          require_cryptographic_holder_binding: false
         },
       ],
     } satisfies DcqlQuery.Input

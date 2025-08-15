@@ -3,8 +3,8 @@ import {
   CredentialMapper,
   HasherSync,
   IVerifiablePresentation,
-  W3CVerifiablePresentation,
-  WrappedVerifiablePresentation,
+  W3CVerifiablePresentation, WrappedMdocCredential, WrappedSdJwtVerifiableCredential,
+  WrappedVerifiablePresentation, WrappedW3CVerifiableCredential,
 } from '@sphereon/ssi-types'
 import {DcqlPresentation, DcqlQuery} from 'dcql'
 import {verifyRevocation} from '../helpers'
@@ -112,4 +112,25 @@ export const extractPresentationsFromDcqlVpToken = (
   opts?: { hasher?: HasherSync },
 ): WrappedVerifiablePresentation[] => {
   return Object.values(extractDcqlPresentationFromDcqlVpToken(vpToken, opts))
+}
+
+// FIXME probably too naive
+export const hasCryptographicHolderBinding = (
+    format: 'mso_mdoc' | 'vc+sd-jwt' | 'jwt_vc_json' | 'ldp_vc',
+    vc: WrappedMdocCredential | WrappedSdJwtVerifiableCredential | WrappedW3CVerifiableCredential
+): boolean => {
+  switch (format) {
+    case 'mso_mdoc':
+      const mdoc = vc as WrappedMdocCredential
+      return Boolean(mdoc.credential?.toJson?.()?.MSO.deviceKeyInfo)
+    case 'vc+sd-jwt':
+      const sdJwt = vc as WrappedSdJwtVerifiableCredential
+      return Boolean(sdJwt.decoded?.cnf?.jwk || sdJwt.decoded?.cnf?.kid)
+    case 'jwt_vc_json':
+      const jwt = vc as WrappedW3CVerifiableCredential
+      return Boolean(jwt.decoded?.proof?.verificationMethod)
+    case 'ldp_vc':
+      const ldp = vc as WrappedW3CVerifiableCredential
+      return Boolean(ldp.decoded?.proof?.verificationMethod)
+  }
 }
