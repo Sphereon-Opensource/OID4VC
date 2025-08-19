@@ -57,8 +57,7 @@ DcqlQuery.validate(parsedDcqlQuery)
 
 // TODO: Disabled because Credo Mdocs are invalid with undefined props in the maps/arrays
 
-// TODO skip
-describe('mdoc RP and OP interaction should', () => {
+describe.skip('mdoc RP and OP interaction should', () => {
   it('succeed when calling with DCQL query and right DCQL presentation without id token', async () => {
     const opMockEntity = await mockedGetEnterpriseAuthToken('OP')
     const rpMockEntity = await mockedGetEnterpriseAuthToken('RP')

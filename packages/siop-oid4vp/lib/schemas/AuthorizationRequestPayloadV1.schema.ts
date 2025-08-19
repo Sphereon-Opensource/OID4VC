@@ -1,16 +1,16 @@
-export const AuthorizationRequestPayloadVID1SchemaObj = {
-  "$id": "AuthorizationRequestPayloadVID1Schema",
+export const AuthorizationRequestPayloadV1SchemaObj = {
+  "$id": "AuthorizationRequestPayloadV1Schema",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/AuthorizationRequestPayloadVID1",
+  "$ref": "#/definitions/AuthorizationRequestPayloadV1",
   "definitions": {
-    "AuthorizationRequestPayloadVID1": {
+    "AuthorizationRequestPayloadV1": {
       "type": "object",
       "properties": {
-        "registration": {
-          "$ref": "#/definitions/RPRegistrationMetadataPayload"
-        },
-        "registration_uri": {
+        "id_token_type": {
           "type": "string"
+        },
+        "client_metadata": {
+          "$ref": "#/definitions/RPRegistrationMetadataPayload"
         },
         "iss": {
           "type": "string"
@@ -90,7 +90,25 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
           "$ref": "#/definitions/RequestUriMethod"
         },
         "claims": {
-          "$ref": "#/definitions/ClaimPayloadVID1"
+          "$ref": "#/definitions/ClaimPayloadCommon"
+        },
+        "response_uri": {
+          "type": "string"
+        },
+        "dcql_query": {
+          "type": "string"
+        },
+        "transaction_data": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "verifier_info": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RelyingPartyAttestation"
+          }
         }
       }
     },
@@ -403,27 +421,29 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
         "post"
       ]
     },
-    "ClaimPayloadVID1": {
-      "type": "object",
-      "properties": {
-        "id_token": {
-          "$ref": "#/definitions/IdTokenClaimPayload"
-        },
-        "vp_token": {
-          "$ref": "#/definitions/VpTokenClaimPayload"
-        }
-      }
-    },
-    "IdTokenClaimPayload": {
+    "ClaimPayloadCommon": {
       "type": "object"
     },
-    "VpTokenClaimPayload": {
+    "RelyingPartyAttestation": {
       "type": "object",
       "properties": {
-        "dcql_query": {
+        "format": {
           "type": "string"
+        },
+        "data": {
+          "type": "string"
+        },
+        "credential_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
+      "required": [
+        "format",
+        "data"
+      ],
       "additionalProperties": false
     }
   }

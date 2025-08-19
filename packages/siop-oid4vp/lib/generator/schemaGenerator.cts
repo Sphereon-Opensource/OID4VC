@@ -146,40 +146,19 @@ const authorizationRequestPayloadVID1 = { // TODO remove
   skipTypeCheck: true,
 }
 
-const authorizationRequestPayloadVD11 = { // TODO remove
+const authorizationRequestPayloadV1 = {
   path: '../types/SIOP.types.ts',
   tsconfig: 'tsconfig.json',
-  type: 'AuthorizationRequestPayloadVD11', // Or <type-name> if you want to generate schema for that one type only
-  schemaId: 'AuthorizationRequestPayloadVD11Schema',
-  outputPath: '../schemas/AuthorizationRequestPayloadVD11.schema.ts',
+  type: 'AuthorizationRequestPayloadV1', // Or <type-name> if you want to generate schema for that one type only
+  schemaId: 'AuthorizationRequestPayloadV1Schema',
+  outputPath: '../schemas/AuthorizationRequestPayloadV1.schema.ts',
   skipTypeCheck: true,
 }
 
-const authorizationRequestPayloadVD12OID4VPD18 = { // TODO remove
-  path: '../types/SIOP.types.ts',
-  tsconfig: 'tsconfig.json',
-  type: 'AuthorizationRequestPayloadVD12OID4VPD18', // Or <type-name> if you want to generate schema for that one type only
-  schemaId: 'AuthorizationRequestPayloadVD12OID4VPD18Schema',
-  outputPath: '../schemas/AuthorizationRequestPayloadVD12OID4VPD18.schema.ts',
-  skipTypeCheck: true,
-}
-
-const authorizationRequestPayloadVD12OID4VPD20 = { // TODO remove
-  path: '../types/SIOP.types.ts',
-  tsconfig: 'tsconfig.json',
-  type: 'AuthorizationRequestPayloadVD12OID4VPD20', // Or <type-name> if you want to generate schema for that one type only
-  schemaId: 'AuthorizationRequestPayloadVD12OID4VPD20Schema',
-  outputPath: '../schemas/AuthorizationRequestPayloadVD12OID4VPD20.schema.ts',
-  skipTypeCheck: true,
-}
-
-// TODO we need 1 schema
 
 const schemas: Schema[] = [
   writeSchema(authorizationRequestPayloadVID1),
-  writeSchema(authorizationRequestPayloadVD11),
-  writeSchema(authorizationRequestPayloadVD12OID4VPD18),
-  writeSchema(authorizationRequestPayloadVD12OID4VPD20),
+  writeSchema(authorizationRequestPayloadV1),
   writeSchema(responseOptsConf),
   writeSchema(rPRegistrationMetadataPayload),
   writeSchema(discoveryMetadataPayload),

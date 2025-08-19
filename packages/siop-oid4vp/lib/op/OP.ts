@@ -301,7 +301,7 @@ export class OP {
     audience?: string
     dcqlResponse?: DcqlResponseOpts
   }): AuthorizationResponseOpts {
-    const version = opts.version ?? this._createResponseOptions.version
+    const version = this._createResponseOptions.version ?? opts.version
     let issuer = opts.issuer ?? this._createResponseOptions?.registration?.issuer
     if (version === SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1) {
       issuer = ResponseIss.JWT_VC_PRESENTATION_V1

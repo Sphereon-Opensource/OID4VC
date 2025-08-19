@@ -49,7 +49,7 @@ beforeEach(async () => {
   TestVectors.mockDID(TestVectors.holderDID, TestVectors.holderKID, TestVectors.holderJwk)
   TestVectors.mockDID(TestVectors.verifierDID, TestVectors.verifierKID, TestVectors.verifierJwk)
 
-  rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_V1 }) // TODO why is the version not set correctly { requestVersion: SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1 })
+  rp = RP.builder({ requestVersion: SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1 })
     .withResponseType(ResponseType.ID_TOKEN, PropertyTarget.REQUEST_OBJECT)
     .withClientId(TestVectors.issuerDID, PropertyTarget.REQUEST_OBJECT)
     .withScope('openid', PropertyTarget.REQUEST_OBJECT)
@@ -81,7 +81,7 @@ beforeEach(async () => {
   op = OP.builder()
     .withCreateJwtCallback(internalSignature(TestVectors.holderHexPrivateKey, TestVectors.holderDID, TestVectors.holderKID, SigningAlgo.ES256))
     .withVerifyJwtCallback(verifyJwtCallback)
-    .addSupportedVersion(SupportedVersion.SIOPv2_V1) //SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1
+    .addSupportedVersion(SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1)
     .build()
 })
 
@@ -122,7 +122,7 @@ describe('RP using test vectors', () => {
     const authRequest = await createAuthRequest()
     const uri = await authRequest.uri()
     expect(uri.encodedUri).toEqual(
-      'openid4vp://?request_uri=https%3A%2F%2Fexample%2Fservice%2Fapi%2Fv1%2Fpresentation-request%2F649d8c3c-f5ac-41bd-9c19-5804ea1b8fe9&client_id=decentralized_identifier%3Adid%3Ajwk%3AeyJhbGciOiJFUzI1NiIsInVzZSI6InNpZyIsImt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiZjgzT0ozRDJ4RjFCZzh2dWI5dExlMWdITXpWNzZlOFR1czl1UEh2UlZFVSIsInkiOiJ4X0ZFelJ1OW0zNkhMTl90dWU2NTlMTnBYVzZwQ3lTdGlrWWpLSVdJNWEwIn0'
+        'openid-vc://?request_uri=https%3A%2F%2Fexample%2Fservice%2Fapi%2Fv1%2Fpresentation-request%2F649d8c3c-f5ac-41bd-9c19-5804ea1b8fe9&client_id=did%3Ajwk%3AeyJhbGciOiJFUzI1NiIsInVzZSI6InNpZyIsImt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiZjgzT0ozRDJ4RjFCZzh2dWI5dExlMWdITXpWNzZlOFR1czl1UEh2UlZFVSIsInkiOiJ4X0ZFelJ1OW0zNkhMTl90dWU2NTlMTnBYVzZwQ3lTdGlrWWpLSVdJNWEwIn0'
     )
   })
 

@@ -122,20 +122,10 @@ export const RPRegistrationMetadataPayloadSchemaObj = {
           ]
         },
         "client_name": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {}
-          ]
+          "type": "string"
         },
         "logo_uri": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {}
-          ]
+          "type": "string"
         },
         "client_purpose": {
           "anyOf": [

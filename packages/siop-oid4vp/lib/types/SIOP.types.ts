@@ -77,7 +77,11 @@ export interface RequestCommonPayload extends JWTPayload {
   response_mode?: ResponseMode // TODO spec says required? // This specification introduces a new response mode post in accordance with [OAuth.Responses]. This response mode is used to request the Self-Issued OP to deliver the result of the authentication process to a certain endpoint using the HTTP POST method. The additional parameter response_mode is used to carry this value.
 }
 
-export interface AuthorizationRequestPayloadV1 // TODO temp name
+export interface AuthorizationRequestPayloadVID1 extends AuthorizationRequestCommonPayload, RequestRegistrationPayloadProperties {
+  claims?: ClaimPayloadVID1
+}
+
+export interface AuthorizationRequestPayloadV1
     extends AuthorizationRequestCommonPayload,
       RequestClientMetadataPayloadProperties,
       RequestIdTokenPayloadProperties {
@@ -102,7 +106,7 @@ export type TransactionData = {
 }
 
 // https://openid.bitbucket.io/connect/openid-connect-self-issued-v2-1_0.html#section-10
-export type AuthorizationRequestPayload = AuthorizationRequestPayloadV1
+export type AuthorizationRequestPayload = AuthorizationRequestPayloadVID1 | AuthorizationRequestPayloadV1
 
 export type JWTVcPresentationProfileAuthenticationRequestPayload = RequestIdTokenPayloadProperties
 
@@ -371,11 +375,6 @@ interface JWT_VCDiscoveryMetadataPayload extends DiscoveryMetadataPayloadVID1 {
   client_purpose?: string
 }
 
-interface DiscoveryMetadataPayloadVD11 extends DiscoveryMetadataCommonPayload {
-  id_token_types_supported?: IdTokenType[] | IdTokenType
-  vp_formats_supported?: Format // from oidc4vp
-}
-
 interface DiscoveryMetadataPayloadV1Final extends DynamicRegistrationClientMetadata, DiscoveryMetadataCommonPayload {
   vp_formats_supported: Format // from oidc4vp
   id_token_types_supported?: IdTokenType[] | IdTokenType // TODO do we still need this??
@@ -383,7 +382,7 @@ interface DiscoveryMetadataPayloadV1Final extends DynamicRegistrationClientMetad
   client_id_prefixes_supported?: string[]
 }
 
-export type DiscoveryMetadataPayload = DiscoveryMetadataPayloadVID1 | JWT_VCDiscoveryMetadataPayload | DiscoveryMetadataPayloadVD11 | DiscoveryMetadataPayloadV1Final
+export type DiscoveryMetadataPayload = DiscoveryMetadataPayloadVID1 | JWT_VCDiscoveryMetadataPayload | DiscoveryMetadataPayloadV1Final
 
 export type DiscoveryMetadataOpts = (JWT_VCDiscoveryMetadataOpts | DiscoveryMetadataOptsVID1 | DiscoveryMetadataOptsVD11) &
   DiscoveryMetadataCommonOpts
@@ -422,7 +421,7 @@ export type RPRegistrationMetadataPayload = Pick<
   | 'scopes_supported'
   | 'subject_types_supported'
   | 'subject_syntax_types_supported'
-  | 'vp_formats_supported'
+  | 'vp_formats'
   | 'client_name'
   | 'logo_uri'
   | 'client_purpose'
