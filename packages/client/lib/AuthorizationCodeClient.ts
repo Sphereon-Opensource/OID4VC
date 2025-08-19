@@ -167,7 +167,7 @@ export const createAuthorizationRequestUrl = async ({
       // W3C credentials have a credential definition, the rest does not
       let credential_definition: undefined | Partial<CredentialDefinitionJwtVcJsonV1_0_15 | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15> =
         undefined
-      if (isW3cCredentialSupported(cred)) {
+      if (isW3cCredentialSupported(cred) && hasCredentialDefinition(cred)) {
         credential_definition = {
           ...cred.credential_definition,
           // type: OPTIONAL. Array as defined in Appendix A.1.1.2. This claim contains the type values the Wallet requests authorization for at the Credential Issuer. It MUST be present if the claim format is present in the root of the authorization details object. It MUST not be present otherwise.
@@ -262,6 +262,15 @@ export const createAuthorizationRequestUrl = async ({
   logger.debug(`Authorization Request URL: ${url}`)
   return url
 }
+
+const hasCredentialDefinition = (cred: any): cred is {
+  credential_definition: { type: string[], credentialSubject?: any }
+} => 'credential_definition' in cred &&
+  cred.credential_definition &&
+  typeof cred.credential_definition === 'object' &&
+  cred.credential_definition !== null &&
+  'type' in cred.credential_definition &&
+  Array.isArray(cred.credential_definition.type)
 
 const handleAuthorizationDetails = (
   endpointMetadata: EndpointMetadataResultV1_0_15 | EndpointMetadataResultV1_0_13,

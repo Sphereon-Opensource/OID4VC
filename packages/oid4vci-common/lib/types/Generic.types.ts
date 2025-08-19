@@ -181,6 +181,15 @@ export interface CredentialSupportedSdJwtVc extends CommonCredentialSupported {
   order?: string[] //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
 }
 
+export interface CredentialSupportedSdJwtVcV13 extends CommonCredentialSupported {
+  format: 'vc+sd-jwt' // TODO SSISDK-26
+
+  vct: string
+  claims?: IssuerCredentialSubject
+
+  order?: string[] //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
+}
+
 export interface CredentialSupportedMsoMdoc extends CommonCredentialSupported {
   format: 'mso_mdoc'
 
@@ -197,7 +206,7 @@ export type CredentialConfigurationSupported =
       (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedMsoMdoc))
 
 export type CredentialsSupportedLegacy = CommonCredentialSupported &
-  (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedMsoMdoc)
+  (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedSdJwtVcV13 | CredentialSupportedMsoMdoc)
 
 export interface CommonCredentialOfferFormat {
   format: OID4VCICredentialFormat | string
@@ -224,6 +233,13 @@ export interface CredentialOfferFormatSdJwtVc extends CommonCredentialOfferForma
   claims?: IssuerCredentialSubject
 }
 
+export interface CredentialOfferFormatSdJwtVcv13 extends CommonCredentialOfferFormat {
+  format: 'vc+sd-jwt'
+
+  vct: string
+  claims?: IssuerCredentialSubject
+}
+
 // NOTE: the sd-jwt format is added to oid4vci in a later draft version than currently
 // supported, so there's no defined offer format. However, based on the request structure
 // we support sd-jwt for older drafts of oid4vci as well
@@ -235,7 +251,7 @@ export interface CredentialOfferFormatMsoMdoc extends CommonCredentialOfferForma
 }
 
 export type CredentialOfferFormatV1_0_11 = CommonCredentialOfferFormat &
-  (CredentialOfferFormatJwtVcJsonLdAndLdpVc | CredentialOfferFormatJwtVcJson | CredentialOfferFormatSdJwtVc | CredentialOfferFormatMsoMdoc)
+  (CredentialOfferFormatJwtVcJsonLdAndLdpVc | CredentialOfferFormatJwtVcJson | CredentialOfferFormatSdJwtVcv13 | CredentialOfferFormatMsoMdoc)
 
 /**
  * Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
@@ -284,6 +300,12 @@ export interface CredentialRequestJwtVcJsonLdAndLdpVc extends CommonCredentialRe
 
 export interface CredentialRequestSdJwtVc extends CommonCredentialRequest {
   format: 'dc+sd-jwt'
+  vct: string
+  claims?: IssuerCredentialSubject
+}
+
+export interface CredentialRequestSdJwtVcV13 extends CommonCredentialRequest {
+  format: 'vc+sd-jwt'
   vct: string
   claims?: IssuerCredentialSubject
 }
