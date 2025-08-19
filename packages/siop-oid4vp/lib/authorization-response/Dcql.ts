@@ -67,7 +67,7 @@ export class Dcql {
             } satisfies DcqlSdJwtVcCredential,
           ]
         } else {
-          throw new Error('DcqlPresentation atm only supports mso_mdoc and vc+sd-jwt')
+          throw new Error('DcqlPresentation atm only supports mso_mdoc and dc+sd-jwt')
         }
       }),
     )

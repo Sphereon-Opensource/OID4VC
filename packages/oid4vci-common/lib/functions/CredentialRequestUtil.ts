@@ -32,7 +32,7 @@ export function getTypesFromRequest(credentialRequest: CredentialRequest, format
     if ('types' in credentialRequest && Array.isArray(credentialRequest.types)) {
       types = credentialRequest.types
     }
-  } else if (format === 'vc+sd-jwt' && 'vct' in credentialRequest) {
+  } else if (format === 'dc+sd-jwt' && 'vct' in credentialRequest) {
     types = [credentialRequest.vct]
   } else if (format === 'mso_mdoc' && 'doctype' in credentialRequest) {
     types = [credentialRequest.doctype]

@@ -664,7 +664,7 @@ export class VcIssuer {
     let preAuthorizedCode: string | undefined
     let issuerState: string | undefined
 
-    const supportedIssuanceFormats = ['jwt_vc_json', 'jwt_vc_json-ld', 'dc+sd-jwt', 'vc+sd-jwt', 'ldp_vc', 'mso_mdoc']
+    const supportedIssuanceFormats = ['jwt_vc_json', 'jwt_vc_json-ld', 'dc+sd-jwt', 'ldp_vc', 'mso_mdoc']
     try {
       if (format && !supportedIssuanceFormats.includes(format)) {
         throw Error(`Format ${format} not supported yet`)

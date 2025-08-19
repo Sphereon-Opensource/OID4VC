@@ -36,14 +36,13 @@ export interface ImageInfo {
   [key: string]: unknown
 }
 
-export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'dc+sd-jwt' | 'vc+sd-jwt' | 'jwt_vc' | 'mso_mdoc' // jwt_vc & vc+sd-jwt are added for backwards compat
+export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'dc+sd-jwt' | 'jwt_vc' | 'mso_mdoc' // jwt_vc & dc+sd-jwt are added for backwards compat
 
 export const supportedOID4VCICredentialFormat: readonly (OID4VCICredentialFormat | string)[] = [
   'jwt_vc_json',
   'jwt_vc_json-ld',
   'ldp_vc',
   'dc+sd-jwt',
-  'vc+sd-jwt',
   'jwt_vc',
   'mso_mdoc'
 ]
@@ -174,7 +173,7 @@ export interface CredentialSupportedJwtVcJson extends CommonCredentialSupported 
 }
 
 export interface CredentialSupportedSdJwtVc extends CommonCredentialSupported {
-  format: 'vc+sd-jwt'
+  format: 'dc+sd-jwt'
 
   vct: string
   claims?: IssuerCredentialSubject
@@ -219,7 +218,7 @@ export interface CredentialOfferFormatJwtVcJson extends CommonCredentialOfferFor
 // supported, so there's no defined offer format. However, based on the request structure
 // we support sd-jwt for older drafts of oid4vci as well
 export interface CredentialOfferFormatSdJwtVc extends CommonCredentialOfferFormat {
-  format: 'vc+sd-jwt'
+  format: 'dc+sd-jwt'
 
   vct: string
   claims?: IssuerCredentialSubject
@@ -284,7 +283,7 @@ export interface CredentialRequestJwtVcJsonLdAndLdpVc extends CommonCredentialRe
 }
 
 export interface CredentialRequestSdJwtVc extends CommonCredentialRequest {
-  format: 'vc+sd-jwt'
+  format: 'dc+sd-jwt'
   vct: string
   claims?: IssuerCredentialSubject
 }
@@ -314,7 +313,7 @@ export interface CredentialResponseJwtVc {
 }
 
 export interface CredentialResponseSdJwtVc {
-  //  format: 'vc+sd-jwt';   TODO do we still need this for previous version support?
+  //  format: 'dc+sd-jwt';   TODO do we still need this for previous version support?
   credential: string
 }
 
