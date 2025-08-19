@@ -54,10 +54,10 @@ export class Dcql {
             ]
           case 'vc+sd-jwt':
             return [queryId, {
-                credential_format: p.format,
+                credential_format: 'dc+sd-jwt',
                 vct: p.vcs[0].decoded.vct,
                 claims: p.vcs[0].decoded,
-                cryptographic_holder_binding: hasCryptographicHolderBinding(p.format, p.vcs[0])
+                cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', p.vcs[0])
               } satisfies DcqlSdJwtVcCredential
             ]
           case 'jwt_vp':
@@ -91,18 +91,18 @@ export class Dcql {
         //       cryptographic_holder_binding: true, // TODO
         //     } satisfies DcqlMdocCredential,
         //   ]
-        // } else if (p.format === 'vc+sd-jwt') {
+        // } else if (p.format === 'dc+sd-jwt') {
         //   return [
         //     queryId,
         //     {
-        //       credential_format: 'vc+sd-jwt',
+        //       credential_format: 'dc+sd-jwt',
         //       vct: p.vcs[0].decoded.vct,
         //       claims: p.vcs[0].decoded,
         //       cryptographic_holder_binding: true, // TODO
         //     } satisfies DcqlSdJwtVcCredential,
         //   ]
         // } else {
-        //   throw new Error('DcqlPresentation atm only supports mso_mdoc and vc+sd-jwt')
+        //   throw new Error('DcqlPresentation atm only supports mso_mdoc and dc+sd-jwt')
         // }
       }),
     )

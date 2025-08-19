@@ -43,7 +43,7 @@ const dcqlQuery = {
   credentials: [
     {
       id: 'my_credential',
-      format: 'vc+sd-jwt',
+      format: 'dc+sd-jwt',
       meta: {
         vct_values: ['OpenBadgeCredential'],
       },
@@ -132,7 +132,7 @@ describe.skip('mdoc RP and OP interaction should', () => {
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
 
     const vc = {
-      credential_format: 'vc+sd-jwt',
+      credential_format: 'dc+sd-jwt',
       vct: SD_JWT_VC.decodedPayload.vct,
       claims: SD_JWT_VC.decodedPayload,
       cryptographic_holder_binding: true,

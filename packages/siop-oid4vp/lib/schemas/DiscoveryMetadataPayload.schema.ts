@@ -1988,7 +1988,7 @@ export const DiscoveryMetadataPayloadSchemaObj = {
         "di_vp": {
           "$ref": "#/definitions/DiObject"
         },
-        "vc+sd-jwt": {
+        "dc+sd-jwt": {
           "$ref": "#/definitions/SdJwtObject"
         },
         "mso_mdoc": {

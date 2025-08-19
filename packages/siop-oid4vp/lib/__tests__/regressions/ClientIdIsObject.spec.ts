@@ -23,7 +23,7 @@ const dcqlQuery = {
     credentials: [
         {
             id: 'my_credential',
-            format: 'vc+sd-jwt',
+            format: 'dc+sd-jwt',
             meta: {
                 vct_values: ['https://high-assurance.com/StateBusinessLicense'],
             },

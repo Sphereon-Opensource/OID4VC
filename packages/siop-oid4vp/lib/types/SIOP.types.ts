@@ -465,14 +465,14 @@ export interface ClientMetadataProperties extends ObjectBy {
 export enum VerifiablePresentationTypeFormat {
   JWT_VP = 'jwt_vp',
   LDP_VP = 'ldp_vp',
-  SD_JWT_VC = 'vc+sd-jwt',
+  SD_JWT_VC = 'dc+sd-jwt',
   MSO_MDOC = 'mso_mdoc',
 }
 
 export enum VerifiableCredentialTypeFormat {
   LDP_VC = 'ldp_vc',
   JWT_VC = 'jwt_vc',
-  SD_JWT_VC = 'vc+sd-jwt',
+  SD_JWT_VC = 'dc+sd-jwt',
   MSO_MDOC = 'mso_mdoc',
 }
 

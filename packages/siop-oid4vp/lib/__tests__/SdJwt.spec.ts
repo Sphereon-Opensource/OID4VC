@@ -62,20 +62,11 @@ const SD_JWT_VC = {
     }
 }
 
-// TODO check this
-// The KB property is added to the JWT when the presentation is signed. Passing a VC will make the test fail
-// const dcqlCredentials = [KB_SD_JWT_PRESENTATION].map((vc) => ({
-//     credential_format: 'vc+sd-jwt',
-//     claims: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload as { [x: string]: Json },
-//     vct: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload.vct,
-//     cryptographic_holder_binding: true
-// })) satisfies DcqlSdJwtVcCredential[]
-
 const dcqlQuery = {
   credentials: [
     {
       id: 'my_credential',
-      format: 'vc+sd-jwt',
+      format: 'dc+sd-jwt',
       meta: {
         vct_values: ['https://high-assurance.com/StateBusinessLicense'],
       },
@@ -89,10 +80,10 @@ const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery)
 DcqlQuery.validate(parsedDcqlQuery)
 
 const dcqlCredential = {
-    credential_format: 'vc+sd-jwt',
+    credential_format: 'dc+sd-jwt',
     vct: SD_JWT_VC.decodedPayload.vct,
     claims: SD_JWT_VC.decodedPayload,
-    cryptographic_holder_binding: hasCryptographicHolderBinding('vc+sd-jwt', CredentialMapper.toWrappedVerifiableCredential(SD_JWT_VC.compactJwtVc)),
+    cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', CredentialMapper.toWrappedVerifiableCredential(SD_JWT_VC.compactJwtVc)),
 } satisfies DcqlSdJwtVcCredential
 
 // TODO skip
@@ -441,7 +432,7 @@ describe('RP and OP interaction should', () => {
 
     // The KB property is added to the JWT when the presentation is signed. Passing a VC will make the test fail
     const dcqlCredentials = [KB_SD_JWT_PRESENTATION].map((vc) => ({
-      credential_format: 'vc+sd-jwt',
+      credential_format: 'dc+sd-jwt',
       claims: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload as { [x: string]: Json },
       vct: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload.vct,
       cryptographic_holder_binding: true
@@ -470,7 +461,7 @@ describe('RP and OP interaction should', () => {
     //                   name: 'John',
     //                 },
     //               },
-    //               credential_format: "vc+sd-jwt",
+    //               credential_format: "dc+sd-jwt",
     //               vct: 'https://high-assurance.com/StateBusinessLicense',
     //             },
     //             success: true,
@@ -490,7 +481,7 @@ describe('RP and OP interaction should', () => {
     //             name: 'John',
     //           },
     //         },
-    //         credential_format: "vc+sd-jwt",
+    //         credential_format: "dc+sd-jwt",
     //         vct: 'https://high-assurance.com/StateBusinessLicense',
     //       },
     //       success: true,
@@ -508,7 +499,7 @@ describe('RP and OP interaction should', () => {
     //           path: ['user', 'name'],
     //         },
     //       ],
-    //       format: 'vc+sd-jwt',
+    //       format: 'dc+sd-jwt',
     //       id: 'my_credential',
     //       meta: {
     //         vct_values: ['https://high-assurance.com/StateBusinessLicense'],

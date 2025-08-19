@@ -116,14 +116,13 @@ export const extractPresentationsFromDcqlVpToken = (
 
 // FIXME probably too naive
 export const hasCryptographicHolderBinding = (
-    format: 'mso_mdoc' | 'vc+sd-jwt' | 'jwt_vc_json' | 'ldp_vc',
+    format: 'mso_mdoc' | 'dc+sd-jwt' | 'jwt_vc_json' | 'ldp_vc',
     vc: WrappedMdocCredential | WrappedSdJwtVerifiableCredential | WrappedW3CVerifiableCredential
 ): boolean => {
   switch (format) {
     case 'mso_mdoc':
-      const mdoc = vc as WrappedMdocCredential
-      return Boolean(mdoc.credential?.toJson?.()?.MSO.deviceKeyInfo)
-    case 'vc+sd-jwt':
+      return true
+    case 'dc+sd-jwt':
       const sdJwt = vc as WrappedSdJwtVerifiableCredential
       return Boolean(sdJwt.decoded?.cnf?.jwk || sdJwt.decoded?.cnf?.kid)
     case 'jwt_vc_json':
