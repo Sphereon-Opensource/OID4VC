@@ -127,12 +127,20 @@ export function getSupportedCredential(opts?: {
       } else if (types) {
         isTypeMatch = normalizedTypes.every((type) => types.includes(type))
       } else {
-        if (isW3cCredentialSupported(config) && 'credential_definition' in config) {
-          isTypeMatch = normalizedTypes.every((type) => config.credential_definition.type.includes(type))
+        // Type guard to check if credential_definition has the expected structure
+        const hasValidCredentialDefinition = isW3cCredentialSupported(config)
+          && 'credential_definition' in config
+          && config.credential_definition
+          && typeof config.credential_definition === 'object' && true && 'type' in config.credential_definition
+          && Array.isArray(config.credential_definition.type)
+
+        if (hasValidCredentialDefinition) {
+          const credDef = config.credential_definition as { type: string[] }
+          isTypeMatch = normalizedTypes.every((type) => credDef.type.includes(type))
         } else if (isW3cCredentialSupported(config) && 'type' in config && Array.isArray(config.type)) {
           isTypeMatch = normalizedTypes.every((type) => (config.type as string[]).includes(type))
-        } else if (isW3cCredentialSupported(config) && 'types' in config) {
-          isTypeMatch = normalizedTypes.every((type) => config.types?.includes(type))
+        } else if (isW3cCredentialSupported(config) && 'types' in config && Array.isArray(config.types)) {
+          isTypeMatch = normalizedTypes.every((type) => (config.types as string[]).includes(type))
         }
       }
     }
