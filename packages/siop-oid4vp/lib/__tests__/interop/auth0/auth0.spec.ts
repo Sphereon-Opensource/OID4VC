@@ -1,13 +1,31 @@
-import { PEX } from '@sphereon/pex'
 import { describe, expect, it } from 'vitest'
-import { anyDef, VCs } from './fixtures'
+import { DcqlQuery, DcqlQueryResult, DcqlW3cVcCredential } from 'dcql'
+import { CredentialMapper } from '@sphereon/ssi-types'
+import { parsedDcqlQueryAny, VCs } from './fixtures'
+import { Json } from '../../../types'
 
-// TODO figure out what to do with this test as we do not use any pd's anymore, should i guess be dcql
 describe.skip('auth0 presentation tool', () => {
-  it('any match definition should return all credentials', async () => {
-    const pex = new PEX()
+  it('any match query should return all credentials', async () => {
     expect(VCs).toHaveLength(5)
-    const selectResult = pex.selectFrom(anyDef, VCs)
-    expect(selectResult.matches).toHaveLength(5)
+    const dcqlCredentials = VCs.map((vc) => {
+      if (typeof vc === 'string') {
+        return {
+          credential_format: 'jwt_vc_json',
+          claims: CredentialMapper.decodeVerifiableCredential(vc).decodedPayload as { [x: string]: Json },
+          type: CredentialMapper.decodeVerifiableCredential(vc).decodedPayload.vct,
+          cryptographic_holder_binding: true
+        } satisfies DcqlW3cVcCredential
+      } else {
+        return {
+          credential_format: 'ldp_vc',
+          claims: vc.credentialSubject as { [x: string]: Json },
+          type: vc.type,
+          cryptographic_holder_binding: true
+        } satisfies DcqlW3cVcCredential
+      }
+    })
+
+    const dcqlQueryResult: DcqlQueryResult = DcqlQuery.query(parsedDcqlQueryAny, dcqlCredentials)
+    expect(dcqlQueryResult.credential_matches).toHaveLength(5)
   })
 })

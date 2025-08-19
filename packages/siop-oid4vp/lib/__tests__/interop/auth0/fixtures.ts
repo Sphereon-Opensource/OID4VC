@@ -1,34 +1,31 @@
-import { PresentationDefinitionV1 } from '@sphereon/pex-models'
+import { DcqlQuery } from 'dcql'
 
-// TODO remove all this and use dcql
-
-export const anyDef: PresentationDefinitionV1 = {
-  id: '1',
-  input_descriptors: [
+const dcqlQuery = {
+  credentials: [
     {
       id: '1',
-      name: 'A specific type of VC',
-      purpose: 'We want a VC of this type',
-      schema: [{ uri: 'VerifiableCredential' }],
+      format: 'jwt_vc_json',
+      meta: {
+        type_values: [
+            ['VerifiableCredential']
+        ]
+      }
     },
-  ],
-}
-
-export const multiple = {
-  id: '00000000-0000-0000-0000-000000000000',
-  input_descriptors: [
     {
-      id: '1',
-      name: 'A specific type of VC',
-      purpose: 'We want a VC of this type',
-      schema: [
-        {
-          uri: '<CREDENTIAL_TYPE>',
-        },
-      ],
+      id: '2',
+      format: 'jwt_vc_json',
+      meta: {
+        type_values: [
+          ['VerifiableCredential']
+        ]
+      }
     },
-  ],
-}
+  ]
+} satisfies DcqlQuery.Input
+
+export const parsedDcqlQueryAny = DcqlQuery.parse(dcqlQuery)
+DcqlQuery.validate(parsedDcqlQueryAny)
+
 export const VCs = [
   {
     '@context': [

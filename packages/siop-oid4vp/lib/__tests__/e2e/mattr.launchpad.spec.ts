@@ -1,6 +1,7 @@
 import { SigningAlgo } from '@sphereon/oid4vc-common'
-import { PresentationSignCallBackParams, PresentationSubmissionLocation } from '@sphereon/pex'
+import { PresentationSignCallBackParams } from '@sphereon/pex'
 import { W3CVerifiablePresentation } from '@sphereon/ssi-types'
+import { DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlW3cVcCredential } from 'dcql'
 import * as ed25519 from '@transmute/did-key-ed25519'
 import { fetch } from 'cross-fetch'
 import { DIDDocument, DIDResolutionResult } from 'did-resolver'
@@ -8,17 +9,11 @@ import { importJWK, JWK, SignJWT } from 'jose'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as u8a from 'uint8arrays'
-const { fromString } = u8a
-
 import { describe, expect, it, test } from 'vitest'
-
 import { AuthorizationRequest, AuthorizationResponse, OP, SupportedVersion } from '../..'
 import { getCreateJwtCallback, getVerifyJwtCallback } from '../DidJwtTestUtils'
-import {DcqlCredential, DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlW3cVcCredential} from 'dcql';
 
-export interface InitiateOfferRequest {
-  types: string[]
-}
+const { fromString } = u8a
 
 export interface InitiateOfferResponse {
   authorizeRequestUri: string
@@ -126,7 +121,7 @@ const dcqlQuery = {
   credentials: [
     {
       id: 'my_credential',
-      format: 'jwt_vc_json',//'jwt_vc_json-ld',
+      format: 'jwt_vc_json',
       meta: {
         type_values: [
           ['https://www.w3.org/2018/credentials#VerifiableCredential'],
@@ -165,11 +160,9 @@ describe.skip('OID4VCI-Client using Mattr issuer should', () => {
 
     const verifiedAuthRequest = await op.verifyAuthorizationRequest(authorizeRequestUri, { correlationId })
     expect(verifiedAuthRequest).toBeDefined()
-    //expect(verifiedAuthRequest.dcqlQuery).toHaveLength(1) // TODO this was enabled?
-
 
     const dcqlCredential = {
-      credential_format: 'jwt_vc_json', //'jwt_vc_json-ld',
+      credential_format: 'jwt_vc_json',
       claims: OPENBADGE_JWT_VC.decodedPayload.vc.credentialSubject,
       type: OPENBADGE_JWT_VC.decodedPayload.vc.type,
       cryptographic_holder_binding: true
@@ -229,13 +222,8 @@ describe.skip('OID4VCI-Client using Mattr issuer should', () => {
     })
     expect(verifiedAuthRequest).toBeDefined()
 
-    // const vc: DcqlCredential = {
-    //   credential_format: 'vc+sd-jwt',
-    //   claims: OPENBADGE_JWT_VC.decodedPayload.vc.credentialSubject,
-    // }
-
     const dcqlCredential = {
-      credential_format: 'jwt_vc_json', //'jwt_vc_json-ld',
+      credential_format: 'jwt_vc_json',
       claims: OPENBADGE_JWT_VC.decodedPayload.vc.credentialSubject,
       type: OPENBADGE_JWT_VC.decodedPayload.vc.type,
       cryptographic_holder_binding: true

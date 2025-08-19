@@ -224,6 +224,7 @@ describe('verifyJWT should', () => {
     ajv.compile(RPRegistrationMetadataPayloadSchemaObj)
     ajv.compile(schema)
   })
+
   it('throw VERIFY_BAD_PARAMETERS when no JWT is passed', async () => {
     expect.assertions(1)
     await expect(AuthorizationRequest.verify(undefined as never, undefined as never)).rejects.toThrow(SIOPErrors.VERIFY_BAD_PARAMS)
@@ -249,7 +250,7 @@ describe('verifyJWT should', () => {
     const mockEntity = await mockedGetEnterpriseAuthToken('COMPANY AA INC')
 
     const requestOpts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.SIOPv2_V1,
       requestObject: {
         jwtIssuer: {
           method: 'did',
@@ -303,7 +304,7 @@ describe('verifyJWT should', () => {
     const verifyOpts: VerifyAuthorizationRequestOpts = {
       verifyJwtCallback: getVerifyJwtCallback(resolver, { checkLinkedDomain: 'if_present' }),
       verification: {},
-      supportedVersions: [SupportedVersion.SIOPv2_ID1],
+      supportedVersions: [SupportedVersion.SIOPv2_V1],
       correlationId: '1234',
       nonce: 'invalid_nonce',
     }
@@ -325,7 +326,7 @@ describe('verifyJWT should', () => {
     async () => {
       const mockEntity = await mockedGetEnterpriseAuthToken('COMPANY AA INC')
       const requestOpts: CreateAuthorizationRequestOpts = {
-        version: SupportedVersion.SIOPv2_ID1,
+        version: SupportedVersion.SIOPv2_V1,
         requestObject: {
           jwtIssuer: {
             method: 'did',
@@ -380,7 +381,7 @@ describe('verifyJWT should', () => {
         const verifyOpts: VerifyAuthorizationRequestOpts = {
           verifyJwtCallback: getVerifyJwtCallback(resolver, { checkLinkedDomain: 'if_present' }),
           verification: {},
-          supportedVersions: [SupportedVersion.SIOPv2_ID1],
+          supportedVersions: [SupportedVersion.SIOPv2_V1],
           correlationId: '1234',
         }
 

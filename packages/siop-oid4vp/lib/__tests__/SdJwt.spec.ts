@@ -95,7 +95,8 @@ const dcqlCredential = {
     cryptographic_holder_binding: hasCryptographicHolderBinding('vc+sd-jwt', CredentialMapper.toWrappedVerifiableCredential(SD_JWT_VC.compactJwtVc)),
 } satisfies DcqlSdJwtVcCredential
 
-describe.skip('RP and OP interaction should', () => {
+// TODO skip
+describe('RP and OP interaction should', () => {
   // FIXME SDK-45 Uniresolver failing
   it('succeed when calling with DCQL query and right DCQL presentation', async () => {
     const opMock = await mockedGetEnterpriseAuthToken('OP')
@@ -117,7 +118,7 @@ describe.skip('RP and OP interaction should', () => {
     const resolver = getResolver('ethr')
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_V1 })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
@@ -148,7 +149,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
       .build()
 
     const op = OP.builder()
@@ -174,7 +175,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({
@@ -234,7 +235,7 @@ describe.skip('RP and OP interaction should', () => {
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
     const rp = RP.builder({
-      requestVersion: SupportedVersion.SIOPv2_D12_OID4VP_D18,
+      requestVersion: SupportedVersion.SIOPv2_V1,
     })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
@@ -264,7 +265,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
       .build()
 
     const op = OP.builder()
@@ -290,7 +291,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({
@@ -363,7 +364,7 @@ describe.skip('RP and OP interaction should', () => {
     const resolver = getResolver('ethr')
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_D12_OID4VP_D20 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_V1 })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
@@ -420,7 +421,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_D12_OID4VP_D20)
+      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({

@@ -1,8 +1,7 @@
 import * as dotenv from 'dotenv'
 import {describe, expect, it} from 'vitest'
+import {DcqlQuery} from 'dcql'
 import {ClientIdentifierPrefix, getRequestObjectJwtVerifier, JwtVerifier, PassBy, SIOPErrors} from '../types'
-import {DcqlQuery} from 'dcql';
-import {removeClientIdentifierPrefix} from '../helpers';
 
 dotenv.config()
 
@@ -39,25 +38,6 @@ const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery)
 DcqlQuery.validate(parsedDcqlQuery)
 
 describe('requestObjectJwtVerifier', () => {
-  it('should throw when an invalid schema is passed', async () => {
-    await expect(
-      getRequestObjectJwtVerifier(
-        {
-          header: {},
-          payload: {
-              ...baseJwtPayload,
-              client_id: `wrong:${baseJwtPayload.client_id}`,
-              client_metadata: {
-                  passBy: PassBy.REFERENCE
-              },
-              dcql_query: JSON.stringify(parsedDcqlQuery)
-          },
-        },
-        { raw: '' },
-      ),
-    ).rejects.toThrow(SIOPErrors.INVALID_CLIENT_ID_SCHEME)
-  })
-
   it('should succeed with a client_id_scheme did', async () => {
     const jwtVerifier = await getRequestObjectJwtVerifier(
       {

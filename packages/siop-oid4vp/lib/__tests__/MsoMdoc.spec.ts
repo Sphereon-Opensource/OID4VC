@@ -1,7 +1,7 @@
-import {defaultHasher, SigningAlgo} from '@sphereon/oid4vc-common'
+import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { describe, expect, it } from 'vitest'
+import { DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlSdJwtVcCredential } from 'dcql'
 import {
-  Dcql,
   OP,
   PassBy,
   PresentationVerificationCallback,
@@ -17,7 +17,6 @@ import {
 import { getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
 import { mockedGetEnterpriseAuthToken, pexHasher, sdJwtVcPresentationSignCallback, WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
-import { DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlSdJwtVcCredential, DcqlPresentationResult } from 'dcql'
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 
@@ -40,7 +39,7 @@ const SD_JWT_VC = {
   }
 }
 
-const dcqlQuery = { // TODO we need to use this structure
+const dcqlQuery = {
   credentials: [
     {
       id: 'my_credential',
@@ -57,7 +56,9 @@ const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery)
 DcqlQuery.validate(parsedDcqlQuery)
 
 // TODO: Disabled because Credo Mdocs are invalid with undefined props in the maps/arrays
-describe.skip('mdoc RP and OP interaction should', () => {
+
+// TODO skip
+describe('mdoc RP and OP interaction should', () => {
   it('succeed when calling with DCQL query and right DCQL presentation without id token', async () => {
     const opMockEntity = await mockedGetEnterpriseAuthToken('OP')
     const rpMockEntity = await mockedGetEnterpriseAuthToken('RP')
@@ -69,7 +70,7 @@ describe.skip('mdoc RP and OP interaction should', () => {
 
     const resolver = getResolver('ethr')
     const rp = RP.builder({
-      requestVersion: SupportedVersion.SIOPv2_D12_OID4VP_D18,
+      requestVersion: SupportedVersion.SIOPv2_V1,
     })
       .withClientId(rpMockEntity.did)
       .withHasher(pexHasher)
@@ -92,7 +93,7 @@ describe.skip('mdoc RP and OP interaction should', () => {
         subject_syntax_types_supported: ['did', 'did:key'],
         passBy: PassBy.VALUE,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
       .build()
     const op = OP.builder()
       .withPresentationSignCallback(sdJwtVcPresentationSignCallback)
@@ -112,7 +113,7 @@ describe.skip('mdoc RP and OP interaction should', () => {
         subject_syntax_types_supported: [],
         passBy: PassBy.VALUE,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({

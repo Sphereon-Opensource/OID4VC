@@ -77,7 +77,7 @@ describe('create JWT from Request JWT should', () => {
     hasher: pexHasher,
     verifyJwtCallback: getVerifyJwtCallback(resolver),
     verification: {},
-    supportedVersions: [SupportedVersion.SIOPv2_ID1],
+    supportedVersions: [SupportedVersion.SIOPv2_V1],
     correlationId: '1234',
   }
 
@@ -101,7 +101,7 @@ describe('create JWT from Request JWT should', () => {
     const mockReqEntity = await mockedGetEnterpriseAuthToken('REQ COMPANY')
     const mockResEntity = await mockedGetEnterpriseAuthToken('RES COMPANY')
     const requestOpts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.SIOPv2_V1,
       /*payload: {
         nonce: '12345',
         state: '12345',
@@ -201,7 +201,7 @@ describe('create JWT from Request JWT should', () => {
         const mockResEntity = await mockedGetEnterpriseAuthToken('RES COMPANY')
 
         const requestOpts: CreateAuthorizationRequestOpts = {
-          version: SupportedVersion.SIOPv2_ID1,
+          version: SupportedVersion.SIOPv2_V1,
           requestObject: {
             passBy: PassBy.REFERENCE,
             reference_uri: 'https://my-request.com/here',
@@ -315,7 +315,7 @@ describe('create JWT from Request JWT should', () => {
     DcqlQuery.validate(parsedDcqlQuery)
 
     const requestOpts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_D12_OID4VP_D20,
+      version: SupportedVersion.SIOPv2_V1,
       requestObject: {
         passBy: PassBy.REFERENCE,
         reference_uri: 'https://my-request.com/here',
@@ -465,7 +465,7 @@ describe('create JWT from Request JWT should', () => {
     DcqlQuery.validate(parsedDcqlQuery)
 
     const requestOpts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.SIOPv2_V1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
       },

@@ -1,5 +1,7 @@
 import { parseJWT, SigningAlgo } from '@sphereon/oid4vc-common'
 import { describe, expect, it } from 'vitest'
+import { DcqlQuery } from 'dcql'
+import { internalSignature } from '../DidJwtTestUtils'
 import {
     PassBy,
     PropertyTarget,
@@ -10,8 +12,6 @@ import {
     SubjectType,
     SupportedVersion
 } from '../..'
-import { internalSignature } from '../DidJwtTestUtils'
-import { DcqlQuery } from 'dcql'
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 // const EXAMPLE_REFERENCE_URL = 'https://rp.acme.com/siop/jwts';
@@ -40,7 +40,7 @@ const rp = RP.builder()
   .withRequestByValue()
   .withRevocationVerification(RevocationVerification.NEVER)
   .withCreateJwtCallback(internalSignature(HEX_KEY, DID, KID, SigningAlgo.ES256K))
-  .withSupportedVersions([SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1])
+  .withSupportedVersions([SupportedVersion.SIOPv2_V1])
   .withClientMetadata({
     idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
     passBy: PassBy.VALUE,

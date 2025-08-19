@@ -6,7 +6,6 @@ import { assertValidRequestObjectOpts } from './Opts'
 import { assertValidRequestObjectPayload, createRequestObjectPayload } from './Payload'
 import {
   AuthorizationRequestPayload,
-  ClientIdentifierPrefix,
   JwtIssuerWithContext,
   RequestObjectJwt,
   RequestObjectPayload,
@@ -95,7 +94,7 @@ export class RequestObject {
         const did = jwtIssuer.didUrl.split('#')[0]
         this.payload.iss = this.payload.iss ?? did
         this.payload.sub = this.payload.sub ?? did
-        this.payload.client_id = `${ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER}:${this.payload.client_id ?? did}`
+        this.payload.client_id = this.payload.client_id ?? did
 
         const header = { kid: jwtIssuer.didUrl, alg: jwtIssuer.alg, typ: 'oauth-authz-req+jwt' }
         this.jwt = await this.opts.createJwtCallback(jwtIssuer, { header, payload: this.payload })

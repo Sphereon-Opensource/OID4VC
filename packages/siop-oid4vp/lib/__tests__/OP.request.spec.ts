@@ -62,7 +62,7 @@ describe('OP OPBuilder should', () => {
         .withCreateJwtCallback(internalSignature('myprivatekey', 'did:example:123', 'did:example:123#key', SigningAlgo.ES256K))
         .withVerifyJwtCallback(getVerifyJwtCallback(getResolver('ethr'), { checkLinkedDomain: 'never' }))
         .withExpiresIn(1000)
-        .withSupportedVersions([SupportedVersion.SIOPv2_ID1])
+        .withSupportedVersions([SupportedVersion.SIOPv2_V1])
         .build(),
     ).toBeInstanceOf(OP)
   })
@@ -106,7 +106,7 @@ describe('OP should', () => {
     verifyJwtCallback: getVerifyJwtCallback(resolver),
     verification: {},
     correlationId: '1234',
-    supportedVersions: [SupportedVersion.SIOPv2_ID1],
+    supportedVersions: [SupportedVersion.SIOPv2_V1],
     nonce: 'qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg',
   }
 
@@ -126,8 +126,7 @@ describe('OP should', () => {
     async () => {
       const mockEntity = await mockedGetEnterpriseAuthToken('ACME Corp')
       const requestOpts: CreateAuthorizationRequestOpts = {
-        version: SupportedVersion.SIOPv2_ID1,
-
+        version: SupportedVersion.SIOPv2_V1,
         requestObject: {
           jwtIssuer: {
             method: 'did',
@@ -139,7 +138,6 @@ describe('OP should', () => {
           },
           passBy: PassBy.REFERENCE,
           reference_uri: EXAMPLE_REFERENCE_URL,
-
           createJwtCallback: getCreateJwtCallback({
             hexPrivateKey: mockEntity.hexPrivateKey,
             did: mockEntity.did,
@@ -205,7 +203,7 @@ describe('OP should', () => {
       const rpMockEntity = await mockedGetEnterpriseAuthToken('ACME RP')
       const opMockEntity = await mockedGetEnterpriseAuthToken('ACME OP')
 
-      const requestURI = await RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      const requestURI = await RP.builder({ requestVersion: SupportedVersion.SIOPv2_V1 })
         .withClientId(WELL_KNOWN_OPENID_FEDERATION)
         .withScope('test')
         .withResponseType(ResponseType.ID_TOKEN)
@@ -247,7 +245,7 @@ describe('OP should', () => {
         })
 
       const verifiedRequest = await OP.builder()
-        .withSupportedVersions([SupportedVersion.SIOPv2_ID1])
+        .withSupportedVersions([SupportedVersion.SIOPv2_V1])
         .withExpiresIn(1000)
         .withIssuer(ResponseIss.SELF_ISSUED_V2)
         .withVerifyJwtCallback(getVerifyJwtCallback(resolver, { checkLinkedDomain: 'never' }))
@@ -275,9 +273,8 @@ describe('OP should', () => {
           'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         })
         .build()
-
         .verifyAuthorizationRequest(requestURI.encodedUri)
-      // console.log(JSON.stringify(verifiedRequest));
+
       expect(verifiedRequest.issuer).toMatch(rpMockEntity.did)
       expect(verifiedRequest.jwt).toBeDefined()
     } catch (e) {
