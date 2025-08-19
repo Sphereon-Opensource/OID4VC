@@ -27,7 +27,7 @@ export const createResponsePayload = async (
     state,
   }
 
-  if (responseOpts.dcqlResponse?.dcqlPresentation) { // TODO if required then remove?
+  if (responseOpts.dcqlResponse?.dcqlPresentation) {
     responsePayload.vp_token = DcqlPresentation.encode(responseOpts.dcqlResponse.dcqlPresentation as DcqlPresentation)
   }
 

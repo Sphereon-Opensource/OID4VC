@@ -64,7 +64,7 @@ const dcqlQuery = {
     credentials: [
         {
             id: 'my_credential',
-            format: 'ldp_vc',//'jwt_vc_json-ld',
+            format: 'ldp_vc',
             meta: {
                 type_values: [
                     ['https://www.w3.org/2018/credentials#VerifiableCredential'],

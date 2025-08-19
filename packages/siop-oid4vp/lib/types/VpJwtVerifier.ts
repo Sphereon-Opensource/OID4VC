@@ -89,7 +89,7 @@ export const getRequestObjectJwtVerifier = async (
     return getJwtVerifierWithContext(jwt, { type })
   }
 
-  if (clientIdentifierPrefix === ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER || clientIdentifierPrefix === 'did') { // did is not an official prefix but conflicts with hwo did are formatted, so added here to handle it
+  if (clientIdentifierPrefix === ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER) {
     return getDidJwtVerifier(jwt, { type })
   } else  if (clientIdentifierPrefix === ClientIdentifierPrefix.X509_SAN_DNS || clientIdentifierPrefix === ClientIdentifierPrefix.X509_HASH) {
     return getX5cVerifier(jwt, { type })

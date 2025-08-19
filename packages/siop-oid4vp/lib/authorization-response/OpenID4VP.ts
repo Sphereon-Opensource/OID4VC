@@ -46,7 +46,7 @@ export const verifyPresentations = async (
   authorizationResponse: AuthorizationResponse,
   verifyOpts: VerifyAuthorizationResponseOpts,
 ): Promise<{ dcql: VerifiedOpenID4VPSubmission }> => {
-  const dcqlQuery = DcqlQuery.parse(verifyOpts.dcqlQuery ?? JSON.parse(authorizationResponse?.authorizationRequest.payload.dcql_query)) // TODO dcql_query is now required?
+  const dcqlQuery = DcqlQuery.parse(verifyOpts.dcqlQuery ?? JSON.parse(authorizationResponse?.authorizationRequest.payload.dcql_query))
   const dcqlPresentation = extractDcqlPresentationFromDcqlVpToken(authorizationResponse.payload.vp_token as string, { hasher: verifyOpts.hasher })
 
   const wrappedPresentations = Object.values(dcqlPresentation)

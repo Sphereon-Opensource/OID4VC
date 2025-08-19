@@ -269,7 +269,6 @@ describe.skip('OID4VCI-Client using Mattr issuer should', () => {
 
     expect(authResponse).toBeDefined()
     expect(authResponse.payload).toBeDefined()
-    expect(authResponse.payload.presentation_submission).toBeDefined()
     expect(authResponse.payload.vp_token).toBeDefined()
   }
 

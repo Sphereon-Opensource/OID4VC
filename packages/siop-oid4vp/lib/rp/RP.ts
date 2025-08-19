@@ -201,7 +201,7 @@ export class RP {
       state?: string
       nonce?: string
       verification?: Verification
-      dcqlQuery?: DcqlQuery // TODO required or optional?
+      dcqlQuery?: DcqlQuery
     },
   ): Promise<VerifiedAuthorizationResponse> {
     const state = opts?.state ?? authorizationResponsePayload.state
@@ -375,7 +375,7 @@ export class RP {
       nonce?: string
       verification?: Verification
       audience?: string
-      dcqlQuery?: DcqlQuery // TODO required or optional?
+      dcqlQuery?: DcqlQuery
     },
   ): Promise<VerifyAuthorizationResponseOpts> {
     let correlationId = opts?.correlationId ?? this._verifyResponseOptions.correlationId

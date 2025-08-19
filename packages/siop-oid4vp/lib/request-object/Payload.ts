@@ -1,5 +1,5 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
-import { CreateAuthorizationRequestOpts, createPresentationDefinitionClaimsProperties } from '../authorization-request'
+import { CreateAuthorizationRequestOpts, createClaimsProperties } from '../authorization-request'
 import { createRequestRegistration } from '../authorization-request/RequestRegistration'
 import { getNonce, getState, removeNullUndefined } from '../helpers'
 import { assertValidRequestObjectOpts } from './Opts'
@@ -20,7 +20,7 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
   }*/
   const state = getState(payload.state)
   const registration = await createRequestRegistration(opts.clientMetadata, opts)
-  const claims = await createPresentationDefinitionClaimsProperties(payload.claims)
+  const claims = await createClaimsProperties(payload.claims)
 
   const metadataKey = opts.version >= SupportedVersion.SIOPv2_D11.valueOf() ? 'client_metadata' : 'registration'
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment

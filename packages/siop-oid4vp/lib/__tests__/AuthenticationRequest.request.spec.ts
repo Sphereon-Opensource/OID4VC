@@ -6,7 +6,8 @@ import { describe, expect, it } from 'vitest'
 import {
   CreateAuthorizationRequestOpts,
   PassBy,
-  RequestObject, ResponseMode,
+  RequestObject,
+  ResponseMode,
   ResponseType,
   Scope,
   SubjectIdentifierType,
@@ -520,79 +521,6 @@ describe('create Request JWT should', () => {
     expect((await RequestObject.fromOpts(opts)).getPayload()).toMatchObject(expected)
   })
 
-// TODO write a test if dcql query is not valid?
-  // it('should throw error if presentation definition object is not valid', async () => {
-  //   const opts: CreateAuthorizationRequestOpts = {
-  //     version: SupportedVersion.SIOPv2_ID1,
-  //     payload: {
-  //       client_id: 'test_client_id',
-  //       scope: 'test',
-  //       response_type: 'id_token',
-  //       redirect_uri: EXAMPLE_REDIRECT_URL,
-  //       request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-  //     },
-  //
-  //     requestObject: {
-  //       jwtIssuer: { method: 'did', didUrl: KID, alg: SigningAlgo.ES256K },
-  //       passBy: PassBy.REFERENCE,
-  //       reference_uri: EXAMPLE_REFERENCE_URL,
-  //
-  //       createJwtCallback: getCreateJwtCallback({
-  //         hexPrivateKey: HEX_KEY,
-  //         did: DID,
-  //         kid: KID,
-  //         alg: SigningAlgo.ES256K,
-  //       }),
-  //       payload: {
-  //         client_id: 'test_client_id',
-  //         scope: 'test',
-  //         response_type: 'id_token',
-  //         response_mode: ResponseMode.DIRECT_POST,
-  //         redirect_uri: EXAMPLE_REDIRECT_URL,
-  //         request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-  //         claims: {
-  //           vp_token: {
-  //             presentation_definition: {
-  //               input_descriptors: [
-  //                 {
-  //                   id: 'Ontario Health Insurance Plan',
-  //                   schema: [
-  //                     {
-  //                       uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-  //                     },
-  //                   ],
-  //                 },
-  //               ],
-  //             } as IPresentationDefinition,
-  //           },
-  //         },
-  //       },
-  //     },
-  //     clientMetadata: {
-  //       idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-  //       requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-  //       responseTypesSupported: [ResponseType.ID_TOKEN],
-  //       scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-  //       subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-  //       subjectTypesSupported: [SubjectType.PAIRWISE],
-  //       vpFormatsSupported: {
-  //         ldp_vc: {
-  //           proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
-  //         },
-  //       },
-  //
-  //       passBy: PassBy.VALUE,
-  //
-  //       logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-  //       clientName: VERIFIER_NAME_FOR_CLIENT,
-  //       'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100306',
-  //       clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-  //       'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-  //     },
-  //   }
-  //   await expect(URI.fromOpts(opts)).rejects.toThrow(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID)
-  // })
-
   it('should succeed when requesting with a valid dcql query', async () => {
     const dcqlQuery = {
       credentials: [
@@ -618,7 +546,7 @@ describe('create Request JWT should', () => {
     DcqlQuery.validate(parsedDcqlQuery)
 
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_V1, //SIOPv2_ID1
+      version: SupportedVersion.SIOPv2_ID1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'test',

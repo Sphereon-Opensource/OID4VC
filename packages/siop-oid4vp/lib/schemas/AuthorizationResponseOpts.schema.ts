@@ -2181,7 +2181,7 @@ export const AuthorizationResponseOptsSchemaObj = {
         "di_vp": {
           "$ref": "#/definitions/DiObject"
         },
-        "dc+sd-jwt": {
+        "vc+sd-jwt": {
           "$ref": "#/definitions/SdJwtObject"
         },
         "mso_mdoc": {

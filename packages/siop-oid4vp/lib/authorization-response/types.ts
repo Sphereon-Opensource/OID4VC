@@ -36,20 +36,16 @@ export interface AuthorizationResponseOpts {
   accessToken?: string
   tokenType?: string
   refreshToken?: string
-  dcqlResponse?: DcqlResponseOpts // TODO should be required???
+  dcqlResponse?: DcqlResponseOpts
   isFirstParty?: boolean
 }
-
-// export interface DcqlResponseOpts {
-//   dcqlPresentation: Record<string, Record<string, unknown> | string>
-// }
 
 export interface DcqlResponseOpts {
   dcqlPresentation: Record<string, string | Record<string, unknown> | Array<string | Record<string, unknown>>>
 }
 
 export interface DcqlQueryPayloadOpts {
-  dcql_query: string // TODO should this not be DcqlQuery?
+  dcql_query: string
 }
 
 export interface VerifiablePresentationWithSubmissionData extends VerifiablePresentationWithFormat {
@@ -79,7 +75,7 @@ export interface VerifyAuthorizationResponseOpts {
   hasher?: HasherSync
   nonce?: string // To verify the response against the supplied nonce
   state?: string // To verify the response against the supplied state
-  dcqlQuery?: DcqlQuery // TODO should this be optional? // TODO use DcqlQuery or string???
+  dcqlQuery?: DcqlQuery
   audience?: string // The audience/redirect_uri
   restrictToFormats?: Format // Further restrict to certain VC formats, not expressed in the presentation definition
   restrictToDIDMethods?: string[]

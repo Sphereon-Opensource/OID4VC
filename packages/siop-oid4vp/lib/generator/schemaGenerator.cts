@@ -137,7 +137,7 @@ const discoveryMetadataPayload = {
   skipTypeCheck: true,
 }
 
-const authorizationRequestPayloadVID1 = { // TODO remove
+const authorizationRequestPayloadVID1 = {
   path: '../types/SIOP.types.ts',
   tsconfig: 'tsconfig.json',
   type: 'AuthorizationRequestPayloadVID1', // Or <type-name> if you want to generate schema for that one type only

@@ -22,7 +22,7 @@ import { AuthorizationRequestPayload } from '../types'
 export class Dcql {
   static findValidDcqlQuery = async (authorizationRequestPayload: AuthorizationRequestPayload): Promise<DcqlQuery | undefined> => {
     const dcqlQuery: string[] = extractDataFromPath(authorizationRequestPayload ?? {}, '$..dcql_query').map((d) => d.value)
-//.claims?.vp_token
+
     if (dcqlQuery.length === 0) {
       return undefined
     }

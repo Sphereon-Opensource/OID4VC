@@ -102,7 +102,7 @@ export class OP {
       audience?: string
       issuer?: ResponseIss | string
       verification?: Verification
-      dcqlResponse?: DcqlResponseOpts // TODO should this be REQUIRED?
+      dcqlResponse?: DcqlResponseOpts
       isFirstParty?: boolean
     },
   ): Promise<AuthorizationResponseWithCorrelationId> {
@@ -258,7 +258,7 @@ export class OP {
       }
     }
 
-    const authResponseAsURI = encodeJsonAsURI(payload, { arraysWithIndex: ['presentation_submission'] }) // TODO dcql
+    const authResponseAsURI = encodeJsonAsURI(payload)
     try {
       const result = await post(responseUri, authResponseAsURI, { contentType: ContentType.FORM_URL_ENCODED, exceptionOnHttpErrorStatus: true })
       await this.emitEvent(AuthorizationEvents.ON_AUTH_RESPONSE_SENT_SUCCESS, { correlationId, subject: response })

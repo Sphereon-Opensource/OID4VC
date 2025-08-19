@@ -42,7 +42,7 @@ export interface RequestObjectPayload extends RequestCommonPayload, JWTPayload {
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
   nonce: string
   state: string
-  dcql_query: string // TODO use  DcqlQuery??? REQUIRED OR OPTIONAL?
+  dcql_query: string
 }
 
 export type RequestObjectJwt = string
@@ -69,12 +69,12 @@ export enum ClientIdentifierPrefix {
 export interface RequestCommonPayload extends JWTPayload {
   scope?: string // REQUIRED. As specified in Section 3.1.2 of [OpenID.Core].
   response_type?: ResponseType | string // REQUIRED. Constant string value id_token.
-  client_id?: string // REQUIRED. RP's identifier at the Self-Issued OP. // TODO SPEC says required?
+  client_id?: string // REQUIRED. RP's identifier at the Self-Issued OP.
   redirect_uri?: string // REQUIRED. URI to which the Self-Issued OP Response will be sent
   id_token_hint?: string // OPTIONAL. As specified in Section 3.1.2 of [OpenID.Core]. If the ID Token is encrypted for the Self-Issued OP, the sub (subject) of the signed ID Token MUST be sent as the kid (Key ID) of the JWE.
   nonce?: string
-  state?: string // TODO spec says required?
-  response_mode?: ResponseMode // TODO spec says required? // This specification introduces a new response mode post in accordance with [OAuth.Responses]. This response mode is used to request the Self-Issued OP to deliver the result of the authentication process to a certain endpoint using the HTTP POST method. The additional parameter response_mode is used to carry this value.
+  state?: string
+  response_mode?: ResponseMode // This specification introduces a new response mode post in accordance with [OAuth.Responses]. This response mode is used to request the Self-Issued OP to deliver the result of the authentication process to a certain endpoint using the HTTP POST method. The additional parameter response_mode is used to carry this value.
 }
 
 export interface AuthorizationRequestPayloadVID1 extends AuthorizationRequestCommonPayload, RequestRegistrationPayloadProperties {
@@ -87,8 +87,7 @@ export interface AuthorizationRequestPayloadV1
       RequestIdTokenPayloadProperties {
   claims?: ClaimPayloadCommon // OPTIONAL. As specified in Section 5.5 of [OpenID.Core]
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
-  // TODO check if dcql_query is required
-  dcql_query?: string // TODO SHOULD BE REQUIRED????  ALSO use DcqlQuery or string??? A JSON object containing a DCQL query as defined in Section 6. // see https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#dcql_query
+  dcql_query?: string // A JSON object containing a DCQL query as defined in Section 6. // see https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#dcql_query
   transaction_data?: string[]
   verifier_info?: RelyingPartyAttestation[]
 }
@@ -150,16 +149,13 @@ export interface IDTokenPayload extends JWTPayload {
   auth_time?: number
   nonce?: string
   _vp_token?: {
-
-    // TODO dcql
-
     /*
       This profile currently supports including only a single VP in the VP Token.
       In such cases, as defined in section 5.2 of OpenID4VP ID1, when the Self-Issued OP returns a single VP in the vp_token,
       VP Token is not an array, and a single VP is passed as a vp_token. In this case, the descriptor map would contain a simple path expression “$”.
       * It's not clear from the ID1 specs how to handle presentation submission in case of multiple VPs
     */
-    //presentation_submission: PresentationSubmission
+    dqcl_query?: string
   }
 }
 
@@ -178,7 +174,6 @@ export interface AuthorizationResponsePayload {
     | CompactSdJwtVc
     | MdocOid4vpMdocVpToken
     | EncodedDcqlQueryVpToken
-  //presentation_submission?: PresentationSubmission // TODO remove
   verifiedData?: IPresentation | AdditionalClaims
   is_first_party?: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -191,7 +186,7 @@ export interface IdTokenClaimPayload {
 }
 
 export interface VpTokenClaimPayload {
-  dcql_query?: string // TODO REQUIRED?
+  dcql_query?: string
 }
 
 export interface ClaimPayloadCommon {
@@ -377,7 +372,7 @@ interface JWT_VCDiscoveryMetadataPayload extends DiscoveryMetadataPayloadVID1 {
 
 interface DiscoveryMetadataPayloadV1Final extends DynamicRegistrationClientMetadata, DiscoveryMetadataCommonPayload {
   vp_formats_supported: Format // from oidc4vp
-  id_token_types_supported?: IdTokenType[] | IdTokenType // TODO do we still need this??
+  id_token_types_supported?: IdTokenType[] | IdTokenType
   encrypted_response_enc_values_supported?: string[] // from oidc4vp
   client_id_prefixes_supported?: string[]
 }
@@ -662,9 +657,6 @@ export const isRequestPayload = (
 
 export const isResponsePayload = (object: RequestObjectPayload | IDTokenPayload): object is IDTokenPayload => 'iss' in object && 'aud' in object
 
-//export const isVP = (object: IVerifiablePresentation | IPresentation): object is IVerifiablePresentation => 'presentation' in object
-//export const isPresentation = (object: IVerifiablePresentation | IPresentation): object is IPresentation => 'presentation_submission' in object
-
 export enum RevocationStatus {
   VALID = 'valid',
   INVALID = 'invalid',
@@ -696,7 +688,7 @@ export enum SupportedVersion {
   SIOPv2_D11 = 110,
   SIOPv2_D12_OID4VP_D18 = 180,
   SIOPv2_D12_OID4VP_D20 = 200,
-  SIOPv2_V1 = 1000, // TODO
+  SIOPv2_V1 = 1000,
   JWT_VC_PRESENTATION_PROFILE_v1 = 71,
 }
 

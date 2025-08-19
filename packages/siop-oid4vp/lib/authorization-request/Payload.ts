@@ -14,8 +14,7 @@ import {
   SupportedVersion,
 } from '../types'
 
-// TODO this can be removed??? // or renamed createClaimsProperties
-export const createPresentationDefinitionClaimsProperties = async (opts: ClaimPayloadOptsVID1): Promise<ClaimPayloadVID1 | undefined> => {
+export const createClaimsProperties = async (opts: ClaimPayloadOptsVID1): Promise<ClaimPayloadVID1 | undefined> => {
   if (!opts || !opts.vp_token) {
     return undefined
   }
@@ -42,7 +41,7 @@ export const createAuthorizationRequestPayload = async (
   const claims = opts.payload?.claims
     ? opts.version >= SupportedVersion.SIOPv2_ID1
       ? opts.payload.claims
-      : await createPresentationDefinitionClaimsProperties(opts.payload.claims)
+      : await createClaimsProperties(opts.payload.claims)
     : undefined
   const isRequestTarget = isTargetOrNoTargets(PropertyTarget.AUTHORIZATION_REQUEST, opts.requestObject.targets)
   const isRequestByValue = opts.requestObject.passBy === PassBy.VALUE

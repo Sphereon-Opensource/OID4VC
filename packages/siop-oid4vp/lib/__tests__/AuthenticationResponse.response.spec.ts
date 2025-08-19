@@ -399,7 +399,7 @@ describe('create JWT from Request JWT should', () => {
     const presentation: DcqlPresentation.Output = {}
     for (const [key, value] of Object.entries(dcqlQueryResult.credential_matches)) {
       if (value.success) {
-        presentation[key] = sdjwt.compactJwtVc//decodedPayload.payload//compactJwtVc
+        presentation[key] = sdjwt.compactJwtVc
       }
     }
 
@@ -444,7 +444,7 @@ describe('create JWT from Request JWT should', () => {
       credentials: [
         {
           id: 'Credentials',
-          format: 'ldp_vc',//'jwt_vc_json-ld',
+          format: 'ldp_vc',
           meta: {
             type_values: [
               ['https://www.w3.org/2018/credentials#VerifiableCredential'],
@@ -504,7 +504,7 @@ describe('create JWT from Request JWT should', () => {
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL,
+        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100315',
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
@@ -525,7 +525,7 @@ describe('create JWT from Request JWT should', () => {
     }
 
     const dcqlCredential = {
-      credential_format: 'ldp_vc', //'jwt_vc_json-ld',
+      credential_format: 'ldp_vc',
       claims: vc.credentialSubject as { [x: string]: Json },
       type: vc.type,
       cryptographic_holder_binding: true

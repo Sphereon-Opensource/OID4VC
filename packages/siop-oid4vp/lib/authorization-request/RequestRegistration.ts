@@ -29,20 +29,9 @@ const createRequestRegistrationPayload = async (
   assertValidRequestRegistrationOpts(opts)
 
   if (opts.passBy == PassBy.VALUE) {
-    // if (version >= SupportedVersion.SIOPv2_D11.valueOf()) {
-    //   return { client_metadata: removeNullUndefined(metadataPayload) }
-    // } else {
       return { registration: removeNullUndefined(metadataPayload) }
-    // }
   } else {
-    // if (version >= SupportedVersion.SIOPv2_D11.valueOf()) {
-    //   return {
-    //     client_metadata_uri: opts.reference_uri, // TODO check SIOP D11 spec
-    //   }
-    // } else {
-      return { registration_uri: opts.reference_uri
-      // }
-    }
+      return { registration_uri: opts.reference_uri }
   }
 }
 
