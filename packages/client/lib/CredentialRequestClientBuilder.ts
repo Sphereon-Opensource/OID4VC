@@ -2,9 +2,11 @@ import {
   AccessTokenResponse,
   CredentialIssuerMetadata,
   CredentialIssuerMetadataV1_0_13,
+  CredentialIssuerMetadataV1_0_15,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
   EndpointMetadata,
+  EndpointMetadataResultV1_0_15,
   ExperimentalSubjectIssuance,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
@@ -16,7 +18,6 @@ import { CredentialOfferClient } from './CredentialOfferClient'
 import { CredentialRequestClientBuilderV1_0_11 } from './CredentialRequestClientBuilderV1_0_11'
 import { CredentialRequestClientBuilderV1_0_13 } from './CredentialRequestClientBuilderV1_0_13'
 import { CredentialRequestClientBuilderV1_0_15 } from './CredentialRequestClientBuilderV1_0_15'
-import { CredentialIssuerMetadataV1_0_15 } from '@sphereon/oid4vci-common'
 
 type CredentialRequestClientBuilderVersionSpecific =
   CredentialRequestClientBuilderV1_0_11
@@ -53,11 +54,11 @@ export class CredentialRequestClientBuilder {
   }): CredentialRequestClientBuilder {
     const specVersion = version ?? OpenId4VCIVersion.VER_1_0_15
     let builder
-
+    const metadataV15 = metadata as EndpointMetadataResultV1_0_15
     if (specVersion >= OpenId4VCIVersion.VER_1_0_15) {
       builder = CredentialRequestClientBuilderV1_0_15.fromCredentialIssuer({
         credentialIssuer,
-        metadata,
+        metadata: metadataV15,
         version,
         credentialIdentifier,
         credentialTypes

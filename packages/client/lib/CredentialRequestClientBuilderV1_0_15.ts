@@ -4,7 +4,7 @@ import {
   CredentialOfferPayloadV1_0_15,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
-  EndpointMetadata,
+  EndpointMetadataResultV1_0_15,
   ExperimentalSubjectIssuance,
   getIssuerFromCredentialOfferPayload,
   OpenId4VCIVersion,
@@ -39,7 +39,7 @@ export class CredentialRequestClientBuilderV1_0_15 {
                                        credentialTypes
                                      }: {
     credentialIssuer: string
-    metadata?: EndpointMetadata
+    metadata?: EndpointMetadataResultV1_0_15
     version?: OpenId4VCIVersion
     credentialIdentifier?: string
     credentialConfigurationId?: string
@@ -53,8 +53,8 @@ export class CredentialRequestClientBuilderV1_0_15 {
       builder.withDeferredCredentialEndpoint(metadata.deferred_credential_endpoint)
     }
     // New in v15: Support for nonce endpoint
-    if (metadata?.nonce_endpoint) {
-      builder.withNonceEndpoint(metadata.nonce_endpoint)
+    if (metadata?.credentialIssuerMetadata?.nonce_endpoint) {
+      builder.withNonceEndpoint(metadata.credentialIssuerMetadata?.nonce_endpoint)
     }
     if (credentialIdentifier) {
       builder.withCredentialIdentifier(credentialIdentifier)
@@ -70,7 +70,7 @@ export class CredentialRequestClientBuilderV1_0_15 {
 
   public static async fromURI({ uri, metadata }: {
     uri: string;
-    metadata?: EndpointMetadata
+    metadata?: EndpointMetadataResultV1_0_15
   }): Promise<CredentialRequestClientBuilderV1_0_15> {
     const offer = await CredentialOfferClient.fromURI(uri)
     return CredentialRequestClientBuilderV1_0_15.fromCredentialOfferRequest({
@@ -85,7 +85,7 @@ export class CredentialRequestClientBuilderV1_0_15 {
     scheme?: string
     baseUrl?: string
     version?: OpenId4VCIVersion
-    metadata?: EndpointMetadata
+    metadata?: EndpointMetadataResultV1_0_15
   }): CredentialRequestClientBuilderV1_0_15 {
     const { request, metadata } = opts
     const version = opts.version ?? request.version ?? determineSpecVersionFromOffer(request.original_credential_offer)
@@ -100,8 +100,8 @@ export class CredentialRequestClientBuilderV1_0_15 {
       builder.withDeferredCredentialEndpoint(metadata.deferred_credential_endpoint)
     }
     // New in v15: Support for nonce endpoint
-    if (metadata?.nonce_endpoint) {
-      builder.withNonceEndpoint(metadata.nonce_endpoint)
+    if (metadata?.credentialIssuerMetadata?.nonce_endpoint) {
+      builder.withNonceEndpoint(metadata.credentialIssuerMetadata.nonce_endpoint)
     }
     const ids: string[] = (request.credential_offer as CredentialOfferPayloadV1_0_15).credential_configuration_ids
     // if there's only one in the offer, we pre-select it. if not, you should provide the credentialConfigurationId
@@ -117,7 +117,7 @@ export class CredentialRequestClientBuilderV1_0_15 {
                                       metadata
                                     }: {
     credentialOffer: CredentialOfferRequestWithBaseUrl
-    metadata?: EndpointMetadata
+    metadata?: EndpointMetadataResultV1_0_15
   }): CredentialRequestClientBuilderV1_0_15 {
     const builder = CredentialRequestClientBuilderV1_0_15.fromCredentialOfferRequest({
       request: credentialOffer,

@@ -471,12 +471,12 @@ export class OpenID4VCIClient {
       requestBuilder = this.credentialOffer
         ? CredentialRequestClientBuilderV1_0_15.fromCredentialOffer({
           credentialOffer: this.credentialOffer,
-          metadata: this.endpointMetadata
+          metadata: this.endpointMetadata as EndpointMetadataResultV1_0_15
         })
         : CredentialRequestClientBuilderV1_0_15.fromCredentialIssuer({
           credentialIssuer: this.getIssuer(),
           credentialTypes,
-          metadata: this.endpointMetadata,
+          metadata: this.endpointMetadata as EndpointMetadataResultV1_0_15,
           version: this.version()
         })
     }

@@ -273,14 +273,14 @@ export class OpenID4VCIClientV1_0_15 {
       logger.debug(`Nonce request error:\r\n${JSON.stringify(response.errorBody)}`)
       return Promise.reject(
         Error(
-          `Retrieving a nonce from ${this._state.endpointMetadata?.nonce_endpoint} for issuer ${this.getIssuer()} failed with error: ${response.errorBody.error}${response.errorBody.error_description ? ` - ${response.errorBody.error_description}` : ''}`
+          `Retrieving a nonce from ${this._state.endpointMetadata?.credentialIssuerMetadata?.nonce_endpoint} for issuer ${this.getIssuer()} failed with error: ${response.errorBody.error}${response.errorBody.error_description ? ` - ${response.errorBody.error_description}` : ''}`
         )
       )
     } else if (!response.successBody) {
       logger.debug(`Nonce request error. No success body`)
       return Promise.reject(
         Error(
-          `Retrieving a nonce from ${this._state.endpointMetadata?.nonce_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`
+          `Retrieving a nonce from ${this._state.endpointMetadata?.credentialIssuerMetadata?.nonce_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`
         )
       )
     }
@@ -693,7 +693,7 @@ export class OpenID4VCIClientV1_0_15 {
   }
 
   public getNonceEndpoint(): string | undefined {
-    return this.endpointMetadata?.nonce_endpoint
+    return this.endpointMetadata?.credentialIssuerMetadata?.nonce_endpoint
   }
 
   public hasNonceEndpoint(): boolean {

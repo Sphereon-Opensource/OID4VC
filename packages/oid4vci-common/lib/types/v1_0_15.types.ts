@@ -346,7 +346,6 @@ export interface EndpointMetadataResultV1_0_15 extends EndpointMetadata {
   authorizationServerType: AuthorizationServerType
   authorizationServerMetadata?: AuthorizationServerMetadata
   credentialIssuerMetadata?: Partial<AuthorizationServerMetadata> & IssuerMetadataV1_0_15
-  nonce_endpoint?: string // Added nonce endpoint support
 }
 
 export interface CredentialIssuerMetadataV1_0_15 extends CredentialIssuerMetadataOptsV1_0_15, Partial<AuthorizationServerMetadata> {
@@ -358,6 +357,7 @@ export interface CredentialIssuerMetadataV1_0_15 extends CredentialIssuerMetadat
   credential_response_encryption_enc_values_supported?: string // OPTIONAL. Array containing a list of the JWE encryption algorithms (enc values) supported.
   require_credential_response_encryption?: boolean // OPTIONAL. Boolean value specifying whether the Credential Issuer requires additional encryption on top of TLS.
   credential_identifiers_supported?: boolean // OPTIONAL. Boolean value specifying whether the Credential Issuer supports returning credential_identifiers parameter.
+  nonce_endpoint?: string // OPTIONAL. URL of the Credential Issuer's Nonce Endpoint, as defined in Section 7. This URL MUST use the https scheme and MAY contain port, path, and query parameter components. If omitted, the Credential Issuer does not support the Nonce Endpoint
 }
 
 
