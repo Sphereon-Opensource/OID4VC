@@ -83,13 +83,17 @@ export const getRequestObjectJwtVerifier = async (
   const clientIdentifierPrefix = getClientIdentifierPrefix(jwt.payload.client_id)
 
   // If a : character is not present in the Client Identifier, the Wallet MUST treat the Client Identifier as referencing a pre-registered client
-  if (!clientIdentifierPrefix || jwt.header.alg === 'none') {
+  if (
+      !clientIdentifierPrefix ||
+      jwt.header.alg === 'none' ||
+      clientIdentifierPrefix.match(/^https?/)
+  ) {
     // All validations must be done manually
     // The Verifier metadata is obtained using [RFC7591] or through out-of-band mechanisms.
     return getJwtVerifierWithContext(jwt, { type })
   }
 
-  if (clientIdentifierPrefix === ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER) {
+  if (clientIdentifierPrefix === ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER || clientIdentifierPrefix === 'did') {
     return getDidJwtVerifier(jwt, { type })
   } else  if (clientIdentifierPrefix === ClientIdentifierPrefix.X509_SAN_DNS || clientIdentifierPrefix === ClientIdentifierPrefix.X509_HASH) {
     return getX5cVerifier(jwt, { type })

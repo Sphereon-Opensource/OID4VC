@@ -38,6 +38,24 @@ const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery)
 DcqlQuery.validate(parsedDcqlQuery)
 
 describe('requestObjectJwtVerifier', () => {
+  it('should throw when an invalid schema is passed', async () => {
+      expect(
+          getRequestObjectJwtVerifier(
+              {
+                  header: {},
+                  payload: {
+                      ...baseJwtPayload,
+                      client_id: `wrong:${baseJwtPayload.client_id}`,
+                      client_metadata: {
+                          passBy: PassBy.REFERENCE
+                      },
+                  },
+              },
+              { raw: '' },
+          ),
+      ).rejects.toThrow(SIOPErrors.INVALID_CLIENT_ID_SCHEME)
+  })
+
   it('should succeed with a client_id_scheme did', async () => {
     const jwtVerifier = await getRequestObjectJwtVerifier(
       {
