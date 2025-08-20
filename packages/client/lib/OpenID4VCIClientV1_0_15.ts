@@ -11,7 +11,8 @@ import {
   AuthorizationServerOpts,
   AuthzFlowType,
   CodeChallengeMethod,
-  CredentialConfigurationSupportedV1_0_15, CredentialOfferPayloadV1_0_15,
+  CredentialConfigurationSupportedV1_0_15,
+  CredentialOfferPayloadV1_0_15,
   CredentialOfferRequestWithBaseUrl,
   CredentialResponseV1_0_15,
   DefaultURISchemes,
@@ -22,9 +23,7 @@ import {
   getIssuerFromCredentialOfferPayload,
   getSupportedCredentials,
   KID_JWK_X5C_ERROR,
-  NonceRequestV1_0_15,
-  NonceResponseV1_0_15,
-  NotificationRequestV1_0_15,
+  NotificationRequest,
   NotificationResponseResult,
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
@@ -42,6 +41,7 @@ import { CredentialRequestOpts } from './CredentialRequestClient'
 import { MetadataClientV1_0_15 } from './MetadataClientV1_0_15'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
 import { generateMissingPKCEOpts, sendNotification } from './functions'
+import { acquireNonceFromAuthorizationServer } from './NonceClient'
 
 const logger = Loggers.DEFAULT.get('sphereon:oid4vci:v15')
 
@@ -263,27 +263,30 @@ export class OpenID4VCIClientV1_0_15 {
     return this.endpointMetadata
   }
 
-  // New in v15: Nonce endpoint support
   public async acquireNonce(): Promise<string> {
-    if (!this.endpointMetadata?.nonce_endpoint) {
-      throw Error('Nonce endpoint not available')
-    }
-
-    const response = await fetch(this.endpointMetadata.nonce_endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({} as NonceRequestV1_0_15)
+    const response = await acquireNonceFromAuthorizationServer({
+      metadata: this.endpointMetadata,
+      issuerOpts: { issuer: this.getIssuer(), fetchMetadata: false }
     })
 
-    if (!response.ok) {
-      throw Error(`Failed to acquire nonce: ${response.status}`)
+    if (response.errorBody) {
+      logger.debug(`Nonce request error:\r\n${JSON.stringify(response.errorBody)}`)
+      return Promise.reject(
+        Error(
+          `Retrieving a nonce from ${this._state.endpointMetadata?.nonce_endpoint} for issuer ${this.getIssuer()} failed with error: ${response.errorBody.error}${response.errorBody.error_description ? ` - ${response.errorBody.error_description}` : ''}`
+        )
+      )
+    } else if (!response.successBody) {
+      logger.debug(`Nonce request error. No success body`)
+      return Promise.reject(
+        Error(
+          `Retrieving a nonce from ${this._state.endpointMetadata?.nonce_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`
+        )
+      )
     }
 
-    const nonceResponse: NonceResponseV1_0_15 = await response.json()
-    this._state.cachedCNonce = nonceResponse.c_nonce
-    return nonceResponse.c_nonce
+    this._state.cachedCNonce = response.successBody.c_nonce
+    return response.successBody.c_nonce
   }
 
   private calculatePKCEOpts(pkce?: PKCEOpts) {
@@ -585,7 +588,7 @@ export class OpenID4VCIClientV1_0_15 {
 
   public async sendNotification(
     credentialRequestOpts: Partial<CredentialRequestOpts>,
-    request: NotificationRequestV1_0_15,
+    request: NotificationRequest,
     accessToken?: string
   ): Promise<NotificationResponseResult> {
     return sendNotification(credentialRequestOpts, request, accessToken ?? this._state.accessToken ?? this._state.accessTokenResponse?.access_token)

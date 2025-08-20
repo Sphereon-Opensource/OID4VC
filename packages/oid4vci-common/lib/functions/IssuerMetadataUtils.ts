@@ -42,11 +42,14 @@ export function getSupportedCredentials(opts?: {
 
 export function determineVersionsFromIssuerMetadata(issuerMetadata: CredentialIssuerMetadata | IssuerMetadata): Array<OpenId4VCIVersion> {
   const versions = new Set<OpenId4VCIVersion>()
-  if ('authorization_server' in issuerMetadata) {
+  if ('credential_configurations_supported' in issuerMetadata) {
+    versions.add(OpenId4VCIVersion.VER_1_0_15)
+  } else if ('authorization_server' in issuerMetadata) {
     versions.add(OpenId4VCIVersion.VER_1_0_11)
   } else if ('authorization_servers' in issuerMetadata) {
     versions.add(OpenId4VCIVersion.VER_1_0_13)
   }
+
   if (versions.size === 0) {
     // The above checks where already very specific and only applicable to single versions we support, so let's skip if we encounter them
     if ('credential_configurations_supported' in issuerMetadata) {

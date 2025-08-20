@@ -56,7 +56,7 @@ import { OpenID4VCIClientStateV1_0_11 } from './OpenID4VCIClientV1_0_11'
 import { OpenID4VCIClientStateV1_0_13 } from './OpenID4VCIClientV1_0_13'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
 import { generateMissingPKCEOpts, sendNotification } from './functions'
-import { OpenID4VCIClientStateV1_0_15 } from './OpenID4VCIClientV1_0_15'
+import { OpenID4VCIClientStateV1_0_15, OpenID4VCIClientV1_0_15 } from './OpenID4VCIClientV1_0_15'
 
 const logger = Loggers.DEFAULT.get('sphereon:oid4vci')
 
@@ -432,6 +432,19 @@ export class OpenID4VCIClient {
     if (jwk) this._state.jwk = jwk
     if (kid) this._state.kid = kid
 
+    try {
+      if (this.version() === OpenId4VCIVersion.VER_1_0_15 || this.hasNonceEndpoint()) {
+        if (!(this._state as OpenID4VCIClientStateV1_0_15).cachedCNonce) {
+          await this.acquireNonceViaV15Delegate()
+        }
+      }
+    } catch (e) {
+      // strict only when v15 or server claims nonce support
+      if (this.version() === OpenId4VCIVersion.VER_1_0_15 || this.hasNonceEndpoint()) {
+        return Promise.reject(Error(`failed to acquire nonce: ${String(e)}`))
+      }
+    }
+
     let requestBuilder: CredentialRequestClientBuilderV1_0_15 | CredentialRequestClientBuilderV1_0_13 | CredentialRequestClientBuilderV1_0_11
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
       requestBuilder = this.credentialOffer
@@ -508,52 +521,98 @@ export class OpenID4VCIClient {
     }
 
     const credentialRequestClient = requestBuilder.build()
-    const proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse({
-      accessTokenResponse: this.accessTokenResponse,
-      callbacks: proofCallbacks,
-      version: this.version(),
-    })
-      .withIssuer(this.getIssuer())
-      .withAlg(this.alg)
 
-    if (this._state.jwk) {
-      proofBuilder.withJWK(this._state.jwk)
-    }
-    if (this._state.kid) {
-      proofBuilder.withKid(this._state.kid)
-    }
+    try {
+      {
+        const proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse({
+          accessTokenResponse: this.accessTokenResponse,
+          callbacks: proofCallbacks,
+          version: this.version(),
+        })
+        if (this.clientId) {
+          proofBuilder.withClientId(this.clientId)
+        }
+        if (jti) {
+          proofBuilder.withJti(jti)
+        }
 
-    if (this.clientId) {
-      proofBuilder.withClientId(this.clientId)
+        const response = await credentialRequestClient.acquireCredentialsUsingProof({
+          proofInput: proofBuilder,
+          credentialTypes,
+          context,
+          format,
+          subjectIssuance,
+          createDPoPOpts,
+        })
+
+        this._state.dpopResponseParams = response.params
+        if (response.errorBody) {
+          logger.debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`)
+          throw Error(
+            `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}`
+          )
+        } else if (!response.successBody) {
+          logger.debug(`Credential request error. No success body`)
+          throw Error(
+            `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`
+          )
+        }
+        return { ...response.successBody, ...(this.dpopResponseParams && { params: this.dpopResponseParams }), access_token: response.access_token }
+      }
+    } catch (e) {
+      if (!this.shouldRetryWithFreshNonce(e)) {
+        return Promise.reject(e instanceof Error ? e : Error(String(e)))
+      }
+
+      // one retry with fresh nonce + rebuilt proof
+      (this._state as OpenID4VCIClientStateV1_0_15).cachedCNonce = undefined
+
+      try {
+        await this.acquireNonceViaV15Delegate()
+      } catch (e2) {
+        return Promise.reject(Error(`retry nonce fetch failed: ${String(e2)}`))
+      }
+
+      // rebuild proof using the fresh nonce and resend
+      const proofBuilder2 = ProofOfPossessionBuilder.fromAccessTokenResponse({
+        accessTokenResponse: this.accessTokenResponse,
+        callbacks: proofCallbacks,
+        version: this.version(),
+      })
+      if (this.clientId) {
+        proofBuilder2.withClientId(this.clientId)
+      }
+      if (jti) {
+        proofBuilder2.withJti(jti)
+      }
+
+      const response2 = await credentialRequestClient.acquireCredentialsUsingProof({
+        proofInput: proofBuilder2,
+        credentialTypes,
+        context,
+        format,
+        subjectIssuance,
+        createDPoPOpts,
+      })
+
+      this._state.dpopResponseParams = response2.params
+      if (response2.errorBody) {
+        logger.debug(`Credential request error (after retry):\r\n${JSON.stringify(response2.errorBody)}`)
+        return Promise.reject(
+          Error(
+            `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed after retry with status: ${response2.origResponse.status}`
+          )
+        )
+      } else if (!response2.successBody) {
+        logger.debug(`Credential request error after retry. No success body`)
+        return Promise.reject(
+          Error(
+            `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed after retry as there was no success response body`
+          )
+        )
+      }
+      return { ...response2.successBody, ...(this.dpopResponseParams && { params: this.dpopResponseParams }), access_token: response2.access_token }
     }
-    if (jti) {
-      proofBuilder.withJti(jti)
-    }
-    const response = await credentialRequestClient.acquireCredentialsUsingProof({
-      proofInput: proofBuilder,
-      credentialTypes,
-      context,
-      format,
-      subjectIssuance,
-      createDPoPOpts,
-    })
-    this._state.dpopResponseParams = response.params
-    if (response.errorBody) {
-      logger.debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`)
-      throw Error(
-        `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${
-          response.origResponse.status
-        }`,
-      )
-    } else if (!response.successBody) {
-      logger.debug(`Credential request error. No success body`)
-      throw Error(
-        `Retrieving a credential from ${
-          this._state.endpointMetadata?.credential_endpoint
-        } for issuer ${this.getIssuer()} failed as there was no success response body`,
-      )
-    }
-    return { ...response.successBody, ...(this.dpopResponseParams && { params: this.dpopResponseParams }), access_token: response.access_token }
   }
 
   public async exportState(): Promise<string> {
@@ -797,4 +856,67 @@ export class OpenID4VCIClient {
       (this._state.authorizationCodeResponse as AuthorizationChallengeCodeResponse)?.authorization_code
     )
   }
+
+  private hasNonceEndpoint(): boolean {
+    const as = this._state.endpointMetadata?.authorizationServerMetadata
+    if (!as) {
+      return false
+    }
+    const endpoint = (as as any).nonce_endpoint
+    return typeof endpoint === 'string' && endpoint.length > 0
+  }
+
+
+  private async acquireNonceViaV15Delegate(): Promise<void> {
+    let v15
+    try {
+      v15 = await OpenID4VCIClientV1_0_15.fromState({ state: JSON.stringify(this._state) }) // TODO find cleaner way to do this
+    } catch (e) {
+      return Promise.reject(Error(`failed to init v15 delegate for nonce: ${String(e)}`))
+    }
+    try {
+      await v15.acquireNonce()
+    } catch (e) {
+      return Promise.reject(Error(`nonce request failed: ${String(e)}`))
+    }
+    (this._state as OpenID4VCIClientStateV1_0_15).cachedCNonce = v15.state.cachedCNonce
+  }
+
+  private shouldRetryWithFreshNonce(err: unknown): boolean {
+    // Only consider retrying if the server actually supports nonce
+    if (!this.hasNonceEndpoint() && this.version() !== OpenId4VCIVersion.VER_1_0_15) {
+      return false
+    }
+
+    const status =
+      (err as any)?.response?.status ??
+      (err as any)?.status
+
+    const body =
+      (err as any)?.response?.data ??
+      (err as any)?.data ??
+      undefined
+
+    const error = typeof body?.error === 'string' ? body.error : undefined
+    const desc = typeof body?.error_description === 'string' ? body.error_description : undefined
+    const text = [error, desc].filter(Boolean).join(' ').toLowerCase()
+
+    // Strong hints the nonce/proof is the issue
+    if (status === 400 || status === 401 || status === 403) {
+      // Common signals to treat as nonce/proof freshness problems
+      if (text.includes('nonce') || text.includes('c_nonce')) {
+        return true
+      }
+      if (text.includes('proof') && (text.includes('invalid') || text.includes('expired'))) {
+        return true
+      }
+      // Some issuers use generic messages but still accept a fresh nonce on retry
+      if (error === 'invalid_proof' || error === 'invalid_request') {
+        return true
+      }
+    }
+
+    return false
+  }
+
 }

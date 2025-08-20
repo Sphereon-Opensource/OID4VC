@@ -360,12 +360,6 @@ export interface CredentialIssuerMetadataV1_0_15 extends CredentialIssuerMetadat
   credential_identifiers_supported?: boolean // OPTIONAL. Boolean value specifying whether the Credential Issuer supports returning credential_identifiers parameter.
 }
 
-// Notification types for v15 - notification_id is now used for an issuance flow that can contain more than one credential
-export interface NotificationRequestV1_0_15 {
-  notification_id: string // REQUIRED. String received in the Credential Response or Deferred Credential Response identifying an issuance flow that contained one or more Credentials with the same Credential Configuration and Credential Dataset.
-  event: 'credential_accepted' | 'credential_failure' | 'credential_deleted' // REQUIRED. Type of the notification event.
-  event_description?: string // OPTIONAL. Human-readable ASCII text providing additional information about the event.
-}
 
 export interface NotificationResponseV1_0_15 {
   // Success responses typically return 204 No Content - When the Credential Issuer has successfully received the Notification Request from the Wallet, it MUST respond with an HTTP status code in the 2xx range.
