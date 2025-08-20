@@ -35,76 +35,56 @@ export class Dcql {
   }
 
   static getDcqlPresentationResult = (
-    record: DcqlPresentation | string,
-    dcqlQuery: DcqlQuery,
-    opts: {
-      hasher?: HasherSync
-    },
+      record: DcqlPresentation | string,
+      dcqlQuery: DcqlQuery,
+      opts: {
+        hasher?: HasherSync
+      },
   ) => {
     const dcqlPresentation = Object.fromEntries(
-      Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
-        switch (p.format) {
-          case 'mso_mdoc':
-            return [queryId, {
-                credential_format: p.format,
-                doctype: p.vcs[0].credential.toJson().docType,
-                namespaces: p.vcs[0].decoded,
-                cryptographic_holder_binding: hasCryptographicHolderBinding(p.format, p.vcs[0])
-              } satisfies DcqlMdocCredential
-            ]
-          case 'vc+sd-jwt':
-            return [queryId, {
-                credential_format: 'dc+sd-jwt',
-                vct: p.vcs[0].decoded.vct,
-                claims: p.vcs[0].decoded,
-                cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', p.vcs[0])
-              } satisfies DcqlSdJwtVcCredential
-            ]
-          case 'jwt_vp':
-            return [queryId, {
-              credential_format: 'jwt_vc_json',
-              claims: p.vcs[0].decoded,
-              cryptographic_holder_binding: hasCryptographicHolderBinding('jwt_vc_json', p.vcs[0]),
-              type: p.vcs[0].credential.type
-            } satisfies DcqlW3cVcCredential
-            ]
-          case 'ldp_vp':
-            return [queryId, {
-              credential_format: 'ldp_vc',
-              claims: p.vcs[0].decoded,
-              cryptographic_holder_binding: hasCryptographicHolderBinding('ldp_vc', p.vcs[0]),
-              type: p.vcs[0].credential.type
-            } satisfies DcqlW3cVcCredential
-            ]
-          default:
-            const format: string = (p as any).format;
-            throw new Error(`Unknown DcqlPresentation format ${format}`)
-        }
+        Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
+          const credentials = p.vcs.map(vc => {
+            switch (p.format) {
+              case 'mso_mdoc':
+                return {
+                  credential_format: p.format,
+                  doctype: vc.credential.toJson().docType,
+                  namespaces: vc.decoded,
+                  cryptographic_holder_binding: hasCryptographicHolderBinding(p.format, vc),
+                } satisfies DcqlMdocCredential
 
-        // if (p.format === 'mso_mdoc') {
-        //   return [
-        //     queryId,
-        //     {
-        //       credential_format: 'mso_mdoc',
-        //       doctype: p.vcs[0].credential.toJson().docType,
-        //       namespaces: p.vcs[0].decoded,
-        //       cryptographic_holder_binding: true, // TODO
-        //     } satisfies DcqlMdocCredential,
-        //   ]
-        // } else if (p.format === 'dc+sd-jwt') {
-        //   return [
-        //     queryId,
-        //     {
-        //       credential_format: 'dc+sd-jwt',
-        //       vct: p.vcs[0].decoded.vct,
-        //       claims: p.vcs[0].decoded,
-        //       cryptographic_holder_binding: true, // TODO
-        //     } satisfies DcqlSdJwtVcCredential,
-        //   ]
-        // } else {
-        //   throw new Error('DcqlPresentation atm only supports mso_mdoc and dc+sd-jwt')
-        // }
-      }),
+              case 'vc+sd-jwt':
+                return {
+                  credential_format: 'dc+sd-jwt',
+                  vct: vc.decoded.vct,
+                  claims: vc.decoded,
+                  cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', vc),
+                } satisfies DcqlSdJwtVcCredential
+
+              case 'jwt_vp':
+                return {
+                  credential_format: 'jwt_vc_json',
+                  claims: vc.decoded,
+                  cryptographic_holder_binding: hasCryptographicHolderBinding('jwt_vc_json', vc),
+                  type: vc.credential.type,
+                } satisfies DcqlW3cVcCredential
+
+              case 'ldp_vp':
+                return {
+                  credential_format: 'ldp_vc',
+                  claims: vc.decoded,
+                  cryptographic_holder_binding: hasCryptographicHolderBinding('ldp_vc', vc),
+                  type: vc.credential.type,
+                } satisfies DcqlW3cVcCredential
+
+              default:
+                const format: string = (p as any).format;
+                throw new Error(`Unknown DcqlPresentation format ${format}`)
+            }
+          })
+
+          return [queryId, credentials]
+        })
     )
 
     return DcqlPresentationResult.fromDcqlPresentation(dcqlPresentation, { dcqlQuery })
