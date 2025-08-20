@@ -60,29 +60,35 @@ import { OpenID4VCIClientStateV1_0_15, OpenID4VCIClientV1_0_15 } from './OpenID4
 
 const logger = Loggers.DEFAULT.get('sphereon:oid4vci')
 
-export type OpenID4VCIClientState = OpenID4VCIClientStateV1_0_11 | OpenID4VCIClientStateV1_0_13 | OpenID4VCIClientStateV1_0_15
+export type OpenID4VCIClientState =
+  OpenID4VCIClientStateV1_0_11
+  | OpenID4VCIClientStateV1_0_13
+  | OpenID4VCIClientStateV1_0_15
 
-export type EndpointMetadataResult = EndpointMetadataResultV1_0_11 | EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_15
+export type EndpointMetadataResult =
+  EndpointMetadataResultV1_0_11
+  | EndpointMetadataResultV1_0_13
+  | EndpointMetadataResultV1_0_15
 
 export class OpenID4VCIClient {
   private readonly _state: OpenID4VCIClientState
 
   private constructor({
-    credentialOffer,
-    clientId,
-    kid,
-    alg,
-    credentialIssuer,
-    pkce,
-    authorizationRequest,
-    accessToken,
-    jwk,
-    endpointMetadata,
-    accessTokenResponse,
-    authorizationRequestOpts,
-    authorizationCodeResponse,
-    authorizationURL,
-  }: {
+                        credentialOffer,
+                        clientId,
+                        kid,
+                        alg,
+                        credentialIssuer,
+                        pkce,
+                        authorizationRequest,
+                        accessToken,
+                        jwk,
+                        endpointMetadata,
+                        accessTokenResponse,
+                        authorizationRequestOpts,
+                        authorizationCodeResponse,
+                        authorizationURL
+                      }: {
     credentialOffer?: CredentialOfferRequestWithBaseUrl
     kid?: string
     alg?: Alg | string
@@ -118,7 +124,7 @@ export class OpenID4VCIClient {
         ? (endpointMetadata as EndpointMetadataResultV1_0_11)
         : (endpointMetadata as EndpointMetadataResultV1_0_15 | undefined),
       accessTokenResponse,
-      authorizationURL,
+      authorizationURL
     } as OpenID4VCIClientState
     // Running syncAuthorizationRequestOpts later as it is using the state
     if (!this._state.authorizationRequestOpts) {
@@ -128,16 +134,16 @@ export class OpenID4VCIClient {
   }
 
   public static async fromCredentialIssuer({
-    kid,
-    alg,
-    retrieveServerMetadata,
-    clientId,
-    credentialIssuer,
-    pkce,
-    authorizationRequest,
-    createAuthorizationRequestURL,
-    endpointMetadata,
-  }: {
+                                             kid,
+                                             alg,
+                                             retrieveServerMetadata,
+                                             clientId,
+                                             credentialIssuer,
+                                             pkce,
+                                             authorizationRequest,
+                                             createAuthorizationRequestURL,
+                                             endpointMetadata
+                                           }: {
     credentialIssuer: string
     kid?: string
     alg?: Alg | string
@@ -155,7 +161,7 @@ export class OpenID4VCIClient {
       credentialIssuer,
       pkce,
       authorizationRequest,
-      endpointMetadata,
+      endpointMetadata
     })
     if (retrieveServerMetadata === undefined || retrieveServerMetadata) {
       await client.retrieveServerMetadata()
@@ -173,17 +179,17 @@ export class OpenID4VCIClient {
   }
 
   public static async fromURI({
-    uri,
-    kid,
-    alg,
-    retrieveServerMetadata,
-    clientId,
-    pkce,
-    createAuthorizationRequestURL,
-    authorizationRequest,
-    resolveOfferUri,
-    endpointMetadata,
-  }: {
+                                uri,
+                                kid,
+                                alg,
+                                retrieveServerMetadata,
+                                clientId,
+                                pkce,
+                                createAuthorizationRequestURL,
+                                authorizationRequest,
+                                resolveOfferUri,
+                                endpointMetadata
+                              }: {
     uri: string
     kid?: string
     alg?: Alg | string
@@ -203,7 +209,7 @@ export class OpenID4VCIClient {
       clientId: clientId ?? authorizationRequest?.clientId ?? credentialOfferClient.clientId,
       pkce,
       authorizationRequest,
-      endpointMetadata,
+      endpointMetadata
     })
 
     if (retrieveServerMetadata === undefined || retrieveServerMetadata) {
@@ -226,7 +232,10 @@ export class OpenID4VCIClient {
    * The Identity provider would present a login screen typically; after you authenticated, it would redirect to the provided redirectUri; which can be same device or cross-device
    * @param opts
    */
-  public async createAuthorizationRequestUrl(opts?: { authorizationRequest?: AuthorizationRequestOpts; pkce?: PKCEOpts }): Promise<string> {
+  public async createAuthorizationRequestUrl(opts?: {
+    authorizationRequest?: AuthorizationRequestOpts;
+    pkce?: PKCEOpts
+  }): Promise<string> {
     if (!this._state.authorizationURL) {
       this.calculatePKCEOpts(opts?.pkce)
       this._state.authorizationRequestOpts = this.syncAuthorizationRequestOpts(opts?.authorizationRequest)
@@ -248,7 +257,7 @@ export class OpenID4VCIClient {
           endpointMetadata: this.endpointMetadata as EndpointMetadataResultV1_0_11,
           authorizationRequest: this._state.authorizationRequestOpts,
           credentialOffer: this.credentialOffer,
-          credentialsSupported: Object.values(this.getCredentialsSupported(true)) as CredentialsSupportedLegacy[],
+          credentialsSupported: Object.values(this.getCredentialsSupported(true)) as CredentialsSupportedLegacy[]
         })
       } else {
         this._state.authorizationURL = await createAuthorizationRequestUrl({
@@ -256,7 +265,7 @@ export class OpenID4VCIClient {
           endpointMetadata: this.endpointMetadata as EndpointMetadataResultV1_0_15,
           authorizationRequest: this._state.authorizationRequestOpts,
           credentialOffer: this.credentialOffer,
-          credentialConfigurationSupported: this.getCredentialsSupported(false) as Record<string, CredentialConfigurationSupportedV1_0_15>,
+          credentialConfigurationSupported: this.getCredentialsSupported(false) as Record<string, CredentialConfigurationSupportedV1_0_15>
         })
       }
     }
@@ -287,7 +296,7 @@ export class OpenID4VCIClient {
       metadata: this.endpointMetadata,
       credentialIssuer: this.getIssuer(),
       clientId: this._state.clientId ?? this._state.authorizationRequestOpts?.clientId,
-      ...opts,
+      ...opts
     })
 
     if (response.errorBody) {
@@ -298,8 +307,8 @@ export class OpenID4VCIClient {
       logger.debug(`Authorization code error. No success body`)
       return Promise.reject(
         Error(
-          `Retrieving an authorization code token from ${this._state.endpointMetadata?.authorization_challenge_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`,
-        ),
+          `Retrieving an authorization code token from ${this._state.endpointMetadata?.authorization_challenge_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`
+        )
       )
     }
 
@@ -311,7 +320,7 @@ export class OpenID4VCIClient {
       clientId?: string
       authorizationResponse?: string | AuthorizationResponse | AuthorizationChallengeCodeResponse // Pass in an auth response, either as URI/redirect, or object
       additionalRequestParams?: Record<string, any>
-    },
+    }
   ): Promise<AccessTokenResponse & { params?: DPoPResponseParams }> {
     const { pin, clientId = this._state.clientId ?? this._state.authorizationRequestOpts?.clientId } = opts ?? {}
     let { redirectUri } = opts ?? {}
@@ -339,7 +348,7 @@ export class OpenID4VCIClient {
         clientId,
         ...(kid && { kid }),
         ...(clientAssertionType && { clientAssertionType }),
-        signCallbacks: asOpts.clientOpts?.signCallbacks ?? this._state.authorizationRequestOpts?.requestObjectOpts?.signCallbacks,
+        signCallbacks: asOpts.clientOpts?.signCallbacks ?? this._state.authorizationRequestOpts?.requestObjectOpts?.signCallbacks
       }
     }
 
@@ -355,7 +364,7 @@ export class OpenID4VCIClient {
 
       if (redirectUri && redirectUri !== this._state.authorizationRequestOpts?.redirectUri) {
         console.log(
-          `Redirect URI mismatch between access-token (${redirectUri}) and authorization request (${this._state.authorizationRequestOpts?.redirectUri}). According to the specification that is not allowed.`,
+          `Redirect URI mismatch between access-token (${redirectUri}) and authorization request (${this._state.authorizationRequestOpts?.redirectUri}). According to the specification that is not allowed.`
         )
       }
       if (this._state.authorizationRequestOpts?.redirectUri && !redirectUri) {
@@ -372,7 +381,7 @@ export class OpenID4VCIClient {
         redirectUri,
         asOpts,
         ...(opts?.createDPoPOpts && { createDPoPOpts: opts.createDPoPOpts }),
-        ...(opts?.additionalRequestParams && { additionalParams: opts.additionalRequestParams }),
+        ...(opts?.additionalRequestParams && { additionalParams: opts.additionalRequestParams })
       })
 
       if (response.errorBody) {
@@ -380,14 +389,14 @@ export class OpenID4VCIClient {
         throw Error(
           `Retrieving an access token from ${this._state.endpointMetadata?.token_endpoint} for issuer ${this.getIssuer()} failed with status: ${
             response.origResponse.status
-          }`,
+          }`
         )
       } else if (!response.successBody) {
         logger.debug(`Access token error. No success body`)
         throw Error(
           `Retrieving an access token from ${
             this._state.endpointMetadata?.token_endpoint
-          } for issuer ${this.getIssuer()} failed as there was no success response body`,
+          } for issuer ${this.getIssuer()} failed as there was no success response body`
         )
       }
       this._state.accessTokenResponse = response.successBody
@@ -399,18 +408,18 @@ export class OpenID4VCIClient {
   }
 
   public async acquireCredentials({
-    credentialTypes,
-    context,
-    proofCallbacks,
-    format,
-    kid,
-    jwk,
-    alg,
-    jti,
-    deferredCredentialAwait,
-    deferredCredentialIntervalInMS,
-    createDPoPOpts,
-  }: {
+                                    credentialTypes,
+                                    context,
+                                    proofCallbacks,
+                                    format,
+                                    kid,
+                                    jwk,
+                                    alg,
+                                    jti,
+                                    deferredCredentialAwait,
+                                    deferredCredentialIntervalInMS,
+                                    createDPoPOpts
+                                  }: {
     credentialTypes: string | string[]
     context?: string[]
     proofCallbacks: ProofOfPossessionCallbacks
@@ -449,27 +458,27 @@ export class OpenID4VCIClient {
     if (this.version() < OpenId4VCIVersion.VER_1_0_13) {
       requestBuilder = this.credentialOffer
         ? CredentialRequestClientBuilderV1_0_11.fromCredentialOffer({
-            credentialOffer: this.credentialOffer,
-            metadata: this.endpointMetadata,
-          })
+          credentialOffer: this.credentialOffer,
+          metadata: this.endpointMetadata
+        })
         : CredentialRequestClientBuilderV1_0_11.fromCredentialIssuer({
-            credentialIssuer: this.getIssuer(),
-            credentialTypes,
-            metadata: this.endpointMetadata,
-            version: this.version(),
-          })
+          credentialIssuer: this.getIssuer(),
+          credentialTypes,
+          metadata: this.endpointMetadata,
+          version: this.version()
+        })
     } else {
       requestBuilder = this.credentialOffer
         ? CredentialRequestClientBuilderV1_0_15.fromCredentialOffer({
-            credentialOffer: this.credentialOffer,
-            metadata: this.endpointMetadata,
-          })
+          credentialOffer: this.credentialOffer,
+          metadata: this.endpointMetadata
+        })
         : CredentialRequestClientBuilderV1_0_15.fromCredentialIssuer({
-            credentialIssuer: this.getIssuer(),
-            credentialTypes,
-            metadata: this.endpointMetadata,
-            version: this.version(),
-          })
+          credentialIssuer: this.getIssuer(),
+          credentialTypes,
+          metadata: this.endpointMetadata,
+          version: this.version()
+        })
     }
     // If we are in an auth code flow, without a c nonce, we return the issuerState back to the issuer in case it is present
     const issuerState =
@@ -523,41 +532,52 @@ export class OpenID4VCIClient {
     const credentialRequestClient = requestBuilder.build()
 
     try {
-      {
-        const proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse({
-          accessTokenResponse: this.accessTokenResponse,
-          callbacks: proofCallbacks,
-          version: this.version(),
-        })
-        if (this.clientId) {
-          proofBuilder.withClientId(this.clientId)
-        }
-        if (jti) {
-          proofBuilder.withJti(jti)
-        }
+      const proofBuilder = ProofOfPossessionBuilder.fromAccessTokenResponse({
+        accessTokenResponse: this.accessTokenResponse,
+        callbacks: proofCallbacks,
+        version: this.version()
+      })
+        .withIssuer(this.getIssuer())
+        .withAlg(this.alg)
 
-        const response = await credentialRequestClient.acquireCredentialsUsingProof({
-          proofInput: proofBuilder,
-          credentialTypes,
-          context,
-          format,
-          subjectIssuance,
-          createDPoPOpts,
-        })
+      if (this._state.jwk) {
+        proofBuilder.withJWK(this._state.jwk)
+      }
+      if (this._state.kid) {
+        proofBuilder.withKid(this._state.kid)
+      }
 
-        this._state.dpopResponseParams = response.params
-        if (response.errorBody) {
-          logger.debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`)
-          throw Error(
-            `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}`
-          )
-        } else if (!response.successBody) {
-          logger.debug(`Credential request error. No success body`)
-          throw Error(
-            `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`
-          )
-        }
-        return { ...response.successBody, ...(this.dpopResponseParams && { params: this.dpopResponseParams }), access_token: response.access_token }
+      if (this.clientId) {
+        proofBuilder.withClientId(this.clientId)
+      }
+      if (jti) {
+        proofBuilder.withJti(jti)
+      }
+
+      const response = await credentialRequestClient.acquireCredentialsUsingProof({
+        proofInput: proofBuilder,
+        credentialTypes,
+        context,
+        format,
+        subjectIssuance,
+        createDPoPOpts
+      })
+
+      this._state.dpopResponseParams = response.params
+      if (response.errorBody) {
+        logger.debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`)
+        throw Error(
+          `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}`
+        )
+      } else if (!response.successBody) {
+        logger.debug(`Credential request error. No success body`)
+        throw Error(
+          `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed as there was no success response body`
+        )
+      }
+      return {
+        ...response.successBody, ...(this.dpopResponseParams && { params: this.dpopResponseParams }),
+        access_token: response.access_token
       }
     } catch (e) {
       if (!this.shouldRetryWithFreshNonce(e)) {
@@ -577,8 +597,18 @@ export class OpenID4VCIClient {
       const proofBuilder2 = ProofOfPossessionBuilder.fromAccessTokenResponse({
         accessTokenResponse: this.accessTokenResponse,
         callbacks: proofCallbacks,
-        version: this.version(),
+        version: this.version()
       })
+        .withIssuer(this.getIssuer())
+        .withAlg(this.alg)
+
+      if (this._state.jwk) {
+        proofBuilder2.withJWK(this._state.jwk)
+      }
+      if (this._state.kid) {
+        proofBuilder2.withKid(this._state.kid)
+      }
+
       if (this.clientId) {
         proofBuilder2.withClientId(this.clientId)
       }
@@ -592,7 +622,7 @@ export class OpenID4VCIClient {
         context,
         format,
         subjectIssuance,
-        createDPoPOpts,
+        createDPoPOpts
       })
 
       this._state.dpopResponseParams = response2.params
@@ -611,7 +641,10 @@ export class OpenID4VCIClient {
           )
         )
       }
-      return { ...response2.successBody, ...(this.dpopResponseParams && { params: this.dpopResponseParams }), access_token: response2.access_token }
+      return {
+        ...response2.successBody, ...(this.dpopResponseParams && { params: this.dpopResponseParams }),
+        access_token: response2.access_token
+      }
     }
   }
 
@@ -621,20 +654,20 @@ export class OpenID4VCIClient {
 
   getCredentialsSupported(
     restrictToInitiationTypes?: boolean,
-    format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[],
+    format?: (OID4VCICredentialFormat | string) | (OID4VCICredentialFormat | string)[]
   ): Record<string, CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0_13> | Array<CredentialConfigurationSupported> {
     return getSupportedCredentials({
       issuerMetadata: this.endpointMetadata.credentialIssuerMetadata,
       version: this.version(),
       format: format,
-      types: restrictToInitiationTypes ? this.getCredentialOfferTypes() : undefined,
+      types: restrictToInitiationTypes ? this.getCredentialOfferTypes() : undefined
     })
   }
 
   public async sendNotification(
     credentialRequestOpts: Partial<CredentialRequestOpts>,
     request: NotificationRequest,
-    accessToken?: string,
+    accessToken?: string
   ): Promise<NotificationResponseResult> {
     return sendNotification(credentialRequestOpts, request, accessToken ?? this._state.accessToken ?? this._state.accessTokenResponse?.access_token)
   }
@@ -786,7 +819,7 @@ export class OpenID4VCIClient {
         (cred) =>
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          typeof cred !== 'string' && 'trust_framework' in cred && 'name' in cred.trust_framework && cred.trust_framework.name.includes('ebsi'),
+          typeof cred !== 'string' && 'trust_framework' in cred && 'name' in cred.trust_framework && cred.trust_framework.name.includes('ebsi')
       )
     ) {
       return true
@@ -826,7 +859,7 @@ export class OpenID4VCIClient {
     let authorizationRequestOpts = {
       ...this._state?.authorizationRequestOpts,
       ...opts,
-      ...(requestObjectOpts && { requestObjectOpts }),
+      ...(requestObjectOpts && { requestObjectOpts })
     } as AuthorizationRequestOpts
     if (!authorizationRequestOpts) {
       // We only set a redirectUri if no options are provided.
@@ -843,7 +876,7 @@ export class OpenID4VCIClient {
 
   private getAuthorizationCode = (
     authorizationResponse?: string | AuthorizationResponse | AuthorizationChallengeCodeResponse,
-    code?: string,
+    code?: string
   ): string | undefined => {
     if (authorizationResponse) {
       this._state.authorizationCodeResponse = { ...toAuthorizationResponsePayload(authorizationResponse) }
@@ -918,5 +951,4 @@ export class OpenID4VCIClient {
 
     return false
   }
-
 }
