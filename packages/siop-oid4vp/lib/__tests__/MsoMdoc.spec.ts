@@ -69,7 +69,7 @@ describe.skip('mdoc RP and OP interaction should', () => {
 
     const resolver = getResolver('ethr')
     const rp = RP.builder({
-      requestVersion: SupportedVersion.SIOPv2_V1,
+      requestVersion: SupportedVersion.OID4VP_v1,
     })
       .withClientId(rpMockEntity.did)
       .withHasher(pexHasher)
@@ -92,7 +92,7 @@ describe.skip('mdoc RP and OP interaction should', () => {
         subject_syntax_types_supported: ['did', 'did:key'],
         passBy: PassBy.VALUE,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
     const op = OP.builder()
       .withPresentationSignCallback(sdJwtVcPresentationSignCallback)
@@ -112,7 +112,7 @@ describe.skip('mdoc RP and OP interaction should', () => {
         subject_syntax_types_supported: [],
         passBy: PassBy.VALUE,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({

@@ -45,7 +45,7 @@ describe('RP OPBuilder should', () => {
 
     const resolver = getResolver('ethr')
     expect(
-      RP.builder({ requestVersion: SupportedVersion.SIOPv2_V1 })
+      RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
         .withClientId('test_client_id')
         .withScope('test')
         .withResponseType(ResponseType.ID_TOKEN)
@@ -63,7 +63,7 @@ describe('RP OPBuilder should', () => {
           'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         })
         .withCreateJwtCallback(internalSignature('myprivatekye', 'did:example:123', 'did:example:123#key', SigningAlgo.ES256K))
-        .withSupportedVersions(SupportedVersion.SIOPv2_V1)
+        .withSupportedVersions(SupportedVersion.OID4VP_v1)
         .build(),
     ).toBeInstanceOf(RP)
   })
@@ -78,7 +78,7 @@ describe('RP should', () => {
     expect.assertions(1)
 
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_V1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: 'test',
         scope: 'test',
@@ -128,7 +128,7 @@ describe('RP should', () => {
   it('succeed from request opts when all params are set', async () => {
     // expect.assertions(1);
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_V1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'openid',
@@ -255,7 +255,7 @@ describe('RP should', () => {
     const expectedJwtRegex =
       /^eyJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6ZXRocjoweDAxMDZhMmU5ODViMUUxRGU5QjVkZGI0YUY2ZEM5ZTkyOEY0ZTk5RDAja2V5cy0xIiwidHlwIjoiSldUIn0\.eyJpYXQiO.*$/
 
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_V1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withClientId(WELL_KNOWN_OPENID_FEDERATION, alltargets)
       .withScope('test', alltargets)
       .withResponseType(ResponseType.ID_TOKEN, alltargets)
@@ -293,7 +293,7 @@ describe('RP should', () => {
         },
         alltargets,
       )
-      .withSupportedVersions([SupportedVersion.SIOPv2_V1])
+      .withSupportedVersions([SupportedVersion.OID4VP_v1])
       .build()
     const request = await rp.createAuthorizationRequestURI({
       correlationId: '1234',

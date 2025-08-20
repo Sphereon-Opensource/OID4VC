@@ -51,7 +51,7 @@ describe('EBSI', () => {
     verifyJwtCallback: getVerifyJwtCallback(getResolver('ebsi')),
     verification: {},
     correlationId: '1234',
-    supportedVersions: [SupportedVersion.SIOPv2_V1],
+    supportedVersions: [SupportedVersion.OID4VP_v1],
   }
   it.skip(
     'succeed from request opts when all params are set',

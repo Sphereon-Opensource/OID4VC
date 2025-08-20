@@ -33,7 +33,7 @@ export const authorizationRequestVersionDiscovery = (authorizationRequest: Autho
   const v1Validation = AuthorizationRequestPayloadV1Schema(authorizationRequestCopy)
 
   if (v1Validation) {
-    versions.push(SupportedVersion.SIOPv2_V1)
+    versions.push(SupportedVersion.OID4VP_v1)
   }
 
   const jwtVC1Validation = validateJWTVCPresentationProfile(authorizationRequestCopy)
@@ -47,7 +47,7 @@ export const authorizationRequestVersionDiscovery = (authorizationRequest: Autho
 
   if (versions.length === 0) {
     // For now just defaulting to v1 of OID4VP
-    versions.push(SupportedVersion.SIOPv2_V1)
+    versions.push(SupportedVersion.OID4VP_v1)
   }
   return versions
 }

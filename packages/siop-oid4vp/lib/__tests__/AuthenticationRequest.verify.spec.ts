@@ -251,7 +251,7 @@ describe('verifyJWT should', () => {
     const mockEntity = await mockedGetEnterpriseAuthToken('COMPANY AA INC')
 
     const requestOpts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_V1,
+      version: SupportedVersion.OID4VP_v1,
       requestObject: {
         jwtIssuer: {
           method: 'did',
@@ -305,7 +305,7 @@ describe('verifyJWT should', () => {
     const verifyOpts: VerifyAuthorizationRequestOpts = {
       verifyJwtCallback: getVerifyJwtCallback(resolver, { checkLinkedDomain: 'if_present' }),
       verification: {},
-      supportedVersions: [SupportedVersion.SIOPv2_V1],
+      supportedVersions: [SupportedVersion.OID4VP_v1],
       correlationId: '1234',
       nonce: 'invalid_nonce',
     }
@@ -327,7 +327,7 @@ describe('verifyJWT should', () => {
     async () => {
       const mockEntity = await mockedGetEnterpriseAuthToken('COMPANY AA INC')
       const requestOpts: CreateAuthorizationRequestOpts = {
-        version: SupportedVersion.SIOPv2_V1,
+        version: SupportedVersion.OID4VP_v1,
         requestObject: {
           jwtIssuer: {
             method: 'did',
@@ -382,7 +382,7 @@ describe('verifyJWT should', () => {
         const verifyOpts: VerifyAuthorizationRequestOpts = {
           verifyJwtCallback: getVerifyJwtCallback(resolver, { checkLinkedDomain: 'if_present' }),
           verification: {},
-          supportedVersions: [SupportedVersion.SIOPv2_V1],
+          supportedVersions: [SupportedVersion.OID4VP_v1],
           correlationId: '1234',
         }
 

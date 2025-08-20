@@ -40,7 +40,7 @@ const rp = RP.builder()
   .withRequestByValue()
   .withRevocationVerification(RevocationVerification.NEVER)
   .withCreateJwtCallback(internalSignature(HEX_KEY, DID, KID, SigningAlgo.ES256K))
-  .withSupportedVersions([SupportedVersion.SIOPv2_V1])
+  .withSupportedVersions([SupportedVersion.OID4VP_v1])
   .withClientMetadata({
     idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
     passBy: PassBy.VALUE,

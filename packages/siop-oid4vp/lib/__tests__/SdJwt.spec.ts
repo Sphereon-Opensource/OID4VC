@@ -109,7 +109,7 @@ describe('RP and OP interaction should', () => {
     const resolver = getResolver('ethr')
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_V1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
@@ -140,7 +140,7 @@ describe('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const op = OP.builder()
@@ -166,7 +166,7 @@ describe('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({
@@ -226,7 +226,7 @@ describe('RP and OP interaction should', () => {
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
     const rp = RP.builder({
-      requestVersion: SupportedVersion.SIOPv2_V1,
+      requestVersion: SupportedVersion.OID4VP_v1,
     })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
@@ -256,7 +256,7 @@ describe('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const op = OP.builder()
@@ -282,7 +282,7 @@ describe('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({
@@ -355,7 +355,7 @@ describe('RP and OP interaction should', () => {
     const resolver = getResolver('ethr')
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_V1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
@@ -412,7 +412,7 @@ describe('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_V1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({

@@ -90,7 +90,7 @@ describe('create Request Uri should', () => {
   it('return a reference url', async () => {
     expect.assertions(12)
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_V1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'openid',
@@ -166,7 +166,7 @@ describe('create Request Uri should', () => {
   it('return a reference url when using did:key', async () => {
     expect.assertions(4)
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_V1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'test',
@@ -229,7 +229,7 @@ describe('create Request Uri should', () => {
   it('return an url with an embedded token value', async () => {
     expect.assertions(4)
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_V1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'test',
@@ -297,7 +297,7 @@ describe('create Request JWT should', () => {
   it('throw REQUEST_OBJECT_TYPE_NOT_SET when requestBy type is different from REFERENCE and VALUE', async () => {
     expect.assertions(1)
     const opts = {
-      version: SupportedVersion.SIOPv2_V1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         redirect_uri: EXAMPLE_REDIRECT_URL,
       },
@@ -328,7 +328,7 @@ describe('create Request JWT should', () => {
   it('throw NO_REFERENCE_URI when no referenceUri is passed with REFERENCE requestBy type is set', async () => {
     expect.assertions(1)
     const opts = {
-      version: SupportedVersion.SIOPv2_V1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         redirect_uri: EXAMPLE_REDIRECT_URL,
       },
@@ -388,7 +388,7 @@ describe('create Request JWT should', () => {
   it('throw NO_REFERENCE_URI when registrationBy type is REFERENCE and no referenceUri is passed', async () => {
     expect.assertions(1)
     const opts = {
-      version: SupportedVersion.SIOPv2_V1,
+      version: SupportedVersion.OID4VP_v1,
       requestObject: {
         passBy: PassBy.REFERENCE,
         reference_uri: EXAMPLE_REFERENCE_URL,
@@ -418,7 +418,7 @@ describe('create Request JWT should', () => {
   it('succeed when all params are set', async () => {
     // expect.assertions(1);
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_V1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: 'test_client_id',
         scope: 'test',

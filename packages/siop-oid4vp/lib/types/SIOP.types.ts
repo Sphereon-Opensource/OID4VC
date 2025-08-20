@@ -688,7 +688,7 @@ export enum SupportedVersion {
   SIOPv2_D11 = 110,
   SIOPv2_D12_OID4VP_D18 = 180,
   SIOPv2_D12_OID4VP_D20 = 200,
-  SIOPv2_V1 = 1000,
+  OID4VP_v1 = 1000,
   JWT_VC_PRESENTATION_PROFILE_v1 = 71,
 }
 
