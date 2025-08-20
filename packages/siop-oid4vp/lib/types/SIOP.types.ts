@@ -42,7 +42,7 @@ export interface RequestObjectPayload extends RequestCommonPayload, JWTPayload {
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
   nonce: string
   state: string
-  dcql_query: string
+  dcql_query?: string
 }
 
 export type RequestObjectJwt = string

@@ -50,7 +50,7 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
     state,
     ...registration.payload,
     claims,
-    dcql_query: payload.dcql_query,
+    ...(payload.dcql_query && { dcql_query: payload.dcql_query }),
     client_metadata: payload.client_metadata,
     iat,
     nbf,
