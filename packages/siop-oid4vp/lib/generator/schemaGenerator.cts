@@ -155,10 +155,19 @@ const authorizationRequestPayloadV1 = {
   skipTypeCheck: true,
 }
 
+const authorizationRequestPayloadD28 = {
+  path: '../types/SIOP.types.ts',
+  tsconfig: 'tsconfig.json',
+  type: 'AuthorizationRequestPayloadD28', // Or <type-name> if you want to generate schema for that one type only
+  schemaId: 'AuthorizationRequestPayloadD28Schema',
+  outputPath: '../schemas/AuthorizationRequestPayloadD28.schema.ts',
+  skipTypeCheck: true,
+}
 
 const schemas: Schema[] = [
   writeSchema(authorizationRequestPayloadVID1),
   writeSchema(authorizationRequestPayloadV1),
+  writeSchema(authorizationRequestPayloadD28),
   writeSchema(responseOptsConf),
   writeSchema(rPRegistrationMetadataPayload),
   writeSchema(discoveryMetadataPayload),

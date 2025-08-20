@@ -81,6 +81,17 @@ export interface AuthorizationRequestPayloadVID1 extends AuthorizationRequestCom
   claims?: ClaimPayloadVID1
 }
 
+export interface AuthorizationRequestPayloadD28
+    extends AuthorizationRequestCommonPayload,
+        RequestClientMetadataPayloadProperties,
+        RequestIdTokenPayloadProperties {
+  claims?: ClaimPayloadCommon // OPTIONAL. As specified in Section 5.5 of [OpenID.Core]
+  response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
+  dcql_query?: string // A JSON object containing a DCQL query as defined in Section 6. // see https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#dcql_query
+  transaction_data?: string[]
+  verifier_attestations?: RelyingPartyAttestation[]
+}
+
 export interface AuthorizationRequestPayloadV1
     extends AuthorizationRequestCommonPayload,
       RequestClientMetadataPayloadProperties,
@@ -105,7 +116,7 @@ export type TransactionData = {
 }
 
 // https://openid.bitbucket.io/connect/openid-connect-self-issued-v2-1_0.html#section-10
-export type AuthorizationRequestPayload = AuthorizationRequestPayloadVID1 | AuthorizationRequestPayloadV1
+export type AuthorizationRequestPayload = AuthorizationRequestPayloadVID1 | AuthorizationRequestPayloadV1 | AuthorizationRequestPayloadD28
 
 export type JWTVcPresentationProfileAuthenticationRequestPayload = RequestIdTokenPayloadProperties
 
@@ -688,6 +699,7 @@ export enum SupportedVersion {
   SIOPv2_D11 = 110,
   SIOPv2_D12_OID4VP_D18 = 180,
   SIOPv2_D12_OID4VP_D20 = 200,
+  SIOPv2_OID4VP_D28 = 280,
   OID4VP_v1 = 1000,
   JWT_VC_PRESENTATION_PROFILE_v1 = 71,
 }

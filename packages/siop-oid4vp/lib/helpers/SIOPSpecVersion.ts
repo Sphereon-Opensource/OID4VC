@@ -1,4 +1,8 @@
-import { AuthorizationRequestPayloadV1Schema, AuthorizationRequestPayloadVID1Schema } from '../schemas'
+import {
+  AuthorizationRequestPayloadD28Schema,
+  AuthorizationRequestPayloadV1Schema,
+  AuthorizationRequestPayloadVID1Schema
+} from '../schemas'
 import { AuthorizationRequestPayload, SupportedVersion } from '../types'
 
 const validateJWTVCPresentationProfile = AuthorizationRequestPayloadVID1Schema
@@ -30,8 +34,13 @@ function isID1Payload(authorizationRequest: AuthorizationRequestPayload) {
 export const authorizationRequestVersionDiscovery = (authorizationRequest: AuthorizationRequestPayload): SupportedVersion[] => {
   const versions = []
   const authorizationRequestCopy: AuthorizationRequestPayload = JSON.parse(JSON.stringify(authorizationRequest))
-  const v1Validation = AuthorizationRequestPayloadV1Schema(authorizationRequestCopy)
 
+  const d28Validation = AuthorizationRequestPayloadD28Schema(authorizationRequestCopy)
+  if (d28Validation) {
+    versions.push(SupportedVersion.SIOPv2_OID4VP_D28)
+  }
+
+  const v1Validation = AuthorizationRequestPayloadV1Schema(authorizationRequestCopy)
   if (v1Validation) {
     versions.push(SupportedVersion.OID4VP_v1)
   }
@@ -40,6 +49,7 @@ export const authorizationRequestVersionDiscovery = (authorizationRequest: Autho
   if (jwtVC1Validation && isJWTVC1Payload(authorizationRequest)) {
     versions.push(SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1)
   }
+
   const vid1Validation = AuthorizationRequestPayloadVID1Schema(authorizationRequestCopy)
   if (vid1Validation && isID1Payload(authorizationRequest)) {
     versions.push(SupportedVersion.SIOPv2_ID1)
