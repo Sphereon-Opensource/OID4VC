@@ -1861,10 +1861,7 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 "type": "string"
               }
             }
-          },
-          "required": [
-            "vp_formats_supported"
-          ]
+          }
         }
       ]
     },

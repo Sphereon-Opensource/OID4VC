@@ -371,7 +371,7 @@ interface JWT_VCDiscoveryMetadataPayload extends DiscoveryMetadataPayloadVID1 {
 }
 
 interface DiscoveryMetadataPayloadV1Final extends DynamicRegistrationClientMetadata, DiscoveryMetadataCommonPayload {
-  vp_formats_supported: Format // from oidc4vp
+  vp_formats_supported?: Format // from oidc4vp
   id_token_types_supported?: IdTokenType[] | IdTokenType
   encrypted_response_enc_values_supported?: string[] // from oidc4vp
   client_id_prefixes_supported?: string[]
@@ -396,7 +396,7 @@ export type RPRegistrationMetadataOpts = Partial<
     | 'scopesSupported'
     | 'subjectTypesSupported'
     | 'subject_syntax_types_supported'
-    | 'vpFormatsSupported'
+    | 'vp_formats_supported'
     | 'clientName'
     | 'logo_uri'
     | 'tos_uri'
@@ -416,7 +416,7 @@ export type RPRegistrationMetadataPayload = Pick<
   | 'scopes_supported'
   | 'subject_types_supported'
   | 'subject_syntax_types_supported'
-  | 'vp_formats'
+  | 'vp_formats_supported'
   | 'client_name'
   | 'logo_uri'
   | 'client_purpose'
