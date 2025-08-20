@@ -5,21 +5,23 @@ import {
   CredentialIssuerMetadataV1_0_13,
   CredentialOfferPayload,
   CredentialOfferPayloadV1_0_13,
+  CredentialOfferPayloadV1_0_15,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
   EndpointMetadataResultV1_0_11,
-  EndpointMetadataResultV1_0_13,
+  EndpointMetadataResultV1_0_13, EndpointMetadataResultV1_0_15,
   getIssuerFromCredentialOfferPayload,
   IssuerMetadataV1_0_08,
   OpenId4VCIVersion,
   OpenIDResponse,
-  WellKnownEndpoints,
+  WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
 import { Loggers } from '@sphereon/ssi-types'
 
 import { MetadataClientV1_0_11 } from './MetadataClientV1_0_11'
 import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13'
 import { retrieveWellknown } from './functions'
+import { MetadataClientV1_0_15 } from './MetadataClientV1_0_15'
 
 const logger = Loggers.DEFAULT.get('sphereon:oid4vci:metadata')
 
@@ -31,8 +33,10 @@ export class MetadataClient {
    */
   public static async retrieveAllMetadataFromCredentialOffer(
     credentialOffer: CredentialOfferRequestWithBaseUrl,
-  ): Promise<EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11> {
-    if (determineSpecVersionFromOffer(credentialOffer.credential_offer) >= OpenId4VCIVersion.VER_1_0_13) {
+  ): Promise<EndpointMetadataResultV1_0_15 | EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11> {
+    if (determineSpecVersionFromOffer(credentialOffer.credential_offer) >= OpenId4VCIVersion.VER_1_0_15) {
+      return await MetadataClientV1_0_15.retrieveAllMetadataFromCredentialOffer(credentialOffer)
+    } else if (determineSpecVersionFromOffer(credentialOffer.credential_offer) >= OpenId4VCIVersion.VER_1_0_13) {
       return await MetadataClientV1_0_13.retrieveAllMetadataFromCredentialOffer(credentialOffer)
     } else {
       return await MetadataClientV1_0_11.retrieveAllMetadataFromCredentialOffer(credentialOffer)
@@ -45,10 +49,12 @@ export class MetadataClient {
    */
   public static async retrieveAllMetadataFromCredentialOfferRequest(
     request: CredentialOfferPayload,
-  ): Promise<EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11> {
+  ): Promise<EndpointMetadataResultV1_0_15 |EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11> {
     const issuer = getIssuerFromCredentialOfferPayload(request)
     if (issuer) {
-      if (determineSpecVersionFromOffer(request) >= OpenId4VCIVersion.VER_1_0_13) {
+      if (determineSpecVersionFromOffer(request) >= OpenId4VCIVersion.VER_1_0_15) {
+        return MetadataClientV1_0_15.retrieveAllMetadataFromCredentialOfferRequest(request as CredentialOfferPayloadV1_0_15)
+      } else if (determineSpecVersionFromOffer(request) >= OpenId4VCIVersion.VER_1_0_13) {
         return MetadataClientV1_0_13.retrieveAllMetadataFromCredentialOfferRequest(request as CredentialOfferPayloadV1_0_13)
       } else {
         return MetadataClientV1_0_11.retrieveAllMetadataFromCredentialOfferRequest(request)
