@@ -193,7 +193,13 @@ export const createAuthorizationRequestUrl = async ({
       throw Error(`Could not create authorization details from credential offer. Please pass in explicit details`)
     }
   }
-  if (!endpointMetadata?.authorization_endpoint) {
+  // v15: authorization endpoint is under Authorization Server metadata (or duplicated in CI metadata)
+  const authorizationEndpoint =
+    (endpointMetadata as any).authorization_endpoint ??
+    (endpointMetadata as EndpointMetadataResultV1_0_15).authorizationServerMetadata?.authorization_endpoint ??
+    (endpointMetadata as EndpointMetadataResultV1_0_15).credentialIssuerMetadata?.authorization_endpoint
+
+  if (!authorizationEndpoint) {
     throw Error('Server metadata does not contain authorization endpoint')
   }
   const parEndpoint = authorizationMetadata?.pushed_authorization_request_endpoint
@@ -253,7 +259,7 @@ export const createAuthorizationRequestUrl = async ({
 
   logger.debug(`Object that will become query params: ` + JSON.stringify(queryObj, null, 2))
   const url = convertJsonToURI(queryObj, {
-    baseUrl: endpointMetadata.authorization_endpoint,
+    baseUrl: authorizationEndpoint,
     uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state', 'state'],
     // arrayTypeProperties: ['authorization_details'],
     mode: JsonURIMode.X_FORM_WWW_URLENCODED
@@ -292,13 +298,23 @@ const handleAuthorizationDetails = (
   return authorizationDetails
 }
 
-const handleLocations = (endpointMetadata: EndpointMetadataResultV1_0_15 | EndpointMetadataResultV1_0_13,
-                         authorizationDetails: AuthorizationDetails) => {
+const handleLocations = (
+  endpointMetadata: EndpointMetadataResultV1_0_15 | EndpointMetadataResultV1_0_13,
+  authorizationDetails: AuthorizationDetails
+) => {
   if (typeof authorizationDetails === 'string') {
     // backwards compat for older versions of the lib
     return authorizationDetails
   }
-  if (authorizationDetails && (endpointMetadata.credentialIssuerMetadata?.authorization_server || endpointMetadata.authorization_endpoint)) {
+
+  // v15 signal: CI metadata lists external Authorization Server(s)
+  const ciMeta = (endpointMetadata as EndpointMetadataResultV1_0_15).credentialIssuerMetadata as any
+  const hasAuthorizationServers = Array.isArray(ciMeta?.authorization_servers) && ciMeta.authorization_servers.length > 0
+
+  // v13/v11 fallback: some older metadata exposed authorization_endpoint at top level
+  const legacyHasAuthzEndpoint = Boolean((endpointMetadata as any).authorization_endpoint)
+
+  if (hasAuthorizationServers || legacyHasAuthzEndpoint) {
     if (authorizationDetails.locations) {
       if (Array.isArray(authorizationDetails.locations)) {
         authorizationDetails.locations.push(endpointMetadata.issuer)
