@@ -416,7 +416,6 @@ describe('create Request JWT should', () => {
   })
 
   it('succeed when all params are set', async () => {
-    // expect.assertions(1);
     const opts: CreateAuthorizationRequestOpts = {
       version: SupportedVersion.OID4VP_v1,
       payload: {
@@ -479,7 +478,7 @@ describe('create Request JWT should', () => {
         scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did:ethr:', 'did'],
-        vp_formats: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: ['EcdsaSecp256k1Signature2019', 'EcdsaSecp256k1Signature2019'],
           },
@@ -489,35 +488,9 @@ describe('create Request JWT should', () => {
         'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100303',
         client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      },
-
-      /*opts: {
-        redirectUri: 'https://acme.com/hello',
-        requestBy: {
-          type: 'REFERENCE',
-          reference_uri: 'https://rp.acme.com/siop/jwts',
-        },
-        withSignature: {
-          hexPrivateKey: 'f857544a9d1097e242ff0b287a7e6e90f19cf973efe2317f2a4678739664420f',
-          did: 'did:ethr:0x0106a2e985b1E1De9B5ddb4aF6dC9e928F4e99D0',
-          kid: 'did:ethr:0x0106a2e985b1E1De9B5ddb4aF6dC9e928F4e99D0#keys-1',
-        },
-        registration: {
-          idTokenSigningAlgValuesSupported: ['EdDSA', 'ES256'],
-          subjectSyntaxTypesSupported: ['did:ethr:', 'did'],
-          vpFormatsSupported: {
-            ldp_vc: {
-              proof_type: ['EcdsaSecp256k1Signature2019', 'EcdsaSecp256k1Signature2019'],
-            },
-          },
-          registrationBy: {
-            type: 'VALUE',
-          },
-        },
-      },*/
+      }
     }
 
-    // await URI.fromOpts(opts).then((uri) => console.log(uri.encodedUri));
     expect((await RequestObject.fromOpts(opts)).getPayload()).toMatchObject(expected)
   })
 
@@ -546,7 +519,7 @@ describe('create Request JWT should', () => {
     DcqlQuery.validate(parsedDcqlQuery)
 
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'test',
@@ -597,7 +570,7 @@ describe('create Request JWT should', () => {
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100305',
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      },
+      }
     }
 
     const uriRequest = await URI.fromOpts(opts)

@@ -44,7 +44,7 @@ export const createRequestRegistration = async (
   createRequestOpts: CreateAuthorizationRequestOpts
   clientMetadataOpts: ClientMetadataOpts
 }> => {
-  const metadata = createRPRegistrationMetadataPayload(clientMetadataOpts)
+  const metadata = createRPRegistrationMetadataPayload(clientMetadataOpts, createRequestOpts.version)
   const payload = await createRequestRegistrationPayload(clientMetadataOpts, metadata, createRequestOpts.version)
   return {
     payload,
@@ -54,7 +54,7 @@ export const createRequestRegistration = async (
   }
 }
 
-const createRPRegistrationMetadataPayload = (opts: RPRegistrationMetadataOpts): RPRegistrationMetadataPayload => {
+const createRPRegistrationMetadataPayload = (opts: RPRegistrationMetadataOpts, version: SupportedVersion): RPRegistrationMetadataPayload => {
   const rpRegistrationMetadataPayload = {
     id_token_signing_alg_values_supported: opts.idTokenSigningAlgValuesSupported,
     request_object_signing_alg_values_supported: opts.requestObjectSigningAlgValuesSupported,
@@ -62,7 +62,7 @@ const createRPRegistrationMetadataPayload = (opts: RPRegistrationMetadataOpts): 
     scopes_supported: opts.scopesSupported,
     subject_types_supported: opts.subjectTypesSupported,
     subject_syntax_types_supported: opts.subject_syntax_types_supported || ['did:web:', 'did:ion:'],
-    vp_formats: opts.vpFormatsSupported,
+    ...(version === SupportedVersion.OID4VP_v1 ? { vp_formats_supported: opts.vpFormatsSupported } : { vp_formats: opts.vpFormatsSupported }),
     client_name: opts.clientName,
     logo_uri: opts.logo_uri,
     tos_uri: opts.tos_uri,
