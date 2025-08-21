@@ -86,8 +86,7 @@ const dcqlCredential = {
     cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', CredentialMapper.toWrappedVerifiableCredential(SD_JWT_VC.compactJwtVc)),
 } satisfies DcqlSdJwtVcCredential
 
-// TODO skip
-describe('RP and OP interaction should', () => {
+describe.skip('RP and OP interaction should', () => {
   // FIXME SDK-45 Uniresolver failing
   it('succeed when calling with DCQL query and right DCQL presentation', async () => {
     const opMock = await mockedGetEnterpriseAuthToken('OP')
@@ -191,7 +190,7 @@ describe('RP and OP interaction should', () => {
     const presentation: DcqlPresentation.Output = {}
     for (const [key, value] of Object.entries(dcqlQueryResult.credential_matches)) {
         if (value.success) {
-            presentation[key.toLowerCase()] = SD_JWT_VC.compactJwtVc // TODO lowercase all
+            presentation[key] = SD_JWT_VC.compactJwtVc
         }
     }
 
