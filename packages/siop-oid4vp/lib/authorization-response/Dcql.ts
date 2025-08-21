@@ -39,14 +39,12 @@ export class Dcql {
     const parsedDcqlQuery = DcqlQuery.parse(JSON.parse(dcqlQuery[0]))
 
     if (version === SupportedVersion.OID4VP_v1) {
-      const allHaveMeta = parsedDcqlQuery.credentials.every(query => {
-        if (query.format === 'jwt_vc_json' || query.format === 'ldp_vc') {
-          return query.meta !== undefined
-        }
-        return true
-      });
-      if (!allHaveMeta) {
-        throw new Error('Missing meta property in dcql query')
+      const hasMeta = parsedDcqlQuery.credentials
+          .filter(q => q.format === 'jwt_vc_json' || q.format === 'ldp_vc')
+          .every(q => q.meta !== undefined)
+
+      if (!hasMeta) {
+        throw new Error('Missing meta property in DCQL query')
       }
     }
 

@@ -655,6 +655,6 @@ describe('create Request JWT should', () => {
       }
     }
 
-    expect(URI.fromOpts(opts)).rejects.toThrow("Missing meta property in dcql query")
+    expect(URI.fromOpts(opts)).rejects.toThrow("Missing meta property in DCQL query")
   })
 })
