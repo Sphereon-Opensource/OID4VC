@@ -535,6 +535,9 @@ export class OpenID4VCIClientV1_0_15 {
     if (jti) {
       proofBuilder.withJti(jti)
     }
+    if (this._state.cachedCNonce) {
+      proofBuilder.withAccessTokenNonce(this._state.cachedCNonce)
+    }
 
     const response = await credentialRequestClient.acquireCredentialsUsingProof({
       proofInput: proofBuilder,

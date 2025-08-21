@@ -1,4 +1,4 @@
-import { EndpointMetadata, formPost, IssuerOpts, OpenIDResponse } from '@sphereon/oid4vci-common'
+import { EndpointMetadataResultV1_0_15, formPost, IssuerOpts, OpenIDResponse } from '@sphereon/oid4vci-common'
 import { MetadataClient } from './MetadataClient'
 
 export interface NonceSuccessBodyV1_0_15 {
@@ -16,7 +16,7 @@ export const sendNonceRequest = async (
 }
 
 export const acquireNonceFromAuthorizationServer = async (opts: {
-  metadata?: EndpointMetadata
+  metadata?: EndpointMetadataResultV1_0_15
   issuerOpts?: IssuerOpts
   headers?: Record<string, string>
 }): Promise<OpenIDResponse<NonceSuccessBodyV1_0_15>> => {
@@ -26,7 +26,7 @@ export const acquireNonceFromAuthorizationServer = async (opts: {
       ? await MetadataClient.retrieveAllMetadata(opts.issuerOpts.issuer, { errorOnNotFound: false })
       : undefined
 
-  const nonceEndpointUrl = metadata?.nonce_endpoint
+  const nonceEndpointUrl = metadata?.credentialIssuerMetadata?.nonce_endpoint
   if (!nonceEndpointUrl) {
     return Promise.reject(Error('Cannot determine nonce endpoint URL'))
   }

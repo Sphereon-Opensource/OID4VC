@@ -442,14 +442,14 @@ export class OpenID4VCIClient {
     if (kid) this._state.kid = kid
 
     try {
-      if (this.version() === OpenId4VCIVersion.VER_1_0_15 || this.hasNonceEndpoint()) {
+      if (this.version() === OpenId4VCIVersion.VER_1_0_15 && this.hasNonceEndpoint()) {
         if (!(this._state as OpenID4VCIClientStateV1_0_15).cachedCNonce) {
           await this.acquireNonceViaV15Delegate()
         }
       }
     } catch (e) {
       // strict only when v15 or server claims nonce support
-      if (this.version() === OpenId4VCIVersion.VER_1_0_15 || this.hasNonceEndpoint()) {
+      if (this.version() === OpenId4VCIVersion.VER_1_0_15 && this.hasNonceEndpoint()) {
         return Promise.reject(Error(`failed to acquire nonce: ${String(e)}`))
       }
     }
@@ -552,6 +552,9 @@ export class OpenID4VCIClient {
       }
       if (jti) {
         proofBuilder.withJti(jti)
+      }
+      if ('cachedCNonce' in this._state && this._state.cachedCNonce) {
+        proofBuilder.withAccessTokenNonce(this._state.cachedCNonce)
       }
 
       const response = await credentialRequestClient.acquireCredentialsUsingProof({
@@ -891,11 +894,7 @@ export class OpenID4VCIClient {
   }
 
   private hasNonceEndpoint(): boolean {
-    const as = this._state.endpointMetadata?.authorizationServerMetadata
-    if (!as) {
-      return false
-    }
-    const endpoint = (as as any).nonce_endpoint
+    const endpoint = this._state.endpointMetadata?.credentialIssuerMetadata?.nonce_endpoint
     return typeof endpoint === 'string' && endpoint.length > 0
   }
 
