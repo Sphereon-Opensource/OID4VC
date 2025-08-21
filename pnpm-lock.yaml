@@ -11,6 +11,9 @@ overrides:
   typescript: 5.8.3
 
 patchedDependencies:
+  dcql@1.0.1:
+    hash: 7950e381aed4d3f7a510973c71a2e2dbe8f9a55a6bd42c2dce9f9c3ca2b0720c
+    path: patches/dcql@1.0.1.patch
   did-jwt@6.11.6:
     hash: 273724dfda88826ea701236dab63df8edf4ac66af32e92c95c1dd3b2c1f58942
     path: patches/did-jwt@6.11.6.patch
@@ -431,7 +434,7 @@ importers:
         version: 4.1.0(encoding@0.1.13)
       dcql:
         specifier: 1.0.1
-        version: 1.0.1(typescript@5.8.3)
+        version: 1.0.1(patch_hash=7950e381aed4d3f7a510973c71a2e2dbe8f9a55a6bd42c2dce9f9c3ca2b0720c)(typescript@5.8.3)
       debug:
         specifier: ^4.4.0
         version: 4.4.1
@@ -14047,7 +14050,7 @@ snapshots:
 
   dayjs@1.11.13: {}
 
-  dcql@1.0.1(typescript@5.8.3):
+  dcql@1.0.1(patch_hash=7950e381aed4d3f7a510973c71a2e2dbe8f9a55a6bd42c2dce9f9c3ca2b0720c)(typescript@5.8.3):
     dependencies:
       valibot: 1.0.0-beta.8(typescript@5.8.3)
     transitivePeerDependencies:

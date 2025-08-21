@@ -86,9 +86,6 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
         "request_uri": {
           "type": "string"
         },
-        "request_uri_method": {
-          "$ref": "#/definitions/RequestUriMethod"
-        },
         "claims": {
           "$ref": "#/definitions/ClaimPayloadVID1"
         }
@@ -394,13 +391,6 @@ export const AuthorizationRequestPayloadVID1SchemaObj = {
         "direct_post.jwt",
         "query.jwt",
         "fragment.jwt"
-      ]
-    },
-    "RequestUriMethod": {
-      "type": "string",
-      "enum": [
-        "get",
-        "post"
       ]
     },
     "ClaimPayloadVID1": {

@@ -202,7 +202,7 @@ export class AuthorizationRequest {
     // TODO: we need to verify somewhere that if response_mode is direct_post, that the response_uri may be present,
     // BUT not both redirect_uri and response_uri. What is the best place to do this?
 
-    const dcqlQuery = await Dcql.findValidDcqlQuery(mergedPayload)
+    const dcqlQuery = await Dcql.findValidDcqlQuery(mergedPayload, this._options?.version)
 
     return {
       jwt,
@@ -285,6 +285,6 @@ export class AuthorizationRequest {
   }
 
   public async getDcqlQuery(): Promise<DcqlQuery | undefined> {
-    return await Dcql.findValidDcqlQuery(this.mergedPayloads())
+    return await Dcql.findValidDcqlQuery(this.mergedPayloads(), this._options.version)
   }
 }

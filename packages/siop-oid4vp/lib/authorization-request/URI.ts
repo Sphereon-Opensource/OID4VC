@@ -161,7 +161,7 @@ export class URI implements AuthorizationRequestURI {
 
     if (requestObjectPayload) {
       // Only used to validate if the request object contains presentation definition(s) | a dcql query
-      await Dcql.findValidDcqlQuery({ ...authorizationRequestPayload, ...requestObjectPayload })
+      await Dcql.findValidDcqlQuery({ ...authorizationRequestPayload, ...requestObjectPayload }, opts.version)
 
       assertValidRequestObjectPayload(requestObjectPayload)
       if (requestObjectPayload.registration) {

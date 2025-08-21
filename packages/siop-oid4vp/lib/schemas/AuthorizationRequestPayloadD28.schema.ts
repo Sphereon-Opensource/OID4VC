@@ -1,9 +1,9 @@
-export const AuthorizationRequestPayloadV1SchemaObj = {
-  "$id": "AuthorizationRequestPayloadV1Schema",
+export const AuthorizationRequestPayloadD28SchemaObj = {
+  "$id": "AuthorizationRequestPayloadD28Schema",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/AuthorizationRequestPayloadV1",
+  "$ref": "#/definitions/AuthorizationRequestPayloadD28",
   "definitions": {
-    "AuthorizationRequestPayloadV1": {
+    "AuthorizationRequestPayloadD28": {
       "type": "object",
       "properties": {
         "id_token_type": {
@@ -95,16 +95,13 @@ export const AuthorizationRequestPayloadV1SchemaObj = {
         "dcql_query": {
           "type": "string"
         },
-        "request_uri_method": {
-          "$ref": "#/definitions/RequestUriMethod"
-        },
         "transaction_data": {
           "type": "array",
           "items": {
             "type": "string"
           }
         },
-        "verifier_info": {
+        "verifier_attestations": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/RelyingPartyAttestation"
@@ -416,13 +413,6 @@ export const AuthorizationRequestPayloadV1SchemaObj = {
     },
     "ClaimPayloadCommon": {
       "type": "object"
-    },
-    "RequestUriMethod": {
-      "type": "string",
-      "enum": [
-        "get",
-        "post"
-      ]
     },
     "RelyingPartyAttestation": {
       "type": "object",
