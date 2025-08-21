@@ -86,9 +86,6 @@ export const AuthorizationRequestPayloadV1SchemaObj = {
         "request_uri": {
           "type": "string"
         },
-        "request_uri_method": {
-          "$ref": "#/definitions/RequestUriMethod"
-        },
         "claims": {
           "$ref": "#/definitions/ClaimPayloadCommon"
         },
@@ -97,6 +94,9 @@ export const AuthorizationRequestPayloadV1SchemaObj = {
         },
         "dcql_query": {
           "type": "string"
+        },
+        "request_uri_method": {
+          "$ref": "#/definitions/RequestUriMethod"
         },
         "transaction_data": {
           "type": "array",
@@ -414,15 +414,15 @@ export const AuthorizationRequestPayloadV1SchemaObj = {
         "fragment.jwt"
       ]
     },
+    "ClaimPayloadCommon": {
+      "type": "object"
+    },
     "RequestUriMethod": {
       "type": "string",
       "enum": [
         "get",
         "post"
       ]
-    },
-    "ClaimPayloadCommon": {
-      "type": "object"
     },
     "RelyingPartyAttestation": {
       "type": "object",
