@@ -146,7 +146,7 @@ export interface VerifiedAuthorizationRequest extends Partial<VerifiedJWT> {
   authorizationRequestPayload: AuthorizationRequestPayload
   requestObject?: RequestObject // The Request object
   registrationMetadataPayload: RPRegistrationMetadataPayload
-  dcqlQuery?: DcqlQuery
+  dcqlQuery: DcqlQuery
   verifyOpts: VerifyAuthorizationRequestOpts // The verification options for the authentication request
   versions: SupportedVersion[]
 }
