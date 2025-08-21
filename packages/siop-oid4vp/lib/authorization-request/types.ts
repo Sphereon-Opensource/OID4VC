@@ -5,6 +5,8 @@ import { RequestObjectOpts } from '../request-object'
 import {
   ClientMetadataOpts,
   IdTokenClaimPayload,
+  RelyingPartyAttestation,
+  RequestUriMethod,
   ResponseMode,
   ResponseType,
   Schema,
@@ -64,12 +66,11 @@ interface AuthorizationRequestCommonOpts<CT extends ClaimPayloadCommonOpts> {
 
 export type AuthorizationRequestOptsVID1 = AuthorizationRequestCommonOpts<ClaimPayloadOptsVID1>
 
-export interface AuthorizationRequestOptsVD11 extends AuthorizationRequestCommonOpts<ClaimPayloadCommonOpts> {
-  idTokenType?: string // OPTIONAL. Space-separated string that specifies the types of ID token the RP wants to obtain, with the values appearing in order of preference. The allowed individual values are subject_signed and attester_signed (see Section 8.2). The default value is attester_signed.
-}
-
 export interface AuthorizationRequestOptsV1 extends AuthorizationRequestCommonOpts<ClaimPayloadCommonOpts> {
   idTokenType?: string // OPTIONAL. Space-separated string that specifies the types of ID token the RP wants to obtain, with the values appearing in order of preference. The allowed individual values are subject_signed and attester_signed (see Section 8.2). The default value is attester_signed.
+  transaction_data?: string[]
+  verifier_info?: RelyingPartyAttestation[]
+  request_uri_method?: RequestUriMethod
 }
 
 export type CreateAuthorizationRequestOpts = AuthorizationRequestOptsVID1 | AuthorizationRequestOptsV1

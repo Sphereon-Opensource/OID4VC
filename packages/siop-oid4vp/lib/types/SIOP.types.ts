@@ -51,7 +51,6 @@ export type RequestObjectJwt = string
 export interface AuthorizationRequestCommonPayload extends RequestCommonPayload, JWTPayload {
   request?: string // OPTIONAL. Request Object value, as specified in Section 6.1 of [OpenID.Core]. The Request Object MAY be encrypted to the Self-Issued OP by the RP. In this case, the sub (subject) of a previously issued ID Token for this RP MUST be sent as the kid (Key ID) of the JWE.
   request_uri?: string // OPTIONAL. URL where Request Object value can be retrieved from, as specified in Section 6.2 of [OpenID.Core].
-  request_uri_method?: RequestUriMethod // OPTIONAL. A string determining the HTTP method to be used when the request_uri parameter is included in the same request.
 }
 
 export type RequestUriMethod = 'get' | 'post'
@@ -88,6 +87,7 @@ export interface AuthorizationRequestPayloadV1
   claims?: ClaimPayloadCommon // OPTIONAL. As specified in Section 5.5 of [OpenID.Core]
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
   dcql_query?: string // A JSON object containing a DCQL query as defined in Section 6. // see https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#dcql_query
+  request_uri_method?: RequestUriMethod // OPTIONAL. A string determining the HTTP method to be used when the request_uri parameter is included in the same request.
   transaction_data?: string[]
   verifier_info?: RelyingPartyAttestation[]
 }

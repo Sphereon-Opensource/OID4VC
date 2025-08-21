@@ -546,7 +546,7 @@ describe('create Request JWT should', () => {
     DcqlQuery.validate(parsedDcqlQuery)
 
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'test',
@@ -597,7 +597,7 @@ describe('create Request JWT should', () => {
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100305',
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      },
+      }
     }
 
     const uriRequest = await URI.fromOpts(opts)
