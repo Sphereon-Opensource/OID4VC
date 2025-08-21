@@ -591,7 +591,7 @@ export function getTypesFromOfferV1_0_11(credentialOffer: CredentialOfferPayload
       return [...prev, ...curr.credential_definition.types]
     } else if (curr.format === 'jwt_vc_json' || curr.format === 'jwt_vc') {
       return [...prev, ...curr.types]
-    } else if (curr.format === 'vc+sd-jwt') { // FIXME SSISDK-26
+    } else if (curr.format === 'vc+sd-jwt') { // FIXME SSISDK-13
       return [...prev, curr.vct]
     }
 

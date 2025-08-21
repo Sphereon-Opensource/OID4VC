@@ -182,7 +182,7 @@ export interface CredentialSupportedSdJwtVc extends CommonCredentialSupported {
 }
 
 export interface CredentialSupportedSdJwtVcV13 extends CommonCredentialSupported {
-  format: 'vc+sd-jwt' // TODO SSISDK-26
+  format: 'vc+sd-jwt' // TODO SSISDK-13
 
   vct: string
   claims?: IssuerCredentialSubject

@@ -210,7 +210,7 @@ export class CredentialRequestClientV1_0_11 {
           ...(opts.context && { '@context': opts.context }),
         } as JsonLdIssuerCredentialDefinition,
       }
-    } else if (format === 'vc+sd-jwt') { // TODO SSISDK-26
+    } else if (format === 'vc+sd-jwt') { // TODO SSISDK-13
       if (types.length > 1) {
         throw Error(`Only a single credential type is supported for ${format}`)
       }

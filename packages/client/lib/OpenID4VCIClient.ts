@@ -58,6 +58,8 @@ import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
 import { generateMissingPKCEOpts, sendNotification } from './functions'
 import { OpenID4VCIClientStateV1_0_15, OpenID4VCIClientV1_0_15 } from './OpenID4VCIClientV1_0_15'
 
+// FIXME This is kind of a "FrankenClient" rather than a proper delegate class. We got away with it before, but now fields are being removed or replaced or made array this is causing more and more technical depth
+
 const logger = Loggers.DEFAULT.get('sphereon:oid4vci')
 
 export type OpenID4VCIClientState =
@@ -900,18 +902,19 @@ export class OpenID4VCIClient {
 
 
   private async acquireNonceViaV15Delegate(): Promise<void> {
-    let v15
+    const state : OpenID4VCIClientStateV1_0_15 = this._state as OpenID4VCIClientStateV1_0_15
+    let v15Client
     try {
-      v15 = await OpenID4VCIClientV1_0_15.fromState({ state: JSON.stringify(this._state) }) // TODO find cleaner way to do this
+      v15Client = await OpenID4VCIClientV1_0_15.fromState({ state })
     } catch (e) {
       return Promise.reject(Error(`failed to init v15 delegate for nonce: ${String(e)}`))
     }
     try {
-      await v15.acquireNonce()
+      await v15Client.acquireNonce()
     } catch (e) {
       return Promise.reject(Error(`nonce request failed: ${String(e)}`))
     }
-    (this._state as OpenID4VCIClientStateV1_0_15).cachedCNonce = v15.state.cachedCNonce
+    state.cachedCNonce = v15Client.state.cachedCNonce
   }
 
   private shouldRetryWithFreshNonce(err: unknown): boolean {
