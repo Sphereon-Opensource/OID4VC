@@ -285,6 +285,6 @@ export class AuthorizationRequest {
   }
 
   public async getDcqlQuery(): Promise<DcqlQuery | undefined> {
-    return await Dcql.findValidDcqlQuery(this.mergedPayloads(), this._options.version)
+    return await Dcql.findValidDcqlQuery(this.mergedPayloads(), this._options?.version)
   }
 }
