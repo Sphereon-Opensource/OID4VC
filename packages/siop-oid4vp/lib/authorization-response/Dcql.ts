@@ -1,8 +1,10 @@
 import {
+  getMdocDecodedPayload,
   HasherSync,
-  WrappedMdocCredential,
-  WrappedSdJwtVerifiableCredential,
-  WrappedW3CVerifiableCredential
+  IVerifiableCredential,
+  JwtDecodedVerifiableCredential,
+  MdocDocument,
+  SdJwtDecodedVerifiableCredentialPayload,
 } from '@sphereon/ssi-types'
 import {
   DcqlMdocCredential,
@@ -14,7 +16,7 @@ import {
 } from 'dcql'
 import {extractDataFromPath} from '../helpers'
 import {extractDcqlPresentationFromDcqlVpToken, hasCryptographicHolderBinding} from './OpenID4VP'
-import {AuthorizationRequestPayload, SupportedVersion} from '../types'
+import {AuthorizationRequestPayload, Json, SupportedVersion} from '../types'
 
 /**
  * Finds a valid DcqlQuery inside the given AuthenticationRequestPayload
@@ -63,13 +65,13 @@ export class Dcql {
           const credentials = p.vcs.map(vc => {
             switch (p.format) {
               case 'mso_mdoc':
-                return Dcql.toDcqlMdocCredential(vc)
+                return Dcql.toDcqlMdocCredential(vc.decoded)
               case 'vc+sd-jwt':
-                return Dcql.toDcqlSdJwtCredential(vc)
+                return Dcql.toDcqlSdJwtCredential(vc.decoded)
               case 'jwt_vp':
-                return Dcql.toDcqlJwtCredential(vc)
+                return Dcql.toDcqlJwtCredential(vc.decoded)
               case 'ldp_vp':
-                return Dcql.toDcqlJsonLdCredential(vc)
+                return Dcql.toDcqlJsonLdCredential(vc.decoded)
               default:
                 const format: string = (p as any).format;
                 throw new Error(`Unknown DcqlPresentation format ${format}`)
@@ -83,39 +85,39 @@ export class Dcql {
     return DcqlPresentationResult.fromDcqlPresentation(dcqlPresentation, { dcqlQuery })
   }
 
-  static toDcqlMdocCredential = (vc: WrappedMdocCredential): DcqlMdocCredential => {
+  static toDcqlMdocCredential = (vc: MdocDocument): DcqlMdocCredential => {
     return {
       credential_format: 'mso_mdoc',
-      doctype: vc.credential.toJson().docType,
-      namespaces: vc.decoded,
+      doctype: vc.toJson().docType,
+      namespaces: getMdocDecodedPayload(vc),
       cryptographic_holder_binding: hasCryptographicHolderBinding('mso_mdoc', vc),
     } satisfies DcqlMdocCredential
   }
 
-  static toDcqlSdJwtCredential = (vc: WrappedSdJwtVerifiableCredential): DcqlSdJwtVcCredential => {
+  static toDcqlSdJwtCredential = (vc: SdJwtDecodedVerifiableCredentialPayload): DcqlSdJwtVcCredential => {
     return {
       credential_format: 'dc+sd-jwt',
-      vct: vc.decoded.vct,
-      claims: vc.decoded,
+      vct: vc.vct,
+      claims: vc,
       cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', vc),
     } satisfies DcqlSdJwtVcCredential
   }
 
-  static toDcqlJwtCredential = (vc: WrappedW3CVerifiableCredential): DcqlW3cVcCredential => {
+  static toDcqlJwtCredential = (vc: JwtDecodedVerifiableCredential): DcqlW3cVcCredential => {
     return {
       credential_format: 'jwt_vc_json',
-      claims: vc.decoded,
+      claims: vc.vc.credentialSubject as { [x: string]: Json },
       cryptographic_holder_binding: hasCryptographicHolderBinding('jwt_vc_json', vc),
-      type: vc.credential.type,
+      type: vc.vc.type,
     } satisfies DcqlW3cVcCredential
   }
 
-  static toDcqlJsonLdCredential = (vc: WrappedW3CVerifiableCredential): DcqlW3cVcCredential => {
+  static toDcqlJsonLdCredential = (vc: IVerifiableCredential): DcqlW3cVcCredential => {
     return {
       credential_format: 'ldp_vc',
-      claims: vc.decoded,
+      claims: vc.credentialSubject as { [x: string]: Json },
       cryptographic_holder_binding: hasCryptographicHolderBinding('ldp_vc', vc),
-      type: vc.credential.type,
+      type: vc.type,
     } satisfies DcqlW3cVcCredential
   }
 

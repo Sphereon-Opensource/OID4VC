@@ -83,7 +83,7 @@ const dcqlCredential = {
     credential_format: 'dc+sd-jwt',
     vct: SD_JWT_VC.decodedPayload.vct,
     claims: SD_JWT_VC.decodedPayload,
-    cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', CredentialMapper.toWrappedVerifiableCredential(SD_JWT_VC.compactJwtVc)),
+    cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', CredentialMapper.toWrappedVerifiableCredential(SD_JWT_VC.compactJwtVc).decoded),
 } satisfies DcqlSdJwtVcCredential
 
 describe.skip('RP and OP interaction should', () => {
