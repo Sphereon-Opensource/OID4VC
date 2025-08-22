@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 import { defaultHasher, SigningAlgo } from '@sphereon/oid4vc-common'
-import {CredentialMapper, decodeSdJwtVc} from '@sphereon/ssi-types'
+import {CredentialMapper, decodeSdJwtVc, SdJwtDecodedVerifiableCredentialPayload} from '@sphereon/ssi-types'
 import {DcqlCredential, DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlSdJwtVcCredential} from 'dcql'
 import { describe, expect, it } from 'vitest'
 import {
@@ -83,7 +83,7 @@ const dcqlCredential = {
     credential_format: 'dc+sd-jwt',
     vct: SD_JWT_VC.decodedPayload.vct,
     claims: SD_JWT_VC.decodedPayload,
-    cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', CredentialMapper.toWrappedVerifiableCredential(SD_JWT_VC.compactJwtVc).decoded),
+    cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', CredentialMapper.toWrappedVerifiableCredential(SD_JWT_VC.compactJwtVc).decoded as SdJwtDecodedVerifiableCredentialPayload),
 } satisfies DcqlSdJwtVcCredential
 
 describe.skip('RP and OP interaction should', () => {
