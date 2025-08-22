@@ -6,7 +6,7 @@ import {
   IVerifiablePresentation,
   JwtDecodedVerifiableCredential,
   MdocDocument,
-  SdJwtDecodedVerifiableCredentialPayload,
+  SdJwtDecodedVerifiableCredential,
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation
 } from '@sphereon/ssi-types'
@@ -121,26 +121,24 @@ export const extractPresentationsFromDcqlVpToken = (
 // FIXME probably too naive
 export const hasCryptographicHolderBinding = (
     format: 'mso_mdoc' | 'dc+sd-jwt' | 'jwt_vc_json' | 'ldp_vc',
-    vc: MdocDocument | SdJwtDecodedVerifiableCredentialPayload | JwtDecodedVerifiableCredential | IVerifiableCredential //WrappedMdocCredential | WrappedSdJwtVerifiableCredential | WrappedW3CVerifiableCredential
+    vc: MdocDocument | SdJwtDecodedVerifiableCredential | JwtDecodedVerifiableCredential | IVerifiableCredential
 ): boolean => {
   switch (format) {
     case 'mso_mdoc':
       return true
     case 'dc+sd-jwt': {
-      const sdJwt = vc as SdJwtDecodedVerifiableCredentialPayload//WrappedSdJwtVerifiableCredential
-      return Boolean(sdJwt.cnf?.jwk || sdJwt.cnf?.kid)
+      const sdJwt = vc as SdJwtDecodedVerifiableCredential
+      return Boolean(sdJwt.decodedPayload.cnf?.jwk || sdJwt.decodedPayload.cnf?.kid)
     }
     case 'jwt_vc_json': {
       const jwt = vc as JwtDecodedVerifiableCredential//WrappedW3CVerifiableCredential
       const proof = jwt.vc?.proof
       return Boolean(Array.isArray(proof) ? proof.some(proof => proof.verificationMethod !== undefined) : (proof as IProof).verificationMethod !== undefined)
-      //return Boolean(jwt.decoded?.proof?.verificationMethod)
     }
     case 'ldp_vc': {
       const ldp = vc as IVerifiableCredential
       const proof = ldp.proof
       return Boolean(Array.isArray(proof) ? proof.some(proof => proof.verificationMethod !== undefined) : (proof as IProof).verificationMethod !== undefined)
-      //return Boolean(ldp.decoded?.proof?.verificationMethod)
     }
   }
 }

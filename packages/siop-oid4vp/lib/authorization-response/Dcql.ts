@@ -1,10 +1,11 @@
 import {
+  decodeSdJwtVc,
   getMdocDecodedPayload,
   HasherSync,
   IVerifiableCredential,
   JwtDecodedVerifiableCredential,
   MdocDocument,
-  SdJwtDecodedVerifiableCredentialPayload,
+  SdJwtDecodedVerifiableCredential,
 } from '@sphereon/ssi-types'
 import {
   DcqlMdocCredential,
@@ -65,13 +66,15 @@ export class Dcql {
           const credentials = p.vcs.map(vc => {
             switch (p.format) {
               case 'mso_mdoc':
-                return Dcql.toDcqlMdocCredential(vc.decoded)
-              case 'vc+sd-jwt':
-                return Dcql.toDcqlSdJwtCredential(vc.decoded)
+                return Dcql.toDcqlMdocCredential(vc.original)
+              case 'vc+sd-jwt': {
+                const decoded = typeof vc.original === 'string' ? decodeSdJwtVc(vc.original, opts.hasher) : vc.original
+                return Dcql.toDcqlSdJwtCredential(decoded)
+              }
               case 'jwt_vp':
-                return Dcql.toDcqlJwtCredential(vc.decoded)
+                return Dcql.toDcqlJwtCredential(vc.original)
               case 'ldp_vp':
-                return Dcql.toDcqlJsonLdCredential(vc.decoded)
+                return Dcql.toDcqlJsonLdCredential(vc.original)
               default:
                 const format: string = (p as any).format;
                 throw new Error(`Unknown DcqlPresentation format ${format}`)
@@ -94,11 +97,11 @@ export class Dcql {
     } satisfies DcqlMdocCredential
   }
 
-  static toDcqlSdJwtCredential = (vc: SdJwtDecodedVerifiableCredentialPayload): DcqlSdJwtVcCredential => {
+  static toDcqlSdJwtCredential = (vc: SdJwtDecodedVerifiableCredential): DcqlSdJwtVcCredential => {
     return {
       credential_format: 'dc+sd-jwt',
-      vct: vc.vct,
-      claims: vc,
+      vct: vc.decodedPayload.vct,
+      claims: vc.decodedPayload,
       cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', vc),
     } satisfies DcqlSdJwtVcCredential
   }
