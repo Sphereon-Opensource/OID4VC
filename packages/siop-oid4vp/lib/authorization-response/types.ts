@@ -19,7 +19,8 @@ import {
   VerifiablePresentationWithFormat,
   Verification,
   CreateJwtCallback,
-  VerifyJwtCallback
+  VerifyJwtCallback,
+  ResponseIss
 } from '../types'
 
 export interface AuthorizationResponseOpts {
@@ -86,4 +87,15 @@ export interface AuthorizationResponseWithCorrelationId {
   responseURI: string
   response: AuthorizationResponse
   correlationId: string
+}
+
+export interface CreateAuthorizationResponseOpts {
+  jwtIssuer?: JwtIssuer
+  version?: SupportedVersion
+  correlationId?: string
+  audience?: string
+  issuer?: ResponseIss | string
+  verification?: Verification
+  dcqlResponse?: DcqlResponseOpts
+  isFirstParty?: boolean
 }
