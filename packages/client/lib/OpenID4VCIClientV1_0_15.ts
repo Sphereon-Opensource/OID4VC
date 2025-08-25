@@ -520,7 +520,6 @@ export class OpenID4VCIClientV1_0_15 {
       callbacks: proofCallbacks,
       version: this.version()
     })
-      .withIssuer(this.getIssuer())
       .withAlg(this.alg)
 
     if (this._state.jwk) {
@@ -529,7 +528,7 @@ export class OpenID4VCIClientV1_0_15 {
     if (this._state.kid) {
       proofBuilder.withKid(this._state.kid)
     }
-    if (this.clientId) {
+    if (this.clientId && (!this.credentialOffer || this.credentialOffer.supportedFlows.includes(AuthzFlowType.AUTHORIZATION_CODE_FLOW) && !this.credentialOffer.preAuthorizedCode)) {
       proofBuilder.withClientId(this.clientId)
     }
     if (jti) {

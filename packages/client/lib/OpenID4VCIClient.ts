@@ -549,7 +549,7 @@ export class OpenID4VCIClient {
         proofBuilder.withKid(this._state.kid)
       }
 
-      if (this.clientId) {
+      if (this.clientId && (!this.credentialOffer || this.credentialOffer.supportedFlows.includes(AuthzFlowType.AUTHORIZATION_CODE_FLOW) && !this.credentialOffer.preAuthorizedCode)) {
         proofBuilder.withClientId(this.clientId)
       }
       if (jti) {
