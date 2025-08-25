@@ -520,6 +520,7 @@ export class OpenID4VCIClientV1_0_15 {
       callbacks: proofCallbacks,
       version: this.version()
     })
+      .withIssuer(this.getIssuer())
       .withAlg(this.alg)
 
     if (this._state.jwk) {
