@@ -10,6 +10,7 @@ import { CredentialOfferPayloadV1_0_08, CredentialRequestV1_0_08 } from './v1_0_
 import { CredentialOfferPayloadV1_0_09, CredentialOfferV1_0_09 } from './v1_0_09.types'
 import { CredentialOfferPayloadV1_0_11, CredentialOfferV1_0_11, CredentialRequestV1_0_11 } from './v1_0_11.types'
 import { CredentialOfferPayloadV1_0_13, CredentialOfferV1_0_13, CredentialRequestV1_0_13 } from './v1_0_13.types'
+import { CredentialOfferPayloadV1_0_15, CredentialRequestV1_0_15 } from './v1_0_15.types'
 
 export interface CredentialResponse extends ExperimentalSubjectIssuance {
   credential?: IVerifiableCredential | string // OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
@@ -33,9 +34,9 @@ export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOffe
 
 export type CredentialOffer = CredentialOfferV1_0_09 | CredentialOfferV1_0_11 | CredentialOfferV1_0_13
 
-export type CredentialOfferPayloadLatest = CredentialOfferPayloadV1_0_13
+export type CredentialOfferPayloadLatest = CredentialOfferPayloadV1_0_15
 
-export type CredentialRequest = UniformCredentialRequest | CredentialRequestV1_0_13 | CredentialRequestV1_0_11 | CredentialRequestV1_0_08
+export type CredentialRequest = UniformCredentialRequest | CredentialRequestV1_0_15 | CredentialRequestV1_0_13 | CredentialRequestV1_0_11 | CredentialRequestV1_0_08
 
 export type CredentialOfferPayload = (
   | CredentialOfferPayloadV1_0_08
@@ -61,8 +62,8 @@ export interface UniformCredentialOfferRequest extends AssertedUniformCredential
   supportedFlows: AuthzFlowType[]
 }
 
-//todo: drop v11
-export type UniformCredentialOfferPayload = CredentialOfferPayloadV1_0_11 | CredentialOfferPayloadV1_0_13
+//todo: drop v11 (done for now, but maybe not final)
+export type UniformCredentialOfferPayload = CredentialOfferPayloadV1_0_11 | CredentialOfferPayloadV1_0_13 | CredentialOfferPayloadV1_0_15
 
 export interface ProofOfPossession {
   proof_type: 'jwt'

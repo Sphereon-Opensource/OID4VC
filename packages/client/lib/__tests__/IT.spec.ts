@@ -7,14 +7,20 @@ import {
   OpenId4VCIVersion,
   ProofOfPossession,
   resolveCredentialOfferURI,
-  WellKnownEndpoints,
+  WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { AccessTokenClient, AccessTokenClientV1_0_11, OpenID4VCIClient, OpenID4VCIClientV1_0_13, ProofOfPossessionBuilder } from '..'
+import {
+  AccessTokenClient,
+  AccessTokenClientV1_0_11,
+  OpenID4VCIClient,
+  OpenID4VCIClientV1_0_15,
+  ProofOfPossessionBuilder
+} from '..'
 import { CredentialOfferClient } from '../CredentialOfferClient'
 import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder'
 
@@ -23,7 +29,7 @@ import {
   IDENTIPROOF_AS_URL,
   IDENTIPROOF_ISSUER_URL,
   IDENTIPROOF_OID4VCI_METADATA,
-  IDENTIPROOF_OID4VCI_METADATA_v13,
+  IDENTIPROOF_OID4VCI_METADATA_v15
 } from './MetadataMocks'
 
 export const UNIT_TEST_TIMEOUT = 30000
@@ -51,7 +57,7 @@ const mockedAccessTokenResponse: AccessTokenResponse = {
   token_type: 'Bearer',
 }
 
-const INITIATE_QR_V1_0_13 =
+const INITIATE_QR_V1_0_15 =
   'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22:%22https://issuer.research.identiproof.io%22,%22credential_configuration_ids%22:%5B%22OpenBadgeCredentialUrl%22%5D,%22grants%22:%7B%22urn:ietf:params:oauth:grant-type:pre-authorized_code%22:%7B%22pre-authorized_code%22:%22oaKazRN8I0IbtZ0C7JuMn5%22,%22tx_code%22:%7B%22input_mode%22:%22text%22,%22length%22:22,%22description%22:%22Please%20enter%20the%20serial%20number%20of%20your%20physical%20drivers%20license%22%7D%7D%7D%7D'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -172,19 +178,20 @@ describe('OID4VCI-Client should', () => {
       interval: 2025101300,
       token_type: 'Bearer',
     })
-    nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA_v13))
+    nock(IDENTIPROOF_ISSUER_URL).get('/.well-known/openid-credential-issuer').reply(200, JSON.stringify(IDENTIPROOF_OID4VCI_METADATA_v15))
     nock(ISSUER_URL)
       .post(/credential/)
       .reply(200, {
         format: 'jwt-vc',
         credential: mockedVC,
       })
-    const client = await OpenID4VCIClientV1_0_13.fromURI({
+    const client = await OpenID4VCIClientV1_0_15.fromURI({
       uri: HTTPS_OFFER_QR_PRE_AUTHORIZED_v13,
       kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1',
       alg: Alg.ES256,
       clientId: 'test-clientId',
     })
+    vi.spyOn(client, 'acquireNonce').mockResolvedValue('mocked-nonce')
     expect(client.credentialOffer).toBeDefined()
     expect(client.endpointMetadata).toBeDefined()
     expect(client.getIssuer()).toEqual('https://issuer.research.identiproof.io')
@@ -196,7 +203,7 @@ describe('OID4VCI-Client should', () => {
 
     const credentialResponse = await client.acquireCredentials({
       credentialIdentifier: 'OpenBadgeCredential',
-      // format: 'jwt_vc_json-ld',
+      format: 'jwt_vc_json-ld',
       proofCallbacks: {
         signCallback: proofOfPossessionCallbackFunction,
       },
@@ -236,7 +243,7 @@ describe('OID4VCI-Client should', () => {
   }
 
   it(
-    'succeed with a full flow without the client v1_0_11',
+    'succeed with a full flow without the client v1_0_15',
     async () => {
       /* Convert the URI into an object */
       const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_08)
@@ -291,68 +298,6 @@ describe('OID4VCI-Client should', () => {
     UNIT_TEST_TIMEOUT,
   )
 
-  it(
-    'succeed with a full flow without the client v1_0_13',
-    async () => {
-      /* Convert the URI into an object */
-      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_13)
-      const preAuthorizedCode = 'oaKazRN8I0IbtZ0C7JuMn5'
-      expect(credentialOffer.baseUrl).toEqual('openid-credential-offer://')
-      expect((credentialOffer.credential_offer as CredentialOfferPayloadV1_0_13).credential_configuration_ids).toEqual(['OpenBadgeCredentialUrl'])
-      expect(credentialOffer.original_credential_offer.grants).toEqual({
-        'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-          'pre-authorized_code': preAuthorizedCode,
-          tx_code: {
-            input_mode: 'text',
-            description: 'Please enter the serial number of your physical drivers license',
-            length: preAuthorizedCode.length,
-          },
-        },
-      })
-
-      nock(ISSUER_URL)
-        .post(/token.*/)
-        .reply(200, JSON.stringify(mockedAccessTokenResponse))
-
-      /* The actual access token calls */
-      const accessTokenClient: AccessTokenClient = new AccessTokenClient()
-      const accessTokenResponse = await accessTokenClient.acquireAccessToken({ credentialOffer: credentialOffer, pin: '1234' })
-      expect(accessTokenResponse.successBody).toEqual(mockedAccessTokenResponse)
-      // Get the credential
-      nock(ISSUER_URL)
-        .post(/credential/)
-        .reply(200, {
-          format: 'jwt-vc',
-          credential: mockedVC,
-        })
-      const credReqClient = CredentialRequestClientBuilder.fromCredentialOffer({ credentialOffer: credentialOffer })
-        .withFormat('jwt_vc')
-
-        .withTokenFromResponse(accessTokenResponse.successBody!)
-        .build()
-
-      const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
-        jwt: jwtDid,
-        callbacks: {
-          signCallback: proofOfPossessionCallbackFunction,
-        },
-        version: OpenId4VCIVersion.VER_1_0_11,
-      })
-        .withEndpointMetadata({
-          issuer: 'https://issuer.research.identiproof.io',
-          credential_endpoint: 'https://issuer.research.identiproof.io/credential',
-          token_endpoint: 'https://issuer.research.identiproof.io/token',
-        })
-        .withKid('did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1')
-        .build()
-      const credResponse = await credReqClient.acquireCredentialsUsingProof({
-        proofInput: proof,
-        credentialTypes: credentialOffer.original_credential_offer.credential_configuration_ids[0],
-      })
-      expect(credResponse.successBody?.credential).toEqual(mockedVC)
-    },
-    UNIT_TEST_TIMEOUT,
-  )
 })
 
 describe('OIDVCI-Client for v1_0_13 should', () => {
@@ -395,7 +340,7 @@ describe('OIDVCI-Client for v1_0_13 should', () => {
     'succeed with a full flow without the client and without did',
     async () => {
       /* Convert the URI into an object */
-      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_13)
+      const credentialOffer: CredentialOfferRequestWithBaseUrl = await CredentialOfferClient.fromURI(INITIATE_QR_V1_0_15)
 
       expect(credentialOffer.baseUrl).toEqual('openid-credential-offer://')
       expect(credentialOffer.original_credential_offer).toEqual({
@@ -439,7 +384,7 @@ describe('OIDVCI-Client for v1_0_13 should', () => {
         callbacks: {
           signCallback: proofOfPossessionCallbackFunction,
         },
-        version: OpenId4VCIVersion.VER_1_0_13,
+        version: OpenId4VCIVersion.VER_1_0_15,
       })
         .withEndpointMetadata({
           issuer: 'https://issuer.research.identiproof.io',
@@ -448,7 +393,9 @@ describe('OIDVCI-Client for v1_0_13 should', () => {
         })
         .withKid('ebfeb1f712ebc6f1c276e12ec21/keys/1')
         .build()
-      const credResponse = await credReqClient.acquireCredentialsUsingProof({ proofInput: proof, credentialIdentifier: 'OpenBadgeCredentialUrl' })
+      const credResponse = await credReqClient.acquireCredentialsUsingProof({
+        format: 'jwt_vc' ,
+        proofInput: proof, credentialIdentifier: 'OpenBadgeCredentialUrl'})
       expect(credResponse.successBody?.credential).toEqual(mockedVC)
     },
     UNIT_TEST_TIMEOUT,

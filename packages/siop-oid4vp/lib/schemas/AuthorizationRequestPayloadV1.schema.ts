@@ -93,7 +93,7 @@ export const AuthorizationRequestPayloadV1SchemaObj = {
           "type": "string"
         },
         "dcql_query": {
-          "type": "string"
+          "type": "object"
         },
         "request_uri_method": {
           "$ref": "#/definitions/RequestUriMethod"

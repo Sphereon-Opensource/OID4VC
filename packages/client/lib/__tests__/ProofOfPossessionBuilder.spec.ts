@@ -62,7 +62,7 @@ describe('ProofOfPossession Builder ', () => {
 
   it('should fail without supplied proof or callbacks and with kid without did', async function () {
     await expect(
-      ProofOfPossessionBuilder.fromProof(undefined as never, OpenId4VCIVersion.VER_1_0_13)
+      ProofOfPossessionBuilder.fromProof(undefined as never, OpenId4VCIVersion.VER_1_0_15)
         .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withClientId('sphereon:wallet')
         .withKid(kid_withoutDid)

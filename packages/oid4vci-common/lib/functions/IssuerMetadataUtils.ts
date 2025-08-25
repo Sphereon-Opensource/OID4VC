@@ -1,4 +1,4 @@
-import { VCI_LOG_COMMON } from '../index'
+import { CredentialConfigurationSupportedV1_0_15, VCI_LOG_COMMON } from '../index'
 import {
   AuthorizationServerMetadata,
   CredentialConfigurationSupported,
@@ -17,8 +17,8 @@ export function getSupportedCredentials(opts?: {
   version: OpenId4VCIVersion
   types?: string[][]
   format?: OID4VCICredentialFormat | string | (OID4VCICredentialFormat | string)[]
-}): Record<string, CredentialConfigurationSupportedV1_0_13> | Array<CredentialConfigurationSupported> {
-  const { version = OpenId4VCIVersion.VER_1_0_13, types } = opts ?? {}
+}): Record<string, CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0_13> | Array<CredentialConfigurationSupported> {
+  const { version = OpenId4VCIVersion.VER_1_0_15, types } = opts ?? {}
   if (types && Array.isArray(types)) {
     if (version < OpenId4VCIVersion.VER_1_0_13) {
       return types.flatMap((typeSet) => getSupportedCredential({ ...opts, version, types: typeSet }) as Array<CredentialConfigurationSupported>)
@@ -42,11 +42,14 @@ export function getSupportedCredentials(opts?: {
 
 export function determineVersionsFromIssuerMetadata(issuerMetadata: CredentialIssuerMetadata | IssuerMetadata): Array<OpenId4VCIVersion> {
   const versions = new Set<OpenId4VCIVersion>()
-  if ('authorization_server' in issuerMetadata) {
+  if ('credential_configurations_supported' in issuerMetadata) {
+    versions.add(OpenId4VCIVersion.VER_1_0_15)
+  } else if ('authorization_server' in issuerMetadata) {
     versions.add(OpenId4VCIVersion.VER_1_0_11)
   } else if ('authorization_servers' in issuerMetadata) {
     versions.add(OpenId4VCIVersion.VER_1_0_13)
   }
+
   if (versions.size === 0) {
     // The above checks where already very specific and only applicable to single versions we support, so let's skip if we encounter them
     if ('credential_configurations_supported' in issuerMetadata) {
@@ -71,11 +74,12 @@ export function getSupportedCredential(opts?: {
   version: OpenId4VCIVersion
   types?: string | string[]
   format?: OID4VCICredentialFormat | string | (OID4VCICredentialFormat | string)[]
-}): Record<string, CredentialConfigurationSupportedV1_0_13> | Array<CredentialConfigurationSupported> {
-  const { issuerMetadata, types, format, version = OpenId4VCIVersion.VER_1_0_13 } = opts ?? {}
+}): Record<string, CredentialConfigurationSupportedV1_0_13> | Record<string, CredentialConfigurationSupportedV1_0_15> | Array<CredentialConfigurationSupported> {
+  const { issuerMetadata, types, format, version = OpenId4VCIVersion.VER_1_0_15 } = opts ?? {}
 
   let credentialConfigurationsV11: Array<CredentialConfigurationSupported> | undefined = undefined
   let credentialConfigurationsV13: Record<string, CredentialConfigurationSupportedV1_0_13> | undefined = undefined
+  let credentialConfigurationsV15: Record<string, CredentialConfigurationSupportedV1_0_15> | undefined = undefined
   if (
     version < OpenId4VCIVersion.VER_1_0_12 ||
     (issuerMetadata?.credential_configurations_supported === undefined && issuerMetadata?.credentials_supported)
@@ -90,17 +94,28 @@ export function getSupportedCredential(opts?: {
         }
         credentialConfigurationsV11?.push(supported as CredentialConfigurationSupported)
       })
+    } else if (version >= OpenId4VCIVersion.VER_1_0_15) {
+      credentialConfigurationsV15 =
+        (issuerMetadata?.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_15>) ?? {}
     } else {
       credentialConfigurationsV11 = (issuerMetadata?.credentials_supported as Array<CredentialConfigurationSupported>) ?? []
     }
-  } else {
+  } else if(version == OpenId4VCIVersion.VER_1_0_13) {
     credentialConfigurationsV13 =
       (issuerMetadata?.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_13>) ?? {}
+  } else {
+    credentialConfigurationsV15 =
+      (issuerMetadata?.credential_configurations_supported as Record<string, CredentialConfigurationSupportedV1_0_15>) ?? {}
   }
   if (!issuerMetadata || (!issuerMetadata.credential_configurations_supported && !issuerMetadata.credentials_supported)) {
     VCI_LOG_COMMON.warning(`No credential issuer metadata or supported credentials found for issuer}`)
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return version < OpenId4VCIVersion.VER_1_0_13 ? credentialConfigurationsV11! : credentialConfigurationsV13!
+    if (version < OpenId4VCIVersion.VER_1_0_13) {
+      return credentialConfigurationsV11!
+    } else if (version >= OpenId4VCIVersion.VER_1_0_15) {
+      return credentialConfigurationsV15!
+    } else {
+      return credentialConfigurationsV15!
+    }
   }
 
   const normalizedTypes: string[] = Array.isArray(types) ? types : types ? [types] : []
@@ -115,12 +130,20 @@ export function getSupportedCredential(opts?: {
       } else if (types) {
         isTypeMatch = normalizedTypes.every((type) => types.includes(type))
       } else {
-        if (isW3cCredentialSupported(config) && 'credential_definition' in config) {
-          isTypeMatch = normalizedTypes.every((type) => config.credential_definition.type.includes(type))
+        // Type guard to check if credential_definition has the expected structure
+        const hasValidCredentialDefinition = isW3cCredentialSupported(config)
+          && 'credential_definition' in config
+          && config.credential_definition
+          && typeof config.credential_definition === 'object' && true && 'type' in config.credential_definition
+          && Array.isArray(config.credential_definition.type)
+
+        if (hasValidCredentialDefinition) {
+          const credDef = config.credential_definition as { type: string[] }
+          isTypeMatch = normalizedTypes.every((type) => credDef.type.includes(type))
         } else if (isW3cCredentialSupported(config) && 'type' in config && Array.isArray(config.type)) {
           isTypeMatch = normalizedTypes.every((type) => (config.type as string[]).includes(type))
-        } else if (isW3cCredentialSupported(config) && 'types' in config) {
-          isTypeMatch = normalizedTypes.every((type) => config.types?.includes(type))
+        } else if (isW3cCredentialSupported(config) && 'types' in config && Array.isArray(config.types)) {
+          isTypeMatch = normalizedTypes.every((type) => (config.types as string[]).includes(type))
         }
       }
     }
@@ -130,7 +153,21 @@ export function getSupportedCredential(opts?: {
     return isTypeMatch && isFormatMatch ? config : undefined
   }
 
-  if (credentialConfigurationsV13) {
+  if (credentialConfigurationsV15) {
+    return Object.entries(credentialConfigurationsV15).reduce(
+      (filteredConfigs, [id, config]) => {
+        if (filterMatchingConfig(config)) {
+          filteredConfigs[id] = config
+          // Added to enable support < 13. We basically assign the
+          if (!config.id) {
+            config.id = id
+          }
+        }
+        return filteredConfigs
+      },
+      {} as Record<string, CredentialConfigurationSupportedV1_0_15>
+    )
+  } else if (credentialConfigurationsV13) {
     return Object.entries(credentialConfigurationsV13).reduce(
       (filteredConfigs, [id, config]) => {
         if (filterMatchingConfig(config)) {
@@ -142,7 +179,7 @@ export function getSupportedCredential(opts?: {
         }
         return filteredConfigs
       },
-      {} as Record<string, CredentialConfigurationSupportedV1_0_13>,
+      {} as Record<string, CredentialConfigurationSupportedV1_0_13>
     )
   } else if (credentialConfigurationsV11) {
     return credentialConfigurationsV11.filter((config) => filterMatchingConfig(config))

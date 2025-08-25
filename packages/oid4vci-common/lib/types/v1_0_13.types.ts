@@ -9,7 +9,7 @@ import {
   CredentialDataSupplierInput,
   CredentialOfferMode,
   CredentialRequestMsoMdoc,
-  CredentialRequestSdJwtVc,
+  CredentialRequestSdJwtVc, CredentialRequestSdJwtVcV13,
   CredentialsSupportedDisplay,
   CredentialSupplierConfig,
   EncValue,
@@ -19,7 +19,7 @@ import {
   OID4VCICredentialFormat,
   ProofTypesSupported,
   ResponseEncryption,
-  StatusListOpts,
+  StatusListOpts
 } from './Generic.types'
 import { QRCodeOpts } from './QRCode.types'
 import { AuthorizationServerMetadata, AuthorizationServerType, EndpointMetadata } from './ServerMetadata'
@@ -117,7 +117,7 @@ export type CredentialRequestV1_0_13 = CredentialRequestV1_0_13Common &
   (
     | CredentialRequestJwtVcJsonV1_0_13
     | CredentialRequestJwtVcJsonLdAndLdpVcV1_0_13
-    | CredentialRequestSdJwtVc
+    | CredentialRequestSdJwtVcV13
     | CredentialRequestMsoMdoc
     | CredentialRequestV1_0_13CredentialIdentifier
   )
