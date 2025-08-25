@@ -332,7 +332,7 @@ describe('create JWT from Request JWT should', () => {
           response_type: 'id_token vp_token',
           response_mode: ResponseMode.DIRECT_POST,
           redirect_uri: EXAMPLE_REDIRECT_URL,
-          dcql_query: JSON.stringify(parsedDcqlQuery),
+          dcql_query: parsedDcqlQuery,
         },
       },
       clientMetadata: {

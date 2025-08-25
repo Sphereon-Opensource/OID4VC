@@ -26,7 +26,7 @@ import { AuthorizationRequestPayload } from '../types'
 
 export class Dcql {
   static findValidDcqlQuery = async (authorizationRequestPayload: AuthorizationRequestPayload): Promise<DcqlQuery | undefined> => {
-    const dcqlQuery: string[] = extractDataFromPath(authorizationRequestPayload ?? {}, '$..dcql_query').map((d) => d.value)
+    const dcqlQuery: DcqlQuery.Input[] = extractDataFromPath(authorizationRequestPayload ?? {}, '$..dcql_query').map((d) => d.value)
 
     if (dcqlQuery.length === 0) {
       return undefined
@@ -36,7 +36,7 @@ export class Dcql {
       throw new Error('Found multiple dcql_query in vp_token. Only one is allowed')
     }
 
-    return DcqlQuery.parse(JSON.parse(dcqlQuery[0]))
+    return DcqlQuery.parse(dcqlQuery[0])
   }
 
   static getDcqlPresentationResult = (
