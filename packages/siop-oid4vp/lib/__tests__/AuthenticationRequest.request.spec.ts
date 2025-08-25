@@ -628,7 +628,7 @@ describe('create Request JWT should', () => {
           request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
           claims: {
             vp_token: {
-              dcql_query: JSON.stringify(parsedDcqlQuery),
+              dcql_query: parsedDcqlQuery,
             },
           },
         },
