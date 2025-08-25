@@ -93,7 +93,7 @@ export const AuthorizationRequestPayloadD28SchemaObj = {
           "type": "string"
         },
         "dcql_query": {
-          "type": "string"
+          "type": "object"
         },
         "transaction_data": {
           "type": "array",
