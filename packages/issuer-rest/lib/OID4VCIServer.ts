@@ -2,18 +2,17 @@ import {
   AuthorizationRequest,
   ClientMetadata,
   CreateCredentialOfferURIResult,
-  CredentialConfigurationSupportedV1_0_13,
+  CredentialConfigurationSupportedV1_0_15,
   CredentialOfferMode,
-  IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
-  QRCodeOpts,
+  QRCodeOpts
 } from '@sphereon/oid4vci-common'
 import {
-  CredentialSupportedBuilderV1_13,
+  CredentialSupportedBuilderV1_15,
   ITokenEndpointOpts,
   oidcAccessTokenVerifyCallback,
   VcIssuer,
-  VcIssuerBuilder,
+  VcIssuerBuilder
 } from '@sphereon/oid4vci-issuer'
 import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
 import express, { Express } from 'express'
@@ -29,11 +28,11 @@ import {
   getCredentialOfferReferenceEndpoint,
   getIssueStatusEndpoint,
   getMetadataEndpoints,
-  pushedAuthorizationEndpoint,
+  pushedAuthorizationEndpoint
 } from './oid4vci-api-functions'
 
 function buildVCIFromEnvironment() {
-  const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+  const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_15> = new CredentialSupportedBuilderV1_15()
     .withCredentialSigningAlgValuesSupported(process.env.credential_signing_alg_values_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
     .withFormat(process.env.credential_supported_format as unknown as OID4VCICredentialFormat)
@@ -53,13 +52,13 @@ function buildVCIFromEnvironment() {
       background_color: process.env.credential_display_background_color as string,
       text_color: process.env.credential_display_text_color as string,
     })
-    .addCredentialSubjectPropertyDisplay(
+    /*.addCredentialSubjectPropertyDisplay( TODO doublecheck removal from the spec
       process.env.credential_subject_display_key1 as string,
       {
         name: process.env.credential_subject_display_key1_name as string,
         locale: process.env.credential_subject_display_key1_locale as string,
       } as IssuerCredentialSubjectDisplay, // fixme: This is wrong (remove the cast and see it has no matches)
-    )
+    )*/
     .build()
   const issuerBuilder = new VcIssuerBuilder()
     .withTXCode({ length: process.env.user_pin_length as unknown as number, input_mode: process.env.user_pin_input_mode as 'numeric' | 'text' })

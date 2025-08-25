@@ -3,11 +3,11 @@ import {
   ClientMetadata,
   ClientResponseType,
   CNonceState,
-  CredentialConfigurationSupportedV1_0_13,
-  CredentialIssuerMetadataOptsV1_0_13,
+  CredentialConfigurationSupportedV1_0_15,
+  CredentialIssuerMetadataOptsV1_0_15,
   CredentialOfferSession,
   IssuerMetadata,
-  IssuerMetadataV1_0_13,
+  IssuerMetadataV1_0_15,
   IStateManager,
   JWTVerifyCallback,
   MetadataDisplay,
@@ -21,11 +21,11 @@ import { oidcAccessTokenVerifyCallback } from '../functions'
 import { MemoryStates } from '../state-manager'
 import { CredentialDataSupplier, CredentialSignerCallback } from '../types'
 
-import { IssuerMetadataBuilderV1_13 } from './IssuerMetadataBuilderV1_13'
+import { IssuerMetadataBuilderV1_15 } from './IssuerMetadataBuilderV1_15'
 
 export class VcIssuerBuilder {
-  issuerMetadataBuilder?: IssuerMetadataBuilderV1_13
-  issuerMetadata: Partial<CredentialIssuerMetadataOptsV1_0_13> = {}
+  issuerMetadataBuilder?: IssuerMetadataBuilderV1_15
+  issuerMetadata: Partial<CredentialIssuerMetadataOptsV1_0_15> = {}
   authorizationServerMetadata: Partial<AuthorizationServerMetadata> = {}
   asClientOpts?: ClientMetadata
   txCode?: TxCode
@@ -41,9 +41,9 @@ export class VcIssuerBuilder {
 
   public withIssuerMetadata(issuerMetadata: IssuerMetadata) {
     if (!issuerMetadata.credential_configurations_supported) {
-      throw new Error('IssuerMetadata should be from type v1_0_13 or higher.')
+      throw new Error('IssuerMetadata should be from type v1_0_15 or higher.')
     }
-    this.issuerMetadata = issuerMetadata as IssuerMetadataV1_0_13
+    this.issuerMetadata = issuerMetadata as IssuerMetadataV1_0_15
     return this
   }
 
@@ -68,7 +68,7 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withIssuerMetadataBuilder(builder: IssuerMetadataBuilderV1_13) {
+  public withIssuerMetadataBuilder(builder: IssuerMetadataBuilderV1_15) {
     this.issuerMetadataBuilder = builder
     return this
   }
@@ -93,12 +93,6 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withBatchCredentialEndpoint(batchCredentialEndpoint: string): this {
-    this.issuerMetadata.batch_credential_endpoint = batchCredentialEndpoint
-    throw Error('Not implemented yet')
-    // return this
-  }
-
   public withTokenEndpoint(tokenEndpoint: string): this {
     this.issuerMetadata.token_endpoint = tokenEndpoint
     return this
@@ -114,12 +108,12 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withCredentialConfigurationsSupported(credentialConfigurationsSupported: Record<string, CredentialConfigurationSupportedV1_0_13>) {
+  public withCredentialConfigurationsSupported(credentialConfigurationsSupported: Record<string, CredentialConfigurationSupportedV1_0_15>) {
     this.issuerMetadata.credential_configurations_supported = credentialConfigurationsSupported
     return this
   }
 
-  public addCredentialConfigurationsSupported(id: string, supportedCredential: CredentialConfigurationSupportedV1_0_13) {
+  public addCredentialConfigurationsSupported(id: string, supportedCredential: CredentialConfigurationSupportedV1_0_15) {
     if (!this.issuerMetadata.credential_configurations_supported) {
       this.issuerMetadata.credential_configurations_supported = {}
     }
@@ -197,7 +191,7 @@ export class VcIssuerBuilder {
     }
 
     const builder = this.issuerMetadataBuilder?.build()
-    const metadata: Partial<IssuerMetadataV1_0_13> = { ...this.issuerMetadata, ...builder }
+    const metadata: Partial<IssuerMetadataV1_0_15> = { ...this.issuerMetadata, ...builder }
     // Let's make sure these get merged correctly:
     metadata.credential_configurations_supported = this.issuerMetadata.credential_configurations_supported
     metadata.display = [...(this.issuerMetadata.display ?? []), ...(builder?.display ?? [])]
@@ -216,7 +210,7 @@ export class VcIssuerBuilder {
         authorizationServer: this.issuerMetadata.authorization_servers[0],
       })
     }
-    return new VcIssuer(metadata as IssuerMetadataV1_0_13, this.authorizationServerMetadata as AuthorizationServerMetadata, {
+    return new VcIssuer(metadata as IssuerMetadataV1_0_15, this.authorizationServerMetadata as AuthorizationServerMetadata, {
       //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
       ...(this.txCode && { txCode: this.txCode }),
       defaultCredentialOfferBaseUri: this.defaultCredentialOfferBaseUri,

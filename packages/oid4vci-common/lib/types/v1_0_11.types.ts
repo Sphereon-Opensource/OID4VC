@@ -1,4 +1,8 @@
-import { AuthorizationDetailsJwtVcJson, AuthorizationServerOpts, CommonAuthorizationRequest } from './Authorization.types'
+import {
+  AuthorizationDetailsJwtVcJson,
+  AuthorizationServerOpts,
+  CommonAuthorizationRequest
+} from './Authorization.types'
 import { UniformCredentialOffer, UniformCredentialOfferRequest } from './CredentialIssuance.types'
 import {
   CommonCredentialRequest,
@@ -7,8 +11,8 @@ import {
   CredentialOfferFormatV1_0_11,
   CredentialRequestJwtVcJson,
   CredentialRequestJwtVcJsonLdAndLdpVc,
-  CredentialRequestSdJwtVc,
-  Grant,
+  CredentialRequestSdJwtVcV13,
+  Grant
 } from './Generic.types'
 import { QRCodeOpts } from './QRCode.types'
 import { AuthorizationServerMetadata, AuthorizationServerType, EndpointMetadata } from './ServerMetadata'
@@ -80,7 +84,7 @@ export interface CredentialOfferPayloadV1_0_11 {
 }
 
 export type CredentialRequestV1_0_11 = CommonCredentialRequest &
-  (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVc)
+  (CredentialRequestJwtVcJson | CredentialRequestJwtVcJsonLdAndLdpVc | CredentialRequestSdJwtVcV13)
 
 export interface CredentialIssuerMetadataV1_0_11 extends CredentialIssuerMetadataOpts, Partial<AuthorizationServerMetadata> {
   authorization_servers?: string[] // OPTIONAL. Array of strings that identify the OAuth 2.0 Authorization Servers (as defined in [RFC8414]) the Credential Issuer relies on for authorization. If this element is omitted, the entity providing the Credential Issuer is also acting as the AS, i.e. the Credential Issuer's identifier is used as the OAuth 2.0 Issuer value to obtain the Authorization Server metadata as per [RFC8414].

@@ -1,9 +1,12 @@
-import { VCI_LOG_COMMON } from '../index'
+import {
+  CredentialConfigurationSupportedMsoMdocV1_0_15,
+  CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15, CredentialDefinitionJwtVcJsonV1_0_15,
+  VCI_LOG_COMMON
+} from '../index'
 import {
   AuthorizationDetails,
   CredentialConfigurationSupported,
-  CredentialConfigurationSupportedMsoMdocV1_0_13,
-  CredentialConfigurationSupportedSdJwtVcV1_0_13,
+  CredentialConfigurationSupportedSdJwtVcV1_0_15,
   CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13,
   CredentialDefinitionJwtVcJsonV1_0_13,
   CredentialOfferFormatV1_0_11,
@@ -13,16 +16,16 @@ import {
   CredentialSupportedSdJwtVc,
   JsonLdIssuerCredentialDefinition,
   UniformCredentialOfferPayload,
-  UniformCredentialOfferRequest,
+  UniformCredentialOfferRequest
 } from '../types'
 
 export function isW3cCredentialSupported(
   supported: CredentialConfigurationSupported | CredentialsSupportedLegacy,
 ): supported is Exclude<
   CredentialConfigurationSupported,
-  | CredentialConfigurationSupportedMsoMdocV1_0_13
+  | CredentialConfigurationSupportedMsoMdocV1_0_15
   | CredentialSupportedMsoMdoc
-  | CredentialConfigurationSupportedSdJwtVcV1_0_13
+  | CredentialConfigurationSupportedSdJwtVcV1_0_15
   | CredentialSupportedSdJwtVc
 > {
   return ['jwt_vc_json', 'jwt_vc_json-ld', 'ldp_vc', 'jwt_vc'].includes(supported.format)
@@ -42,6 +45,8 @@ export function getTypesFromObject(
     | CredentialOfferFormatV1_0_11
     | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13
     | CredentialDefinitionJwtVcJsonV1_0_13
+    | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15
+    | CredentialDefinitionJwtVcJsonV1_0_15
     | JsonLdIssuerCredentialDefinition
     | string,
 ): string[] | undefined {
@@ -54,6 +59,8 @@ export function getTypesFromObject(
       subject.credential_definition as
         | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13
         | CredentialDefinitionJwtVcJsonV1_0_13
+        | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15
+        | CredentialDefinitionJwtVcJsonV1_0_15
         | JsonLdIssuerCredentialDefinition,
     )
   } else if ('types' in subject && subject.types) {
@@ -116,7 +123,7 @@ export function getTypesFromCredentialSupported(
     credentialSupported.format === 'ldp_vc'
   ) {
     types = getTypesFromObject(credentialSupported) ?? []
-  } else if (credentialSupported.format === 'vc+sd-jwt') {
+  } else if (credentialSupported.format === 'dc+sd-jwt') {
     types = [credentialSupported.vct]
   } else if (credentialSupported.format === 'mso_mdoc') {
     types = [credentialSupported.doctype]

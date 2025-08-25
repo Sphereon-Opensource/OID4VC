@@ -13,6 +13,11 @@ import {
   EndpointMetadataResultV1_0_13,
   IssuerMetadataV1_0_13,
 } from './v1_0_13.types'
+import {
+  CredentialConfigurationSupportedV1_0_15,
+  CredentialRequestV1_0_15, EndpointMetadataResultV1_0_15,
+  IssuerMetadataV1_0_15
+} from './v1_0_15.types'
 
 export type InputCharSet = 'numeric' | 'text'
 export type KeyProofType = 'jwt' | 'cwt' | 'ldp_vp'
@@ -31,7 +36,16 @@ export interface ImageInfo {
   [key: string]: unknown
 }
 
-export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'vc+sd-jwt' | 'jwt_vc' | 'mso_mdoc' // jwt_vc is added for backwards compat
+export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'dc+sd-jwt'| 'vc+sd-jwt' | 'jwt_vc' | 'mso_mdoc' // jwt_vc & vc+sd-jwt are added for backwards compat TODO SSISDK-36
+
+export const supportedOID4VCICredentialFormat: readonly (OID4VCICredentialFormat | string)[] = [
+  'jwt_vc_json',
+  'jwt_vc_json-ld',
+  'ldp_vc',
+  'dc+sd-jwt',
+  'jwt_vc',
+  'mso_mdoc'
+]
 
 export interface NameAndLocale {
   name?: string // REQUIRED. String value of a display name for the Credential.
@@ -159,7 +173,16 @@ export interface CredentialSupportedJwtVcJson extends CommonCredentialSupported 
 }
 
 export interface CredentialSupportedSdJwtVc extends CommonCredentialSupported {
-  format: 'vc+sd-jwt'
+  format: 'dc+sd-jwt'
+
+  vct: string
+  claims?: IssuerCredentialSubject
+
+  order?: string[] //An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
+}
+
+export interface CredentialSupportedSdJwtVcV13 extends CommonCredentialSupported {
+  format: 'vc+sd-jwt' // TODO SSISDK-13
 
   vct: string
   claims?: IssuerCredentialSubject
@@ -177,12 +200,13 @@ export interface CredentialSupportedMsoMdoc extends CommonCredentialSupported {
 }
 
 export type CredentialConfigurationSupported =
+  | CredentialConfigurationSupportedV1_0_15
   | CredentialConfigurationSupportedV1_0_13
   | (CommonCredentialSupported &
       (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedMsoMdoc))
 
 export type CredentialsSupportedLegacy = CommonCredentialSupported &
-  (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedMsoMdoc)
+  (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedSdJwtVcV13 | CredentialSupportedMsoMdoc)
 
 export interface CommonCredentialOfferFormat {
   format: OID4VCICredentialFormat | string
@@ -203,6 +227,13 @@ export interface CredentialOfferFormatJwtVcJson extends CommonCredentialOfferFor
 // supported, so there's no defined offer format. However, based on the request structure
 // we support sd-jwt for older drafts of oid4vci as well
 export interface CredentialOfferFormatSdJwtVc extends CommonCredentialOfferFormat {
+  format: 'dc+sd-jwt'
+
+  vct: string
+  claims?: IssuerCredentialSubject
+}
+
+export interface CredentialOfferFormatSdJwtVcv13 extends CommonCredentialOfferFormat {
   format: 'vc+sd-jwt'
 
   vct: string
@@ -220,7 +251,7 @@ export interface CredentialOfferFormatMsoMdoc extends CommonCredentialOfferForma
 }
 
 export type CredentialOfferFormatV1_0_11 = CommonCredentialOfferFormat &
-  (CredentialOfferFormatJwtVcJsonLdAndLdpVc | CredentialOfferFormatJwtVcJson | CredentialOfferFormatSdJwtVc | CredentialOfferFormatMsoMdoc)
+  (CredentialOfferFormatJwtVcJsonLdAndLdpVc | CredentialOfferFormatJwtVcJson | CredentialOfferFormatSdJwtVcv13 | CredentialOfferFormatMsoMdoc)
 
 /**
  * Optional storage that can help the credential Data Supplier. For instance to store credential input data during offer creation, if no additional data can be supplied later on
@@ -249,7 +280,7 @@ export interface ErrorResponse {
   state?: string
 }
 
-export type UniformCredentialRequest = CredentialRequestV1_0_11 | CredentialRequestV1_0_13
+export type UniformCredentialRequest = CredentialRequestV1_0_11 | CredentialRequestV1_0_13 | CredentialRequestV1_0_15
 
 export interface CommonCredentialRequest extends ExperimentalSubjectIssuance {
   format: OID4VCICredentialFormat /* | OID4VCICredentialFormat[];*/ // for now it seems only one is supported in the spec
@@ -268,6 +299,12 @@ export interface CredentialRequestJwtVcJsonLdAndLdpVc extends CommonCredentialRe
 }
 
 export interface CredentialRequestSdJwtVc extends CommonCredentialRequest {
+  format: 'dc+sd-jwt'
+  vct: string
+  claims?: IssuerCredentialSubject
+}
+
+export interface CredentialRequestSdJwtVcV13 extends CommonCredentialRequest {
   format: 'vc+sd-jwt'
   vct: string
   claims?: IssuerCredentialSubject
@@ -405,9 +442,9 @@ export interface GrantUrnIetf {
 export const PRE_AUTH_CODE_LITERAL = 'pre-authorized_code'
 export const PRE_AUTH_GRANT_LITERAL = 'urn:ietf:params:oauth:grant-type:pre-authorized_code'
 
-export type EndpointMetadataResult = EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11
+export type EndpointMetadataResult = EndpointMetadataResultV1_0_15 | EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11
 
-export type IssuerMetadata = IssuerMetadataV1_0_13 | IssuerMetadataV1_0_08
+export type IssuerMetadata = IssuerMetadataV1_0_15 | IssuerMetadataV1_0_13 | IssuerMetadataV1_0_08
 
 export type NotificationEventType = 'credential_accepted' | 'credential_failure' | 'credential_deleted'
 

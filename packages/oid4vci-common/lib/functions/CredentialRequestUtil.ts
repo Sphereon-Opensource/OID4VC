@@ -2,22 +2,21 @@ import {
   CredentialRequest,
   CredentialRequestV1_0_08,
   CredentialRequestV1_0_11,
-  CredentialRequestV1_0_13,
+  CredentialRequestV1_0_13, CredentialRequestV1_0_15,
+  OID4VCICredentialFormat,
   OpenId4VCIVersion,
-  UniformCredentialRequest,
+  UniformCredentialRequest
 } from '../types'
 
-import { getFormatForVersion } from './FormatUtils'
-
-export function getTypesFromRequest(credentialRequest: CredentialRequest, opts?: { filterVerifiableCredential: boolean }) {
+export function getTypesFromRequest(credentialRequest: CredentialRequest, format: OID4VCICredentialFormat, opts?: { filterVerifiableCredential: boolean }) {
   let types: string[] = []
   if ('credential_identifier' in credentialRequest && credentialRequest.credential_identifier) {
     throw Error(`Cannot get types from request when it contains a credential_identifier`)
   } else if (
-    credentialRequest.format === 'jwt_vc_json-ld' ||
-    credentialRequest.format === 'ldp_vc' ||
-    credentialRequest.format === 'jwt_vc' ||
-    credentialRequest.format === 'jwt_vc_json'
+    format === 'jwt_vc_json-ld' ||
+    format === 'ldp_vc' ||
+    format === 'jwt_vc' ||
+    format === 'jwt_vc_json'
   ) {
     if ('credential_definition' in credentialRequest && credentialRequest.credential_definition) {
       types =
@@ -33,9 +32,9 @@ export function getTypesFromRequest(credentialRequest: CredentialRequest, opts?:
     if ('types' in credentialRequest && Array.isArray(credentialRequest.types)) {
       types = credentialRequest.types
     }
-  } else if (credentialRequest.format === 'vc+sd-jwt' && 'vct' in credentialRequest) {
+  } else if (format === 'dc+sd-jwt' && 'vct' in credentialRequest) {
     types = [credentialRequest.vct]
-  } else if (credentialRequest.format === 'mso_mdoc' && 'doctype' in credentialRequest) {
+  } else if (format === 'mso_mdoc' && 'doctype' in credentialRequest) {
     types = [credentialRequest.doctype]
   }
 
@@ -48,20 +47,19 @@ export function getTypesFromRequest(credentialRequest: CredentialRequest, opts?:
   return types
 }
 
-export function getCredentialRequestForVersion(
+export function getCredentialRequestForVersion( // TODO Can this go out?
   credentialRequest: UniformCredentialRequest,
+  format: OID4VCICredentialFormat,
   version: OpenId4VCIVersion,
-): UniformCredentialRequest | CredentialRequestV1_0_08 | CredentialRequestV1_0_11 | CredentialRequestV1_0_13 {
+): UniformCredentialRequest | CredentialRequestV1_0_08 | CredentialRequestV1_0_11 | CredentialRequestV1_0_13 | CredentialRequestV1_0_15 {
   if (version === OpenId4VCIVersion.VER_1_0_08) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const draft8Format = getFormatForVersion(credentialRequest.format!, version)
-    const types = getTypesFromRequest(credentialRequest, { filterVerifiableCredential: true })
+    const types = getTypesFromRequest(credentialRequest, format, { filterVerifiableCredential: true })
 
     if (credentialRequest.credential_subject_issuance) {
       throw Error('Experimental subject issuance is not supported for older versions of the spec')
     }
     return {
-      format: draft8Format,
+      format: format,
       proof: credentialRequest.proof,
       type: types[0],
     } satisfies CredentialRequestV1_0_08

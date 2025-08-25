@@ -68,7 +68,7 @@ export async function createDidJWT(
   { issuer, signer, expiresIn, canonicalize }: JWTOptions,
   header: Partial<JwtPayload>,
 ): Promise<string> {
-  return createJWT(payload, { issuer, signer, expiresIn, canonicalize }, header)
+  return createJWT(payload, { issuer: issuer, signer, expiresIn, canonicalize }, header)
 }
 export interface InternalSignature {
   hexPrivateKey: string // hex private key Only secp256k1 format
@@ -120,8 +120,8 @@ export function getCreateJwtCallback(signature: InternalSignature) {
       if (jwtIssuer.type === 'id-token') {
         if (!jwt.payload.sub) jwt.payload.sub = signature.did
 
-        const issuer = jwtIssuer.authorizationResponseOpts.registration?.issuer || this._payload.iss
-        if (!issuer || !(issuer.includes(ResponseIss.SELF_ISSUED_V2) || issuer === this._payload.sub)) {
+        const issuer = jwtIssuer.authorizationResponseOpts.registration?.issuer || jwt.payload.iss
+        if (!issuer || !(issuer.includes(ResponseIss.SELF_ISSUED_V2) || issuer === jwt._payload.sub)) {
           throw new Error(SIOPErrors.NO_SELF_ISSUED_ISS)
         }
         if (!jwt.payload.iss) {

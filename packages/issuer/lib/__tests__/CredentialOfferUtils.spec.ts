@@ -90,7 +90,7 @@ describe('CredentialOfferUtils should', () => {
         {
           credential_issuer: credentialOffer.credential_issuer,
           credential_endpoint: 'test_issuer',
-          issuer: 'test_issuer',
+          credential_issuer: 'test_issuer',
           credentials_supported: [],
         },
         { credentialOffer, scheme: 'https' },
@@ -124,7 +124,7 @@ describe('CredentialOfferUtils should', () => {
         {
           credential_issuer: credentialOffer.credential_issuer,
           credential_endpoint: 'test_issuer',
-          issuer: 'test_issuer',
+          credential_issuer: 'test_issuer',
           credentials_supported: [],
         },
         { credentialOffer, scheme: 'http' },
@@ -143,7 +143,7 @@ describe('CredentialOfferUtils should', () => {
         {
           credential_issuer: 'https://credential-issuer.example.com',
           credential_endpoint: 'test_issuer',
-          issuer: 'test_issuer',
+          credential_issuer: 'test_issuer',
           credentials_supported: [],
         },
         { credentialOfferUri },
@@ -160,7 +160,7 @@ describe('CredentialOfferUtils should', () => {
         {
           credential_issuer: 'https://credential-issuer.example.com',
           credential_endpoint: 'test_issuer',
-          issuer: 'test_issuer',
+          credential_issuer: 'test_issuer',
           credentials_supported: [],
         },
         { credentialOfferUri, scheme: 'https', baseUri: 'credential-issuer.example.com' },
@@ -177,7 +177,7 @@ describe('CredentialOfferUtils should', () => {
         {
           credential_issuer: 'https://credential-issuer.example.com',
           credential_endpoint: 'test_issuer',
-          issuer: 'test_issuer',
+          credential_issuer: 'test_issuer',
           credentials_supported: [],
         },
         { credentialOfferUri, scheme: 'https', baseUri: 'credential-issuer.example.com' },
@@ -192,7 +192,7 @@ describe('CredentialOfferUtils should', () => {
         {
           credential_issuer: 'https://credential-issuer.example.com',
           credential_endpoint: 'test_issuer',
-          issuer: 'test_issuer',
+          credential_issuer: 'test_issuer',
           credentials_supported: [],
         },
         { scheme: 'https', baseUri: 'credential-issuer.example.com' },

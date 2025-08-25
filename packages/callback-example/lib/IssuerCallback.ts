@@ -34,7 +34,7 @@ export const getIssuerCallbackV1_0_11 = (credential: CredentialIssuanceInput, ke
   }
 }
 
-export const getIssuerCallbackV1_0_13 = (
+export const getIssuerCallbackV1_0_15 = (
   credential: CredentialIssuanceInput,
   credentialRequest: CredentialRequest,
   keyPair: any,

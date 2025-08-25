@@ -4,23 +4,41 @@ import { PARMode, WellKnownEndpoints } from '@sphereon/oid4vci-common'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { OpenID4VCIClientV1_0_11 } from '../OpenID4VCIClientV1_0_11'
+import { OpenID4VCIClientV1_0_15 } from '../OpenID4VCIClientV1_0_15'
 
 const MOCK_URL = 'https://server.example.com/'
-describe('OpenID4VCIClientV1_0_11', () => {
-  let client: OpenID4VCIClientV1_0_11
+describe('OpenID4VCIClientV1_0_15', () => {
+  let client: OpenID4VCIClientV1_0_15
+
+  const OFFER = {
+    credential_issuer: MOCK_URL,
+    credential_configuration_ids: ['TestCredential'],
+    grants: {
+      'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
+        'pre-authorized_code': 'eyJhbGciOiJSU0Et...FYUaBy',
+        user_pin_required: false
+      }
+    }
+  }
+
+  // Build the URI once, avoid hand-encoding mistakes
+  const OFFER_URI = `openid-credential-offer://?credential_offer=${encodeURIComponent(JSON.stringify(OFFER))}`
 
   beforeEach(async () => {
     nock(MOCK_URL).get(/.*/).reply(200, {})
     nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {})
     nock(MOCK_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {})
-    nock(`${MOCK_URL}`).post('/v1/auth/par').reply(201, { request_uri: 'test_uri', expires_in: 90 })
-    client = await OpenID4VCIClientV1_0_11.fromURI({
+
+    // PAR endpoint path is implementation-specific; keeping your existing one is fine
+    nock(MOCK_URL).post('/v1/auth/par').reply(201, { request_uri: 'test_uri', expires_in: 90 })
+
+    client = await OpenID4VCIClientV1_0_15.fromURI({
       createAuthorizationRequestURL: false,
       clientId: 'test-client',
-      uri: 'openid-initiate-issuance://?issuer=https://server.example.com&credential_type=TestCredential',
+      uri: OFFER_URI
     })
   })
+
 
   afterEach(() => {
     nock.cleanAll()
@@ -33,10 +51,10 @@ describe('OpenID4VCIClientV1_0_11', () => {
       authorizationRequest: {
         parMode: PARMode.REQUIRE,
         scope: 'openid TestCredential',
-        redirectUri: 'http://localhost:8881/cb',
-      },
+        redirectUri: 'http://localhost:8881/cb'
+      }
     })
-    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri')
+    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?client_id=test-client&request_uri=test_uri')
   })
 
   it('should fail when pushed_authorization_request_endpoint is not present', async () => {
@@ -46,9 +64,9 @@ describe('OpenID4VCIClientV1_0_11', () => {
         authorizationRequest: {
           parMode: PARMode.REQUIRE,
           scope: 'openid TestCredential',
-          redirectUri: 'http://localhost:8881/cb',
-        },
-      }),
+          redirectUri: 'http://localhost:8881/cb'
+        }
+      })
     ).rejects.toThrow(Error('PAR mode is set to required by Authorization Server does not support PAR!'))
   })
 
@@ -57,9 +75,9 @@ describe('OpenID4VCIClientV1_0_11', () => {
       client.createAuthorizationRequestUrl({
         authorizationRequest: {
           parMode: PARMode.REQUIRE,
-          redirectUri: 'http://localhost:8881/cb',
-        },
-      }),
+          redirectUri: 'http://localhost:8881/cb'
+        }
+      })
     ).rejects.toThrow('Could not create authorization details from credential offer. Please pass in explicit details')
   })
 
@@ -75,14 +93,14 @@ describe('OpenID4VCIClientV1_0_11', () => {
             format: 'ldp_vc',
             credential_definition: {
               '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
-              types: ['VerifiableCredential', 'UniversityDegreeCredential'],
-            },
-          },
+              types: ['VerifiableCredential', 'UniversityDegreeCredential']
+            }
+          }
         ],
-        redirectUri: 'http://localhost:8881/cb',
-      },
+        redirectUri: 'http://localhost:8881/cb'
+      }
     })
-    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri')
+    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?client_id=test-client&request_uri=test_uri')
   })
 
   it('should not fail when only scope is present', async () => {
@@ -92,10 +110,10 @@ describe('OpenID4VCIClientV1_0_11', () => {
       authorizationRequest: {
         parMode: PARMode.REQUIRE,
         scope: 'openid TestCredential',
-        redirectUri: 'http://localhost:8881/cb',
-      },
+        redirectUri: 'http://localhost:8881/cb'
+      }
     })
-    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri')
+    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?client_id=test-client&request_uri=test_uri')
   })
 
   it('should not fail when both authorization_details and scope are present', async () => {
@@ -110,14 +128,14 @@ describe('OpenID4VCIClientV1_0_11', () => {
             format: 'ldp_vc',
             credential_definition: {
               '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
-              types: ['VerifiableCredential', 'UniversityDegreeCredential'],
-            },
-          },
+              types: ['VerifiableCredential', 'UniversityDegreeCredential']
+            }
+          }
         ],
         scope: 'openid TestCredential',
-        redirectUri: 'http://localhost:8881/cb',
-      },
+        redirectUri: 'http://localhost:8881/cb'
+      }
     })
-    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?request_uri=test_uri')
+    expect(actual).toEqual('https://server.example.com/v1/auth/authorize?client_id=test-client&request_uri=test_uri')
   })
 })

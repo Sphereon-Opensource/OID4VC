@@ -4,7 +4,7 @@ import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   Alg,
   CNonceState,
-  CredentialIssuerMetadataOptsV1_0_13,
+  CredentialIssuerMetadataOptsV1_0_15,
   CredentialOfferSession,
   IssueStatus,
   Jwt,
@@ -141,7 +141,7 @@ describe('OID4VCIServer', () => {
             ],
           },
         },
-      } as CredentialIssuerMetadataOptsV1_0_13,
+      } as CredentialIssuerMetadataOptsV1_0_15,
       authorizationServerMetadata,
       {
         cNonceExpiresIn: 300,
