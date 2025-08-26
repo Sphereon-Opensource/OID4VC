@@ -64,10 +64,12 @@ export class Dcql {
     const dcqlPresentation = Object.fromEntries(
         Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
           const credentials = p.vcs.map(vc => {
+
             switch (p.format) {
               case 'mso_mdoc':
                 return Dcql.toDcqlMdocCredential(vc.original)
-              case 'vc+sd-jwt': {
+              // @ts-ignore // FIXME we need update on the ssi-types
+              case 'dc+sd-jwt': {
                 const decoded = typeof vc.original === 'string' ? decodeSdJwtVc(vc.original, opts.hasher) : vc.original
                 return Dcql.toDcqlSdJwtCredential(decoded)
               }
