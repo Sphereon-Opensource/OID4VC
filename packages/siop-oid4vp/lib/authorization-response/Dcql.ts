@@ -62,6 +62,7 @@ export class Dcql {
       },
   ) => {
     const dcqlPresentation = Object.fromEntries(
+        // FIXME SSISDK-41
         Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
           const credentials = p.vcs.map(vc => {
 
