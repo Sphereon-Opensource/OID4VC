@@ -312,13 +312,13 @@ export class OP {
     if (!issuer) {
       throw Error(`No issuer value present. Either use IDv1, JWT VC Presentation profile version, or provide a DID as issuer value`)
     }
-    const dcqlQuery = opts.dcqlResponse ?? this._createResponseOptions.dcqlResponse
+    const dcqlResponse = opts.dcqlResponse ?? this._createResponseOptions.dcqlResponse
 
     const responseURI = opts.audience ?? this._createResponseOptions.responseURI
     return {
       ...this._createResponseOptions,
       ...opts,
-      ...dcqlQuery,
+      ...dcqlResponse,
       registration: { ...this._createResponseOptions?.registration, issuer: issuer },
       responseURI,
       responseURIType:

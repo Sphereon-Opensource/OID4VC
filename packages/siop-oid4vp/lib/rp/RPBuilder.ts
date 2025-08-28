@@ -219,8 +219,8 @@ export class RPBuilder {
     return this
   }
 
-  withDcqlQuery(dcqlQuery: DcqlQuery | string, targets?: PropertyTargets): RPBuilder {
-    const dcql = typeof dcqlQuery === 'string' ? dcqlQuery : JSON.stringify(dcqlQuery)
+  withDcqlQuery(dcqlQuery: DcqlQuery, targets?: PropertyTargets): RPBuilder {
+    const dcql = dcqlQuery
     this._authorizationRequestPayload.dcql_query = assignIfAuth(
         {
           propertyValue: dcql,

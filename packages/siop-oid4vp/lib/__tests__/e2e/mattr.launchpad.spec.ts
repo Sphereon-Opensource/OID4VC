@@ -153,7 +153,7 @@ describe.skip('OID4VCI-Client using Mattr issuer should', () => {
     const correlationId = 'test'
 
     const op: OP = OP.builder()
-      .withPresentationSignCallback(presentationSignCalback)
+      .withPresentationSignCallback(presentationSignCallback)
       .withCreateJwtCallback(getCreateJwtCallback({ alg: SigningAlgo.EDDSA, kid, did: didStr, hexPrivateKey }))
       .withVerifyJwtCallback(getVerifyJwtCallback(getResolver(), { checkLinkedDomain: 'never' }))
       .build()
@@ -326,7 +326,7 @@ describe.skip('Mattr OID4VP v18 credential offer', () => {
   })
 })
 
-async function presentationSignCalback(args: PresentationSignCallBackParams): Promise<W3CVerifiablePresentation> {
+async function presentationSignCallback(args: PresentationSignCallBackParams): Promise<W3CVerifiablePresentation> {
   const importedJwk = await importJWK(jwk, 'EdDSA')
   const jwt = await new SignJWT({ vp: { ...args.presentation }, nonce: args.options.proofOptions?.nonce, iss: args.options.holderDID })
     .setProtectedHeader({
