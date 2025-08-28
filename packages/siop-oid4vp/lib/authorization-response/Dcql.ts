@@ -1,11 +1,8 @@
 import {
-  decodeSdJwtVc,
-  getMdocDecodedPayload,
   HasherSync,
-  IVerifiableCredential,
-  JwtDecodedVerifiableCredential,
-  MdocDocument,
-  SdJwtDecodedVerifiableCredential,
+  WrappedMdocCredential,
+  WrappedSdJwtVerifiableCredential,
+  WrappedW3CVerifiableCredential,
 } from '@sphereon/ssi-types'
 import {
   DcqlMdocCredential,
@@ -17,7 +14,7 @@ import {
 } from 'dcql'
 import {extractDataFromPath} from '../helpers'
 import {extractDcqlPresentationFromDcqlVpToken, hasCryptographicHolderBinding} from './OpenID4VP'
-import {AuthorizationRequestPayload, Json, SupportedVersion} from '../types'
+import {AuthorizationRequestPayload, SupportedVersion} from '../types'
 
 /**
  * Finds a valid DcqlQuery inside the given AuthenticationRequestPayload
@@ -65,21 +62,15 @@ export class Dcql {
         // FIXME SSISDK-41
         Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
           const credentials = p.vcs.map(vc => {
-
             switch (p.format) {
               case 'mso_mdoc':
                 return Dcql.toDcqlMdocCredential(vc.original)
-
-              case 'vc+sd-jwt':
-              // @ts-ignore // FIXME we need update on the ssi-types
-              case 'dc+sd-jwt': {
-                const decoded = typeof vc.original === 'string' ? decodeSdJwtVc(vc.original, opts.hasher) : vc.original
-                return Dcql.toDcqlSdJwtCredential(decoded)
-              }
+              case 'dc+sd-jwt':
+                return Dcql.toDcqlSdJwtCredential(vc)
               case 'jwt_vp':
-                return Dcql.toDcqlJwtCredential(vc.original)
+                return Dcql.toDcqlJwtCredential(vc)
               case 'ldp_vp':
-                return Dcql.toDcqlJsonLdCredential(vc.original)
+                return Dcql.toDcqlJsonLdCredential(vc)
               default:
                 const format: string = (p as any).format;
                 throw new Error(`Unknown DcqlPresentation format ${format}`)
@@ -93,39 +84,39 @@ export class Dcql {
     return DcqlPresentationResult.fromDcqlPresentation(dcqlPresentation, { dcqlQuery })
   }
 
-  static toDcqlMdocCredential = (vc: MdocDocument): DcqlMdocCredential => {
+  static toDcqlMdocCredential = (vc: WrappedMdocCredential): DcqlMdocCredential => {
     return {
       credential_format: 'mso_mdoc',
-      doctype: vc.toJson().docType,
-      namespaces: getMdocDecodedPayload(vc),
+      doctype: vc.credential.toJson().docType,
+      namespaces: vc.decoded,
       cryptographic_holder_binding: hasCryptographicHolderBinding('mso_mdoc', vc),
     } satisfies DcqlMdocCredential
   }
 
-  static toDcqlSdJwtCredential = (vc: SdJwtDecodedVerifiableCredential): DcqlSdJwtVcCredential => {
+  static toDcqlSdJwtCredential = (vc: WrappedSdJwtVerifiableCredential): DcqlSdJwtVcCredential => {
     return {
       credential_format: 'dc+sd-jwt',
-      vct: vc.decodedPayload.vct,
-      claims: vc.decodedPayload,
+      vct: vc.decoded.vct,
+      claims: vc.decoded,
       cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', vc),
     } satisfies DcqlSdJwtVcCredential
   }
 
-  static toDcqlJwtCredential = (vc: JwtDecodedVerifiableCredential): DcqlW3cVcCredential => {
+  static toDcqlJwtCredential = (vc: WrappedW3CVerifiableCredential): DcqlW3cVcCredential => {
     return {
       credential_format: 'jwt_vc_json',
-      claims: vc.vc.credentialSubject as { [x: string]: Json },
+      claims: vc.decoded,
       cryptographic_holder_binding: hasCryptographicHolderBinding('jwt_vc_json', vc),
-      type: vc.vc.type,
+      type: vc.credential.type,
     } satisfies DcqlW3cVcCredential
   }
 
-  static toDcqlJsonLdCredential = (vc: IVerifiableCredential): DcqlW3cVcCredential => {
+  static toDcqlJsonLdCredential = (vc: WrappedW3CVerifiableCredential): DcqlW3cVcCredential => {
     return {
       credential_format: 'ldp_vc',
-      claims: vc.credentialSubject as { [x: string]: Json },
+      claims: vc.decoded,
       cryptographic_holder_binding: hasCryptographicHolderBinding('ldp_vc', vc),
-      type: vc.type,
+      type: vc.credential.type,
     } satisfies DcqlW3cVcCredential
   }
 

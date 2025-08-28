@@ -1,14 +1,13 @@
 import {
   CompactSdJwtVc,
   CredentialMapper,
-  HasherSync, IProof,
-  IVerifiableCredential,
+  HasherSync,
   IVerifiablePresentation,
-  JwtDecodedVerifiableCredential,
-  MdocDocument,
-  SdJwtDecodedVerifiableCredential,
   W3CVerifiablePresentation,
-  WrappedVerifiablePresentation
+  WrappedMdocCredential,
+  WrappedSdJwtVerifiableCredential,
+  WrappedVerifiablePresentation,
+  WrappedW3CVerifiableCredential
 } from '@sphereon/ssi-types'
 import {DcqlPresentation, DcqlQuery} from 'dcql'
 import {verifyRevocation} from '../helpers'
@@ -121,24 +120,19 @@ export const extractPresentationsFromDcqlVpToken = (
 // FIXME probably too naive
 export const hasCryptographicHolderBinding = (
     format: 'mso_mdoc' | 'dc+sd-jwt' | 'jwt_vc_json' | 'ldp_vc',
-    vc: MdocDocument | SdJwtDecodedVerifiableCredential | JwtDecodedVerifiableCredential | IVerifiableCredential
+    vc: WrappedMdocCredential | WrappedSdJwtVerifiableCredential | WrappedW3CVerifiableCredential
 ): boolean => {
   switch (format) {
     case 'mso_mdoc':
       return true
-    case 'dc+sd-jwt': {
-      const sdJwt = vc as SdJwtDecodedVerifiableCredential
-      return Boolean(sdJwt.decodedPayload.cnf?.jwk || sdJwt.decodedPayload.cnf?.kid)
-    }
-    case 'jwt_vc_json': {
-      const jwt = vc as JwtDecodedVerifiableCredential//WrappedW3CVerifiableCredential
-      const proof = jwt.vc?.proof
-      return Boolean(Array.isArray(proof) ? proof.some(proof => proof.verificationMethod !== undefined) : (proof as IProof).verificationMethod !== undefined)
-    }
-    case 'ldp_vc': {
-      const ldp = vc as IVerifiableCredential
-      const proof = ldp.proof
-      return Boolean(Array.isArray(proof) ? proof.some(proof => proof.verificationMethod !== undefined) : (proof as IProof).verificationMethod !== undefined)
-    }
+    case 'dc+sd-jwt':
+      const sdJwt = vc as WrappedSdJwtVerifiableCredential
+      return Boolean(sdJwt.decoded?.cnf?.jwk || sdJwt.decoded?.cnf?.kid)
+    case 'jwt_vc_json':
+      const jwt = vc as WrappedW3CVerifiableCredential
+      return Boolean(jwt.decoded?.proof?.verificationMethod)
+    case 'ldp_vc':
+      const ldp = vc as WrappedW3CVerifiableCredential
+      return Boolean(ldp.decoded?.proof?.verificationMethod)
   }
 }
