@@ -52,8 +52,8 @@ export class Dcql {
           const credentials = p.vcs.map(vc => {
             switch (p.format) {
               case 'mso_mdoc':
-                return Dcql.toDcqlMdocCredential(vc)
-              case 'vc+sd-jwt':
+                return Dcql.toDcqlMdocCredential(vc.original)
+              case 'dc+sd-jwt':
                 return Dcql.toDcqlSdJwtCredential(vc)
               case 'jwt_vp':
                 return Dcql.toDcqlJwtCredential(vc)
