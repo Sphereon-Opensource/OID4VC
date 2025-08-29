@@ -49,7 +49,7 @@ const jwt_withoutDid: Jwt = {
   header: {
     alg: Alg.ES256,
     kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1',
-    typ: 'openid4vci-proof+jwt' // ← updated
+    typ: 'openid4vci-proof+jwt'
   },
   payload: {
     iss: 'sphereon:wallet',

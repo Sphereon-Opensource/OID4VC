@@ -260,11 +260,11 @@ export function accessTokenEndpoint(router: Router, issuer: VcIssuer, opts: ITok
   router.post(
     determinePath(baseUrl, url.pathname, { stripBasePath: true }),
     verifyTokenRequest({
-      issuer: issuer,
+      issuer,
       preAuthorizedCodeExpirationDuration,
     }),
     handleTokenRequest({
-      issuer: issuer,
+      issuer,
       accessTokenSignerCallback: opts.accessTokenSignerCallback,
       cNonceExpiresIn: issuer.cNonceExpiresIn,
       interval,

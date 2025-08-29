@@ -93,9 +93,12 @@ export class CredentialRequestClientBuilderV1_0_15 {
       throw new Error('Versions below v1.0.15 (draft 15) are not supported.')
     }
     const builder = new CredentialRequestClientBuilderV1_0_15()
-    const issuer = getIssuerFromCredentialOfferPayload(request.credential_offer) ?? (metadata?.issuer as string)
+    const issuer = getIssuerFromCredentialOfferPayload(request.credential_offer) ?? (metadata ? metadata.issuer as string : undefined)
+    if (!issuer && !metadata?.credential_endpoint) {
+      throw Error(`Issuer could not be determined`)
+    }
     builder.withVersion(version)
-    builder.withCredentialEndpoint(metadata?.credential_endpoint ?? (issuer.endsWith('/') ? `${issuer}credential` : `${issuer}/credential`))
+    builder.withCredentialEndpoint(metadata?.credential_endpoint ?? (issuer!.endsWith('/') ? `${issuer}credential` : `${issuer}/credential`))
     if (metadata?.deferred_credential_endpoint) {
       builder.withDeferredCredentialEndpoint(metadata.deferred_credential_endpoint)
     }

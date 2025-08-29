@@ -94,9 +94,6 @@ export class MetadataClientV1_0_15 {
         throw Error(`Issuer ${issuer} provided a separate authorization server ${authorization_servers}, but that server did not provide metadata`)
       }
     } else {
-      if (!authorizationServerType) {
-        authorizationServerType = 'OAuth 2.0'
-      }
       logger.debug(`Issuer ${issuer} has ${authorizationServerType} Server metadata in well-known location`)
       if (!authMetadata.authorization_endpoint) {
         console.warn(
@@ -189,7 +186,7 @@ export class MetadataClientV1_0_15 {
 
     // Return v15-only fields (no legacy top-level authorization_server/authorization_endpoint and no nonce/deferred at top-level)
     return {
-      issuer: issuer,
+      issuer,
       token_endpoint,
       credential_endpoint,
       authorization_challenge_endpoint,
