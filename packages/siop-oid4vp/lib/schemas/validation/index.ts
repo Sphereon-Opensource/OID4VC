@@ -1,14 +1,15 @@
 import {
-  AuthorizationRequestPayloadVD11Schema,
   AuthorizationRequestPayloadVID1Schema,
+  AuthorizationRequestPayloadD28Schema,
+  AuthorizationRequestPayloadV1Schema,
   AuthorizationResponseOptsSchema,
   RPRegistrationMetadataPayloadSchema
 } from './schemaValidation.cjs'
 
 export {
   AuthorizationRequestPayloadVID1Schema,
-  AuthorizationRequestPayloadVD11Schema,
+  AuthorizationRequestPayloadD28Schema,
+  AuthorizationRequestPayloadV1Schema,
   RPRegistrationMetadataPayloadSchema,
   AuthorizationResponseOptsSchema
-  /*CreateAuthorizationRequestOptsSchema, */
 };

@@ -1,6 +1,5 @@
 import { ClaimPayloadCommonOpts } from '../authorization-request'
 import { PassBy, SIOPErrors } from '../types'
-
 import { RequestObjectOpts } from './types'
 
 export const assertValidRequestObjectOpts = (opts: RequestObjectOpts<ClaimPayloadCommonOpts>, checkRequestObject: boolean) => {
@@ -18,5 +17,4 @@ export const assertValidRequestObjectOpts = (opts: RequestObjectOpts<ClaimPayloa
       throw Error(SIOPErrors.BAD_PARAMS)
     }
   }
-  // assertValidRequestRegistrationOpts(opts['registration'] ? opts['registration'] : opts['clientMetadata']);
 }

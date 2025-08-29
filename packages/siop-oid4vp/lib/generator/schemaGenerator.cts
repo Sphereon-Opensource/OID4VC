@@ -109,16 +109,6 @@ function correctSchema(schemaString: string) {
       '    },',
   )
 }
-/*
-const requestOptsConf = {
-  path: '../authorization-request/types.ts',
-  tsconfig: 'tsconfig.json',
-  type: 'CreateAuthorizationRequestOpts', // Or <type-name> if you want to generate schema for that one type only
-  schemaId: 'CreateAuthorizationRequestOptsSchema',
-  outputPath: '../../schemas/AuthorizationRequestOpts.schema.ts',
-  // outputConstName: 'AuthorizationRequestOptsSchema',
-  skipTypeCheck: true
-};*/
 
 const responseOptsConf = {
   path: '../authorization-response/types.ts',
@@ -126,7 +116,6 @@ const responseOptsConf = {
   type: 'AuthorizationResponseOpts', // Or <type-name> if you want to generate schema for that one type only
   schemaId: 'AuthorizationResponseOptsSchema',
   outputPath: '../schemas/AuthorizationResponseOpts.schema.ts',
-  // outputConstName: 'AuthorizationResponseOptsSchema',
   skipTypeCheck: true,
 }
 
@@ -136,7 +125,6 @@ const rPRegistrationMetadataPayload = {
   type: 'RPRegistrationMetadataPayload',
   schemaId: 'RPRegistrationMetadataPayloadSchema',
   outputPath: '../schemas/RPRegistrationMetadataPayload.schema.ts',
-  // outputConstName: 'RPRegistrationMetadataPayloadSchema',
   skipTypeCheck: true,
 }
 
@@ -146,7 +134,6 @@ const discoveryMetadataPayload = {
   type: 'DiscoveryMetadataPayload',
   schemaId: 'DiscoveryMetadataPayloadSchema',
   outputPath: '../schemas/DiscoveryMetadataPayload.schema.ts',
-  // outputConstName: 'DiscoveryMetadataPayloadSchema',
   skipTypeCheck: true,
 }
 
@@ -156,46 +143,31 @@ const authorizationRequestPayloadVID1 = {
   type: 'AuthorizationRequestPayloadVID1', // Or <type-name> if you want to generate schema for that one type only
   schemaId: 'AuthorizationRequestPayloadVID1Schema',
   outputPath: '../schemas/AuthorizationRequestPayloadVID1.schema.ts',
-  // outputConstName: 'AuthorizationRequestPayloadSchemaVID1',
   skipTypeCheck: true,
 }
 
-const authorizationRequestPayloadVD11 = {
+const authorizationRequestPayloadV1 = {
   path: '../types/SIOP.types.ts',
   tsconfig: 'tsconfig.json',
-  type: 'AuthorizationRequestPayloadVD11', // Or <type-name> if you want to generate schema for that one type only
-  schemaId: 'AuthorizationRequestPayloadVD11Schema',
-  outputPath: '../schemas/AuthorizationRequestPayloadVD11.schema.ts',
-  // outputConstName: 'AuthorizationRequestPayloadSchemaVD11',
+  type: 'AuthorizationRequestPayloadV1', // Or <type-name> if you want to generate schema for that one type only
+  schemaId: 'AuthorizationRequestPayloadV1Schema',
+  outputPath: '../schemas/AuthorizationRequestPayloadV1.schema.ts',
   skipTypeCheck: true,
 }
 
-const authorizationRequestPayloadVD12OID4VPD18 = {
+const authorizationRequestPayloadD28 = {
   path: '../types/SIOP.types.ts',
   tsconfig: 'tsconfig.json',
-  type: 'AuthorizationRequestPayloadVD12OID4VPD18', // Or <type-name> if you want to generate schema for that one type only
-  schemaId: 'AuthorizationRequestPayloadVD12OID4VPD18Schema',
-  outputPath: '../schemas/AuthorizationRequestPayloadVD12OID4VPD18.schema.ts',
-  // outputConstName: 'AuthorizationRequestPayloadSchemaVD11',
-  skipTypeCheck: true,
-}
-
-const authorizationRequestPayloadVD12OID4VPD20 = {
-  path: '../types/SIOP.types.ts',
-  tsconfig: 'tsconfig.json',
-  type: 'AuthorizationRequestPayloadVD12OID4VPD20', // Or <type-name> if you want to generate schema for that one type only
-  schemaId: 'AuthorizationRequestPayloadVD12OID4VPD20Schema',
-  outputPath: '../schemas/AuthorizationRequestPayloadVD12OID4VPD20.schema.ts',
-  // outputConstName: 'AuthorizationRequestPayloadSchemaVD11',
+  type: 'AuthorizationRequestPayloadD28', // Or <type-name> if you want to generate schema for that one type only
+  schemaId: 'AuthorizationRequestPayloadD28Schema',
+  outputPath: '../schemas/AuthorizationRequestPayloadD28.schema.ts',
   skipTypeCheck: true,
 }
 
 const schemas: Schema[] = [
   writeSchema(authorizationRequestPayloadVID1),
-  writeSchema(authorizationRequestPayloadVD11),
-  writeSchema(authorizationRequestPayloadVD12OID4VPD18),
-  writeSchema(authorizationRequestPayloadVD12OID4VPD20),
-  // writeSchema(requestOptsConf),
+  writeSchema(authorizationRequestPayloadV1),
+  writeSchema(authorizationRequestPayloadD28),
   writeSchema(responseOptsConf),
   writeSchema(rPRegistrationMetadataPayload),
   writeSchema(discoveryMetadataPayload),

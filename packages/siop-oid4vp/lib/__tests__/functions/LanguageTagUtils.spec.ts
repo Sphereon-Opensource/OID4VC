@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-
 import { LanguageTagUtils } from '../..'
 
 describe('Language tag util should', () => {
@@ -207,13 +206,13 @@ describe('Language tag util should', () => {
 
   it('return empty if list is given but not effective', async () => {
     expect.assertions(1)
-    const result = await LanguageTagUtils.getLanguageTaggedProperties({}, [])
+    const result = LanguageTagUtils.getLanguageTaggedProperties({}, [])
     expect(result).toEqual(new Map<string, string>())
   })
 
   it('throw error if list is given but no proper field names', async () => {
     expect.assertions(1)
-    await expect(() => LanguageTagUtils.getLanguageTaggedProperties({}, [''])).toThrowError()
+    expect(() => LanguageTagUtils.getLanguageTaggedProperties({}, [''])).toThrowError()
   })
 
   it('do not throw error if mapping is null', async () => {
@@ -223,7 +222,7 @@ describe('Language tag util should', () => {
 
   it('return empty map if mapping is given but not effective', async () => {
     expect.assertions(1)
-    const result = await LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, new Map<string, string>())
+    const result = LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, new Map<string, string>())
     expect(result).toEqual(new Map<string, string>())
   })
 
@@ -231,27 +230,27 @@ describe('Language tag util should', () => {
     expect.assertions(1)
     const languageTagEnabledFieldsNamesMapping: Map<string, string> = new Map<string, string>()
     languageTagEnabledFieldsNamesMapping.set(null as any, 'valid')
-    await expect(() => LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, languageTagEnabledFieldsNamesMapping)).toThrowError()
+    expect(() => LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, languageTagEnabledFieldsNamesMapping)).toThrowError()
   })
 
   it('throw error if mapping is given but no proper field names', async () => {
     expect.assertions(1)
     const languageTagEnabledFieldsNamesMapping: Map<string, string> = new Map<string, string>()
     languageTagEnabledFieldsNamesMapping.set('', 'valid')
-    await expect(() => LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, languageTagEnabledFieldsNamesMapping)).toThrowError()
+    expect(() => LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, languageTagEnabledFieldsNamesMapping)).toThrowError()
   })
 
   it('throw error if mapping is given but no mapped names', async () => {
     expect.assertions(1)
     const languageTagEnabledFieldsNamesMapping: Map<string, string> = new Map<string, string>()
     languageTagEnabledFieldsNamesMapping.set('valid', null as any)
-    await expect(() => LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, languageTagEnabledFieldsNamesMapping)).toThrowError()
+    expect(() => LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, languageTagEnabledFieldsNamesMapping)).toThrowError()
   })
 
   it('throw error if mapping is given but no proper mapped names', async () => {
     expect.assertions(1)
     const languageTagEnabledFieldsNamesMapping: Map<string, string> = new Map<string, string>()
     languageTagEnabledFieldsNamesMapping.set('valid', '')
-    await expect(() => LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, languageTagEnabledFieldsNamesMapping)).toThrowError()
+    expect(() => LanguageTagUtils.getLanguageTaggedPropertiesMapped({}, languageTagEnabledFieldsNamesMapping)).toThrowError()
   })
 })

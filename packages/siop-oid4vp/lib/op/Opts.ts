@@ -1,12 +1,10 @@
 import { defaultHasher } from '@sphereon/oid4vc-common'
-
 import { VerifyAuthorizationRequestOpts } from '../authorization-request'
 import { AuthorizationResponseOpts } from '../authorization-response'
 import { LanguageTagUtils } from '../helpers'
 import { AuthorizationResponseOptsSchema } from '../schemas'
-import { PassBy, ResponseRegistrationOpts } from '../types'
-
 import { OPBuilder } from './OPBuilder'
+import { PassBy, ResponseRegistrationOpts } from '../types'
 
 export const createResponseOptsFromBuilderOrExistingOpts = (opts: {
   builder?: OPBuilder

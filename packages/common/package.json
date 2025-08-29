@@ -22,7 +22,7 @@
     "test": "vitest run --config ../../vitest.config.ts --coverage"
   },
   "dependencies": {
-    "@sphereon/ssi-types": "0.34.1-next.3",
+    "@sphereon/ssi-types": "0.34.1-feat.SSISDK.35.61",
     "jwt-decode": "^4.0.0",
     "uint8arrays": "^3.1.1",
     "uuid": "^9.0.0"

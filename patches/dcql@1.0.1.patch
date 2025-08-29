@@ -1,0 +1,656 @@
+diff --git a/dist/index.d.mts b/dist/index.d.mts
+index e5bd1f9..f2c1dd0 100644
+--- a/dist/index.d.mts
++++ b/dist/index.d.mts
+@@ -3705,11 +3705,11 @@ declare namespace DcqlQueryResult {
+                 values?: (string | number | boolean)[] | undefined;
+                 id?: string | undefined;
+             }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, undefined>;
+-            readonly meta: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ObjectSchema<{
++            readonly meta: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ObjectSchema<{
+                 readonly type_values: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.SchemaWithPipe<[v.ArraySchema<v.StringSchema<undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string>, v.ErrorMessage<v.CustomIssue> | undefined>]>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<NonEmptyArray<string>>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<NonEmptyArray<string>>, "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types.">]>;
+-            }, undefined>]>, v.DescriptionAction<{
++            }, undefined>]>, undefined>, v.DescriptionAction<{
+                 type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            }, "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
++            } | undefined, "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
+             readonly id: v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.DescriptionAction<string, "REQUIRED. A string identifying the Credential in the response and, if provided, the constraints in 'credential_sets'.">]>;
+             readonly require_cryptographic_holder_binding: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, true>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether the Verifier requires a Cryptographic Holder Binding proof. The default value is true, i.e., a Verifiable Presentation with Cryptographic Holder Binding is required. If set to false, the Verifier accepts a Credential without Cryptographic Holder Binding proof.">]>;
+             readonly multiple: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, false>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether multiple Credentials can be returned for this Credential Query. If omitted, the default value is false.">]>;
+@@ -3771,9 +3771,6 @@ declare namespace DcqlQueryResult {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -3784,6 +3781,9 @@ declare namespace DcqlQueryResult {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<{
+             id: string;
+             require_cryptographic_holder_binding: boolean;
+@@ -3831,9 +3831,6 @@ declare namespace DcqlQueryResult {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -3844,6 +3841,9 @@ declare namespace DcqlQueryResult {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>, "REQUIRED. A non-empty array of Credential Queries that specify the requested Verifiable Credentials.">]>;
+         readonly credential_matches: v.RecordSchema<v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.NonEmptyAction<string, undefined>]>, v.UnionSchema<[v.ObjectSchema<{
+             readonly success: v.LiteralSchema<true, undefined>;
+@@ -5650,11 +5650,11 @@ declare namespace DcqlQuery {
+                 values?: (string | number | boolean)[] | undefined;
+                 id?: string | undefined;
+             }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, undefined>;
+-            readonly meta: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ObjectSchema<{
++            readonly meta: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ObjectSchema<{
+                 readonly type_values: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.SchemaWithPipe<[v.ArraySchema<v.StringSchema<undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string>, v.ErrorMessage<v.CustomIssue> | undefined>]>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<NonEmptyArray<string>>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<NonEmptyArray<string>>, "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types.">]>;
+-            }, undefined>]>, v.DescriptionAction<{
++            }, undefined>]>, undefined>, v.DescriptionAction<{
+                 type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            }, "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
++            } | undefined, "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
+             readonly id: v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.DescriptionAction<string, "REQUIRED. A string identifying the Credential in the response and, if provided, the constraints in 'credential_sets'.">]>;
+             readonly require_cryptographic_holder_binding: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, true>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether the Verifier requires a Cryptographic Holder Binding proof. The default value is true, i.e., a Verifiable Presentation with Cryptographic Holder Binding is required. If set to false, the Verifier accepts a Credential without Cryptographic Holder Binding proof.">]>;
+             readonly multiple: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, false>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether multiple Credentials can be returned for this Credential Query. If omitted, the default value is false.">]>;
+@@ -5716,9 +5716,6 @@ declare namespace DcqlQuery {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -5729,6 +5726,9 @@ declare namespace DcqlQuery {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<{
+             id: string;
+             require_cryptographic_holder_binding: boolean;
+@@ -5776,9 +5776,6 @@ declare namespace DcqlQuery {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -5789,6 +5786,9 @@ declare namespace DcqlQuery {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>, "REQUIRED. A non-empty array of Credential Queries that specify the requested Verifiable Credentials.">]>;
+         readonly credential_sets: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ArraySchema<v.ObjectSchema<{
+             readonly options: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.ArraySchema<v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.NonEmptyAction<string, undefined>]>, undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string[]>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<string[]>, "REQUIRED. A non-empty array, where each value in the array is a list of Credential Query identifiers representing one set of Credentials that satisfies the use case.">]>;
+@@ -5861,9 +5861,6 @@ declare namespace DcqlQuery {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -5874,6 +5871,9 @@ declare namespace DcqlQuery {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>;
+         credential_matches: {
+             [x: string]: {
+@@ -6310,9 +6310,6 @@ declare namespace DcqlQuery {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -6323,6 +6320,9 @@ declare namespace DcqlQuery {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>;
+         credential_sets?: NonEmptyArray<{
+             options: NonEmptyArray<string[]>;
+@@ -6436,11 +6436,11 @@ declare namespace DcqlPresentationResult {
+                 values?: (string | number | boolean)[] | undefined;
+                 id?: string | undefined;
+             }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, undefined>;
+-            readonly meta: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ObjectSchema<{
++            readonly meta: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ObjectSchema<{
+                 readonly type_values: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.SchemaWithPipe<[v.ArraySchema<v.StringSchema<undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string>, v.ErrorMessage<v.CustomIssue> | undefined>]>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<NonEmptyArray<string>>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<NonEmptyArray<string>>, "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types.">]>;
+-            }, undefined>]>, v.DescriptionAction<{
++            }, undefined>]>, undefined>, v.DescriptionAction<{
+                 type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            }, "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
++            } | undefined, "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
+             readonly id: v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.DescriptionAction<string, "REQUIRED. A string identifying the Credential in the response and, if provided, the constraints in 'credential_sets'.">]>;
+             readonly require_cryptographic_holder_binding: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, true>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether the Verifier requires a Cryptographic Holder Binding proof. The default value is true, i.e., a Verifiable Presentation with Cryptographic Holder Binding is required. If set to false, the Verifier accepts a Credential without Cryptographic Holder Binding proof.">]>;
+             readonly multiple: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, false>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether multiple Credentials can be returned for this Credential Query. If omitted, the default value is false.">]>;
+@@ -6502,9 +6502,6 @@ declare namespace DcqlPresentationResult {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -6515,6 +6512,9 @@ declare namespace DcqlPresentationResult {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<{
+             id: string;
+             require_cryptographic_holder_binding: boolean;
+@@ -6562,9 +6562,6 @@ declare namespace DcqlPresentationResult {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -6575,6 +6572,9 @@ declare namespace DcqlPresentationResult {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>, "REQUIRED. A non-empty array of Credential Queries that specify the requested Verifiable Credentials.">]>;
+         readonly credential_matches: v.RecordSchema<v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.NonEmptyAction<string, undefined>]>, v.UnionSchema<[v.ObjectSchema<{
+             readonly success: v.LiteralSchema<true, undefined>;
+@@ -8058,11 +8058,11 @@ declare namespace DcqlPresentationResult {
+                     values?: (string | number | boolean)[] | undefined;
+                     id?: string | undefined;
+                 }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, undefined>;
+-                readonly meta: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ObjectSchema<{
++                readonly meta: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ObjectSchema<{
+                     readonly type_values: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.SchemaWithPipe<[v.ArraySchema<v.StringSchema<undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string>, v.ErrorMessage<v.CustomIssue> | undefined>]>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<NonEmptyArray<string>>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<NonEmptyArray<string>>, "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types.">]>;
+-                }, undefined>]>, v.DescriptionAction<{
++                }, undefined>]>, undefined>, v.DescriptionAction<{
+                     type_values: NonEmptyArray<NonEmptyArray<string>>;
+-                }, "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
++                } | undefined, "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
+                 readonly id: v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.DescriptionAction<string, "REQUIRED. A string identifying the Credential in the response and, if provided, the constraints in 'credential_sets'.">]>;
+                 readonly require_cryptographic_holder_binding: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, true>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether the Verifier requires a Cryptographic Holder Binding proof. The default value is true, i.e., a Verifiable Presentation with Cryptographic Holder Binding is required. If set to false, the Verifier accepts a Credential without Cryptographic Holder Binding proof.">]>;
+                 readonly multiple: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, false>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether multiple Credentials can be returned for this Credential Query. If omitted, the default value is false.">]>;
+@@ -8124,9 +8124,6 @@ declare namespace DcqlPresentationResult {
+                 require_cryptographic_holder_binding: boolean;
+                 multiple: boolean;
+                 format: "ldp_vc" | "jwt_vc_json";
+-                meta: {
+-                    type_values: NonEmptyArray<NonEmptyArray<string>>;
+-                };
+                 claims?: NonEmptyArray<{
+                     path: NonEmptyArray<string | number | null>;
+                     values?: (string | number | boolean)[] | undefined;
+@@ -8137,6 +8134,9 @@ declare namespace DcqlPresentationResult {
+                     type: "aki" | "etsi_tl" | "openid_federation";
+                     values: NonEmptyArray<string>;
+                 }> | undefined;
++                meta?: {
++                    type_values: NonEmptyArray<NonEmptyArray<string>>;
++                } | undefined;
+             }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<{
+                 id: string;
+                 require_cryptographic_holder_binding: boolean;
+@@ -8184,9 +8184,6 @@ declare namespace DcqlPresentationResult {
+                 require_cryptographic_holder_binding: boolean;
+                 multiple: boolean;
+                 format: "ldp_vc" | "jwt_vc_json";
+-                meta: {
+-                    type_values: NonEmptyArray<NonEmptyArray<string>>;
+-                };
+                 claims?: NonEmptyArray<{
+                     path: NonEmptyArray<string | number | null>;
+                     values?: (string | number | boolean)[] | undefined;
+@@ -8197,6 +8194,9 @@ declare namespace DcqlPresentationResult {
+                     type: "aki" | "etsi_tl" | "openid_federation";
+                     values: NonEmptyArray<string>;
+                 }> | undefined;
++                meta?: {
++                    type_values: NonEmptyArray<NonEmptyArray<string>>;
++                } | undefined;
+             }>, "REQUIRED. A non-empty array of Credential Queries that specify the requested Verifiable Credentials.">]>;
+             readonly credential_matches: v.RecordSchema<v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.NonEmptyAction<string, undefined>]>, v.UnionSchema<[v.ObjectSchema<{
+                 readonly success: v.LiteralSchema<true, undefined>;
+@@ -12543,11 +12543,11 @@ declare namespace DcqlCredentialQuery {
+             values?: (string | number | boolean)[] | undefined;
+             id?: string | undefined;
+         }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, undefined>;
+-        readonly meta: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ObjectSchema<{
++        readonly meta: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ObjectSchema<{
+             readonly type_values: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.SchemaWithPipe<[v.ArraySchema<v.StringSchema<undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string>, v.ErrorMessage<v.CustomIssue> | undefined>]>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<NonEmptyArray<string>>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<NonEmptyArray<string>>, "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types.">]>;
+-        }, undefined>]>, v.DescriptionAction<{
++        }, undefined>]>, undefined>, v.DescriptionAction<{
+             type_values: NonEmptyArray<NonEmptyArray<string>>;
+-        }, "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
++        } | undefined, "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
+         readonly id: v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.DescriptionAction<string, "REQUIRED. A string identifying the Credential in the response and, if provided, the constraints in 'credential_sets'.">]>;
+         readonly require_cryptographic_holder_binding: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, true>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether the Verifier requires a Cryptographic Holder Binding proof. The default value is true, i.e., a Verifiable Presentation with Cryptographic Holder Binding is required. If set to false, the Verifier accepts a Credential without Cryptographic Holder Binding proof.">]>;
+         readonly multiple: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, false>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether multiple Credentials can be returned for this Credential Query. If omitted, the default value is false.">]>;
+@@ -12663,11 +12663,11 @@ declare namespace DcqlCredentialQuery {
+             values?: (string | number | boolean)[] | undefined;
+             id?: string | undefined;
+         }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, undefined>;
+-        readonly meta: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ObjectSchema<{
++        readonly meta: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ObjectSchema<{
+             readonly type_values: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.SchemaWithPipe<[v.ArraySchema<v.StringSchema<undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string>, v.ErrorMessage<v.CustomIssue> | undefined>]>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<NonEmptyArray<string>>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<NonEmptyArray<string>>, "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types.">]>;
+-        }, undefined>]>, v.DescriptionAction<{
++        }, undefined>]>, undefined>, v.DescriptionAction<{
+             type_values: NonEmptyArray<NonEmptyArray<string>>;
+-        }, "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
++        } | undefined, "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
+         readonly id: v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.DescriptionAction<string, "REQUIRED. A string identifying the Credential in the response and, if provided, the constraints in 'credential_sets'.">]>;
+         readonly require_cryptographic_holder_binding: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, true>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether the Verifier requires a Cryptographic Holder Binding proof. The default value is true, i.e., a Verifiable Presentation with Cryptographic Holder Binding is required. If set to false, the Verifier accepts a Credential without Cryptographic Holder Binding proof.">]>;
+         readonly multiple: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, false>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether multiple Credentials can be returned for this Credential Query. If omitted, the default value is false.">]>;
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index e5bd1f9..f2c1dd0 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -3705,11 +3705,11 @@ declare namespace DcqlQueryResult {
+                 values?: (string | number | boolean)[] | undefined;
+                 id?: string | undefined;
+             }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, undefined>;
+-            readonly meta: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ObjectSchema<{
++            readonly meta: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ObjectSchema<{
+                 readonly type_values: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.SchemaWithPipe<[v.ArraySchema<v.StringSchema<undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string>, v.ErrorMessage<v.CustomIssue> | undefined>]>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<NonEmptyArray<string>>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<NonEmptyArray<string>>, "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types.">]>;
+-            }, undefined>]>, v.DescriptionAction<{
++            }, undefined>]>, undefined>, v.DescriptionAction<{
+                 type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            }, "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
++            } | undefined, "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
+             readonly id: v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.DescriptionAction<string, "REQUIRED. A string identifying the Credential in the response and, if provided, the constraints in 'credential_sets'.">]>;
+             readonly require_cryptographic_holder_binding: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, true>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether the Verifier requires a Cryptographic Holder Binding proof. The default value is true, i.e., a Verifiable Presentation with Cryptographic Holder Binding is required. If set to false, the Verifier accepts a Credential without Cryptographic Holder Binding proof.">]>;
+             readonly multiple: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, false>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether multiple Credentials can be returned for this Credential Query. If omitted, the default value is false.">]>;
+@@ -3771,9 +3771,6 @@ declare namespace DcqlQueryResult {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -3784,6 +3781,9 @@ declare namespace DcqlQueryResult {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<{
+             id: string;
+             require_cryptographic_holder_binding: boolean;
+@@ -3831,9 +3831,6 @@ declare namespace DcqlQueryResult {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -3844,6 +3841,9 @@ declare namespace DcqlQueryResult {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>, "REQUIRED. A non-empty array of Credential Queries that specify the requested Verifiable Credentials.">]>;
+         readonly credential_matches: v.RecordSchema<v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.NonEmptyAction<string, undefined>]>, v.UnionSchema<[v.ObjectSchema<{
+             readonly success: v.LiteralSchema<true, undefined>;
+@@ -5650,11 +5650,11 @@ declare namespace DcqlQuery {
+                 values?: (string | number | boolean)[] | undefined;
+                 id?: string | undefined;
+             }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, undefined>;
+-            readonly meta: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ObjectSchema<{
++            readonly meta: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ObjectSchema<{
+                 readonly type_values: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.SchemaWithPipe<[v.ArraySchema<v.StringSchema<undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string>, v.ErrorMessage<v.CustomIssue> | undefined>]>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<NonEmptyArray<string>>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<NonEmptyArray<string>>, "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types.">]>;
+-            }, undefined>]>, v.DescriptionAction<{
++            }, undefined>]>, undefined>, v.DescriptionAction<{
+                 type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            }, "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
++            } | undefined, "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
+             readonly id: v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.DescriptionAction<string, "REQUIRED. A string identifying the Credential in the response and, if provided, the constraints in 'credential_sets'.">]>;
+             readonly require_cryptographic_holder_binding: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, true>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether the Verifier requires a Cryptographic Holder Binding proof. The default value is true, i.e., a Verifiable Presentation with Cryptographic Holder Binding is required. If set to false, the Verifier accepts a Credential without Cryptographic Holder Binding proof.">]>;
+             readonly multiple: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, false>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether multiple Credentials can be returned for this Credential Query. If omitted, the default value is false.">]>;
+@@ -5716,9 +5716,6 @@ declare namespace DcqlQuery {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -5729,6 +5726,9 @@ declare namespace DcqlQuery {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<{
+             id: string;
+             require_cryptographic_holder_binding: boolean;
+@@ -5776,9 +5776,6 @@ declare namespace DcqlQuery {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -5789,6 +5786,9 @@ declare namespace DcqlQuery {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>, "REQUIRED. A non-empty array of Credential Queries that specify the requested Verifiable Credentials.">]>;
+         readonly credential_sets: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ArraySchema<v.ObjectSchema<{
+             readonly options: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.ArraySchema<v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.NonEmptyAction<string, undefined>]>, undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string[]>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<string[]>, "REQUIRED. A non-empty array, where each value in the array is a list of Credential Query identifiers representing one set of Credentials that satisfies the use case.">]>;
+@@ -5861,9 +5861,6 @@ declare namespace DcqlQuery {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -5874,6 +5871,9 @@ declare namespace DcqlQuery {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>;
+         credential_matches: {
+             [x: string]: {
+@@ -6310,9 +6310,6 @@ declare namespace DcqlQuery {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -6323,6 +6320,9 @@ declare namespace DcqlQuery {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>;
+         credential_sets?: NonEmptyArray<{
+             options: NonEmptyArray<string[]>;
+@@ -6436,11 +6436,11 @@ declare namespace DcqlPresentationResult {
+                 values?: (string | number | boolean)[] | undefined;
+                 id?: string | undefined;
+             }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, undefined>;
+-            readonly meta: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ObjectSchema<{
++            readonly meta: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ObjectSchema<{
+                 readonly type_values: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.SchemaWithPipe<[v.ArraySchema<v.StringSchema<undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string>, v.ErrorMessage<v.CustomIssue> | undefined>]>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<NonEmptyArray<string>>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<NonEmptyArray<string>>, "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types.">]>;
+-            }, undefined>]>, v.DescriptionAction<{
++            }, undefined>]>, undefined>, v.DescriptionAction<{
+                 type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            }, "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
++            } | undefined, "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
+             readonly id: v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.DescriptionAction<string, "REQUIRED. A string identifying the Credential in the response and, if provided, the constraints in 'credential_sets'.">]>;
+             readonly require_cryptographic_holder_binding: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, true>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether the Verifier requires a Cryptographic Holder Binding proof. The default value is true, i.e., a Verifiable Presentation with Cryptographic Holder Binding is required. If set to false, the Verifier accepts a Credential without Cryptographic Holder Binding proof.">]>;
+             readonly multiple: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, false>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether multiple Credentials can be returned for this Credential Query. If omitted, the default value is false.">]>;
+@@ -6502,9 +6502,6 @@ declare namespace DcqlPresentationResult {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -6515,6 +6512,9 @@ declare namespace DcqlPresentationResult {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<{
+             id: string;
+             require_cryptographic_holder_binding: boolean;
+@@ -6562,9 +6562,6 @@ declare namespace DcqlPresentationResult {
+             require_cryptographic_holder_binding: boolean;
+             multiple: boolean;
+             format: "ldp_vc" | "jwt_vc_json";
+-            meta: {
+-                type_values: NonEmptyArray<NonEmptyArray<string>>;
+-            };
+             claims?: NonEmptyArray<{
+                 path: NonEmptyArray<string | number | null>;
+                 values?: (string | number | boolean)[] | undefined;
+@@ -6575,6 +6572,9 @@ declare namespace DcqlPresentationResult {
+                 type: "aki" | "etsi_tl" | "openid_federation";
+                 values: NonEmptyArray<string>;
+             }> | undefined;
++            meta?: {
++                type_values: NonEmptyArray<NonEmptyArray<string>>;
++            } | undefined;
+         }>, "REQUIRED. A non-empty array of Credential Queries that specify the requested Verifiable Credentials.">]>;
+         readonly credential_matches: v.RecordSchema<v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.NonEmptyAction<string, undefined>]>, v.UnionSchema<[v.ObjectSchema<{
+             readonly success: v.LiteralSchema<true, undefined>;
+@@ -8058,11 +8058,11 @@ declare namespace DcqlPresentationResult {
+                     values?: (string | number | boolean)[] | undefined;
+                     id?: string | undefined;
+                 }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, undefined>;
+-                readonly meta: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ObjectSchema<{
++                readonly meta: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ObjectSchema<{
+                     readonly type_values: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.SchemaWithPipe<[v.ArraySchema<v.StringSchema<undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string>, v.ErrorMessage<v.CustomIssue> | undefined>]>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<NonEmptyArray<string>>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<NonEmptyArray<string>>, "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types.">]>;
+-                }, undefined>]>, v.DescriptionAction<{
++                }, undefined>]>, undefined>, v.DescriptionAction<{
+                     type_values: NonEmptyArray<NonEmptyArray<string>>;
+-                }, "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
++                } | undefined, "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
+                 readonly id: v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.DescriptionAction<string, "REQUIRED. A string identifying the Credential in the response and, if provided, the constraints in 'credential_sets'.">]>;
+                 readonly require_cryptographic_holder_binding: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, true>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether the Verifier requires a Cryptographic Holder Binding proof. The default value is true, i.e., a Verifiable Presentation with Cryptographic Holder Binding is required. If set to false, the Verifier accepts a Credential without Cryptographic Holder Binding proof.">]>;
+                 readonly multiple: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, false>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether multiple Credentials can be returned for this Credential Query. If omitted, the default value is false.">]>;
+@@ -8124,9 +8124,6 @@ declare namespace DcqlPresentationResult {
+                 require_cryptographic_holder_binding: boolean;
+                 multiple: boolean;
+                 format: "ldp_vc" | "jwt_vc_json";
+-                meta: {
+-                    type_values: NonEmptyArray<NonEmptyArray<string>>;
+-                };
+                 claims?: NonEmptyArray<{
+                     path: NonEmptyArray<string | number | null>;
+                     values?: (string | number | boolean)[] | undefined;
+@@ -8137,6 +8134,9 @@ declare namespace DcqlPresentationResult {
+                     type: "aki" | "etsi_tl" | "openid_federation";
+                     values: NonEmptyArray<string>;
+                 }> | undefined;
++                meta?: {
++                    type_values: NonEmptyArray<NonEmptyArray<string>>;
++                } | undefined;
+             }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<{
+                 id: string;
+                 require_cryptographic_holder_binding: boolean;
+@@ -8184,9 +8184,6 @@ declare namespace DcqlPresentationResult {
+                 require_cryptographic_holder_binding: boolean;
+                 multiple: boolean;
+                 format: "ldp_vc" | "jwt_vc_json";
+-                meta: {
+-                    type_values: NonEmptyArray<NonEmptyArray<string>>;
+-                };
+                 claims?: NonEmptyArray<{
+                     path: NonEmptyArray<string | number | null>;
+                     values?: (string | number | boolean)[] | undefined;
+@@ -8197,6 +8194,9 @@ declare namespace DcqlPresentationResult {
+                     type: "aki" | "etsi_tl" | "openid_federation";
+                     values: NonEmptyArray<string>;
+                 }> | undefined;
++                meta?: {
++                    type_values: NonEmptyArray<NonEmptyArray<string>>;
++                } | undefined;
+             }>, "REQUIRED. A non-empty array of Credential Queries that specify the requested Verifiable Credentials.">]>;
+             readonly credential_matches: v.RecordSchema<v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.NonEmptyAction<string, undefined>]>, v.UnionSchema<[v.ObjectSchema<{
+                 readonly success: v.LiteralSchema<true, undefined>;
+@@ -12543,11 +12543,11 @@ declare namespace DcqlCredentialQuery {
+             values?: (string | number | boolean)[] | undefined;
+             id?: string | undefined;
+         }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, undefined>;
+-        readonly meta: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ObjectSchema<{
++        readonly meta: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ObjectSchema<{
+             readonly type_values: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.SchemaWithPipe<[v.ArraySchema<v.StringSchema<undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string>, v.ErrorMessage<v.CustomIssue> | undefined>]>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<NonEmptyArray<string>>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<NonEmptyArray<string>>, "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types.">]>;
+-        }, undefined>]>, v.DescriptionAction<{
++        }, undefined>]>, undefined>, v.DescriptionAction<{
+             type_values: NonEmptyArray<NonEmptyArray<string>>;
+-        }, "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
++        } | undefined, "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
+         readonly id: v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.DescriptionAction<string, "REQUIRED. A string identifying the Credential in the response and, if provided, the constraints in 'credential_sets'.">]>;
+         readonly require_cryptographic_holder_binding: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, true>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether the Verifier requires a Cryptographic Holder Binding proof. The default value is true, i.e., a Verifiable Presentation with Cryptographic Holder Binding is required. If set to false, the Verifier accepts a Credential without Cryptographic Holder Binding proof.">]>;
+         readonly multiple: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, false>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether multiple Credentials can be returned for this Credential Query. If omitted, the default value is false.">]>;
+@@ -12663,11 +12663,11 @@ declare namespace DcqlCredentialQuery {
+             values?: (string | number | boolean)[] | undefined;
+             id?: string | undefined;
+         }>, v.ErrorMessage<v.CustomIssue> | undefined>]>, undefined>;
+-        readonly meta: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ObjectSchema<{
++        readonly meta: v.SchemaWithPipe<[v.OptionalSchema<v.SchemaWithPipe<[v.ObjectSchema<{
+             readonly type_values: v.SchemaWithPipe<[v.SchemaWithPipe<[v.ArraySchema<v.SchemaWithPipe<[v.ArraySchema<v.StringSchema<undefined>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<string>, v.ErrorMessage<v.CustomIssue> | undefined>]>, (i: v.ArrayIssue) => string>, v.CustomSchema<NonEmptyArray<NonEmptyArray<string>>, v.ErrorMessage<v.CustomIssue> | undefined>]>, v.DescriptionAction<NonEmptyArray<NonEmptyArray<string>>, "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types.">]>;
+-        }, undefined>]>, v.DescriptionAction<{
++        }, undefined>]>, undefined>, v.DescriptionAction<{
+             type_values: NonEmptyArray<NonEmptyArray<string>>;
+-        }, "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
++        } | undefined, "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential.">]>;
+         readonly id: v.SchemaWithPipe<[v.StringSchema<undefined>, v.RegexAction<string, undefined>, v.DescriptionAction<string, "REQUIRED. A string identifying the Credential in the response and, if provided, the constraints in 'credential_sets'.">]>;
+         readonly require_cryptographic_holder_binding: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, true>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether the Verifier requires a Cryptographic Holder Binding proof. The default value is true, i.e., a Verifiable Presentation with Cryptographic Holder Binding is required. If set to false, the Verifier accepts a Credential without Cryptographic Holder Binding proof.">]>;
+         readonly multiple: v.SchemaWithPipe<[v.OptionalSchema<v.BooleanSchema<undefined>, false>, v.DescriptionAction<boolean, "OPTIONAL. A boolean which indicates whether multiple Credentials can be returned for this Credential Query. If omitted, the default value is false.">]>;
+diff --git a/dist/index.js b/dist/index.js
+index d56e2f9..f9b34da 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -1083,18 +1083,20 @@ var DcqlCredentialQuery;
+     format: v10.picklist(["jwt_vc_json", "ldp_vc"]),
+     claims: v10.optional(vNonEmptyArray(DcqlClaimsQuery.vW3cSdJwtVc)),
+     meta: v10.pipe(
+-      v10.pipe(
+-        v10.object({
+-          type_values: v10.pipe(
+-            vNonEmptyArray(vNonEmptyArray(v10.string())),
+-            v10.description(
+-              "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types."
++      v10.optional(
++        v10.pipe(
++          v10.object({
++            type_values: v10.pipe(
++              vNonEmptyArray(vNonEmptyArray(v10.string())),
++              v10.description(
++                "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types."
++              )
+             )
+-          )
+-        })
++          })
++        )
+       ),
+       v10.description(
+-        "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential."
++        "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential."
+       )
+     )
+   });
+diff --git a/dist/index.mjs b/dist/index.mjs
+index e1b70f9..4a4ea1b 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -1019,18 +1019,20 @@ var DcqlCredentialQuery;
+     format: v10.picklist(["jwt_vc_json", "ldp_vc"]),
+     claims: v10.optional(vNonEmptyArray(DcqlClaimsQuery.vW3cSdJwtVc)),
+     meta: v10.pipe(
+-      v10.pipe(
+-        v10.object({
+-          type_values: v10.pipe(
+-            vNonEmptyArray(vNonEmptyArray(v10.string())),
+-            v10.description(
+-              "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types."
++      v10.optional(
++        v10.pipe(
++          v10.object({
++            type_values: v10.pipe(
++              vNonEmptyArray(vNonEmptyArray(v10.string())),
++              v10.description(
++                "REQUIRED. An array of string arrays that specifies the fully expanded types (IRIs) after the @context was applied that the Verifier accepts to be presented in the Presentation. Each of the top-level arrays specifies one alternative to match the type values of the Verifiable Credential against. Each inner array specifies a set of fully expanded types that MUST be present in the type property of the Verifiable Credential, regardless of order or the presence of additional types."
++              )
+             )
+-          )
+-        })
++          })
++        )
+       ),
+       v10.description(
+-        "REQUIRED. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential."
++        "OPTIONAL. An object defining additional properties requested by the Verifier that apply to the metadata and validity data of the Credential."
+       )
+     )
+   });

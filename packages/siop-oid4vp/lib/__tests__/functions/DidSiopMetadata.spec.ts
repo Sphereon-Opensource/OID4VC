@@ -2,7 +2,6 @@ import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { Format } from '@sphereon/pex-models'
 import { IProofType } from '@sphereon/ssi-types'
 import { describe, expect, it } from 'vitest'
-
 import { SIOPErrors, supportedCredentialsFormats } from '../..'
 
 describe('DidSiopMetadata should ', () => {

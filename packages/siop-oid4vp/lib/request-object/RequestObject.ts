@@ -1,12 +1,16 @@
 import { JwtHeader, JwtIssuer, parseJWT } from '@sphereon/oid4vc-common'
-
 import { ClaimPayloadCommonOpts, ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts } from '../authorization-request'
 import { assertValidAuthorizationRequestOpts } from '../authorization-request/Opts'
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
-import { AuthorizationRequestPayload, JwtIssuerWithContext, RequestObjectJwt, RequestObjectPayload, SIOPErrors } from '../types'
-
 import { assertValidRequestObjectOpts } from './Opts'
 import { assertValidRequestObjectPayload, createRequestObjectPayload } from './Payload'
+import {
+  AuthorizationRequestPayload,
+  JwtIssuerWithContext,
+  RequestObjectJwt,
+  RequestObjectPayload,
+  SIOPErrors
+} from '../types'
 import { RequestObjectOpts } from './types'
 
 export class RequestObject {
@@ -91,21 +95,20 @@ export class RequestObject {
         this.payload.iss = this.payload.iss ?? did
         this.payload.sub = this.payload.sub ?? did
         this.payload.client_id = this.payload.client_id ?? did
-        this.payload.client_id_scheme = 'did'
 
-        const header = { kid: jwtIssuer.didUrl, alg: jwtIssuer.alg, typ: 'JWT' }
+        const header = { kid: jwtIssuer.didUrl, alg: jwtIssuer.alg, typ: 'oauth-authz-req+jwt' }
         this.jwt = await this.opts.createJwtCallback(jwtIssuer, { header, payload: this.payload })
       } else if (jwtIssuer.method === 'x5c') {
         this.payload.iss = jwtIssuer.issuer
 
-        const header = { x5c: jwtIssuer.x5c, typ: 'JWT', alg: jwtIssuer.alg }
+        const header = { x5c: jwtIssuer.x5c, typ: 'oauth-authz-req+jwt', alg: jwtIssuer.alg }
         this.jwt = await this.opts.createJwtCallback(jwtIssuer, { header, payload: this.payload })
       } else if (jwtIssuer.method === 'jwk') {
         if (!this.payload.client_id) {
           throw new Error('Please provide a client_id for the RP')
         }
 
-        const header = { jwk: jwtIssuer.jwk, typ: 'JWT', alg: jwtIssuer.jwk.alg as string }
+        const header = { jwk: jwtIssuer.jwk, typ: 'oauth-authz-req+jwt', alg: jwtIssuer.jwk.alg as string }
         this.jwt = await this.opts.createJwtCallback(jwtIssuer, { header, payload: this.payload })
       } else {
         throw new Error(`JwtIssuer method '${(jwtIssuer as JwtIssuer).method}' not implemented`)
@@ -135,7 +138,7 @@ export class RequestObject {
     if (this.options) {
       assertValidRequestObjectOpts(this.options, false)
     }
-    assertValidRequestObjectPayload(await this.getPayload())
+    assertValidRequestObjectPayload(this.getPayload())
   }
 
   public get options(): RequestObjectOpts<ClaimPayloadCommonOpts | ClaimPayloadOptsVID1> | undefined {

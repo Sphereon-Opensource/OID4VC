@@ -26,8 +26,8 @@
     "pnpm": ">=10"
   },
   "resolutions": {
-    "@sphereon/ssi-types": "0.34.1-next.3",
-    "dcql": "0.2.22",
+    "@sphereon/ssi-types": "0.34.1-feat.SSISDK.35.61",
+    "dcql": "1.0.1",
     "node-fetch": "2.6.12",
     "typescript": "5.8.3"
   },
@@ -50,6 +50,12 @@
     "turbo": "^2.5.0",
     "typescript": "5.8.3",
     "vitest": "^3.1.1"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "did-jwt@6.11.6": "patches/did-jwt@6.11.6.patch",
+      "dcql@1.0.1": "patches/dcql@1.0.1.patch"
+    }
   },
   "keywords": [
     "Sphereon",

@@ -1,5 +1,4 @@
 import { base64urlEncodeBuffer, defaultHasher, uuidv4 } from '@sphereon/oid4vc-common'
-
 export function getNonce(state: string, nonce?: string) {
   return nonce ?? toNonce(state)
 }
