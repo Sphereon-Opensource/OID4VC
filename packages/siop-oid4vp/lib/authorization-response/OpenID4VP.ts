@@ -3,8 +3,11 @@ import {
   CredentialMapper,
   HasherSync,
   IVerifiablePresentation,
-  W3CVerifiablePresentation, WrappedMdocCredential, WrappedSdJwtVerifiableCredential,
-  WrappedVerifiablePresentation, WrappedW3CVerifiableCredential,
+  W3CVerifiablePresentation,
+  WrappedMdocCredential,
+  WrappedSdJwtVerifiableCredential,
+  WrappedVerifiablePresentation,
+  WrappedW3CVerifiableCredential
 } from '@sphereon/ssi-types'
 import {DcqlPresentation, DcqlQuery} from 'dcql'
 import {verifyRevocation} from '../helpers'

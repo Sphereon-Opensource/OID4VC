@@ -1,4 +1,5 @@
 export * from './AuthorizationRequestPayloadVID1.schema';
+export * from './AuthorizationRequestPayloadD28.schema';
 export * from './AuthorizationRequestPayloadV1.schema';
 // export * from './AuthorizationRequestOpts.schema';
 export * from './AuthorizationResponseOpts.schema';

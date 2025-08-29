@@ -2289,6 +2289,7 @@ export const AuthorizationResponseOptsSchemaObj = {
         110,
         180,
         200,
+        280,
         1000,
         71
       ]

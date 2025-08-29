@@ -1,6 +1,6 @@
 import {EventEmitter} from 'events'
 import {jarmAuthResponseSend, JarmClientMetadata, jarmMetadataValidate, JarmServerMetadata} from '@sphereon/jarm'
-import {JwtIssuer, uuidv4} from '@sphereon/oid4vc-common'
+import {uuidv4} from '@sphereon/oid4vc-common'
 import {IIssuerId} from '@sphereon/ssi-types'
 import {AuthorizationRequest, URI, VerifyAuthorizationRequestOpts} from '../authorization-request'
 import {mergeVerificationOpts} from '../authorization-request/Opts'
@@ -8,6 +8,7 @@ import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   AuthorizationResponseWithCorrelationId,
+  CreateAuthorizationResponseOpts,
   DcqlResponseOpts
 } from '../authorization-response'
 import {encodeJsonAsURI, extractJwksFromJwksMetadata, JwksMetadataParams, post} from '../helpers'
@@ -95,16 +96,7 @@ export class OP {
 
   public async createAuthorizationResponse(
     verifiedAuthorizationRequest: VerifiedAuthorizationRequest,
-    responseOpts: {
-      jwtIssuer?: JwtIssuer
-      version?: SupportedVersion
-      correlationId?: string
-      audience?: string
-      issuer?: ResponseIss | string
-      verification?: Verification
-      dcqlResponse?: DcqlResponseOpts
-      isFirstParty?: boolean
-    },
+    responseOpts?: CreateAuthorizationResponseOpts,
   ): Promise<AuthorizationResponseWithCorrelationId> {
     if (
       verifiedAuthorizationRequest.correlationId &&

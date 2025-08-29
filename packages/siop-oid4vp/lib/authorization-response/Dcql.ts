@@ -2,7 +2,7 @@ import {
   HasherSync,
   WrappedMdocCredential,
   WrappedSdJwtVerifiableCredential,
-  WrappedW3CVerifiableCredential
+  WrappedW3CVerifiableCredential,
 } from '@sphereon/ssi-types'
 import {
   DcqlMdocCredential,
@@ -12,9 +12,9 @@ import {
   DcqlSdJwtVcCredential,
   DcqlW3cVcCredential
 } from 'dcql'
-import { extractDataFromPath } from '../helpers'
-import { extractDcqlPresentationFromDcqlVpToken, hasCryptographicHolderBinding } from './OpenID4VP'
-import { AuthorizationRequestPayload } from '../types'
+import {extractDataFromPath} from '../helpers'
+import {extractDcqlPresentationFromDcqlVpToken, hasCryptographicHolderBinding} from './OpenID4VP'
+import {AuthorizationRequestPayload, SupportedVersion} from '../types'
 
 /**
  * Finds a valid DcqlQuery inside the given AuthenticationRequestPayload
@@ -25,7 +25,7 @@ import { AuthorizationRequestPayload } from '../types'
  */
 
 export class Dcql {
-  static findValidDcqlQuery = async (authorizationRequestPayload: AuthorizationRequestPayload): Promise<DcqlQuery | undefined> => {
+  static findValidDcqlQuery = async (authorizationRequestPayload: AuthorizationRequestPayload, version?: SupportedVersion): Promise<DcqlQuery | undefined> => {
     const dcqlQuery: DcqlQuery.Input[] = extractDataFromPath(authorizationRequestPayload ?? {}, '$..dcql_query').map((d) => d.value)
 
     if (dcqlQuery.length === 0) {
@@ -36,7 +36,19 @@ export class Dcql {
       throw new Error('Found multiple dcql_query in vp_token. Only one is allowed')
     }
 
-    return DcqlQuery.parse(dcqlQuery[0])
+    const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery[0])
+
+    if (version === SupportedVersion.OID4VP_v1) {
+      const hasMeta = parsedDcqlQuery.credentials
+          .filter(q => q.format === 'jwt_vc_json' || q.format === 'ldp_vc')
+          .every(q => q.meta !== undefined)
+
+      if (!hasMeta) {
+        throw new Error('Missing meta property in DCQL query')
+      }
+    }
+
+    return parsedDcqlQuery
   }
 
   static getDcqlPresentationResult = (
