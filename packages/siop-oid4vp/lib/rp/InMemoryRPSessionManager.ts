@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events'
-
 import { AuthorizationRequest } from '../authorization-request'
 import { AuthorizationResponse } from '../authorization-response'
 import {
@@ -10,7 +9,6 @@ import {
   AuthorizationResponseState,
   AuthorizationResponseStateStatus,
 } from '../types'
-
 import { IRPSessionManager } from './types'
 
 /**

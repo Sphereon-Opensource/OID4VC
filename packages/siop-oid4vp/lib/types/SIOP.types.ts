@@ -1,24 +1,25 @@
 import { JarmClientMetadata } from '@sphereon/jarm'
 import { DynamicRegistrationClientMetadata, JWKS, SigningAlgo } from '@sphereon/oid4vc-common'
-import { Format, PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models'
+import { Format } from '@sphereon/pex-models'
 import {
   AdditionalClaims,
   CompactSdJwtVc,
   IPresentation,
-  IVerifiablePresentation,
   MdocOid4vpMdocVpToken,
-  PresentationSubmission,
   W3CVerifiableCredential,
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
-
-import { AuthorizationRequest, CreateAuthorizationRequestOpts, PropertyTargets, VerifyAuthorizationRequestOpts } from '../authorization-request'
+import {
+  AuthorizationRequest,
+  CreateAuthorizationRequestOpts,
+  PropertyTargets,
+  VerifyAuthorizationRequestOpts
+} from '../authorization-request'
 import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
-  PresentationDefinitionWithLocation,
   PresentationVerificationCallback,
   VerifyAuthorizationResponseOpts,
 } from '../authorization-response'
@@ -35,22 +36,33 @@ export interface RequestObjectPayload extends RequestCommonPayload, JWTPayload {
   scope: string // REQUIRED. As specified in Section 3.1.2 of [OpenID.Core].
   response_type: ResponseType | string // REQUIRED. Constant string value id_token.
   client_id: string // REQUIRED. RP's identifier at the Self-Issued OP.
-  client_id_scheme?: ClientIdScheme // The client_id_scheme enables deployments of this specification to use different mechanisms to obtain and validate metadata of the Verifier beyond the scope of [RFC6749]. The term client_id_scheme is used since the Verifier is acting as an OAuth 2.0 Client.
   entity_id?: string // OPTIONAL for OIDF
   client_metadata: ClientMetadataOpts
   redirect_uri?: string // REQUIRED before OID4VP v18, now optional because of response_uri. URI to which the Self-Issued OP Response will be sent
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
   nonce: string
   state: string
+  dcql_query?: Record<string, any>
 }
 
 export type RequestObjectJwt = string
 
 // https://openid.net/specs/openid-connect-self-issued-v2-1_0.html#section-8
-
 export interface AuthorizationRequestCommonPayload extends RequestCommonPayload, JWTPayload {
   request?: string // OPTIONAL. Request Object value, as specified in Section 6.1 of [OpenID.Core]. The Request Object MAY be encrypted to the Self-Issued OP by the RP. In this case, the sub (subject) of a previously issued ID Token for this RP MUST be sent as the kid (Key ID) of the JWE.
   request_uri?: string // OPTIONAL. URL where Request Object value can be retrieved from, as specified in Section 6.2 of [OpenID.Core].
+}
+
+export type RequestUriMethod = 'get' | 'post'
+
+export enum ClientIdentifierPrefix {
+  REDIRECT_URI = 'redirect_uri',
+  OPENID_FEDERATION = 'openid_federation',
+  DECENTRALIZED_IDENTIFIER = 'decentralized_identifier',
+  VERIFIER_ATTESTATION = 'verifier_attestation',
+  X509_SAN_DNS = 'x509_san_dns',
+  X509_HASH = 'x509_hash',
+  ORIGIN = 'origin',
 }
 
 export interface RequestCommonPayload extends JWTPayload {
@@ -58,9 +70,7 @@ export interface RequestCommonPayload extends JWTPayload {
   response_type?: ResponseType | string // REQUIRED. Constant string value id_token.
   client_id?: string // REQUIRED. RP's identifier at the Self-Issued OP.
   redirect_uri?: string // REQUIRED. URI to which the Self-Issued OP Response will be sent
-
   id_token_hint?: string // OPTIONAL. As specified in Section 3.1.2 of [OpenID.Core]. If the ID Token is encrypted for the Self-Issued OP, the sub (subject) of the signed ID Token MUST be sent as the kid (Key ID) of the JWE.
-  // claims?: ClaimPayloadCommon; // OPTIONAL. As specified in Section 5.5 of [OpenID.Core]
   nonce?: string
   state?: string
   response_mode?: ResponseMode // This specification introduces a new response mode post in accordance with [OAuth.Responses]. This response mode is used to request the Self-Issued OP to deliver the result of the authentication process to a certain endpoint using the HTTP POST method. The additional parameter response_mode is used to carry this value.
@@ -70,48 +80,34 @@ export interface AuthorizationRequestPayloadVID1 extends AuthorizationRequestCom
   claims?: ClaimPayloadVID1
 }
 
-export interface AuthorizationRequestPayloadVD11
-  extends AuthorizationRequestCommonPayload,
-    RequestClientMetadataPayloadProperties,
-    RequestIdTokenPayloadProperties {
+export interface AuthorizationRequestPayloadV1
+    extends AuthorizationRequestCommonPayload,
+      RequestClientMetadataPayloadProperties,
+      RequestIdTokenPayloadProperties {
   claims?: ClaimPayloadCommon // OPTIONAL. As specified in Section 5.5 of [OpenID.Core]
-  presentation_definition?: PresentationDefinitionV1 | PresentationDefinitionV2 | PresentationDefinitionV1[] | PresentationDefinitionV2[]
-  presentation_definition_uri?: string
-}
-
-export interface AuthorizationRequestPayloadVD12OID4VPD18
-  extends AuthorizationRequestCommonPayload,
-    RequestClientMetadataPayloadProperties,
-    RequestIdTokenPayloadProperties {
-  claims?: ClaimPayloadCommon // OPTIONAL. As specified in Section 5.5 of [OpenID.Core]
-  presentation_definition?: PresentationDefinitionV1 | PresentationDefinitionV2 | PresentationDefinitionV1[] | PresentationDefinitionV2[]
-  presentation_definition_uri?: string
-  client_id_scheme?: ClientIdSchemeOID4VPD18
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
+  dcql_query?: Record<string, any> // A JSON object containing a DCQL query as defined in Section 6. // see https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#dcql_query
+  request_uri_method?: RequestUriMethod // OPTIONAL. A string determining the HTTP method to be used when the request_uri parameter is included in the same request.
+  // TODO SSISDK-37
+  transaction_data?: string[]
+  // TODO SSISDK-38
+  verifier_info?: RelyingPartyAttestation[]
 }
 
-export interface AuthorizationRequestPayloadVD12OID4VPD20
-  extends AuthorizationRequestCommonPayload,
-    RequestClientMetadataPayloadProperties,
-    RequestIdTokenPayloadProperties {
-  claims?: ClaimPayloadCommon // OPTIONAL. As specified in Section 5.5 of [OpenID.Core]
-  presentation_definition?: PresentationDefinitionV1 | PresentationDefinitionV2 | PresentationDefinitionV1[] | PresentationDefinitionV2[]
-  presentation_definition_uri?: string
-  client_id_scheme?: ClientIdSchemeOID4VPD20
-  response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
-  dcql_query?: string
+export type RelyingPartyAttestation = {
+  format: string // REQUIRED. A string that identifies the format of the attestation and how it is encoded TODO vc types?
+  data: string // REQUIRED. An object or string containing an attestation (e.g. a JWT) TODO vc objects Format
+  credential_ids?: string[]
 }
 
-export type ClientIdSchemeOID4VPD18 = 'pre-registered' | 'redirect_uri' | 'entity_id' | 'did'
-export type ClientIdSchemeOID4VPD20 = ClientIdSchemeOID4VPD18 | 'x509_san_dns' | 'x509_san_uri' | 'entity_id' | 'verifier_attestation'
-export type ClientIdScheme = ClientIdSchemeOID4VPD18 | ClientIdSchemeOID4VPD20
+export type TransactionData = {
+  type: string
+  credential_ids: string[]
+  [x: string]: any
+}
 
 // https://openid.bitbucket.io/connect/openid-connect-self-issued-v2-1_0.html#section-10
-export type AuthorizationRequestPayload =
-  | AuthorizationRequestPayloadVID1
-  | AuthorizationRequestPayloadVD11
-  | AuthorizationRequestPayloadVD12OID4VPD18
-  | AuthorizationRequestPayloadVD12OID4VPD20
+export type AuthorizationRequestPayload = AuthorizationRequestPayloadVID1 | AuthorizationRequestPayloadV1
 
 export type JWTVcPresentationProfileAuthenticationRequestPayload = RequestIdTokenPayloadProperties
 
@@ -121,7 +117,6 @@ export interface RequestIdTokenPayloadProperties {
 
 export interface RequestClientMetadataPayloadProperties {
   client_metadata?: RPRegistrationMetadataPayload // OPTIONAL. This parameter is used by the RP to provide information about itself to a Self-Issued OP that would normally be provided to an OP during Dynamic RP Registration, as specified in {#rp-registration-parameter}.
-  client_metadata_uri?: string // OPTIONAL. This parameter is used by the RP to provide information about itself to a Self-Issued OP that would normally be provided to an OP during Dynamic RP Registration, as specified in {#rp-registration-parameter}.
 }
 
 export interface RequestRegistrationPayloadProperties {
@@ -140,8 +135,7 @@ export interface VerifiedAuthorizationRequest extends Partial<VerifiedJWT> {
   authorizationRequestPayload: AuthorizationRequestPayload
   requestObject?: RequestObject // The Request object
   registrationMetadataPayload: RPRegistrationMetadataPayload
-  presentationDefinitions?: PresentationDefinitionWithLocation[] // The optional presentation definition objects that the RP requests
-  dcqlQuery?: DcqlQuery
+  dcqlQuery: DcqlQuery
   verifyOpts: VerifyAuthorizationRequestOpts // The verification options for the authentication request
   versions: SupportedVersion[]
 }
@@ -163,7 +157,7 @@ export interface IDTokenPayload extends JWTPayload {
       VP Token is not an array, and a single VP is passed as a vp_token. In this case, the descriptor map would contain a simple path expression “$”.
       * It's not clear from the ID1 specs how to handle presentation submission in case of multiple VPs
     */
-    presentation_submission: PresentationSubmission
+    dqcl_query?: string
   }
 }
 
@@ -182,7 +176,6 @@ export interface AuthorizationResponsePayload {
     | CompactSdJwtVc
     | MdocOid4vpMdocVpToken
     | EncodedDcqlQueryVpToken
-  presentation_submission?: PresentationSubmission
   verifiedData?: IPresentation | AdditionalClaims
   is_first_party?: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -195,8 +188,6 @@ export interface IdTokenClaimPayload {
 }
 
 export interface VpTokenClaimPayload {
-  presentation_definition?: PresentationDefinitionV1 | PresentationDefinitionV2
-  presentation_definition_uri?: string
   dcql_query?: string
 }
 
@@ -221,7 +212,6 @@ export interface VerifiablePresentationWithFormat {
 
 export interface RequestStateInfo {
   client_id: string // RP ID
-
   // sub: string
   nonce?: string
   state?: string
@@ -381,12 +371,14 @@ interface JWT_VCDiscoveryMetadataPayload extends DiscoveryMetadataPayloadVID1 {
   client_purpose?: string
 }
 
-interface DiscoveryMetadataPayloadVD11 extends DiscoveryMetadataCommonPayload {
-  id_token_types_supported?: IdTokenType[] | IdTokenType
+interface DiscoveryMetadataPayloadV1Final extends DynamicRegistrationClientMetadata, DiscoveryMetadataCommonPayload {
   vp_formats_supported?: Format // from oidc4vp
+  id_token_types_supported?: IdTokenType[] | IdTokenType
+  encrypted_response_enc_values_supported?: string[] // from oidc4vp
+  client_id_prefixes_supported?: string[]
 }
 
-export type DiscoveryMetadataPayload = DiscoveryMetadataPayloadVID1 | JWT_VCDiscoveryMetadataPayload | DiscoveryMetadataPayloadVD11
+export type DiscoveryMetadataPayload = DiscoveryMetadataPayloadVID1 | JWT_VCDiscoveryMetadataPayload | DiscoveryMetadataPayloadV1Final
 
 export type DiscoveryMetadataOpts = (JWT_VCDiscoveryMetadataOpts | DiscoveryMetadataOptsVID1 | DiscoveryMetadataOptsVD11) &
   DiscoveryMetadataCommonOpts
@@ -405,7 +397,7 @@ export type RPRegistrationMetadataOpts = Partial<
     | 'scopesSupported'
     | 'subjectTypesSupported'
     | 'subject_syntax_types_supported'
-    | 'vpFormatsSupported'
+    | 'vp_formats_supported'
     | 'clientName'
     | 'logo_uri'
     | 'tos_uri'
@@ -425,7 +417,7 @@ export type RPRegistrationMetadataPayload = Pick<
   | 'scopes_supported'
   | 'subject_types_supported'
   | 'subject_syntax_types_supported'
-  | 'vp_formats'
+  | 'vp_formats_supported'
   | 'client_name'
   | 'logo_uri'
   | 'client_purpose'
@@ -436,13 +428,12 @@ export type RPRegistrationMetadataPayload = Pick<
 
 export interface CommonSupportedMetadata {
   subject_syntax_types_supported?: string[]
-  vp_formats: Format
+  vp_formats_supported: Format
 }
 
 export interface ObjectBy {
   passBy: PassBy
   reference_uri?: string // for pass by reference
-
   targets?: PropertyTargets
 }
 
@@ -470,14 +461,14 @@ export interface ClientMetadataProperties extends ObjectBy {
 export enum VerifiablePresentationTypeFormat {
   JWT_VP = 'jwt_vp',
   LDP_VP = 'ldp_vp',
-  SD_JWT_VC = 'vc+sd-jwt',
+  SD_JWT_VC = 'dc+sd-jwt',
   MSO_MDOC = 'mso_mdoc',
 }
 
 export enum VerifiableCredentialTypeFormat {
   LDP_VC = 'ldp_vc',
   JWT_VC = 'jwt_vc',
-  SD_JWT_VC = 'vc+sd-jwt',
+  SD_JWT_VC = 'dc+sd-jwt',
   MSO_MDOC = 'mso_mdoc',
 }
 
@@ -517,30 +508,18 @@ export interface VerifiedIDToken {
   verifyOpts: VerifyAuthorizationResponseOpts
 }
 
-export interface VerifiedOpenID4VPSubmissionDcql {
+export interface VerifiedOpenID4VPSubmission {
   dcqlQuery: DcqlQuery
   presentation: { [credentialQueryId: string]: WrappedVerifiablePresentation }
   nonce?: string
 }
 
-export interface VerifiedOpenID4VPSubmission {
-  submissionData: PresentationSubmission
-  presentationDefinitions: PresentationDefinitionWithLocation[]
-  presentations: WrappedVerifiablePresentation[]
-  nonce?: string
-}
-
 export interface VerifiedAuthorizationResponse {
   correlationId: string
-
   authorizationResponse: AuthorizationResponse
-
   oid4vpSubmission?: VerifiedOpenID4VPSubmission
-  oid4vpSubmissionDcql?: VerifiedOpenID4VPSubmissionDcql
-
   nonce?: string
   state: string
-
   idToken?: VerifiedIDToken
   verifyOpts?: VerifyAuthorizationResponseOpts
 }
@@ -558,7 +537,6 @@ export enum ResponseMode {
   // See https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-response-mode-direct_post
   DIRECT_POST = 'direct_post',
   QUERY = 'query',
-
   DIRECT_POST_JWT = 'direct_post.jwt',
   QUERY_JWT = 'query.jwt',
   FRAGMENT_JWT = 'fragment.jwt',
@@ -680,9 +658,6 @@ export const isRequestPayload = (
 
 export const isResponsePayload = (object: RequestObjectPayload | IDTokenPayload): object is IDTokenPayload => 'iss' in object && 'aud' in object
 
-export const isVP = (object: IVerifiablePresentation | IPresentation): object is IVerifiablePresentation => 'presentation' in object
-export const isPresentation = (object: IVerifiablePresentation | IPresentation): object is IPresentation => 'presentation_submission' in object
-
 export enum RevocationStatus {
   VALID = 'valid',
   INVALID = 'invalid',
@@ -714,6 +689,7 @@ export enum SupportedVersion {
   SIOPv2_D11 = 110,
   SIOPv2_D12_OID4VP_D18 = 180,
   SIOPv2_D12_OID4VP_D20 = 200,
+  OID4VP_v1 = 1000,
   JWT_VC_PRESENTATION_PROFILE_v1 = 71,
 }
 

@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest'
-
 import { IDToken, VerifyAuthorizationResponseOpts } from '..'
 import SIOPErrors from '../types/Errors'
-
 import { getVerifyJwtCallback } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
 
@@ -29,21 +27,6 @@ describe('verify JWT from Request JWT should', () => {
   it('throw VERIFY_BAD_PARAMS when no verifyOpts is passed', async () => {
     expect.assertions(1)
     await expect(IDToken.verify(validButExpiredResJWT, undefined as never)).rejects.toThrow(SIOPErrors.VERIFY_BAD_PARAMS)
-  })
-
-  it('throw JWT_ERROR when expired but valid JWT is passed in', async () => {
-    expect.assertions(1)
-    try {
-      await expect(IDToken.verify(validButExpiredResJWT, { ...verifyOpts, audience: 'https://acme.com/hello' })).rejects.toThrow(
-        /invalid_jwt: JWT has expired: exp: 1632272403/,
-      )
-    } catch (e) {
-      if (e.message.includes('Service Unavailable') || e.message.includes('503 Service Unavailable')) {
-        console.warn('Temporarily skipped due to Service Unavailable')
-      } else {
-        throw e
-      }
-    }
   })
 
   it('throw JWT_ERROR when expired but valid JWT is passed in', async () => {

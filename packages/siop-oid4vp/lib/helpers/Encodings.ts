@@ -1,4 +1,3 @@
-import { InputDescriptorV1 } from '@sphereon/pex-models'
 import { parse, stringify } from 'qs'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -14,25 +13,6 @@ export function decodeUriAsJson(uri: string) {
     throw new Error(SIOPErrors.BAD_PARAMS)
   }
   const parts = parse(queryString, { plainObjects: true, depth: 10, parameterLimit: 5000, ignoreQueryPrefix: true })
-
-  const vpToken = (parts?.claims as { [key: string]: any })?.['vp_token']
-  const descriptors = vpToken?.presentation_definition?.['input_descriptors'] // FIXME?
-  if (descriptors && Array.isArray(descriptors)) {
-    // Whenever we have a [{'uri': 'str1'}, 'uri': 'str2'] qs changes this to {uri: ['str1','str2']} which means schema validation fails. So we have to fix that
-    vpToken.presentation_definition['input_descriptors'] = descriptors.map((descriptor: InputDescriptorV1) => {
-      if (Array.isArray(descriptor.schema)) {
-        descriptor.schema = descriptor.schema.flatMap((val) => {
-          if (typeof val === 'string') {
-            return { uri: val }
-          } else if (typeof val === 'object' && Array.isArray(val.uri)) {
-            return val.uri.map((uri) => ({ uri: uri as string }))
-          }
-          return val
-        })
-      }
-      return descriptor
-    })
-  }
 
   const json: Record<string, any> = {}
   for (const key in parts) {

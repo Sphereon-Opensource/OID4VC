@@ -144,7 +144,7 @@ export function getVerifyJwtCallback(
   },
 ): VerifyJwtCallback {
   return async (jwtVerifier, jwt) => {
-    resolver = resolver ?? getResolver(['ethr', 'ion'])
+    resolver = resolver ?? getResolver(['ethr', 'jwk'])
     const audience =
       jwtVerifier.type === 'request-object'
         ? (verifyOpts?.audience ?? getAudience(jwt.raw))

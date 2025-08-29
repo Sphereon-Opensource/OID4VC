@@ -1,14 +1,16 @@
 import { parseJWT } from '@sphereon/oid4vc-common'
 import { DcqlQuery } from 'dcql'
-
-import { PresentationDefinitionWithLocation } from '../authorization-response'
 import { Dcql } from '../authorization-response'
-import { PresentationExchange } from '../authorization-response/PresentationExchange'
-import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
+import {fetchByReferenceOrUseByValue, getClientIdentifierPrefix, removeNullUndefined} from '../helpers'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
 import { RequestObject } from '../request-object'
+import { assertValidAuthorizationRequestOpts, assertValidVerifyAuthorizationRequestOpts } from './Opts'
+import { assertValidRPRegistrationMedataPayload, createAuthorizationRequestPayload } from './Payload'
+import { URI } from './URI'
+import { CreateAuthorizationRequestOpts, VerifyAuthorizationRequestOpts } from './types'
 import {
   AuthorizationRequestPayload,
+  ClientIdentifierPrefix,
   getJwtVerifierWithContext,
   getRequestObjectJwtVerifier,
   PassBy,
@@ -23,11 +25,6 @@ import {
   SupportedVersion,
   VerifiedAuthorizationRequest,
 } from '../types'
-
-import { assertValidAuthorizationRequestOpts, assertValidVerifyAuthorizationRequestOpts } from './Opts'
-import { assertValidRPRegistrationMedataPayload, createAuthorizationRequestPayload } from './Payload'
-import { URI } from './URI'
-import { CreateAuthorizationRequestOpts, VerifyAuthorizationRequestOpts } from './types'
 
 export class AuthorizationRequest {
   private readonly _requestObject?: RequestObject
@@ -103,7 +100,7 @@ export class AuthorizationRequest {
   }
 
   public async getSupportedVersionsFromPayload(): Promise<SupportedVersion[]> {
-    const mergedPayload = { ...this.payload, ...(await this.requestObject?.getPayload()) }
+    const mergedPayload = { ...this.payload, ...(this.requestObject?.getPayload()) }
     return authorizationRequestVersionDiscovery(mergedPayload)
   }
 
@@ -137,7 +134,7 @@ export class AuthorizationRequest {
       }
 
       // verify the verifier attestation
-      if (requestObjectPayload.client_id_scheme === 'verifier_attestation') {
+      if (getClientIdentifierPrefix(requestObjectPayload.client_id) === ClientIdentifierPrefix.VERIFIER_ATTESTATION) {
         const jwtVerifier = await getJwtVerifierWithContext(parsedJwt, { type: 'verifier-attestation' })
         const result = await opts.verifyJwtCallback(jwtVerifier, { ...parsedJwt, raw: jwt })
         if (!result) {
@@ -186,7 +183,7 @@ export class AuthorizationRequest {
     } else if (mergedPayload.response_uri) {
       responseURIType = 'response_uri'
       responseURI = mergedPayload.response_uri
-    } else if (mergedPayload.client_id_scheme === 'redirect_uri' && mergedPayload.client_id) {
+    } else if (getClientIdentifierPrefix(mergedPayload.client_id) === ClientIdentifierPrefix.REDIRECT_URI) {
       responseURIType = 'redirect_uri'
       responseURI = mergedPayload.client_id
     } else {
@@ -194,21 +191,16 @@ export class AuthorizationRequest {
     }
 
     // TODO see if this is too naive. The OpenID conformance test explicitly tests for this
-    // But the spec says: The client_id and client_id_scheme MUST be omitted in unsigned requests defined in Appendix A.3.1.
-    // So I would expect client_id_scheme and client_id to be undefined when the JWT header has alg: none
-    if (mergedPayload.client_id && mergedPayload.client_id_scheme === 'redirect_uri' && mergedPayload.client_id !== responseURI) {
+    // But the spec says: The client_id MUST be omitted in unsigned requests defined in Appendix A.3.1.
+    // So I would expect client_id to be undefined when the JWT header has alg: none
+    if (getClientIdentifierPrefix(mergedPayload.client_id) === ClientIdentifierPrefix.REDIRECT_URI && mergedPayload.client_id !== responseURI) {
       throw Error(
-        `${SIOPErrors.INVALID_REQUEST}, response_uri does not match the client_id provided by the verifier which is required for client_id_scheme redirect_uri`,
+        `${SIOPErrors.INVALID_REQUEST}, response_uri does not match the client_id provided by the verifier which is required for client_id_prefix ${ClientIdentifierPrefix.REDIRECT_URI}`,
       )
     }
 
     // TODO: we need to verify somewhere that if response_mode is direct_post, that the response_uri may be present,
     // BUT not both redirect_uri and response_uri. What is the best place to do this?
-
-    const presentationDefinitions: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(
-      mergedPayload,
-      await this.getSupportedVersion(),
-    )
 
     const dcqlQuery = await Dcql.findValidDcqlQuery(mergedPayload)
 
@@ -218,12 +210,10 @@ export class AuthorizationRequest {
       issuer: parsedJwt?.payload.iss,
       responseURIType,
       responseURI,
-      clientIdScheme: mergedPayload.client_id_scheme,
       correlationId: opts.correlationId,
       authorizationRequest: this,
       verifyOpts: opts,
       dcqlQuery,
-      presentationDefinitions,
       registrationMetadataPayload: registrationMetadataPayload!,
       requestObject: this.requestObject,
       authorizationRequestPayload: this.payload,
@@ -265,7 +255,7 @@ export class AuthorizationRequest {
   }
 
   public async toStateInfo(): Promise<RequestStateInfo> {
-    const requestObject = await this.requestObject?.getPayload()
+    const requestObject = this.requestObject?.getPayload()
     return {
       client_id: this.options?.clientMetadata?.client_id,
       iat: requestObject?.iat ?? this.payload.iat,
@@ -294,11 +284,7 @@ export class AuthorizationRequest {
     return mergedPayload as RequestObjectPayload
   }
 
-  public async getPresentationDefinitions(version?: SupportedVersion): Promise<PresentationDefinitionWithLocation[] | undefined> {
-    return await PresentationExchange.findValidPresentationDefinitions(await this.mergedPayloads(), version)
-  }
-
   public async getDcqlQuery(): Promise<DcqlQuery | undefined> {
-    return await Dcql.findValidDcqlQuery(await this.mergedPayloads())
+    return await Dcql.findValidDcqlQuery(this.mergedPayloads())
   }
 }

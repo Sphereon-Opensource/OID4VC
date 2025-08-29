@@ -1,5 +1,4 @@
 import { SIOPErrors } from '../types'
-
 import { AuthorizationResponseOpts, VerifyAuthorizationResponseOpts } from './types'
 
 export const assertValidResponseOpts = (opts: AuthorizationResponseOpts) => {

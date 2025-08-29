@@ -1,7 +1,6 @@
 import { assertValidRequestObjectOpts } from '../request-object/Opts'
-import { SIOPErrors, Verification } from '../types'
-
 import { assertValidRequestRegistrationOpts } from './RequestRegistration'
+import { SIOPErrors, Verification } from '../types'
 import { CreateAuthorizationRequestOpts, VerifyAuthorizationRequestOpts } from './types'
 
 export const assertValidVerifyAuthorizationRequestOpts = (opts: VerifyAuthorizationRequestOpts) => {

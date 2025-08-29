@@ -1,8 +1,117 @@
-export const RPRegistrationMetadataPayloadSchemaObj = {
-  "$id": "RPRegistrationMetadataPayloadSchema",
+export const AuthorizationRequestPayloadV1SchemaObj = {
+  "$id": "AuthorizationRequestPayloadV1Schema",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/RPRegistrationMetadataPayload",
+  "$ref": "#/definitions/AuthorizationRequestPayloadV1",
   "definitions": {
+    "AuthorizationRequestPayloadV1": {
+      "type": "object",
+      "properties": {
+        "id_token_type": {
+          "type": "string"
+        },
+        "client_metadata": {
+          "$ref": "#/definitions/RPRegistrationMetadataPayload"
+        },
+        "iss": {
+          "type": "string"
+        },
+        "sub": {
+          "type": "string"
+        },
+        "aud": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "iat": {
+          "type": "number"
+        },
+        "nbf": {
+          "type": "number"
+        },
+        "type": {
+          "type": "string"
+        },
+        "exp": {
+          "type": "number"
+        },
+        "rexp": {
+          "type": "number"
+        },
+        "jti": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "response_type": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ResponseType"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "client_id": {
+          "type": "string"
+        },
+        "redirect_uri": {
+          "type": "string"
+        },
+        "id_token_hint": {
+          "type": "string"
+        },
+        "nonce": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "response_mode": {
+          "$ref": "#/definitions/ResponseMode"
+        },
+        "request": {
+          "type": "string"
+        },
+        "request_uri": {
+          "type": "string"
+        },
+        "claims": {
+          "$ref": "#/definitions/ClaimPayloadCommon"
+        },
+        "response_uri": {
+          "type": "string"
+        },
+        "dcql_query": {
+          "type": "object"
+        },
+        "request_uri_method": {
+          "$ref": "#/definitions/RequestUriMethod"
+        },
+        "transaction_data": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "verifier_info": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RelyingPartyAttestation"
+          }
+        }
+      }
+    },
     "RPRegistrationMetadataPayload": {
       "type": "object",
       "properties": {
@@ -289,6 +398,51 @@ export const RPRegistrationMetadataPayloadSchemaObj = {
       },
       "required": [
         "alg"
+      ],
+      "additionalProperties": false
+    },
+    "ResponseMode": {
+      "type": "string",
+      "enum": [
+        "fragment",
+        "form_post",
+        "post",
+        "direct_post",
+        "query",
+        "direct_post.jwt",
+        "query.jwt",
+        "fragment.jwt"
+      ]
+    },
+    "ClaimPayloadCommon": {
+      "type": "object"
+    },
+    "RequestUriMethod": {
+      "type": "string",
+      "enum": [
+        "get",
+        "post"
+      ]
+    },
+    "RelyingPartyAttestation": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string"
+        },
+        "data": {
+          "type": "string"
+        },
+        "credential_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "format",
+        "data"
       ],
       "additionalProperties": false
     }

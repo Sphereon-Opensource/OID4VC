@@ -47,7 +47,7 @@ export const verifyRevocation = async (
 
 function originalTypeToVerifiableCredentialTypeFormat(original: WrappedVerifiableCredential['format']): VerifiableCredentialTypeFormat {
   const mapping: { [T in WrappedVerifiableCredential['format']]: VerifiableCredentialTypeFormat } = {
-    'vc+sd-jwt': VerifiableCredentialTypeFormat.SD_JWT_VC,
+    'dc+sd-jwt': VerifiableCredentialTypeFormat.SD_JWT_VC,
     jwt: VerifiableCredentialTypeFormat.JWT_VC,
     jwt_vc: VerifiableCredentialTypeFormat.JWT_VC,
     ldp: VerifiableCredentialTypeFormat.LDP_VC,

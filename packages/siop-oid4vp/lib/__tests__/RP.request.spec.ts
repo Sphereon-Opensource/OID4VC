@@ -1,8 +1,8 @@
 import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { IProofType } from '@sphereon/ssi-types'
 import { describe, expect, it } from 'vitest'
-
 import {
+  ClientIdentifierPrefix,
   CreateAuthorizationRequestOpts,
   PassBy,
   PropertyTarget,
@@ -14,7 +14,6 @@ import {
   SubjectType,
   SupportedVersion,
 } from '..'
-
 import { getCreateJwtCallback, getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
 import { WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
@@ -46,7 +45,7 @@ describe('RP OPBuilder should', () => {
 
     const resolver = getResolver('ethr')
     expect(
-      RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
         .withClientId('test_client_id')
         .withScope('test')
         .withResponseType(ResponseType.ID_TOKEN)
@@ -63,9 +62,8 @@ describe('RP OPBuilder should', () => {
           clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
           'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         })
-
         .withCreateJwtCallback(internalSignature('myprivatekye', 'did:example:123', 'did:example:123#key', SigningAlgo.ES256K))
-        .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+        .withSupportedVersions(SupportedVersion.OID4VP_v1)
         .build(),
     ).toBeInstanceOf(RP)
   })
@@ -74,13 +72,13 @@ describe('RP OPBuilder should', () => {
 describe('RP should', () => {
   it('throw Error when build from request opts without enough params', async () => {
     expect.assertions(1)
-    await expect(() => RP.fromRequestOpts({} as never)).toThrowError(Error)
+    expect(() => RP.fromRequestOpts({} as never)).toThrowError(Error)
   })
   it('return an RP when all request arguments are set', async () => {
     expect.assertions(1)
 
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: 'test',
         scope: 'test',
@@ -130,7 +128,7 @@ describe('RP should', () => {
   it('succeed from request opts when all params are set', async () => {
     // expect.assertions(1);
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'openid',
@@ -146,7 +144,6 @@ describe('RP should', () => {
         },
         passBy: PassBy.REFERENCE,
         reference_uri: EXAMPLE_REFERENCE_URL,
-
         createJwtCallback: getCreateJwtCallback({
           hexPrivateKey: HEX_KEY,
           did: DID,
@@ -180,7 +177,7 @@ describe('RP should', () => {
     const expectedPayloadWithoutRequest = {
       response_type: 'id_token',
       scope: 'openid',
-      client_id: WELL_KNOWN_OPENID_FEDERATION,
+      client_id: DID,
       redirect_uri: 'https://acme.com/hello',
       // nonce: 'qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg',
       /* registration: {
@@ -207,7 +204,7 @@ describe('RP should', () => {
     }
 
     const expectedUri =
-      'openid4vp://?client_id=https%3A%2F%2Fwww.example.com%2F.well-known%2Fopenid-federation&scope=openid&response_type=id_token&response_mode=post&redirect_uri=https%3A%2F%2Facme.com%2Fhello&request_uri=https%3A%2F%2Frp.acme.com%2Fsiop%2Fjwts'
+      'openid4vp://?client_id=did%3Aethr%3A0x0106a2e985b1E1De9B5ddb4aF6dC9e928F4e99D0&scope=openid&response_type=id_token&response_mode=post&redirect_uri=https%3A%2F%2Facme.com%2Fhello&request_uri=https%3A%2F%2Frp.acme.com%2Fsiop%2Fjwts'
     const expectedJwtRegex =
       /^eyJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6ZXRocjoweDAxMDZhMmU5ODViMUUxRGU5QjVkZGI0YUY2ZEM5ZTkyOEY0ZTk5RDAja2V5cy0xIiwidHlwIjoiSldUIn0\.ey.*$/
 
@@ -234,7 +231,7 @@ describe('RP should', () => {
         scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr'],
         subject_types_supported: [SubjectType.PAIRWISE],
-        vp_formats: {
+        vp_formats_supported: {
           jwt: {
             alg: ['EdDSA', 'ES256K', 'ES256'],
           },
@@ -254,12 +251,11 @@ describe('RP should', () => {
     }
 
     const expectedUri =
-      'openid4vp://?client_id=https%3A%2F%2Fwww.example.com%2F.well-known%2Fopenid-federation&scope=test&response_type=id_token&redirect_uri=https%3A%2F%2Facme.com%2Fhello&registration=%7B%22id_token_signing_alg_values_supported%22%3A%5B%22EdDSA%22%5D%2C%22request_object_signing_alg_values_supported%22%3A%5B%22EdDSA%22%2C%22ES256%22%5D%2C%22response_types_supported%22%3A%5B%22id_token%22%5D%2C%22scopes_supported%22%3A%5B%22openid%20did_authn%22%2C%22openid%22%5D%2C%22subject_types_supported%22%3A%5B%22pairwise%22%5D%2C%22subject_syntax_types_supported%22%3A%5B%22did%3Aethr%22%5D%2C%22vp_formats%22%3A%7B%22jwt%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vc%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vp%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%7D%2C%22client_name%22%3A%22Client%20Verifier%20Relying%20Party%20Sphereon%20INC%202022-09-29%2001%22%2C%22logo_uri%22%3A%22https%3A%2F%2Fsphereon.com%2Fcontent%2Fthemes%2Fsphereon%2Fassets%2Ffavicons%2Fsafari-pinned-tab.svg%202022-09-29%2001%22%2C%22client_purpose%22%3A%22To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%2C%22client_id%22%3A%22https%3A%2F%2Fwww.example.com%2F.well-known%2Fopenid-federation%22%2C%22client_name%23nl-NL%22%3A%22%20***%20dutch%20***%20Client%20Verifier%20Relying%20Party%20Sphereon%20B.V.%202022-09-29%2001%22%2C%22client_purpose%23nl-NL%22%3A%22%20***%20Dutch%20***%20To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%7D&request_uri=https%3A%2F%2Frp.acme.com%2Fsiop%2Fjwts'
-
+      'openid4vp://?client_id=https%3A%2F%2Fwww.example.com%2F.well-known%2Fopenid-federation&scope=test&response_type=id_token&redirect_uri=https%3A%2F%2Facme.com%2Fhello&client_metadata=%7B%22client_id%22%3A%22https%3A%2F%2Fwww.example.com%2F.well-known%2Fopenid-federation%22%2C%22idTokenSigningAlgValuesSupported%22%3A%5B%22EdDSA%22%5D%2C%22requestObjectSigningAlgValuesSupported%22%3A%5B%22EdDSA%22%2C%22ES256%22%5D%2C%22responseTypesSupported%22%3A%5B%22id_token%22%5D%2C%22vpFormatsSupported%22%3A%7B%22jwt%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vc%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vp%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%7D%2C%22scopesSupported%22%3A%5B%22openid%20did_authn%22%2C%22openid%22%5D%2C%22subjectTypesSupported%22%3A%5B%22pairwise%22%5D%2C%22subject_syntax_types_supported%22%3A%5B%22did%3Aethr%22%5D%2C%22passBy%22%3A%22VALUE%22%2C%22logo_uri%22%3A%22https%3A%2F%2Fsphereon.com%2Fcontent%2Fthemes%2Fsphereon%2Fassets%2Ffavicons%2Fsafari-pinned-tab.svg%202022-09-29%2001%22%2C%22clientName%22%3A%22Client%20Verifier%20Relying%20Party%20Sphereon%20INC%202022-09-29%2001%22%2C%22clientName%23nl-NL%22%3A%22%20***%20dutch%20***%20Client%20Verifier%20Relying%20Party%20Sphereon%20B.V.%202022-09-29%2001%22%2C%22clientPurpose%22%3A%22To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%2C%22clientPurpose%23nl-NL%22%3A%22%20***%20Dutch%20***%20To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%2C%22targets%22%3A%5B%22authorization-request%22%2C%22request-object%22%5D%7D&request_uri=https%3A%2F%2Frp.acme.com%2Fsiop%2Fjwts&registration=%7B%22id_token_signing_alg_values_supported%22%3A%5B%22EdDSA%22%5D%2C%22request_object_signing_alg_values_supported%22%3A%5B%22EdDSA%22%2C%22ES256%22%5D%2C%22response_types_supported%22%3A%5B%22id_token%22%5D%2C%22scopes_supported%22%3A%5B%22openid%20did_authn%22%2C%22openid%22%5D%2C%22subject_types_supported%22%3A%5B%22pairwise%22%5D%2C%22subject_syntax_types_supported%22%3A%5B%22did%3Aethr%22%5D%2C%22vp_formats_supported%22%3A%7B%22jwt%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vc%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vp%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%7D%2C%22client_name%22%3A%22Client%20Verifier%20Relying%20Party%20Sphereon%20INC%202022-09-29%2001%22%2C%22logo_uri%22%3A%22https%3A%2F%2Fsphereon.com%2Fcontent%2Fthemes%2Fsphereon%2Fassets%2Ffavicons%2Fsafari-pinned-tab.svg%202022-09-29%2001%22%2C%22client_purpose%22%3A%22To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%2C%22client_id%22%3A%22https%3A%2F%2Fwww.example.com%2F.well-known%2Fopenid-federation%22%2C%22client_name%23nl-NL%22%3A%22%20***%20dutch%20***%20Client%20Verifier%20Relying%20Party%20Sphereon%20B.V.%202022-09-29%2001%22%2C%22client_purpose%23nl-NL%22%3A%22%20***%20Dutch%20***%20To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%7D'
     const expectedJwtRegex =
       /^eyJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6ZXRocjoweDAxMDZhMmU5ODViMUUxRGU5QjVkZGI0YUY2ZEM5ZTkyOEY0ZTk5RDAja2V5cy0xIiwidHlwIjoiSldUIn0\.eyJpYXQiO.*$/
 
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withClientId(WELL_KNOWN_OPENID_FEDERATION, alltargets)
       .withScope('test', alltargets)
       .withResponseType(ResponseType.ID_TOKEN, alltargets)
@@ -297,7 +293,7 @@ describe('RP should', () => {
         },
         alltargets,
       )
-      .withSupportedVersions([SupportedVersion.SIOPv2_D11])
+      .withSupportedVersions([SupportedVersion.OID4VP_v1])
       .build()
     const request = await rp.createAuthorizationRequestURI({
       correlationId: '1234',

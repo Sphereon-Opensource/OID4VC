@@ -5,10 +5,15 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@sphereon/ssi-types': 0.34.1-next.3
-  dcql: 0.2.22
+  '@sphereon/ssi-types': 0.34.1-feat.SSISDK.35.61
+  dcql: 1.0.1
   node-fetch: 2.6.12
   typescript: 5.8.3
+
+patchedDependencies:
+  did-jwt@6.11.6:
+    hash: 273724dfda88826ea701236dab63df8edf4ac66af32e92c95c1dd3b2c1f58942
+    path: patches/did-jwt@6.11.6.patch
 
 importers:
 
@@ -81,8 +86,8 @@ importers:
         specifier: workspace:^
         version: link:../issuer
       '@sphereon/ssi-types':
-        specifier: 0.34.1-next.3
-        version: 0.34.1-next.3
+        specifier: 0.34.1-feat.SSISDK.35.61
+        version: 0.34.1-feat.SSISDK.35.61
       jose:
         specifier: ^4.10.0
         version: 4.15.9
@@ -121,8 +126,8 @@ importers:
         specifier: workspace:^
         version: link:../oid4vci-common
       '@sphereon/ssi-types':
-        specifier: 0.34.1-next.3
-        version: 0.34.1-next.3
+        specifier: 0.34.1-feat.SSISDK.35.61
+        version: 0.34.1-feat.SSISDK.35.61
       cross-fetch:
         specifier: ^4.1.0
         version: 4.1.0(encoding@0.1.13)
@@ -185,8 +190,8 @@ importers:
   packages/common:
     dependencies:
       '@sphereon/ssi-types':
-        specifier: 0.34.1-next.3
-        version: 0.34.1-next.3
+        specifier: 0.34.1-feat.SSISDK.35.61
+        version: 0.34.1-feat.SSISDK.35.61
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
@@ -220,7 +225,7 @@ importers:
         version: 0.1.3(encoding@0.1.13)
       did-jwt:
         specifier: 6.11.6
-        version: 6.11.6
+        version: 6.11.6(patch_hash=273724dfda88826ea701236dab63df8edf4ac66af32e92c95c1dd3b2c1f58942)
       did-resolver:
         specifier: ^4.1.0
         version: 4.1.0
@@ -241,8 +246,8 @@ importers:
         specifier: 0.34.1-next.3
         version: 0.34.1-next.3(@noble/hashes@1.6.1)
       '@sphereon/ssi-types':
-        specifier: 0.34.1-next.3
-        version: 0.34.1-next.3
+        specifier: 0.34.1-feat.SSISDK.35.61
+        version: 0.34.1-feat.SSISDK.35.61
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0(encoding@0.1.13)
@@ -284,8 +289,8 @@ importers:
         specifier: 0.34.1-next.3
         version: 0.34.1-next.3(@noble/hashes@1.6.1)
       '@sphereon/ssi-types':
-        specifier: 0.34.1-next.3
-        version: 0.34.1-next.3
+        specifier: 0.34.1-feat.SSISDK.35.61
+        version: 0.34.1-feat.SSISDK.35.61
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0(encoding@0.1.13)
@@ -376,8 +381,8 @@ importers:
         specifier: workspace:^
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.34.1-next.3
-        version: 0.34.1-next.3
+        specifier: 0.34.1-feat.SSISDK.35.61
+        version: 0.34.1-feat.SSISDK.35.61
       cross-fetch:
         specifier: ^4.1.0
         version: 4.1.0(encoding@0.1.13)
@@ -422,14 +427,14 @@ importers:
         specifier: ^2.3.2
         version: 2.3.2
       '@sphereon/ssi-types':
-        specifier: 0.34.1-next.3
-        version: 0.34.1-next.3
+        specifier: 0.34.1-feat.SSISDK.35.61
+        version: 0.34.1-feat.SSISDK.35.61
       cross-fetch:
         specifier: ^4.0.0
         version: 4.1.0(encoding@0.1.13)
       dcql:
-        specifier: 0.2.22
-        version: 0.2.22(typescript@5.8.3)
+        specifier: 1.0.1
+        version: 1.0.1(typescript@5.8.3)
       debug:
         specifier: ^4.4.0
         version: 4.4.1
@@ -541,7 +546,7 @@ importers:
         version: 6.31.3(encoding@0.1.13)
       did-jwt:
         specifier: 6.11.6
-        version: 6.11.6
+        version: 6.11.6(patch_hash=273724dfda88826ea701236dab63df8edf4ac66af32e92c95c1dd3b2c1f58942)
       did-resolver:
         specifier: ^4.1.0
         version: 4.1.0
@@ -2729,7 +2734,6 @@ packages:
 
   '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.26':
     resolution: {integrity: sha512-QXJ6R8ENiZV2rPMbn06cw5JKwqUYN1kzVRbYfONqE1PEXx1noQ4md7uxr2zSczi0ubKkNcbyYDNtIMTZIhGzmQ==}
-    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.2':
     resolution: {integrity: sha512-foFxfLkRwcn/MOp/eht46Q7wsvpQGlO7aowowIIb5Tz9u97kYZ2kz6K2h2ODxWuv5CRA7Q0MY8XUBGE2lfOhOQ==}
@@ -2758,8 +2762,8 @@ packages:
   '@sphereon/ssi-sdk-ext.x509-utils@0.28.1-next.53':
     resolution: {integrity: sha512-8njjZ6lzgFxL601sEGTCBFd1YaT+sHSM9oJ4LJ3++KXTTrj9RaiIFjCy+5yFaGsi5Wa08+ET78VVxHNxXXnC0Q==}
 
-  '@sphereon/ssi-types@0.34.1-next.3':
-    resolution: {integrity: sha512-xtxs3zkrAddf9G5K0Ec7TENYz8xrpuRFg8oPkx3T9ZaQsGGmM4jN8Jem6r/2p7k618Mj72etWFQ9kCvzC1m8Iw==}
+  '@sphereon/ssi-types@0.34.1-feat.SSISDK.35.61':
+    resolution: {integrity: sha512-EzX+TG5YWO4pZD0iIVd6JiSXBuvgOMgVmP0N/joFUNk1Xn0wO8ACHFwWQxXmv59vNNCrhrC1CEhceegtNdP86Q==}
 
   '@sphereon/wellknown-dids-client@0.1.3':
     resolution: {integrity: sha512-TAT24L3RoXD8ocrkTcsz7HuJmgjNjdoV6IXP1p3DdaI/GqkynytXE3J1+F7vUFMRYwY5nW2RaXSgDQhrFJemaA==}
@@ -4271,8 +4275,8 @@ packages:
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
 
-  dcql@0.2.22:
-    resolution: {integrity: sha512-4CfuUoJ1/dfj4aOMwCGF3HEHsPpRUyALbst5Dx3qcNkIXNFpVqebKVYd58X9/ZlKN/wWJxPS34S7uQ0fcbzS5A==}
+  dcql@1.0.1:
+    resolution: {integrity: sha512-XZ9VJfvHZwPbeg6O+GvyNi7P5n4L+J0ATCFBUvgn2LXzQPoatHnOt9b7uHHtFWZzxyD5ngLpBCEOteEzKgtIAA==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -4436,8 +4440,8 @@ packages:
   did-jwt@7.4.7:
     resolution: {integrity: sha512-Apz7nIfIHSKWIMaEP5L/K8xkwByvjezjTG0xiqwKdnNj1x8M0+Yasury5Dm/KPltxi2PlGfRPf3IejRKZrT8mQ==}
 
-  did-jwt@8.0.15:
-    resolution: {integrity: sha512-E+Qf+E0vUdAv2PcldxmvZwtPdmExaXkvwQA7tp3TKkCiK9aPNUrD7ZKSPi2lJQ2ZaGe3z0VKceQtGRl5Kolghg==}
+  did-jwt@8.0.17:
+    resolution: {integrity: sha512-qWPog796seH8CzvNShvqvs6YeCRVAYWmKzcPtirnhvH6wjiFvhquztJZwr5E9VHnTosW6V7bclWzrp7/HGJbSw==}
 
   did-resolver@4.1.0:
     resolution: {integrity: sha512-S6fWHvCXkZg2IhS4RcVHxwuyVejPR7c+a4Go0xbQ9ps5kILa8viiYQgrM4gfTyeTjJ0ekgJH9gk/BawTpmkbZA==}
@@ -9892,7 +9896,7 @@ snapshots:
       '@cef-ebsi/key-encoder': 1.0.4
       '@cef-ebsi/siop-auth': 4.0.3(debug@4.4.1)
       '@noble/hashes': 1.8.0
-      did-jwt: 8.0.15
+      did-jwt: 8.0.17
       eciesjs: 0.4.15
       elliptic: 6.6.1
       jose: 4.15.9
@@ -9908,7 +9912,7 @@ snapshots:
       '@cef-ebsi/key-encoder': 1.0.4
       '@noble/hashes': 1.8.0
       axios: 1.9.0(debug@4.4.1)
-      did-jwt: 8.0.15
+      did-jwt: 8.0.17
       did-resolver: 4.1.0
       eciesjs: 0.4.15
       elliptic: 6.6.1
@@ -9986,7 +9990,7 @@ snapshots:
       '@cef-ebsi/key-encoder': 1.0.4
       '@noble/hashes': 1.8.0
       bn.js: 5.2.2
-      did-jwt: 8.0.15
+      did-jwt: 8.0.17
       did-resolver: 4.1.0
       elliptic: 6.6.1
       multiformats: 9.9.0
@@ -12105,7 +12109,7 @@ snapshots:
       '@sd-jwt/present': 0.7.2
       '@sd-jwt/types': 0.7.2
       '@sphereon/pex-models': 2.3.2
-      '@sphereon/ssi-types': 0.34.1-next.3
+      '@sphereon/ssi-types': 0.34.1-feat.SSISDK.35.61
       ajv: 8.17.1
       ajv-formats: 2.1.1(ajv@8.17.1)
       jwt-decode: 3.1.2
@@ -12116,7 +12120,7 @@ snapshots:
 
   '@sphereon/ssi-express-support@0.34.1-next.3(@noble/hashes@1.6.1)':
     dependencies:
-      '@sphereon/ssi-types': 0.34.1-next.3
+      '@sphereon/ssi-types': 0.34.1-feat.SSISDK.35.61
       body-parser: 1.20.3
       casbin: 5.38.0
       cookie-session: 2.1.0
@@ -12141,7 +12145,7 @@ snapshots:
       '@noble/curves': 1.7.0
       '@noble/hashes': 1.6.1
       '@sphereon/ssi-sdk-ext.x509-utils': 0.28.1-next.53
-      '@sphereon/ssi-types': 0.34.1-next.3
+      '@sphereon/ssi-types': 0.34.1-feat.SSISDK.35.61
       '@stablelib/ed25519': 1.0.3
       '@trust/keyto': 1.0.1
       '@veramo/core': 4.2.0
@@ -12163,7 +12167,7 @@ snapshots:
       '@peculiar/asn1-schema': 2.3.15
       '@peculiar/asn1-x509': 2.3.15
       '@peculiar/x509': 1.12.3
-      '@sphereon/ssi-types': 0.34.1-next.3
+      '@sphereon/ssi-types': 0.34.1-feat.SSISDK.35.61
       '@trust/keyto': 1.0.1
       debug: 4.4.1
       js-x509-utils: 1.0.7
@@ -12173,7 +12177,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@sphereon/ssi-types@0.34.1-next.3':
+  '@sphereon/ssi-types@0.34.1-feat.SSISDK.35.61':
     dependencies:
       '@noble/hashes': 1.6.1
       '@sd-jwt/decode': 0.9.2
@@ -12187,7 +12191,7 @@ snapshots:
 
   '@sphereon/wellknown-dids-client@0.1.3(encoding@0.1.13)':
     dependencies:
-      '@sphereon/ssi-types': 0.34.1-next.3
+      '@sphereon/ssi-types': 0.34.1-feat.SSISDK.35.61
       cross-fetch: 3.2.0(encoding@0.1.13)
       jwt-decode: 3.1.2
     transitivePeerDependencies:
@@ -13856,7 +13860,7 @@ snapshots:
 
   credential-status@2.0.6:
     dependencies:
-      did-jwt: 6.11.6
+      did-jwt: 6.11.6(patch_hash=273724dfda88826ea701236dab63df8edf4ac66af32e92c95c1dd3b2c1f58942)
       did-resolver: 4.1.0
 
   credentials-context@2.0.0: {}
@@ -14015,7 +14019,7 @@ snapshots:
 
   dayjs@1.11.13: {}
 
-  dcql@0.2.22(typescript@5.8.3):
+  dcql@1.0.1(typescript@5.8.3):
     dependencies:
       valibot: 1.0.0-beta.8(typescript@5.8.3)
     transitivePeerDependencies:
@@ -14152,7 +14156,7 @@ snapshots:
       did-jwt: 7.4.7
       did-resolver: 4.1.0
 
-  did-jwt@6.11.6:
+  did-jwt@6.11.6(patch_hash=273724dfda88826ea701236dab63df8edf4ac66af32e92c95c1dd3b2c1f58942):
     dependencies:
       '@stablelib/ed25519': 1.0.3
       '@stablelib/random': 1.0.2
@@ -14170,8 +14174,8 @@ snapshots:
   did-jwt@7.4.7:
     dependencies:
       '@noble/ciphers': 0.4.1
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.1
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
       '@scure/base': 1.2.5
       canonicalize: 2.1.0
       did-resolver: 4.1.0
@@ -14179,7 +14183,7 @@ snapshots:
       multiformats: 9.9.0
       uint8arrays: 3.1.1
 
-  did-jwt@8.0.15:
+  did-jwt@8.0.17:
     dependencies:
       '@noble/ciphers': 1.3.0
       '@noble/curves': 1.9.1
@@ -15795,7 +15799,7 @@ snapshots:
   jake@10.9.2:
     dependencies:
       async: 3.2.6
-      chalk: 4.1.0
+      chalk: 4.1.2
       filelist: 1.0.4
       minimatch: 3.1.2
 
@@ -17378,7 +17382,7 @@ snapshots:
   ora@5.3.0:
     dependencies:
       bl: 4.1.0
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       is-interactive: 1.0.0
@@ -17634,7 +17638,7 @@ snapshots:
 
   pkijs@3.2.5:
     dependencies:
-      '@noble/hashes': 1.6.1
+      '@noble/hashes': 1.8.0
       asn1js: 3.0.6
       bytestreamjs: 2.0.1
       pvtsutils: 1.3.6

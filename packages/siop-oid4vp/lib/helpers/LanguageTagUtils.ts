@@ -1,8 +1,6 @@
 import Tags from 'language-tags'
-
-import { SIOPErrors } from '../types'
-
-import { isStringNullOrEmpty } from './ObjectUtils'
+import {SIOPErrors} from '../types'
+import {isStringNullOrEmpty} from './ObjectUtils'
 
 export class LanguageTagUtils {
   private static readonly LANGUAGE_TAG_SEPARATOR = '#'
@@ -26,8 +24,7 @@ export class LanguageTagUtils {
   static getLanguageTaggedProperties(source: object, requiredFieldNames: Array<string>): Map<string, string> {
     const languageTagEnabledFieldsNamesMapping: Map<string, string> = new Map<string, string>()
     requiredFieldNames.forEach((value) => languageTagEnabledFieldsNamesMapping.set(value, value))
-    const languageTaggedPropertiesMapped = this.getLanguageTaggedPropertiesMapped(source, languageTagEnabledFieldsNamesMapping)
-    return languageTaggedPropertiesMapped
+    return this.getLanguageTaggedPropertiesMapped(source, languageTagEnabledFieldsNamesMapping)
   }
 
   /**
@@ -38,7 +35,6 @@ export class LanguageTagUtils {
    *                                  the fields names will be transformed as per the mapping provided.
    */
   static getLanguageTaggedPropertiesMapped(source: object, enabledFieldNamesMapping: Map<string, string>): Map<string, string> {
-    //  this.assertSourceIsWorthChecking(source)
     this.assertValidTargetFieldNames(enabledFieldNamesMapping)
 
     const discoveredLanguageTaggedFields: Map<string, string> = new Map<string, string>()
@@ -113,15 +109,7 @@ export class LanguageTagUtils {
             throw new Error(SIOPErrors.BAD_PARAMS + '. languageTagEnabledFieldsName must be non-null or non-empty')
           }
         }
-      } /* else { this would fail test "return no lingually tagged fields if there are no lingually tagged fields in the source object"
-        throw new Error(SIOPErrors.BAD_PARAMS + ' LanguageTagEnabledFieldsNamesMapping must be non-null or non-empty');
-      }*/
+      }
     }
   }
-
-  /* private static assertSourceIsWorthChecking(source: unknown): void {
-    if (!source) {
-      throw new Error(SIOPErrors.BAD_PARAMS + ' Source must be non-null i.e. not-initialized.')
-    }
-  }*/
 }

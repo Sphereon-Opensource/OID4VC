@@ -1,9 +1,9 @@
 import { parseJWT } from '@sphereon/oid4vc-common'
-
 import { Dcql } from '../authorization-response'
-import { PresentationExchange } from '../authorization-response/PresentationExchange'
 import { decodeUriAsJson, encodeJsonAsURI, fetchByReferenceOrUseByValue } from '../helpers'
 import { assertValidRequestObjectPayload, RequestObject } from '../request-object'
+import { AuthorizationRequest } from './AuthorizationRequest'
+import { assertValidRPRegistrationMedataPayload } from './Payload'
 import {
   AuthorizationRequestPayload,
   AuthorizationRequestURI,
@@ -16,9 +16,6 @@ import {
   SupportedVersion,
   UrlEncodingFormat,
 } from '../types'
-
-import { AuthorizationRequest } from './AuthorizationRequest'
-import { assertValidRPRegistrationMedataPayload } from './Payload'
 import { CreateAuthorizationRequestOpts } from './types'
 
 export class URI implements AuthorizationRequestURI {
@@ -27,7 +24,6 @@ export class URI implements AuthorizationRequestURI {
   private readonly _authorizationRequestPayload: AuthorizationRequestPayload
   private readonly _encodedUri: string // The encoded URI
   private readonly _encodingFormat: UrlEncodingFormat
-  // private _requestObjectBy: ObjectBy;
 
   private _registrationMetadataPayload: RPRegistrationMetadataPayload | undefined
 
@@ -137,7 +133,7 @@ export class URI implements AuthorizationRequestURI {
    * Creates an URI Request
    * @param opts Options to define the Uri Request
    * @param authorizationRequestPayload
-   *
+   * @param requestObject
    */
   private static async fromAuthorizationRequestPayload(
     opts: { uriScheme?: string; passBy: PassBy; reference_uri?: string; version?: SupportedVersion },
@@ -145,7 +141,7 @@ export class URI implements AuthorizationRequestURI {
     requestObject?: RequestObject,
   ): Promise<URI> {
     if (!authorizationRequestPayload) {
-      if (!requestObject || !(await requestObject.getPayload())) {
+      if (!requestObject || !requestObject.getPayload()) {
         throw Error(SIOPErrors.BAD_PARAMS)
       }
       authorizationRequestPayload = {} // No auth request payload, so the eventual URI will contain a `request_uri` or `request` value only
@@ -165,7 +161,6 @@ export class URI implements AuthorizationRequestURI {
 
     if (requestObjectPayload) {
       // Only used to validate if the request object contains presentation definition(s) | a dcql query
-      await PresentationExchange.findValidPresentationDefinitions({ ...authorizationRequestPayload, ...requestObjectPayload })
       await Dcql.findValidDcqlQuery({ ...authorizationRequestPayload, ...requestObjectPayload })
 
       assertValidRequestObjectPayload(requestObjectPayload)
@@ -217,7 +212,6 @@ export class URI implements AuthorizationRequestURI {
       scheme,
       encodedUri: `${scheme}?${encodeJsonAsURI(uniformAuthorizationRequestPayload)}`,
       encodingFormat: UrlEncodingFormat.FORM_URL_ENCODED,
-      // requestObjectBy: opts.requestBy,
       authorizationRequestPayload: uniformAuthorizationRequestPayload,
       requestObjectJwt: requestObjectJwt,
     })
@@ -250,7 +244,7 @@ export class URI implements AuthorizationRequestURI {
       registrationMetadata = rpRegistrationMetadata
     } else {
       registrationMetadata = await fetchByReferenceOrUseByValue(
-        authorizationRequestPayload['client_metadata_uri'] ?? authorizationRequestPayload['registration_uri'],
+        authorizationRequestPayload['registration_uri'],
         authorizationRequestPayload['client_metadata'] ?? authorizationRequestPayload['registration'],
       )
     }

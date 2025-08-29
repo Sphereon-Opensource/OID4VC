@@ -1,11 +1,8 @@
 import { defaultHasher } from '@sphereon/oid4vc-common'
-
 import { CreateAuthorizationRequestOpts, PropertyTarget, PropertyTargets, RequestPropertyWithTargets } from '../authorization-request'
 import { VerifyAuthorizationResponseOpts } from '../authorization-response'
-// import { CreateAuthorizationRequestOptsSchema } from '../schemas';
-import { ClientMetadataOpts, RequestObjectPayload, SIOPErrors, Verification } from '../types'
-
 import { RPBuilder } from './RPBuilder'
+import { ClientMetadataOpts, RequestObjectPayload, SIOPErrors, Verification } from '../types'
 
 export const createRequestOptsFromBuilderOrExistingOpts = (opts: { builder?: RPBuilder; createRequestOpts?: CreateAuthorizationRequestOpts }) => {
   const version = opts.builder ? opts.builder.getSupportedRequestVersion() : opts.createRequestOpts.version
@@ -20,11 +17,6 @@ export const createRequestOptsFromBuilderOrExistingOpts = (opts: { builder?: RPB
         version,
         payload: {
           ...opts.builder.authorizationRequestPayload,
-          // ...(isTargetOrNoTargets(PropertyTarget.AUTHORIZATION_REQUEST, opts.builder.requestObjectBy.targets) ? {passBy: opts.builder.requestObjectBy.passBy, request_uri: opts.buigfdlder.requestObjectBy.referenceUri}: {})
-          //response_types_supported: opts.builder.clientMetadata?.responseTypesSupported,
-          // subject_types_supported: opts.builder.clientMetadata?.subjectTypesSupported,
-          // request_object_signing_alg_values_supported: opts.builder.clientMetadata?.requestObjectSigningAlgValuesSupported
-          //scopes_supported: opts.builder.clientMetadata?.scopesSupported,
         },
         requestObject: {
           ...opts.builder.requestObjectBy,

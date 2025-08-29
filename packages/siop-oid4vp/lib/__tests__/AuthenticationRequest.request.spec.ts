@@ -1,15 +1,13 @@
 import { parse } from 'querystring'
-
 import { SigningAlgo } from '@sphereon/oid4vc-common'
-import { IPresentationDefinition } from '@sphereon/pex'
 import { IProofType } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
 import { describe, expect, it } from 'vitest'
-
 import {
   CreateAuthorizationRequestOpts,
   PassBy,
   RequestObject,
+  ResponseMode,
   ResponseType,
   Scope,
   SubjectIdentifierType,
@@ -18,7 +16,6 @@ import {
   URI,
 } from '..'
 import SIOPErrors from '../types/Errors'
-
 import { getCreateJwtCallback } from './DidJwtTestUtils'
 import { WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
 import {
@@ -93,7 +90,7 @@ describe('create Request Uri should', () => {
   it('return a reference url', async () => {
     expect.assertions(12)
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'openid',
@@ -119,6 +116,7 @@ describe('create Request Uri should', () => {
           client_id: WELL_KNOWN_OPENID_FEDERATION,
           scope: 'openid',
           response_type: 'id_token',
+          response_mode: ResponseMode.DIRECT_POST,
           request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
           redirect_uri: EXAMPLE_REDIRECT_URL,
         },
@@ -168,7 +166,7 @@ describe('create Request Uri should', () => {
   it('return a reference url when using did:key', async () => {
     expect.assertions(4)
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'test',
@@ -191,6 +189,7 @@ describe('create Request Uri should', () => {
           client_id: WELL_KNOWN_OPENID_FEDERATION,
           scope: 'test',
           response_type: 'id_token',
+          response_mode: ResponseMode.DIRECT_POST,
           request_object_signing_alg_values_supported: [SigningAlgo.ES256, SigningAlgo.EDDSA],
           redirect_uri: EXAMPLE_REDIRECT_URL,
         },
@@ -230,7 +229,7 @@ describe('create Request Uri should', () => {
   it('return an url with an embedded token value', async () => {
     expect.assertions(4)
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'test',
@@ -255,6 +254,7 @@ describe('create Request Uri should', () => {
           client_id: WELL_KNOWN_OPENID_FEDERATION,
           scope: 'test',
           response_type: 'id_token',
+          response_mode: ResponseMode.DIRECT_POST,
           request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
           redirect_uri: EXAMPLE_REDIRECT_URL,
         },
@@ -297,7 +297,7 @@ describe('create Request JWT should', () => {
   it('throw REQUEST_OBJECT_TYPE_NOT_SET when requestBy type is different from REFERENCE and VALUE', async () => {
     expect.assertions(1)
     const opts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         redirect_uri: EXAMPLE_REDIRECT_URL,
       },
@@ -328,7 +328,7 @@ describe('create Request JWT should', () => {
   it('throw NO_REFERENCE_URI when no referenceUri is passed with REFERENCE requestBy type is set', async () => {
     expect.assertions(1)
     const opts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         redirect_uri: EXAMPLE_REDIRECT_URL,
       },
@@ -388,12 +388,10 @@ describe('create Request JWT should', () => {
   it('throw NO_REFERENCE_URI when registrationBy type is REFERENCE and no referenceUri is passed', async () => {
     expect.assertions(1)
     const opts = {
-      version: SupportedVersion.SIOPv2_ID1,
-
+      version: SupportedVersion.OID4VP_v1,
       requestObject: {
         passBy: PassBy.REFERENCE,
         reference_uri: EXAMPLE_REFERENCE_URL,
-
         signature: {
           hexPrivateKey: HEX_KEY,
           did: DID,
@@ -418,9 +416,8 @@ describe('create Request JWT should', () => {
   })
 
   it('succeed when all params are set', async () => {
-    // expect.assertions(1);
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: 'test_client_id',
         scope: 'test',
@@ -428,7 +425,6 @@ describe('create Request JWT should', () => {
         request_object_signing_alg_values_supported: [SigningAlgo.ES256, SigningAlgo.EDDSA],
         redirect_uri: EXAMPLE_REDIRECT_URL,
       },
-
       requestObject: {
         jwtIssuer: { method: 'did', didUrl: KID, alg: SigningAlgo.ES256K },
         passBy: PassBy.REFERENCE,
@@ -443,6 +439,7 @@ describe('create Request JWT should', () => {
           client_id: 'test_client_id',
           scope: 'test',
           response_type: 'id_token',
+          response_mode: ResponseMode.DIRECT_POST,
           request_object_signing_alg_values_supported: [SigningAlgo.ES256, SigningAlgo.EDDSA],
           redirect_uri: EXAMPLE_REDIRECT_URL,
         },
@@ -460,9 +457,7 @@ describe('create Request JWT should', () => {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
         },
-
         passBy: PassBy.VALUE,
-
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100303',
@@ -483,7 +478,7 @@ describe('create Request JWT should', () => {
         scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did:ethr:', 'did'],
-        vp_formats: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: ['EcdsaSecp256k1Signature2019', 'EcdsaSecp256k1Signature2019'],
           },
@@ -493,205 +488,38 @@ describe('create Request JWT should', () => {
         'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100303',
         client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      },
-
-      /*opts: {
-        redirectUri: 'https://acme.com/hello',
-        requestBy: {
-          type: 'REFERENCE',
-          reference_uri: 'https://rp.acme.com/siop/jwts',
-        },
-        withSignature: {
-          hexPrivateKey: 'f857544a9d1097e242ff0b287a7e6e90f19cf973efe2317f2a4678739664420f',
-          did: 'did:ethr:0x0106a2e985b1E1De9B5ddb4aF6dC9e928F4e99D0',
-          kid: 'did:ethr:0x0106a2e985b1E1De9B5ddb4aF6dC9e928F4e99D0#keys-1',
-        },
-        registration: {
-          idTokenSigningAlgValuesSupported: ['EdDSA', 'ES256'],
-          subjectSyntaxTypesSupported: ['did:ethr:', 'did'],
-          vpFormatsSupported: {
-            ldp_vc: {
-              proof_type: ['EcdsaSecp256k1Signature2019', 'EcdsaSecp256k1Signature2019'],
-            },
-          },
-          registrationBy: {
-            type: 'VALUE',
-          },
-        },
-      },*/
+      }
     }
 
-    // await URI.fromOpts(opts).then((uri) => console.log(uri.encodedUri));
     expect((await RequestObject.fromOpts(opts)).getPayload()).toMatchObject(expected)
   })
 
-  it('succeed when requesting with a valid PD', async () => {
-    const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
-      payload: {
-        client_id: WELL_KNOWN_OPENID_FEDERATION,
-        scope: 'test',
-        response_type: 'id_token',
-        request_object_signing_alg_values_supported: [SigningAlgo.ES256, SigningAlgo.EDDSA],
-        redirect_uri: EXAMPLE_REDIRECT_URL,
-      },
-      requestObject: {
-        jwtIssuer: { method: 'did', didUrl: KID, alg: SigningAlgo.ES256K },
-        passBy: PassBy.REFERENCE,
-        reference_uri: EXAMPLE_REFERENCE_URL,
-
-        createJwtCallback: getCreateJwtCallback({
-          hexPrivateKey: HEX_KEY,
-          did: DID,
-          kid: KID,
-          alg: SigningAlgo.ES256K,
-        }),
-        payload: {
-          client_id: WELL_KNOWN_OPENID_FEDERATION,
-          scope: 'test',
-          response_type: 'id_token',
-          redirect_uri: EXAMPLE_REDIRECT_URL,
-          request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-          claims: {
-            vp_token: {
-              presentation_definition: {
-                id: 'Insurance Plans',
-                input_descriptors: [
-                  {
-                    id: 'Ontario Health Insurance Plan',
-                    schema: [
-                      {
-                        uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-                      },
-                    ],
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-      clientMetadata: {
-        client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
-          ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
-          },
-        },
-
-        passBy: PassBy.VALUE,
-
-        logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100305',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      },
-    }
-
-    const uriRequest = await URI.fromOpts(opts)
-
-    const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
-    expect(uriDecoded.startsWith('openid4vp://?')).toBeTruthy()
-    expect(uriDecoded).toContain(`request_uri=https://rp.acme.com/siop/jwts`)
-    expect((await (await uriRequest.toAuthorizationRequest())?.requestObject?.getPayload())?.claims.vp_token).toBeDefined()
-  })
-
-  it('should throw error if presentation definition object is not valid', async () => {
-    const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
-      payload: {
-        client_id: 'test_client_id',
-        scope: 'test',
-        response_type: 'id_token',
-        redirect_uri: EXAMPLE_REDIRECT_URL,
-        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-      },
-
-      requestObject: {
-        jwtIssuer: { method: 'did', didUrl: KID, alg: SigningAlgo.ES256K },
-        passBy: PassBy.REFERENCE,
-        reference_uri: EXAMPLE_REFERENCE_URL,
-
-        createJwtCallback: getCreateJwtCallback({
-          hexPrivateKey: HEX_KEY,
-          did: DID,
-          kid: KID,
-          alg: SigningAlgo.ES256K,
-        }),
-        payload: {
-          client_id: 'test_client_id',
-          scope: 'test',
-          response_type: 'id_token',
-          redirect_uri: EXAMPLE_REDIRECT_URL,
-          request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-          claims: {
-            vp_token: {
-              presentation_definition: {
-                input_descriptors: [
-                  {
-                    id: 'Ontario Health Insurance Plan',
-                    schema: [
-                      {
-                        uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-                      },
-                    ],
-                  },
-                ],
-              } as IPresentationDefinition,
-            },
-          },
-        },
-      },
-      clientMetadata: {
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
-          ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
-          },
-        },
-
-        passBy: PassBy.VALUE,
-
-        logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100306',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      },
-    }
-    await expect(URI.fromOpts(opts)).rejects.toThrow(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_DEFINITION_NOT_VALID)
-  })
-
   it('should succeed when requesting with a valid dcql query', async () => {
-    const dcqlQuery: DcqlQuery = {
+    const dcqlQuery = {
       credentials: [
         {
           id: 'Credentials',
           format: 'jwt_vc_json',
+          meta: {
+            type_values: [
+                ['VerifiableCredential']
+            ],
+          },
           claims: [
             {
-              id: 'ID Card Credential',
+              id: 'ID_Card_Credential',
               path: ['$.issuer.id'],
               values: ['did:example:issuer'],
             },
           ],
         },
       ],
-    }
+    } satisfies DcqlQuery.Input
+    const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery)
+    DcqlQuery.validate(parsedDcqlQuery)
+
     const opts: CreateAuthorizationRequestOpts = {
-      version: SupportedVersion.SIOPv2_ID1,
+      version: SupportedVersion.OID4VP_v1,
       payload: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         scope: 'test',
@@ -703,7 +531,6 @@ describe('create Request JWT should', () => {
         jwtIssuer: { method: 'did', didUrl: KID, alg: SigningAlgo.ES256K },
         passBy: PassBy.REFERENCE,
         reference_uri: EXAMPLE_REFERENCE_URL,
-
         createJwtCallback: getCreateJwtCallback({
           hexPrivateKey: HEX_KEY,
           did: DID,
@@ -714,11 +541,12 @@ describe('create Request JWT should', () => {
           client_id: WELL_KNOWN_OPENID_FEDERATION,
           scope: 'test',
           response_type: 'vp_token',
+          response_mode: ResponseMode.DIRECT_POST,
           redirect_uri: EXAMPLE_REDIRECT_URL,
           request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
           claims: {
             vp_token: {
-              dcql_query: JSON.stringify(dcqlQuery),
+              dcql_query: parsedDcqlQuery,
             },
           },
         },
@@ -736,15 +564,13 @@ describe('create Request JWT should', () => {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
         },
-
         passBy: PassBy.VALUE,
-
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100305',
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      },
+      }
     }
 
     const uriRequest = await URI.fromOpts(opts)
@@ -752,6 +578,6 @@ describe('create Request JWT should', () => {
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
     expect(uriDecoded.startsWith('openid4vp://?')).toBeTruthy()
     expect(uriDecoded).toContain(`request_uri=https://rp.acme.com/siop/jwts`)
-    expect((await (await uriRequest.toAuthorizationRequest())?.requestObject?.getPayload())?.claims.vp_token).toBeDefined()
+    expect(((await uriRequest.toAuthorizationRequest())?.requestObject?.getPayload())?.claims.vp_token).toBeDefined()
   })
 })
