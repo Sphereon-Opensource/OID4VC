@@ -502,7 +502,7 @@ export class VcIssuer {
           format,
           credential,
           jwtVerifyResult,
-          issuer: issuer,
+          issuer,
           ...(session && { statusLists: session.statusLists })
         },
         signerCallback

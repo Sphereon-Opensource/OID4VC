@@ -76,7 +76,7 @@ export async function createDidJWT(
   { issuer, signer, expiresIn, canonicalize }: JWTOptions,
   header: Partial<JWTHeader>,
 ): Promise<string> {
-  return createJWT(payload, { issuer: issuer, signer, expiresIn, canonicalize }, header)
+  return createJWT(payload, { issuer, signer, expiresIn, canonicalize }, header)
 }
 
 export async function signIDTokenPayload(payload: IDTokenPayload, signature: InternalSignature | ExternalSignature | SuppliedSignature) {

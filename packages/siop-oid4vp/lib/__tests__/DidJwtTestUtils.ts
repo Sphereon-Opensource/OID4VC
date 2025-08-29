@@ -68,7 +68,7 @@ export async function createDidJWT(
   { issuer, signer, expiresIn, canonicalize }: JWTOptions,
   header: Partial<JwtPayload>,
 ): Promise<string> {
-  return createJWT(payload, { issuer: issuer, signer, expiresIn, canonicalize }, header)
+  return createJWT(payload, { issuer, signer, expiresIn, canonicalize }, header)
 }
 export interface InternalSignature {
   hexPrivateKey: string // hex private key Only secp256k1 format
