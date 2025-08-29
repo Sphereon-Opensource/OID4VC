@@ -1,6 +1,7 @@
 import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereon/oid4vc-common'
 import {
   acquireDeferredCredential,
+  CredentialRequestV1_0_11,
   CredentialResponse,
   DPoPResponseParams,
   getCredentialRequestForVersion,
@@ -14,7 +15,7 @@ import {
   post,
   ProofOfPossession,
   UniformCredentialRequest,
-  URL_NOT_VALID,
+  URL_NOT_VALID
 } from '@sphereon/oid4vci-common'
 import { CredentialFormat, Loggers } from '@sphereon/ssi-types'
 
@@ -36,6 +37,7 @@ export interface CredentialRequestOptsV1_0_11 {
   token: string
   version: OpenId4VCIVersion
 }
+
 
 export class CredentialRequestClientV1_0_11 {
   private readonly _credentialRequestOpts: Partial<CredentialRequestOptsV1_0_11>
@@ -78,7 +80,11 @@ export class CredentialRequestClientV1_0_11 {
     uniformRequest: UniformCredentialRequest,
     createDPoPOpts?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
-    const request = getCredentialRequestForVersion(uniformRequest, this.version())
+    const uniformRequestV11 = uniformRequest as CredentialRequestV1_0_11
+    if (!uniformRequestV11.format) {
+      return Promise.reject(Error('format is missing from the (legacy v11) credential request'))
+    }
+    const request = getCredentialRequestForVersion(uniformRequest, uniformRequestV11.format, this.version())
     const credentialEndpoint: string = this.credentialRequestOpts.credentialEndpoint
     if (!isValidURL(credentialEndpoint)) {
       logger.debug(`Invalid credential endpoint: ${credentialEndpoint}`)
@@ -204,7 +210,7 @@ export class CredentialRequestClientV1_0_11 {
           ...(opts.context && { '@context': opts.context }),
         } as JsonLdIssuerCredentialDefinition,
       }
-    } else if (format === 'vc+sd-jwt') {
+    } else if (format === 'vc+sd-jwt') { // TODO SSISDK-13
       if (types.length > 1) {
         throw Error(`Only a single credential type is supported for ${format}`)
       }

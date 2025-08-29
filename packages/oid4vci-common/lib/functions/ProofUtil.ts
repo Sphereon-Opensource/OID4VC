@@ -48,7 +48,7 @@ export const createProofOfPossession = async <DIDDoc extends object = never>(
   }
 
   const jwtPayload = createJWT(popMode, jwtProps, existingJwt)
-  const jwt = await callbacks.signCallback(jwtPayload, jwtPayload.header.kid)
+  const jwt = await callbacks.signCallback(jwtPayload, jwtPayload.header.kid, popMode === 'pop')
   const proof = {
     proof_type: 'jwt',
     jwt,

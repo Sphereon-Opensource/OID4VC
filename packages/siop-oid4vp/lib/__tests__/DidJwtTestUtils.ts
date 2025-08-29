@@ -120,8 +120,8 @@ export function getCreateJwtCallback(signature: InternalSignature) {
       if (jwtIssuer.type === 'id-token') {
         if (!jwt.payload.sub) jwt.payload.sub = signature.did
 
-        const issuer = jwtIssuer.authorizationResponseOpts.registration?.issuer || this._payload.iss
-        if (!issuer || !(issuer.includes(ResponseIss.SELF_ISSUED_V2) || issuer === this._payload.sub)) {
+        const issuer = jwtIssuer.authorizationResponseOpts.registration?.issuer || jwt.payload.iss
+        if (!issuer || !(issuer.includes(ResponseIss.SELF_ISSUED_V2) || issuer === jwt._payload.sub)) {
           throw new Error(SIOPErrors.NO_SELF_ISSUED_ISS)
         }
         if (!jwt.payload.iss) {

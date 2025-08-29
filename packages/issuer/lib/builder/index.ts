@@ -1,5 +1,7 @@
 export * from './CredentialSupportedBuilderV1_13'
+export * from './CredentialSupportedBuilderV1_15'
 export * from './VcIssuerBuilder'
 export * from './IssuerMetadataBuilderV1_13'
+export * from './IssuerMetadataBuilderV1_15'
 export * from './DisplayBuilder'
 export * from './AuthorizationServerMetadataBuilder'
