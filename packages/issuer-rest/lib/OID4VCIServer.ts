@@ -52,13 +52,6 @@ function buildVCIFromEnvironment() {
       background_color: process.env.credential_display_background_color as string,
       text_color: process.env.credential_display_text_color as string,
     })
-    /*.addCredentialSubjectPropertyDisplay( TODO doublecheck removal from the spec
-      process.env.credential_subject_display_key1 as string,
-      {
-        name: process.env.credential_subject_display_key1_name as string,
-        locale: process.env.credential_subject_display_key1_locale as string,
-      } as IssuerCredentialSubjectDisplay, // fixme: This is wrong (remove the cast and see it has no matches)
-    )*/
     .build()
   const issuerBuilder = new VcIssuerBuilder()
     .withTXCode({ length: process.env.user_pin_length as unknown as number, input_mode: process.env.user_pin_input_mode as 'numeric' | 'text' })

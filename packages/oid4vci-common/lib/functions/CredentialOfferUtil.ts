@@ -144,7 +144,7 @@ function tryDecodeOffer(input: string): string {
 
 /**
  * Look for version-specific keys.
- * returns one of VER_1_0_11, VER_1_0_13, VER_1_0_15, or VER_UNKNOWN.
+ * returns one of VER_1_0_11, or VER_UNKNOWN. (we cannot tell v11/v12 from v15 by the offer version
  */
 function sniffOfferVersion(jsonLike: string): OpenId4VCIVersion {
   if (!jsonLike) return OpenId4VCIVersion.VER_UNKNOWN;
@@ -153,8 +153,6 @@ function sniffOfferVersion(jsonLike: string): OpenId4VCIVersion {
   const has = (k: string) => new RegExp(`"${k}"\\s*:`, 'i').test(jsonLike);
 
   if (has('credentials')) return OpenId4VCIVersion.VER_1_0_11;
-  if (has('credential_configuration_id')) return OpenId4VCIVersion.VER_1_0_13;
-  if (has('credential_configuration_ids')) return OpenId4VCIVersion.VER_1_0_15;
 
   return OpenId4VCIVersion.VER_UNKNOWN;
 }

@@ -443,16 +443,14 @@ export class OpenID4VCIClient {
     if (jwk) this._state.jwk = jwk
     if (kid) this._state.kid = kid
 
-    try {
       if (this.version() === OpenId4VCIVersion.VER_1_0_15 && this.hasNonceEndpoint()) {
         if (!(this._state as OpenID4VCIClientStateV1_0_15).cachedCNonce) {
-          await this.acquireNonceViaV15Delegate()
+          try {
+            await this.acquireNonceViaV15Delegate()
+          } catch (e) {
+            // strict only when v15 or server claims nonce support
+            return Promise.reject(Error(`failed to acquire nonce: ${String(e)}`))
         }
-      }
-    } catch (e) {
-      // strict only when v15 or server claims nonce support
-      if (this.version() === OpenId4VCIVersion.VER_1_0_15 && this.hasNonceEndpoint()) {
-        return Promise.reject(Error(`failed to acquire nonce: ${String(e)}`))
       }
     }
 
@@ -549,7 +547,7 @@ export class OpenID4VCIClient {
         proofBuilder.withKid(this._state.kid)
       }
 
-      if (this.clientId) {
+      if (this.clientId && (!this.credentialOffer || this.credentialOffer.supportedFlows.includes(AuthzFlowType.AUTHORIZATION_CODE_FLOW) && !this.credentialOffer.preAuthorizedCode)) {
         proofBuilder.withClientId(this.clientId)
       }
       if (jti) {

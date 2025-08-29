@@ -123,7 +123,7 @@ export function getTypesFromCredentialSupported(
     credentialSupported.format === 'ldp_vc'
   ) {
     types = getTypesFromObject(credentialSupported) ?? []
-  } else if (credentialSupported.format === 'dc+sd-jwt') {
+  } else if (credentialSupported.format === 'dc+sd-jwt' || credentialSupported.format === 'vc+sd-jwt') { // TODO SSISDK-13
     types = [credentialSupported.vct]
   } else if (credentialSupported.format === 'mso_mdoc') {
     types = [credentialSupported.doctype]

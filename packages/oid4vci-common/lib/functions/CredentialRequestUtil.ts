@@ -47,7 +47,7 @@ export function getTypesFromRequest(credentialRequest: CredentialRequest, format
   return types
 }
 
-export function getCredentialRequestForVersion( // TODO Can this go out?
+export function getCredentialRequestForVersion(
   credentialRequest: UniformCredentialRequest,
   format: OID4VCICredentialFormat,
   version: OpenId4VCIVersion,
@@ -59,7 +59,7 @@ export function getCredentialRequestForVersion( // TODO Can this go out?
       throw Error('Experimental subject issuance is not supported for older versions of the spec')
     }
     return {
-      format: format,
+      format,
       proof: credentialRequest.proof,
       type: types[0],
     } satisfies CredentialRequestV1_0_08
