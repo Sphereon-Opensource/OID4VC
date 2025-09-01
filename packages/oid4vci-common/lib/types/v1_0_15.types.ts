@@ -194,7 +194,7 @@ export interface CredentialOfferPayloadV1_0_15 {
 }
 
 // Credential Response for v15 - credential response always returns an array when not returning a transaction_id
-export interface CredentialResponseV1_0_15 {
+export interface CredentialResponseV1_0_15 extends ExperimentalSubjectIssuance {
   credentials?: CredentialResponseCredentialV1_0_15[] // OPTIONAL. Contains an array of one or more issued Credentials. It MUST NOT be used if the transaction_id parameter is present. The elements of the array MUST be objects.
   transaction_id?: string // OPTIONAL. String identifying a Deferred Issuance transaction. This parameter is contained in the response if the Credential Issuer cannot immediately issue the Credential. The value is subsequently used to obtain the respective Credential with the Deferred Credential Endpoint. It MUST NOT be used if the credentials parameter is present. It MUST be invalidated after the Credential for which it was meant has been obtained by the Wallet.
   notification_id?: string // OPTIONAL. String identifying one or more Credentials issued in one Credential Response. It MUST be included in the Notification Request as defined in Section 10. It MUST NOT be present if the credentials parameter is not present.
