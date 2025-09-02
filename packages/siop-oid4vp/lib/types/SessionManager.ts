@@ -2,7 +2,8 @@ import { AuthorizationRequest } from '../authorization-request'
 import { AuthorizationResponse } from '../authorization-response'
 
 export interface AuthorizationRequestState {
-  correlationId?: string
+  correlationId: string
+  queryId: string
   request: AuthorizationRequest
   status: AuthorizationRequestStateStatus
   timestamp: number
@@ -11,7 +12,8 @@ export interface AuthorizationRequestState {
 }
 
 export interface AuthorizationResponseState {
-  correlationId?: string
+  correlationId: string
+  queryId: string
   response: AuthorizationResponse
   status: AuthorizationResponseStateStatus
   timestamp: number
