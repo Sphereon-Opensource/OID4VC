@@ -104,7 +104,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
 
   private async onAuthorizationRequestSentSuccess(event: AuthorizationEvent<AuthorizationRequest>): Promise<void> {
     this.cleanup().catch((error) => console.log(JSON.stringify(error)))
-    this.updateState('request', event, AuthorizationRequestStateStatus.SENT)
+    this.updateState('request', event, AuthorizationRequestStateStatus.RETRIEVED)
   }
 
   private async onAuthorizationRequestSentFailed(event: AuthorizationEvent<AuthorizationRequest>): Promise<void> {
