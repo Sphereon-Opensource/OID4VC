@@ -32,6 +32,7 @@ export type CredentialSignerCallback = (opts: {
 export interface CredentialDataSupplierArgs extends CNonceState {
   credentialRequest: UniformCredentialRequest
   credentialOffer: AssertedUniformCredentialOffer
+  format: OID4VCICredentialFormat
   clientId?: string
   credentialSupplierConfig?: CredentialSupplierConfig
   credentialDataSupplierInput?: CredentialDataSupplierInput
