@@ -564,6 +564,11 @@ export enum ResponseMode {
   FRAGMENT_JWT = 'fragment.jwt',
 }
 
+export enum RequestUriMethod {
+  GET = 'get',
+  POST = 'post',
+}
+
 export enum ProtocolFlow {
   SAME_DEVICE = 'same_device',
   CROSS_DEVICE = 'cross_device',
