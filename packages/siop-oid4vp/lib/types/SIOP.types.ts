@@ -569,6 +569,12 @@ export enum RequestUriMethod {
   POST = 'post',
 }
 
+export enum VerifiedDataMode {
+  AUTHORIZATION_RESPONSE = 'authorization_response',
+  CREDENTIAL_CLAIMS_DESERIALIZED = 'credential_claims_deserialized',
+  VP_TOKEN = 'vp_token'
+}
+
 export enum ProtocolFlow {
   SAME_DEVICE = 'same_device',
   CROSS_DEVICE = 'cross_device',
