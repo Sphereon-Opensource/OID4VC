@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events'
-
 import { AuthorizationRequest } from '../authorization-request'
 import { AuthorizationResponse } from '../authorization-response'
 import {
@@ -9,8 +8,8 @@ import {
   AuthorizationRequestStateStatus,
   AuthorizationResponseState,
   AuthorizationResponseStateStatus,
+  AuthorizationResponseStateWithVerifiedData,
 } from '../types'
-
 import { IRPSessionManager } from './types'
 
 /**
@@ -201,23 +200,19 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         timestamp: event.timestamp,
         lastUpdated: event.timestamp,
       }
+      let state: AuthorizationRequestState | AuthorizationResponseState
       if (type === 'request') {
-        const state = eventState as AuthorizationRequestState
+        state = eventState as AuthorizationRequestState
         this.authorizationRequests[event.correlationId] = state
-
-        if (event.callback && event.callback.status.includes(status)) {
-          void this.executeCallback(state)
-        }
-
         this.updateMapping(this.nonceMapping, event, 'nonce', event.correlationId, true)
         this.updateMapping(this.stateMapping, event, 'state', event.correlationId, true)
       } else {
-        const state = eventState as AuthorizationResponseState
+        state = eventState as AuthorizationResponseState
         this.authorizationResponses[event.correlationId] = state
+      }
 
-        if (event.callback && event.callback.status.includes(status)) {
-          void this.executeCallback(state)
-        }
+      if (event.callback && event.callback.status.includes(status)) {
+        void this.executeCallback(state)
       }
     } catch (error: unknown) {
       console.log(`Error in update state happened: ${error}`)
@@ -262,8 +257,20 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     })
   }
 
-  private async executeCallback(state: AuthorizationRequestState | AuthorizationResponseState) {
+  private async executeCallback(state: AuthorizationRequestState | AuthorizationResponseStateWithVerifiedData) {
     console.log('HELLO!!!!!!!!')
+
+    const statusBody = {
+      status: state.status,
+      correlation_id: state.correlationId,
+      query_id: state.queryId,
+      last_updated: state.lastUpdated,
+      ...((state?.status === AuthorizationResponseStateStatus.VERIFIED && state.verifiedData !== undefined) && { verifiedData: state.verifiedData }),
+      ...(state.error && { message: state.error.message })
+    }
+
+    console.log(`state: ${JSON.stringify(statusBody)}`)
+
   }
 }
 

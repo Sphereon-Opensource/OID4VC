@@ -1,6 +1,7 @@
 import { AuthorizationRequest } from '../authorization-request'
 import { AuthorizationResponse } from '../authorization-response'
-import {CallbackOpts} from './SIOP.types';
+import {CallbackOpts} from './SIOP.types'
+import { AdditionalClaims } from '@sphereon/ssi-types'
 
 export interface AuthorizationRequestState {
   correlationId: string
@@ -22,6 +23,10 @@ export interface AuthorizationResponseState {
   timestamp: number
   lastUpdated: number
   error?: Error
+}
+
+export interface AuthorizationResponseStateWithVerifiedData extends AuthorizationResponseState {
+  verifiedData?: AdditionalClaims
 }
 
 export enum AuthorizationRequestStateStatus {
