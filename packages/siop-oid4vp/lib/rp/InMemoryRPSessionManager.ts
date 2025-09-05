@@ -202,11 +202,22 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         lastUpdated: event.timestamp,
       }
       if (type === 'request') {
-        this.authorizationRequests[event.correlationId] = eventState as AuthorizationRequestState
+        const state = eventState as AuthorizationRequestState
+        this.authorizationRequests[event.correlationId] = state
+
+        if (event.callback && event.callback.status.includes(status)) {
+          void this.executeCallback(state)
+        }
+
         this.updateMapping(this.nonceMapping, event, 'nonce', event.correlationId, true)
         this.updateMapping(this.stateMapping, event, 'state', event.correlationId, true)
       } else {
-        this.authorizationResponses[event.correlationId] = eventState as AuthorizationResponseState
+        const state = eventState as AuthorizationResponseState
+        this.authorizationResponses[event.correlationId] = state
+
+        if (event.callback && event.callback.status.includes(status)) {
+          void this.executeCallback(state)
+        }
       }
     } catch (error: unknown) {
       console.log(`Error in update state happened: ${error}`)
@@ -251,9 +262,9 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     })
   }
 
-  // private async executeCallback() {
-  //   console.log('HELLO!!!!!!!!')
-  // }
+  private async executeCallback(state: AuthorizationRequestState | AuthorizationResponseState) {
+    console.log('HELLO!!!!!!!!')
+  }
 }
 
 function hashcodeForValue(event: AuthorizationEvent<AuthorizationRequest | AuthorizationResponse>, key: string): number {
