@@ -197,6 +197,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         ...(type === 'response' ? { response: event.subject } : {}),
         ...(event.error ? { error: event.error } : {}),
         status,
+        callback: event.callback,
         timestamp: event.timestamp,
         lastUpdated: event.timestamp,
       }
@@ -249,6 +250,10 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
       cleanupCorrelations.call(this, resByCorrelationId)
     })
   }
+
+  // private async executeCallback() {
+  //   console.log('HELLO!!!!!!!!')
+  // }
 }
 
 function hashcodeForValue(event: AuthorizationEvent<AuthorizationRequest | AuthorizationResponse>, key: string): number {

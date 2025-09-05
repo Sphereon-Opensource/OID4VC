@@ -13,7 +13,7 @@ import {
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
-
+import { z } from 'zod'
 import { AuthorizationRequest, CreateAuthorizationRequestOpts, PropertyTargets, VerifyAuthorizationRequestOpts } from '../authorization-request'
 import {
   AuthorizationResponse,
@@ -26,6 +26,7 @@ import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 import { JWTPayload, VerifiedJWT } from './JWT.types'
+import { CallbackOptsSchema } from '../schemas/universal-oid4vp'
 
 export const DEFAULT_EXPIRATION_TIME = 10 * 60
 
@@ -558,7 +559,6 @@ export enum ResponseMode {
   // See https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-response-mode-direct_post
   DIRECT_POST = 'direct_post',
   QUERY = 'query',
-
   DIRECT_POST_JWT = 'direct_post.jwt',
   QUERY_JWT = 'query.jwt',
   FRAGMENT_JWT = 'fragment.jwt',
@@ -745,3 +745,5 @@ export enum ContentType {
   FORM_URL_ENCODED = 'application/x-www-form-urlencoded',
   UTF_8 = 'UTF-8',
 }
+
+export type CallbackOpts = z.infer<typeof CallbackOptsSchema>;
