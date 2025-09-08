@@ -10,8 +10,10 @@ import {
   W3CVerifiablePresentation,
 } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
-
+import { AuthorizationResponse } from './AuthorizationResponse'
 import {
+  CreateJwtCallback,
+  VerifyJwtCallback,
   ResponseMode,
   ResponseRegistrationOpts,
   ResponseType,
@@ -20,10 +22,6 @@ import {
   VerifiablePresentationWithFormat,
   Verification,
 } from '../types'
-import { CreateJwtCallback } from '../types/VpJwtIssuer'
-import { VerifyJwtCallback } from '../types/VpJwtVerifier'
-
-import { AuthorizationResponse } from './AuthorizationResponse'
 
 export interface AuthorizationResponseOpts {
   // redirectUri?: string; // It's typically comes from the request opts as a measure to prevent hijacking.

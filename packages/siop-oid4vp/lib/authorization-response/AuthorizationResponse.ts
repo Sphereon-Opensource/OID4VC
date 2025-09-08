@@ -23,7 +23,6 @@ export class AuthorizationResponse {
   // private _requestObject?: RequestObject | undefined
   private readonly _idToken?: IDToken
   private readonly _payload: AuthorizationResponsePayload
-
   private readonly _options?: AuthorizationResponseOpts
 
   private constructor({

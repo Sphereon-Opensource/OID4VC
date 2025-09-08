@@ -193,9 +193,10 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     try {
       const eventState = {
         correlationId: event.correlationId,
+        queryId: event.queryId,
         ...(type === 'request' ? { request: event.subject } : {}),
         ...(type === 'response' ? { response: event.subject } : {}),
-        ...(event.error ? { error: event.error } : {}),
+        ...(event.error && { error: event.error }),
         status,
         timestamp: event.timestamp,
         lastUpdated: event.timestamp,
