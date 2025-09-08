@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import { AuthorizationRequest } from '../authorization-request'
 import { AuthorizationResponse } from '../authorization-response'
+import { post } from '../helpers'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
@@ -8,7 +9,7 @@ import {
   AuthorizationRequestStateStatus,
   AuthorizationResponseState,
   AuthorizationResponseStateStatus,
-  AuthorizationResponseStateWithVerifiedData,
+  AuthorizationResponseStateWithVerifiedData
 } from '../types'
 import { IRPSessionManager } from './types'
 
@@ -212,7 +213,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
       }
 
       if (event.callback && event.callback.status.includes(status)) {
-        void this.executeCallback(state)
+        void this.executeCallback(event.callback.url, state)
       }
     } catch (error: unknown) {
       console.log(`Error in update state happened: ${error}`)
@@ -257,9 +258,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     })
   }
 
-  private async executeCallback(state: AuthorizationRequestState | AuthorizationResponseStateWithVerifiedData) {
-    console.log('HELLO!!!!!!!!')
-
+  private async executeCallback(url: string, state: AuthorizationRequestState | AuthorizationResponseStateWithVerifiedData): Promise<void> {
     const statusBody = {
       status: state.status,
       correlation_id: state.correlationId,
@@ -269,8 +268,9 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
       ...(state.error && { message: state.error.message })
     }
 
-    console.log(`state: ${JSON.stringify(statusBody)}`)
+    void post(url, JSON.stringify(statusBody))
 
+    console.log(`state: ${JSON.stringify(statusBody)}`)
   }
 }
 
