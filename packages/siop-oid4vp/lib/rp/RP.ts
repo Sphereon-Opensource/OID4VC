@@ -111,7 +111,6 @@ export class RP {
 
   public async createAuthorizationRequestURI(opts: {
     correlationId: string
-    queryId: string
     nonce: string | RequestPropertyWithTargets<string>
     state: string | RequestPropertyWithTargets<string>
     jwtIssuer?: JwtIssuer
@@ -129,7 +128,7 @@ export class RP {
       const authRequest = await AuthorizationRequest.fromOpts(authorizationRequestOpts)
       this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
         correlationId: opts.correlationId,
-        subject: { ...authRequest, queryId: opts.queryId },
+        subject: authRequest,
         callback: opts.callback
       })
       return uri
