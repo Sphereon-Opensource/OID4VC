@@ -268,9 +268,8 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
       ...(state.error && { message: state.error.message })
     }
 
-    void post(url, JSON.stringify(statusBody))
-
-    console.log(`state: ${JSON.stringify(statusBody)}`)
+    post(url, JSON.stringify(statusBody))
+        .catch(error => console.error("Callback failed:", error))
   }
 }
 
