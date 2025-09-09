@@ -2,12 +2,12 @@ import { KeyObject } from 'crypto'
 
 import {
   Alg,
-  EndpointMetadata,
-  getCredentialRequestForVersion,
+  EndpointMetadataResultV1_0_15,
   getIssuerFromCredentialOfferPayload,
   Jwt,
   OpenId4VCIVersion,
-  ProofOfPossession, UniformCredentialRequest,
+  ProofOfPossession,
+  UniformCredentialRequest,
   URL_NOT_VALID,
   WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
@@ -17,14 +17,19 @@ import * as jose from 'jose'
 import nock from 'nock'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { CredentialOfferClientV1_0_15, CredentialRequestClientBuilderV1_0_15, MetadataClientV1_0_15, ProofOfPossessionBuilder } from '..'
+import {
+  CredentialOfferClientV1_0_15,
+  CredentialRequestClientBuilderV1_0_15,
+  MetadataClientV1_0_15,
+  ProofOfPossessionBuilder
+} from '..'
 
 import {
   IDENTIPROOF_ISSUER_URL,
   IDENTIPROOF_OID4VCI_METADATA,
   INITIATION_TEST,
   INITIATION_TEST_V1_0_15,
-  WALT_OID4VCI_METADATA,
+  WALT_OID4VCI_METADATA
 } from './MetadataMocks'
 import { getMockData } from './data/VciDataFixtures'
 
@@ -243,7 +248,7 @@ describe('Credential Request Client ', () => {
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build()
-    const uniformRequest = { format: 'jwt_vc_json', types: ['random'], proof } satisfies UniformCredentialRequest
+    const uniformRequest = { credential_configuration_id: 'random', proof } satisfies UniformCredentialRequest
     await expect(credReqClient.acquireCredentialsUsingRequest(uniformRequest, 'jwt_vc_json')).rejects.toThrow(
       Error(URL_NOT_VALID),
     )
@@ -265,7 +270,7 @@ describe('Credential Request Client ', () => {
       .withKid(kid_withoutDid)
       .withClientId('sphereon:wallet')
       .build()
-    await expect(credReqClient.acquireCredentialsUsingRequest({ format: 'jwt_vc_json', types: ['random'], proof }, 'jwt_vc_json')).rejects.toThrow(
+    await expect(credReqClient.acquireCredentialsUsingRequest({ credential_configuration_id: 'random'}, 'jwt_vc_json')).rejects.toThrow(
       Error(URL_NOT_VALID),
     )
   })
@@ -324,7 +329,7 @@ describe('Credential Request Client with different issuers ', () => {
     const credentialRequest = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
-        metadata: getMockData('spruce')?.metadata as unknown as EndpointMetadata,
+        metadata: getMockData('spruce')?.metadata as unknown as EndpointMetadataResultV1_0_15,
       })
     )
       .build()
@@ -337,8 +342,7 @@ describe('Credential Request Client with different issuers ', () => {
         format: 'jwt_vc',
         version: OpenId4VCIVersion.VER_1_0_15,
       })
-    const draft15CredentialRequest = getCredentialRequestForVersion(credentialRequest, 'jwt_vc_json', OpenId4VCIVersion.VER_1_0_15)
-    expect(draft15CredentialRequest).toEqual(getMockData('spruce')?.credential.request)
+    expect(credentialRequest).toEqual(getMockData('spruce')?.credential.request)
   })
 
   it('should create correct CredentialRequest for Walt', async () => {
@@ -359,7 +363,7 @@ describe('Credential Request Client with different issuers ', () => {
     const credentialOffer = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
-        metadata: getMockData('walt')?.metadata as unknown as EndpointMetadata,
+        metadata: getMockData('walt')?.metadata as unknown as EndpointMetadataResultV1_0_15,
       })
     )
       .build()
@@ -382,7 +386,7 @@ describe('Credential Request Client with different issuers ', () => {
     const credentialOffer = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
-        metadata: getMockData('uniissuer')?.metadata as unknown as EndpointMetadata,
+        metadata: getMockData('uniissuer')?.metadata as unknown as EndpointMetadataResultV1_0_15,
       })
     )
       .build()
@@ -411,23 +415,22 @@ describe('Credential Request Client with different issuers ', () => {
         }
       })
     )}`
-    const credentialOffer = await (
+    const credentialRequest = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
-        metadata: getMockData('mattr')?.metadata as unknown as EndpointMetadata,
+        metadata: getMockData('mattr')?.metadata as unknown as EndpointMetadataResultV1_0_15
       })
     )
       .build()
       .createCredentialRequest({
         proofInput: {
           proof_type: 'jwt',
-          jwt: getMockData('mattr')?.credential.request.proof.jwt as string,
+          jwt: getMockData('mattr')?.credential.request.proof.jwt as string
         },
         credentialTypes: ['OpenBadgeCredential'],
         format: 'ldp_vc',
-        version: OpenId4VCIVersion.VER_1_0_15,
+        version: OpenId4VCIVersion.VER_1_0_15
       })
-    const credentialRequest = getCredentialRequestForVersion(credentialOffer, 'jwt_vc_json', OpenId4VCIVersion.VER_1_0_15)
     expect(credentialRequest).toEqual(getMockData('mattr')?.credential.request)
   })
 
@@ -445,10 +448,10 @@ describe('Credential Request Client with different issuers ', () => {
         }
       })
     )}`
-    const credentialOffer = await (
+    const credentialRequest = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
-        metadata: getMockData('diwala')?.metadata as unknown as EndpointMetadata,
+        metadata: getMockData('diwala')?.metadata as unknown as EndpointMetadataResultV1_0_15,
       })
     )
       .build()
@@ -462,8 +465,6 @@ describe('Credential Request Client with different issuers ', () => {
         version: OpenId4VCIVersion.VER_1_0_15,
       })
 
-    // createCredentialRequest returns uniform format in draft 15
-    const credentialRequest = getCredentialRequestForVersion(credentialOffer, 'ldp_vc', OpenId4VCIVersion.VER_1_0_15)
 
     expect(credentialRequest).toEqual(getMockData('diwala')?.credential.request)
   })

@@ -51,7 +51,7 @@ describe('Issuance Initiation V1_0_15', () => {
 
   it('Should return URI from Issuance Initiation Request', async () => {
     const issuanceInitiationClient = await CredentialOfferClientV1_0_15.fromURI(INITIATION_TEST_HTTPS_URI_V1_0_15_PRE_AUTH)
-    expect(CredentialOfferClient.toURI(issuanceInitiationClient)).toEqual(INITIATION_TEST_HTTPS_URI_V1_0_15_PRE_AUTH)
+    expect(CredentialOfferClientV1_0_15.toURI(issuanceInitiationClient)).toEqual(INITIATION_TEST_HTTPS_URI_V1_0_15_PRE_AUTH)
   })
 
   it('Should throw error on invalid URI', async () => {

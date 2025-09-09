@@ -17,7 +17,7 @@ import {
 export class ProofOfPossessionBuilder<DIDDoc = never> {
   private readonly proof?: ProofOfPossession
   private readonly callbacks?: ProofOfPossessionCallbacks
-  private readonly version: OpenId4VCIVersion
+//  private readonly version: OpenId4VCIVersion
   private readonly mode: PoPMode = 'pop'
 
   private kid?: string
@@ -49,11 +49,11 @@ export class ProofOfPossessionBuilder<DIDDoc = never> {
     this.mode = mode
     this.proof = proof
     this.callbacks = callbacks
-    this.version = version
+//    this.version = version
     if (jwt) {
       this.withJwt(jwt)
     } else {
-      this.withTyp(version < OpenId4VCIVersion.VER_1_0_11 || mode === 'JWT' ? 'JWT' : 'openid4vci-proof+jwt')
+      this.withTyp(mode === 'JWT' ? 'JWT' : 'openid4vci-proof+jwt')
     }
     if (accessTokenResponse) {
       this.withAccessTokenResponse(accessTokenResponse)
@@ -142,7 +142,7 @@ export class ProofOfPossessionBuilder<DIDDoc = never> {
   }
 
   withTyp(typ: Typ): this {
-    if (this.mode === 'pop' && this.version >= OpenId4VCIVersion.VER_1_0_11) {
+    if (this.mode === 'pop') {
       if (!!typ && typ !== 'openid4vci-proof+jwt') {
         throw Error(`typ must be openid4vci-proof+jwt for version 1.0.11 and up. Provided: ${typ}`)
       }
@@ -189,7 +189,7 @@ export class ProofOfPossessionBuilder<DIDDoc = never> {
     if (jwt.header.typ) {
       this.withTyp(jwt.header.typ as Typ)
     }
-    if (!this.typ && this.version >= OpenId4VCIVersion.VER_1_0_11) {
+    if (!this.typ) {
       this.withTyp('openid4vci-proof+jwt')
     }
     this.withAlg(jwt.header.alg)
@@ -216,7 +216,7 @@ export class ProofOfPossessionBuilder<DIDDoc = never> {
         this.mode,
         this.callbacks,
         {
-          typ: this.typ ?? (this.version < OpenId4VCIVersion.VER_1_0_11 || this.mode === 'JWT' ? 'JWT' : 'openid4vci-proof+jwt'),
+          typ: this.typ ?? (this.mode === 'JWT' ? 'JWT' : 'openid4vci-proof+jwt'),
           kid: this.kid,
           jwk: this.jwk,
           jti: this.jti,

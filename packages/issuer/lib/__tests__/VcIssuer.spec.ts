@@ -347,20 +347,23 @@ describe('VcIssuer', () => {
       c_nonce: 'new-test-nonce',
       c_nonce_expires_in: 300,
       notification_id: '43243',
-      credential: {
-        '@context': ['https://www.w3.org/2018/credentials/v1'],
-        credentialSubject: {},
-        issuanceDate: expect.any(String),
-        issuer: 'did:key:test',
-        proof: {
-          created: expect.any(String),
-          jwt: 'ye.ye.ye',
-          proofPurpose: 'assertionMethod',
-          type: 'JwtProof2020',
-          verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf'
-        },
-        type: ['VerifiableCredential']
+      credentials: [{
+        credential: {
+          '@context': ['https://www.w3.org/2018/credentials/v1'],
+          credentialSubject: {},
+          issuanceDate: expect.any(String),
+          issuer: 'did:key:test',
+          proof: {
+            created: expect.any(String),
+            jwt: 'ye.ye.ye',
+            proofPurpose: 'assertionMethod',
+            type: 'JwtProof2020',
+            verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf'
+          },
+          type: ['VerifiableCredential']
+        }
       }
+      ]
     })
   })
 
@@ -595,20 +598,22 @@ describe('VcIssuer without did', () => {
       c_nonce: 'new-test-nonce',
       c_nonce_expires_in: 300,
       notification_id: '43243',
-      credential: {
-        '@context': ['https://www.w3.org/2018/credentials/v1'],
-        credentialSubject: {},
-        issuanceDate: expect.any(String),
-        issuer: 'test.com',
-        proof: {
-          created: expect.any(String),
-          jwt: 'ye.ye.ye',
-          proofPurpose: 'assertionMethod',
-          type: 'JwtProof2020',
-          verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf'
-        },
-        type: ['VerifiableCredential']
-      }
+      credentials: [{
+        credential: {
+          '@context': ['https://www.w3.org/2018/credentials/v1'],
+          credentialSubject: {},
+          issuanceDate: expect.any(String),
+          issuer: 'test.com',
+          proof: {
+            created: expect.any(String),
+            jwt: 'ye.ye.ye',
+            proofPurpose: 'assertionMethod',
+            type: 'JwtProof2020',
+            verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf'
+          },
+          type: ['VerifiableCredential']
+        }
+      }]
     })
   })
 
@@ -741,11 +746,16 @@ describe.skip('VcIssuer v15 nonce endpoint support', () => {
 
     // Mock endpoint metadata with nonce endpoint
     client.state.endpointMetadata = {
-      nonce_endpoint: 'https://issuer.example.com/nonce',
       credential_endpoint: 'https://issuer.example.com/credential',
       token_endpoint: 'https://issuer.example.com/token',
       issuer: IDENTIPROOF_ISSUER_URL,
-      authorizationServerType: 'OID4VCI'
+      authorizationServerType: 'OID4VCI',
+      credentialIssuerMetadata: {
+        credential_issuer: IDENTIPROOF_ISSUER_URL,
+        credential_endpoint: 'https://issuer.example.com/credential',
+        credential_configurations_supported: {},
+        nonce_endpoint: 'https://issuer.example.com/nonce'
+      }
     }
 
     const nonce = await client.acquireNonce()

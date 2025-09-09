@@ -7,8 +7,6 @@ import {
   AuthorizationDetails,
   CredentialConfigurationSupported,
   CredentialConfigurationSupportedSdJwtVcV1_0_15,
-  CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13,
-  CredentialDefinitionJwtVcJsonV1_0_13,
   CredentialOfferFormatV1_0_11,
   CredentialOfferPayload,
   CredentialsSupportedLegacy,
@@ -43,8 +41,6 @@ export function getTypesFromObject(
   subject:
     | CredentialConfigurationSupported
     | CredentialOfferFormatV1_0_11
-    | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13
-    | CredentialDefinitionJwtVcJsonV1_0_13
     | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15
     | CredentialDefinitionJwtVcJsonV1_0_15
     | JsonLdIssuerCredentialDefinition
@@ -57,8 +53,6 @@ export function getTypesFromObject(
   } else if ('credential_definition' in subject) {
     return getTypesFromObject(
       subject.credential_definition as
-        | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13
-        | CredentialDefinitionJwtVcJsonV1_0_13
         | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15
         | CredentialDefinitionJwtVcJsonV1_0_15
         | JsonLdIssuerCredentialDefinition,
@@ -123,7 +117,7 @@ export function getTypesFromCredentialSupported(
     credentialSupported.format === 'ldp_vc'
   ) {
     types = getTypesFromObject(credentialSupported) ?? []
-  } else if (credentialSupported.format === 'dc+sd-jwt' || credentialSupported.format === 'vc+sd-jwt') { // TODO SSISDK-13
+  } else if (credentialSupported.format === 'dc+sd-jwt'/* || credentialSupported.format === 'vc+sd-jwt'*/) { // TODO VCDM needs vc+sd-jwt back
     types = [credentialSupported.vct]
   } else if (credentialSupported.format === 'mso_mdoc') {
     types = [credentialSupported.doctype]
