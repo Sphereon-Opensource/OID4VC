@@ -7,7 +7,6 @@ import {
   CommonAuthorizationChallengeRequest,
   convertJsonToURI,
   CreateRequestObjectMode,
-  CredentialConfigurationSupportedV1_0_13,
   CredentialConfigurationSupportedV1_0_15,
   CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15,
   CredentialDefinitionJwtVcJsonV1_0_15,
@@ -15,7 +14,6 @@ import {
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
   EndpointMetadata,
-  EndpointMetadataResultV1_0_13,
   EndpointMetadataResultV1_0_15,
   formPost,
   IssuerOpts,
@@ -71,7 +69,7 @@ export async function createSignedAuthRequestWhenNeeded(requestObject: Record<st
     const pop = await ProofOfPossessionBuilder.fromJwt({
       jwt,
       callbacks: opts.signCallbacks,
-      version: OpenId4VCIVersion.VER_1_0_11,
+      version: OpenId4VCIVersion.VER_1_0_15,
       mode: 'JWT'
     }).build()
     requestObject['request'] = pop.jwt
@@ -80,8 +78,8 @@ export async function createSignedAuthRequestWhenNeeded(requestObject: Record<st
 
 function filterSupportedCredentials(
   credentialOffer: CredentialOfferPayloadV1_0_15,
-  credentialsSupported?: Record<string, CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0_13>
-): ((CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0_13) & {
+  credentialsSupported?: Record<string, CredentialConfigurationSupportedV1_0_15>
+): ((CredentialConfigurationSupportedV1_0_15) & {
   configuration_id: string
 })[] {
   if (!credentialOffer.credential_configuration_ids || !credentialsSupported) {
@@ -104,10 +102,10 @@ export const createAuthorizationRequestUrl = async ({
                                                       version
                                                     }: {
   pkce: PKCEOpts
-  endpointMetadata: EndpointMetadataResultV1_0_15 | EndpointMetadataResultV1_0_13
+  endpointMetadata: EndpointMetadataResultV1_0_15
   authorizationRequest: AuthorizationRequestOpts
   credentialOffer?: CredentialOfferRequestWithBaseUrl
-  credentialConfigurationSupported?: Record<string, CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0_13>
+  credentialConfigurationSupported?: Record<string, CredentialConfigurationSupportedV1_0_15>
   clientId?: string
   version?: OpenId4VCIVersion
 }): Promise<string> => {
@@ -279,7 +277,7 @@ const hasCredentialDefinition = (cred: any): cred is {
   Array.isArray(cred.credential_definition.type)
 
 const handleAuthorizationDetails = (
-  endpointMetadata: EndpointMetadataResultV1_0_15 | EndpointMetadataResultV1_0_13,
+  endpointMetadata: EndpointMetadataResultV1_0_15,
   authorizationDetails?: AuthorizationDetails | AuthorizationDetails[]
 ): AuthorizationDetails | AuthorizationDetails[] | undefined => {
   if (authorizationDetails) {
@@ -299,7 +297,7 @@ const handleAuthorizationDetails = (
 }
 
 const handleLocations = (
-  endpointMetadata: EndpointMetadataResultV1_0_15 | EndpointMetadataResultV1_0_13,
+  endpointMetadata: EndpointMetadataResultV1_0_15,
   authorizationDetails: AuthorizationDetails
 ) => {
   if (typeof authorizationDetails === 'string') {

@@ -20,14 +20,14 @@ import {
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
   TxCodeAndPinRequired,
-  UniformCredentialOfferPayload,
+  UniformCredentialOfferPayload
 } from '@sphereon/oid4vci-common'
 import { ObjectUtils } from '@sphereon/ssi-types'
 
-import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13'
 import { createJwtBearerClientAssertion } from './functions'
 import { shouldRetryTokenRequestWithDPoPNonce } from './functions/dpopUtil'
 import { LOG } from './types'
+import { MetadataClientV1_0_15 } from './MetadataClientV1_0_15'
 
 export class AccessTokenClient {
   public async acquireAccessToken(opts: AccessTokenRequestOpts): Promise<OpenIDResponse<AccessTokenResponse, DPoPResponseParams>> {
@@ -89,7 +89,7 @@ export class AccessTokenClient {
       metadata: metadata
         ? metadata
         : issuerOpts?.fetchMetadata
-          ? await MetadataClientV1_0_13.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
+          ? await MetadataClientV1_0_15.retrieveAllMetadata(issuerOpts.issuer, { errorOnNotFound: false })
           : undefined,
     })
 

@@ -1,25 +1,18 @@
 import {
   AuthorizationServerMetadata,
   AuthorizationServerType,
-  CredentialIssuerMetadataV1_0_11,
-  CredentialIssuerMetadataV1_0_13,
+  CredentialIssuerMetadataV1_0_15,
   CredentialOfferPayload,
-  CredentialOfferPayloadV1_0_13,
   CredentialOfferPayloadV1_0_15,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
-  EndpointMetadataResultV1_0_11,
-  EndpointMetadataResultV1_0_13, EndpointMetadataResultV1_0_15,
+  EndpointMetadataResultV1_0_15,
   getIssuerFromCredentialOfferPayload,
-  IssuerMetadataV1_0_08,
   OpenId4VCIVersion,
   OpenIDResponse,
   WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
 import { Loggers } from '@sphereon/ssi-types'
-
-import { MetadataClientV1_0_11 } from './MetadataClientV1_0_11'
-import { MetadataClientV1_0_13 } from './MetadataClientV1_0_13'
 import { retrieveWellknown } from './functions'
 import { MetadataClientV1_0_15 } from './MetadataClientV1_0_15'
 
@@ -33,14 +26,12 @@ export class MetadataClient {
    */
   public static async retrieveAllMetadataFromCredentialOffer(
     credentialOffer: CredentialOfferRequestWithBaseUrl,
-  ): Promise<EndpointMetadataResultV1_0_15 | EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11> {
-    if (determineSpecVersionFromOffer(credentialOffer.credential_offer) >= OpenId4VCIVersion.VER_1_0_15) {
+  ): Promise<EndpointMetadataResultV1_0_15> {
+    const openId4VCIVersion = determineSpecVersionFromOffer(credentialOffer.credential_offer)
+    if (openId4VCIVersion >= OpenId4VCIVersion.VER_1_0_15) {
       return await MetadataClientV1_0_15.retrieveAllMetadataFromCredentialOffer(credentialOffer)
-    } else if (determineSpecVersionFromOffer(credentialOffer.credential_offer) >= OpenId4VCIVersion.VER_1_0_13) {
-      return await MetadataClientV1_0_13.retrieveAllMetadataFromCredentialOffer(credentialOffer)
-    } else {
-      return await MetadataClientV1_0_11.retrieveAllMetadataFromCredentialOffer(credentialOffer)
     }
+    return Promise.reject(Error(`OpenId4VCIVersion ${openId4VCIVersion} is not supported in retrieveAllMetadataFromCredentialOffer`))
   }
 
   /**
@@ -49,15 +40,14 @@ export class MetadataClient {
    */
   public static async retrieveAllMetadataFromCredentialOfferRequest(
     request: CredentialOfferPayload,
-  ): Promise<EndpointMetadataResultV1_0_15 |EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11> {
+  ): Promise<EndpointMetadataResultV1_0_15> {
     const issuer = getIssuerFromCredentialOfferPayload(request)
     if (issuer) {
-      if (determineSpecVersionFromOffer(request) >= OpenId4VCIVersion.VER_1_0_15) {
+      const openId4VCIVersion = determineSpecVersionFromOffer(request)
+      if (openId4VCIVersion >= OpenId4VCIVersion.VER_1_0_15) {
         return MetadataClientV1_0_15.retrieveAllMetadataFromCredentialOfferRequest(request as CredentialOfferPayloadV1_0_15)
-      } else if (determineSpecVersionFromOffer(request) >= OpenId4VCIVersion.VER_1_0_13) {
-        return MetadataClientV1_0_13.retrieveAllMetadataFromCredentialOfferRequest(request as CredentialOfferPayloadV1_0_13)
       } else {
-        return MetadataClientV1_0_11.retrieveAllMetadataFromCredentialOfferRequest(request)
+        return Promise.reject(Error(`OpenId4VCIVersion ${openId4VCIVersion} is not supported in retrieveAllMetadataFromCredentialOfferRequest`))
       }
     }
     throw new Error("can't retrieve metadata from CredentialOfferRequest. No issuer field is present")
@@ -71,7 +61,7 @@ export class MetadataClient {
   public static async retrieveAllMetadata(
     issuer: string,
     opts?: { errorOnNotFound: boolean },
-  ): Promise<EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11> {
+  ): Promise<EndpointMetadataResultV1_0_15> {
     let token_endpoint: string | undefined
     let credential_endpoint: string | undefined
     let deferred_credential_endpoint: string | undefined
@@ -98,7 +88,10 @@ export class MetadataClient {
         authorization_server = credentialIssuerMetadata.authorization_server as string
         authorization_servers = [authorization_server]
       }
+    } else {
+      throw new Error(`Issuer ${issuer} does not expose /.well-known/openid-credential-issuer`)
     }
+
     // No specific OID4VCI endpoint. Either can be an OAuth2 AS or an OIDC IDP. Let's start with OIDC first
     // TODO: for now we're taking just the first one
     let response: OpenIDResponse<AuthorizationServerMetadata> = await retrieveWellknown(
@@ -193,10 +186,7 @@ export class MetadataClient {
     }
 
     if (!credentialIssuerMetadata && authMetadata) {
-      // Apparently everything worked out and the issuer is exposing everything in oAuth2/OIDC well-knowns. Spec is vague about this situation, but we can support it
-      credentialIssuerMetadata = authorization_server
-        ? (authMetadata as CredentialIssuerMetadataV1_0_11)
-        : (authMetadata as CredentialIssuerMetadataV1_0_13)
+      return Promise.reject(Error(`No /.well-known/openid-credential-issuer at ${issuer}.`))
     }
     logger.debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`)
 
@@ -205,15 +195,14 @@ export class MetadataClient {
       token_endpoint,
       credential_endpoint,
       deferred_credential_endpoint,
-      ...(authorization_server ? { authorization_server } : { authorization_servers: authorization_servers }),
+      nonce_endpoint: credentialIssuerMetadata.nonce_endpoint,
+      authorization_servers: authorization_server ? [authorization_server] : (authorization_servers ?? [issuer]),
       authorization_endpoint,
       authorization_challenge_endpoint,
       authorizationServerType,
-      credentialIssuerMetadata: authorization_server
-        ? (credentialIssuerMetadata as IssuerMetadataV1_0_08 & Partial<AuthorizationServerMetadata>)
-        : (credentialIssuerMetadata as CredentialIssuerMetadataV1_0_13),
+      credentialIssuerMetadata: credentialIssuerMetadata as CredentialIssuerMetadataV1_0_15,
       authorizationServerMetadata: authMetadata,
-    } as EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11
+    } as EndpointMetadataResultV1_0_15
   }
 
   /**
@@ -228,9 +217,7 @@ export class MetadataClient {
       errorOnNotFound?: boolean
     },
   ): Promise<
-    | OpenIDResponse<
-        CredentialIssuerMetadataV1_0_11 | CredentialIssuerMetadataV1_0_13 | (IssuerMetadataV1_0_08 & Partial<AuthorizationServerMetadata>)
-      >
+    | OpenIDResponse<CredentialIssuerMetadataV1_0_15>
     | undefined
   > {
     return retrieveWellknown(issuerHost, WellKnownEndpoints.OPENID4VCI_ISSUER, {

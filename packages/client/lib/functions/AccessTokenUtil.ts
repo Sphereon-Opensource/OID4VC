@@ -43,7 +43,7 @@ export const createJwtBearerClientAssertion = async (
     const pop = await ProofOfPossessionBuilder.fromJwt({
       jwt,
       callbacks: signCallbacks,
-      version: opts.version ?? OpenId4VCIVersion.VER_1_0_13,
+      version: opts.version ?? OpenId4VCIVersion.VER_1_0_15,
       mode: 'JWT',
     }).build()
     request.client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
