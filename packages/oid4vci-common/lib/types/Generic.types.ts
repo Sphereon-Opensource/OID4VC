@@ -5,14 +5,6 @@ import { ExperimentalSubjectIssuance } from '../experimental/holder-vci'
 import { ProofOfPossession } from './CredentialIssuance.types'
 import { AuthorizationServerMetadata } from './ServerMetadata'
 import { CredentialOfferSession } from './StateManager.types'
-import { IssuerMetadataV1_0_08 } from './v1_0_08.types'
-import { CredentialRequestV1_0_11, EndpointMetadataResultV1_0_11 } from './v1_0_11.types'
-import {
-  CredentialConfigurationSupportedV1_0_13,
-  CredentialRequestV1_0_13,
-  EndpointMetadataResultV1_0_13,
-  IssuerMetadataV1_0_13,
-} from './v1_0_13.types'
 import {
   CredentialConfigurationSupportedV1_0_15,
   CredentialRequestV1_0_15, EndpointMetadataResultV1_0_15,
@@ -201,7 +193,6 @@ export interface CredentialSupportedMsoMdoc extends CommonCredentialSupported {
 
 export type CredentialConfigurationSupported =
   | CredentialConfigurationSupportedV1_0_15
-  | CredentialConfigurationSupportedV1_0_13
   | (CommonCredentialSupported &
       (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedMsoMdoc))
 
@@ -280,7 +271,7 @@ export interface ErrorResponse {
   state?: string
 }
 
-export type UniformCredentialRequest = CredentialRequestV1_0_11 | CredentialRequestV1_0_13 | CredentialRequestV1_0_15
+export type UniformCredentialRequest = CredentialRequestV1_0_15
 
 export interface CommonCredentialRequest extends ExperimentalSubjectIssuance {
   format: OID4VCICredentialFormat /* | OID4VCICredentialFormat[];*/ // for now it seems only one is supported in the spec
@@ -304,11 +295,6 @@ export interface CredentialRequestSdJwtVc extends CommonCredentialRequest {
   claims?: IssuerCredentialSubject
 }
 
-export interface CredentialRequestSdJwtVcV13 extends CommonCredentialRequest {
-  format: 'vc+sd-jwt'
-  vct: string
-  claims?: IssuerCredentialSubject
-}
 
 export interface CredentialRequestMsoMdoc extends CommonCredentialRequest {
   format: 'mso_mdoc'
@@ -442,9 +428,9 @@ export interface GrantUrnIetf {
 export const PRE_AUTH_CODE_LITERAL = 'pre-authorized_code'
 export const PRE_AUTH_GRANT_LITERAL = 'urn:ietf:params:oauth:grant-type:pre-authorized_code'
 
-export type EndpointMetadataResult = EndpointMetadataResultV1_0_15 | EndpointMetadataResultV1_0_13 | EndpointMetadataResultV1_0_11
+export type EndpointMetadataResult = EndpointMetadataResultV1_0_15
 
-export type IssuerMetadata = IssuerMetadataV1_0_15 | IssuerMetadataV1_0_13 | IssuerMetadataV1_0_08
+export type IssuerMetadata = IssuerMetadataV1_0_15
 
 export type NotificationEventType = 'credential_accepted' | 'credential_failure' | 'credential_deleted'
 

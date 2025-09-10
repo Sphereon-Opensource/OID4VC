@@ -1,5 +1,6 @@
 import {
-  AuthzFlowType, CredentialOfferPayloadV1_0_13,
+  AuthorizationServerType,
+  AuthzFlowType,
   CredentialOfferPayloadV1_0_15,
   CredentialOfferRequestWithBaseUrl,
   PRE_AUTH_GRANT_LITERAL
@@ -22,8 +23,8 @@ const offerPreAuth = {
   ],
   grants: {
     'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-      'pre-authorized_code': 'eyJhbGciOiJSU0Et...FYUaBy',
-      user_pin_required: false,
+      'pre-authorized_code': 'eyJhbGciOiJSU0Et...FYUaBy'
+      // No tx_code means no PIN required in v15
     },
   },
 }
@@ -55,8 +56,6 @@ export const INITIATION_TEST_HTTPS_URI_V1_0_15_AUTH_CODE =
 export const INITIATION_TEST_URI =
   'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F%22%2C%22credential_configuration_ids%22%3A%5B%22OpenBadgeCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE%22%2C%22tx_code%22%3A%7B%22description%22%3A%22Please%20provide%20the%20one-time%20code%20that%20was%20sent%20via%20e-mail%22%2C%22input_mode%22%3A%22numeric%22%2C%22length%22%3A4%7D%7D%7D%7D'
 
-export const INITIATION_TEST_URI_V1_0_08 =
-  'openid-initiate-issuance://?credential_type=OpenBadgeCredential&issuer=https%3A%2F%2Fjff%2Ewalt%2Eid%2Fissuer-api%2Foidc%2F&pre-authorized_code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE&user_pin_required=false'
 
 export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
   baseUrl: 'openid-credential-offer://',
@@ -111,8 +110,7 @@ export const INITIATION_TEST_V1_0_15: CredentialOfferRequestWithBaseUrl = {
     grants: {
       'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
         'pre-authorized_code':
-          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
-        user_pin_required: false
+          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE'
       }
     }
   },
@@ -122,8 +120,7 @@ export const INITIATION_TEST_V1_0_15: CredentialOfferRequestWithBaseUrl = {
     grants: {
       'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
         'pre-authorized_code':
-          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
-        user_pin_required: false
+          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE'
       }
     }
   },
@@ -160,6 +157,7 @@ export const IDENTIPROOF_OID4VCI_METADATA = {
   authorization_server: 'https://auth.research.identiproof.io',
   credential_endpoint: 'https://issuer.research.identiproof.io/credential',
   jwks_uri: 'https://issuer.research.identiproof.io/.well-known/did.json',
+  token_endpoint: 'https://auth.research.identiproof.io/oauth2/token',
   credentials_supported: {
     'Cyber Security Certificate': {
       formats: {
@@ -310,6 +308,7 @@ export const WALT_OID4VCI_METADATA = {
   jwks_uri: 'https://jff.walt.id/issuer-api/oidc',
   grant_types_supported: ['authorization_code', PRE_AUTH_GRANT_LITERAL],
   request_uri_parameter_supported: true,
+  authorizationServerType: 'OID4VCI' as AuthorizationServerType,
   credentials_supported: {
     VerifiableDiploma: {
       display: [{ name: 'VerifiableDiploma' }],

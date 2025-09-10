@@ -5,7 +5,7 @@ import { post } from './HttpUtils'
 export function isDeferredCredentialResponse(credentialResponse: OpenIDResponse<CredentialResponse>) {
   const orig = credentialResponse.successBody
   // Specs mention 202, but some implementations like EBSI return 200
-  return credentialResponse.origResponse.status % 200 <= 2 && !!orig && !orig.credential && (!!orig.acceptance_token || !!orig.transaction_id)
+  return credentialResponse.origResponse.status % 200 <= 2 && !!orig && !orig.credentials && (!!orig.acceptance_token || !!orig.transaction_id)
 }
 function assertNonFatalError(credentialResponse: OpenIDResponse<CredentialResponse>) {
   if (credentialResponse.origResponse.status === 400 && credentialResponse.errorBody?.error) {
@@ -55,12 +55,12 @@ export async function acquireDeferredCredential({
   })
 
   const DEFAULT_SLEEP_IN_MS = 5000
-  while (!credentialResponse.successBody?.credential && deferredCredentialAwait) {
+  while (!credentialResponse.successBody?.credentials && deferredCredentialAwait) {
     assertNonFatalError(credentialResponse)
     const pending = isDeferredCredentialIssuancePending(credentialResponse)
     console.log(`Issuance still pending?: ${pending}`)
     if (!pending) {
-      throw Error(`Issuance isn't pending anymore: ${credentialResponse}`)
+      return Promise.reject(Error(`Issuance isn't pending anymore: ${credentialResponse}`))
     }
 
     await sleep(deferredCredentialIntervalInMS ?? DEFAULT_SLEEP_IN_MS)

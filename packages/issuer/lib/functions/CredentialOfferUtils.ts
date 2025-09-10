@@ -1,14 +1,11 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   AssertedUniformCredentialOffer,
-  CredentialIssuerMetadataOpts,
   CredentialIssuerMetadataOptsV1_0_15,
-  CredentialIssuerMetadataV1_0_11,
   CredentialOfferMode,
-  CredentialOfferPayloadV1_0_11,
   CredentialOfferPayloadV1_0_15,
   CredentialOfferSession,
-  CredentialOfferV1_0_13,
+  CredentialOfferV1_0_15,
   Grant,
   GrantAuthorizationCode,
   GrantUrnIetf,
@@ -121,52 +118,9 @@ export function createCredentialOfferObject(
   return { credential_offer, credential_offer_uri: opts?.credentialOfferUri }
 }
 
-export function createCredentialOfferObjectv1_0_11(
-  issuerMetadata?: CredentialIssuerMetadataOpts,
-  // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
-  opts?: {
-    credentialOffer?: CredentialOfferPayloadV1_0_11
-    credentialOfferUri?: string
-    scheme?: string
-    baseUri?: string
-    grants?: CredentialOfferGrantInput
-  },
-): AssertedUniformCredentialOffer {
-  if (!issuerMetadata && !opts?.credentialOffer && !opts?.credentialOfferUri) {
-    throw new Error('You have to provide issuerMetadata or credentialOffer object for creating a deeplink')
-  }
-  // v13 to v11 grant
-  const grants = createCredentialOfferGrants(opts?.grants)
-  if (grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code) {
-    const { tx_code, ...rest } = grants[PRE_AUTH_GRANT_LITERAL]
-    grants[PRE_AUTH_GRANT_LITERAL] = {
-      user_pin_required: true,
-      ...rest,
-    }
-  }
-
-  let credential_offer: CredentialOfferPayloadV1_0_11
-  if (opts?.credentialOffer) {
-    credential_offer = {
-      ...opts.credentialOffer,
-      credentials:
-        opts.credentialOffer?.credentials ?? issuerMetadata?.credentials_supported.map((s) => s.id).filter((i): i is string => i !== undefined),
-    }
-  } else {
-    if (!issuerMetadata) {
-      throw new Error('Issuer metadata is required when no credential offer is provided')
-    }
-    credential_offer = {
-      credential_issuer: issuerMetadata.credential_issuer,
-      credentials: issuerMetadata?.credentials_supported.map((s) => s.id).filter((i): i is string => i !== undefined),
-    }
-  }
-
-  return { credential_offer, credential_offer_uri: opts?.credentialOfferUri }
-}
 
 export function createCredentialOfferURIFromObject(
-  credentialOffer: CredentialOfferV1_0_13 | UniformCredentialOffer,
+  credentialOffer: CredentialOfferV1_0_15 | UniformCredentialOffer,
   offerMode: CredentialOfferMode,
   opts?: { scheme?: string; baseUri?: string },
 ) {
@@ -200,22 +154,6 @@ export function createCredentialOfferURI(
   },
 ): string {
   const credentialOffer = createCredentialOfferObject(issuerMetadata, opts)
-  return createCredentialOfferURIFromObject(credentialOffer, offerMode, opts)
-}
-
-export function createCredentialOfferURIv1_0_11(
-  offerMode: CredentialOfferMode,
-  issuerMetadata?: CredentialIssuerMetadataV1_0_11,
-  // todo: probably it's wise to create another builder for CredentialOfferPayload that will generate different kinds of CredentialOfferPayload
-  opts?: {
-    credentialOffer?: CredentialOfferPayloadV1_0_11
-    credentialOfferUri?: string
-    scheme?: string
-    baseUri?: string
-    grants?: CredentialOfferGrantInput
-  },
-): string {
-  const credentialOffer = createCredentialOfferObjectv1_0_11(issuerMetadata, opts)
   return createCredentialOfferURIFromObject(credentialOffer, offerMode, opts)
 }
 

@@ -180,8 +180,11 @@ describe('sd-jwt vc', () => {
         access_token: 'ey.val.ue',
         c_nonce: 'new-c-nonce',
         c_nonce_expires_in: 300,
-        credential: 'sd-jwt',
-        // format: 'dc+sd-jwt',
+        credentials: [
+          {
+            credential: 'sd-jwt'
+          }
+        ]
       })
     },
     UNIT_TEST_TIMEOUT,
@@ -285,8 +288,11 @@ describe('sd-jwt vc', () => {
         access_token: 'ey.val.ue',
         c_nonce: 'new-c-nonce',
         c_nonce_expires_in: 300,
-        credential: 'sd-jwt',
-        // format: 'dc+sd-jwt',
+        credentials: [
+          {
+            credential: 'sd-jwt'
+          }
+        ]
       })
     },
     UNIT_TEST_TIMEOUT,

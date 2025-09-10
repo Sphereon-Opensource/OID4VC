@@ -535,7 +535,7 @@ export class VcIssuer {
       }
 
       const response: CredentialResponse = {
-        credential: verifiableCredential,
+        credentials: [{ credential: verifiableCredential }],
         // format: credentialRequest.format,
         c_nonce: newcNonce,
         c_nonce_expires_in: this._cNonceExpiresIn,
