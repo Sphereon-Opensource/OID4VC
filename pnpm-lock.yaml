@@ -500,14 +500,14 @@ importers:
         specifier: ^6.0.0
         version: 6.0.1(encoding@0.1.13)(expo@48.0.21(@babel/core@7.27.1)(encoding@0.1.13))(react-native@0.71.19(@babel/core@7.27.1)(@babel/preset-env@7.27.2(@babel/core@7.27.1))(encoding@0.1.13)(react@18.3.1))(web-streams-polyfill@3.3.3)
       '@sd-jwt/crypto-nodejs':
-        specifier: ^0.9.2
-        version: 0.9.2
+        specifier: ^0.15.0
+        version: 0.15.0
       '@sd-jwt/sd-jwt-vc':
-        specifier: ^0.9.2
-        version: 0.9.2
+        specifier: ^0.15.0
+        version: 0.15.1
       '@sd-jwt/types':
-        specifier: ^0.9.2
-        version: 0.9.2
+        specifier: ^0.15.0
+        version: 0.15.0
       '@sphereon/did-uni-client':
         specifier: ^0.6.2
         version: 0.6.3(encoding@0.1.13)
@@ -2634,12 +2634,16 @@ packages:
   '@scure/base@1.2.5':
     resolution: {integrity: sha512-9rE6EOVeIQzt5TSu4v+K523F8u6DhBsoZWPGKlnCshhlDhy0kJzUX4V+tr2dWmzF1GdekvThABoEQBGBQI7xZw==}
 
-  '@sd-jwt/core@0.9.2':
-    resolution: {integrity: sha512-AbvID/VIogRtPtCWGmfUlCZczHaBSRFmTwOAiUeuPRjDJTGUQu3gMRKwsfSGRHlfPo0pSaRQ7lqN3N+a5i+SDA==}
+  '@sd-jwt/core@0.15.0':
+    resolution: {integrity: sha512-H+I8OcZj8/f6GZxNSblJqJXi6Mo/W5sUcVNiW9K6kc0rEGt+na111zS1vpjbG6QEJT/YC9egIVUHXNJlNIlWxw==}
     engines: {node: '>=18'}
 
-  '@sd-jwt/crypto-nodejs@0.9.2':
-    resolution: {integrity: sha512-OL5drLhrsDok60XfLoovAK+DT/6mA1myZe1tkA8JflV8tcx4OZTLi/UMVcW/hc+7nBugYICutVSoIejTYsgbEw==}
+  '@sd-jwt/crypto-nodejs@0.15.0':
+    resolution: {integrity: sha512-qWoXeJL/knLUDYJ5s3elOwT5iakGz3gGpjdM3F9Xghq0lx6MdOUEBdLoJuGzhkyxCVg2eBNewLqsaeg7h2Ik/Q==}
+    engines: {node: '>=18'}
+
+  '@sd-jwt/decode@0.15.0':
+    resolution: {integrity: sha512-c9PX4/Cnl1G0pSUXU236lkDx1AzkbgGKFnevBaVIPX8WlJl0nII345uDW/KWCV4rs5Ci8j4ZviWVOJm8TCt2fg==}
     engines: {node: '>=18'}
 
   '@sd-jwt/decode@0.7.2':
@@ -2650,20 +2654,24 @@ packages:
     resolution: {integrity: sha512-jHY7hqk7EMkp6E2cB13QmXvRZN7njvAveVh+zKKy0kxpAM7DmcR4TqcDA4mc5y4lP8zWFUgbk7oGLCx2wiBq+w==}
     engines: {node: '>=18'}
 
-  '@sd-jwt/jwt-status-list@0.9.2':
-    resolution: {integrity: sha512-59bPkgSnwvibJgUNVKmSE3SFMQwvDnh3Xr21aUi0bgII7yoHTQ+vqnryVOF8qcjpyICyi/clIlkTw3VWSyAV+g==}
+  '@sd-jwt/jwt-status-list@0.15.0':
+    resolution: {integrity: sha512-+wy0+Z5tgO6hjTSjrDV9o/fjxIBqWajsTl3cU//u2mZpPFWljLCvZgC0743iwphkkRf9hSQhRsPIgH5mIWtRVQ==}
+    engines: {node: '>=18'}
+
+  '@sd-jwt/present@0.15.0':
+    resolution: {integrity: sha512-Wf/KUKDe06QjnRBzaN6fMAtYPVynQZ+hJOSnpDiNU3E2k3X1KB/rPy7J4uT08ch3ZwJN+08FR7aFsrKvWjjsmg==}
     engines: {node: '>=18'}
 
   '@sd-jwt/present@0.7.2':
     resolution: {integrity: sha512-mQV85u2+mLLy2VZ9Wx2zpaB6yTDnbhCfWkP7eeCrzJQHBKAAHko8GrylEFmLKewFIcajS/r4lT/zHOsCkp5pZw==}
     engines: {node: '>=18'}
 
-  '@sd-jwt/present@0.9.2':
-    resolution: {integrity: sha512-ozBDYfQxUCwu0N+gbyk6zJDraMslFFuNLW+GxITybdDfVJek65tBtbROB8ZBvkAlEl0PDRKebq+xKOCRmplmWA==}
+  '@sd-jwt/sd-jwt-vc@0.15.1':
+    resolution: {integrity: sha512-xgs611LuHwNU71sw1dcWluFB0C+20uqvsuQdpcPnLckKu0yyxmm9Sb2s01Ec0uBvC3HGdQAgmP/I/B0mHXYPUA==}
     engines: {node: '>=18'}
 
-  '@sd-jwt/sd-jwt-vc@0.9.2':
-    resolution: {integrity: sha512-UOx5ULWyztJv2FbIjVJ0XCDixXwpgFxRCFykhLeRJI0T9+48hi2ucvOdqZqD2X7LkXkjCZNR0kQlJs+/n8gLEg==}
+  '@sd-jwt/types@0.15.0':
+    resolution: {integrity: sha512-3b/jz4xkQ9HAOVtnR5s+R9qzqPUig8EvTK4kDOL1rSdTHSQ8E50+Gji1k2m/0hF/DP4EskWc5iQJKrk2qRohaQ==}
     engines: {node: '>=18'}
 
   '@sd-jwt/types@0.7.2':
@@ -2672,6 +2680,10 @@ packages:
 
   '@sd-jwt/types@0.9.2':
     resolution: {integrity: sha512-eV/MY80ekeTrqaohzPpkrgwPki6Igx69D6RniduV1Ehv6o/zaJQ2F0hY/RqBAkJhQtBQoOzouwKYHme40k1Dlw==}
+    engines: {node: '>=18'}
+
+  '@sd-jwt/utils@0.15.0':
+    resolution: {integrity: sha512-eHenn93LQD1DirBwz8bgE5vEH+sJaKKP+1y9kk2OGuPh1vLiw1hT0O7zlvRVHf9Z9SFYe09ZVucH0jDkjo5OAw==}
     engines: {node: '>=18'}
 
   '@sd-jwt/utils@0.7.2':
@@ -2737,6 +2749,7 @@ packages:
 
   '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.26':
     resolution: {integrity: sha512-QXJ6R8ENiZV2rPMbn06cw5JKwqUYN1kzVRbYfONqE1PEXx1noQ4md7uxr2zSczi0ubKkNcbyYDNtIMTZIhGzmQ==}
+    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.2':
     resolution: {integrity: sha512-foFxfLkRwcn/MOp/eht46Q7wsvpQGlO7aowowIIb5Tz9u97kYZ2kz6K2h2ODxWuv5CRA7Q0MY8XUBGE2lfOhOQ==}
@@ -11972,14 +11985,19 @@ snapshots:
 
   '@scure/base@1.2.5': {}
 
-  '@sd-jwt/core@0.9.2':
+  '@sd-jwt/core@0.15.0':
     dependencies:
-      '@sd-jwt/decode': 0.9.2
-      '@sd-jwt/present': 0.9.2
-      '@sd-jwt/types': 0.9.2
-      '@sd-jwt/utils': 0.9.2
+      '@sd-jwt/decode': 0.15.0
+      '@sd-jwt/present': 0.15.0
+      '@sd-jwt/types': 0.15.0
+      '@sd-jwt/utils': 0.15.0
 
-  '@sd-jwt/crypto-nodejs@0.9.2': {}
+  '@sd-jwt/crypto-nodejs@0.15.0': {}
+
+  '@sd-jwt/decode@0.15.0':
+    dependencies:
+      '@sd-jwt/types': 0.15.0
+      '@sd-jwt/utils': 0.15.0
 
   '@sd-jwt/decode@0.7.2':
     dependencies:
@@ -11991,11 +12009,17 @@ snapshots:
       '@sd-jwt/types': 0.9.2
       '@sd-jwt/utils': 0.9.2
 
-  '@sd-jwt/jwt-status-list@0.9.2':
+  '@sd-jwt/jwt-status-list@0.15.0':
     dependencies:
-      '@sd-jwt/types': 0.9.2
+      '@sd-jwt/types': 0.15.0
       base64url: 3.0.1
       pako: 2.1.0
+
+  '@sd-jwt/present@0.15.0':
+    dependencies:
+      '@sd-jwt/decode': 0.15.0
+      '@sd-jwt/types': 0.15.0
+      '@sd-jwt/utils': 0.15.0
 
   '@sd-jwt/present@0.7.2':
     dependencies:
@@ -12003,23 +12027,24 @@ snapshots:
       '@sd-jwt/types': 0.7.2
       '@sd-jwt/utils': 0.7.2
 
-  '@sd-jwt/present@0.9.2':
+  '@sd-jwt/sd-jwt-vc@0.15.1':
     dependencies:
-      '@sd-jwt/decode': 0.9.2
-      '@sd-jwt/types': 0.9.2
-      '@sd-jwt/utils': 0.9.2
-
-  '@sd-jwt/sd-jwt-vc@0.9.2':
-    dependencies:
-      '@sd-jwt/core': 0.9.2
-      '@sd-jwt/jwt-status-list': 0.9.2
-      '@sd-jwt/utils': 0.9.2
+      '@sd-jwt/core': 0.15.0
+      '@sd-jwt/jwt-status-list': 0.15.0
+      '@sd-jwt/utils': 0.15.0
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
+
+  '@sd-jwt/types@0.15.0': {}
 
   '@sd-jwt/types@0.7.2': {}
 
   '@sd-jwt/types@0.9.2': {}
+
+  '@sd-jwt/utils@0.15.0':
+    dependencies:
+      '@sd-jwt/types': 0.15.0
+      js-base64: 3.7.7
 
   '@sd-jwt/utils@0.7.2':
     dependencies:

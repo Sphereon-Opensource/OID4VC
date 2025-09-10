@@ -444,6 +444,7 @@ export class VcIssuer {
           ...(cNonceState ? { ...cNonceState } : { ...authSession }),
           credentialRequest: opts.credentialRequest,
           credentialSupplierConfig: this._issuerMetadata.credential_supplier_config,
+          format,
           credentialOffer /*todo: clientId: */,
           ...(credentialDataSupplierInput && { credentialDataSupplierInput })
         } as CredentialDataSupplierArgs)

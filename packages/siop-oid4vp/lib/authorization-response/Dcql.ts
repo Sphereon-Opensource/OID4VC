@@ -26,7 +26,7 @@ import {AuthorizationRequestPayload, SupportedVersion} from '../types'
 
 export class Dcql {
   static findValidDcqlQuery = async (authorizationRequestPayload: AuthorizationRequestPayload, version?: SupportedVersion): Promise<DcqlQuery | undefined> => {
-    const dcqlQuery: DcqlQuery.Input[] = extractDataFromPath(authorizationRequestPayload ?? {}, '$..dcql_query').map((d) => d.value)
+    const dcqlQuery: DcqlQuery.Input[] = extractDataFromPath(authorizationRequestPayload ?? {}, '$..dcql_query').map((d) => d.value) //: string[]
 
     if (dcqlQuery.length === 0) {
       return undefined
