@@ -752,7 +752,7 @@ export class OpenID4VCIClient {
    */
   public isEBSI() {
 
-    // FIXME CredentialOfferPayloadV1_0_15 no longer has credentials
+    // FIXME SSISDK-40 CredentialOfferPayloadV1_0_15 no longer has credentials
     // if (
     //   this.credentialOffer &&
     //   (this.credentialOffer?.credential_offer as CredentialOfferPayloadV1_0_15)?.credentials?.find(

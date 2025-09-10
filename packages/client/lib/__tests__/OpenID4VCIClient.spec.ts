@@ -234,7 +234,7 @@ describe('OpenID4VCIClient should', () => {
   })
 })
 describe('should successfully handle isEbsi function', () => {
-  it.skip('should return true when calling isEbsi function', async () => { // Draft v15 broke our EBSI implementation
+  it.skip('should return true when calling isEbsi function', async () => { // FIXME SSISDK-40 Draft v15 broke our EBSI implementation
     nock(MOCK_URL).get(/.*/).reply(200, {})
     nock(MOCK_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {})
     nock(MOCK_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {})
