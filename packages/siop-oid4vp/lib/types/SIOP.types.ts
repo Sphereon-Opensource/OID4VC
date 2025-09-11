@@ -8,10 +8,11 @@ import {
   MdocOid4vpMdocVpToken,
   W3CVerifiableCredential,
   W3CVerifiablePresentation,
-  WrappedVerifiablePresentation,
+  WrappedVerifiablePresentation
 } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
-import { z } from 'zod'import {
+import { z } from 'zod'
+import {
   AuthorizationRequest,
   CreateAuthorizationRequestOpts,
   PropertyTargets,
@@ -21,7 +22,7 @@ import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   PresentationVerificationCallback,
-  VerifyAuthorizationResponseOpts,
+  VerifyAuthorizationResponseOpts
 } from '../authorization-response'
 import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'
@@ -53,8 +54,6 @@ export interface AuthorizationRequestCommonPayload extends RequestCommonPayload,
   request?: string // OPTIONAL. Request Object value, as specified in Section 6.1 of [OpenID.Core]. The Request Object MAY be encrypted to the Self-Issued OP by the RP. In this case, the sub (subject) of a previously issued ID Token for this RP MUST be sent as the kid (Key ID) of the JWE.
   request_uri?: string // OPTIONAL. URL where Request Object value can be retrieved from, as specified in Section 6.2 of [OpenID.Core].
 }
-
-export type RequestUriMethod = 'get' | 'post'
 
 export enum ClientIdentifierPrefix {
   REDIRECT_URI = 'redirect_uri',

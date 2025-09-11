@@ -20,8 +20,6 @@ import {
   SupportedVersion,
   VerifiablePresentationWithFormat,
   Verification,
-  CreateJwtCallback,
-  VerifyJwtCallback,
   ResponseIss
 } from '../types'
 
