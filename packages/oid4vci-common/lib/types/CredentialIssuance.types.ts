@@ -3,12 +3,11 @@ import { BaseJWK } from '@sphereon/oid4vc-common'
 import { ExperimentalSubjectIssuance } from '../experimental/holder-vci'
 
 import { AuthzFlowType } from './Authorization.types'
-import { OID4VCICredentialFormat, TxCode, UniformCredentialRequest } from './Generic.types'
+import { OID4VCICredentialFormat, TxCode } from './Generic.types'
 import { OpenId4VCIVersion } from './OpenID4VCIVersions.types'
 import {
   CredentialOfferPayloadV1_0_15,
   CredentialOfferV1_0_15,
-  CredentialRequestV1_0_15,
   CredentialResponseCredentialV1_0_15
 } from './v1_0_15.types'
 
@@ -35,8 +34,6 @@ export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOffe
 export type CredentialOffer = CredentialOfferV1_0_15
 
 export type CredentialOfferPayloadLatest = CredentialOfferPayloadV1_0_15
-
-export type CredentialRequest = UniformCredentialRequest | CredentialRequestV1_0_15
 
 export type CredentialOfferPayload = (
   CredentialOfferPayloadV1_0_15
