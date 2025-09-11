@@ -264,7 +264,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
       correlation_id: state.correlationId,
       query_id: state.queryId,
       last_updated: state.lastUpdated,
-      ...((state?.status === AuthorizationResponseStateStatus.VERIFIED && state.verifiedData !== undefined) && { verifiedData: state.verifiedData }),
+      ...((state?.status === AuthorizationResponseStateStatus.VERIFIED && state.verifiedData !== undefined) && { verified_data: state.verifiedData }),
       ...(state.error && { message: state.error.message })
     }
 
