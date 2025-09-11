@@ -212,7 +212,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         this.authorizationResponses[event.correlationId] = state
       }
 
-      if (event.callback && event.callback.status.includes(status)) {
+      if (event.callback && (event.callback.status === undefined || event.callback.status.includes(status))) {
         void this.executeCallback(event.callback.url, state)
       }
     } catch (error: unknown) {
