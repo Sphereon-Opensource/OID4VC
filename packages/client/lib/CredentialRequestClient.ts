@@ -14,7 +14,7 @@ import {
   post,
   ProofOfPossession,
   supportedOID4VCICredentialFormat,
-  UniformCredentialRequest,
+  CredentialRequest,
   URL_NOT_VALID
 } from '@sphereon/oid4vci-common'
 import { CredentialFormat, Loggers } from '@sphereon/ssi-types'
@@ -194,7 +194,7 @@ export class CredentialRequestClient {
   }
 
   public async acquireCredentialsUsingRequestWithoutProof(
-    uniformRequest: UniformCredentialRequest,
+    uniformRequest: CredentialRequest,
     format: OID4VCICredentialFormat,
     createDPoPOpts?: CreateDPoPClientOpts
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
@@ -202,7 +202,7 @@ export class CredentialRequestClient {
   }
 
   public async acquireCredentialsUsingRequest(
-    uniformRequest: UniformCredentialRequest,
+    uniformRequest: CredentialRequest,
     format: OID4VCICredentialFormat,
     createDPoPOpts?: CreateDPoPClientOpts
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
@@ -210,7 +210,7 @@ export class CredentialRequestClient {
   }
 
   private async acquireCredentialsUsingRequestImpl(
-    uniformRequest: UniformCredentialRequest & { proof?: ProofOfPossession },
+    uniformRequest: CredentialRequest & { proof?: ProofOfPossession },
     format: OID4VCICredentialFormat,
     createDPoPOpts?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {

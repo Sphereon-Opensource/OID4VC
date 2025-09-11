@@ -7,7 +7,7 @@ import {
   JwtVerifyResult,
   OID4VCICredentialFormat,
   StatusListOpts,
-  UniformCredentialRequest
+  CredentialRequest
 } from '@sphereon/oid4vci-common'
 import {
   CompactSdJwtVc,
@@ -30,7 +30,7 @@ export type CredentialSignerCallback = (opts: {
 }) => Promise<W3CVerifiableCredential | CompactSdJwtVc>
 
 export interface CredentialDataSupplierArgs extends CNonceState {
-  credentialRequest: UniformCredentialRequest
+  credentialRequest: CredentialRequest
   credentialOffer: AssertedUniformCredentialOffer
   format: OID4VCICredentialFormat
   clientId?: string

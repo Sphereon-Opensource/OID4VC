@@ -7,7 +7,7 @@ import {
   Jwt,
   OpenId4VCIVersion,
   ProofOfPossession,
-  UniformCredentialRequest,
+  CredentialRequest,
   URL_NOT_VALID,
   WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
@@ -248,7 +248,7 @@ describe('Credential Request Client ', () => {
       .withKid(kid)
       .withClientId('sphereon:wallet')
       .build()
-    const uniformRequest = { credential_configuration_id: 'random', proof } satisfies UniformCredentialRequest
+    const uniformRequest = { credential_configuration_id: 'random', proof } satisfies CredentialRequest
     await expect(credReqClient.acquireCredentialsUsingRequest(uniformRequest, 'jwt_vc_json')).rejects.toThrow(
       Error(URL_NOT_VALID),
     )

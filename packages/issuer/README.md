@@ -20,7 +20,7 @@ The CredentialOfferState is used to track of the creation date of the credential
 
 ```typescript
 export interface CredentialOfferState {
-  credentialOffer: CredentialOfferPayloadV1_0_11
+  credentialOffer: CredentialOfferPayloadV1_0_15
   createdOn: number
 }
 ```

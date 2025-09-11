@@ -7,7 +7,8 @@ import { AuthorizationServerMetadata } from './ServerMetadata'
 import { CredentialOfferSession } from './StateManager.types'
 import {
   CredentialConfigurationSupportedV1_0_15,
-  CredentialRequestV1_0_15, EndpointMetadataResultV1_0_15,
+  CredentialRequestV1_0_15,
+  EndpointMetadataResultV1_0_15,
   IssuerMetadataV1_0_15
 } from './v1_0_15.types'
 
@@ -271,7 +272,7 @@ export interface ErrorResponse {
   state?: string
 }
 
-export type UniformCredentialRequest = CredentialRequestV1_0_15
+export type CredentialRequest = CredentialRequestV1_0_15
 
 export interface CommonCredentialRequest extends ExperimentalSubjectIssuance {
   format: OID4VCICredentialFormat /* | OID4VCICredentialFormat[];*/ // for now it seems only one is supported in the spec
