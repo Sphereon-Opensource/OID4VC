@@ -1,6 +1,7 @@
 import {
   CredentialConfigurationSupportedMsoMdocV1_0_15,
-  CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15, CredentialDefinitionJwtVcJsonV1_0_15,
+  CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15,
+  CredentialDefinitionJwtVcJsonV1_0_15,
   VCI_LOG_COMMON
 } from '../index'
 import {
@@ -8,13 +9,10 @@ import {
   CredentialConfigurationSupported,
   CredentialConfigurationSupportedSdJwtVcV1_0_15,
   CredentialOfferFormatV1_0_11,
-  CredentialOfferPayload,
   CredentialsSupportedLegacy,
   CredentialSupportedMsoMdoc,
   CredentialSupportedSdJwtVc,
-  JsonLdIssuerCredentialDefinition,
-  UniformCredentialOfferPayload,
-  UniformCredentialOfferRequest
+  JsonLdIssuerCredentialDefinition
 } from '../types'
 
 export function isW3cCredentialSupported(
@@ -67,28 +65,6 @@ export function getTypesFromObject(
     return [subject.doctype as string]
   }
   VCI_LOG_COMMON.warning('Could not deduce credential types. Probably a failure down the line will happen!')
-  return undefined
-}
-
-export function getTypesFromCredentialOffer(
-  offer: UniformCredentialOfferRequest | CredentialOfferPayload | UniformCredentialOfferPayload,
-  opts?: { configIdAsType?: boolean },
-): Array<Array<string>> | undefined {
-  const { configIdAsType = false } = { ...opts }
-  if ('credentials' in offer && Array.isArray(offer.credentials)) {
-    return offer.credentials.map((cred) => getTypesFromObject(cred)).filter((cred): cred is string[] => cred !== undefined)
-  } else if (configIdAsType && 'credential_configuration_ids' in offer && Array.isArray(offer.credential_configuration_ids)) {
-    return offer.credential_configuration_ids.map((id) => [id])
-  } else if ('credential_offer' in offer && offer.credential_offer) {
-    return getTypesFromCredentialOffer(offer.credential_offer, opts)
-  } else if ('credential_type' in offer && offer.credential_type) {
-    if (typeof offer.credential_type === 'string') {
-      return [[offer.credential_type]]
-    } else if (Array.isArray(offer.credential_type)) {
-      return [offer.credential_type]
-    }
-  }
-  VCI_LOG_COMMON.warning('Could not deduce credential types from offer. Probably a failure down the line will happen!')
   return undefined
 }
 
