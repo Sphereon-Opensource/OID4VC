@@ -50,6 +50,7 @@ export const verifyPresentations = async (
   verifyOpts: VerifyAuthorizationResponseOpts,
 ): Promise<{ dcql: VerifiedOpenID4VPSubmission }> => {
   const dcqlQuery = DcqlQuery.parse(verifyOpts.dcqlQuery ?? JSON.parse(authorizationResponse?.authorizationRequest.payload.dcql_query))
+  DcqlQuery.validate(dcqlQuery)
   const dcqlPresentation = extractDcqlPresentationFromDcqlVpToken(authorizationResponse.payload.vp_token as string, { hasher: verifyOpts.hasher })
 
   const wrappedPresentations = Object.values(dcqlPresentation)
@@ -59,7 +60,7 @@ export const verifyPresentations = async (
       ),
     )
 
-    await Dcql.assertValidDcqlPresentationResult(authorizationResponse.payload.vp_token as string, dcqlQuery, { hasher: verifyOpts.hasher })
+    const dcqlPresentationResult = await Dcql.assertValidDcqlPresentationResult(authorizationResponse.payload.vp_token as string, dcqlQuery, { hasher: verifyOpts.hasher })
 
     if (verifiedPresentations.some((verified) => !verified)) {
       const message = verifiedPresentations
@@ -95,7 +96,7 @@ export const verifyPresentations = async (
     }
   }
 
-  return { dcql: { nonce, presentation: dcqlPresentation, dcqlQuery } }
+  return { dcql: { nonce, presentation: dcqlPresentation, dcqlQuery , dcqlPresentationResult} }
 }
 
 export const extractDcqlPresentationFromDcqlVpToken = (

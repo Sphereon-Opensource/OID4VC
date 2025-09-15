@@ -10,7 +10,7 @@ import {
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
-import { DcqlQuery } from 'dcql'
+import { DcqlPresentationResult, DcqlQuery } from 'dcql'
 import {
   AuthorizationRequest,
   CreateAuthorizationRequestOpts,
@@ -522,6 +522,7 @@ export interface VerifiedIDToken {
 export interface VerifiedOpenID4VPSubmission {
   dcqlQuery: DcqlQuery
   presentation: { [credentialQueryId: string]: WrappedVerifiablePresentation }
+  dcqlPresentationResult?: DcqlPresentationResult
   nonce?: string
 }
 
