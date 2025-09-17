@@ -186,6 +186,9 @@ export const RPRegistrationMetadataPayloadSchemaObj = {
         "vc+sd-jwt": {
           "$ref": "#/definitions/SdJwtObject"
         },
+        "dc+sd-jwt": {
+          "$ref": "#/definitions/SdJwtObject"
+        },
         "mso_mdoc": {
           "$ref": "#/definitions/MsoMdocObject"
         }
