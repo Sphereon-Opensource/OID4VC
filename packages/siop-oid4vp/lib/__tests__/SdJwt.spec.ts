@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 import { defaultHasher, SigningAlgo } from '@sphereon/oid4vc-common'
-import { decodeSdJwtVc } from '@sphereon/ssi-types'
+import { CredentialMapper, decodeSdJwtVc } from '@sphereon/ssi-types'
 import { DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlSdJwtVcCredential } from 'dcql'
 import { describe, expect, it } from 'vitest'
 import {
@@ -83,7 +83,7 @@ const dcqlCredential = {
     credential_format: 'dc+sd-jwt',
     vct: SD_JWT_VC.decodedPayload.vct,
     claims: SD_JWT_VC.decodedPayload,
-    cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', decodeSdJwtVc(SD_JWT_VC.compactJwtVc, defaultHasher))
+    cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', CredentialMapper.toWrappedVerifiableCredential(decodeSdJwtVc(SD_JWT_VC.compactJwtVc, defaultHasher)))
 } satisfies DcqlSdJwtVcCredential
 
 describe.skip('RP and OP interaction should', () => {
@@ -136,8 +136,8 @@ describe.skip('RP and OP interaction should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100322',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
       .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
@@ -162,8 +162,8 @@ describe.skip('RP and OP interaction should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100323',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
       .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
@@ -252,8 +252,8 @@ describe.skip('RP and OP interaction should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100322',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
       .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
@@ -278,8 +278,8 @@ describe.skip('RP and OP interaction should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100323',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
       .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
@@ -383,8 +383,8 @@ describe.skip('RP and OP interaction should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100322',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
       .build()
 
@@ -408,8 +408,8 @@ describe.skip('RP and OP interaction should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100323',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
       .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()

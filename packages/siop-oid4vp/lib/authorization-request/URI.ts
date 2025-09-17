@@ -177,24 +177,12 @@ export class URI implements AuthorizationRequestURI {
     if (!type) {
       throw new Error(SIOPErrors.REQUEST_OBJECT_TYPE_NOT_SET)
     }
-    const authorizationRequest = await AuthorizationRequest.fromUriOrJwt(requestObjectJwt)
 
     let scheme
     if (opts.uriScheme) {
       scheme = opts.uriScheme.endsWith('://') ? opts.uriScheme : `${opts.uriScheme}://`
-    } else if (opts.version) {
-      if (opts.version === SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1) {
-        scheme = 'openid-vc://'
-      } else {
-        scheme = 'openid4vp://'
-      }
     } else {
-      try {
-        scheme =
-          (await authorizationRequest.getSupportedVersion()) === SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1 ? 'openid-vc://' : 'openid4vp://'
-      } catch (error: unknown) {
-        scheme = 'openid4vp://'
-      }
+      scheme = 'openid4vp://'
     }
 
     if (type === PassBy.REFERENCE) {

@@ -1,5 +1,5 @@
 import { JwtHeader, JwtIssuer, parseJWT } from '@sphereon/oid4vc-common'
-import { ClaimPayloadCommonOpts, ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts } from '../authorization-request'
+import { ClaimPayloadCommonOpts, ClaimPayloadOpts, CreateAuthorizationRequestOpts } from '../authorization-request'
 import { assertValidAuthorizationRequestOpts } from '../authorization-request/Opts'
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
 import { assertValidRequestObjectOpts } from './Opts'
@@ -16,10 +16,10 @@ import { RequestObjectOpts } from './types'
 export class RequestObject {
   private payload: RequestObjectPayload
   private jwt?: RequestObjectJwt
-  private readonly opts: RequestObjectOpts<ClaimPayloadCommonOpts | ClaimPayloadOptsVID1>
+  private readonly opts: RequestObjectOpts<ClaimPayloadCommonOpts | ClaimPayloadOpts>
 
   private constructor(
-    opts?: CreateAuthorizationRequestOpts | RequestObjectOpts<ClaimPayloadCommonOpts | ClaimPayloadOptsVID1>,
+    opts?: CreateAuthorizationRequestOpts | RequestObjectOpts<ClaimPayloadCommonOpts | ClaimPayloadOpts>,
     payload?: RequestObjectPayload,
     jwt?: string,
   ) {
@@ -141,7 +141,7 @@ export class RequestObject {
     assertValidRequestObjectPayload(this.getPayload())
   }
 
-  public get options(): RequestObjectOpts<ClaimPayloadCommonOpts | ClaimPayloadOptsVID1> | undefined {
+  public get options(): RequestObjectOpts<ClaimPayloadCommonOpts | ClaimPayloadOpts> | undefined {
     return this.opts
   }
 
@@ -155,8 +155,8 @@ export class RequestObject {
   }
 
   private static mergeOAuth2AndOpenIdProperties(
-    opts: CreateAuthorizationRequestOpts | RequestObjectOpts<ClaimPayloadCommonOpts | ClaimPayloadOptsVID1>,
-  ): RequestObjectOpts<ClaimPayloadCommonOpts | ClaimPayloadOptsVID1> {
+    opts: CreateAuthorizationRequestOpts | RequestObjectOpts<ClaimPayloadCommonOpts | ClaimPayloadOpts>,
+  ): RequestObjectOpts<ClaimPayloadCommonOpts | ClaimPayloadOpts> {
     if (!opts) {
       throw Error(SIOPErrors.BAD_PARAMS)
     }

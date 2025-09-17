@@ -1,6 +1,5 @@
 import fs from 'fs'
 import path from 'path'
-
 import Ajv from 'ajv'
 import standaloneCode from 'ajv/dist/standalone'
 import {
@@ -13,8 +12,8 @@ import {
   MutableTypeFormatter,
   SchemaGenerator,
   SubTypeFormatter,
+  Schema
 } from 'ts-json-schema-generator'
-import { Schema } from 'ts-json-schema-generator/dist/src/Schema/Schema'
 
 class CustomTypeFormatter implements SubTypeFormatter {
   public supportsType(type: FunctionType): boolean {
@@ -137,15 +136,6 @@ const discoveryMetadataPayload = {
   skipTypeCheck: true,
 }
 
-const authorizationRequestPayloadVID1 = {
-  path: '../types/SIOP.types.ts',
-  tsconfig: 'tsconfig.json',
-  type: 'AuthorizationRequestPayloadVID1', // Or <type-name> if you want to generate schema for that one type only
-  schemaId: 'AuthorizationRequestPayloadVID1Schema',
-  outputPath: '../schemas/AuthorizationRequestPayloadVID1.schema.ts',
-  skipTypeCheck: true,
-}
-
 const authorizationRequestPayloadV1 = {
   path: '../types/SIOP.types.ts',
   tsconfig: 'tsconfig.json',
@@ -165,7 +155,6 @@ const authorizationRequestPayloadD28 = {
 }
 
 const schemas: Schema[] = [
-  writeSchema(authorizationRequestPayloadVID1),
   writeSchema(authorizationRequestPayloadV1),
   writeSchema(authorizationRequestPayloadD28),
   writeSchema(responseOptsConf),

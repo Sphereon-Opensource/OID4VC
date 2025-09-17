@@ -62,17 +62,17 @@ const createRPRegistrationMetadataPayload = (opts: RPRegistrationMetadataOpts, v
     scopes_supported: opts.scopesSupported,
     subject_types_supported: opts.subjectTypesSupported,
     subject_syntax_types_supported: opts.subject_syntax_types_supported || ['did:web:', 'did:ion:'],
-    ...(version === SupportedVersion.OID4VP_v1 ? { vp_formats_supported: opts.vpFormatsSupported } : { vp_formats: opts.vpFormatsSupported }),
+    ...(version === SupportedVersion.OID4VP_v1 ? { vp_formats_supported: opts.vp_formats_supported } : { vp_formats: opts.vp_formats_supported }),
     client_name: opts.clientName,
     logo_uri: opts.logo_uri,
     tos_uri: opts.tos_uri,
-    client_purpose: opts.clientPurpose,
+    client_purpose: opts.client_purpose,
     client_id: opts.client_id,
   }
 
   const languageTagEnabledFieldsNamesMapping = new Map<string, string>()
   languageTagEnabledFieldsNamesMapping.set('clientName', 'client_name')
-  languageTagEnabledFieldsNamesMapping.set('clientPurpose', 'client_purpose')
+  languageTagEnabledFieldsNamesMapping.set('client_purpose', 'client_purpose')
 
   const languageTaggedFields: Map<string, string> = LanguageTagUtils.getLanguageTaggedPropertiesMapped(opts, languageTagEnabledFieldsNamesMapping)
 

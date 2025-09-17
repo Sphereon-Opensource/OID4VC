@@ -46,7 +46,7 @@ export interface DcqlResponseOpts {
 }
 
 export interface DcqlQueryPayloadOpts {
-  dcql_query: string
+  dcql_query: Record<string, any> // TODO maybe Record<string, any> // string
 }
 
 export interface VerifiablePresentationWithSubmissionData extends VerifiablePresentationWithFormat {

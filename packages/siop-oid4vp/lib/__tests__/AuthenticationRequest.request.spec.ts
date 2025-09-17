@@ -138,8 +138,8 @@ describe('create Request Uri should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100300',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
     }
 
@@ -211,8 +211,8 @@ describe('create Request Uri should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100301',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
     }
 
@@ -276,8 +276,8 @@ describe('create Request Uri should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100302',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
     }
 
@@ -452,7 +452,7 @@ describe('create Request JWT should', () => {
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -461,8 +461,8 @@ describe('create Request JWT should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100303',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
     }
 
@@ -568,8 +568,8 @@ describe('create Request JWT should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100305',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       }
     }
 
@@ -650,8 +650,8 @@ describe('create Request JWT should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100305',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       }
     }
 

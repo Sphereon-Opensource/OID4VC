@@ -17,7 +17,7 @@ import {
   VerifyJwtCallback
 } from '../types'
 
-export interface ClaimPayloadOptsVID1 extends ClaimPayloadCommonOpts {
+export interface ClaimPayloadOpts extends ClaimPayloadCommonOpts {
   id_token?: IdTokenClaimPayload
   vp_token?: DcqlQueryPayloadOpts
 }
@@ -30,7 +30,7 @@ export interface ClaimPayloadCommonOpts {
 export interface AuthorizationRequestPayloadOpts<CT extends ClaimPayloadCommonOpts> extends Partial<RequestObjectPayloadOpts<CT>> {
   request_uri?: string // The Request object payload if provided by reference
   // Note we do not list the request property here, as the lib constructs the value, and we do not want people to pass that value in directly as it will lead to people not understanding why things fail
-  dcql_query?: string
+  dcql_query?: Record<string, any>
 }
 
 export interface RequestObjectPayloadOpts<CT extends ClaimPayloadCommonOpts> {
@@ -64,8 +64,6 @@ interface AuthorizationRequestCommonOpts<CT extends ClaimPayloadCommonOpts> {
   uriScheme?: Schema | string // Use a custom scheme for the URI. By default openid:// will be used
 }
 
-export type AuthorizationRequestOptsVID1 = AuthorizationRequestCommonOpts<ClaimPayloadOptsVID1>
-
 export interface AuthorizationRequestOptsV1 extends AuthorizationRequestCommonOpts<ClaimPayloadCommonOpts> {
   idTokenType?: string // OPTIONAL. Space-separated string that specifies the types of ID token the RP wants to obtain, with the values appearing in order of preference. The allowed individual values are subject_signed and attester_signed (see Section 8.2). The default value is attester_signed.
   transaction_data?: string[]
@@ -73,7 +71,7 @@ export interface AuthorizationRequestOptsV1 extends AuthorizationRequestCommonOp
   request_uri_method?: RequestUriMethod
 }
 
-export type CreateAuthorizationRequestOpts = AuthorizationRequestOptsVID1 | AuthorizationRequestOptsV1
+export type CreateAuthorizationRequestOpts = AuthorizationRequestOptsV1
 
 export interface VerifyAuthorizationRequestOpts {
   correlationId: string

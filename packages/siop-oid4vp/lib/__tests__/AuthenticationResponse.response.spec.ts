@@ -147,8 +147,8 @@ describe('create JWT from Request JWT should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100311',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
     }
     const responseOpts: AuthorizationResponseOpts = {
@@ -237,8 +237,8 @@ describe('create JWT from Request JWT should', () => {
             logo_uri: VERIFIER_LOGO_FOR_CLIENT,
             clientName: VERIFIER_NAME_FOR_CLIENT,
             'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100313',
-            clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-            'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+            client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+            'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
           },
         }
 
@@ -352,8 +352,8 @@ describe('create JWT from Request JWT should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100315',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
     }
 
@@ -505,8 +505,8 @@ describe('create JWT from Request JWT should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100315',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
     }
     const vc: ICredential = {

@@ -116,12 +116,10 @@ export const AuthorizationRequestPayloadV1SchemaObj = {
       "type": "object",
       "properties": {
         "client_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {}
-          ]
+          "type": "string"
+        },
+        "client_purpose": {
+          "type": "string"
         },
         "id_token_signing_alg_values_supported": {
           "anyOf": [
@@ -223,26 +221,13 @@ export const AuthorizationRequestPayloadV1SchemaObj = {
           }
         },
         "vp_formats_supported": {
-          "anyOf": [
-            {},
-            {
-              "$ref": "#/definitions/Format"
-            }
-          ]
+          "$ref": "#/definitions/Format"
         },
         "client_name": {
           "type": "string"
         },
         "logo_uri": {
           "type": "string"
-        },
-        "client_purpose": {
-          "anyOf": [
-            {},
-            {
-              "type": "string"
-            }
-          ]
         }
       }
     },

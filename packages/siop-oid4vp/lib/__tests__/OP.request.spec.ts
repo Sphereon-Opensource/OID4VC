@@ -169,8 +169,8 @@ describe('OP should', () => {
           logo_uri: VERIFIER_LOGO_FOR_CLIENT,
           clientName: VERIFIER_NAME_FOR_CLIENT,
           'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100334',
-          clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-          'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+          client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+          'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         },
       }
 
@@ -232,8 +232,8 @@ describe('OP should', () => {
           logo_uri: VERIFIER_LOGO_FOR_CLIENT,
           clientName: VERIFIER_NAME_FOR_CLIENT,
           'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100335',
-          clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-          'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+          client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+          'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         })
         .build()
 

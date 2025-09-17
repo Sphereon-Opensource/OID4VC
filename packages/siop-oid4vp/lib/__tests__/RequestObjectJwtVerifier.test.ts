@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv'
 import {describe, expect, it} from 'vitest'
 import {DcqlQuery} from 'dcql'
 import {ClientIdentifierPrefix, getRequestObjectJwtVerifier, JwtVerifier, PassBy, SIOPErrors} from '../types'
+import {VERIFIERZ_PURPOSE_TO_VERIFY} from './data/mockedData';
 
 dotenv.config()
 
@@ -66,7 +67,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
@@ -86,7 +87,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
@@ -104,7 +105,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
@@ -125,7 +126,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
@@ -145,7 +146,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
@@ -164,7 +165,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
@@ -186,7 +187,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
