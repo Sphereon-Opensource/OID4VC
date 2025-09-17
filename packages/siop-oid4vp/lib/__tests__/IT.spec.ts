@@ -171,7 +171,7 @@ describe.skip('RP and OP interaction should', () => {
           idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
           requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
           responseTypesSupported: [ResponseType.ID_TOKEN],
-          vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+          vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
           scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
           subjectTypesSupported: [SubjectType.PAIRWISE],
           subject_syntax_types_supported: ['did', 'did:ethr'],
@@ -273,7 +273,7 @@ describe.skip('RP and OP interaction should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ethr'],
@@ -371,7 +371,7 @@ describe.skip('RP and OP interaction should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         responseTypesSupported: [ResponseType.ID_TOKEN, ResponseType.VP_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ethr'],
@@ -472,7 +472,7 @@ describe.skip('RP and OP interaction should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ethr'],
@@ -582,7 +582,7 @@ describe.skip('RP and OP interaction should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.ES256K],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.ES256K],
         responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           jwt_vc: { alg: [SigningAlgo.EDDSA] },
           jwt_vp: { alg: [SigningAlgo.EDDSA] },
           ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
@@ -715,7 +715,7 @@ describe.skip('RP and OP interaction should', () => {
           idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
           requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
           responseTypesSupported: [ResponseType.ID_TOKEN],
-          vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+          vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
           scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
           subjectTypesSupported: [SubjectType.PAIRWISE],
           subject_syntax_types_supported: ['did', 'did:ethr'],
@@ -824,7 +824,7 @@ describe.skip('RP and OP interaction should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.ES256K],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.ES256K],
         responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           jwt_vc: { alg: [SigningAlgo.EDDSA] },
           jwt_vp: { alg: [SigningAlgo.EDDSA] },
           ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
@@ -955,7 +955,7 @@ describe.skip('RP and OP interaction should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.ES256K],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.ES256K],
         responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           jwt_vc: { alg: [SigningAlgo.EDDSA] },
           ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp_vp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
@@ -1237,7 +1237,7 @@ describe.skip('RP and OP interaction should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.ES256K],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.ES256K],
         responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           jwt_vc: { alg: [SigningAlgo.EDDSA] },
           ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp_vp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
@@ -1348,7 +1348,7 @@ describe.skip('RP and OP interaction should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.ES256K],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.ES256K],
         responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           jwt_vc: { alg: [SigningAlgo.EDDSA] },
           jwt_vp: { alg: [SigningAlgo.EDDSA] },
           ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
@@ -1457,7 +1457,7 @@ describe.skip('RP and OP interaction should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.ES256K],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.ES256K],
         responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           jwt_vc: { alg: [SigningAlgo.EDDSA] },
           jwt_vp: { alg: [SigningAlgo.EDDSA] },
           ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
@@ -1536,7 +1536,7 @@ describe.skip('RP and OP interaction should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ethr'],
@@ -1595,7 +1595,7 @@ describe.skip('RP and OP interaction should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ethr'],
@@ -1689,7 +1689,7 @@ describe.skip('RP and OP interaction should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ethr'],

@@ -286,7 +286,7 @@ describe('verifyJWT should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
         subject_syntax_types_supported: ['did:ethr:'],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -362,7 +362,7 @@ describe('verifyJWT should', () => {
           idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
           requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
           subject_syntax_types_supported: ['did:ethr:'],
-          vpFormatsSupported: {
+          vp_formats_supported: {
             ldp_vc: {
               proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
             },

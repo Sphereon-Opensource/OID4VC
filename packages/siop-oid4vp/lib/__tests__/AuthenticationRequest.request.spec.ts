@@ -129,7 +129,7 @@ describe('create Request Uri should', () => {
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -202,7 +202,7 @@ describe('create Request Uri should', () => {
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -267,7 +267,7 @@ describe('create Request Uri should', () => {
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -314,7 +314,7 @@ describe('create Request JWT should', () => {
       registration: {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -345,7 +345,7 @@ describe('create Request JWT should', () => {
       registration: {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -374,7 +374,7 @@ describe('create Request JWT should', () => {
       registration: {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -404,7 +404,7 @@ describe('create Request JWT should', () => {
       registration: {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -559,7 +559,7 @@ describe('create Request JWT should', () => {
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -641,7 +641,7 @@ describe('create Request JWT should', () => {
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },

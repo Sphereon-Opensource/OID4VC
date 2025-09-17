@@ -160,7 +160,7 @@ describe('OP should', () => {
           responseTypesSupported: [ResponseType.ID_TOKEN],
           scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
           subjectTypesSupported: [SubjectType.PAIRWISE],
-          vpFormatsSupported: {
+          vp_formats_supported: {
             jwt_vc: { alg: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
             jwt_vp: { alg: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
             jwt: { alg: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
@@ -224,7 +224,7 @@ describe('OP should', () => {
           idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
           requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
           responseTypesSupported: [ResponseType.ID_TOKEN],
-          vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+          vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
           scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
           subjectTypesSupported: [SubjectType.PAIRWISE],
           subject_syntax_types_supported: ['did', 'did:ethr'],

@@ -138,7 +138,7 @@ describe('create JWT from Request JWT should', () => {
         responseTypesSupported: [ResponseType.ID_TOKEN],
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -228,7 +228,7 @@ describe('create JWT from Request JWT should', () => {
             responseTypesSupported: [ResponseType.ID_TOKEN],
             scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
             subjectTypesSupported: [SubjectType.PAIRWISE],
-            vpFormatsSupported: {
+            vp_formats_supported: {
               ldp_vc: {
                 proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
               },
@@ -343,7 +343,7 @@ describe('create JWT from Request JWT should', () => {
         responseTypesSupported: [ResponseType.ID_TOKEN],
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -496,7 +496,7 @@ describe('create JWT from Request JWT should', () => {
         responseTypesSupported: [ResponseType.ID_TOKEN],
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
