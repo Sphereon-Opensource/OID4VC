@@ -221,7 +221,247 @@ export const AuthorizationRequestPayloadV1SchemaObj = {
           }
         },
         "vp_formats_supported": {
-          "$ref": "#/definitions/Format"
+          "type": "object",
+          "properties": {
+            "jwt": {
+              "type": "object",
+              "properties": {
+                "alg_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "alg_values"
+              ],
+              "additionalProperties": false
+            },
+            "jwt_vc": {
+              "type": "object",
+              "properties": {
+                "alg_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "alg_values"
+              ],
+              "additionalProperties": false
+            },
+            "jwt_vc_json": {
+              "type": "object",
+              "properties": {
+                "alg_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "alg_values"
+              ],
+              "additionalProperties": false
+            },
+            "jwt_vp": {
+              "type": "object",
+              "properties": {
+                "alg_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "alg_values"
+              ],
+              "additionalProperties": false
+            },
+            "jwt_vp_json": {
+              "type": "object",
+              "properties": {
+                "alg_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "alg_values"
+              ],
+              "additionalProperties": false
+            },
+            "ldp": {
+              "type": "object",
+              "properties": {
+                "proof_type_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "proof_type_values"
+              ],
+              "additionalProperties": false
+            },
+            "ldp_vc": {
+              "type": "object",
+              "properties": {
+                "proof_type_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "proof_type_values"
+              ],
+              "additionalProperties": false
+            },
+            "ldp_vp": {
+              "type": "object",
+              "properties": {
+                "proof_type_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "proof_type_values"
+              ],
+              "additionalProperties": false
+            },
+            "di": {
+              "type": "object",
+              "properties": {
+                "proof_type_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "cryptosuite": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "proof_type_values",
+                "cryptosuite"
+              ],
+              "additionalProperties": false
+            },
+            "di_vc": {
+              "type": "object",
+              "properties": {
+                "proof_type_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "cryptosuite": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "proof_type_values",
+                "cryptosuite"
+              ],
+              "additionalProperties": false
+            },
+            "di_vp": {
+              "type": "object",
+              "properties": {
+                "proof_type_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "cryptosuite": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "proof_type_values",
+                "cryptosuite"
+              ],
+              "additionalProperties": false
+            },
+            "vc+sd-jwt": {
+              "type": "object",
+              "properties": {
+                "sd-jwt_alg_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "kb-jwt_alg_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "dc+sd-jwt": {
+              "type": "object",
+              "properties": {
+                "sd-jwt_alg_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "kb-jwt_alg_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "mso_mdoc": {
+              "type": "object",
+              "properties": {
+                "alg_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "alg_values"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
         },
         "client_name": {
           "type": "string"
@@ -255,139 +495,6 @@ export const AuthorizationRequestPayloadV1SchemaObj = {
         "public",
         "pairwise"
       ]
-    },
-    "Format": {
-      "type": "object",
-      "properties": {
-        "jwt": {
-          "$ref": "#/definitions/JwtObject"
-        },
-        "jwt_vc": {
-          "$ref": "#/definitions/JwtObject"
-        },
-        "jwt_vc_json": {
-          "$ref": "#/definitions/JwtObject"
-        },
-        "jwt_vp": {
-          "$ref": "#/definitions/JwtObject"
-        },
-        "jwt_vp_json": {
-          "$ref": "#/definitions/JwtObject"
-        },
-        "ldp": {
-          "$ref": "#/definitions/LdpObject"
-        },
-        "ldp_vc": {
-          "$ref": "#/definitions/LdpObject"
-        },
-        "ldp_vp": {
-          "$ref": "#/definitions/LdpObject"
-        },
-        "di": {
-          "$ref": "#/definitions/DiObject"
-        },
-        "di_vc": {
-          "$ref": "#/definitions/DiObject"
-        },
-        "di_vp": {
-          "$ref": "#/definitions/DiObject"
-        },
-        "vc+sd-jwt": {
-          "$ref": "#/definitions/SdJwtObject"
-        },
-        "dc+sd-jwt": {
-          "$ref": "#/definitions/SdJwtObject"
-        },
-        "mso_mdoc": {
-          "$ref": "#/definitions/MsoMdocObject"
-        }
-      },
-      "additionalProperties": false
-    },
-    "JwtObject": {
-      "type": "object",
-      "properties": {
-        "alg": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "alg"
-      ],
-      "additionalProperties": false
-    },
-    "LdpObject": {
-      "type": "object",
-      "properties": {
-        "proof_type": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "proof_type"
-      ],
-      "additionalProperties": false
-    },
-    "DiObject": {
-      "type": "object",
-      "properties": {
-        "proof_type": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "cryptosuite": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "proof_type",
-        "cryptosuite"
-      ],
-      "additionalProperties": false
-    },
-    "SdJwtObject": {
-      "type": "object",
-      "properties": {
-        "sd-jwt_alg_values": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "kb-jwt_alg_values": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    "MsoMdocObject": {
-      "type": "object",
-      "properties": {
-        "alg": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "alg"
-      ],
-      "additionalProperties": false
     },
     "ResponseMode": {
       "type": "string",

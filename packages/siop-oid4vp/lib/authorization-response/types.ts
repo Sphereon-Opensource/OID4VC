@@ -1,8 +1,8 @@
 import { JwtIssuer } from '@sphereon/oid4vc-common'
 import { PresentationSignCallBackParams } from '@sphereon/pex'
-import { Format } from '@sphereon/pex-models'
 import {
   CompactSdJwtVc,
+  Format,
   HasherSync,
   MdocOid4vpIssuerSigned,
   PresentationSubmission,

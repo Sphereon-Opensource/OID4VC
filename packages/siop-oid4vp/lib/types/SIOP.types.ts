@@ -1,9 +1,9 @@
 import { JarmClientMetadata } from '@sphereon/jarm'
 import { DynamicRegistrationClientMetadata, SigningAlgo } from '@sphereon/oid4vc-common'
-import { Format } from '@sphereon/pex-models'
 import {
   AdditionalClaims,
   CompactSdJwtVc,
+  Format,
   IPresentation,
   MdocOid4vpMdocVpToken,
   W3CVerifiableCredential,
