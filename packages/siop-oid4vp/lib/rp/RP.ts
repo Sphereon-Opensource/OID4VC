@@ -28,7 +28,6 @@ import {
   AuthorizationEvent,
   AuthorizationEvents,
   AuthorizationResponsePayload,
-  CallbackOpts,
   DecryptCompact,
   PassBy,
   RegisterEventListener,
@@ -37,8 +36,10 @@ import {
   SIOPErrors,
   SupportedVersion,
   Verification,
-  VerifiedAuthorizationResponse
+  VerifiedAuthorizationResponse,
+  CallbackOpts
 } from '../types'
+
 
 import {
   createRequestOptsFromBuilderOrExistingOpts,

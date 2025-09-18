@@ -1,7 +1,7 @@
 import { AuthorizationRequest } from '../authorization-request'
 import { AuthorizationResponse } from '../authorization-response'
-import {CallbackOpts} from './SIOP.types'
 import { AdditionalClaims } from '@sphereon/ssi-types'
+import { CallbackOpts } from '../types'
 
 export interface AuthorizationRequestState {
   correlationId: string

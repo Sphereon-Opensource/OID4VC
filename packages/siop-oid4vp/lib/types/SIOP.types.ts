@@ -11,7 +11,6 @@ import {
   WrappedVerifiablePresentation
 } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
-import { z } from 'zod'
 import {
   AuthorizationRequest,
   CreateAuthorizationRequestOpts,
@@ -28,7 +27,18 @@ import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 import { JWTPayload, VerifiedJWT } from './JWT.types'
-import { CallbackOptsSchema } from '../schemas/universal-oid4vp'
+import {
+  QRCodeOptsSchema,
+  QRCodeOptsPayloadSchema,
+  CallbackOptsSchema,
+  CallbackOptsPayloadSchema,
+  CreateAuthorizationRequestSchema,
+  CreateAuthorizationRequestPayloadSchema,
+  CreateAuthorizationResponseSchema,
+  CreateAuthorizationResponsePayloadSchema,
+  VerifiedDataOptsSchema
+} from '../schemas'
+import { z } from 'zod'
 
 export const DEFAULT_EXPIRATION_TIME = 10 * 60
 
@@ -734,4 +744,12 @@ export enum ContentType {
   UTF_8 = 'UTF-8',
 }
 
-export type CallbackOpts = z.infer<typeof CallbackOptsSchema>;
+export type QRCodeOpts = z.infer<typeof QRCodeOptsSchema>
+export type QRCodeOptsPayload = z.infer<typeof QRCodeOptsPayloadSchema>
+export type CallbackOpts = z.infer<typeof CallbackOptsSchema>
+export type CallbackOptsPayload = z.infer<typeof CallbackOptsPayloadSchema>
+export type CreateAuthorizationRequest = z.infer<typeof CreateAuthorizationRequestSchema>
+export type CreateAuthorizationRequestPayload = z.infer<typeof CreateAuthorizationRequestPayloadSchema>
+export type CreateAuthorizationResponse = z.infer<typeof CreateAuthorizationResponseSchema>
+export type CreateAuthorizationResponsePayload = z.infer<typeof CreateAuthorizationResponsePayloadSchema>
+export type VerifiedDataOpts = z.infer<typeof VerifiedDataOptsSchema>
