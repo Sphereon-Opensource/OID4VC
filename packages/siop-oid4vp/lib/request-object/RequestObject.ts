@@ -78,7 +78,7 @@ export class RequestObject {
         return undefined
       }
       this.removeRequestProperties()
-      if (this.payload.registration_uri) {
+      if (this.payload.registration_uri || this.payload.client_metadata) {
         delete this.payload.registration
       }
 
