@@ -131,7 +131,7 @@ describe('create Request Uri should', () => {
         subjectTypesSupported: [SubjectType.PAIRWISE],
         vp_formats_supported: {
           ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+            proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
         },
         passBy: PassBy.VALUE,
@@ -204,7 +204,7 @@ describe('create Request Uri should', () => {
         subjectTypesSupported: [SubjectType.PAIRWISE],
         vp_formats_supported: {
           ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+            proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
         },
         passBy: PassBy.VALUE,
@@ -269,7 +269,7 @@ describe('create Request Uri should', () => {
         subjectTypesSupported: [SubjectType.PAIRWISE],
         vp_formats_supported: {
           ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+            proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
         },
         passBy: PassBy.VALUE,
@@ -561,7 +561,7 @@ describe('create Request JWT should', () => {
         subjectTypesSupported: [SubjectType.PAIRWISE],
         vp_formats_supported: {
           ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+            proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
         },
         passBy: PassBy.VALUE,

@@ -159,10 +159,10 @@ describe('RP should', () => {
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
         vp_formats_supported: {
-          jwt_vc: { alg: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
-          jwt_vp: { alg: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
-          jwt: { alg: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
-          ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
+          jwt_vc: { alg_values: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
+          jwt_vp: { alg_values: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
+          jwt: { alg_values: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
+          ldp_vc: { proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
         },
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT + ' 2022-09-29 00',
@@ -232,13 +232,13 @@ describe('RP should', () => {
         subject_types_supported: [SubjectType.PAIRWISE],
         vp_formats_supported: {
           jwt: {
-            alg: ['EdDSA', 'ES256K', 'ES256'],
+            alg_values: ['EdDSA', 'ES256K', 'ES256'],
           },
           jwt_vc: {
-            alg: ['EdDSA', 'ES256K', 'ES256'],
+            alg_values: ['EdDSA', 'ES256K', 'ES256'],
           },
           jwt_vp: {
-            alg: ['EdDSA', 'ES256K', 'ES256'],
+            alg_values: ['EdDSA', 'ES256K', 'ES256'],
           },
         },
         logo_uri: VERIFIER_LOGO_FOR_CLIENT + ' 2022-09-29 01',
@@ -250,7 +250,7 @@ describe('RP should', () => {
     }
 
     const expectedUri =
-      'openid4vp://?client_id=https%3A%2F%2Fwww.example.com%2F.well-known%2Fopenid-federation&scope=test&response_type=id_token&redirect_uri=https%3A%2F%2Facme.com%2Fhello&client_metadata=%7B%22client_id%22%3A%22https%3A%2F%2Fwww.example.com%2F.well-known%2Fopenid-federation%22%2C%22idTokenSigningAlgValuesSupported%22%3A%5B%22EdDSA%22%5D%2C%22requestObjectSigningAlgValuesSupported%22%3A%5B%22EdDSA%22%2C%22ES256%22%5D%2C%22responseTypesSupported%22%3A%5B%22id_token%22%5D%2C%22vp_formats_supported%22%3A%7B%22jwt%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vc%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vp%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%7D%2C%22scopesSupported%22%3A%5B%22openid%20did_authn%22%2C%22openid%22%5D%2C%22subjectTypesSupported%22%3A%5B%22pairwise%22%5D%2C%22subject_syntax_types_supported%22%3A%5B%22did%3Aethr%22%5D%2C%22passBy%22%3A%22VALUE%22%2C%22logo_uri%22%3A%22https%3A%2F%2Fsphereon.com%2Fcontent%2Fthemes%2Fsphereon%2Fassets%2Ffavicons%2Fsafari-pinned-tab.svg%202022-09-29%2001%22%2C%22clientName%22%3A%22Client%20Verifier%20Relying%20Party%20Sphereon%20INC%202022-09-29%2001%22%2C%22clientName%23nl-NL%22%3A%22%20***%20dutch%20***%20Client%20Verifier%20Relying%20Party%20Sphereon%20B.V.%202022-09-29%2001%22%2C%22client_purpose%22%3A%22To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%2C%22client_purpose%23nl-NL%22%3A%22%20***%20Dutch%20***%20To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%2C%22targets%22%3A%5B%22authorization-request%22%2C%22request-object%22%5D%7D&request_uri=https%3A%2F%2Frp.acme.com%2Fsiop%2Fjwts&registration=%7B%22id_token_signing_alg_values_supported%22%3A%5B%22EdDSA%22%5D%2C%22request_object_signing_alg_values_supported%22%3A%5B%22EdDSA%22%2C%22ES256%22%5D%2C%22response_types_supported%22%3A%5B%22id_token%22%5D%2C%22scopes_supported%22%3A%5B%22openid%20did_authn%22%2C%22openid%22%5D%2C%22subject_types_supported%22%3A%5B%22pairwise%22%5D%2C%22subject_syntax_types_supported%22%3A%5B%22did%3Aethr%22%5D%2C%22vp_formats_supported%22%3A%7B%22jwt%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vc%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vp%22%3A%7B%22alg%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%7D%2C%22client_name%22%3A%22Client%20Verifier%20Relying%20Party%20Sphereon%20INC%202022-09-29%2001%22%2C%22logo_uri%22%3A%22https%3A%2F%2Fsphereon.com%2Fcontent%2Fthemes%2Fsphereon%2Fassets%2Ffavicons%2Fsafari-pinned-tab.svg%202022-09-29%2001%22%2C%22client_purpose%22%3A%22To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%2C%22client_id%22%3A%22https%3A%2F%2Fwww.example.com%2F.well-known%2Fopenid-federation%22%2C%22client_name%23nl-NL%22%3A%22%20***%20dutch%20***%20Client%20Verifier%20Relying%20Party%20Sphereon%20B.V.%202022-09-29%2001%22%2C%22client_purpose%23nl-NL%22%3A%22%20***%20Dutch%20***%20To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%7D'
+      'openid4vp://?client_id=https%3A%2F%2Fwww.example.com%2F.well-known%2Fopenid-federation&scope=test&response_type=id_token&redirect_uri=https%3A%2F%2Facme.com%2Fhello&client_metadata=%7B%22client_id%22%3A%22https%3A%2F%2Fwww.example.com%2F.well-known%2Fopenid-federation%22%2C%22idTokenSigningAlgValuesSupported%22%3A%5B%22EdDSA%22%5D%2C%22requestObjectSigningAlgValuesSupported%22%3A%5B%22EdDSA%22%2C%22ES256%22%5D%2C%22responseTypesSupported%22%3A%5B%22id_token%22%5D%2C%22vp_formats_supported%22%3A%7B%22jwt%22%3A%7B%22alg_values%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vc%22%3A%7B%22alg_values%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vp%22%3A%7B%22alg_values%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%7D%2C%22scopesSupported%22%3A%5B%22openid%20did_authn%22%2C%22openid%22%5D%2C%22subjectTypesSupported%22%3A%5B%22pairwise%22%5D%2C%22subject_syntax_types_supported%22%3A%5B%22did%3Aethr%22%5D%2C%22passBy%22%3A%22VALUE%22%2C%22logo_uri%22%3A%22https%3A%2F%2Fsphereon.com%2Fcontent%2Fthemes%2Fsphereon%2Fassets%2Ffavicons%2Fsafari-pinned-tab.svg%202022-09-29%2001%22%2C%22clientName%22%3A%22Client%20Verifier%20Relying%20Party%20Sphereon%20INC%202022-09-29%2001%22%2C%22clientName%23nl-NL%22%3A%22%20***%20dutch%20***%20Client%20Verifier%20Relying%20Party%20Sphereon%20B.V.%202022-09-29%2001%22%2C%22client_purpose%22%3A%22To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%2C%22client_purpose%23nl-NL%22%3A%22%20***%20Dutch%20***%20To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%2C%22targets%22%3A%5B%22authorization-request%22%2C%22request-object%22%5D%7D&request_uri=https%3A%2F%2Frp.acme.com%2Fsiop%2Fjwts&registration=%7B%22id_token_signing_alg_values_supported%22%3A%5B%22EdDSA%22%5D%2C%22request_object_signing_alg_values_supported%22%3A%5B%22EdDSA%22%2C%22ES256%22%5D%2C%22response_types_supported%22%3A%5B%22id_token%22%5D%2C%22scopes_supported%22%3A%5B%22openid%20did_authn%22%2C%22openid%22%5D%2C%22subject_types_supported%22%3A%5B%22pairwise%22%5D%2C%22subject_syntax_types_supported%22%3A%5B%22did%3Aethr%22%5D%2C%22vp_formats_supported%22%3A%7B%22jwt%22%3A%7B%22alg_values%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vc%22%3A%7B%22alg_values%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%2C%22jwt_vp%22%3A%7B%22alg_values%22%3A%5B%22EdDSA%22%2C%22ES256K%22%2C%22ES256%22%5D%7D%7D%2C%22client_name%22%3A%22Client%20Verifier%20Relying%20Party%20Sphereon%20INC%202022-09-29%2001%22%2C%22logo_uri%22%3A%22https%3A%2F%2Fsphereon.com%2Fcontent%2Fthemes%2Fsphereon%2Fassets%2Ffavicons%2Fsafari-pinned-tab.svg%202022-09-29%2001%22%2C%22client_purpose%22%3A%22To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%2C%22client_id%22%3A%22https%3A%2F%2Fwww.example.com%2F.well-known%2Fopenid-federation%22%2C%22client_name%23nl-NL%22%3A%22%20***%20dutch%20***%20Client%20Verifier%20Relying%20Party%20Sphereon%20B.V.%202022-09-29%2001%22%2C%22client_purpose%23nl-NL%22%3A%22%20***%20Dutch%20***%20To%20request%2C%20receive%20and%20verify%20your%20credential%20about%20the%20the%20valid%20subject.%202022-09-29%2001%22%7D'
     const expectedJwtRegex =
       /^eyJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6ZXRocjoweDAxMDZhMmU5ODViMUUxRGU5QjVkZGI0YUY2ZEM5ZTkyOEY0ZTk5RDAja2V5cy0xIiwidHlwIjoiSldUIn0\.eyJpYXQiO.*$/
 
@@ -271,13 +271,13 @@ describe('RP should', () => {
           responseTypesSupported: [ResponseType.ID_TOKEN],
           vp_formats_supported: {
             jwt: {
-              alg: ['EdDSA', 'ES256K', 'ES256'],
+              alg_values: ['EdDSA', 'ES256K', 'ES256'],
             },
             jwt_vc: {
-              alg: ['EdDSA', 'ES256K', 'ES256'],
+              alg_values: ['EdDSA', 'ES256K', 'ES256'],
             },
             jwt_vp: {
-              alg: ['EdDSA', 'ES256K', 'ES256'],
+              alg_values: ['EdDSA', 'ES256K', 'ES256'],
             },
           },
           scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],

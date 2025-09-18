@@ -18,7 +18,7 @@ describe('DidSiopMetadata should ', () => {
         alg_values: [SigningAlgo.ES256, SigningAlgo.ES256K],
       },
     }
-    expect(supportedCredentialsFormats(rpFormat, opFormat)).toStrictEqual({ jwt_vc: { alg: ['ES256', 'ES256K'] } })
+    expect(supportedCredentialsFormats(rpFormat, opFormat)).toStrictEqual({ jwt_vc: { alg_values: ['ES256', 'ES256K'] } })
   })
 
   it('throw CREDENTIAL_FORMATS_NOT_SUPPORTED for algs not matching', async function () {
