@@ -325,7 +325,7 @@ const rp = RP.builder()
   .withClientMetadata({
     idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
     requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-    responseTypesSupported: [ResponseType.ID_TOKEN],
+    response_types_supported: [ResponseType.ID_TOKEN],
     vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
     scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
     subjectTypesSupported: [SubjectType.PAIRWISE],
@@ -366,7 +366,7 @@ const op = OP.builder()
     idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
     issuer: ResponseIss.SELF_ISSUED_V2,
     requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-    responseTypesSupported: [ResponseType.ID_TOKEN],
+    response_types_supported: [ResponseType.ID_TOKEN],
     vpFormats: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
     scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
     subjectTypesSupported: [SubjectType.PAIRWISE],

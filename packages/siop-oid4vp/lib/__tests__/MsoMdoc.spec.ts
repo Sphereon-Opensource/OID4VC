@@ -86,7 +86,7 @@ describe.skip('mdoc RP and OP interaction should', () => {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.VP_TOKEN],
+        response_types_supported: [ResponseType.VP_TOKEN],
         vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
         subjectTypesSupported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:key'],

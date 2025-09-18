@@ -157,7 +157,7 @@ describe('OP should', () => {
           idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
           subject_syntax_types_supported: ['did:ethr', SubjectIdentifierType.DID],
           requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-          responseTypesSupported: [ResponseType.ID_TOKEN],
+          response_types_supported: [ResponseType.ID_TOKEN],
           scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
           subjectTypesSupported: [SubjectType.PAIRWISE],
           vp_formats_supported: {
@@ -223,7 +223,7 @@ describe('OP should', () => {
           client_id: WELL_KNOWN_OPENID_FEDERATION,
           idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
           requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-          responseTypesSupported: [ResponseType.ID_TOKEN],
+          response_types_supported: [ResponseType.ID_TOKEN],
           vp_formats_supported: { jwt_vc: { alg_values: [SigningAlgo.EDDSA] } },
           scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
           subjectTypesSupported: [SubjectType.PAIRWISE],

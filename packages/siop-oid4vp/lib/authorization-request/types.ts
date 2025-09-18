@@ -44,6 +44,7 @@ export interface RequestObjectPayloadOpts<CT extends ClaimPayloadCommonOpts> {
   nonce?: string // An optional nonce, will be generated if not provided
   state?: string // An optional state, will be generated if not provided
   aud?: string // The audience of the request
+  dcql_query?: Record<string, any>
   authorization_endpoint?: string
   response_mode: ResponseMode // How the URI should be returned. This is not being used by the library itself, allows an implementor to make a decision
   response_types_supported?: ResponseType[] | ResponseType

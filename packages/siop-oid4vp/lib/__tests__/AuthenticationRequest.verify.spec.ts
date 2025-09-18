@@ -280,7 +280,7 @@ describe('verifyJWT should', () => {
       },
       clientMetadata: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        responseTypesSupported: [ResponseType.ID_TOKEN],
+        response_types_supported: [ResponseType.ID_TOKEN],
         scopesSupported: [Scope.OPENID, Scope.OPENID_DIDAUTHN],
         subjectTypesSupported: [SubjectType.PAIRWISE],
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
@@ -356,7 +356,7 @@ describe('verifyJWT should', () => {
         },
         clientMetadata: {
           client_id: WELL_KNOWN_OPENID_FEDERATION,
-          responseTypesSupported: [ResponseType.ID_TOKEN],
+          response_types_supported: [ResponseType.ID_TOKEN],
           scopesSupported: [Scope.OPENID, Scope.OPENID_DIDAUTHN],
           subjectTypesSupported: [SubjectType.PAIRWISE],
           idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],

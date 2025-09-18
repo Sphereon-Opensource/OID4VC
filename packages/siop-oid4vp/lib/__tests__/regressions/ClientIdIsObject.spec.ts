@@ -45,7 +45,7 @@ const rp = RP.builder()
     idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
     passBy: PassBy.VALUE,
     requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-    responseTypesSupported: [ResponseType.ID_TOKEN],
+    response_types_supported: [ResponseType.ID_TOKEN],
     vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
     scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
     subjectTypesSupported: [SubjectType.PAIRWISE],

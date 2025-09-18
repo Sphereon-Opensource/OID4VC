@@ -135,7 +135,7 @@ describe('create JWT from Request JWT should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
+        response_types_supported: [ResponseType.ID_TOKEN],
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
         vp_formats_supported: {
@@ -225,7 +225,7 @@ describe('create JWT from Request JWT should', () => {
             idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
             subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
             requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-            responseTypesSupported: [ResponseType.ID_TOKEN],
+            response_types_supported: [ResponseType.ID_TOKEN],
             scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
             subjectTypesSupported: [SubjectType.PAIRWISE],
             vp_formats_supported: {
@@ -340,7 +340,7 @@ describe('create JWT from Request JWT should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
+        response_types_supported: [ResponseType.ID_TOKEN],
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
         vp_formats_supported: {
@@ -493,7 +493,7 @@ describe('create JWT from Request JWT should', () => {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
         requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
+        response_types_supported: [ResponseType.ID_TOKEN],
         scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
         vp_formats_supported: {

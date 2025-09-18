@@ -134,7 +134,6 @@ export type ResponseURIType = 'response_uri' | 'redirect_uri'
 export interface VerifiedAuthorizationRequest extends Partial<VerifiedJWT> {
   responseURIType: ResponseURIType
   responseURI?: string
-  clientIdScheme?: string
   correlationId: string
   authorizationRequest: AuthorizationRequest
   authorizationRequestPayload: AuthorizationRequestPayload
@@ -354,14 +353,14 @@ export type RPRegistrationMetadataOpts = Partial<
   Pick<
     DiscoveryMetadataOpts,
     | 'client_id'
-    | 'idTokenSigningAlgValuesSupported'
-    | 'requestObjectSigningAlgValuesSupported'
-    | 'responseTypesSupported'
-    | 'scopesSupported'
-    | 'subjectTypesSupported'
+    | 'id_token_signing_alg_values_supported'
+    | 'request_object_signing_alg_values_supported'
+    | 'response_types_supported'
+    | 'scopes_supported'
+    | 'subject_types_supported'
     | 'subject_syntax_types_supported'
     | 'vp_formats_supported'
-    | 'clientName'
+    | 'client_name'
     | 'logo_uri'
     | 'tos_uri'
     | 'client_purpose'
