@@ -84,11 +84,11 @@ describe.skip('mdoc RP and OP interaction should', () => {
       .withAuthorizationEndpoint('www.myauthorizationendpoint.com')
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         response_types_supported: [ResponseType.VP_TOKEN],
         vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:key'],
         passBy: PassBy.VALUE,
       })

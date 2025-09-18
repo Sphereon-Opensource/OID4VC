@@ -56,14 +56,14 @@ export const createRequestRegistration = async (
 
 const createRPRegistrationMetadataPayload = (opts: RPRegistrationMetadataOpts, version: SupportedVersion): RPRegistrationMetadataPayload => {
   const rpRegistrationMetadataPayload = {
-    id_token_signing_alg_values_supported: opts.idTokenSigningAlgValuesSupported,
-    request_object_signing_alg_values_supported: opts.requestObjectSigningAlgValuesSupported,
+    id_token_signing_alg_values_supported: opts.id_token_signing_alg_values_supported,
+    request_object_signing_alg_values_supported: opts.request_object_signing_alg_values_supported,
     response_types_supported: opts.response_types_supported,
-    scopes_supported: opts.scopesSupported,
-    subject_types_supported: opts.subjectTypesSupported,
+    scopes_supported: opts.scopes_supported,
+    subject_types_supported: opts.subject_types_supported,
     subject_syntax_types_supported: opts.subject_syntax_types_supported || ['did:web:', 'did:ion:'],
     ...(version === SupportedVersion.OID4VP_v1 ? { vp_formats_supported: opts.vp_formats_supported } : { vp_formats: opts.vp_formats_supported }),
-    client_name: opts.clientName,
+    client_name: opts.client_name,
     logo_uri: opts.logo_uri,
     tos_uri: opts.tos_uri,
     client_purpose: opts.client_purpose,
@@ -71,7 +71,7 @@ const createRPRegistrationMetadataPayload = (opts: RPRegistrationMetadataOpts, v
   }
 
   const languageTagEnabledFieldsNamesMapping = new Map<string, string>()
-  languageTagEnabledFieldsNamesMapping.set('clientName', 'client_name')
+  languageTagEnabledFieldsNamesMapping.set('client_name', 'client_name')
   languageTagEnabledFieldsNamesMapping.set('client_purpose', 'client_purpose')
 
   const languageTaggedFields: Map<string, string> = LanguageTagUtils.getLanguageTaggedPropertiesMapped(opts, languageTagEnabledFieldsNamesMapping)

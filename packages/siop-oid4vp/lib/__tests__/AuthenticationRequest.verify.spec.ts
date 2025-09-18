@@ -281,10 +281,10 @@ describe('verifyJWT should', () => {
       clientMetadata: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
         response_types_supported: [ResponseType.ID_TOKEN],
-        scopesSupported: [Scope.OPENID, Scope.OPENID_DIDAUTHN],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
+        scopes_supported: [Scope.OPENID, Scope.OPENID_DIDAUTHN],
+        subject_types_supported: [SubjectType.PAIRWISE],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
         subject_syntax_types_supported: ['did:ethr:'],
         vp_formats_supported: {
           ldp_vc: {
@@ -293,8 +293,8 @@ describe('verifyJWT should', () => {
         },
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100309',
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100309',
         client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
@@ -357,10 +357,10 @@ describe('verifyJWT should', () => {
         clientMetadata: {
           client_id: WELL_KNOWN_OPENID_FEDERATION,
           response_types_supported: [ResponseType.ID_TOKEN],
-          scopesSupported: [Scope.OPENID, Scope.OPENID_DIDAUTHN],
-          subjectTypesSupported: [SubjectType.PAIRWISE],
-          idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
-          requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
+          scopes_supported: [Scope.OPENID, Scope.OPENID_DIDAUTHN],
+          subject_types_supported: [SubjectType.PAIRWISE],
+          id_token_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
+          request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256K],
           subject_syntax_types_supported: ['did:ethr:'],
           vp_formats_supported: {
             ldp_vc: {
@@ -369,8 +369,8 @@ describe('verifyJWT should', () => {
           },
           passBy: PassBy.VALUE,
           logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-          clientName: VERIFIER_NAME_FOR_CLIENT,
-          'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100309',
+          client_name: VERIFIER_NAME_FOR_CLIENT,
+          'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100309',
           client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
           'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         },

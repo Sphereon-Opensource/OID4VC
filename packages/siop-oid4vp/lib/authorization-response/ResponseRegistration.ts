@@ -70,7 +70,7 @@ export const createDiscoveryMetadataPayload = (opts: DiscoveryMetadataOpts): Dis
   }
 
   const languageTagEnabledFieldsNamesMapping = new Map<string, string>()
-  languageTagEnabledFieldsNamesMapping.set('clientName', 'client_name')
+  languageTagEnabledFieldsNamesMapping.set('client_name', 'client_name')
   languageTagEnabledFieldsNamesMapping.set('client_purpose', 'client_purpose')
 
   const languageTaggedFields: Map<string, string> = LanguageTagUtils.getLanguageTaggedPropertiesMapped(opts, languageTagEnabledFieldsNamesMapping)
