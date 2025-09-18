@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import { AuthorizationRequest } from '../authorization-request'
 import { AuthorizationResponse } from '../authorization-response'
+import { post } from '../helpers'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
@@ -8,6 +9,7 @@ import {
   AuthorizationRequestStateStatus,
   AuthorizationResponseState,
   AuthorizationResponseStateStatus,
+  AuthorizationResponseStateWithVerifiedData
 } from '../types'
 import { IRPSessionManager } from './types'
 
@@ -102,7 +104,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
 
   private async onAuthorizationRequestSentSuccess(event: AuthorizationEvent<AuthorizationRequest>): Promise<void> {
     this.cleanup().catch((error) => console.log(JSON.stringify(error)))
-    this.updateState('request', event, AuthorizationRequestStateStatus.SENT)
+    this.updateState('request', event, AuthorizationRequestStateStatus.RETRIEVED)
   }
 
   private async onAuthorizationRequestSentFailed(event: AuthorizationEvent<AuthorizationRequest>): Promise<void> {
@@ -191,19 +193,28 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     try {
       const eventState = {
         correlationId: event.correlationId,
-        ...(type === 'request' ? { request: event.subject } : {}),
-        ...(type === 'response' ? { response: event.subject } : {}),
-        ...(event.error ? { error: event.error } : {}),
+        queryId: event.queryId,
+        ...(type === 'request' && { request: event.subject }),
+        ...(type === 'response' && { response: event.subject }),
+        ...(event.error && { error: event.error }),
         status,
+        callback: event.callback,
         timestamp: event.timestamp,
         lastUpdated: event.timestamp,
       }
+      let state: AuthorizationRequestState | AuthorizationResponseState
       if (type === 'request') {
-        this.authorizationRequests[event.correlationId] = eventState as AuthorizationRequestState
+        state = eventState as AuthorizationRequestState
+        this.authorizationRequests[event.correlationId] = state
         this.updateMapping(this.nonceMapping, event, 'nonce', event.correlationId, true)
         this.updateMapping(this.stateMapping, event, 'state', event.correlationId, true)
       } else {
-        this.authorizationResponses[event.correlationId] = eventState as AuthorizationResponseState
+        state = eventState as AuthorizationResponseState
+        this.authorizationResponses[event.correlationId] = state
+      }
+
+      if (event.callback && (event.callback.status === undefined || event.callback.status.includes(status))) {
+        void this.executeCallback(event.callback.url, state)
       }
     } catch (error: unknown) {
       console.log(`Error in update state happened: ${error}`)
@@ -246,6 +257,20 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     Object.entries(this.authorizationResponses).forEach((resByCorrelationId) => {
       cleanupCorrelations.call(this, resByCorrelationId)
     })
+  }
+
+  private async executeCallback(url: string, state: AuthorizationRequestState | AuthorizationResponseStateWithVerifiedData): Promise<void> {
+    const statusBody = {
+      status: state.status,
+      correlation_id: state.correlationId,
+      query_id: state.queryId,
+      last_updated: state.lastUpdated,
+      ...((state?.status === AuthorizationResponseStateStatus.VERIFIED && state.verifiedData !== undefined) && { verified_data: state.verifiedData }),
+      ...(state.error && { message: state.error.message })
+    }
+
+    post(url, JSON.stringify(statusBody))
+        .catch(error => console.error("Callback failed:", error))
   }
 }
 

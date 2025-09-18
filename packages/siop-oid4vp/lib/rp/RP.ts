@@ -28,6 +28,7 @@ import {
   AuthorizationEvent,
   AuthorizationEvents,
   AuthorizationResponsePayload,
+  CallbackOpts,
   DecryptCompact,
   PassBy,
   RegisterEventListener,
@@ -81,6 +82,7 @@ export class RP {
 
   public async createAuthorizationRequest(opts: {
     correlationId: string
+    queryId?: string,
     nonce: string | RequestPropertyWithTargets<string>
     state: string | RequestPropertyWithTargets<string>
     jwtIssuer?: JwtIssuer
@@ -95,6 +97,7 @@ export class RP {
       .then((authorizationRequest: AuthorizationRequest) => {
         void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
           correlationId: opts.correlationId,
+          queryId: opts.queryId,
           subject: authorizationRequest,
         })
         return authorizationRequest
@@ -110,6 +113,7 @@ export class RP {
 
   public async createAuthorizationRequestURI(opts: {
     correlationId: string
+    queryId?: string
     nonce: string | RequestPropertyWithTargets<string>
     state: string | RequestPropertyWithTargets<string>
     jwtIssuer?: JwtIssuer
@@ -118,6 +122,7 @@ export class RP {
     requestByReferenceURI?: string
     responseURI?: string
     responseURIType?: ResponseURIType
+    callback?: CallbackOpts
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
@@ -126,7 +131,9 @@ export class RP {
       const authRequest = await AuthorizationRequest.fromOpts(authorizationRequestOpts)
       this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
         correlationId: opts.correlationId,
+        queryId: opts.queryId,
         subject: authRequest,
+        callback: opts.callback
       })
       return uri
     } catch (error) {
@@ -429,7 +436,9 @@ export class RP {
     type: AuthorizationEvents,
     payload: {
       correlationId: string
+      queryId?: string
       subject?: AuthorizationRequest | AuthorizationResponse | AuthorizationResponsePayload
+      callback?: CallbackOpts
       error?: Error
     },
   ): void {

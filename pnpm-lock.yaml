@@ -459,6 +459,9 @@ importers:
       uint8arrays:
         specifier: ^3.1.1
         version: 3.1.1
+      zod:
+        specifier: ^4.1.5
+        version: 4.1.5
     devDependencies:
       '@babel/core':
         specifier: ^7.23.9
@@ -8946,6 +8949,9 @@ packages:
     resolution: {integrity: sha512-D7eujBWkLa3p2sIpJA0d1pr7es+a7m0vFAnZLlCEKq/Ij2k0MLi9Br2UPxoxdYystm5K1yeBGzub0FlYUEWj2Q==}
     engines: {node: '>=8.0.0'}
     hasBin: true
+
+  zod@4.1.5:
+    resolution: {integrity: sha512-rcUUZqlLJgBC33IT3PNMgsCq6TzLQEG/Ei/KTCU0PedSWRMAXoOUN+4t/0H+Q8bdnLPdqUYnvboJT0bn/229qg==}
 
 snapshots:
 
@@ -19622,3 +19628,5 @@ snapshots:
       validator: 13.15.0
     optionalDependencies:
       commander: 9.5.0
+
+  zod@4.1.5: {}

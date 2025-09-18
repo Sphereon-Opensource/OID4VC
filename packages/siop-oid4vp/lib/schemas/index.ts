@@ -6,3 +6,4 @@ export * from './AuthorizationResponseOpts.schema';
 export * from './DiscoveryMetadataPayload.schema';
 export * from './RPRegistrationMetadataPayload.schema';
 export * from './validation';
+export * from './universal-oid4vp';

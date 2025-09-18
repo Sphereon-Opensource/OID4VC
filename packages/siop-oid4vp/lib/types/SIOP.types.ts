@@ -8,9 +8,10 @@ import {
   MdocOid4vpMdocVpToken,
   W3CVerifiableCredential,
   W3CVerifiablePresentation,
-  WrappedVerifiablePresentation,
+  WrappedVerifiablePresentation
 } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
+import { z } from 'zod'
 import {
   AuthorizationRequest,
   CreateAuthorizationRequestOpts,
@@ -21,12 +22,13 @@ import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   PresentationVerificationCallback,
-  VerifyAuthorizationResponseOpts,
+  VerifyAuthorizationResponseOpts
 } from '../authorization-response'
 import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 import { JWTPayload, VerifiedJWT } from './JWT.types'
+import { CallbackOptsSchema } from '../schemas/universal-oid4vp'
 
 export const DEFAULT_EXPIRATION_TIME = 10 * 60
 
@@ -52,8 +54,6 @@ export interface AuthorizationRequestCommonPayload extends RequestCommonPayload,
   request?: string // OPTIONAL. Request Object value, as specified in Section 6.1 of [OpenID.Core]. The Request Object MAY be encrypted to the Self-Issued OP by the RP. In this case, the sub (subject) of a previously issued ID Token for this RP MUST be sent as the kid (Key ID) of the JWE.
   request_uri?: string // OPTIONAL. URL where Request Object value can be retrieved from, as specified in Section 6.2 of [OpenID.Core].
 }
-
-export type RequestUriMethod = 'get' | 'post'
 
 export enum ClientIdentifierPrefix {
   REDIRECT_URI = 'redirect_uri',
@@ -553,6 +553,17 @@ export enum ResponseMode {
   FRAGMENT_JWT = 'fragment.jwt',
 }
 
+export enum RequestUriMethod {
+  GET = 'get',
+  POST = 'post',
+}
+
+export enum VerifiedDataMode {
+  AUTHORIZATION_RESPONSE = 'authorization_response',
+  CREDENTIAL_CLAIMS_DESERIALIZED = 'credential_claims_deserialized',
+  VP_TOKEN = 'vp_token'
+}
+
 export enum ProtocolFlow {
   SAME_DEVICE = 'same_device',
   CROSS_DEVICE = 'cross_device',
@@ -722,3 +733,5 @@ export enum ContentType {
   FORM_URL_ENCODED = 'application/x-www-form-urlencoded',
   UTF_8 = 'UTF-8',
 }
+
+export type CallbackOpts = z.infer<typeof CallbackOptsSchema>;
