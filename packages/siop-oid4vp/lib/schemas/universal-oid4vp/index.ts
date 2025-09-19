@@ -1,18 +1,18 @@
 import {
   AuthorizationRequestStateStatus,
   AuthorizationResponseStateStatus,
-  RequestUriMethod,
-  ResponseMode,
-  ResponseType,
-  VerifiedDataMode,
-  QRCodeOpts,
-  QRCodeOptsPayload,
   CallbackOpts,
   CallbackOptsPayload,
   CreateAuthorizationRequest,
   CreateAuthorizationRequestPayload,
   CreateAuthorizationResponse,
-  CreateAuthorizationResponsePayload
+  CreateAuthorizationResponsePayload,
+  QRCodeOpts,
+  QRCodeOptsPayload,
+  RequestUriMethod,
+  ResponseMode,
+  ResponseType,
+  VerifiedDataMode
 } from '../../types'
 import { z } from 'zod'
 
