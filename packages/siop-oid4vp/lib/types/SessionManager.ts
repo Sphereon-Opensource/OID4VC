@@ -2,7 +2,8 @@ import { AuthorizationRequest } from '../authorization-request'
 import { AuthorizationResponse } from '../authorization-response'
 
 export interface AuthorizationRequestState {
-  correlationId?: string
+  correlationId: string
+  queryId: string
   request: AuthorizationRequest
   status: AuthorizationRequestStateStatus
   timestamp: number
@@ -11,7 +12,8 @@ export interface AuthorizationRequestState {
 }
 
 export interface AuthorizationResponseState {
-  correlationId?: string
+  correlationId: string
+  queryId: string
   response: AuthorizationResponse
   status: AuthorizationResponseStateStatus
   timestamp: number
@@ -20,17 +22,13 @@ export interface AuthorizationResponseState {
 }
 
 export enum AuthorizationRequestStateStatus {
-  CREATED = 'created',
-  SENT = 'sent',
-  RECEIVED = 'received',
-  VERIFIED = 'verified',
-  ERROR = 'error',
+  CREATED = "authorization_request_created",
+  RETRIEVED = "authorization_request_retrieved",
+  ERROR = "error"
 }
 
 export enum AuthorizationResponseStateStatus {
-  CREATED = 'created',
-  SENT = 'sent',
-  RECEIVED = 'received',
-  VERIFIED = 'verified',
-  ERROR = 'error',
+  RECEIVED = "authorization_response_received",
+  VERIFIED = "authorization_response_verified",
+  ERROR = "error"
 }

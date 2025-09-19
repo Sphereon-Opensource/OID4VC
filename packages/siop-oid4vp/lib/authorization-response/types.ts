@@ -11,6 +11,8 @@ import {
 import { DcqlQuery } from 'dcql'
 import { AuthorizationResponse } from './AuthorizationResponse'
 import {
+  CreateJwtCallback,
+  VerifyJwtCallback,
   ResponseMode,
   ResponseRegistrationOpts,
   ResponseType,
