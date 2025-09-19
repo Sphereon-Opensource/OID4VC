@@ -113,29 +113,19 @@ export const RPRegistrationMetadataPayloadSchemaObj = {
             "type": "string"
           }
         },
-        "vp_formats": {
+        "vp_formats_supported": {
           "anyOf": [
+            {},
             {
               "$ref": "#/definitions/Format"
-            },
-            {}
+            }
           ]
         },
         "client_name": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {}
-          ]
+          "type": "string"
         },
         "logo_uri": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {}
-          ]
+          "type": "string"
         },
         "client_purpose": {
           "anyOf": [

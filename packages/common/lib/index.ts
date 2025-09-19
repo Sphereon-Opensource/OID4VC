@@ -7,6 +7,7 @@ export * from './types'
 export * from './jwt'
 export * from './dpop'
 export * from './oauth'
+export * from './helpers/Encodings'
 
 export { v4 as uuidv4 } from 'uuid'
 export { defaultHasher } from './hasher'

@@ -17,5 +17,5 @@ export interface IRPSessionManager {
 
   getCorrelationIdByState(state: string, errorOnNotFound?: boolean): Promise<string | undefined>
 
-  deleteStateForCorrelationId(correlationId: string)
+  deleteStateForCorrelationId(correlationId: string): Promise<void>
 }

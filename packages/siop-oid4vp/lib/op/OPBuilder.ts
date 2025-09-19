@@ -1,12 +1,9 @@
 import { EventEmitter } from 'events'
-
 import { HasherSync, IIssuerId } from '@sphereon/ssi-types'
-
 import { PropertyTargets } from '../authorization-request'
 import { PresentationSignCallback } from '../authorization-response'
-import { CreateJwtCallback, ResponseIss, ResponseMode, ResponseRegistrationOpts, SupportedVersion, VerifyJwtCallback } from '../types'
-
 import { OP } from './OP'
+import { CreateJwtCallback, ResponseIss, ResponseMode, ResponseRegistrationOpts, SupportedVersion, VerifyJwtCallback } from '../types'
 
 export class OPBuilder {
   expiresIn?: number
@@ -50,14 +47,6 @@ export class OPBuilder {
     return this
   }
 
-  /*//TODO registration object creation
-  authorizationEndpoint?: Schema.OPENID | string;
-  scopesSupported?: Scope[] | Scope;
-  subjectTypesSupported?: SubjectType[] | SubjectType;
-  idTokenSigningAlgValuesSupported?: SigningAlgo[] | SigningAlgo;
-  requestObjectSigningAlgValuesSupported?: SigningAlgo[] | SigningAlgo;
-*/
-
   withCreateJwtCallback(createJwtCallback: CreateJwtCallback): OPBuilder {
     this.createJwtCallback = createJwtCallback
     return this
@@ -99,11 +88,7 @@ export class OPBuilder {
   }
 
   build(): OP {
-    /*if (!this.responseRegistration) {
-      throw Error('You need to provide response registrations values')
-    } else */ /*if (!this.withSignature) {
-      throw Error('You need to supply withSignature values');
-    } else */ if (!this.supportedVersions || this.supportedVersions.length === 0) {
+    if (!this.supportedVersions || this.supportedVersions.length === 0) {
       this.supportedVersions = [SupportedVersion.SIOPv2_D11, SupportedVersion.SIOPv2_ID1, SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1]
     }
     // We ignore the private visibility, as we don't want others to use the OP directly

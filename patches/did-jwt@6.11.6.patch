@@ -1,0 +1,123 @@
+diff --git a/lib/JWT.d.ts b/lib/JWT.d.ts
+index 6a16a50..bf2df15 100644
+--- a/lib/JWT.d.ts
++++ b/lib/JWT.d.ts
+@@ -170,6 +170,13 @@ export declare function createJWT(payload: Partial<JWTPayload>, { issuer, signer
+  *  @return   {VerificationMethod}                       The public key used to sign the JWS
+  */
+ export declare function verifyJWS(jws: string, pubKeys: VerificationMethod | VerificationMethod[]): VerificationMethod;
++/**
++ * Extracts a Decentralized Identifier (DID) from a Client Identifier that has a possible client identifier prefix prepended.
++ *
++ * @param    {String}            clientId                A full Client Identifier
++ * @returns  {String}
++ */
++export declare const extractDidFromClientId: (clientId: string) => string;
+ /**
+  *  Verifies given JWT. If the JWT is valid, the promise returns an object including the JWT, the payload of the JWT,
+  *  and the DID document of the issuer of the JWT.
+diff --git a/lib/index.cjs b/lib/index.cjs
+index 8f41df8..4718ded 100644
+--- a/lib/index.cjs
++++ b/lib/index.cjs
+@@ -1034,7 +1034,7 @@ const verifyJWT = function (jwt, options = {
+         throw new Error(`${JWT_ERROR.INVALID_JWT}: JWT client_id is required`);
+       }
+ 
+-      did = payload.client_id;
++      did = extractDidFromClientId(payload.client_id);
+     } else {
+       did = payload.iss;
+     }
+@@ -1317,6 +1317,21 @@ function verifyJWS(jws, pubKeys) {
+   const jwsDecoded = decodeJWS(jws);
+   return verifyJWSDecoded(jwsDecoded, pubKeys);
+ }
++/**
++ * Extracts a Decentralized Identifier (DID) from a Client Identifier that has a possible client identifier prefix prepended.
++ *
++ * @param    {String}            clientId                A full Client Identifier
++ * @returns  {String}
++ */
++
++const extractDidFromClientId = clientId => {
++  if (!clientId.includes(':did:')) {
++    return clientId;
++  }
++
++  const match = clientId.match(/(did:[^\s]+)/i);
++  return match ? match[1] : clientId;
++};
+ 
+ const _iteratorSymbol = typeof Symbol !== "undefined" ? Symbol.iterator || (Symbol.iterator = Symbol("Symbol.iterator")) : "@@iterator";
+ 
+diff --git a/lib/index.module.js b/lib/index.module.js
+index 82a660c..22cdbce 100644
+--- a/lib/index.module.js
++++ b/lib/index.module.js
+@@ -1008,7 +1008,7 @@ const verifyJWT = function (jwt, options = {
+         throw new Error(`${JWT_ERROR.INVALID_JWT}: JWT client_id is required`);
+       }
+ 
+-      did = payload.client_id;
++      did = extractDidFromClientId(payload.client_id);
+     } else {
+       did = payload.iss;
+     }
+@@ -1291,6 +1291,21 @@ function verifyJWS(jws, pubKeys) {
+   const jwsDecoded = decodeJWS(jws);
+   return verifyJWSDecoded(jwsDecoded, pubKeys);
+ }
++/**
++ * Extracts a Decentralized Identifier (DID) from a Client Identifier that has a possible client identifier prefix prepended.
++ *
++ * @param    {String}            clientId                A full Client Identifier
++ * @returns  {String}
++ */
++
++const extractDidFromClientId = clientId => {
++  if (!clientId.includes(':did:')) {
++    return clientId;
++  }
++
++  const match = clientId.match(/(did:[^\s]+)/i);
++  return match ? match[1] : clientId;
++};
+ 
+ const _iteratorSymbol = typeof Symbol !== "undefined" ? Symbol.iterator || (Symbol.iterator = Symbol("Symbol.iterator")) : "@@iterator";
+ 
+diff --git a/src/JWT.ts b/src/JWT.ts
+index 2c6ed6a..9f8a321 100644
+--- a/src/JWT.ts
++++ b/src/JWT.ts
+@@ -354,6 +354,21 @@ export function verifyJWS(jws: string, pubKeys: VerificationMethod | Verificatio
+   return verifyJWSDecoded(jwsDecoded, pubKeys)
+ }
+ 
++/**
++ * Extracts a Decentralized Identifier (DID) from a Client Identifier that has a possible client identifier prefix prepended.
++ *
++ * @param    {String}            clientId                A full Client Identifier
++ * @returns  {String}
++ */
++export const extractDidFromClientId = (clientId: string): string => {
++  if (!clientId.includes(':did:')) {
++    return clientId
++  }
++
++  const match = clientId.match(/(did:[^\s]+)/i)
++  return match ? match[1] : clientId
++}
++
+ /**
+  *  Verifies given JWT. If the JWT is valid, the promise returns an object including the JWT, the payload of the JWT,
+  *  and the DID document of the issuer of the JWT.
+@@ -428,7 +443,7 @@ export async function verifyJWT(
+     if (!payload.client_id) {
+       throw new Error(`${JWT_ERROR.INVALID_JWT}: JWT client_id is required`)
+     }
+-    did = payload.client_id
++    did = extractDidFromClientId(payload.client_id)
+   } else {
+     did = payload.iss
+   }

@@ -1,5 +1,4 @@
 import { Format } from '@sphereon/pex-models'
-
 import {
   CommonSupportedMetadata,
   DiscoveryMetadataPayload,
@@ -22,7 +21,7 @@ export function assertValidMetadata(opMetadata: DiscoveryMetadataPayload, rpMeta
       subjectSyntaxTypesSupported = [...opMetadata.subject_syntax_types_supported]
     }
   }
-  return { vp_formats: credentials, subject_syntax_types_supported: subjectSyntaxTypesSupported }
+  return { vp_formats_supported: credentials, subject_syntax_types_supported: subjectSyntaxTypesSupported }
 }
 
 function getIntersection<T>(rpMetadata: Array<T> | T, opMetadata: Array<T> | T): Array<T> {

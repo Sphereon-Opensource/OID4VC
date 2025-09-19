@@ -1,10 +1,20 @@
-import { HasherSync } from '@sphereon/ssi-types'
-import { DcqlMdocCredential, DcqlPresentation, DcqlPresentationResult, DcqlQuery, DcqlSdJwtVcCredential } from 'dcql'
-
-import { extractDataFromPath } from '../helpers'
-import { AuthorizationRequestPayload, SIOPErrors } from '../types'
-
-import { extractDcqlPresentationFromDcqlVpToken } from './OpenID4VP'
+import {
+  HasherSync,
+  WrappedMdocCredential,
+  WrappedSdJwtVerifiableCredential,
+  WrappedW3CVerifiableCredential,
+} from '@sphereon/ssi-types'
+import {
+  DcqlMdocCredential,
+  DcqlPresentation,
+  DcqlPresentationResult,
+  DcqlQuery,
+  DcqlSdJwtVcCredential,
+  DcqlW3cVcCredential
+} from 'dcql'
+import {extractDataFromPath} from '../helpers'
+import {extractDcqlPresentationFromDcqlVpToken, hasCryptographicHolderBinding} from './OpenID4VP'
+import {AuthorizationRequestPayload, SupportedVersion} from '../types'
 
 /**
  * Finds a valid DcqlQuery inside the given AuthenticationRequestPayload
@@ -15,64 +25,99 @@ import { extractDcqlPresentationFromDcqlVpToken } from './OpenID4VP'
  */
 
 export class Dcql {
-  static findValidDcqlQuery = async (authorizationRequestPayload: AuthorizationRequestPayload): Promise<DcqlQuery | undefined> => {
-    const dcqlQuery: string[] = extractDataFromPath(authorizationRequestPayload, '$.dcql_query').map((d) => d.value)
-    const definitions = extractDataFromPath(authorizationRequestPayload, '$.presentation_definition')
-    const definitionsFromList = extractDataFromPath(authorizationRequestPayload, '$.presentation_definition[*]')
-    const definitionRefs = extractDataFromPath(authorizationRequestPayload, '$.presentation_definition_uri')
-    const definitionRefsFromList = extractDataFromPath(authorizationRequestPayload, '$.presentation_definition_uri[*]')
+  static findValidDcqlQuery = async (authorizationRequestPayload: AuthorizationRequestPayload, version?: SupportedVersion): Promise<DcqlQuery | undefined> => {
+    const dcqlQuery: DcqlQuery.Input[] = extractDataFromPath(authorizationRequestPayload ?? {}, '$..dcql_query').map((d) => d.value)
 
-    const hasPD = (definitions && definitions.length > 0) || (definitionsFromList && definitionsFromList.length > 0)
-    const hasPdRef = (definitionRefs && definitionRefs.length > 0) || (definitionRefsFromList && definitionRefsFromList.length > 0)
-    const hasDcql = dcqlQuery && dcqlQuery.length > 0
-
-    if ([hasPD, hasPdRef, hasDcql].filter(Boolean).length > 1) {
-      throw new Error(SIOPErrors.REQUEST_CLAIMS_PRESENTATION_NON_EXCLUSIVE)
+    if (dcqlQuery.length === 0) {
+      return undefined
     }
-
-    if (dcqlQuery.length === 0) return undefined
 
     if (dcqlQuery.length > 1) {
       throw new Error('Found multiple dcql_query in vp_token. Only one is allowed')
     }
 
-    return DcqlQuery.parse(JSON.parse(dcqlQuery[0]))
+    const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery[0])
+
+    if (version === SupportedVersion.OID4VP_v1) {
+      const hasMeta = parsedDcqlQuery.credentials
+          .filter(q => q.format === 'jwt_vc_json' || q.format === 'ldp_vc')
+          .every(q => q.meta !== undefined)
+
+      if (!hasMeta) {
+        throw new Error('Missing meta property in DCQL query')
+      }
+    }
+
+    return parsedDcqlQuery
   }
 
   static getDcqlPresentationResult = (
-    record: DcqlPresentation | string,
-    dcqlQuery: DcqlQuery,
-    opts: {
-      hasher?: HasherSync
-    },
+      record: DcqlPresentation | string,
+      dcqlQuery: DcqlQuery,
+      opts: {
+        hasher?: HasherSync
+      },
   ) => {
     const dcqlPresentation = Object.fromEntries(
-      Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
-        if (p.format === 'mso_mdoc') {
-          return [
-            queryId,
-            {
-              credential_format: 'mso_mdoc',
-              doctype: p.vcs[0].credential.toJson().docType,
-              namespaces: p.vcs[0].decoded,
-            } satisfies DcqlMdocCredential,
-          ]
-        } else if (p.format === 'vc+sd-jwt') {
-          return [
-            queryId,
-            {
-              credential_format: 'vc+sd-jwt',
-              vct: p.vcs[0].decoded.vct,
-              claims: p.vcs[0].decoded,
-            } satisfies DcqlSdJwtVcCredential,
-          ]
-        } else {
-          throw new Error('DcqlPresentation atm only supports mso_mdoc and vc+sd-jwt')
-        }
-      }),
+        // FIXME SSISDK-41
+        Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
+          const credentials = p.vcs.map(vc => {
+            switch (p.format) {
+              case 'mso_mdoc':
+                return Dcql.toDcqlMdocCredential(vc.original)
+              case 'dc+sd-jwt':
+                return Dcql.toDcqlSdJwtCredential(vc)
+              case 'jwt_vp':
+                return Dcql.toDcqlJwtCredential(vc)
+              case 'ldp_vp':
+                return Dcql.toDcqlJsonLdCredential(vc)
+              default:
+                const format: string = (p as any).format;
+                throw new Error(`Unknown DcqlPresentation format ${format}`)
+            }
+          })
+
+          return [queryId, credentials]
+        })
     )
 
     return DcqlPresentationResult.fromDcqlPresentation(dcqlPresentation, { dcqlQuery })
+  }
+
+  static toDcqlMdocCredential = (vc: WrappedMdocCredential): DcqlMdocCredential => {
+    return {
+      credential_format: 'mso_mdoc',
+      doctype: vc.credential.toJson().docType,
+      namespaces: vc.decoded,
+      cryptographic_holder_binding: hasCryptographicHolderBinding('mso_mdoc', vc),
+    } satisfies DcqlMdocCredential
+  }
+
+  static toDcqlSdJwtCredential = (vc: WrappedSdJwtVerifiableCredential): DcqlSdJwtVcCredential => {
+    return {
+      credential_format: 'dc+sd-jwt',
+      vct: vc.decoded.vct,
+      claims: vc.decoded,
+      cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', vc),
+    } satisfies DcqlSdJwtVcCredential
+  }
+
+  static toDcqlJwtCredential = (vc: WrappedW3CVerifiableCredential): DcqlW3cVcCredential => {
+    return {
+      credential_format: 'jwt_vc_json',
+      claims: vc.decoded,
+      cryptographic_holder_binding: hasCryptographicHolderBinding('jwt_vc_json', vc),
+      type: vc.credential.type,
+    } satisfies DcqlW3cVcCredential
+  }
+
+  static toDcqlJsonLdCredential = (vc: WrappedW3CVerifiableCredential): DcqlW3cVcCredential => {
+    return {
+      credential_format: 'ldp_vc',
+      claims: vc.decoded,
+      cryptographic_holder_binding: hasCryptographicHolderBinding('ldp_vc', vc),
+      type: vc.credential.type,
+    } satisfies DcqlW3cVcCredential
   }
 
   static assertValidDcqlPresentationResult = async (

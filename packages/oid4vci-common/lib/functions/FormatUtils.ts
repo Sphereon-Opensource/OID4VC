@@ -17,7 +17,7 @@ export function isNotFormat<T extends { format?: OID4VCICredentialFormat }, Form
 }
 
 const isUniformFormat = (format: string): format is OID4VCICredentialFormat => {
-  return ['jwt_vc_json', 'jwt_vc_json-ld', 'ldp_vc', 'vc+sd-jwt', 'mso_mdoc'].includes(format)
+  return ['jwt_vc_json', 'jwt_vc_json-ld', 'ldp_vc', 'dc+sd-jwt', 'mso_mdoc'].includes(format)
 }
 
 export function getUniformFormat(format: string | OID4VCICredentialFormat | CredentialFormat): OID4VCICredentialFormat {
@@ -40,13 +40,7 @@ export function getUniformFormat(format: string | OID4VCICredentialFormat | Cred
 export function getFormatForVersion(format: string, version: OpenId4VCIVersion) {
   const uniformFormat = isUniformFormat(format) ? format : getUniformFormat(format)
 
-  if (version === OpenId4VCIVersion.VER_1_0_08) {
-    if (uniformFormat === 'jwt_vc_json') {
-      return 'jwt_vc' as const
-    } else if (uniformFormat === 'ldp_vc' || uniformFormat === 'jwt_vc_json-ld') {
-      return 'ldp_vc' as const
-    }
-  }
+  // Removed version specific format rules
 
   return uniformFormat
 }

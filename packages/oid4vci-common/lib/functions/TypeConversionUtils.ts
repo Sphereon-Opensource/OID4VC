@@ -1,28 +1,27 @@
-import { VCI_LOG_COMMON } from '../index'
+import {
+  CredentialConfigurationSupportedMsoMdocV1_0_15,
+  CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15,
+  CredentialDefinitionJwtVcJsonV1_0_15,
+  VCI_LOG_COMMON
+} from '../index'
 import {
   AuthorizationDetails,
   CredentialConfigurationSupported,
-  CredentialConfigurationSupportedMsoMdocV1_0_13,
-  CredentialConfigurationSupportedSdJwtVcV1_0_13,
-  CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13,
-  CredentialDefinitionJwtVcJsonV1_0_13,
+  CredentialConfigurationSupportedSdJwtVcV1_0_15,
   CredentialOfferFormatV1_0_11,
-  CredentialOfferPayload,
   CredentialsSupportedLegacy,
   CredentialSupportedMsoMdoc,
   CredentialSupportedSdJwtVc,
-  JsonLdIssuerCredentialDefinition,
-  UniformCredentialOfferPayload,
-  UniformCredentialOfferRequest,
+  JsonLdIssuerCredentialDefinition
 } from '../types'
 
 export function isW3cCredentialSupported(
   supported: CredentialConfigurationSupported | CredentialsSupportedLegacy,
 ): supported is Exclude<
   CredentialConfigurationSupported,
-  | CredentialConfigurationSupportedMsoMdocV1_0_13
+  | CredentialConfigurationSupportedMsoMdocV1_0_15
   | CredentialSupportedMsoMdoc
-  | CredentialConfigurationSupportedSdJwtVcV1_0_13
+  | CredentialConfigurationSupportedSdJwtVcV1_0_15
   | CredentialSupportedSdJwtVc
 > {
   return ['jwt_vc_json', 'jwt_vc_json-ld', 'ldp_vc', 'jwt_vc'].includes(supported.format)
@@ -40,8 +39,8 @@ export function getTypesFromObject(
   subject:
     | CredentialConfigurationSupported
     | CredentialOfferFormatV1_0_11
-    | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13
-    | CredentialDefinitionJwtVcJsonV1_0_13
+    | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15
+    | CredentialDefinitionJwtVcJsonV1_0_15
     | JsonLdIssuerCredentialDefinition
     | string,
 ): string[] | undefined {
@@ -52,8 +51,8 @@ export function getTypesFromObject(
   } else if ('credential_definition' in subject) {
     return getTypesFromObject(
       subject.credential_definition as
-        | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_13
-        | CredentialDefinitionJwtVcJsonV1_0_13
+        | CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15
+        | CredentialDefinitionJwtVcJsonV1_0_15
         | JsonLdIssuerCredentialDefinition,
     )
   } else if ('types' in subject && subject.types) {
@@ -66,28 +65,6 @@ export function getTypesFromObject(
     return [subject.doctype as string]
   }
   VCI_LOG_COMMON.warning('Could not deduce credential types. Probably a failure down the line will happen!')
-  return undefined
-}
-
-export function getTypesFromCredentialOffer(
-  offer: UniformCredentialOfferRequest | CredentialOfferPayload | UniformCredentialOfferPayload,
-  opts?: { configIdAsType?: boolean },
-): Array<Array<string>> | undefined {
-  const { configIdAsType = false } = { ...opts }
-  if ('credentials' in offer && Array.isArray(offer.credentials)) {
-    return offer.credentials.map((cred) => getTypesFromObject(cred)).filter((cred): cred is string[] => cred !== undefined)
-  } else if (configIdAsType && 'credential_configuration_ids' in offer && Array.isArray(offer.credential_configuration_ids)) {
-    return offer.credential_configuration_ids.map((id) => [id])
-  } else if ('credential_offer' in offer && offer.credential_offer) {
-    return getTypesFromCredentialOffer(offer.credential_offer, opts)
-  } else if ('credential_type' in offer && offer.credential_type) {
-    if (typeof offer.credential_type === 'string') {
-      return [[offer.credential_type]]
-    } else if (Array.isArray(offer.credential_type)) {
-      return [offer.credential_type]
-    }
-  }
-  VCI_LOG_COMMON.warning('Could not deduce credential types from offer. Probably a failure down the line will happen!')
   return undefined
 }
 
@@ -116,7 +93,7 @@ export function getTypesFromCredentialSupported(
     credentialSupported.format === 'ldp_vc'
   ) {
     types = getTypesFromObject(credentialSupported) ?? []
-  } else if (credentialSupported.format === 'vc+sd-jwt') {
+  } else if (credentialSupported.format === 'dc+sd-jwt'/* || credentialSupported.format === 'vc+sd-jwt'*/) { // TODO VCDM needs vc+sd-jwt back
     types = [credentialSupported.vct]
   } else if (credentialSupported.format === 'mso_mdoc') {
     types = [credentialSupported.doctype]

@@ -8,12 +8,11 @@ import {
   AuthorizationChallengeErrorResponse,
   AuthorizationRequest,
   CommonAuthorizationChallengeRequest,
-  CredentialIssuerMetadataOptsV1_0_13,
+  CredentialIssuerMetadataOptsV1_0_15,
   CredentialOfferMode,
-  CredentialOfferRESTRequest,
-  CredentialRequestV1_0_13,
+  CredentialOfferRESTRequestV1_0_15,
+  CredentialRequestV1_0_15,
   determineGrantTypes,
-  determineSpecVersionFromOffer,
   EVENTS,
   extractBearerToken,
   generateRandomString,
@@ -23,13 +22,12 @@ import {
   JWT_SIGNER_CALLBACK_REQUIRED_ERROR,
   NotificationRequest,
   NotificationStatusEventNames,
-  OpenId4VCIVersion,
   TokenErrorResponse,
   trimBoth,
   trimEnd,
   trimStart,
   validateJWT,
-  WellKnownEndpoints,
+  WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
 import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
@@ -42,7 +40,7 @@ import {
   ICreateCredentialOfferEndpointOpts,
   ICreateCredentialOfferURIResponse,
   IGetCredentialOfferEndpointOpts,
-  IGetIssueStatusEndpointOpts,
+  IGetIssueStatusEndpointOpts
 } from './OID4VCIServer'
 import { validateRequestBody } from './expressUtils'
 
@@ -134,7 +132,7 @@ export function getCredentialOfferReferenceEndpoint(router: Router, issuer: VcIs
   return path
 }
 
-function isExternalAS(issuerMetadata: CredentialIssuerMetadataOptsV1_0_13) {
+function isExternalAS(issuerMetadata: CredentialIssuerMetadataOptsV1_0_15) {
   return issuerMetadata.authorization_servers?.some((as) => !as.includes(issuerMetadata.credential_issuer))
 }
 
@@ -294,7 +292,7 @@ export function getCredentialEndpoint(
   LOG.log(`[OID4VCI] getCredential endpoint enabled at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
     try {
-      const credentialRequest = request.body as CredentialRequestV1_0_13
+      const credentialRequest = request.body as CredentialRequestV1_0_15
       LOG.log(`credential request received`, credentialRequest)
       try {
         const jwt = extractBearerToken(request.header('Authorization'))
@@ -461,7 +459,7 @@ export function deleteCredentialOfferEndpoint(router: Router, issuer: VcIssuer, 
   })
 }
 
-function buildCredentialOfferReferenceUri(request: Request<CredentialOfferRESTRequest>, offerReferencePath?: string) {
+function buildCredentialOfferReferenceUri(request: Request<CredentialOfferRESTRequestV1_0_15>, offerReferencePath?: string) {
   if (!offerReferencePath) {
     return Promise.reject(Error('issuePayloadPath must bet set for offerMode REFERENCE!'))
   }
@@ -490,15 +488,15 @@ export function createCredentialOfferEndpoint(
     opts?.credentialOfferReferenceBasePath ?? issuerPayloadPath ?? determinePath(opts?.baseUrl, '/credential-offers', { stripBasePath: true })
 
   LOG.log(`[OID4VCI] createCredentialOffer endpoint enabled at ${path}`)
-  router.post(path, async (request: Request<CredentialOfferRESTRequest>, response: Response<ICreateCredentialOfferURIResponse>) => {
+  router.post(path, async (request: Request<CredentialOfferRESTRequestV1_0_15>, response: Response<ICreateCredentialOfferURIResponse>) => {
     try {
-      const specVersion = determineSpecVersionFromOffer(request.body.original_credential_offer)
-      if (specVersion < OpenId4VCIVersion.VER_1_0_13) {
-        return sendErrorResponse(response, 400, {
-          error: TokenErrorResponse.invalid_client,
-          error_description: 'credential offer request should be of spec version 1.0.13 or above',
-        })
-      }
+      // const specVersion = determineSpecVersionFromOffer(request.body.original_credential_offer)
+      // if (specVersion < OpenId4VCIVersion.VER_1_0_15) {
+      //   return sendErrorResponse(response, 400, {
+      //     error: TokenErrorResponse.invalid_client,
+      //     error_description: 'credential offer request should be of spec version 1.0.15 or above',
+      //   })
+      // }
 
       const grantTypes = determineGrantTypes(request.body)
       if (grantTypes.length === 0) {
