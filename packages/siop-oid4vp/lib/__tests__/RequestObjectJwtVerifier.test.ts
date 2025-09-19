@@ -2,7 +2,6 @@ import * as dotenv from 'dotenv'
 import {describe, expect, it} from 'vitest'
 import {DcqlQuery} from 'dcql'
 import {ClientIdentifierPrefix, getRequestObjectJwtVerifier, JwtVerifier, PassBy, SIOPErrors} from '../types'
-import {VERIFIERZ_PURPOSE_TO_VERIFY} from './data/mockedData';
 
 dotenv.config()
 
