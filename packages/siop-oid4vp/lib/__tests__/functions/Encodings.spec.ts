@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { encodeJsonAsURI } from '../..'
-import {DcqlQuery} from 'dcql';
+import { DcqlQuery } from 'dcql'
 
 describe('Encodings', () => {
   /*test('encodeAsUriValue', () => {

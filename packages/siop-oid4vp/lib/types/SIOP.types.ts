@@ -1,9 +1,9 @@
 import { JarmClientMetadata } from '@sphereon/jarm'
-import { DynamicRegistrationClientMetadata, JWKS, SigningAlgo } from '@sphereon/oid4vc-common'
-import { Format } from '@sphereon/pex-models'
+import { DynamicRegistrationClientMetadata, SigningAlgo } from '@sphereon/oid4vc-common'
 import {
   AdditionalClaims,
   CompactSdJwtVc,
+  Format,
   IPresentation,
   MdocOid4vpMdocVpToken,
   W3CVerifiableCredential,
@@ -78,10 +78,6 @@ export interface RequestCommonPayload extends JWTPayload {
   response_mode?: ResponseMode // This specification introduces a new response mode post in accordance with [OAuth.Responses]. This response mode is used to request the Self-Issued OP to deliver the result of the authentication process to a certain endpoint using the HTTP POST method. The additional parameter response_mode is used to carry this value.
 }
 
-export interface AuthorizationRequestPayloadVID1 extends AuthorizationRequestCommonPayload, RequestRegistrationPayloadProperties {
-  claims?: ClaimPayloadVID1
-}
-
 export interface AuthorizationRequestPayloadD28
     extends AuthorizationRequestCommonPayload,
         RequestClientMetadataPayloadProperties,
@@ -120,9 +116,7 @@ export type TransactionData = {
 }
 
 // https://openid.bitbucket.io/connect/openid-connect-self-issued-v2-1_0.html#section-10
-export type AuthorizationRequestPayload = AuthorizationRequestPayloadVID1 | AuthorizationRequestPayloadV1 | AuthorizationRequestPayloadD28
-
-export type JWTVcPresentationProfileAuthenticationRequestPayload = RequestIdTokenPayloadProperties
+export type AuthorizationRequestPayload = AuthorizationRequestPayloadV1 | AuthorizationRequestPayloadD28
 
 export interface RequestIdTokenPayloadProperties {
   id_token_type?: string // OPTIONAL. Space-separated string that specifies the types of ID token the RP wants to obtain, with the values appearing in order of preference. The allowed individual values are subject_signed and attester_signed (see Section 8.2). The default value is attester_signed. The RP determines the type if ID token returned based on the comparison of the iss and sub claims values (see(see Section 12.1). In order to preserve compatibility with existing OpenID Connect deployments, the OP MAY return an ID token that does not fulfill the requirements as expressed in this parameter. So the RP SHOULD be prepared to reliably handle such an outcome.
@@ -142,7 +136,6 @@ export type ResponseURIType = 'response_uri' | 'redirect_uri'
 export interface VerifiedAuthorizationRequest extends Partial<VerifiedJWT> {
   responseURIType: ResponseURIType
   responseURI?: string
-  clientIdScheme?: string
   correlationId: string
   authorizationRequest: AuthorizationRequest
   authorizationRequestPayload: AuthorizationRequestPayload
@@ -201,7 +194,7 @@ export interface IdTokenClaimPayload {
 }
 
 export interface VpTokenClaimPayload {
-  dcql_query?: string
+  dcql_query?: Record<string, any>
 }
 
 export interface ClaimPayloadCommon {
@@ -209,7 +202,7 @@ export interface ClaimPayloadCommon {
   [x: string]: any
 }
 
-export interface ClaimPayloadVID1 extends ClaimPayloadCommon {
+export interface ClaimPayload extends ClaimPayloadCommon {
   id_token?: IdTokenClaimPayload
   vp_token?: VpTokenClaimPayload
 }
@@ -279,37 +272,6 @@ interface DiscoveryMetadataCommonOpts {
   [x: string]: any
 }
 
-//same for jwt_vc
-interface DiscoveryMetadataOptsVID1 extends DiscoveryMetadataCommonOpts {
-  client_id?: string // from oidc4vp
-  redirectUris?: string[] | string // from oidc4vp
-  clientName?: string // from oidc4vp
-  clientUri?: string // from oidc4vp
-  scope?: string // from oidc4vp
-  contacts?: string[] // from oidc4vp
-  tosUri?: string // from oidc4vp
-  policyUri?: string // from oidc4vp
-  jwks?: JWKS // from oidc4vp
-  softwareId?: string // from oidc4vp
-  softwareVersion?: string // from oidc4vp
-  tokenEndpointAuthMethod?: string // from oidc4vp
-  applicationType?: string // from oidc4vp
-  responseTypes?: string // from oidc4vp, also name suggests array
-  grantTypes?: string // from oidc4vp, also name suggests array
-  //TODO add the check: Mandatory if PassBy.Value
-  vpFormats?: Format // from oidc4vp
-}
-
-interface JWT_VCDiscoveryMetadataOpts extends DiscoveryMetadataOptsVID1 {
-  logo_uri?: string
-  clientPurpose?: string
-}
-
-interface DiscoveryMetadataOptsVD11 extends DiscoveryMetadataCommonOpts {
-  idTokenTypesSupported?: IdTokenType[] | IdTokenType
-  vpFormatsSupported?: Format // from oidc4vp
-}
-
 // https://openid.net/specs/openid-connect-self-issued-v2-1_0.html#section-8.2
 // https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
 interface DiscoveryMetadataCommonPayload {
@@ -374,27 +336,16 @@ interface DiscoveryMetadataCommonPayload {
   [x: string]: any
 }
 
-interface DiscoveryMetadataPayloadVID1 extends DynamicRegistrationClientMetadata, DiscoveryMetadataCommonPayload {
-  client_id?: string
-  application_type?: string
-  vp_formats?: Format
-}
-
-interface JWT_VCDiscoveryMetadataPayload extends DiscoveryMetadataPayloadVID1 {
-  client_purpose?: string
-}
-
-interface DiscoveryMetadataPayloadV1Final extends DynamicRegistrationClientMetadata, DiscoveryMetadataCommonPayload {
+interface DiscoveryMetadataPayloadV1 extends DynamicRegistrationClientMetadata, DiscoveryMetadataCommonPayload {
   vp_formats_supported?: Format // from oidc4vp
   id_token_types_supported?: IdTokenType[] | IdTokenType
   encrypted_response_enc_values_supported?: string[] // from oidc4vp
   client_id_prefixes_supported?: string[]
 }
 
-export type DiscoveryMetadataPayload = DiscoveryMetadataPayloadVID1 | JWT_VCDiscoveryMetadataPayload | DiscoveryMetadataPayloadV1Final
+export type DiscoveryMetadataPayload = DiscoveryMetadataPayloadV1
 
-export type DiscoveryMetadataOpts = (JWT_VCDiscoveryMetadataOpts | DiscoveryMetadataOptsVID1 | DiscoveryMetadataOptsVD11) &
-  DiscoveryMetadataCommonOpts
+export type DiscoveryMetadataOpts = DiscoveryMetadataCommonOpts
 
 export type ClientMetadataOpts = RPRegistrationMetadataOpts & ClientMetadataProperties & JarmClientMetadata & JwksMetadataParams
 
@@ -404,17 +355,17 @@ export type RPRegistrationMetadataOpts = Partial<
   Pick<
     DiscoveryMetadataOpts,
     | 'client_id'
-    | 'idTokenSigningAlgValuesSupported'
-    | 'requestObjectSigningAlgValuesSupported'
-    | 'responseTypesSupported'
-    | 'scopesSupported'
-    | 'subjectTypesSupported'
+    | 'id_token_signing_alg_values_supported'
+    | 'request_object_signing_alg_values_supported'
+    | 'response_types_supported'
+    | 'scopes_supported'
+    | 'subject_types_supported'
     | 'subject_syntax_types_supported'
     | 'vp_formats_supported'
-    | 'clientName'
+    | 'client_name'
     | 'logo_uri'
     | 'tos_uri'
-    | 'clientPurpose'
+    | 'client_purpose'
   >
 > & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -423,7 +374,6 @@ export type RPRegistrationMetadataOpts = Partial<
 
 export type RPRegistrationMetadataPayload = Pick<
   DiscoveryMetadataPayload,
-  | 'client_id'
   | 'id_token_signing_alg_values_supported'
   | 'request_object_signing_alg_values_supported'
   | 'response_types_supported'
@@ -433,8 +383,9 @@ export type RPRegistrationMetadataPayload = Pick<
   | 'vp_formats_supported'
   | 'client_name'
   | 'logo_uri'
-  | 'client_purpose'
 > & {
+  client_id?: string
+  client_purpose?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
 }
@@ -704,13 +655,8 @@ export interface RevocationOpts {
 }
 
 export enum SupportedVersion {
-  SIOPv2_ID1 = 70,
-  SIOPv2_D11 = 110,
-  SIOPv2_D12_OID4VP_D18 = 180,
-  SIOPv2_D12_OID4VP_D20 = 200,
   SIOPv2_OID4VP_D28 = 280,
-  OID4VP_v1 = 1000,
-  JWT_VC_PRESENTATION_PROFILE_v1 = 71,
+  OID4VP_v1 = 1000
 }
 
 export interface SIOPResonse<T> {

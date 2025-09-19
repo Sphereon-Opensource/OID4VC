@@ -31,7 +31,7 @@ export const createResponseOptsFromBuilderOrExistingOpts = (opts: {
     if (!responseOpts.registration.passBy) {
       responseOpts.registration.passBy = PassBy.VALUE
     }
-    const languageTagEnabledFieldsNames = ['clientName', 'clientPurpose']
+    const languageTagEnabledFieldsNames = ['client_name', 'client_purpose']
     const languageTaggedFields: Map<string, string> = LanguageTagUtils.getLanguageTaggedProperties(
       opts.builder.responseRegistration,
       languageTagEnabledFieldsNames,

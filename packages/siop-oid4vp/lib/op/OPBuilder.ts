@@ -20,7 +20,6 @@ export class OPBuilder {
 
   withHasher(hasher: HasherSync): OPBuilder {
     this.hasher = hasher
-
     return this
   }
 
@@ -89,7 +88,7 @@ export class OPBuilder {
 
   build(): OP {
     if (!this.supportedVersions || this.supportedVersions.length === 0) {
-      this.supportedVersions = [SupportedVersion.SIOPv2_D11, SupportedVersion.SIOPv2_ID1, SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1]
+      this.supportedVersions = [SupportedVersion.SIOPv2_OID4VP_D28, SupportedVersion.OID4VP_v1]
     }
     // We ignore the private visibility, as we don't want others to use the OP directly
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

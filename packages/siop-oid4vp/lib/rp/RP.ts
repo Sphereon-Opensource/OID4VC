@@ -334,6 +334,10 @@ export class RP {
       }
     }
 
+    if (this._createRequestOptions.requestObject.payload?.dcql_query) {
+      this._createRequestOptions.requestObject.payload.scope = undefined
+    }
+
     const newOpts = { ...this._createRequestOptions, version }
     newOpts.requestObject = { ...newOpts.requestObject, jwtIssuer: opts.jwtIssuer }
 

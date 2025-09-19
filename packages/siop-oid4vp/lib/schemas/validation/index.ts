@@ -1,5 +1,4 @@
 import {
-  AuthorizationRequestPayloadVID1Schema,
   AuthorizationRequestPayloadD28Schema,
   AuthorizationRequestPayloadV1Schema,
   AuthorizationResponseOptsSchema,
@@ -7,7 +6,6 @@ import {
 } from './schemaValidation.cjs'
 
 export {
-  AuthorizationRequestPayloadVID1Schema,
   AuthorizationRequestPayloadD28Schema,
   AuthorizationRequestPayloadV1Schema,
   RPRegistrationMetadataPayloadSchema,

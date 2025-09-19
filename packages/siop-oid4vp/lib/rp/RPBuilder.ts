@@ -36,12 +36,9 @@ export class RPBuilder {
   _responseRedirectUri?: string
   private _authorizationRequestPayload: Partial<AuthorizationRequestPayload> = {}
   private _requestObjectPayload: Partial<RequestObjectPayload> = {}
-
   clientMetadata?: ClientMetadataOpts = undefined
   clientId: string
   entityId: string
-  clientIdScheme: string
-
   hasher: HasherSync
 
   private constructor(supportedRequestVersion?: SupportedVersion) {
@@ -173,37 +170,20 @@ export class RPBuilder {
 
   withClientMetadata(clientMetadata: ClientMetadataOpts, targets?: PropertyTargets): RPBuilder {
     clientMetadata.targets = targets
-    if (this.getSupportedRequestVersion() < SupportedVersion.SIOPv2_D11) {
-      this._authorizationRequestPayload.registration = assignIfAuth(
-        {
-          propertyValue: clientMetadata,
-          targets,
-        },
-        false,
-      )
-      this._requestObjectPayload.registration = assignIfRequestObject(
-        {
-          propertyValue: clientMetadata,
-          targets,
-        },
-        true,
-      )
-    } else {
-      this._authorizationRequestPayload.client_metadata = assignIfAuth(
-        {
-          propertyValue: clientMetadata,
-          targets,
-        },
-        false,
+    this._authorizationRequestPayload.client_metadata = assignIfAuth(
+      {
+        propertyValue: clientMetadata,
+        targets,
+      },
+      false,
       )
       this._requestObjectPayload.client_metadata = assignIfRequestObject(
-        {
-          propertyValue: clientMetadata,
-          targets,
-        },
-        true,
-      )
-    }
+      {
+        propertyValue: clientMetadata,
+        targets,
+      },
+      true,
+    )
     this.clientMetadata = clientMetadata
     //fixme: Add URL
     return this
