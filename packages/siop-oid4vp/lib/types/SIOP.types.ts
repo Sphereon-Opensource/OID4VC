@@ -11,6 +11,7 @@ import {
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
+import { z } from 'zod'
 import {
   AuthorizationRequest,
   CreateAuthorizationRequestOpts,
@@ -27,6 +28,7 @@ import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 import { JWTPayload, VerifiedJWT } from './JWT.types'
+import { CallbackOptsSchema } from '../schemas'
 
 export const DEFAULT_EXPIRATION_TIME = 10 * 60
 
@@ -553,9 +555,10 @@ export enum ResponseMode {
   FRAGMENT_JWT = 'fragment.jwt',
 }
 
-export enum RequestUriMethod {
-  GET = 'get',
-  POST = 'post',
+export enum VerifiedDataMode {
+  AUTHORIZATION_RESPONSE = 'authorization_response',
+  CREDENTIAL_CLAIMS_DESERIALIZED = 'credential_claims_deserialized',
+  VP_TOKEN = 'vp_token'
 }
 
 export enum ProtocolFlow {
@@ -727,3 +730,5 @@ export enum ContentType {
   FORM_URL_ENCODED = 'application/x-www-form-urlencoded',
   UTF_8 = 'UTF-8',
 }
+
+export type CallbackOpts = z.infer<typeof CallbackOptsSchema>;

@@ -28,6 +28,7 @@ import {
   AuthorizationEvent,
   AuthorizationEvents,
   AuthorizationResponsePayload,
+  CallbackOpts,
   DecryptCompact,
   PassBy,
   RegisterEventListener,
@@ -121,6 +122,7 @@ export class RP {
     requestByReferenceURI?: string
     responseURI?: string
     responseURIType?: ResponseURIType
+    callback?: CallbackOpts
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
@@ -131,6 +133,7 @@ export class RP {
         correlationId: opts.correlationId,
         queryId: opts.queryId,
         subject: authRequest,
+        callback: opts.callback
       })
       return uri
     } catch (error) {
@@ -435,6 +438,7 @@ export class RP {
       correlationId: string
       queryId?: string
       subject?: AuthorizationRequest | AuthorizationResponse | AuthorizationResponsePayload
+      callback?: CallbackOpts
       error?: Error
     },
   ): void {

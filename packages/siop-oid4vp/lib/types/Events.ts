@@ -1,3 +1,5 @@
+import {CallbackOpts} from './SIOP.types';
+
 export enum AuthorizationEvents {
   ON_AUTH_REQUEST_CREATED_SUCCESS = 'onAuthRequestCreatedSuccess',
   ON_AUTH_REQUEST_CREATED_FAILED = 'onAuthRequestCreatedFailed',
@@ -26,17 +28,19 @@ export enum AuthorizationEvents {
 
 export class AuthorizationEvent<T> {
   private readonly _subject: T | undefined
+  private readonly _callback: CallbackOpts | undefined
   private readonly _error?: Error
   private readonly _timestamp: number
   private readonly _correlationId: string
   private readonly _queryId: string
 
-  public constructor(args: { correlationId: string; queryId?: string, subject?: T; error?: Error }) {
+  public constructor(args: { correlationId: string; queryId?: string, subject?: T; callback?: CallbackOpts, error?: Error }) {
     //fixme: Create correlationId if not provided. Might need to be deferred to registry though
     this._correlationId = args.correlationId
     this._queryId = args.queryId
     this._timestamp = Date.now()
     this._subject = args.subject
+    this._callback = args.callback
     this._error = args.error
   }
 
@@ -50,6 +54,10 @@ export class AuthorizationEvent<T> {
 
   get error(): Error | undefined {
     return this._error
+  }
+
+  get callback(): CallbackOpts | undefined {
+    return this._callback
   }
 
   public hasError(): boolean {

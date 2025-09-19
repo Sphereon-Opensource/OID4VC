@@ -12,7 +12,6 @@ import { DcqlQuery } from 'dcql'
 import { AuthorizationResponse } from './AuthorizationResponse'
 import {
   CreateJwtCallback,
-  VerifyJwtCallback,
   ResponseMode,
   ResponseRegistrationOpts,
   ResponseType,
@@ -20,7 +19,6 @@ import {
   SupportedVersion,
   VerifiablePresentationWithFormat,
   Verification,
-  CreateJwtCallback,
   VerifyJwtCallback,
   ResponseIss
 } from '../types'
