@@ -16,7 +16,6 @@ import {
   VerifyJwtCallbackBase,
   X5cJwtVerifier,
 } from '@sphereon/oid4vc-common'
-
 import SIOPErrors from './Errors'
 import {ClientIdentifierPrefix, RequestObjectPayload} from './SIOP.types'
 import {getClientIdentifierPrefix, removeClientIdentifierPrefix} from '../helpers';

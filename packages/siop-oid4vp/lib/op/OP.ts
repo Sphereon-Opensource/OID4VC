@@ -114,7 +114,7 @@ export class OP {
     } else if (!version) {
       version = rpSupportedVersions.reduce(
         (previous, current) => (current.valueOf() > previous.valueOf() ? current : previous),
-        SupportedVersion.SIOPv2_ID1,
+        SupportedVersion.OID4VP_v1,
       )
     }
     const correlationId = responseOpts?.correlationId ?? verifiedAuthorizationRequest.correlationId ?? uuidv4()
@@ -293,17 +293,11 @@ export class OP {
     audience?: string
     dcqlResponse?: DcqlResponseOpts
   }): AuthorizationResponseOpts {
-    const version = this._createResponseOptions.version ?? opts.version
     let issuer = opts.issuer ?? this._createResponseOptions?.registration?.issuer
-    if (version === SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1) {
-      issuer = ResponseIss.JWT_VC_PRESENTATION_V1
-    } else if (version === SupportedVersion.SIOPv2_ID1) {
-      issuer = ResponseIss.SELF_ISSUED_V2
-    }
-
     if (!issuer) {
       throw Error(`No issuer value present. Either use IDv1, JWT VC Presentation profile version, or provide a DID as issuer value`)
     }
+
     const dcqlResponse = opts.dcqlResponse ?? this._createResponseOptions.dcqlResponse
 
     const responseURI = opts.audience ?? this._createResponseOptions.responseURI
@@ -313,8 +307,7 @@ export class OP {
       ...dcqlResponse,
       registration: { ...this._createResponseOptions?.registration, issuer },
       responseURI,
-      responseURIType:
-        this._createResponseOptions.responseURIType ?? (version < SupportedVersion.SIOPv2_D12_OID4VP_D18 && responseURI ? 'redirect_uri' : undefined),
+      responseURIType: this._createResponseOptions.responseURIType
     }
   }
 

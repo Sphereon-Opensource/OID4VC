@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 import { defaultHasher, SigningAlgo } from '@sphereon/oid4vc-common'
-import { decodeSdJwtVc } from '@sphereon/ssi-types'
+import { CredentialMapper, decodeSdJwtVc } from '@sphereon/ssi-types'
 import { DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlSdJwtVcCredential } from 'dcql'
 import { describe, expect, it } from 'vitest'
 import {
@@ -83,7 +83,7 @@ const dcqlCredential = {
     credential_format: 'dc+sd-jwt',
     vct: SD_JWT_VC.decodedPayload.vct,
     claims: SD_JWT_VC.decodedPayload,
-    cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', decodeSdJwtVc(SD_JWT_VC.compactJwtVc, defaultHasher))
+    cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', CredentialMapper.toWrappedVerifiableCredential(decodeSdJwtVc(SD_JWT_VC.compactJwtVc, defaultHasher)))
 } satisfies DcqlSdJwtVcCredential
 
 describe.skip('RP and OP interaction should', () => {
@@ -125,19 +125,19 @@ describe.skip('RP and OP interaction should', () => {
       .withVerifyJwtCallback(getVerifyJwtCallback(resolver))
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:key'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100322',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100322',
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
       .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
@@ -162,8 +162,8 @@ describe.skip('RP and OP interaction should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100323',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
       .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
@@ -242,18 +242,18 @@ describe.skip('RP and OP interaction should', () => {
       .withAuthorizationEndpoint('www.myauthorizationendpoint.com')
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.VP_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.VP_TOKEN],
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:key'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100322',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100322',
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
       .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
@@ -278,8 +278,8 @@ describe.skip('RP and OP interaction should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100323',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
       .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
@@ -372,19 +372,19 @@ describe.skip('RP and OP interaction should', () => {
       .withVerifyJwtCallback(getVerifyJwtCallback(resolver))
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:key'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100322',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100322',
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
       .build()
 
@@ -408,8 +408,8 @@ describe.skip('RP and OP interaction should', () => {
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100323',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
       .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()

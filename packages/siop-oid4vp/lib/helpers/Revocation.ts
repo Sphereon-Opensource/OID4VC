@@ -7,7 +7,8 @@ import {
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
 
-import { LOG, RevocationStatus, RevocationVerification, RevocationVerificationCallback, VerifiableCredentialTypeFormat } from '../types'
+import { LOG, RevocationStatus, RevocationVerification, RevocationVerificationCallback,
+  SupportedRevocationFormats, VerifiableCredentialTypeFormat } from '../types'
 
 export const verifyRevocation = async (
   vpToken: WrappedVerifiablePresentation,
@@ -46,7 +47,7 @@ export const verifyRevocation = async (
 }
 
 function originalTypeToVerifiableCredentialTypeFormat(original: WrappedVerifiableCredential['format']): VerifiableCredentialTypeFormat {
-  const mapping: { [T in WrappedVerifiableCredential['format']]: VerifiableCredentialTypeFormat } = {
+  const mapping: { [T in SupportedRevocationFormats]: VerifiableCredentialTypeFormat } = {
     'dc+sd-jwt': VerifiableCredentialTypeFormat.SD_JWT_VC,
     jwt: VerifiableCredentialTypeFormat.JWT_VC,
     jwt_vc: VerifiableCredentialTypeFormat.JWT_VC,

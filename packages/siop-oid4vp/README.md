@@ -323,12 +323,12 @@ const rp = RP.builder()
   .withVerifyJwtCallback(verifyJwtCallback)
   .withRevocationVerification(RevocationVerification.NEVER)
   .withClientMetadata({
-    idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-    requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-    responseTypesSupported: [ResponseType.ID_TOKEN],
-    vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-    scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-    subjectTypesSupported: [SubjectType.PAIRWISE],
+    id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+    request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+    response_types_supported: [ResponseType.ID_TOKEN],
+    vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+    scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+    subject_types_supported: [SubjectType.PAIRWISE],
     subjectSyntaxTypesSupported: ['did', 'did:ethr'],
     passBY: PassBy.VALUE,
   })
@@ -363,13 +363,13 @@ const op = OP.builder()
   .withVerifyJwtCallback(verifyJwtCallback)
   .withClientMetadata({
     authorizationEndpoint: 'www.myauthorizationendpoint.com',
-    idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
+    id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
     issuer: ResponseIss.SELF_ISSUED_V2,
-    requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-    responseTypesSupported: [ResponseType.ID_TOKEN],
+    request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+    response_types_supported: [ResponseType.ID_TOKEN],
     vpFormats: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-    scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-    subjectTypesSupported: [SubjectType.PAIRWISE],
+    scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+    subject_types_supported: [SubjectType.PAIRWISE],
     subjectSyntaxTypesSupported: ['did:ethr'],
     passBy: PassBy.VALUE,
   })
@@ -736,7 +736,7 @@ const opts: AuthorizationRequestOpts = {
     scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
     subjectSyntaxTypesSupported: ['did:ethr:', SubjectIdentifierType.DID],
     subjectTypesSupported: [SubjectType.PAIRWISE],
-    vpFormatsSupported: {
+    vp_formats_supported: {
       ldp_vc: {
         proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
       },

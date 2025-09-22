@@ -3,18 +3,17 @@ import { RequestObject } from '../request-object'
 import { isTarget, isTargetOrNoTargets } from '../rp/Opts'
 import { RPRegistrationMetadataPayloadSchema } from '../schemas'
 import { createRequestRegistration } from './RequestRegistration'
-import { ClaimPayloadOptsVID1, CreateAuthorizationRequestOpts, PropertyTarget } from './types'
+import { ClaimPayloadOpts, CreateAuthorizationRequestOpts, PropertyTarget } from './types'
 import {
   AuthorizationRequestPayload,
-  ClaimPayloadVID1,
+  ClaimPayload,
   ClientMetadataOpts,
   PassBy,
   RPRegistrationMetadataPayload,
   SIOPErrors,
-  SupportedVersion,
 } from '../types'
 
-export const createClaimsProperties = async (opts: ClaimPayloadOptsVID1): Promise<ClaimPayloadVID1 | undefined> => {
+export const createClaimsProperties = async (opts: ClaimPayloadOpts): Promise<ClaimPayload | undefined> => {
   if (!opts || !opts.vp_token) {
     return undefined
   }
@@ -39,10 +38,6 @@ export const createAuthorizationRequestPayload = async (
   const registration = await createRequestRegistration(clientMetadata, opts)
 
   const claims = opts.payload?.claims
-    ? opts.version >= SupportedVersion.SIOPv2_ID1
-      ? opts.payload.claims
-      : await createClaimsProperties(opts.payload.claims)
-    : undefined
   const isRequestTarget = isTargetOrNoTargets(PropertyTarget.AUTHORIZATION_REQUEST, opts.requestObject.targets)
   const isRequestByValue = opts.requestObject.passBy === PassBy.VALUE
 
