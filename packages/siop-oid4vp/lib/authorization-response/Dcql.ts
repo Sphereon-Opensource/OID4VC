@@ -26,17 +26,17 @@ import {AuthorizationRequestPayload, SupportedVersion} from '../types'
 
 export class Dcql {
   static findValidDcqlQuery = async (authorizationRequestPayload: AuthorizationRequestPayload, version?: SupportedVersion): Promise<DcqlQuery | undefined> => {
-    const dcqlQueryStrings: string[] = extractDataFromPath(authorizationRequestPayload ?? {}, '$..dcql_query').map((d) => d.value)
+    const dcqlQuery: DcqlQuery.Input[] = extractDataFromPath(authorizationRequestPayload ?? {}, '$..dcql_query').map((d) => d.value)
 
-    if (dcqlQueryStrings.length === 0) {
+    if (dcqlQuery.length === 0) {
       return undefined
     }
 
-    if (dcqlQueryStrings.length > 1) {
+    if (dcqlQuery.length > 1) {
       throw new Error('Found multiple dcql_query in vp_token. Only one is allowed')
     }
 
-    const parsedDcqlQuery = DcqlQuery.parse(JSON.parse(dcqlQueryStrings[0]))
+    const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery[0])
 
     if (version === SupportedVersion.OID4VP_v1) {
       const hasMeta = parsedDcqlQuery.credentials
