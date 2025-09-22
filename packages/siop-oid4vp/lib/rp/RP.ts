@@ -19,7 +19,7 @@ import {
 } from '../authorization-request'
 import { mergeVerificationOpts } from '../authorization-request/Opts'
 import {
-  AuthorizationResponse,
+  AuthorizationResponse, DcqlQueryLookupCallback,
   extractPresentationsFromDcqlVpToken,
   VerifyAuthorizationResponseOpts
 } from '../authorization-response'
@@ -59,6 +59,7 @@ export class RP {
   private readonly _eventEmitter?: EventEmitter
   private readonly _sessionManager?: IRPSessionManager
   private readonly _responseRedirectUri?: string
+  private readonly _dcqlQueryLookupCallback?: DcqlQueryLookupCallback
 
   private constructor(opts: {
     builder?: RPBuilder
@@ -71,6 +72,7 @@ export class RP {
     this._eventEmitter = opts.builder?.eventEmitter
     this._sessionManager = opts.builder?.sessionManager
     this._responseRedirectUri = opts.builder?._responseRedirectUri
+    this._dcqlQueryLookupCallback = opts.builder?.dcqlQueryLookupCallback
   }
 
   public static fromRequestOpts(opts: CreateAuthorizationRequestOpts): RP {
@@ -128,6 +130,11 @@ export class RP {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
     try {
+      if(opts.queryId && this._dcqlQueryLookupCallback) {
+        const dcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
+        authorizationRequestOpts.payload.dcql_query = JSON.stringify(dcqlQuery)
+      }
+
       const uri = await URI.fromOpts(authorizationRequestOpts)
       const authRequest = await AuthorizationRequest.fromOpts(authorizationRequestOpts)
       this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
@@ -340,6 +347,7 @@ export class RP {
 
     newOpts.requestObject.payload = newOpts.requestObject.payload ?? ({} as RequestObjectPayloadOpts<ClaimPayloadCommonOpts>)
     newOpts.payload = newOpts.payload ?? {}
+
     if (referenceURI) {
       if (newOpts.requestObject.passBy && newOpts.requestObject.passBy !== PassBy.REFERENCE) {
         throw Error(`Cannot pass by reference with uri ${referenceURI} when mode is ${newOpts.requestObject.passBy}`)
