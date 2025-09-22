@@ -10,7 +10,7 @@ import {
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation
 } from '@sphereon/ssi-types'
-import { DcqlQuery } from 'dcql'
+import { DcqlPresentation, DcqlQuery } from 'dcql'
 import {
   AuthorizationRequest,
   CreateAuthorizationRequestOpts,
@@ -182,7 +182,7 @@ export interface IDTokenPayload extends JWTPayload {
   }
 }
 
-export type EncodedDcqlQueryVpToken = string
+export type EncodedDcqlPresentationVpToken = string
 
 export interface AuthorizationResponsePayload {
   access_token?: string
@@ -196,7 +196,7 @@ export interface AuthorizationResponsePayload {
     | W3CVerifiablePresentation
     | CompactSdJwtVc
     | MdocOid4vpMdocVpToken
-    | EncodedDcqlQueryVpToken
+    | EncodedDcqlPresentationVpToken
   verifiedData?: IPresentation | AdditionalClaims
   is_first_party?: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
