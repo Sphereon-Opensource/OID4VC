@@ -10,7 +10,7 @@ import {
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation
 } from '@sphereon/ssi-types'
-import { DcqlPresentation, DcqlQuery } from 'dcql'
+import { DcqlQuery } from 'dcql'
 import {
   AuthorizationRequest,
   CreateAuthorizationRequestOpts,
@@ -28,14 +28,14 @@ import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 import { JWTPayload, VerifiedJWT } from './JWT.types'
 import {
-  QRCodeOptsSchema,
-  QRCodeOptsPayloadSchema,
-  CallbackOptsSchema,
   CallbackOptsPayloadSchema,
-  CreateAuthorizationRequestSchema,
+  CallbackOptsSchema,
   CreateAuthorizationRequestPayloadSchema,
-  CreateAuthorizationResponseSchema,
+  CreateAuthorizationRequestSchema,
   CreateAuthorizationResponsePayloadSchema,
+  CreateAuthorizationResponseSchema,
+  QRCodeOptsPayloadSchema,
+  QRCodeOptsSchema,
   VerifiedDataOptsSchema
 } from '../schemas'
 import { z } from 'zod'
