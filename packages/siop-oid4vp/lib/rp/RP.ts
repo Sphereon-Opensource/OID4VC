@@ -96,6 +96,12 @@ export class RP {
     responseURIType?: ResponseURIType
   }): Promise<AuthorizationRequest> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
+
+    if(opts.queryId && this._dcqlQueryLookupCallback) {
+      const dcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
+      authorizationRequestOpts.payload.dcql_query = JSON.stringify(dcqlQuery)
+    }
+
     return AuthorizationRequest.fromOpts(authorizationRequestOpts)
       .then((authorizationRequest: AuthorizationRequest) => {
         void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
