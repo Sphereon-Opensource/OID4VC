@@ -39,7 +39,6 @@ import {
   QRCodeOptsSchema,
   VerifiedDataOptsSchema
 } from '../schemas'
-import { z } from 'zod'
 
 export const DEFAULT_EXPIRATION_TIME = 10 * 60
 

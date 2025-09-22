@@ -98,8 +98,8 @@ export class RP {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
     if(opts.queryId && this._dcqlQueryLookupCallback) {
-      const dcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
-      authorizationRequestOpts.payload.dcql_query = JSON.stringify(dcqlQuery)
+      const dcqlQuery:DcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
+      authorizationRequestOpts.payload.dcql_query = dcqlQuery
     }
 
     return AuthorizationRequest.fromOpts(authorizationRequestOpts)
@@ -137,8 +137,8 @@ export class RP {
 
     try {
       if(opts.queryId && this._dcqlQueryLookupCallback) {
-        const dcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
-        authorizationRequestOpts.payload.dcql_query = JSON.stringify(dcqlQuery)
+        const dcqlQuery:DcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
+        authorizationRequestOpts.payload.dcql_query = dcqlQuery
       }
 
       const uri = await URI.fromOpts(authorizationRequestOpts)
