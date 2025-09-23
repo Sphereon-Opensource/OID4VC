@@ -35,6 +35,11 @@ export class AuthorizationServerMetadataBuilder {
     return this
   }
 
+  public withNonceEndpoint(endpoint: string): AuthorizationServerMetadataBuilder {
+    this.metadata.nonce_endpoint = endpoint
+    return this
+  }
+
   public withTokenEndpointAuthMethodsSupported(methods: Array<TokenEndpointAuthMethod>): AuthorizationServerMetadataBuilder {
     this.metadata.token_endpoint_auth_methods_supported = methods
     return this

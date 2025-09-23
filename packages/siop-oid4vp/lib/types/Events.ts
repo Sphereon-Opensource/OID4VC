@@ -1,4 +1,4 @@
-import {CallbackOpts} from './SIOP.types';
+import { CallbackOpts } from '../types'
 
 export enum AuthorizationEvents {
   ON_AUTH_REQUEST_CREATED_SUCCESS = 'onAuthRequestCreatedSuccess',

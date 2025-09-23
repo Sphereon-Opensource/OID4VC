@@ -1,4 +1,4 @@
-import { uuidv4 } from '@sphereon/oid4vc-common'
+import { epochTime, uuidv4 } from '@sphereon/oid4vc-common'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AccessTokenRequest,
@@ -40,7 +40,8 @@ import {
   ICreateCredentialOfferEndpointOpts,
   ICreateCredentialOfferURIResponse,
   IGetCredentialOfferEndpointOpts,
-  IGetIssueStatusEndpointOpts
+  IGetIssueStatusEndpointOpts,
+  INonceEndpointOpts
 } from './OID4VCIServer'
 import { validateRequestBody } from './expressUtils'
 
@@ -56,7 +57,7 @@ export function getIssueStatusEndpoint(router: Router, issuer: VcIssuer, opts: I
       if (!session || !session.credentialOffer) {
         return sendErrorResponse(response, 404, {
           error: 'invalid_request',
-          error_description: `Credential offer ${id} not found`,
+          error_description: `Credential offer ${id} not found`
         })
       }
 
@@ -67,7 +68,7 @@ export function getIssueStatusEndpoint(router: Router, issuer: VcIssuer, opts: I
         status: session.status,
         statusLists: session.statusLists,
         ...(session.error && { error: session.error }),
-        ...(session.clientId && { clientId: session.clientId }),
+        ...(session.clientId && { clientId: session.clientId })
       }
       return response.json(authStatusBody)
     } catch (e) {
@@ -76,9 +77,9 @@ export function getIssueStatusEndpoint(router: Router, issuer: VcIssuer, opts: I
         500,
         {
           error: 'invalid_request',
-          error_description: (e as Error).message,
+          error_description: (e as Error).message
         },
-        e,
+        e
       )
     }
   })
@@ -93,7 +94,7 @@ export function getCredentialOfferReferenceEndpoint(router: Router, issuer: VcIs
       if (!id) {
         return sendErrorResponse(response, 404, {
           error: 'invalid_request',
-          error_description: `query parameter 'id' is missing`,
+          error_description: `query parameter 'id' is missing`
         })
       }
 
@@ -107,12 +108,12 @@ export function getCredentialOfferReferenceEndpoint(router: Router, issuer: VcIs
       if (!session || !session.credentialOffer || session.status !== 'OFFER_CREATED') {
         if (session?.status) {
           LOG.warning(
-            `[OID4VCI] credential offer reference URI request with ${id}, but request was already received earlier. Session status: ${session.status}`,
+            `[OID4VCI] credential offer reference URI request with ${id}, but request was already received earlier. Session status: ${session.status}`
           )
         }
         return sendErrorResponse(response, 404, {
           error: 'invalid_request',
-          error_description: `Credential offer ${id} not found`,
+          error_description: `Credential offer ${id} not found`
         })
       }
 
@@ -123,9 +124,9 @@ export function getCredentialOfferReferenceEndpoint(router: Router, issuer: VcIs
         500,
         {
           error: 'invalid_request',
-          error_description: (e as Error).message,
+          error_description: (e as Error).message
         },
-        e,
+        e
       )
     }
   })
@@ -139,7 +140,7 @@ function isExternalAS(issuerMetadata: CredentialIssuerMetadataOptsV1_0_15) {
 export function authorizationChallengeEndpoint(
   router: Router,
   issuer: VcIssuer,
-  opts: IAuthorizationChallengeEndpointOpts & { baseUrl: string | URL },
+  opts: IAuthorizationChallengeEndpointOpts & { baseUrl: string | URL }
 ) {
   const endpoint = issuer.authorizationServerMetadata.authorization_challenge_endpoint ?? issuer.issuerMetadata.authorization_challenge_endpoint
   const baseUrl = getBaseUrl(opts.baseUrl)
@@ -151,13 +152,18 @@ export function authorizationChallengeEndpoint(
   LOG.log(`[OID4VCI] authorization challenge endpoint at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
     const authorizationChallengeRequest = request.body as CommonAuthorizationChallengeRequest
-    const { client_id, issuer_state, auth_session, presentation_during_issuance_session } = authorizationChallengeRequest
+    const {
+      client_id,
+      issuer_state,
+      auth_session,
+      presentation_during_issuance_session
+    } = authorizationChallengeRequest
 
     try {
       if (!client_id && !auth_session) {
         const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
           error: AuthorizationChallengeError.invalid_request,
-          error_description: 'No client id or auth session present',
+          error_description: 'No client id or auth session present'
         } as AuthorizationChallengeErrorResponse
         throw authorizationChallengeErrorResponse
       }
@@ -167,7 +173,7 @@ export function authorizationChallengeEndpoint(
         if (!session) {
           const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
             error: AuthorizationChallengeError.invalid_session,
-            error_description: 'Session is invalid',
+            error_description: 'Session is invalid'
           }
           throw authorizationChallengeErrorResponse
         }
@@ -176,7 +182,7 @@ export function authorizationChallengeEndpoint(
         const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
           error: AuthorizationChallengeError.insufficient_authorization,
           auth_session: issuer_state,
-          presentation: authRequestURI,
+          presentation: authRequestURI
         }
         throw authorizationChallengeErrorResponse
       }
@@ -186,7 +192,7 @@ export function authorizationChallengeEndpoint(
         if (!session) {
           const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
             error: AuthorizationChallengeError.invalid_session,
-            error_description: 'Session is invalid',
+            error_description: 'Session is invalid'
           }
           throw authorizationChallengeErrorResponse
         }
@@ -197,14 +203,14 @@ export function authorizationChallengeEndpoint(
           session.authorizationCode = authorizationCode
           await issuer.credentialOfferSessions.set(auth_session, session)
           const authorizationChallengeCodeResponse: AuthorizationChallengeCodeResponse = {
-            authorization_code: authorizationCode,
+            authorization_code: authorizationCode
           }
           return response.json(authorizationChallengeCodeResponse)
         }
       }
 
       const authorizationChallengeErrorResponse: AuthorizationChallengeErrorResponse = {
-        error: AuthorizationChallengeError.invalid_request,
+        error: AuthorizationChallengeError.invalid_request
       }
       throw authorizationChallengeErrorResponse
     } catch (e) {
@@ -213,11 +219,13 @@ export function authorizationChallengeEndpoint(
   })
 }
 
-export function accessTokenEndpoint(router: Router, issuer: VcIssuer, opts: ITokenEndpointOpts & ISingleEndpointOpts & { baseUrl: string | URL }) {
+export function accessTokenEndpoint(router: Router, issuer: VcIssuer, opts: ITokenEndpointOpts & ISingleEndpointOpts & {
+  baseUrl: string | URL
+}) {
   const externalAS = isExternalAS(issuer.issuerMetadata) || issuer.asClientOpts
   if (externalAS || (opts.accessTokenProvider && opts.accessTokenProvider !== 'internal')) {
     LOG.log(
-      `[OID4VCI] External Authorization Server ${issuer.issuerMetadata.authorization_servers} is being used. Not enabling internal issuer token endpoint`,
+      `[OID4VCI] External Authorization Server ${issuer.issuerMetadata.authorization_servers} is being used. Not enabling internal issuer token endpoint`
     )
     return
   } else if (opts?.enabled === false) {
@@ -247,7 +255,7 @@ export function accessTokenEndpoint(router: Router, issuer: VcIssuer, opts: ITok
   // issuer is also AS
   const path = determinePath(baseUrl, opts?.tokenPath ?? process.env.TOKEN_PATH ?? '/token', {
     skipBaseUrlCheck: false,
-    stripBasePath: true,
+    stripBasePath: true
   })
   // let's fix any baseUrl ending with a slash as path will always start with a slash, and we already removed it at the end of the base url
 
@@ -260,7 +268,7 @@ export function accessTokenEndpoint(router: Router, issuer: VcIssuer, opts: ITok
     determinePath(baseUrl, url.pathname, { stripBasePath: true }),
     verifyTokenRequest({
       issuer,
-      preAuthorizedCodeExpirationDuration,
+      preAuthorizedCodeExpirationDuration
     }),
     handleTokenRequest({
       issuer,
@@ -268,8 +276,8 @@ export function accessTokenEndpoint(router: Router, issuer: VcIssuer, opts: ITok
       cNonceExpiresIn: issuer.cNonceExpiresIn,
       interval,
       tokenExpiresIn,
-      accessTokenIssuer,
-    }),
+      accessTokenIssuer
+    })
   )
 }
 
@@ -277,7 +285,7 @@ export function getCredentialEndpoint(
   router: Router,
   issuer: VcIssuer,
   opts: Pick<ITokenEndpointOpts, 'accessTokenVerificationCallback' | 'accessTokenSignerCallback' | 'tokenExpiresIn' | 'cNonceExpiresIn'> &
-    ISingleEndpointOpts & { baseUrl: string | URL },
+    ISingleEndpointOpts & { baseUrl: string | URL }
 ) {
   const endpoint = issuer.issuerMetadata.credential_endpoint
   const baseUrl = getBaseUrl(opts.baseUrl)
@@ -300,14 +308,14 @@ export function getCredentialEndpoint(
       } catch (e) {
         LOG.warning(e)
         return sendErrorResponse(response, 400, {
-          error: 'invalid_token',
+          error: 'invalid_token'
         })
       }
 
       const credential = await issuer.issueCredential({
         credentialRequest: credentialRequest,
         tokenExpiresIn: opts.tokenExpiresIn,
-        cNonceExpiresIn: opts.cNonceExpiresIn,
+        cNonceExpiresIn: opts.cNonceExpiresIn
       })
       return response.json(credential)
     } catch (e) {
@@ -316,9 +324,9 @@ export function getCredentialEndpoint(
         500,
         {
           error: 'invalid_request',
-          error_description: (e as Error).message,
+          error_description: (e as Error).message
         },
-        e,
+        e
       )
     }
   })
@@ -327,7 +335,7 @@ export function getCredentialEndpoint(
 export function notificationEndpoint(
   router: Router,
   issuer: VcIssuer,
-  opts: ISingleEndpointOpts & Pick<ITokenEndpointOpts, 'accessTokenVerificationCallback'> & { baseUrl: string | URL },
+  opts: ISingleEndpointOpts & Pick<ITokenEndpointOpts, 'accessTokenVerificationCallback'> & { baseUrl: string | URL }
 ) {
   const endpoint = issuer.issuerMetadata.notification_endpoint
   const baseUrl = getBaseUrl(opts.baseUrl)
@@ -341,7 +349,7 @@ export function notificationEndpoint(
     try {
       const notificationRequest = request.body as NotificationRequest
       LOG.log(
-        `notification ${notificationRequest.event}/${notificationRequest.event_description} received for ${notificationRequest.notification_id}`,
+        `notification ${notificationRequest.event}/${notificationRequest.event_description} received for ${notificationRequest.notification_id}`
       )
       const jwt = extractBearerToken(request.header('Authorization'))
       EVENTS.emit(NotificationStatusEventNames.OID4VCI_NOTIFICATION_RECEIVED, {
@@ -351,14 +359,14 @@ export function notificationEndpoint(
         initiator: jwt,
         initiatorType: InitiatorType.EXTERNAL,
         system: System.OID4VCI,
-        subsystem: SubSystem.API,
+        subsystem: SubSystem.API
       })
       try {
         const jwtResult = await validateJWT(jwt, { accessTokenVerificationCallback: opts.accessTokenVerificationCallback })
         const accessToken = jwtResult.jwt.payload as AccessTokenRequest
         const errorOrSession = await issuer.processNotification({
           preAuthorizedCode: accessToken['pre-authorized_code'],
-          /*TODO: authorizationCode*/ notification: notificationRequest,
+          /*TODO: authorizationCode*/ notification: notificationRequest
         })
         if (errorOrSession instanceof Error) {
           EVENTS.emit(NotificationStatusEventNames.OID4VCI_NOTIFICATION_ERROR, {
@@ -368,7 +376,7 @@ export function notificationEndpoint(
             initiator: jwtResult.jwt,
             initiatorType: InitiatorType.EXTERNAL,
             system: System.OID4VCI,
-            subsystem: SubSystem.API,
+            subsystem: SubSystem.API
           })
           return sendErrorResponse(response, 400, errorOrSession.message)
         } else {
@@ -379,13 +387,13 @@ export function notificationEndpoint(
             initiator: jwtResult.jwt,
             initiatorType: InitiatorType.EXTERNAL,
             system: System.OID4VCI,
-            subsystem: SubSystem.API,
+            subsystem: SubSystem.API
           })
         }
       } catch (e) {
         LOG.warning(e)
         return sendErrorResponse(response, 400, {
-          error: 'invalid_token',
+          error: 'invalid_token'
         })
       }
       return response.status(204).send()
@@ -395,9 +403,66 @@ export function notificationEndpoint(
         400,
         {
           error: 'invalid_notification_request',
-          error_description: (e as Error).message,
+          error_description: (e as Error).message
         },
-        e,
+        e
+      )
+    }
+  })
+}
+
+export function nonceEndpoint(router: Router, issuer: VcIssuer, opts: INonceEndpointOpts) {
+  const endpoint = issuer.issuerMetadata.nonce_endpoint
+  const baseUrl = getBaseUrl(opts.baseUrl)
+
+  if (!endpoint) {
+    LOG.warning('Nonce endpoint disabled as no "nonce_endpoint" has been configured in issuer metadata')
+    return
+  }
+
+  const path = determinePath(baseUrl, endpoint, { stripBasePath: true })
+  LOG.log(`[OID4VCI] nonce endpoint enabled at ${path}`)
+
+  router.post(path, async (request: Request, response: Response) => {
+    try {
+      // Verify access token if present (optional per spec)
+      if (request.header('Authorization')) {
+        try {
+          const jwt = extractBearerToken(request.header('Authorization'))
+          await validateJWT(jwt, {
+            accessTokenVerificationCallback: issuer.jwtVerifyCallback
+          })
+        } catch (e) {
+          LOG.warning(e)
+          return sendErrorResponse(response, 400, {
+            error: 'invalid_token'
+          })
+        }
+      }
+
+      const cNonce = uuidv4()
+      const cNonceExpiresIn = issuer.cNonceExpiresIn || 300
+
+      const createdAt = epochTime()
+      await issuer.cNonces.set(cNonce, {
+        cNonce,
+        createdAt: createdAt,
+        expiresAt: createdAt + cNonceExpiresIn
+      })
+
+      return response.json({
+        c_nonce: cNonce,
+        c_nonce_expires_in: cNonceExpiresIn
+      })
+    } catch (e) {
+      return sendErrorResponse(
+        response,
+        500,
+        {
+          error: 'server_error',
+          error_description: (e as Error).message
+        },
+        e
       )
     }
   })
@@ -413,7 +478,7 @@ export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opt
       if (!session || !session.credentialOffer) {
         return sendErrorResponse(response, 404, {
           error: 'invalid_request',
-          error_description: `Credential offer ${id} not found`,
+          error_description: `Credential offer ${id} not found`
         })
       }
       return response.json(session.credentialOffer.credential_offer)
@@ -423,9 +488,9 @@ export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opt
         500,
         {
           error: 'invalid_request',
-          error_description: (e as Error).message,
+          error_description: (e as Error).message
         },
-        e,
+        e
       )
     }
   })
@@ -440,7 +505,7 @@ export function deleteCredentialOfferEndpoint(router: Router, issuer: VcIssuer, 
       if (!id) {
         return sendErrorResponse(response, 400, {
           error: 'invalid_request',
-          error_description: 'id must be present',
+          error_description: 'id must be present'
         })
       }
       await issuer.deleteCredentialOfferSessionById(id)
@@ -451,9 +516,9 @@ export function deleteCredentialOfferEndpoint(router: Router, issuer: VcIssuer, 
         500,
         {
           error: 'invalid_request',
-          error_description: (e as Error).message,
+          error_description: (e as Error).message
         },
-        e,
+        e
       )
     }
   })
@@ -481,7 +546,7 @@ export function createCredentialOfferEndpoint(
   router: Router,
   issuer: VcIssuer,
   opts?: ICreateCredentialOfferEndpointOpts & { baseUrl?: string },
-  issuerPayloadPath?: string, // backwards compat, sigh
+  issuerPayloadPath?: string // backwards compat, sigh
 ) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers', { stripBasePath: true })
   const offerReferencePath =
@@ -500,14 +565,17 @@ export function createCredentialOfferEndpoint(
 
       const grantTypes = determineGrantTypes(request.body)
       if (grantTypes.length === 0) {
-        return sendErrorResponse(response, 400, { error: TokenErrorResponse.invalid_grant, error_description: 'No grant type supplied' })
+        return sendErrorResponse(response, 400, {
+          error: TokenErrorResponse.invalid_grant,
+          error_description: 'No grant type supplied'
+        })
       }
       const grants = request.body.grants as Grant
       const credentialConfigIds = request.body.credential_configuration_ids as string[]
       if (!credentialConfigIds || credentialConfigIds.length === 0) {
         return sendErrorResponse(response, 400, {
           error: TokenErrorResponse.invalid_request,
-          error_description: 'credential_configuration_ids missing credential_configuration_ids in credential offer payload',
+          error_description: 'credential_configuration_ids missing credential_configuration_ids in credential offer payload'
         })
       }
       const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
@@ -521,7 +589,7 @@ export function createCredentialOfferEndpoint(
         ...(request.body.correlationId && { correlationId: request.body.correlationId }),
         ...(offerMode === 'REFERENCE' && { credentialOfferUri: buildCredentialOfferReferenceUri(request, offerReferencePath) }),
         qrCodeOpts,
-        grants,
+        grants
       })
       const resultResponse: ICreateCredentialOfferURIResponse = result
       if ('session' in resultResponse) {
@@ -536,9 +604,9 @@ export function createCredentialOfferEndpoint(
         500,
         {
           error: TokenErrorResponse.invalid_request,
-          error_description: (e as Error).message,
+          error_description: (e as Error).message
         },
-        e,
+        e
       )
     }
   })
@@ -548,12 +616,12 @@ export function pushedAuthorizationEndpoint(
   router: Router,
   issuer: VcIssuer,
   authRequestsData: Map<string, AuthorizationRequest>,
-  opts?: ISingleEndpointOpts,
+  opts?: ISingleEndpointOpts
 ) {
   const externalAS = isExternalAS(issuer.issuerMetadata) || issuer.asClientOpts
   if (externalAS) {
     LOG.log(
-      `[OID4VCI] External Authorization Server ${issuer.issuerMetadata.authorization_servers} is being used. Not enabling internal PAR endpoint`,
+      `[OID4VCI] External Authorization Server ${issuer.issuerMetadata.authorization_servers} is being used. Not enabling internal PAR endpoint`
     )
     return
   } else if (opts?.enabled === false) {
@@ -572,7 +640,7 @@ export function pushedAuthorizationEndpoint(
     } catch (e: unknown) {
       return sendErrorResponse(res, 400, {
         error: 'invalid_request',
-        error_description: (e as Error).message,
+        error_description: (e as Error).message
       })
     }
     return next()
@@ -582,7 +650,7 @@ export function pushedAuthorizationEndpoint(
     // FIXME Fake client for testing, it needs to come from a registered client
     const client = {
       scope: ['openid', 'test'],
-      redirectUris: ['http://localhost:8080/*', 'https://www.test.com/*', 'https://test.nl', 'http://*/chart', 'http:*'],
+      redirectUris: ['http://localhost:8080/*', 'https://www.test.com/*', 'https://test.nl', 'http://*/chart', 'http:*']
     }
 
     // For security reasons the redirect_uri from the request needs to be matched against the ones present in the registered client
@@ -590,7 +658,7 @@ export function pushedAuthorizationEndpoint(
     if (!matched.length) {
       return sendErrorResponse(res, 400, {
         error: 'invalid_request',
-        error_description: 'redirect_uri is not valid for the given client',
+        error_description: 'redirect_uri is not valid for the given client'
       })
     }
 
@@ -598,7 +666,7 @@ export function pushedAuthorizationEndpoint(
     if (!req.body.scope.split(',').every((scope: string) => client.scope.includes(scope))) {
       return sendErrorResponse(res, 400, {
         error: 'invalid_scope',
-        error_description: 'scope is not valid for the given client',
+        error_description: 'scope is not valid for the given client'
       })
     }
 
@@ -635,7 +703,7 @@ export function getMetadataEndpoints(router: Router, issuer: VcIssuer) {
 export function determinePath(
   baseUrl: URL | string | undefined,
   endpoint: string,
-  opts?: { skipBaseUrlCheck?: boolean; prependUrl?: string; stripBasePath?: boolean },
+  opts?: { skipBaseUrlCheck?: boolean; prependUrl?: string; stripBasePath?: boolean }
 ) {
   const basePath = baseUrl ? getBasePath(baseUrl) : ''
   let path = endpoint
