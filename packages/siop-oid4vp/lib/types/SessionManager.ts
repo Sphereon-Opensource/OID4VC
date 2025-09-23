@@ -1,7 +1,6 @@
 import { AuthorizationRequest } from '../authorization-request'
 import { AuthorizationResponse } from '../authorization-response'
-import { AdditionalClaims } from '@sphereon/ssi-types'
-import { CallbackOpts } from '../types'
+import {CallbackOpts, VerifiedData} from '../types'
 
 export interface AuthorizationRequestState {
   correlationId: string
@@ -26,7 +25,7 @@ export interface AuthorizationResponseState {
 }
 
 export interface AuthorizationResponseStateWithVerifiedData extends AuthorizationResponseState {
-  verifiedData?: AdditionalClaims
+  verifiedData?: VerifiedData
 }
 
 export enum AuthorizationRequestStateStatus {
