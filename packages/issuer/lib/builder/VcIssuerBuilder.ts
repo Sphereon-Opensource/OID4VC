@@ -98,6 +98,11 @@ export class VcIssuerBuilder {
     return this
   }
 
+  public withNonceEndpoint(nonceEndpoint: string): this {
+    this.issuerMetadata.nonce_endpoint = nonceEndpoint
+    return this
+  }
+
   public withIssuerDisplay(issuerDisplay: MetadataDisplay[] | MetadataDisplay): this {
     this.issuerMetadata.display = Array.isArray(issuerDisplay) ? issuerDisplay : [issuerDisplay]
     return this
