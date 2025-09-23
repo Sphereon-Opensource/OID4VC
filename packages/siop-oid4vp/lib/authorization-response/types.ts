@@ -69,6 +69,13 @@ export type PresentationVerificationCallback = (
 
 export type PresentationSignCallback = (args: PresentationSignCallBackParams) => Promise<W3CVerifiablePresentation | CompactSdJwtVc>
 
+export type DcqlQueryLookupCallback = (
+  queryId: string,
+  version?: string,
+  tenantId?: string
+) => Promise<DcqlQuery>
+
+
 export interface VerifyAuthorizationResponseOpts {
   correlationId: string
   verification: Verification

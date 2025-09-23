@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import { HasherSync } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
 import { PropertyTarget, PropertyTargets } from '../authorization-request'
-import { PresentationVerificationCallback } from '../authorization-response'
+import { DcqlQueryLookupCallback, PresentationVerificationCallback } from '../authorization-response'
 import {assignIfAuth, assignIfRequestObject, isTarget, isTargetOrNoTargets} from './Opts'
 import { RP } from './RP'
 import {
@@ -30,6 +30,7 @@ export class RPBuilder {
   revocationVerification?: RevocationVerification
   revocationVerificationCallback?: RevocationVerificationCallback
   presentationVerificationCallback?: PresentationVerificationCallback
+  dcqlQueryLookupCallback?: DcqlQueryLookupCallback
   supportedVersions: SupportedVersion[]
   eventEmitter?: EventEmitter
   sessionManager?: IRPSessionManager
@@ -196,6 +197,11 @@ export class RPBuilder {
 
   withVerifyJwtCallback(verifyJwtCallback: VerifyJwtCallback): RPBuilder {
     this.verifyJwtCallback = verifyJwtCallback
+    return this
+  }
+
+  withDcqlQueryLookup(dcqlQueryLookupCallback:DcqlQueryLookupCallback) : RPBuilder {
+    this.dcqlQueryLookupCallback = dcqlQueryLookupCallback
     return this
   }
 

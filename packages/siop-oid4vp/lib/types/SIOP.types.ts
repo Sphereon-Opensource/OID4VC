@@ -8,7 +8,7 @@ import {
   MdocOid4vpMdocVpToken,
   W3CVerifiableCredential,
   W3CVerifiablePresentation,
-  WrappedVerifiablePresentation,
+  WrappedVerifiablePresentation
 } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
 import { z } from 'zod'
@@ -22,13 +22,23 @@ import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   PresentationVerificationCallback,
-  VerifyAuthorizationResponseOpts,
+  VerifyAuthorizationResponseOpts
 } from '../authorization-response'
 import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 import { JWTPayload, VerifiedJWT } from './JWT.types'
-import { CallbackOptsSchema } from '../schemas'
+import {
+  CallbackOptsPayloadSchema,
+  CallbackOptsSchema,
+  CreateAuthorizationRequestPayloadSchema,
+  CreateAuthorizationRequestSchema,
+  CreateAuthorizationResponsePayloadSchema,
+  CreateAuthorizationResponseSchema,
+  QRCodeOptsPayloadSchema,
+  QRCodeOptsSchema,
+  VerifiedDataOptsSchema
+} from '../schemas'
 
 export const DEFAULT_EXPIRATION_TIME = 10 * 60
 
@@ -167,7 +177,7 @@ export interface IDTokenPayload extends JWTPayload {
   }
 }
 
-export type EncodedDcqlQueryVpToken = string
+export type EncodedDcqlPresentationVpToken = string
 
 export interface AuthorizationResponsePayload {
   access_token?: string
@@ -181,7 +191,7 @@ export interface AuthorizationResponsePayload {
     | W3CVerifiablePresentation
     | CompactSdJwtVc
     | MdocOid4vpMdocVpToken
-    | EncodedDcqlQueryVpToken
+    | EncodedDcqlPresentationVpToken
   verifiedData?: IPresentation | AdditionalClaims
   is_first_party?: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -677,4 +687,12 @@ export enum ContentType {
   UTF_8 = 'UTF-8',
 }
 
-export type CallbackOpts = z.infer<typeof CallbackOptsSchema>;
+export type QRCodeOpts = z.infer<typeof QRCodeOptsSchema>
+export type QRCodeOptsPayload = z.infer<typeof QRCodeOptsPayloadSchema>
+export type CallbackOpts = z.infer<typeof CallbackOptsSchema>
+export type CallbackOptsPayload = z.infer<typeof CallbackOptsPayloadSchema>
+export type CreateAuthorizationRequest = z.infer<typeof CreateAuthorizationRequestSchema>
+export type CreateAuthorizationRequestPayload = z.infer<typeof CreateAuthorizationRequestPayloadSchema>
+export type CreateAuthorizationResponse = z.infer<typeof CreateAuthorizationResponseSchema>
+export type CreateAuthorizationResponsePayload = z.infer<typeof CreateAuthorizationResponsePayloadSchema>
+export type VerifiedDataOpts = z.infer<typeof VerifiedDataOptsSchema>
