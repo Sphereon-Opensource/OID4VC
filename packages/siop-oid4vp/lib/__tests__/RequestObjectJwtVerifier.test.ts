@@ -66,7 +66,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
@@ -86,7 +86,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
@@ -104,7 +104,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
@@ -125,7 +125,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
@@ -145,7 +145,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
@@ -164,7 +164,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },
@@ -186,7 +186,7 @@ describe('requestObjectJwtVerifier', () => {
             client_metadata: {
                 passBy: PassBy.REFERENCE
             },
-            dcql_query: JSON.stringify(parsedDcqlQuery)
+            dcql_query: parsedDcqlQuery
         },
       },
       { raw: '' },

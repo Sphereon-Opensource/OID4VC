@@ -3,7 +3,7 @@ import { CreateAuthorizationRequestOpts, createClaimsProperties } from '../autho
 import { createRequestRegistration } from '../authorization-request/RequestRegistration'
 import { getNonce, getState, removeNullUndefined } from '../helpers'
 import { assertValidRequestObjectOpts } from './Opts'
-import { RequestObjectPayload, ResponseMode, ResponseType, SIOPErrors, SupportedVersion } from '../types'
+import { RequestObjectPayload, ResponseMode, ResponseType, SIOPErrors } from '../types'
 
 export const createRequestObjectPayload = async (opts: CreateAuthorizationRequestOpts): Promise<RequestObjectPayload | undefined> => {
   assertValidRequestObjectOpts(opts.requestObject, false)
@@ -22,7 +22,7 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
   const registration = await createRequestRegistration(opts.clientMetadata, opts)
   const claims = await createClaimsProperties(payload.claims)
 
-  const metadataKey = opts.version >= SupportedVersion.SIOPv2_D11.valueOf() ? 'client_metadata' : 'registration'
+  const metadataKey = 'client_metadata'
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const clientId = payload.client_id ?? registration.payload[metadataKey]?.client_id

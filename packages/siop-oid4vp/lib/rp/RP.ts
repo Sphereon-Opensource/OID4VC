@@ -19,7 +19,7 @@ import {
 } from '../authorization-request'
 import { mergeVerificationOpts } from '../authorization-request/Opts'
 import {
-  AuthorizationResponse,
+  AuthorizationResponse, DcqlQueryLookupCallback,
   extractPresentationsFromDcqlVpToken,
   VerifyAuthorizationResponseOpts
 } from '../authorization-response'
@@ -36,8 +36,10 @@ import {
   SIOPErrors,
   SupportedVersion,
   Verification,
-  VerifiedAuthorizationResponse
+  VerifiedAuthorizationResponse,
+  CallbackOpts
 } from '../types'
+
 
 import {
   createRequestOptsFromBuilderOrExistingOpts,
@@ -57,6 +59,7 @@ export class RP {
   private readonly _eventEmitter?: EventEmitter
   private readonly _sessionManager?: IRPSessionManager
   private readonly _responseRedirectUri?: string
+  private readonly _dcqlQueryLookupCallback?: DcqlQueryLookupCallback
 
   private constructor(opts: {
     builder?: RPBuilder
@@ -69,6 +72,7 @@ export class RP {
     this._eventEmitter = opts.builder?.eventEmitter
     this._sessionManager = opts.builder?.sessionManager
     this._responseRedirectUri = opts.builder?._responseRedirectUri
+    this._dcqlQueryLookupCallback = opts.builder?.dcqlQueryLookupCallback
   }
 
   public static fromRequestOpts(opts: CreateAuthorizationRequestOpts): RP {
@@ -81,6 +85,7 @@ export class RP {
 
   public async createAuthorizationRequest(opts: {
     correlationId: string
+    queryId?: string,
     nonce: string | RequestPropertyWithTargets<string>
     state: string | RequestPropertyWithTargets<string>
     jwtIssuer?: JwtIssuer
@@ -91,10 +96,17 @@ export class RP {
     responseURIType?: ResponseURIType
   }): Promise<AuthorizationRequest> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
+
+    if(opts.queryId && this._dcqlQueryLookupCallback) {
+      const dcqlQuery:DcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
+      authorizationRequestOpts.payload.dcql_query = dcqlQuery
+    }
+
     return AuthorizationRequest.fromOpts(authorizationRequestOpts)
       .then((authorizationRequest: AuthorizationRequest) => {
         void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
           correlationId: opts.correlationId,
+          queryId: opts.queryId,
           subject: authorizationRequest,
         })
         return authorizationRequest
@@ -110,6 +122,7 @@ export class RP {
 
   public async createAuthorizationRequestURI(opts: {
     correlationId: string
+    queryId?: string
     nonce: string | RequestPropertyWithTargets<string>
     state: string | RequestPropertyWithTargets<string>
     jwtIssuer?: JwtIssuer
@@ -118,15 +131,23 @@ export class RP {
     requestByReferenceURI?: string
     responseURI?: string
     responseURIType?: ResponseURIType
+    callback?: CallbackOpts
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
     try {
+      if(opts.queryId && this._dcqlQueryLookupCallback) {
+        const dcqlQuery:DcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
+        authorizationRequestOpts.payload.dcql_query = dcqlQuery
+      }
+
       const uri = await URI.fromOpts(authorizationRequestOpts)
       const authRequest = await AuthorizationRequest.fromOpts(authorizationRequestOpts)
       this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
         correlationId: opts.correlationId,
+        queryId: opts.queryId,
         subject: authRequest,
+        callback: opts.callback
       })
       return uri
     } catch (error) {
@@ -327,11 +348,16 @@ export class RP {
       }
     }
 
+    if (this._createRequestOptions.requestObject.payload?.dcql_query) {
+      this._createRequestOptions.requestObject.payload.scope = undefined
+    }
+
     const newOpts = { ...this._createRequestOptions, version }
     newOpts.requestObject = { ...newOpts.requestObject, jwtIssuer: opts.jwtIssuer }
 
     newOpts.requestObject.payload = newOpts.requestObject.payload ?? ({} as RequestObjectPayloadOpts<ClaimPayloadCommonOpts>)
     newOpts.payload = newOpts.payload ?? {}
+
     if (referenceURI) {
       if (newOpts.requestObject.passBy && newOpts.requestObject.passBy !== PassBy.REFERENCE) {
         throw Error(`Cannot pass by reference with uri ${referenceURI} when mode is ${newOpts.requestObject.passBy}`)
@@ -429,7 +455,9 @@ export class RP {
     type: AuthorizationEvents,
     payload: {
       correlationId: string
+      queryId?: string
       subject?: AuthorizationRequest | AuthorizationResponse | AuthorizationResponsePayload
+      callback?: CallbackOpts
       error?: Error
     },
   ): void {

@@ -269,1759 +269,469 @@ export const AuthorizationResponseOptsSchemaObj = {
       ]
     },
     "ResponseRegistrationOpts": {
-      "anyOf": [
-        {
-          "type": "object",
-          "properties": {
-            "passBy": {
-              "$ref": "#/definitions/PassBy"
+      "type": "object",
+      "properties": {
+        "passBy": {
+          "$ref": "#/definitions/PassBy"
+        },
+        "reference_uri": {
+          "type": "string"
+        },
+        "targets": {
+          "$ref": "#/definitions/PropertyTargets"
+        },
+        "id_token_encrypted_response_alg": {
+          "$ref": "#/definitions/EncKeyAlgorithm"
+        },
+        "id_token_encrypted_response_enc": {
+          "$ref": "#/definitions/EncSymmetricAlgorithmCode"
+        },
+        "authorizationEndpoint": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Schema"
             },
-            "reference_uri": {
-              "type": "string"
-            },
-            "targets": {
-              "$ref": "#/definitions/PropertyTargets"
-            },
-            "id_token_encrypted_response_alg": {
-              "$ref": "#/definitions/EncKeyAlgorithm"
-            },
-            "id_token_encrypted_response_enc": {
-              "$ref": "#/definitions/EncSymmetricAlgorithmCode"
-            },
-            "authorizationEndpoint": {
-              "anyOf": [
-                {
-                  "$ref": "#/definitions/Schema"
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "issuer": {
-              "anyOf": [
-                {
-                  "$ref": "#/definitions/ResponseIss"
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "responseTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/ResponseType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/ResponseType"
-                }
-              ]
-            },
-            "scopesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/Scope"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/Scope"
-                }
-              ]
-            },
-            "subjectTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/SubjectType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/SubjectType"
-                }
-              ]
-            },
-            "idTokenSigningAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "requestObjectSigningAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "subject_syntax_types_supported": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "tokenEndpoint": {
-              "type": "string"
-            },
-            "userinfoEndpoint": {
-              "type": "string"
-            },
-            "jwksUri": {
-              "type": "string"
-            },
-            "registrationEndpoint": {
-              "type": "string"
-            },
-            "responseModesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/ResponseMode"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/ResponseMode"
-                }
-              ]
-            },
-            "grantTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/GrantType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/GrantType"
-                }
-              ]
-            },
-            "acrValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/AuthenticationContextReferences"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/AuthenticationContextReferences"
-                }
-              ]
-            },
-            "idTokenEncryptionAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "idTokenEncryptionEncValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "userinfoSigningAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "userinfoEncryptionAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "userinfoEncryptionEncValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "requestObjectEncryptionAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "requestObjectEncryptionEncValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "tokenEndpointAuthMethodsSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/TokenEndpointAuthMethod"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/TokenEndpointAuthMethod"
-                }
-              ]
-            },
-            "tokenEndpointAuthSigningAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "displayValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "claimTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/ClaimType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/ClaimType"
-                }
-              ]
-            },
-            "claimsSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "serviceDocumentation": {
-              "type": "string"
-            },
-            "claimsLocalesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "uiLocalesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "claimsParameterSupported": {
-              "type": "boolean"
-            },
-            "requestParameterSupported": {
-              "type": "boolean"
-            },
-            "requestUriParameterSupported": {
-              "type": "boolean"
-            },
-            "requireRequestUriRegistration": {
-              "type": "boolean"
-            },
-            "opPolicyUri": {
-              "type": "string"
-            },
-            "opTosUri": {
-              "type": "string"
-            },
-            "client_id": {
-              "type": "string"
-            },
-            "redirectUris": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "clientName": {
-              "type": "string"
-            },
-            "clientUri": {
-              "type": "string"
-            },
-            "scope": {
-              "type": "string"
-            },
-            "contacts": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "tosUri": {
-              "type": "string"
-            },
-            "policyUri": {
-              "type": "string"
-            },
-            "jwks": {
-              "type": "object",
-              "properties": {
-                "keys": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "kty": {
-                        "type": "string"
-                      },
-                      "crv": {
-                        "type": "string"
-                      },
-                      "x": {
-                        "type": "string"
-                      },
-                      "y": {
-                        "type": "string"
-                      },
-                      "e": {
-                        "type": "string"
-                      },
-                      "n": {
-                        "type": "string"
-                      },
-                      "alg": {
-                        "type": "string"
-                      },
-                      "d": {
-                        "type": "string"
-                      },
-                      "dp": {
-                        "type": "string"
-                      },
-                      "dq": {
-                        "type": "string"
-                      },
-                      "ext": {
-                        "type": "boolean"
-                      },
-                      "k": {
-                        "type": "string"
-                      },
-                      "key_ops": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "kid": {
-                        "type": "string"
-                      },
-                      "oth": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "d": {
-                              "type": "string"
-                            },
-                            "r": {
-                              "type": "string"
-                            },
-                            "t": {
-                              "type": "string"
-                            }
-                          },
-                          "additionalProperties": false
-                        }
-                      },
-                      "p": {
-                        "type": "string"
-                      },
-                      "q": {
-                        "type": "string"
-                      },
-                      "qi": {
-                        "type": "string"
-                      },
-                      "use": {
-                        "type": "string"
-                      },
-                      "x5c": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "x5t": {
-                        "type": "string"
-                      },
-                      "x5t#S256": {
-                        "type": "string"
-                      },
-                      "x5u": {
-                        "type": "string"
-                      }
-                    },
-                    "additionalProperties": {}
-                  }
-                }
-              },
-              "required": [
-                "keys"
-              ],
-              "additionalProperties": false
-            },
-            "softwareId": {
-              "type": "string"
-            },
-            "softwareVersion": {
-              "type": "string"
-            },
-            "tokenEndpointAuthMethod": {
-              "type": "string"
-            },
-            "applicationType": {
-              "type": "string"
-            },
-            "responseTypes": {
-              "type": "string"
-            },
-            "grantTypes": {
-              "type": "string"
-            },
-            "vpFormats": {
-              "$ref": "#/definitions/Format"
-            },
-            "logo_uri": {
-              "type": "string"
-            },
-            "clientPurpose": {
+            {
               "type": "string"
             }
-          },
-          "required": [
-            "passBy"
           ]
         },
-        {
-          "type": "object",
-          "properties": {
-            "passBy": {
-              "$ref": "#/definitions/PassBy"
+        "issuer": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ResponseIss"
             },
-            "reference_uri": {
+            {
               "type": "string"
-            },
-            "targets": {
-              "$ref": "#/definitions/PropertyTargets"
-            },
-            "id_token_encrypted_response_alg": {
-              "$ref": "#/definitions/EncKeyAlgorithm"
-            },
-            "id_token_encrypted_response_enc": {
-              "$ref": "#/definitions/EncSymmetricAlgorithmCode"
-            },
-            "authorizationEndpoint": {
-              "anyOf": [
-                {
-                  "$ref": "#/definitions/Schema"
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "issuer": {
-              "anyOf": [
-                {
-                  "$ref": "#/definitions/ResponseIss"
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "responseTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/ResponseType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/ResponseType"
-                }
-              ]
-            },
-            "scopesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/Scope"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/Scope"
-                }
-              ]
-            },
-            "subjectTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/SubjectType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/SubjectType"
-                }
-              ]
-            },
-            "idTokenSigningAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "requestObjectSigningAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "subject_syntax_types_supported": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "tokenEndpoint": {
-              "type": "string"
-            },
-            "userinfoEndpoint": {
-              "type": "string"
-            },
-            "jwksUri": {
-              "type": "string"
-            },
-            "registrationEndpoint": {
-              "type": "string"
-            },
-            "responseModesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/ResponseMode"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/ResponseMode"
-                }
-              ]
-            },
-            "grantTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/GrantType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/GrantType"
-                }
-              ]
-            },
-            "acrValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/AuthenticationContextReferences"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/AuthenticationContextReferences"
-                }
-              ]
-            },
-            "idTokenEncryptionAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "idTokenEncryptionEncValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "userinfoSigningAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "userinfoEncryptionAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "userinfoEncryptionEncValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "requestObjectEncryptionAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "requestObjectEncryptionEncValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "tokenEndpointAuthMethodsSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/TokenEndpointAuthMethod"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/TokenEndpointAuthMethod"
-                }
-              ]
-            },
-            "tokenEndpointAuthSigningAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "displayValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "claimTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/ClaimType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/ClaimType"
-                }
-              ]
-            },
-            "claimsSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "serviceDocumentation": {
-              "type": "string"
-            },
-            "claimsLocalesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "uiLocalesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "claimsParameterSupported": {
-              "type": "boolean"
-            },
-            "requestParameterSupported": {
-              "type": "boolean"
-            },
-            "requestUriParameterSupported": {
-              "type": "boolean"
-            },
-            "requireRequestUriRegistration": {
-              "type": "boolean"
-            },
-            "opPolicyUri": {
-              "type": "string"
-            },
-            "opTosUri": {
-              "type": "string"
-            },
-            "client_id": {
-              "type": "string"
-            },
-            "redirectUris": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "clientName": {
-              "type": "string"
-            },
-            "clientUri": {
-              "type": "string"
-            },
-            "scope": {
-              "type": "string"
-            },
-            "contacts": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "tosUri": {
-              "type": "string"
-            },
-            "policyUri": {
-              "type": "string"
-            },
-            "jwks": {
-              "type": "object",
-              "properties": {
-                "keys": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "kty": {
-                        "type": "string"
-                      },
-                      "crv": {
-                        "type": "string"
-                      },
-                      "x": {
-                        "type": "string"
-                      },
-                      "y": {
-                        "type": "string"
-                      },
-                      "e": {
-                        "type": "string"
-                      },
-                      "n": {
-                        "type": "string"
-                      },
-                      "alg": {
-                        "type": "string"
-                      },
-                      "d": {
-                        "type": "string"
-                      },
-                      "dp": {
-                        "type": "string"
-                      },
-                      "dq": {
-                        "type": "string"
-                      },
-                      "ext": {
-                        "type": "boolean"
-                      },
-                      "k": {
-                        "type": "string"
-                      },
-                      "key_ops": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "kid": {
-                        "type": "string"
-                      },
-                      "oth": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "d": {
-                              "type": "string"
-                            },
-                            "r": {
-                              "type": "string"
-                            },
-                            "t": {
-                              "type": "string"
-                            }
-                          },
-                          "additionalProperties": false
-                        }
-                      },
-                      "p": {
-                        "type": "string"
-                      },
-                      "q": {
-                        "type": "string"
-                      },
-                      "qi": {
-                        "type": "string"
-                      },
-                      "use": {
-                        "type": "string"
-                      },
-                      "x5c": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "x5t": {
-                        "type": "string"
-                      },
-                      "x5t#S256": {
-                        "type": "string"
-                      },
-                      "x5u": {
-                        "type": "string"
-                      }
-                    },
-                    "additionalProperties": {}
-                  }
-                }
-              },
-              "required": [
-                "keys"
-              ],
-              "additionalProperties": false
-            },
-            "softwareId": {
-              "type": "string"
-            },
-            "softwareVersion": {
-              "type": "string"
-            },
-            "tokenEndpointAuthMethod": {
-              "type": "string"
-            },
-            "applicationType": {
-              "type": "string"
-            },
-            "responseTypes": {
-              "type": "string"
-            },
-            "grantTypes": {
-              "type": "string"
-            },
-            "vpFormats": {
-              "$ref": "#/definitions/Format"
             }
-          },
-          "required": [
-            "passBy"
           ]
         },
-        {
-          "type": "object",
-          "properties": {
-            "passBy": {
-              "$ref": "#/definitions/PassBy"
+        "responseTypesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResponseType"
+              }
             },
-            "reference_uri": {
-              "type": "string"
+            {
+              "$ref": "#/definitions/ResponseType"
+            }
+          ]
+        },
+        "scopesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Scope"
+              }
             },
-            "targets": {
-              "$ref": "#/definitions/PropertyTargets"
+            {
+              "$ref": "#/definitions/Scope"
+            }
+          ]
+        },
+        "subjectTypesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SubjectType"
+              }
             },
-            "id_token_encrypted_response_alg": {
-              "$ref": "#/definitions/EncKeyAlgorithm"
+            {
+              "$ref": "#/definitions/SubjectType"
+            }
+          ]
+        },
+        "idTokenSigningAlgValuesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "EdDSA",
+                  "RS256",
+                  "PS256",
+                  "ES256",
+                  "ES256K"
+                ]
+              }
             },
-            "id_token_encrypted_response_enc": {
-              "$ref": "#/definitions/EncSymmetricAlgorithmCode"
-            },
-            "authorizationEndpoint": {
-              "anyOf": [
-                {
-                  "$ref": "#/definitions/Schema"
-                },
-                {
-                  "type": "string"
-                }
+            {
+              "type": "string",
+              "enum": [
+                "EdDSA",
+                "RS256",
+                "PS256",
+                "ES256",
+                "ES256K"
               ]
+            }
+          ]
+        },
+        "requestObjectSigningAlgValuesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "EdDSA",
+                  "RS256",
+                  "PS256",
+                  "ES256",
+                  "ES256K"
+                ]
+              }
             },
-            "issuer": {
-              "anyOf": [
-                {
-                  "$ref": "#/definitions/ResponseIss"
-                },
-                {
-                  "type": "string"
-                }
+            {
+              "type": "string",
+              "enum": [
+                "EdDSA",
+                "RS256",
+                "PS256",
+                "ES256",
+                "ES256K"
               ]
+            }
+          ]
+        },
+        "subject_syntax_types_supported": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tokenEndpoint": {
+          "type": "string"
+        },
+        "userinfoEndpoint": {
+          "type": "string"
+        },
+        "jwksUri": {
+          "type": "string"
+        },
+        "registrationEndpoint": {
+          "type": "string"
+        },
+        "responseModesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResponseMode"
+              }
             },
-            "responseTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/ResponseType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/ResponseType"
-                }
+            {
+              "$ref": "#/definitions/ResponseMode"
+            }
+          ]
+        },
+        "grantTypesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GrantType"
+              }
+            },
+            {
+              "$ref": "#/definitions/GrantType"
+            }
+          ]
+        },
+        "acrValuesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AuthenticationContextReferences"
+              }
+            },
+            {
+              "$ref": "#/definitions/AuthenticationContextReferences"
+            }
+          ]
+        },
+        "idTokenEncryptionAlgValuesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "EdDSA",
+                  "RS256",
+                  "PS256",
+                  "ES256",
+                  "ES256K"
+                ]
+              }
+            },
+            {
+              "type": "string",
+              "enum": [
+                "EdDSA",
+                "RS256",
+                "PS256",
+                "ES256",
+                "ES256K"
               ]
-            },
-            "scopesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/Scope"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/Scope"
-                }
-              ]
-            },
-            "subjectTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/SubjectType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/SubjectType"
-                }
-              ]
-            },
-            "idTokenSigningAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "requestObjectSigningAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "subject_syntax_types_supported": {
+            }
+          ]
+        },
+        "idTokenEncryptionEncValuesSupported": {
+          "anyOf": [
+            {
               "type": "array",
               "items": {
                 "type": "string"
               }
             },
-            "tokenEndpoint": {
+            {
               "type": "string"
-            },
-            "userinfoEndpoint": {
-              "type": "string"
-            },
-            "jwksUri": {
-              "type": "string"
-            },
-            "registrationEndpoint": {
-              "type": "string"
-            },
-            "responseModesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/ResponseMode"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/ResponseMode"
-                }
-              ]
-            },
-            "grantTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/GrantType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/GrantType"
-                }
-              ]
-            },
-            "acrValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/AuthenticationContextReferences"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/AuthenticationContextReferences"
-                }
-              ]
-            },
-            "idTokenEncryptionAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "idTokenEncryptionEncValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "userinfoSigningAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "userinfoEncryptionAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "userinfoEncryptionEncValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "requestObjectEncryptionAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "requestObjectEncryptionEncValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "tokenEndpointAuthMethodsSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/TokenEndpointAuthMethod"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/TokenEndpointAuthMethod"
-                }
-              ]
-            },
-            "tokenEndpointAuthSigningAlgValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "EdDSA",
-                      "RS256",
-                      "PS256",
-                      "ES256",
-                      "ES256K"
-                    ]
-                  }
-                },
-                {
-                  "type": "string",
-                  "enum": [
-                    "EdDSA",
-                    "RS256",
-                    "PS256",
-                    "ES256",
-                    "ES256K"
-                  ]
-                }
-              ]
-            },
-            "displayValuesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "claimTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/ClaimType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/ClaimType"
-                }
-              ]
-            },
-            "claimsSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "serviceDocumentation": {
-              "type": "string"
-            },
-            "claimsLocalesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "uiLocalesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "claimsParameterSupported": {
-              "type": "boolean"
-            },
-            "requestParameterSupported": {
-              "type": "boolean"
-            },
-            "requestUriParameterSupported": {
-              "type": "boolean"
-            },
-            "requireRequestUriRegistration": {
-              "type": "boolean"
-            },
-            "opPolicyUri": {
-              "type": "string"
-            },
-            "opTosUri": {
-              "type": "string"
-            },
-            "idTokenTypesSupported": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/IdTokenType"
-                  }
-                },
-                {
-                  "$ref": "#/definitions/IdTokenType"
-                }
-              ]
-            },
-            "vpFormatsSupported": {
-              "$ref": "#/definitions/Format"
             }
-          },
-          "required": [
-            "passBy"
           ]
+        },
+        "userinfoSigningAlgValuesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "EdDSA",
+                  "RS256",
+                  "PS256",
+                  "ES256",
+                  "ES256K"
+                ]
+              }
+            },
+            {
+              "type": "string",
+              "enum": [
+                "EdDSA",
+                "RS256",
+                "PS256",
+                "ES256",
+                "ES256K"
+              ]
+            }
+          ]
+        },
+        "userinfoEncryptionAlgValuesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "EdDSA",
+                  "RS256",
+                  "PS256",
+                  "ES256",
+                  "ES256K"
+                ]
+              }
+            },
+            {
+              "type": "string",
+              "enum": [
+                "EdDSA",
+                "RS256",
+                "PS256",
+                "ES256",
+                "ES256K"
+              ]
+            }
+          ]
+        },
+        "userinfoEncryptionEncValuesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "requestObjectEncryptionAlgValuesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "EdDSA",
+                  "RS256",
+                  "PS256",
+                  "ES256",
+                  "ES256K"
+                ]
+              }
+            },
+            {
+              "type": "string",
+              "enum": [
+                "EdDSA",
+                "RS256",
+                "PS256",
+                "ES256",
+                "ES256K"
+              ]
+            }
+          ]
+        },
+        "requestObjectEncryptionEncValuesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "tokenEndpointAuthMethodsSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TokenEndpointAuthMethod"
+              }
+            },
+            {
+              "$ref": "#/definitions/TokenEndpointAuthMethod"
+            }
+          ]
+        },
+        "tokenEndpointAuthSigningAlgValuesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "EdDSA",
+                  "RS256",
+                  "PS256",
+                  "ES256",
+                  "ES256K"
+                ]
+              }
+            },
+            {
+              "type": "string",
+              "enum": [
+                "EdDSA",
+                "RS256",
+                "PS256",
+                "ES256",
+                "ES256K"
+              ]
+            }
+          ]
+        },
+        "displayValuesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "claimTypesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ClaimType"
+              }
+            },
+            {
+              "$ref": "#/definitions/ClaimType"
+            }
+          ]
+        },
+        "claimsSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "serviceDocumentation": {
+          "type": "string"
+        },
+        "claimsLocalesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "uiLocalesSupported": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "claimsParameterSupported": {
+          "type": "boolean"
+        },
+        "requestParameterSupported": {
+          "type": "boolean"
+        },
+        "requestUriParameterSupported": {
+          "type": "boolean"
+        },
+        "requireRequestUriRegistration": {
+          "type": "boolean"
+        },
+        "opPolicyUri": {
+          "type": "string"
+        },
+        "opTosUri": {
+          "type": "string"
         }
+      },
+      "required": [
+        "passBy"
       ]
     },
     "PassBy": {
@@ -2145,153 +855,11 @@ export const AuthorizationResponseOptsSchemaObj = {
         "distributed"
       ]
     },
-    "Format": {
-      "type": "object",
-      "properties": {
-        "jwt": {
-          "$ref": "#/definitions/JwtObject"
-        },
-        "jwt_vc": {
-          "$ref": "#/definitions/JwtObject"
-        },
-        "jwt_vc_json": {
-          "$ref": "#/definitions/JwtObject"
-        },
-        "jwt_vp": {
-          "$ref": "#/definitions/JwtObject"
-        },
-        "jwt_vp_json": {
-          "$ref": "#/definitions/JwtObject"
-        },
-        "ldp": {
-          "$ref": "#/definitions/LdpObject"
-        },
-        "ldp_vc": {
-          "$ref": "#/definitions/LdpObject"
-        },
-        "ldp_vp": {
-          "$ref": "#/definitions/LdpObject"
-        },
-        "di": {
-          "$ref": "#/definitions/DiObject"
-        },
-        "di_vc": {
-          "$ref": "#/definitions/DiObject"
-        },
-        "di_vp": {
-          "$ref": "#/definitions/DiObject"
-        },
-        "vc+sd-jwt": {
-          "$ref": "#/definitions/SdJwtObject"
-        },
-        "mso_mdoc": {
-          "$ref": "#/definitions/MsoMdocObject"
-        }
-      },
-      "additionalProperties": false
-    },
-    "JwtObject": {
-      "type": "object",
-      "properties": {
-        "alg": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "alg"
-      ],
-      "additionalProperties": false
-    },
-    "LdpObject": {
-      "type": "object",
-      "properties": {
-        "proof_type": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "proof_type"
-      ],
-      "additionalProperties": false
-    },
-    "DiObject": {
-      "type": "object",
-      "properties": {
-        "proof_type": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "cryptosuite": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "proof_type",
-        "cryptosuite"
-      ],
-      "additionalProperties": false
-    },
-    "SdJwtObject": {
-      "type": "object",
-      "properties": {
-        "sd-jwt_alg_values": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "kb-jwt_alg_values": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    "MsoMdocObject": {
-      "type": "object",
-      "properties": {
-        "alg": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "alg"
-      ],
-      "additionalProperties": false
-    },
-    "IdTokenType": {
-      "type": "string",
-      "enum": [
-        "subject_signed",
-        "attester_signed"
-      ]
-    },
     "SupportedVersion": {
       "type": "number",
       "enum": [
-        70,
-        110,
-        180,
-        200,
         280,
-        1000,
-        71
+        1000
       ]
     },
     "CreateJwtCallback": {

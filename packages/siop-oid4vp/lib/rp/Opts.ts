@@ -22,8 +22,8 @@ export const createRequestOptsFromBuilderOrExistingOpts = (opts: { builder?: RPB
           ...opts.builder.requestObjectBy,
           payload: {
             ...(opts.builder.requestObjectPayload as RequestObjectPayload),
-            subject_types_supported: opts.builder.clientMetadata?.subjectTypesSupported,
-            request_object_signing_alg_values_supported: opts.builder.clientMetadata?.requestObjectSigningAlgValuesSupported,
+            subject_types_supported: opts.builder.clientMetadata?.subject_types_supported,
+            request_object_signing_alg_values_supported: opts.builder.clientMetadata?.request_object_signing_alg_values_supported,
           },
           createJwtCallback: opts.builder.createJwtCallback,
         },

@@ -123,23 +123,23 @@ describe('create Request Uri should', () => {
       },
       clientMetadata: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        subject_types_supported: [SubjectType.PAIRWISE],
+        vp_formats_supported: {
           ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+            proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
         },
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100300',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100300',
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
     }
 
@@ -196,23 +196,23 @@ describe('create Request Uri should', () => {
       },
       clientMetadata: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        subject_types_supported: [SubjectType.PAIRWISE],
+        vp_formats_supported: {
           ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+            proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
         },
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100301',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100301',
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
     }
 
@@ -261,23 +261,23 @@ describe('create Request Uri should', () => {
       },
       clientMetadata: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        subject_types_supported: [SubjectType.PAIRWISE],
+        vp_formats_supported: {
           ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+            proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
         },
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100302',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100302',
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
     }
 
@@ -314,7 +314,7 @@ describe('create Request JWT should', () => {
       registration: {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -345,7 +345,7 @@ describe('create Request JWT should', () => {
       registration: {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -374,7 +374,7 @@ describe('create Request JWT should', () => {
       registration: {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -404,7 +404,7 @@ describe('create Request JWT should', () => {
       registration: {
         idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        vpFormatsSupported: {
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
@@ -446,23 +446,23 @@ describe('create Request JWT should', () => {
       },
       clientMetadata: {
         client_id: 'test_client_id',
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        subject_types_supported: [SubjectType.PAIRWISE],
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
         },
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100303',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100303',
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       },
     }
 
@@ -553,23 +553,23 @@ describe('create Request JWT should', () => {
       },
       clientMetadata: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        subject_types_supported: [SubjectType.PAIRWISE],
+        vp_formats_supported: {
           ldp_vc: {
-            proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+            proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
         },
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100305',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100305',
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       }
     }
 
@@ -635,23 +635,23 @@ describe('create Request JWT should', () => {
       },
       clientMetadata: {
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subject_syntax_types_supported: ['did:ethr:', SubjectIdentifierType.DID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
-        vpFormatsSupported: {
+        subject_types_supported: [SubjectType.PAIRWISE],
+        vp_formats_supported: {
           ldp_vc: {
             proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
           },
         },
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100305',
-        clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-        'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100305',
+        client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+        'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       }
     }
 

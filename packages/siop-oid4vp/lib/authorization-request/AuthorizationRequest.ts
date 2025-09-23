@@ -20,7 +20,6 @@ import {
   ResponseType,
   ResponseURIType,
   RPRegistrationMetadataPayload,
-  Schema,
   SIOPErrors,
   SupportedVersion,
   VerifiedAuthorizationRequest,
@@ -92,8 +91,6 @@ export class AuthorizationRequest {
   public async getSupportedVersion() {
     if (this.options?.version) {
       return this.options.version
-    } else if (this._uri?.encodedUri?.startsWith(Schema.OPENID_VC) || this._uri?.scheme?.startsWith(Schema.OPENID_VC)) {
-      return SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1
     }
 
     return (await this.getSupportedVersionsFromPayload())[0]

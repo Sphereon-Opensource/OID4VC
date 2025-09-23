@@ -1,8 +1,8 @@
 import { JwtIssuer } from '@sphereon/oid4vc-common'
 import { PresentationSignCallBackParams } from '@sphereon/pex'
-import { Format } from '@sphereon/pex-models'
 import {
   CompactSdJwtVc,
+  Format,
   HasherSync,
   MdocOid4vpIssuerSigned,
   PresentationSubmission,
@@ -11,6 +11,7 @@ import {
 import { DcqlQuery } from 'dcql'
 import { AuthorizationResponse } from './AuthorizationResponse'
 import {
+  CreateJwtCallback,
   ResponseMode,
   ResponseRegistrationOpts,
   ResponseType,
@@ -18,7 +19,6 @@ import {
   SupportedVersion,
   VerifiablePresentationWithFormat,
   Verification,
-  CreateJwtCallback,
   VerifyJwtCallback,
   ResponseIss
 } from '../types'
@@ -46,7 +46,7 @@ export interface DcqlResponseOpts {
 }
 
 export interface DcqlQueryPayloadOpts {
-  dcql_query: string
+  dcql_query: Record<string, any> // TODO maybe Record<string, any> // string
 }
 
 export interface VerifiablePresentationWithSubmissionData extends VerifiablePresentationWithFormat {
@@ -68,6 +68,13 @@ export type PresentationVerificationCallback = (
 ) => Promise<PresentationVerificationResult>
 
 export type PresentationSignCallback = (args: PresentationSignCallBackParams) => Promise<W3CVerifiablePresentation | CompactSdJwtVc>
+
+export type DcqlQueryLookupCallback = (
+  queryId: string,
+  version?: string,
+  tenantId?: string
+) => Promise<DcqlQuery>
+
 
 export interface VerifyAuthorizationResponseOpts {
   correlationId: string
