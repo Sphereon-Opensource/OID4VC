@@ -31,7 +31,8 @@ export const ResponseTypeSchema = z.enum([ResponseType.VP_TOKEN])
 
 export const ResponseModeSchema = z.enum([ResponseMode.DIRECT_POST, ResponseMode.DIRECT_POST_JWT])
 
-export const RequestUriMethodSchema = z.enum(Object.values(RequestUriMethod))
+const requestUriMethods = ['get', 'post'] as const satisfies Array<RequestUriMethod>;
+export const RequestUriMethodSchema = z.enum(requestUriMethods)
 
 // Internal schemas
 export const QRCodeOptsSchema = z.object({

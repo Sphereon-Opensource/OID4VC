@@ -65,6 +65,8 @@ export interface AuthorizationRequestCommonPayload extends RequestCommonPayload,
   request_uri?: string // OPTIONAL. URL where Request Object value can be retrieved from, as specified in Section 6.2 of [OpenID.Core].
 }
 
+export type RequestUriMethod = 'get' | 'post'
+
 export enum ClientIdentifierPrefix {
   REDIRECT_URI = 'redirect_uri',
   OPENID_FEDERATION = 'openid_federation',
@@ -512,11 +514,6 @@ export enum ResponseMode {
   DIRECT_POST_JWT = 'direct_post.jwt',
   QUERY_JWT = 'query.jwt',
   FRAGMENT_JWT = 'fragment.jwt',
-}
-
-export enum RequestUriMethod {
-  GET = 'get',
-  POST = 'post',
 }
 
 export enum VerifiedDataMode {
