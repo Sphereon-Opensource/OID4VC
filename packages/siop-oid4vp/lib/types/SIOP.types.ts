@@ -4,7 +4,6 @@ import {
   AdditionalClaims,
   CompactSdJwtVc,
   Format,
-  IPresentation,
   MdocOid4vpMdocVpToken,
   W3CVerifiableCredential,
   W3CVerifiablePresentation,
@@ -182,7 +181,7 @@ export interface AuthorizationResponsePayload {
     | CompactSdJwtVc
     | MdocOid4vpMdocVpToken
     | EncodedDcqlQueryVpToken
-  verifiedData?: IPresentation | AdditionalClaims
+  verified_data?: VerifiedData
   is_first_party?: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
@@ -678,3 +677,35 @@ export enum ContentType {
 }
 
 export type CallbackOpts = z.infer<typeof CallbackOptsSchema>;
+
+export type VerifiedData = {
+  authorization_response?: VerifiedDataAuthorizationResponse
+  credential_claims?: Array<VerifiedDataClaimsSet>
+}
+
+export type VerifiedDataClaimsSet = {
+  id: string
+  type: string
+  claims?: AdditionalClaims
+}
+
+export type VerifiedDataAuthorizationResponse = {
+  presentation_submission?: Record<string, any>
+  vp_token?: VpToken
+}
+
+export type SingleObjectVpTokenPE = Record<string, any>
+
+export type SingleStringVpTokenPE = string
+
+export type MultipleVpTokens = Array<SingleObjectVpTokenPE> | Array<SingleStringVpTokenPE>
+
+export type MultipleVpTokenDCQL = {
+  [x: string]: MultipleVpTokens
+}
+
+export type VpToken =
+    | SingleObjectVpTokenPE
+    | SingleStringVpTokenPE
+    | MultipleVpTokens
+    | MultipleVpTokenDCQL
