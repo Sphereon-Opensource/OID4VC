@@ -193,12 +193,12 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     try {
       const eventState = {
         correlationId: event.correlationId,
-        queryId: event.queryId,
+        queryId: event.queryId ?? this.authorizationRequests[event.correlationId].queryId,
         ...(type === 'request' && { request: event.subject }),
         ...(type === 'response' && { response: event.subject }),
         ...(event.error && { error: event.error }),
         status,
-        callback: event.callback,
+        callback: event.callback ?? this.authorizationRequests[event.correlationId].callback,
         timestamp: event.timestamp,
         lastUpdated: event.timestamp,
       }
@@ -213,7 +213,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         this.authorizationResponses[event.correlationId] = state
       }
 
-      if (event.callback && (event.callback.status === undefined || event.callback.status.includes(status))) {
+      if (eventState.callback && (eventState.callback.status === undefined || eventState.callback.status.includes(status))) {
         void this.executeCallback(event.callback.url, state)
       }
     } catch (error: unknown) {
@@ -265,7 +265,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
       correlation_id: state.correlationId,
       query_id: state.queryId,
       last_updated: state.lastUpdated,
-      ...((state?.status === AuthorizationResponseStateStatus.VERIFIED && state.verifiedData !== undefined) && { verified_data: state.verifiedData }),
+      ...('verifiedData' in state && { verified_data: state.verifiedData }),
       ...(state.error && { message: state.error.message })
     }
 
