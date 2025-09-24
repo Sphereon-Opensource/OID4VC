@@ -9,7 +9,8 @@ import {
   AuthorizationRequestStateStatus,
   AuthorizationResponseState,
   AuthorizationResponseStateStatus,
-  AuthorizationResponseStateWithVerifiedData
+  AuthorizationResponseStateWithVerifiedData,
+  CallbackOpts
 } from '../types'
 import { IRPSessionManager } from './types'
 
@@ -27,6 +28,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
   private readonly nonceMapping: Record<number, string> = {}
   // stored by hashcode
   private readonly stateMapping: Record<number, string> = {}
+  private readonly callbacks: Record<string, CallbackOpts> = {}
   private readonly maxAgeInSeconds: number
 
   private static getKeysForCorrelationId(mapping: Record<number, string>, correlationId: string): number[] {
@@ -198,7 +200,6 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         ...(type === 'response' && { response: event.subject }),
         ...(event.error && { error: event.error }),
         status,
-        callback: event.callback ?? this.authorizationRequests[event.correlationId].callback,
         timestamp: event.timestamp,
         lastUpdated: event.timestamp,
       }
@@ -208,13 +209,17 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         this.authorizationRequests[event.correlationId] = state
         this.updateMapping(this.nonceMapping, event, 'nonce', event.correlationId, true)
         this.updateMapping(this.stateMapping, event, 'state', event.correlationId, true)
+        if (event.callback) {
+          this.callbacks[event.correlationId] = event.callback
+        }
       } else {
         state = eventState as AuthorizationResponseState
         this.authorizationResponses[event.correlationId] = state
       }
 
-      if (eventState.callback && (eventState.callback.status === undefined || eventState.callback.status.includes(status))) {
-        void this.executeCallback(eventState.callback.url, state)
+      const callback = this.callbacks[event.correlationId]
+      if (callback && (callback.status === undefined || callback.status.includes(status))) {
+        void this.executeCallback(callback.url, state)
       }
     } catch (error: unknown) {
       console.log(`Error in update state happened: ${error}`)
