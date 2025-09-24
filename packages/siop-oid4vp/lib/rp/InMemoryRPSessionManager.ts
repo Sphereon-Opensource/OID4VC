@@ -28,7 +28,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
   private readonly nonceMapping: Record<number, string> = {}
   // stored by hashcode
   private readonly stateMapping: Record<number, string> = {}
-  private readonly callbacks: Record<string, CallbackOpts> = {}
+  private readonly callbackMapping: Record<string, CallbackOpts> = {}
   private readonly maxAgeInSeconds: number
 
   private static getKeysForCorrelationId(mapping: Record<number, string>, correlationId: string): number[] {
@@ -210,14 +210,14 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         this.updateMapping(this.nonceMapping, event, 'nonce', event.correlationId, true)
         this.updateMapping(this.stateMapping, event, 'state', event.correlationId, true)
         if (event.callback) {
-          this.callbacks[event.correlationId] = event.callback
+          this.callbackMapping[event.correlationId] = event.callback
         }
       } else {
         state = eventState as AuthorizationResponseState
         this.authorizationResponses[event.correlationId] = state
       }
 
-      const callback = this.callbacks[event.correlationId]
+      const callback = this.callbackMapping[event.correlationId]
       if (callback && (callback.status === undefined || callback.status.includes(status))) {
         void this.executeCallback(callback.url, state)
       }
