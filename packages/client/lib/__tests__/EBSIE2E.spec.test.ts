@@ -4,7 +4,7 @@ import { CredentialMapper } from '@sphereon/ssi-types'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 import { from } from '@trust/keyto'
-import { fetch } from 'cross-fetch'
+import fetch from 'cross-fetch'
 import pkg from 'debug'
 const { debug: Debug } = pkg
 import { base64url, importJWK, JWK, SignJWT } from 'jose'
