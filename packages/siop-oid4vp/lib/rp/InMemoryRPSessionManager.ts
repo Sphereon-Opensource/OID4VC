@@ -214,7 +214,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
       }
 
       if (eventState.callback && (eventState.callback.status === undefined || eventState.callback.status.includes(status))) {
-        void this.executeCallback(event.callback.url, state)
+        void this.executeCallback(eventState.callback.url, state)
       }
     } catch (error: unknown) {
       console.log(`Error in update state happened: ${error}`)
