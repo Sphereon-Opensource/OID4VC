@@ -191,7 +191,6 @@ export interface AuthorizationResponsePayload {
     | CompactSdJwtVc
     | MdocOid4vpMdocVpToken
     | EncodedDcqlPresentationVpToken
-  verified_data?: VerifiedData
   is_first_party?: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
