@@ -482,8 +482,12 @@ export interface VerifiedIDToken {
 
 export interface VerifiedOpenID4VPSubmission {
   dcqlQuery: DcqlQuery
-  presentation: { [credentialQueryId: string]: WrappedVerifiablePresentation }
+  presentation: PresentationSubmission
   nonce?: string
+}
+
+export interface PresentationSubmission {
+  [credentialQueryId: string]: WrappedVerifiablePresentation
 }
 
 export interface VerifiedAuthorizationResponse {
