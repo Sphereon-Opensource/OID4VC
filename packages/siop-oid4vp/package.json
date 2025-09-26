@@ -30,7 +30,7 @@
     "@sphereon/jarm": "workspace:^",
     "@sphereon/oid4vc-common": "workspace:^",
     "@sphereon/pex": "5.0.0-unstable.28",
-    "@sphereon/ssi-types": "0.34.1-feature.DIIPv4.164",
+    "@sphereon/ssi-types": "0.34.1-feature.DIIPv4.244",
     "cross-fetch": "^4.0.0",
     "dcql": "1.0.1",
     "debug": "^4.4.0",

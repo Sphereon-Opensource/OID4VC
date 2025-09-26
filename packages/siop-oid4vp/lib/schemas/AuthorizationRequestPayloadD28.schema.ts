@@ -445,16 +445,19 @@ export const AuthorizationRequestPayloadD28SchemaObj = {
             "mso_mdoc": {
               "type": "object",
               "properties": {
-                "alg_values": {
+                "issuerauth_alg_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "deviceauth_alg_values": {
                   "type": "array",
                   "items": {
                     "type": "string"
                   }
                 }
               },
-              "required": [
-                "alg_values"
-              ],
               "additionalProperties": false
             }
           },

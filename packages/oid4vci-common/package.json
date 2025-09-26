@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@sphereon/oid4vc-common": "workspace:^",
-    "@sphereon/ssi-types": "0.34.1-feature.DIIPv4.164",
+    "@sphereon/ssi-types": "0.34.1-feature.DIIPv4.244",
     "cross-fetch": "^4.1.0",
     "debug": "^4.4.0",
     "jwt-decode": "^4.0.0",
