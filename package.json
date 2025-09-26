@@ -26,7 +26,7 @@
     "pnpm": ">=10"
   },
   "resolutions": {
-    "@sphereon/ssi-types": "0.34.1-feature.DIIPv4.244",
+    "@sphereon/ssi-types": "0.34.1-feature.DIIPv4.245",
     "dcql": "1.0.1",
     "node-fetch": "2.6.12",
     "typescript": "5.8.3"

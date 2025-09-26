@@ -24,7 +24,7 @@
     "@sphereon/oid4vc-common": "workspace:^",
     "@sphereon/oid4vci-common": "workspace:^",
     "@sphereon/ssi-express-support": "0.34.1-next.3",
-    "@sphereon/ssi-types": "0.34.1-feature.DIIPv4.244",
+    "@sphereon/ssi-types": "0.34.1-feature.DIIPv4.245",
     "short-uuid": "^4.2.2",
     "uuid": "^9.0.0"
   },

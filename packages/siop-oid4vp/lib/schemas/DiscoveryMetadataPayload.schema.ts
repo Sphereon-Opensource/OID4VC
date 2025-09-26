@@ -835,13 +835,13 @@ export const DiscoveryMetadataPayloadSchemaObj = {
                 "issuerauth_alg_values": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "type": "number"
                   }
                 },
                 "deviceauth_alg_values": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "type": "number"
                   }
                 }
               },
