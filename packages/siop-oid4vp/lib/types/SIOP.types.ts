@@ -28,6 +28,8 @@ import { RequestObject, RequestObjectOpts } from '../request-object'
 import { IRPSessionManager } from '../rp'
 import { JWTPayload, VerifiedJWT } from './JWT.types'
 import {
+  AuthStatusResponsePayloadSchema,
+  AuthStatusResponseSchema,
   CallbackOptsPayloadSchema,
   CallbackOptsSchema,
   CreateAuthorizationRequestPayloadSchema,
@@ -35,7 +37,7 @@ import {
   CreateAuthorizationResponsePayloadSchema,
   CreateAuthorizationResponseSchema,
   QRCodeOptsPayloadSchema,
-  QRCodeOptsSchema,
+  QRCodeOptsSchema, RequestErrorPayloadSchema, RequestErrorSchema,
   VerifiedDataOptsSchema
 } from '../schemas'
 
@@ -699,6 +701,11 @@ export type CreateAuthorizationRequestPayload = z.infer<typeof CreateAuthorizati
 export type CreateAuthorizationResponse = z.infer<typeof CreateAuthorizationResponseSchema>
 export type CreateAuthorizationResponsePayload = z.infer<typeof CreateAuthorizationResponsePayloadSchema>
 export type VerifiedDataOpts = z.infer<typeof VerifiedDataOptsSchema>
+export type RequestError = z.infer<typeof RequestErrorSchema>
+export type RequestErrorPayload = z.infer<typeof RequestErrorPayloadSchema>
+export type AuthStatusResponse = z.infer<typeof AuthStatusResponseSchema>
+export type AuthStatusResponsePayload = z.infer<typeof AuthStatusResponsePayloadSchema>
+
 
 export type VerifiedData = {
   authorization_response?: VerifiedDataAuthorizationResponse

@@ -1,6 +1,6 @@
 import {
   AuthorizationRequestStateStatus,
-  AuthorizationResponseStateStatus,
+  AuthorizationResponseStateStatus, AuthStatusResponse, AuthStatusResponsePayload,
   CallbackOpts,
   CallbackOptsPayload,
   CreateAuthorizationRequest,
@@ -8,7 +8,7 @@ import {
   CreateAuthorizationResponse,
   CreateAuthorizationResponsePayload,
   QRCodeOpts,
-  QRCodeOptsPayload,
+  QRCodeOptsPayload, RequestError, RequestErrorPayload,
   RequestUriMethod,
   ResponseMode,
   ResponseType,
@@ -194,5 +194,80 @@ export const createAuthorizationResponseToPayload = (internal: CreateAuthorizati
     request_uri: parsed.requestUri,
     status_uri: parsed.statusUri,
     qr_uri: parsed.qrUri
+  }
+}
+
+
+export const RequestErrorSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  errorDetails: z.string().optional()
+})
+
+export const AuthStatusResponseSchema = z.object({
+  status: AuthorizationStatusSchema,
+  correlationId: z.string(),
+  queryId: z.string(),
+  lastUpdated: z.number(),
+  verifiedData: z.any().optional(), // Replace with actual VerifiedDataSchema when available
+  error: RequestErrorSchema.optional()
+})
+
+
+export const RequestErrorPayloadSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  error_details: z.string().optional()
+})
+
+export const AuthStatusResponsePayloadSchema = z.object({
+  status: AuthorizationStatusSchema,
+  correlation_id: z.string(),
+  query_id: z.string(),
+  last_updated: z.number(),
+  verified_data: z.any().optional(), // Replace with actual VerifiedDataSchema when available
+  error: RequestErrorPayloadSchema.optional()
+})
+
+
+export const requestErrorFromPayload = (payload: RequestError): RequestError => {
+  const parsed = RequestErrorPayloadSchema.parse(payload)
+  return {
+    status: parsed.status,
+    message: parsed.message,
+    errorDetails: parsed.error_details
+  }
+}
+
+export const requestErrorToPayload = (internal: RequestError): RequestErrorPayload => {
+  const parsed = RequestErrorSchema.parse(internal)
+  return {
+    status: parsed.status,
+    message: parsed.message,
+    error_details: parsed.errorDetails
+  }
+}
+
+export const authStatusResponseFromPayload = (payload: AuthStatusResponse): AuthStatusResponse => {
+  const parsed = AuthStatusResponsePayloadSchema.parse(payload)
+  return {
+    status: parsed.status,
+    correlationId: parsed.correlation_id,
+    queryId: parsed.query_id,
+    lastUpdated: parsed.last_updated,
+    verifiedData: parsed.verified_data,
+    error: parsed.error ? requestErrorFromPayload(parsed.error) : undefined
+  }
+}
+
+export const authStatusResponseToPayload = (internal: AuthStatusResponse): AuthStatusResponsePayload => {
+  const parsed = AuthStatusResponseSchema.parse(internal)
+  return {
+    status: parsed.status,
+    correlation_id: parsed.correlationId,
+    query_id: parsed.queryId,
+    last_updated: parsed.lastUpdated,
+    verified_data: parsed.verifiedData,
+    error: parsed.error ? requestErrorToPayload(parsed.error) : undefined
   }
 }
