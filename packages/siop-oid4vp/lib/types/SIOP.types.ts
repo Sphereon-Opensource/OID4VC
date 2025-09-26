@@ -9,7 +9,7 @@ import {
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation
 } from '@sphereon/ssi-types'
-import { DcqlQuery } from 'dcql'
+import { DcqlPresentationResult, DcqlQuery } from 'dcql'
 import { z } from 'zod'
 import {
   AuthorizationRequest,
@@ -483,6 +483,7 @@ export interface VerifiedIDToken {
 export interface VerifiedOpenID4VPSubmission {
   dcqlQuery: DcqlQuery
   presentation: PresentationSubmission
+  dcqlPresentationResult?: DcqlPresentationResult
   nonce?: string
 }
 
