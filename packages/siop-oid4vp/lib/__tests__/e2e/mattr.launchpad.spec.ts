@@ -3,7 +3,7 @@ import { PresentationSignCallBackParams } from '@sphereon/pex'
 import { W3CVerifiablePresentation } from '@sphereon/ssi-types'
 import { DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlW3cVcCredential } from 'dcql'
 import * as ed25519 from '@transmute/did-key-ed25519'
-import { fetch } from 'cross-fetch'
+import fetch from 'cross-fetch'
 import { DIDDocument, DIDResolutionResult } from 'did-resolver'
 import { importJWK, JWK, SignJWT } from 'jose'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment

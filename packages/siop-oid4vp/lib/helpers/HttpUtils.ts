@@ -1,5 +1,5 @@
 import { Loggers } from '@sphereon/ssi-types'
-import { fetch } from 'cross-fetch'
+import fetch from 'cross-fetch'
 import { ContentType, SIOPErrors, SIOPResonse } from '../types'
 
 const logger = Loggers.DEFAULT.get('sphereon:siopv2:http')

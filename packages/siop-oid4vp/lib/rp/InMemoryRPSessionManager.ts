@@ -9,7 +9,8 @@ import {
   AuthorizationRequestStateStatus,
   AuthorizationResponseState,
   AuthorizationResponseStateStatus,
-  AuthorizationResponseStateWithVerifiedData
+  AuthorizationResponseStateWithVerifiedData,
+  CallbackOpts
 } from '../types'
 import { IRPSessionManager } from './types'
 
@@ -27,6 +28,8 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
   private readonly nonceMapping: Record<number, string> = {}
   // stored by hashcode
   private readonly stateMapping: Record<number, string> = {}
+  private readonly callbackMapping: Record<string, CallbackOpts> = {}
+  private readonly queryIdMapping: Record<string, string> = {}
   private readonly maxAgeInSeconds: number
 
   private static getKeysForCorrelationId(mapping: Record<number, string>, correlationId: string): number[] {
@@ -193,12 +196,11 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
     try {
       const eventState = {
         correlationId: event.correlationId,
-        queryId: event.queryId,
+        queryId: event.queryId ?? this.queryIdMapping[event.correlationId],
         ...(type === 'request' && { request: event.subject }),
         ...(type === 'response' && { response: event.subject }),
         ...(event.error && { error: event.error }),
         status,
-        callback: event.callback,
         timestamp: event.timestamp,
         lastUpdated: event.timestamp,
       }
@@ -208,13 +210,20 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         this.authorizationRequests[event.correlationId] = state
         this.updateMapping(this.nonceMapping, event, 'nonce', event.correlationId, true)
         this.updateMapping(this.stateMapping, event, 'state', event.correlationId, true)
+        if (event.queryId) {
+          this.queryIdMapping[event.correlationId] = event.queryId
+        }
+        if (event.callback) {
+          this.callbackMapping[event.correlationId] = event.callback
+        }
       } else {
         state = eventState as AuthorizationResponseState
         this.authorizationResponses[event.correlationId] = state
       }
 
-      if (event.callback && (event.callback.status === undefined || event.callback.status.includes(status))) {
-        void this.executeCallback(event.callback.url, state)
+      const callback = this.callbackMapping[event.correlationId]
+      if (callback && (callback.status === undefined || callback.status.includes(status))) {
+        void this.executeCallback(callback.url, state)
       }
     } catch (error: unknown) {
       console.log(`Error in update state happened: ${error}`)
@@ -265,7 +274,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
       correlation_id: state.correlationId,
       query_id: state.queryId,
       last_updated: state.lastUpdated,
-      ...((state?.status === AuthorizationResponseStateStatus.VERIFIED && state.verifiedData !== undefined) && { verified_data: state.verifiedData }),
+      ...('verifiedData' in state && { verified_data: state.verifiedData }),
       ...(state.error && { message: state.error.message })
     }
 

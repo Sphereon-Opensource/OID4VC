@@ -1755,3 +1755,75 @@ describe.skip('RP and OP interaction should', () => {
     expect(resState?.status).toBe('error')
   })
 })
+
+
+describe('credential_sets tests', () => {
+  it('DCQL credential_sets: happy flow (single required option is satisfied)', () => {
+    const queryWithSet: DcqlQuery.Input = {
+      credentials: [
+        {
+          id: 'credA',
+          format: 'ldp_vc',
+          meta: {
+            type_values: [
+              ['https://www.w3.org/2018/credentials#VerifiableCredential'],
+              ['PermanentResidentCard']
+            ]
+          },
+          claims: [{ path: ['givenName'], values: ['JANE'] }]
+        }
+      ],
+      credential_sets: [
+        {
+          options: [['credA']],
+          required: true,
+          purpose: 'must include credA'
+        }
+      ]
+    }
+
+    const parsed = DcqlQuery.parse(queryWithSet)
+    DcqlQuery.validate(parsed) // validates structure + credential_sets references
+
+    const dcqlCredential: DcqlW3cVcCredential = {
+      credential_format: 'ldp_vc',
+      claims: (getVCs()[0].credentialSubject as { [x: string]: Json }),
+      type: getVCs()[0].type,
+      cryptographic_holder_binding: true
+    }
+
+    const result: DcqlQueryResult = DcqlQuery.query(parsed, [dcqlCredential])
+
+    // set is satisfied and matching_options should include ['credA']
+    expect(result.can_be_satisfied).toBe(true)
+    expect(result.credential_sets?.[0].matching_options).toEqual([['credA']])
+  })
+
+  it('DCQL credential_sets: invalid rule (references unknown credential id) fails validation', () => {
+    const queryWithBadSet: DcqlQuery.Input = {
+      credentials: [
+        {
+          id: 'credA',
+          format: 'ldp_vc',
+          meta: {
+            type_values: [
+              ['https://www.w3.org/2018/credentials#VerifiableCredential'],
+              ['PermanentResidentCard']
+            ]
+          },
+          claims: [{ path: ['givenName'], values: ['JANE'] }]
+        }
+      ],
+      credential_sets: [
+        {
+          // This option references a non-existent credential query id
+          options: [['does_not_exist']],
+          required: true
+        }
+      ]
+    }
+
+    const parsed = DcqlQuery.parse(queryWithBadSet)
+    expect(() => DcqlQuery.validate(parsed)).toThrowError(/Credential set contains undefined credential id/i)
+  })
+})

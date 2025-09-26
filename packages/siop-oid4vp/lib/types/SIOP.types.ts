@@ -9,7 +9,7 @@ import {
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation
 } from '@sphereon/ssi-types'
-import { DcqlQuery } from 'dcql'
+import { DcqlPresentationResult, DcqlQuery } from 'dcql'
 import { z } from 'zod'
 import {
   AuthorizationRequest,
@@ -191,7 +191,6 @@ export interface AuthorizationResponsePayload {
     | CompactSdJwtVc
     | MdocOid4vpMdocVpToken
     | EncodedDcqlPresentationVpToken
-  verified_data?: VerifiedData
   is_first_party?: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any
@@ -483,8 +482,13 @@ export interface VerifiedIDToken {
 
 export interface VerifiedOpenID4VPSubmission {
   dcqlQuery: DcqlQuery
-  presentation: { [credentialQueryId: string]: WrappedVerifiablePresentation }
+  presentation: PresentationSubmission
+  dcqlPresentationResult?: DcqlPresentationResult
   nonce?: string
+}
+
+export interface PresentationSubmission {
+  [credentialQueryId: string]: WrappedVerifiablePresentation
 }
 
 export interface VerifiedAuthorizationResponse {

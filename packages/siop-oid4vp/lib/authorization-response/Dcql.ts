@@ -57,7 +57,7 @@ export class Dcql {
       opts: {
         hasher?: HasherSync
       },
-  ) => {
+  ) : DcqlPresentationResult.Output => {
     const dcqlPresentation = Object.fromEntries(
         // FIXME SSISDK-41
         Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
