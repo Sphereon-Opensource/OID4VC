@@ -1,6 +1,6 @@
 import { Alg, Jwt } from '@sphereon/oid4vci-common'
 import { CredentialMapper } from '@sphereon/ssi-types'
-import { fetch } from 'cross-fetch'
+import fetch from 'cross-fetch'
 import { importJWK, JWK, SignJWT } from 'jose'
 import { describe, expect, it } from 'vitest'
 

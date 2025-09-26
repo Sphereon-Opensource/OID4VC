@@ -1,35 +1,8 @@
 import {
   AuthorizationRequestPayloadD28Schema,
-  AuthorizationRequestPayloadV1Schema,
-  AuthorizationRequestPayloadVID1Schema
+  AuthorizationRequestPayloadV1Schema
 } from '../schemas'
 import { AuthorizationRequestPayload, SupportedVersion } from '../types'
-
-const validateJWTVCPresentationProfile = AuthorizationRequestPayloadVID1Schema
-
-function isJWTVC1Payload(authorizationRequest: AuthorizationRequestPayload) {
-  return (
-    authorizationRequest.scope &&
-    authorizationRequest.scope.toLowerCase().includes('openid') &&
-    authorizationRequest.response_type &&
-    authorizationRequest.response_type.toLowerCase().includes('id_token') &&
-    authorizationRequest.response_mode &&
-    authorizationRequest.response_mode.toLowerCase() === 'post' &&
-    authorizationRequest.client_id &&
-    authorizationRequest.client_id.toLowerCase().startsWith('did:') &&
-    authorizationRequest.redirect_uri &&
-    (authorizationRequest.registration_uri || authorizationRequest.registration) &&
-    authorizationRequest.claims &&
-    'vp_token' in authorizationRequest.claims
-  )
-}
-function isID1Payload(authorizationRequest: AuthorizationRequestPayload) {
-  return (
-    !authorizationRequest.client_metadata_uri &&
-    !authorizationRequest.client_metadata &&
-    !authorizationRequest.dcql_query
-  )
-}
 
 export const authorizationRequestVersionDiscovery = (authorizationRequest: AuthorizationRequestPayload): SupportedVersion[] => {
   const versions = []
@@ -43,16 +16,6 @@ export const authorizationRequestVersionDiscovery = (authorizationRequest: Autho
   const v1Validation = AuthorizationRequestPayloadV1Schema(authorizationRequestCopy)
   if (v1Validation) {
     versions.push(SupportedVersion.OID4VP_v1)
-  }
-
-  const jwtVC1Validation = validateJWTVCPresentationProfile(authorizationRequestCopy)
-  if (jwtVC1Validation && isJWTVC1Payload(authorizationRequest)) {
-    versions.push(SupportedVersion.JWT_VC_PRESENTATION_PROFILE_v1)
-  }
-
-  const vid1Validation = AuthorizationRequestPayloadVID1Schema(authorizationRequestCopy)
-  if (vid1Validation && isID1Payload(authorizationRequest)) {
-    versions.push(SupportedVersion.SIOPv2_ID1)
   }
 
   if (versions.length === 0) {

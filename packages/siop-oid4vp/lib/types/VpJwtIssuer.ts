@@ -1,5 +1,4 @@
 import { CreateJwtCallback as CreateJwtCallbackBase, JwtIssuanceContextBase, JwtIssuer } from '@sphereon/oid4vc-common'
-
 import { AuthorizationResponseOpts } from '../authorization-response'
 
 interface RequestObjectContext extends JwtIssuanceContextBase {

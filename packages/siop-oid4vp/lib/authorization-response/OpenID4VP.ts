@@ -13,7 +13,7 @@ import {DcqlPresentation, DcqlQuery} from 'dcql'
 import {verifyRevocation} from '../helpers'
 import {AuthorizationResponse} from './AuthorizationResponse'
 import {Dcql} from './Dcql'
-import {RevocationVerification, VerifiedOpenID4VPSubmission} from '../types'
+import {PresentationSubmission, RevocationVerification, VerifiedOpenID4VPSubmission} from '../types'
 import {VerifyAuthorizationResponseOpts,} from './types'
 
 export const extractNonceFromWrappedVerifiablePresentation = (wrappedVp: WrappedVerifiablePresentation): string | undefined => {
@@ -49,7 +49,7 @@ export const verifyPresentations = async (
   authorizationResponse: AuthorizationResponse,
   verifyOpts: VerifyAuthorizationResponseOpts,
 ): Promise<{ dcql: VerifiedOpenID4VPSubmission }> => {
-  const dcqlQuery = DcqlQuery.parse(verifyOpts.dcqlQuery ?? JSON.parse(authorizationResponse?.authorizationRequest.payload.dcql_query))
+  const dcqlQuery = DcqlQuery.parse(verifyOpts.dcqlQuery ?? authorizationResponse?.authorizationRequest.payload.dcql_query as DcqlQuery)
   DcqlQuery.validate(dcqlQuery)
   const dcqlPresentation = extractDcqlPresentationFromDcqlVpToken(authorizationResponse.payload.vp_token as string, { hasher: verifyOpts.hasher })
 
@@ -102,7 +102,7 @@ export const verifyPresentations = async (
 export const extractDcqlPresentationFromDcqlVpToken = (
   vpToken: DcqlPresentation.Input | string,
   opts?: { hasher?: HasherSync },
-): { [credentialQueryId: string]: WrappedVerifiablePresentation } => {
+): PresentationSubmission => {
   return Object.fromEntries(
       Object.entries(DcqlPresentation.parse(vpToken)).map(([credentialQueryId, vp]) => [
         credentialQueryId,

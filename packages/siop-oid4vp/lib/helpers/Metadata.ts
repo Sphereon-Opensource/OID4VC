@@ -1,4 +1,4 @@
-import { Format } from '@sphereon/pex-models'
+import { Format } from '@sphereon/ssi-types'
 import {
   CommonSupportedMetadata,
   DiscoveryMetadataPayload,

@@ -6,7 +6,7 @@ import {
   PRE_AUTH_GRANT_LITERAL,
   UniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common'
-import { fetch } from 'cross-fetch'
+import fetch from 'cross-fetch'
 
 export function isUriEncoded(str: string): boolean {
   const pattern = /%[0-9A-F]{2}/i

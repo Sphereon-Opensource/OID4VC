@@ -42,13 +42,13 @@ const rp = RP.builder()
   .withCreateJwtCallback(internalSignature(HEX_KEY, DID, KID, SigningAlgo.ES256K))
   .withSupportedVersions([SupportedVersion.OID4VP_v1])
   .withClientMetadata({
-    idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
+    id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
     passBy: PassBy.VALUE,
-    requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-    responseTypesSupported: [ResponseType.ID_TOKEN],
-    vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-    scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-    subjectTypesSupported: [SubjectType.PAIRWISE],
+    request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+    response_types_supported: [ResponseType.ID_TOKEN],
+    vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+    scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+    subject_types_supported: [SubjectType.PAIRWISE],
     subject_syntax_types_supported: ['did:ethr:', 'did:key:', 'did'],
   })
   .withDcqlQuery(parsedDcqlQuery, [PropertyTarget.REQUEST_OBJECT])

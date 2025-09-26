@@ -29,7 +29,7 @@ export interface ImageInfo {
   [key: string]: unknown
 }
 
-export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'dc+sd-jwt'| 'vc+sd-jwt' | 'jwt_vc' | 'mso_mdoc' // jwt_vc & vc+sd-jwt are added for backwards compat TODO SSISDK-36
+export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'dc+sd-jwt'| /*'vc+sd-jwt' |*/ 'jwt_vc' | 'mso_mdoc' // jwt_vc & vc+sd-jwt are added for backwards compat TODO SSISDK-36
 
 export const supportedOID4VCICredentialFormat: readonly (OID4VCICredentialFormat | string)[] = [
   'jwt_vc_json',
