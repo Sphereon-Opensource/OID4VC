@@ -288,7 +288,7 @@ export interface AuthorizationDetailsJwtVcJsonLdAndLdpVc extends CommonAuthoriza
 }
 
 export interface AuthorizationDetailsSdJwtVc extends CommonAuthorizationDetails {
-  format: 'dc+sd-jwt'
+  format: 'dc+sd-jwt' | 'vc+sd-jwt'
 
   vct: string
   claims?: IssuerCredentialSubject
