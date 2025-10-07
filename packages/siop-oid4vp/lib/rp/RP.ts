@@ -93,7 +93,8 @@ export class RP {
     version?: SupportedVersion
     requestByReferenceURI?: string
     responseURI?: string
-    responseURIType?: ResponseURIType
+    responseURIType?: ResponseURIType,
+    responseRedirectURI?: string
   }): Promise<AuthorizationRequest> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
@@ -131,7 +132,8 @@ export class RP {
     requestByReferenceURI?: string
     responseURI?: string
     responseURIType?: ResponseURIType
-    callback?: CallbackOpts
+    callback?: CallbackOpts,
+    responseRedirectURI?: string
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
@@ -147,7 +149,8 @@ export class RP {
         correlationId: opts.correlationId,
         queryId: opts.queryId,
         subject: authRequest,
-        callback: opts.callback
+        callback: opts.callback,
+        responseRedirectURI: opts.responseRedirectURI
       })
       return uri
     } catch (error) {
@@ -458,6 +461,7 @@ export class RP {
       queryId?: string
       subject?: AuthorizationRequest | AuthorizationResponse | AuthorizationResponsePayload
       callback?: CallbackOpts
+      responseRedirectURI?: string
       error?: Error
     },
   ): void {

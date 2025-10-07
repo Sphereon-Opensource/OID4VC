@@ -199,6 +199,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         queryId: event.queryId ?? this.queryIdMapping[event.correlationId],
         ...(type === 'request' && { request: event.subject }),
         ...(type === 'response' && { response: event.subject }),
+        ...(type === 'request' && event.responseRedirectURI && {responseRedirectURI: event.responseRedirectURI}),
         ...(event.error && { error: event.error }),
         status,
         timestamp: event.timestamp,
