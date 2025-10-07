@@ -37,7 +37,7 @@ import {
   SupportedVersion,
   Verification,
   VerifiedAuthorizationResponse,
-  CallbackOpts
+  CallbackOpts, AuthorizationRequestState
 } from '../types'
 
 
@@ -282,14 +282,33 @@ export class RP {
     return this._verifyResponseOptions
   }
 
-  public getResponseRedirectUri(mappings?: Record<string, string>): string | undefined {
-    if (!this._responseRedirectUri) {
-      return undefined
-    }
+  public async getResponseRedirectUri(mappings?: Record<string, string>): Promise<string | undefined> {
     if (!mappings) {
+      if (!this._responseRedirectUri) {
+        return undefined
+      }
       return this._responseRedirectUri
     }
-    return Object.entries(mappings).reduce((uri, [key, value]) => uri.replace(`:${key}`, value), this._responseRedirectUri)
+
+    let state: AuthorizationRequestState
+    const correlationId = mappings['correlation_id'] ?? mappings['correlationId']
+    if (correlationId) {
+      state = await this.sessionManager.getRequestStateByCorrelationId(correlationId, true)
+    } else {
+      const stateId = mappings['state']
+      if (stateId) {
+        state = await this.sessionManager.getRequestStateByState(stateId, true)
+      }
+    }
+
+    let redirectUri: string | undefined
+    if (state) {
+      redirectUri = state.responseRedirectURI
+    }
+    if (!redirectUri) {
+      redirectUri = this._responseRedirectUri
+    }
+    return Object.entries(mappings).reduce((uri, [key, value]) => uri.replace(`:${key}`, value), redirectUri)
   }
 
   private newAuthorizationRequestOpts(opts: {
