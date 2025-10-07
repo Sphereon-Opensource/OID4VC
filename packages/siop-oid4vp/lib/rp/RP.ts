@@ -284,33 +284,33 @@ export class RP {
 
   public async getResponseRedirectUri(mappings?: Record<string, string>): Promise<string | undefined> {
     if (!mappings) {
-      if (!this._responseRedirectUri) {
-        return undefined
-      }
       return this._responseRedirectUri
     }
 
-    let state: AuthorizationRequestState
-    const correlationId = mappings['correlation_id'] ?? mappings['correlationId']
+    // Attempt to retrieve state from session manager
+    let state: AuthorizationRequestState | undefined
     if (this.sessionManager) {
+      const correlationId = mappings['correlation_id'] ?? mappings['correlationId']
+
       if (correlationId) {
         state = await this.sessionManager.getRequestStateByCorrelationId(correlationId, true)
-      } else {
-        const stateId = mappings['state']
-        if (stateId) {
-          state = await this.sessionManager.getRequestStateByState(stateId, true)
-        }
+      } else if (mappings['state']) {
+        state = await this.sessionManager.getRequestStateByState(mappings['state'], true)
       }
     }
 
-    let redirectUri: string | undefined
-    if (state) {
-      redirectUri = state.responseRedirectURI
-    }
+    // Determine the redirect URI from state or fallback to default
+    const redirectUri = state?.responseRedirectURI ?? this._responseRedirectUri
+
     if (!redirectUri) {
-      redirectUri = this._responseRedirectUri
+      return undefined
     }
-    return Object.entries(mappings).reduce((uri, [key, value]) => uri.replace(`:${key}`, value), redirectUri)
+
+    // Apply mappings to the redirect URI
+    return Object.entries(mappings).reduce(
+      (uri, [key, value]) => uri.replace(`:${key}`, value),
+      redirectUri
+    )
   }
 
   private newAuthorizationRequestOpts(opts: {
