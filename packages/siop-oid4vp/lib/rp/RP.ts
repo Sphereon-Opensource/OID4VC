@@ -292,12 +292,14 @@ export class RP {
 
     let state: AuthorizationRequestState
     const correlationId = mappings['correlation_id'] ?? mappings['correlationId']
-    if (correlationId) {
-      state = await this.sessionManager.getRequestStateByCorrelationId(correlationId, true)
-    } else {
-      const stateId = mappings['state']
-      if (stateId) {
-        state = await this.sessionManager.getRequestStateByState(stateId, true)
+    if (this.sessionManager) {
+      if (correlationId) {
+        state = await this.sessionManager.getRequestStateByCorrelationId(correlationId, true)
+      } else {
+        const stateId = mappings['state']
+        if (stateId) {
+          state = await this.sessionManager.getRequestStateByState(stateId, true)
+        }
       }
     }
 

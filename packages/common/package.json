@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build": "tsup --config ../../tsup.config.ts --tsconfig ../../tsconfig.tsup.json",
-    "test": "vitest run --config ../../vitest.config.ts --coverage"
+    "test": "vitest run --config ../../vitest.config.mts --coverage"
   },
   "dependencies": {
     "@sphereon/ssi-types": "0.34.1-feature.DIIPv4.245",
