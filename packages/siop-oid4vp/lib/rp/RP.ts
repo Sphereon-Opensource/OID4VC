@@ -138,11 +138,6 @@ export class RP {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
     try {
-      if(opts.queryId && this._dcqlQueryLookupCallback) {
-        const dcqlQuery:DcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
-        authorizationRequestOpts.payload.dcql_query = dcqlQuery
-      }
-
       const uri = await URI.fromOpts(authorizationRequestOpts)
       const authRequest = await AuthorizationRequest.fromOpts(authorizationRequestOpts)
       this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
