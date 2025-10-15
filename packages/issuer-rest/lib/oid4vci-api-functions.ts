@@ -425,13 +425,21 @@ export function nonceEndpoint(router: Router, issuer: VcIssuer, opts: INonceEndp
 
   router.post(path, async (request: Request, response: Response) => {
     try {
+      let preAuthorizedCode: string | undefined
+      let issuerState: string | undefined
+
       // Verify access token if present (optional per spec)
       if (request.header('Authorization')) {
         try {
           const jwt = extractBearerToken(request.header('Authorization'))
-          await validateJWT(jwt, {
+          const jwtResult = await validateJWT(jwt, {
             accessTokenVerificationCallback: issuer.jwtVerifyCallback
           })
+
+          // Extract session info from access token
+          const accessToken = jwtResult.jwt.payload as AccessTokenRequest
+          preAuthorizedCode = accessToken['pre-authorized_code']
+          issuerState = accessToken.issuer_state
         } catch (e) {
           LOG.warning(e)
           return sendErrorResponse(response, 400, {
@@ -447,7 +455,9 @@ export function nonceEndpoint(router: Router, issuer: VcIssuer, opts: INonceEndp
       await issuer.cNonces.set(cNonce, {
         cNonce,
         createdAt: createdAt,
-        expiresAt: createdAt + cNonceExpiresIn
+        expiresAt: createdAt + cNonceExpiresIn,
+        ...(preAuthorizedCode && { preAuthorizedCode }),
+        ...(issuerState && { issuerState })
       })
 
       return response.json({
