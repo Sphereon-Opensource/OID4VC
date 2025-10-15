@@ -429,6 +429,7 @@ export function nonceEndpoint(router: Router, issuer: VcIssuer, opts: INonceEndp
       let issuerState: string | undefined
 
       // Verify access token if present (optional per spec)
+      // If not present, the nonce will be unbound to any session
       if (request.header('Authorization')) {
         try {
           const jwt = extractBearerToken(request.header('Authorization'))
@@ -439,9 +440,6 @@ export function nonceEndpoint(router: Router, issuer: VcIssuer, opts: INonceEndp
           // Extract session info from access token
           const accessToken = jwtResult.jwt.payload as AccessTokenRequest
           preAuthorizedCode = accessToken['pre-authorized_code']
-          if ('issuer_state' in accessToken && typeof accessToken.issuer_state === 'string') {
-            issuerState = accessToken.issuer_state
-          }
         } catch (e) {
           LOG.warning(e)
           return sendErrorResponse(response, 400, {
@@ -454,13 +452,22 @@ export function nonceEndpoint(router: Router, issuer: VcIssuer, opts: INonceEndp
       const cNonceExpiresIn = issuer.cNonceExpiresIn || 300
 
       const createdAt = epochTime()
-      await issuer.cNonces.set(cNonce, {
+
+      // Create nonce state - only include session identifiers if available
+      const cNonceState: any = {
         cNonce,
         createdAt: createdAt,
-        expiresAt: createdAt + cNonceExpiresIn,
-        ...(preAuthorizedCode && { preAuthorizedCode }),
-        ...(issuerState && { issuerState })
-      })
+        expiresAt: createdAt + cNonceExpiresIn
+      }
+
+      if (preAuthorizedCode) {
+        cNonceState.preAuthorizedCode = preAuthorizedCode
+      }
+      if (issuerState) {
+        cNonceState.issuerState = issuerState
+      }
+
+      await issuer.cNonces.set(cNonce, cNonceState)
 
       return response.json({
         c_nonce: cNonce,
