@@ -241,7 +241,7 @@ export const createAccessTokenResponse = async (
   const preAuthorizedCode = request[PRE_AUTH_CODE_LITERAL] as string
 
   const cNonce = opts.cNonce ?? uuidv4()
-  await cNonces.set(cNonce, { cNonce, createdAt: +new Date(), preAuthorizedCode })
+  await cNonces.set(cNonce, { cNonce, createdAt: +new Date() })
 
   const access_token = await generateAccessToken({
     tokenExpiresIn,

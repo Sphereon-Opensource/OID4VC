@@ -282,8 +282,10 @@ describe('VcIssuer', () => {
             proof_type: 'jwt',
             jwt: 'ye.ye.ye'
           }
+        },
+        issuerCorrelation: {
+          issuerState: 'invalid state',
         }
-        // issuerState: 'invalid state',
       })
     ).rejects.toThrow(Error(STATE_MISSING_ERROR + ' (test-nonce)'))
   })
@@ -314,7 +316,6 @@ describe('VcIssuer', () => {
     const createdAt = +new Date()
     await vcIssuer.cNonces.set('test-nonce', {
       cNonce: 'test-nonce',
-      preAuthorizedCode: 'test-pre-authorized-code',
       createdAt: createdAt
     })
     await vcIssuer.credentialOfferSessions.set('test-pre-authorized-code', {
@@ -340,6 +341,9 @@ describe('VcIssuer', () => {
             proof_type: 'jwt',
             jwt: 'ye.ye.ye'
           }
+        },
+        issuerCorrelation: {
+          preAuthorizedCode: 'test-pre-authorized-code'
         },
         newCNonce: 'new-test-nonce'
       })
@@ -371,7 +375,6 @@ describe('VcIssuer', () => {
     const createdAt = +new Date()
     await vcIssuer.cNonces.set('test-nonce', {
       cNonce: 'test-nonce',
-      preAuthorizedCode: 'test-pre-authorized-code',
       createdAt: createdAt
     })
 
@@ -405,6 +408,9 @@ describe('VcIssuer', () => {
             proof_type: 'jwt',
             jwt: 'ye.ye.ye'
           }
+        },
+        issuerCorrelation: {
+          preAuthorizedCode: 'test-pre-authorized-code'
         }
       })
     ).rejects.toThrow(Error(ALG_ERROR))
@@ -540,7 +546,10 @@ describe('VcIssuer without did', () => {
             jwt: 'ye.ye.ye'
           }
         }
-        // issuerState: 'invalid state',
+        ,
+        issuerCorrelation: {
+          issuerState: 'invalid state'
+        }
       })
     ).rejects.toThrow(Error(STATE_MISSING_ERROR + ' (test-nonce)'))
   })
@@ -565,7 +574,6 @@ describe('VcIssuer without did', () => {
     const createdAt = +new Date()
     await vcIssuer.cNonces.set('test-nonce', {
       cNonce: 'test-nonce',
-      preAuthorizedCode: 'test-pre-authorized-code',
       createdAt: createdAt
     })
     await vcIssuer.credentialOfferSessions.set('test-pre-authorized-code', {
@@ -591,6 +599,9 @@ describe('VcIssuer without did', () => {
             proof_type: 'jwt',
             jwt: 'ye.ye.ye'
           }
+        },
+        issuerCorrelation: {
+          preAuthorizedCode: 'test-pre-authorized-code'
         },
         newCNonce: 'new-test-nonce'
       })
@@ -621,7 +632,6 @@ describe('VcIssuer without did', () => {
     const createdAt = +new Date()
     await vcIssuer.cNonces.set('test-nonce', {
       cNonce: 'test-nonce',
-      preAuthorizedCode: 'test-pre-authorized-code',
       createdAt: createdAt
     })
 
@@ -649,6 +659,9 @@ describe('VcIssuer without did', () => {
             proof_type: 'jwt',
             jwt: 'ye.ye.ye'
           }
+        },
+        issuerCorrelation: {
+          preAuthorizedCode: 'test-pre-authorized-code'
         }
       })
     ).rejects.toThrow(Error(ALG_ERROR))

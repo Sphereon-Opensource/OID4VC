@@ -29,7 +29,7 @@ import {
   validateJWT,
   WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
-import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
+import { IssuerCorrelation, ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
@@ -302,9 +302,17 @@ export function getCredentialEndpoint(
     try {
       const credentialRequest = request.body as CredentialRequestV1_0_15
       LOG.log(`credential request received`, credentialRequest)
+      const issuerCorrelation :IssuerCorrelation = {}
       try {
         const jwt = extractBearerToken(request.header('Authorization'))
-        await validateJWT(jwt, { accessTokenVerificationCallback: opts.accessTokenVerificationCallback ?? issuer.jwtVerifyCallback })
+        const jwtVerifyResult = (await validateJWT(jwt, { accessTokenVerificationCallback: opts.accessTokenVerificationCallback ?? issuer.jwtVerifyCallback }))
+        const tokenClaims = jwtVerifyResult.jwt.payload
+        if('preAuthorizedCode' in tokenClaims && typeof tokenClaims.preAuthorizedCode === 'string') {
+          issuerCorrelation.preAuthorizedCode = tokenClaims.preAuthorizedCode
+        }
+        if('issuer_state' in tokenClaims && typeof tokenClaims.issuer_state === 'string') {
+          issuerCorrelation.issuerState = tokenClaims.issuer_state
+        }
       } catch (e) {
         LOG.warning(e)
         return sendErrorResponse(response, 400, {
@@ -314,6 +322,7 @@ export function getCredentialEndpoint(
 
       const credential = await issuer.issueCredential({
         credentialRequest: credentialRequest,
+        issuerCorrelation,
         tokenExpiresIn: opts.tokenExpiresIn,
         cNonceExpiresIn: opts.cNonceExpiresIn
       })

@@ -47,3 +47,8 @@ export interface CredentialDataSupplierResult {
 }
 
 export type CredentialDataSupplier = (args: CredentialDataSupplierArgs) => Promise<CredentialDataSupplierResult>
+
+export type IssuerCorrelation = {
+  issuerState?: string
+  preAuthorizedCode?: string
+}
