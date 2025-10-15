@@ -439,7 +439,9 @@ export function nonceEndpoint(router: Router, issuer: VcIssuer, opts: INonceEndp
           // Extract session info from access token
           const accessToken = jwtResult.jwt.payload as AccessTokenRequest
           preAuthorizedCode = accessToken['pre-authorized_code']
-          issuerState = accessToken.issuer_state
+          if ('issuer_state' in accessToken && typeof accessToken.issuer_state === 'string') {
+            issuerState = accessToken.issuer_state
+          }
         } catch (e) {
           LOG.warning(e)
           return sendErrorResponse(response, 400, {
