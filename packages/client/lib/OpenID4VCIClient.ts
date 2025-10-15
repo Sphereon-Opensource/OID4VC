@@ -373,6 +373,10 @@ export class OpenID4VCIClient {
       this._state.accessTokenResponse = response.successBody
       this._state.dpopResponseParams = response.params
       this._state.accessToken = response.successBody.access_token
+
+      if (response.successBody.c_nonce) {
+        this._state.cachedCNonce = response.successBody.c_nonce
+      }
     }
 
     return { ...this.accessTokenResponse, ...(this.dpopResponseParams && { params: this.dpopResponseParams }) }
