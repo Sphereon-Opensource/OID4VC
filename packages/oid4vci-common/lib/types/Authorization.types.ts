@@ -482,6 +482,7 @@ export interface AccessTokenResponse {
   c_nonce_expires_in?: number // in seconds
   authorization_pending?: boolean
   interval?: number // in seconds
+  authorization_details?: AuthorizationDetails[]
 }
 
 export enum AuthzFlowType {

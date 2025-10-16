@@ -252,6 +252,10 @@ export const createAccessTokenResponse = async (
     accessTokenProvider,
   })
 
+  const credentialOfferSession = await credentialOfferSessions.getAsserted(preAuthorizedCode)
+  credentialOfferSession.status = IssueStatus.ACCESS_TOKEN_CREATED
+  credentialOfferSession.lastUpdatedAt = +new Date()
+
   const response: AccessTokenResponse = {
     access_token,
     token_type: dPoPJwk ? 'DPoP' : 'bearer',
@@ -259,10 +263,13 @@ export const createAccessTokenResponse = async (
     c_nonce: cNonce,
     c_nonce_expires_in: cNonceExpiresIn,
     interval,
+    ...(credentialOfferSession.authorizationDetails && {
+      authorization_details: credentialOfferSession.authorizationDetails.map(detail => ({
+        ...detail,
+        credential_identifiers: generateCredentialIdentifiers(detail, credentialOfferSession)
+      }))
+    })
   }
-  const credentialOfferSession = await credentialOfferSessions.getAsserted(preAuthorizedCode)
-  credentialOfferSession.status = IssueStatus.ACCESS_TOKEN_CREATED
-  credentialOfferSession.lastUpdatedAt = +new Date()
   await credentialOfferSessions.set(preAuthorizedCode, credentialOfferSession)
   return response
 }

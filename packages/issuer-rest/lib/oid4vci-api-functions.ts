@@ -698,7 +698,31 @@ export function pushedAuthorizationEndpoint(
       })
     }
 
-    //TODO Implement authorization_details verification
+    // Add the authorization_details validation here:
+    if (req.body.authorization_details) {
+      const authDetails = Array.isArray(req.body.authorization_details)
+        ? req.body.authorization_details
+        : JSON.parse(req.body.authorization_details)
+
+      // Validate each authorization detail
+      for (const detail of authDetails) {
+        if (detail.type !== 'openid_credential') {
+          return sendErrorResponse(res, 400, {
+            error: 'invalid_authorization_details',
+            error_description: 'Only openid_credential type is supported'
+          })
+        }
+
+        // Validate credential_configuration_id exists in issuer metadata
+        if (detail.credential_configuration_id &&
+            !issuer.issuerMetadata.credential_configurations_supported[detail.credential_configuration_id]) {
+          return sendErrorResponse(res, 400, {
+            error: 'invalid_credential_request',
+            error_description: `Unsupported credential configuration: ${detail.credential_configuration_id}`
+          })
+        }
+      }
+    }
 
     // TODO: Both UUID and requestURI need to be configurable for the server
     const uuid = uuidv4()
