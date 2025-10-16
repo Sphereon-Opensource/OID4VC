@@ -175,7 +175,17 @@ export class OID4VCIServer {
       opts.asClientOpts || this._issuer.asClientOpts ? ({ ...opts.asClientOpts, ...this._issuer.asClientOpts } as ClientMetadata) : undefined
 
     pushedAuthorizationEndpoint(this.router, this.issuer, this.authRequestsData)
-    getMetadataEndpoints(this.router, this.issuer)
+
+  // Create root router for alternative .well-known endpoints if needed
+  const basePath = getBasePath(this.baseUrl)
+  let rootRouter: express.Router | undefined
+  if (basePath && basePath !== '/') {
+    rootRouter = express.Router()
+    this._app.use('/', rootRouter)
+  }
+
+  getMetadataEndpoints(this.router, this.issuer, rootRouter, this.baseUrl)
+
     let issuerPayloadPath: string | undefined
     if (this.isGetIssuePayloadEndpointEnabled(opts?.endpointOpts?.getIssuePayloadOpts)) {
       issuerPayloadPath = getCredentialOfferReferenceEndpoint(this.router, this.issuer, {
@@ -227,7 +237,7 @@ export class OID4VCIServer {
         baseUrl: this.baseUrl,
       })
     }
-    this._app.use(getBasePath(this.baseUrl), this._router)
+    this._app.use(basePath, this._router)
   }
 
   public get app(): Express {

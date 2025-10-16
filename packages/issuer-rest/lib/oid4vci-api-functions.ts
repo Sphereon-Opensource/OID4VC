@@ -716,7 +716,7 @@ export function pushedAuthorizationEndpoint(
   })
 }
 
-export function getMetadataEndpoints(router: Router, issuer: VcIssuer) {
+export function getMetadataEndpoints(router: Router, issuer: VcIssuer, rootRouter?: Router, baseUrl?: URL | string) {
   const credentialIssuerHandler = (request: Request, response: Response) => {
     return response.json(issuer.issuerMetadata)
   }
@@ -725,35 +725,19 @@ export function getMetadataEndpoints(router: Router, issuer: VcIssuer) {
     return response.json(issuer.authorizationServerMetadata)
   }
 
-  // Original endpoints
+  // Original endpoints on the context router
   router.get(WellKnownEndpoints.OPENID4VCI_ISSUER, credentialIssuerHandler)
   router.get(WellKnownEndpoints.OAUTH_AS, authorizationServerHandler)
 
-  // Alternative endpoints with .well-known at root
-  const alternativeCredentialIssuerEndpoint = getAlternativeWellKnownEndpoint(WellKnownEndpoints.OPENID4VCI_ISSUER)
-  const alternativeAuthServerEndpoint = getAlternativeWellKnownEndpoint(WellKnownEndpoints.OAUTH_AS)
-
-  if (alternativeCredentialIssuerEndpoint) {
-    router.get(alternativeCredentialIssuerEndpoint, credentialIssuerHandler)
-  }
-
-  if (alternativeAuthServerEndpoint) {
-    router.get(alternativeAuthServerEndpoint, authorizationServerHandler)
+  // Alternative root-level endpoints if rootRouter provided
+  if (rootRouter && baseUrl) {
+    const basePath = getBasePath(baseUrl)
+    if (basePath && basePath !== '/') {
+      rootRouter.get(`/.well-known/openid-credential-issuer${basePath}`, credentialIssuerHandler)
+      rootRouter.get(`/.well-known/oauth-authorization-server${basePath}`, authorizationServerHandler)
+    }
   }
 }
-
-function getAlternativeWellKnownEndpoint(originalEndpoint: string): string | null {
-  const wellKnownIndex = originalEndpoint.indexOf('/.well-known/')
-  if (wellKnownIndex <= 0) {
-    return null
-  }
-
-  const contextPath = originalEndpoint.substring(0, wellKnownIndex)
-  const wellKnownResource = originalEndpoint.substring(wellKnownIndex + '/.well-known/'.length)
-
-  return `/.well-known/${wellKnownResource}${contextPath}`
-}
-
 
 export function determinePath(
   baseUrl: URL | string | undefined,
