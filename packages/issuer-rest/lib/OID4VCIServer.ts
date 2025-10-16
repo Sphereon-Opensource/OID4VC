@@ -176,15 +176,15 @@ export class OID4VCIServer {
 
     pushedAuthorizationEndpoint(this.router, this.issuer, this.authRequestsData)
 
-  // Create root router for alternative .well-known endpoints if needed
-  const basePath = getBasePath(this.baseUrl)
-  let rootRouter: express.Router | undefined
-  if (basePath && basePath !== '/') {
-    rootRouter = express.Router()
-    this._app.use('/', rootRouter)
-  }
+    // Create root router for alternative .well-known endpoints if needed
+    const basePath = getBasePath(this.baseUrl)
+    let rootRouter: express.Router | undefined
+    if (basePath && basePath !== '/') {
+      rootRouter = express.Router()
+      this._app.use('/', rootRouter)
+    }
 
-  getMetadataEndpoints(this.router, this.issuer, rootRouter, basePath)
+    getMetadataEndpoints(this.router, this.issuer, rootRouter, basePath)
 
     let issuerPayloadPath: string | undefined
     if (this.isGetIssuePayloadEndpointEnabled(opts?.endpointOpts?.getIssuePayloadOpts)) {
