@@ -1,13 +1,14 @@
 import {
   AssertedUniformCredentialOffer,
+  AuthorizationDetailsV1_0_15,
   CNonceState,
   CredentialDataSupplierInput,
+  CredentialRequest,
   CredentialRequestV1_0_15,
   CredentialSupplierConfig,
   JwtVerifyResult,
   OID4VCICredentialFormat,
-  StatusListOpts,
-  CredentialRequest
+  StatusListOpts
 } from '@sphereon/oid4vci-common'
 import {
   CompactSdJwtVc,
@@ -51,4 +52,5 @@ export type CredentialDataSupplier = (args: CredentialDataSupplierArgs) => Promi
 export type IssuerCorrelation = {
   issuerState?: string
   preAuthorizedCode?: string
+  authorizationDetails?: AuthorizationDetailsV1_0_15[]
 }

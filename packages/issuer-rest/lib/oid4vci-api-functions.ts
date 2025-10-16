@@ -313,6 +313,23 @@ export function getCredentialEndpoint(
         if('issuer_state' in tokenClaims && typeof tokenClaims.issuer_state === 'string') {
           issuerCorrelation.issuerState = tokenClaims.issuer_state
         }
+
+        // Handle credential_identifier from authorization_details flow
+        if ('authorization_details' in tokenClaims && Array.isArray(tokenClaims.authorization_details)) {
+          issuerCorrelation.authorizationDetails = tokenClaims.authorization_details
+
+          if (credentialRequest.credential_identifier) {
+            const validIdentifiers = tokenClaims.authorization_details
+              .flatMap((detail: any) => detail.credential_identifiers || [])
+
+            if (!validIdentifiers.includes(credentialRequest.credential_identifier)) {
+              return sendErrorResponse(response, 400, {
+                error: 'invalid_credential_request',
+                error_description: 'credential_identifier not found in authorization_details'
+              })
+            }
+          }
+        }
       } catch (e) {
         LOG.warning(e)
         return sendErrorResponse(response, 400, {
@@ -727,8 +744,22 @@ export function pushedAuthorizationEndpoint(
     // TODO: Both UUID and requestURI need to be configurable for the server
     const uuid = uuidv4()
     const requestUri = `urn:ietf:params:oauth:request_uri:${uuid}`
-    // The redirect_uri is created and set in a map, to keep track of the actual request
-    authRequestsData.set(requestUri, req.body)
+
+    // Store authorization_details in the request for later retrieval
+    let requestData = req.body
+    if (req.body.authorization_details) {
+      const authDetails = Array.isArray(req.body.authorization_details)
+        ? req.body.authorization_details
+        : JSON.parse(req.body.authorization_details)
+
+      requestData = {
+        ...req.body,
+        authorization_details: authDetails // Store parsed authorization details
+      }
+    }
+
+    authRequestsData.set(requestUri, requestData)
+
     // Invalidates the request_uri removing it from the mapping after it is expired, needs to be refactored because
     // some of the properties will be needed in subsequent steps if the authorization succeeds
     // TODO in the /token endpoint the code_challenge must be matched against the hashed code_verifier

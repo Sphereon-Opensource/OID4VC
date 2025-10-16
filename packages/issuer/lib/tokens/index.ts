@@ -25,7 +25,7 @@ import {
   USER_PIN_TX_CODE_SPEC_ERROR,
 } from '@sphereon/oid4vci-common'
 
-import { isPreAuthorizedCodeExpired } from '../functions'
+import { generateCredentialIdentifiers, isPreAuthorizedCodeExpired } from '../functions'
 
 export interface ITokenEndpointOpts {
   tokenEndpointDisabled?: boolean // Disable if used in an existing OAuth2/OIDC environment and have the AS handle tokens
@@ -105,10 +105,60 @@ export const assertValidAccessTokenRequest = async (
   opts: {
     credentialOfferSessions: IStateManager<CredentialOfferSession>
     expirationDuration: number
-  },
+    authRequestsData?: Map<string, any> // Add this for authorization code flow
+  }
 ) => {
-  const { credentialOfferSessions, expirationDuration } = opts
-  // Only pre-auth supported for now
+  const { credentialOfferSessions, expirationDuration, authRequestsData } = opts
+
+  // Handle authorization code flow
+  if (request.grant_type === GrantTypes.AUTHORIZATION_CODE) {
+    if (!request.code || !authRequestsData) {
+      throw new TokenError(400, TokenErrorResponse.invalid_request, 'Authorization code required')
+    }
+
+    // Find the authorization request data by code
+    // This is simplified - you'll need to implement proper code->request mapping
+    const authRequestData = Array.from(authRequestsData.values())
+      .find(data => data.authorization_code === request.code)
+
+    if (!authRequestData) {
+      throw new TokenError(400, TokenErrorResponse.invalid_grant, 'Invalid authorization code')
+    }
+
+    // Create or update credential offer session with authorization_details
+    const sessionId = request.code // or generate a proper session ID
+    let credentialOfferSession = await credentialOfferSessions.get(sessionId)
+
+    if (!credentialOfferSession) {
+      // Create new session for authorization code flow
+      credentialOfferSession = {
+        createdAt: Date.now(),
+        lastUpdatedAt: Date.now(),
+        status: IssueStatus.ACCESS_TOKEN_REQUESTED,
+        notification_id: uuidv4(),
+        credentialOffer: {
+          credential_offer: {
+            credential_issuer: '', // Set appropriately
+            credential_configuration_ids: [], // Set from authorization_details
+            grants: {}
+          }
+        },
+        authorizationDetails: authRequestData.authorization_details,
+        authorizationCode: request.code
+      }
+      await credentialOfferSessions.set(sessionId, credentialOfferSession)
+    } else {
+      credentialOfferSession.authorizationDetails = authRequestData.authorization_details
+      credentialOfferSession.authorizationCode = request.code
+      credentialOfferSession.status = IssueStatus.ACCESS_TOKEN_REQUESTED
+      credentialOfferSession.lastUpdatedAt = Date.now()
+      await credentialOfferSessions.set(sessionId, credentialOfferSession)
+    }
+
+    return { preAuthSession: credentialOfferSession }
+  }
+
+  // Handle pre-authorized code flow (existing logic)
   if (request.grant_type !== GrantTypes.PRE_AUTHORIZED_CODE) {
     throw new TokenError(400, TokenErrorResponse.invalid_grant, UNSUPPORTED_GRANT_TYPE_ERROR)
   }
@@ -237,8 +287,17 @@ export const createAccessTokenResponse = async (
     interval,
     accessTokenProvider = 'internal',
   } = opts
-  // Pre-auth flow
-  const preAuthorizedCode = request[PRE_AUTH_CODE_LITERAL] as string
+
+  let sessionKey: string
+  let credentialOfferSession: CredentialOfferSession
+
+  if (request.grant_type === GrantTypes.AUTHORIZATION_CODE) {
+    sessionKey = request.code!
+    credentialOfferSession = await credentialOfferSessions.getAsserted(sessionKey)
+  } else {
+    sessionKey = request[PRE_AUTH_CODE_LITERAL] as string
+    credentialOfferSession = await credentialOfferSessions.getAsserted(sessionKey)
+  }
 
   const cNonce = opts.cNonce ?? uuidv4()
   await cNonces.set(cNonce, { cNonce, createdAt: +new Date() })
@@ -246,13 +305,12 @@ export const createAccessTokenResponse = async (
   const access_token = await generateAccessToken({
     tokenExpiresIn,
     accessTokenSignerCallback,
-    preAuthorizedCode,
+    preAuthorizedCode: sessionKey,
     accessTokenIssuer,
     dPoPJwk,
     accessTokenProvider,
   })
 
-  const credentialOfferSession = await credentialOfferSessions.getAsserted(preAuthorizedCode)
   credentialOfferSession.status = IssueStatus.ACCESS_TOKEN_CREATED
   credentialOfferSession.lastUpdatedAt = +new Date()
 
@@ -264,12 +322,17 @@ export const createAccessTokenResponse = async (
     c_nonce_expires_in: cNonceExpiresIn,
     interval,
     ...(credentialOfferSession.authorizationDetails && {
-      authorization_details: credentialOfferSession.authorizationDetails.map(detail => ({
-        ...detail,
-        credential_identifiers: generateCredentialIdentifiers(detail, credentialOfferSession)
-      }))
+      authorization_details: credentialOfferSession.authorizationDetails.map(detail => {
+        if (typeof detail === 'string') {
+          return detail
+        }
+        return {
+          ...detail,
+          credential_identifiers: generateCredentialIdentifiers(detail, credentialOfferSession)
+        }
+      })
     })
   }
-  await credentialOfferSessions.set(preAuthorizedCode, credentialOfferSession)
+  await credentialOfferSessions.set(sessionKey, credentialOfferSession)
   return response
 }

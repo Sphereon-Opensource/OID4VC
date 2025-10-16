@@ -1,6 +1,6 @@
 import { AssertedUniformCredentialOffer } from './CredentialIssuance.types'
 import { CredentialDataSupplierInput, NotificationRequest, StatusListOpts } from './Generic.types'
-import { AuthorizationDetails } from './Authorization.types'
+import { AuthorizationDetailsV1_0_15 } from './v1_0_15.types'
 
 export interface StateType {
   createdAt: number
@@ -22,7 +22,7 @@ export interface CredentialOfferSession extends StateType {
   authorizationCode?: string
   redirectUri?: string
   statusLists?: Array<StatusListOpts>
-  authorizationDetails?: AuthorizationDetails[]
+  authorizationDetails?: AuthorizationDetailsV1_0_15[]
 }
 
 export enum IssueStatus {

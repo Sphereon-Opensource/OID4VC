@@ -1,7 +1,6 @@
 import {
   AuthorizationChallengeCodeResponse,
-  AuthorizationChallengeRequestOpts,
-  AuthorizationDetails,
+  AuthorizationChallengeRequestOpts, AuthorizationDetailsV1_0_15,
   AuthorizationRequestOpts,
   CodeChallengeMethod,
   CommonAuthorizationChallengeRequest,
@@ -185,7 +184,7 @@ export const createAuthorizationRequestUrl = async ({
         ...(format && { format }),
         ...(vct && { vct, claims: cred.claims ? removeDisplayAndValueTypes(cred.claims) : undefined }),
         ...(doctype && { doctype, claims: cred.claims ? removeDisplayAndValueTypes(cred.claims) : undefined })
-      } as AuthorizationDetails
+      } as AuthorizationDetailsV1_0_15
     })
     if (!authorizationDetails || authorizationDetails.length === 0) {
       throw Error(`Could not create authorization details from credential offer. Please pass in explicit details`)
@@ -278,8 +277,8 @@ const hasCredentialDefinition = (cred: any): cred is {
 
 const handleAuthorizationDetails = (
   endpointMetadata: EndpointMetadataResultV1_0_15,
-  authorizationDetails?: AuthorizationDetails | AuthorizationDetails[]
-): AuthorizationDetails | AuthorizationDetails[] | undefined => {
+  authorizationDetails?: AuthorizationDetailsV1_0_15 | AuthorizationDetailsV1_0_15[]
+): AuthorizationDetailsV1_0_15 | AuthorizationDetailsV1_0_15[] | undefined => {
   if (authorizationDetails) {
     if (typeof authorizationDetails === 'string') {
       // backwards compat for older versions of the lib
@@ -298,7 +297,7 @@ const handleAuthorizationDetails = (
 
 const handleLocations = (
   endpointMetadata: EndpointMetadataResultV1_0_15,
-  authorizationDetails: AuthorizationDetails
+  authorizationDetails: AuthorizationDetailsV1_0_15
 ) => {
   if (typeof authorizationDetails === 'string') {
     // backwards compat for older versions of the lib

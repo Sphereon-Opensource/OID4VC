@@ -1,11 +1,11 @@
 import {
+  AuthorizationDetailsV1_0_15,
   CredentialConfigurationSupportedMsoMdocV1_0_15,
   CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15,
   CredentialDefinitionJwtVcJsonV1_0_15,
   VCI_LOG_COMMON
 } from '../index'
 import {
-  AuthorizationDetails,
   CredentialConfigurationSupported,
   CredentialConfigurationSupportedSdJwtVcV1_0_15,
   CredentialOfferFormatV1_0_11,
@@ -68,7 +68,7 @@ export function getTypesFromObject(
   return undefined
 }
 
-export function getTypesFromAuthorizationDetails(authDetails: AuthorizationDetails, opts?: { configIdAsType?: boolean }): string[] | undefined {
+export function getTypesFromAuthorizationDetails(authDetails: AuthorizationDetailsV1_0_15, opts?: { configIdAsType?: boolean }): string[] | undefined {
   const { configIdAsType = false } = { ...opts }
   if (typeof authDetails === 'string') {
     return [authDetails]

@@ -1,7 +1,8 @@
 import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereon/oid4vc-common'
 import {
   acquireDeferredCredential,
-  AuthorizationDetails,
+  AuthorizationDetailsV1_0_15,
+  CredentialRequest,
   CredentialRequestV1_0_15,
   CredentialResponse,
   DPoPResponseParams,
@@ -14,7 +15,6 @@ import {
   post,
   ProofOfPossession,
   supportedOID4VCICredentialFormat,
-  CredentialRequest,
   URL_NOT_VALID
 } from '@sphereon/oid4vci-common'
 import { CredentialFormat, Loggers } from '@sphereon/ssi-types'
@@ -40,7 +40,7 @@ export interface CredentialRequestOpts {
   version: OpenId4VCIVersion
   subjectIssuance?: ExperimentalSubjectIssuance
   issuerState?: string
-  authorizationDetails?: AuthorizationDetails[]
+  authorizationDetails?: AuthorizationDetailsV1_0_15[]
 }
 
 export type CreateCredentialRequestOpts = {
@@ -72,14 +72,14 @@ export async function buildProof(
   return await proofInput.build()
 }
 
-function isOpenIdCredentialDetail(ad: AuthorizationDetails): ad is AuthorizationDetails {
+function isOpenIdCredentialDetail(ad: AuthorizationDetailsV1_0_15): ad is AuthorizationDetailsV1_0_15 {
   return typeof ad === 'object' && ad !== null && ad.type === 'openid_credential'
 }
 
 function findAuthorizationDetail(
-  authorizationDetails: AuthorizationDetails[] | undefined,
+  authorizationDetails: AuthorizationDetailsV1_0_15[] | undefined,
   preferredConfigId?: string
-): AuthorizationDetails | undefined {
+): AuthorizationDetailsV1_0_15 | undefined {
   if (!authorizationDetails) {
     return undefined
   }
