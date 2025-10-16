@@ -184,7 +184,7 @@ export class OID4VCIServer {
     this._app.use('/', rootRouter)
   }
 
-  getMetadataEndpoints(this.router, this.issuer, rootRouter, this.baseUrl)
+  getMetadataEndpoints(this.router, this.issuer, rootRouter, basePath)
 
     let issuerPayloadPath: string | undefined
     if (this.isGetIssuePayloadEndpointEnabled(opts?.endpointOpts?.getIssuePayloadOpts)) {

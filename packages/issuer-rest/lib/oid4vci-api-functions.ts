@@ -716,7 +716,7 @@ export function pushedAuthorizationEndpoint(
   })
 }
 
-export function getMetadataEndpoints(router: Router, issuer: VcIssuer, rootRouter?: Router, baseUrl?: URL | string) {
+export function getMetadataEndpoints(router: Router, issuer: VcIssuer, rootRouter?: Router, basePath?: string) {
   const credentialIssuerHandler = (request: Request, response: Response) => {
     return response.json(issuer.issuerMetadata)
   }
@@ -730,12 +730,9 @@ export function getMetadataEndpoints(router: Router, issuer: VcIssuer, rootRoute
   router.get(WellKnownEndpoints.OAUTH_AS, authorizationServerHandler)
 
   // Alternative root-level endpoints if rootRouter provided
-  if (rootRouter && baseUrl) {
-    const basePath = getBasePath(baseUrl)
-    if (basePath && basePath !== '/') {
-      rootRouter.get(`/.well-known/openid-credential-issuer${basePath}`, credentialIssuerHandler)
-      rootRouter.get(`/.well-known/oauth-authorization-server${basePath}`, authorizationServerHandler)
-    }
+  if (rootRouter && basePath && basePath !== '/') {
+    rootRouter.get(`/.well-known/openid-credential-issuer${basePath}`, credentialIssuerHandler)
+    rootRouter.get(`/.well-known/oauth-authorization-server${basePath}`, authorizationServerHandler)
   }
 }
 
