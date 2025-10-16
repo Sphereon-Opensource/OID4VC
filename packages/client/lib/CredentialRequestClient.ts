@@ -76,7 +76,6 @@ function isOpenIdCredentialDetail(ad: AuthorizationDetails): ad is Authorization
   return typeof ad === 'object' && ad !== null && ad.type === 'openid_credential'
 }
 
-// Update the helper function:
 function findAuthorizationDetail(
   authorizationDetails: AuthorizationDetails[] | undefined,
   preferredConfigId?: string
@@ -93,10 +92,20 @@ function findAuthorizationDetail(
 
   // If a preferred config ID is specified, try to find a match
   if (preferredConfigId) {
-    const match = openIdCredentialDetails.find(detail =>
-      typeof detail === 'object' && detail !== null &&
-      (detail as any).credential_configuration_id === preferredConfigId
-    )
+    const match = openIdCredentialDetails.find(detail => {
+      if (typeof detail !== 'object' || detail === null) return false
+
+      const detailObj = detail as any
+
+      if (detailObj.credential_configuration_id === preferredConfigId) {
+        return true
+      }
+      if (detailObj.credential_identifier === preferredConfigId) {
+        return true
+      }
+      return Array.isArray(detailObj.credential_identifiers) && detailObj.credential_identifiers.includes(preferredConfigId)
+    })
+
     if (match) {
       return match
     }
