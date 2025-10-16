@@ -199,6 +199,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         queryId: event.queryId ?? this.queryIdMapping[event.correlationId],
         ...(type === 'request' && { request: event.subject }),
         ...(type === 'response' && { response: event.subject }),
+        ...(type === 'request' && event.responseRedirectURI && {responseRedirectURI: event.responseRedirectURI}),
         ...(event.error && { error: event.error }),
         status,
         timestamp: event.timestamp,
@@ -206,7 +207,11 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
       }
       let state: AuthorizationRequestState | AuthorizationResponseState
       if (type === 'request') {
-        state = eventState as AuthorizationRequestState
+        const prevState = this.authorizationRequests[event.correlationId]
+        state = {
+          ...prevState,
+          ...eventState
+        } as AuthorizationRequestState
         this.authorizationRequests[event.correlationId] = state
         this.updateMapping(this.nonceMapping, event, 'nonce', event.correlationId, true)
         this.updateMapping(this.stateMapping, event, 'state', event.correlationId, true)

@@ -8,6 +8,7 @@ export interface AuthorizationRequestState {
   request: AuthorizationRequest
   status: AuthorizationRequestStateStatus
   callback?: CallbackOpts
+  responseRedirectURI?: string
   timestamp: number
   lastUpdated: number
   error?: Error

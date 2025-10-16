@@ -304,7 +304,7 @@ describe('RP should', () => {
     expect(request.encodedUri).toMatch(expectedUri)
     expect(request.requestObjectJwt).toMatch(expectedJwtRegex)
 
-    const responseRedirectUri = rp.getResponseRedirectUri({ correlation_id: '1234', state: 'b32f0087fc9816eb813fd11f' })
+    const responseRedirectUri = await rp.getResponseRedirectUri({ correlation_id: '1234', state: 'b32f0087fc9816eb813fd11f' })
     expect(responseRedirectUri).toBe('https://acme.com/1234?state=b32f0087fc9816eb813fd11f')
   })
 })

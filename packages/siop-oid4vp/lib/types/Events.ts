@@ -33,14 +33,23 @@ export class AuthorizationEvent<T> {
   private readonly _timestamp: number
   private readonly _correlationId: string
   private readonly _queryId: string
+  private readonly _responseRedirectURI: string
 
-  public constructor(args: { correlationId: string; queryId?: string, subject?: T; callback?: CallbackOpts, error?: Error }) {
+  public constructor(args: {
+    correlationId: string;
+    queryId?: string,
+    subject?: T;
+    callback?: CallbackOpts;
+    responseRedirectURI?: string,
+    error?: Error
+  }) {
     //fixme: Create correlationId if not provided. Might need to be deferred to registry though
     this._correlationId = args.correlationId
     this._queryId = args.queryId
     this._timestamp = Date.now()
     this._subject = args.subject
     this._callback = args.callback
+    this._responseRedirectURI = args.responseRedirectURI
     this._error = args.error
   }
 
@@ -58,6 +67,10 @@ export class AuthorizationEvent<T> {
 
   get callback(): CallbackOpts | undefined {
     return this._callback
+  }
+
+  get responseRedirectURI(): string {
+    return this._responseRedirectURI
   }
 
   public hasError(): boolean {

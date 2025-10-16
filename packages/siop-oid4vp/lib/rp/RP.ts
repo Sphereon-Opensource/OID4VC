@@ -37,7 +37,7 @@ import {
   SupportedVersion,
   Verification,
   VerifiedAuthorizationResponse,
-  CallbackOpts
+  CallbackOpts, AuthorizationRequestState
 } from '../types'
 
 
@@ -93,7 +93,8 @@ export class RP {
     version?: SupportedVersion
     requestByReferenceURI?: string
     responseURI?: string
-    responseURIType?: ResponseURIType
+    responseURIType?: ResponseURIType,
+    responseRedirectURI?: string
   }): Promise<AuthorizationRequest> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
@@ -131,23 +132,20 @@ export class RP {
     requestByReferenceURI?: string
     responseURI?: string
     responseURIType?: ResponseURIType
-    callback?: CallbackOpts
+    callback?: CallbackOpts,
+    responseRedirectURI?: string
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
     try {
-      if(opts.queryId && this._dcqlQueryLookupCallback) {
-        const dcqlQuery:DcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
-        authorizationRequestOpts.payload.dcql_query = dcqlQuery
-      }
-
       const uri = await URI.fromOpts(authorizationRequestOpts)
       const authRequest = await AuthorizationRequest.fromOpts(authorizationRequestOpts)
       this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
         correlationId: opts.correlationId,
         queryId: opts.queryId,
         subject: authRequest,
-        callback: opts.callback
+        callback: opts.callback,
+        responseRedirectURI: opts.responseRedirectURI
       })
       return uri
     } catch (error) {
@@ -279,14 +277,35 @@ export class RP {
     return this._verifyResponseOptions
   }
 
-  public getResponseRedirectUri(mappings?: Record<string, string>): string | undefined {
-    if (!this._responseRedirectUri) {
-      return undefined
-    }
+  public async getResponseRedirectUri(mappings?: Record<string, string>): Promise<string | undefined> {
     if (!mappings) {
       return this._responseRedirectUri
     }
-    return Object.entries(mappings).reduce((uri, [key, value]) => uri.replace(`:${key}`, value), this._responseRedirectUri)
+
+    // Attempt to retrieve state from session manager
+    let state: AuthorizationRequestState | undefined
+    if (this.sessionManager) {
+      const correlationId = mappings['correlation_id'] ?? mappings['correlationId']
+
+      if (correlationId) {
+        state = await this.sessionManager.getRequestStateByCorrelationId(correlationId, true)
+      } else if (mappings['state']) {
+        state = await this.sessionManager.getRequestStateByState(mappings['state'], true)
+      }
+    }
+
+    // Determine the redirect URI from state or fallback to default
+    const redirectUri = state?.responseRedirectURI ?? this._responseRedirectUri
+
+    if (!redirectUri) {
+      return undefined
+    }
+
+    // Apply mappings to the redirect URI
+    return Object.entries(mappings).reduce(
+      (uri, [key, value]) => uri.replace(`:${key}`, value),
+      redirectUri
+    )
   }
 
   private newAuthorizationRequestOpts(opts: {
@@ -458,6 +477,7 @@ export class RP {
       queryId?: string
       subject?: AuthorizationRequest | AuthorizationResponse | AuthorizationResponsePayload
       callback?: CallbackOpts
+      responseRedirectURI?: string
       error?: Error
     },
   ): void {
