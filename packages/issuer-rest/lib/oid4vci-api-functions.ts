@@ -220,7 +220,8 @@ export function authorizationChallengeEndpoint(
 }
 
 export function accessTokenEndpoint(router: Router, issuer: VcIssuer, opts: ITokenEndpointOpts & ISingleEndpointOpts & {
-  baseUrl: string | URL
+  baseUrl: string | URL,
+  authRequestsData?: Map<string, AuthorizationRequest>
 }) {
   const externalAS = isExternalAS(issuer.issuerMetadata) || issuer.asClientOpts
   if (externalAS || (opts.accessTokenProvider && opts.accessTokenProvider !== 'internal')) {
@@ -263,12 +264,14 @@ export function accessTokenEndpoint(router: Router, issuer: VcIssuer, opts: ITok
 
   LOG.log(`[OID4VCI] Token endpoint enabled at ${url.toString()}`)
 
+
   // this.issuer.issuerMetadata.token_endpoint = url.toString()
   router.post(
     determinePath(baseUrl, url.pathname, { stripBasePath: true }),
     verifyTokenRequest({
       issuer,
-      preAuthorizedCodeExpirationDuration
+      preAuthorizedCodeExpirationDuration,
+      authRequestsData: opts.authRequestsData
     }),
     handleTokenRequest({
       issuer,

@@ -2,7 +2,7 @@ import { calculateJwkThumbprint, JWK, uuidv4 } from '@sphereon/oid4vc-common'
 import {
   AccessTokenRequest,
   AccessTokenResponse,
-  Alg,
+  Alg, AuthorizationRequest,
   CNonceState,
   CredentialOfferSession,
   EXPIRED_PRE_AUTHORIZED_CODE,
@@ -22,7 +22,7 @@ import {
   UNSUPPORTED_GRANT_TYPE_ERROR,
   USER_PIN_NOT_REQUIRED_ERROR,
   USER_PIN_REQUIRED_ERROR,
-  USER_PIN_TX_CODE_SPEC_ERROR,
+  USER_PIN_TX_CODE_SPEC_ERROR
 } from '@sphereon/oid4vci-common'
 
 import { generateCredentialIdentifiers, isPreAuthorizedCodeExpired } from '../functions'
@@ -105,7 +105,7 @@ export const assertValidAccessTokenRequest = async (
   opts: {
     credentialOfferSessions: IStateManager<CredentialOfferSession>
     expirationDuration: number
-    authRequestsData?: Map<string, any> // Add this for authorization code flow
+    authRequestsData?: Map<string, any>
   }
 ) => {
   const { credentialOfferSessions, expirationDuration, authRequestsData } = opts
@@ -118,7 +118,7 @@ export const assertValidAccessTokenRequest = async (
 
     // Find the authorization request data by code
     // This is simplified - you'll need to implement proper code->request mapping
-    const authRequestData = Array.from(authRequestsData.values())
+    const authRequestData:AuthorizationRequest | undefined = Array.from(authRequestsData.values())
       .find(data => data.authorization_code === request.code)
 
     if (!authRequestData) {
@@ -143,12 +143,12 @@ export const assertValidAccessTokenRequest = async (
             grants: {}
           }
         },
-        authorizationDetails: authRequestData.authorization_details,
+        authorizationDetails: authRequestData?.authorization_details,
         authorizationCode: request.code
       }
       await credentialOfferSessions.set(sessionId, credentialOfferSession)
     } else {
-      credentialOfferSession.authorizationDetails = authRequestData.authorization_details
+      credentialOfferSession.authorizationDetails = authRequestData?.authorization_details
       credentialOfferSession.authorizationCode = request.code
       credentialOfferSession.status = IssueStatus.ACCESS_TOKEN_REQUESTED
       credentialOfferSession.lastUpdatedAt = Date.now()

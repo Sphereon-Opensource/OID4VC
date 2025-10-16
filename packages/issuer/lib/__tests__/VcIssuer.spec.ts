@@ -8,12 +8,16 @@ import { VcIssuer } from '../VcIssuer'
 import { AuthorizationServerMetadataBuilder, CredentialSupportedBuilderV1_15, VcIssuerBuilder } from '../builder'
 import { MemoryStates } from '../state-manager'
 import {
-  Alg, ALG_ERROR,
+  Alg,
+  ALG_ERROR,
   AuthorizationDetailsV1_0_15,
   CredentialConfigurationSupportedV1_0_15,
   CredentialOfferSession,
-  IssueStatus, STATE_MISSING_ERROR
+  GrantTypes,
+  IssueStatus,
+  STATE_MISSING_ERROR
 } from '@sphereon/oid4vci-common'
+import { createAccessTokenResponse } from '../tokens'
 
 const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
 
@@ -332,6 +336,105 @@ describe('VcIssuer', () => {
 
     expect(result.credentials).toHaveLength(1)
     expect(typeof result.credentials[0].credential).toBe('object')
+  })
+
+  it('should generate credential_identifiers in token response and accept them in credential request', async () => {
+    const createdAt = +new Date()
+
+    // Setup session with authorization_details
+    const authorizationDetails: AuthorizationDetailsV1_0_15[] = [{
+      type: 'openid_credential',
+      credential_configuration_id: 'UniversityDegree_JWT',
+      format: 'jwt_vc_json' as const,
+      types: ['VerifiableCredential', 'UniversityDegree_JWT']
+    }]
+
+    await vcIssuer.credentialOfferSessions.set('test-pre-authorized-code', {
+      createdAt: createdAt,
+      notification_id: '43243',
+      preAuthorizedCode: 'test-pre-authorized-code',
+      credentialOffer: {
+        credential_offer: {
+          credential_issuer: 'did:key:test',
+          credential_configuration_ids: ['UniversityDegree_JWT']
+        }
+      },
+      authorizationDetails: authorizationDetails,
+      lastUpdatedAt: createdAt,
+      status: IssueStatus.ACCESS_TOKEN_CREATED
+    })
+
+    const tokenResponse = await createAccessTokenResponse({
+      grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
+      'pre-authorized_code': 'test-pre-authorized-code'
+    }, {
+      credentialOfferSessions: vcIssuer.credentialOfferSessions,
+      cNonces: vcIssuer.cNonces,
+      tokenExpiresIn: 300,
+      accessTokenSignerCallback: async () => 'mock-access-token',
+      accessTokenIssuer: 'test-issuer'
+    })
+
+    // Verify token response includes authorization_details with generated credential_identifiers
+    expect(tokenResponse.authorization_details).toBeDefined()
+    expect(tokenResponse.authorization_details).toHaveLength(1)
+    expect(tokenResponse.authorization_details![0]).toHaveProperty('credential_identifiers')
+    expect(tokenResponse.authorization_details![0].credential_identifiers).toHaveLength(1)
+
+    const generatedIdentifier = tokenResponse.authorization_details![0].credential_identifiers![0]
+    expect(generatedIdentifier).toMatch(/UniversityDegree_JWT_/)
+
+    // Step 2: Mock JWT verification for credential request
+    jwtVerifyCallback.mockResolvedValue({
+      did: 'did:example:1234',
+      kid: 'did:example:1234#auth',
+      alg: Alg.ES256K,
+      didDocument: {
+        '@context': 'https://www.w3.org/ns/did/v1',
+        id: 'did:example:1234'
+      },
+      jwt: {
+        header: {
+          typ: 'openid4vci-proof+jwt',
+          alg: Alg.ES256K,
+          kid: 'test-kid'
+        },
+        payload: {
+          aud: IDENTIPROOF_ISSUER_URL,
+          iat: +new Date() / 1000,
+          nonce: 'test-nonce',
+          // Include authorization_details from token response
+          authorization_details: tokenResponse.authorization_details
+        }
+      }
+    })
+
+    await vcIssuer.cNonces.set('test-nonce', {
+      cNonce: 'test-nonce',
+      createdAt: createdAt
+    })
+
+    // Step 3: Use generated credential_identifier in credential request
+    const credentialResult = await vcIssuer.issueCredential({
+      credential: verifiableCredential,
+      credentialRequest: {
+        credential_identifier: generatedIdentifier,
+        proof: {
+          proof_type: 'jwt',
+          jwt: 'ye.ye.ye'
+        }
+      } as any,
+      issuerCorrelation: {
+        preAuthorizedCode: 'test-pre-authorized-code',
+        authorizationDetails: tokenResponse.authorization_details
+      },
+      newCNonce: 'new-test-nonce'
+    })
+
+    // Verify credential was issued successfully
+    expect(credentialResult.credentials).toHaveLength(1)
+    expect(credentialResult.credentials[0].credential).toBeDefined()
+    expect(credentialResult.notification_id).toBe('43243')
   })
 
   it('should reject invalid credential_identifier', async () => {

@@ -204,7 +204,11 @@ export class OID4VCIServer {
     })
     this.assertAccessTokenHandling()
     if (!this.isTokenEndpointDisabled(opts?.endpointOpts?.tokenEndpointOpts, opts?.asClientOpts)) {
-      accessTokenEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.tokenEndpointOpts, baseUrl: this.baseUrl })
+      accessTokenEndpoint(this.router, this.issuer, {
+        ...opts?.endpointOpts?.tokenEndpointOpts,
+        baseUrl: this.baseUrl,
+        authRequestsData: this.authRequestsData
+      })
     }
     if (this.isStatusEndpointEnabled(opts?.endpointOpts?.getStatusOpts)) {
       getIssueStatusEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.getStatusOpts, baseUrl: this.baseUrl })
