@@ -691,24 +691,21 @@ export class VcIssuer {
       const issuer_state = 'issuer_state' in credentialRequest && credentialRequest.issuer_state
         ? credentialRequest.issuer_state : issuerCorrelation.issuerState
       if (!nonce && !issuer_state) {
-        throw Error('No nonce was found in the Proof of Possession')
+        throw Error('No nonce or issuer_state was found in the Proof of Possession')
       }
-      let createdAt: number
+
+      let createdAt: number = +new Date()
       let cNonceState: CNonceState | undefined
       if (nonce) {
         cNonceState = await this.cNonces.getAsserted(nonce)
-/*
-        preAuthorizedCode = cNonceState.preAuthorizedCode
-        issuerState = cNonceState.issuerState
-*/
         createdAt = cNonceState.createdAt
-      } else if (issuer_state) {
+      }
+      if (issuer_state) {
         const session = await this._credentialOfferSessions.getAsserted(issuer_state as string)
         issuerState = issuer_state as string | undefined
         createdAt = session.createdAt
-      } else {
-        throw Error('No nonce or issuer_state was found in the Proof of Possession')
       }
+
       // The verify callback should set the correct values, but let's look at the JWT ourselves to to be sure
       const alg = jwtVerifyResult.alg ?? header.alg
       const kid = jwtVerifyResult.kid ?? header.kid
