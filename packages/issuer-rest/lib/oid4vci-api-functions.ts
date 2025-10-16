@@ -720,13 +720,40 @@ export function getMetadataEndpoints(router: Router, issuer: VcIssuer) {
   const credentialIssuerHandler = (request: Request, response: Response) => {
     return response.json(issuer.issuerMetadata)
   }
-  router.get(WellKnownEndpoints.OPENID4VCI_ISSUER, credentialIssuerHandler)
 
   const authorizationServerHandler = (request: Request, response: Response) => {
     return response.json(issuer.authorizationServerMetadata)
   }
+
+  // Original endpoints
+  router.get(WellKnownEndpoints.OPENID4VCI_ISSUER, credentialIssuerHandler)
   router.get(WellKnownEndpoints.OAUTH_AS, authorizationServerHandler)
+
+  // Alternative endpoints with .well-known at root
+  const alternativeCredentialIssuerEndpoint = getAlternativeWellKnownEndpoint(WellKnownEndpoints.OPENID4VCI_ISSUER)
+  const alternativeAuthServerEndpoint = getAlternativeWellKnownEndpoint(WellKnownEndpoints.OAUTH_AS)
+
+  if (alternativeCredentialIssuerEndpoint) {
+    router.get(alternativeCredentialIssuerEndpoint, credentialIssuerHandler)
+  }
+
+  if (alternativeAuthServerEndpoint) {
+    router.get(alternativeAuthServerEndpoint, authorizationServerHandler)
+  }
 }
+
+function getAlternativeWellKnownEndpoint(originalEndpoint: string): string | null {
+  const wellKnownIndex = originalEndpoint.indexOf('/.well-known/')
+  if (wellKnownIndex <= 0) {
+    return null
+  }
+
+  const contextPath = originalEndpoint.substring(0, wellKnownIndex)
+  const wellKnownResource = originalEndpoint.substring(wellKnownIndex + '/.well-known/'.length)
+
+  return `/.well-known/${wellKnownResource}${contextPath}`
+}
+
 
 export function determinePath(
   baseUrl: URL | string | undefined,
