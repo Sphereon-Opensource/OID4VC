@@ -9,7 +9,7 @@ export class AuthorizationDetailsBuilder {
   private readonly authorizationDetails: Partial<Exclude<AuthorizationDetailsV1_0_15, string>>
 
   constructor() {
-    this.authorizationDetails = {}
+    this.authorizationDetails = { type: 'openid_credential' }
   }
 
   withFormats(format: OID4VCICredentialFormat): AuthorizationDetailsBuilder {
