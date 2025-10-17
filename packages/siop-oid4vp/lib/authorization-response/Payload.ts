@@ -3,13 +3,88 @@ import { AuthorizationRequest } from '../authorization-request'
 import { IDToken } from '../id-token'
 import { RequestObject } from '../request-object'
 import { assertValidResponseOpts } from './Opts'
-import { AuthorizationRequestPayload, AuthorizationResponsePayload, IDTokenPayload, SIOPErrors } from '../types'
+import {
+  AuthorizationRequestPayload,
+  AuthorizationResponsePayload,
+  DcqlPresentationEntry,
+  DcqlVpToken,
+  DcqlVpTokenInput,
+  IDTokenPayload,
+  NonEmptyArray,
+  SIOPErrors
+} from '../types'
 import { AuthorizationResponseOpts } from './types'
+
+
+/**
+ * Checks if an object is array-like (has only numeric string keys: "0", "1", "2", etc.)
+ * This handles objects that were serialized arrays: { "0": val1, "1": val2 }
+ */
+const isArrayLikeObject = (value: unknown): value is Record<string, DcqlPresentationEntry> => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false
+  }
+  const keys = Object.keys(value)
+  return keys.length > 0 && keys.every(key => /^\d+$/.test(key))
+}
+
+/**
+ * Normalizes a credential query value to an array.
+ * Handles three input formats:
+ * 1. Single value: "credential" -> ["credential"]
+ * 2. Array: ["cred1", "cred2"] -> ["cred1", "cred2"]
+ * 3. Array-like object: {"0": "cred1", "1": "cred2"} -> ["cred1", "cred2"]
+ */
+const normalizeToArray = (
+  credentialQueryId: string,
+  value: DcqlPresentationEntry | DcqlPresentationEntry[] | Record<string, DcqlPresentationEntry>
+): NonEmptyArray<DcqlPresentationEntry> => {
+  let presentationsArray: DcqlPresentationEntry[]
+
+  if (Array.isArray(value)) {
+    presentationsArray = value
+  } else if (isArrayLikeObject(value)) {
+    // Convert array-like object to array by sorting keys numerically
+    const sortedKeys = Object.keys(value).sort((a, b) => Number(a) - Number(b))
+    presentationsArray = sortedKeys.map(key => value[key])
+  } else {
+    // Single value, wrap in array
+    presentationsArray = [value]
+  }
+
+  if (presentationsArray.length === 0) {
+    throw new Error(
+      `DCQL presentations for credential query '${credentialQueryId}' cannot be empty`
+    )
+  }
+
+  // Cast to NonEmptyArray since we verified length > 0
+  return presentationsArray as NonEmptyArray<DcqlPresentationEntry>
+}
+
+/**
+ * Converts a DCQL presentation input (which may have mixed formats) to the canonical
+ * format where all credential queries map to non-empty arrays of presentations.
+ *
+ * This ensures consistent handling of:
+ * - Single presentations: { "PID": "eyJ..." } -> { "PID": ["eyJ..."] }
+ * - Array presentations: { "PID": ["eyJ..."] } -> { "PID": ["eyJ..."] }
+ * - Array-like objects: { "PID": {"0": "eyJ..."} } -> { "PID": ["eyJ..."] }
+ */
+const toCanonicalDcqlPresentation = (input: DcqlVpTokenInput): DcqlVpToken => {
+  return Object.fromEntries(
+    Object.entries(input).map(([credentialQueryId, value]) => {
+      const presentationsArray = normalizeToArray(credentialQueryId, value)
+      return [credentialQueryId, presentationsArray]
+    })
+  ) as DcqlVpToken
+}
+
 
 export const createResponsePayload = async (
   authorizationRequest: AuthorizationRequest,
   responseOpts: AuthorizationResponseOpts,
-  idTokenPayload?: IDTokenPayload,
+  idTokenPayload?: IDTokenPayload
 ): Promise<AuthorizationResponsePayload | undefined> => {
   assertValidResponseOpts(responseOpts)
   if (!authorizationRequest) {
@@ -20,15 +95,21 @@ export const createResponsePayload = async (
   const state: string | undefined = authorizationRequest.getMergedProperty('state')
 
   const responsePayload: AuthorizationResponsePayload = {
-    ...(responseOpts.accessToken && { access_token: responseOpts.accessToken, expires_in: responseOpts.expiresIn || 3600 }),
+    ...(responseOpts.accessToken && {
+      access_token: responseOpts.accessToken,
+      expires_in: responseOpts.expiresIn || 3600
+    }),
     ...(responseOpts.tokenType && { token_type: responseOpts.tokenType }),
     ...(responseOpts.refreshToken && { refresh_token: responseOpts.refreshToken }),
     ...(responseOpts.isFirstParty && { is_first_party: responseOpts.isFirstParty }),
-    state,
+    state
   }
 
   if (responseOpts.dcqlResponse?.dcqlPresentation) {
-    responsePayload.vp_token = DcqlPresentation.encode(responseOpts.dcqlResponse.dcqlPresentation as DcqlPresentation)
+    const canonicalPresentation = toCanonicalDcqlPresentation(
+      responseOpts.dcqlResponse.dcqlPresentation
+    )
+    responsePayload.vp_token = DcqlPresentation.encode(canonicalPresentation)
   }
 
   if (idTokenPayload) {
@@ -46,7 +127,7 @@ export const createResponsePayload = async (
  */
 export const mergeOAuth2AndOpenIdInRequestPayload = async (
   payload: AuthorizationRequestPayload,
-  requestObject?: RequestObject,
+  requestObject?: RequestObject
 ): Promise<AuthorizationRequestPayload> => {
   const payloadCopy = JSON.parse(JSON.stringify(payload))
 

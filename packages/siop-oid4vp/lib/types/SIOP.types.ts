@@ -2,9 +2,7 @@ import { JarmClientMetadata } from '@sphereon/jarm'
 import { DynamicRegistrationClientMetadata, SigningAlgo } from '@sphereon/oid4vc-common'
 import {
   AdditionalClaims,
-  CompactSdJwtVc,
   Format,
-  MdocOid4vpMdocVpToken,
   W3CVerifiableCredential,
   W3CVerifiablePresentation,
   WrappedVerifiablePresentation
@@ -37,9 +35,12 @@ import {
   CreateAuthorizationResponsePayloadSchema,
   CreateAuthorizationResponseSchema,
   QRCodeOptsPayloadSchema,
-  QRCodeOptsSchema, RequestErrorPayloadSchema, RequestErrorSchema,
+  QRCodeOptsSchema,
+  RequestErrorPayloadSchema,
+  RequestErrorSchema,
   VerifiedDataOptsSchema
 } from '../schemas'
+import { Json } from './Json.types'
 
 export const DEFAULT_EXPIRATION_TIME = 10 * 60
 
@@ -178,6 +179,14 @@ export interface IDTokenPayload extends JWTPayload {
   }
 }
 
+export type NonEmptyArray<T> = [T, ...T[]]
+export type DcqlPresentationEntry = string | Record<string, Json>
+export type DcqlVpToken = Record<string, NonEmptyArray<DcqlPresentationEntry>>
+export type DcqlVpTokenInput = Record<
+  string,
+  DcqlPresentationEntry | DcqlPresentationEntry[] | Record<string, DcqlPresentationEntry>
+>
+
 export type EncodedDcqlPresentationVpToken = string
 
 export interface AuthorizationResponsePayload {
@@ -187,12 +196,7 @@ export interface AuthorizationResponsePayload {
   expires_in?: number
   state?: string
   id_token?: string
-  vp_token?:
-    | Array<W3CVerifiablePresentation | CompactSdJwtVc | MdocOid4vpMdocVpToken>
-    | W3CVerifiablePresentation
-    | CompactSdJwtVc
-    | MdocOid4vpMdocVpToken
-    | EncodedDcqlPresentationVpToken
+  vp_token?: EncodedDcqlPresentationVpToken
   is_first_party?: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [x: string]: any

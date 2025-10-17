@@ -6,12 +6,14 @@ import {
   HasherSync,
   MdocOid4vpIssuerSigned,
   PresentationSubmission,
-  W3CVerifiablePresentation,
+  W3CVerifiablePresentation
 } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
 import { AuthorizationResponse } from './AuthorizationResponse'
 import {
   CreateJwtCallback,
+  DcqlVpTokenInput,
+  ResponseIss,
   ResponseMode,
   ResponseRegistrationOpts,
   ResponseType,
@@ -19,8 +21,7 @@ import {
   SupportedVersion,
   VerifiablePresentationWithFormat,
   Verification,
-  VerifyJwtCallback,
-  ResponseIss
+  VerifyJwtCallback
 } from '../types'
 
 export interface AuthorizationResponseOpts {
@@ -42,7 +43,7 @@ export interface AuthorizationResponseOpts {
 }
 
 export interface DcqlResponseOpts {
-  dcqlPresentation: Record<string, string | Record<string, unknown> | Array<string | Record<string, unknown>>>
+  dcqlPresentation: DcqlVpTokenInput
 }
 
 export interface DcqlQueryPayloadOpts {
