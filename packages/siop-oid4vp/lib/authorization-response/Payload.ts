@@ -44,11 +44,9 @@ const normalizeToArray = (
   if (Array.isArray(value)) {
     presentationsArray = value
   } else if (isArrayLikeObject(value)) {
-    // Convert array-like object to array by sorting keys numerically
     const sortedKeys = Object.keys(value).sort((a, b) => Number(a) - Number(b))
     presentationsArray = sortedKeys.map(key => value[key])
   } else {
-    // Single value, wrap in array
     presentationsArray = [value]
   }
 
@@ -58,7 +56,6 @@ const normalizeToArray = (
     )
   }
 
-  // Cast to NonEmptyArray since we verified length > 0
   return presentationsArray as NonEmptyArray<DcqlPresentationEntry>
 }
 
