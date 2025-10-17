@@ -1,4 +1,4 @@
-import { epochTime, uuidv4 } from '@sphereon/oid4vc-common'
+import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
   ACCESS_TOKEN_ISSUER_REQUIRED_ERROR,
   AccessTokenRequest,
@@ -434,46 +434,18 @@ export function nonceEndpoint(router: Router, issuer: VcIssuer, opts: INonceEndp
 
   router.post(path, async (request: Request, response: Response) => {
     try {
-      let preAuthorizedCode: string | undefined
-      let issuerState: string | undefined
-
-      // Verify access token if present (optional per spec)
-      // If not present, the nonce will be unbound to any session
-      if (request.header('Authorization')) {
-        try {
-          const jwt = extractBearerToken(request.header('Authorization'))
-          const jwtResult = await validateJWT(jwt, {
-            accessTokenVerificationCallback: issuer.jwtVerifyCallback
-          })
-
-          // Extract session info from access token
-          const accessToken = jwtResult.jwt.payload as AccessTokenRequest
-          preAuthorizedCode = accessToken['pre-authorized_code']
-        } catch (e) {
-          LOG.warning(e)
-          return sendErrorResponse(response, 400, {
-            error: 'invalid_token'
-          })
-        }
-      }
-
       const cNonce = uuidv4()
       const cNonceExpiresIn = issuer.cNonceExpiresIn || 300
 
-      const createdAt = epochTime()
+      const createdAt = +Date.now()
+      const expiresAt = createdAt + Math.abs(cNonceExpiresIn) * 1000
+
 
       // Create nonce state - only include session identifiers if available
       const cNonceState: any = {
         cNonce,
-        createdAt: createdAt,
-        expiresAt: createdAt + cNonceExpiresIn
-      }
-
-      if (preAuthorizedCode) {
-        cNonceState.preAuthorizedCode = preAuthorizedCode
-      }
-      if (issuerState) {
-        cNonceState.issuerState = issuerState
+        createdAt,
+        expiresAt
       }
 
       await issuer.cNonces.set(cNonce, cNonceState)
