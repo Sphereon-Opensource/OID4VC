@@ -151,6 +151,9 @@ describe('sd-jwt vc', () => {
         .reply(200, async (_, body) =>
           vcIssuer.issueCredential({
             credentialRequest: { ...(body as any), credential_identifier: 'SdJwtCredential' },
+            issuerCorrelation: {
+              preAuthorizedCode: '123'
+            },
             credential: {
               vct: 'Hello',
               iss: 'did:example:123',
@@ -259,6 +262,9 @@ describe('sd-jwt vc', () => {
         .reply(200, async (_, body) =>
           vcIssuer.issueCredential({
             credentialRequest: { ...(body as any), credential_identifier: offered.vct },
+            issuerCorrelation: {
+              preAuthorizedCode: '123'
+            },
             credential: {
               vct: 'Hello',
               iss: 'example.com',

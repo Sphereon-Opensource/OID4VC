@@ -29,7 +29,7 @@ import {
   validateJWT,
   WellKnownEndpoints
 } from '@sphereon/oid4vci-common'
-import { ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
+import { IssuerCorrelation, ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
@@ -302,9 +302,17 @@ export function getCredentialEndpoint(
     try {
       const credentialRequest = request.body as CredentialRequestV1_0_15
       LOG.log(`credential request received`, credentialRequest)
+      const issuerCorrelation :IssuerCorrelation = {}
       try {
         const jwt = extractBearerToken(request.header('Authorization'))
-        await validateJWT(jwt, { accessTokenVerificationCallback: opts.accessTokenVerificationCallback ?? issuer.jwtVerifyCallback })
+        const jwtVerifyResult = (await validateJWT(jwt, { accessTokenVerificationCallback: opts.accessTokenVerificationCallback ?? issuer.jwtVerifyCallback }))
+        const tokenClaims = jwtVerifyResult.jwt.payload
+        if('preAuthorizedCode' in tokenClaims && typeof tokenClaims.preAuthorizedCode === 'string') {
+          issuerCorrelation.preAuthorizedCode = tokenClaims.preAuthorizedCode
+        }
+        if('issuer_state' in tokenClaims && typeof tokenClaims.issuer_state === 'string') {
+          issuerCorrelation.issuerState = tokenClaims.issuer_state
+        }
       } catch (e) {
         LOG.warning(e)
         return sendErrorResponse(response, 400, {
@@ -314,6 +322,7 @@ export function getCredentialEndpoint(
 
       const credential = await issuer.issueCredential({
         credentialRequest: credentialRequest,
+        issuerCorrelation,
         tokenExpiresIn: opts.tokenExpiresIn,
         cNonceExpiresIn: opts.cNonceExpiresIn
       })
@@ -425,13 +434,21 @@ export function nonceEndpoint(router: Router, issuer: VcIssuer, opts: INonceEndp
 
   router.post(path, async (request: Request, response: Response) => {
     try {
+      let preAuthorizedCode: string | undefined
+      let issuerState: string | undefined
+
       // Verify access token if present (optional per spec)
+      // If not present, the nonce will be unbound to any session
       if (request.header('Authorization')) {
         try {
           const jwt = extractBearerToken(request.header('Authorization'))
-          await validateJWT(jwt, {
+          const jwtResult = await validateJWT(jwt, {
             accessTokenVerificationCallback: issuer.jwtVerifyCallback
           })
+
+          // Extract session info from access token
+          const accessToken = jwtResult.jwt.payload as AccessTokenRequest
+          preAuthorizedCode = accessToken['pre-authorized_code']
         } catch (e) {
           LOG.warning(e)
           return sendErrorResponse(response, 400, {
@@ -444,11 +461,22 @@ export function nonceEndpoint(router: Router, issuer: VcIssuer, opts: INonceEndp
       const cNonceExpiresIn = issuer.cNonceExpiresIn || 300
 
       const createdAt = epochTime()
-      await issuer.cNonces.set(cNonce, {
+
+      // Create nonce state - only include session identifiers if available
+      const cNonceState: any = {
         cNonce,
         createdAt: createdAt,
         expiresAt: createdAt + cNonceExpiresIn
-      })
+      }
+
+      if (preAuthorizedCode) {
+        cNonceState.preAuthorizedCode = preAuthorizedCode
+      }
+      if (issuerState) {
+        cNonceState.issuerState = issuerState
+      }
+
+      await issuer.cNonces.set(cNonce, cNonceState)
 
       return response.json({
         c_nonce: cNonce,

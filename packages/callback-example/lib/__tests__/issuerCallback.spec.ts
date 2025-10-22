@@ -1,11 +1,7 @@
 import { KeyObject } from 'crypto'
 
 import { uuidv4 } from '@sphereon/oid4vc-common'
-import {
-  CredentialRequestClientBuilder,
-  CredentialRequestClientBuilderV1_0_15,
-  ProofOfPossessionBuilder
-} from '@sphereon/oid4vci-client'
+import { CredentialRequestClientBuilderV1_0_15, ProofOfPossessionBuilder } from '@sphereon/oid4vci-client'
 import {
   Alg,
   CNonceState,
@@ -21,7 +17,6 @@ import {
 } from '@sphereon/oid4vci-common'
 import {
   AuthorizationServerMetadataBuilder,
-  CredentialDataSupplierResult,
   CredentialSupportedBuilderV1_15,
   MemoryStates,
   VcIssuer,
@@ -172,7 +167,7 @@ describe('issuerCallback', () => {
     })
 
     const nonces = new MemoryStates<CNonceState>()
-    await nonces.set('test_value', { cNonce: 'test_value', createdAt: +new Date(), issuerState: 'existing-state' })
+    await nonces.set('test_value', { cNonce: 'test_value', createdAt: +new Date() })
     vcIssuer = new VcIssuerBuilder()
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
@@ -309,6 +304,10 @@ describe('issuerCallback', () => {
 
     const credentialResponse = await vcIssuer.issueCredential({
       credentialRequest: credentialRequest,
+      issuerCorrelation: {
+        preAuthorizedCode: 'test_code',
+        issuerState: 'existing-state'
+      },
       credential,
       responseCNonce: state,
       credentialSignerCallback: getIssuerCallbackV1_0_15(credential, credentialRequest, didKey.keyPairs, didKey.didDocument.verificationMethod[0].id)
