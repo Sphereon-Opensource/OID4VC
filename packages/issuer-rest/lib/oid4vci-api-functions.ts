@@ -41,7 +41,7 @@ import {
   ICreateCredentialOfferURIResponse,
   IGetCredentialOfferEndpointOpts,
   IGetIssueStatusEndpointOpts,
-  INonceEndpointOpts
+  INonceEndpointOpts, WellKnownHostLocation
 } from './OID4VCIServer'
 import { validateRequestBody } from './expressUtils'
 
@@ -716,7 +716,15 @@ export function pushedAuthorizationEndpoint(
   })
 }
 
-export function getMetadataEndpoints(router: Router, issuer: VcIssuer, rootRouter?: Router, basePath?: string) {
+export function getMetadataEndpoints(
+  router: Router,
+  issuer: VcIssuer,
+  opts?: {
+    rootRouter?: Router
+    basePath?: string
+    wellKnownHostLocation?: WellKnownHostLocation
+  }
+) {
   const credentialIssuerHandler = (request: Request, response: Response) => {
     return response.json(issuer.issuerMetadata)
   }
@@ -725,14 +733,19 @@ export function getMetadataEndpoints(router: Router, issuer: VcIssuer, rootRoute
     return response.json(issuer.authorizationServerMetadata)
   }
 
-  // Original endpoints on the context router
-  router.get(WellKnownEndpoints.OPENID4VCI_ISSUER, credentialIssuerHandler)
-  router.get(WellKnownEndpoints.OAUTH_AS, authorizationServerHandler)
+  const location = opts?.wellKnownHostLocation ?? WellKnownHostLocation.AT_BOTH
 
-  // Alternative root-level endpoints if rootRouter provided
-  if (rootRouter && basePath && basePath !== '/') {
-    rootRouter.get(`/.well-known/openid-credential-issuer${basePath}`, credentialIssuerHandler)
-    rootRouter.get(`/.well-known/oauth-authorization-server${basePath}`, authorizationServerHandler)
+  // Register endpoints on context router if configured
+  if (location === WellKnownHostLocation.AT_CONTEXT_PATH || location === WellKnownHostLocation.AT_BOTH) {
+    router.get(WellKnownEndpoints.OPENID4VCI_ISSUER, credentialIssuerHandler)
+    router.get(WellKnownEndpoints.OAUTH_AS, authorizationServerHandler)
+  }
+
+  // Register endpoints on root router if configured
+  if (opts?.rootRouter && opts?.basePath && opts.basePath !== '/' &&
+    (location === WellKnownHostLocation.AT_ROOT_PATH || location === WellKnownHostLocation.AT_BOTH)) {
+    opts.rootRouter.get(`/.well-known/openid-credential-issuer${opts.basePath}`, credentialIssuerHandler)
+    opts.rootRouter.get(`/.well-known/oauth-authorization-server${opts.basePath}`, authorizationServerHandler)
   }
 }
 

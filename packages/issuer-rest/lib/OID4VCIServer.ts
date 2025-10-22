@@ -144,10 +144,17 @@ export interface INonceEndpointOpts extends ISingleEndpointOpts {
   baseUrl: string | URL
 }
 
+export enum WellKnownHostLocation {
+  AT_CONTEXT_PATH = 'AT_CONTEXT_PATH',
+  AT_ROOT_PATH = 'AT_ROOT_PATH',
+  AT_BOTH = 'AT_BOTH'
+}
+
 export interface IOID4VCIServerOpts extends HasEndpointOpts {
   asClientOpts?: ClientMetadata
   endpointOpts?: IOID4VCIEndpointOpts
   baseUrl?: string
+  wellKnownHostLocation?: WellKnownHostLocation
 }
 
 export class OID4VCIServer {
@@ -159,6 +166,7 @@ export class OID4VCIServer {
   // private readonly _server?: http.Server
   private readonly _router: express.Router
   private readonly _asClientOpts?: ClientMetadata
+  private readonly _wellknownHostLocation?: WellKnownHostLocation
 
   constructor(
     expressSupport: ExpressSupport,
@@ -173,18 +181,22 @@ export class OID4VCIServer {
     this._issuer = opts?.issuer ? opts.issuer : buildVCIFromEnvironment()
     this._asClientOpts =
       opts.asClientOpts || this._issuer.asClientOpts ? ({ ...opts.asClientOpts, ...this._issuer.asClientOpts } as ClientMetadata) : undefined
-
+    this._wellknownHostLocation = opts?.wellKnownHostLocation ?? (process.env.WELLKNOWN_HOST_LOCATION as WellKnownHostLocation)
     pushedAuthorizationEndpoint(this.router, this.issuer, this.authRequestsData)
 
     // Create root router for alternative .well-known endpoints if needed
     const basePath = getBasePath(this.baseUrl)
     let rootRouter: express.Router | undefined
-    if (basePath && basePath !== '/') {
+    if (basePath && basePath !== '/' && (this.wellknownHostLocation == WellKnownHostLocation.AT_ROOT_PATH || this.wellknownHostLocation == WellKnownHostLocation.AT_BOTH)) {
       rootRouter = express.Router()
       this._app.use('/', rootRouter)
     }
 
-    getMetadataEndpoints(this.router, this.issuer, rootRouter, basePath)
+    getMetadataEndpoints(this.router, this.issuer, {
+      rootRouter,
+      basePath,
+      wellKnownHostLocation: this.wellknownHostLocation
+    })
 
     let issuerPayloadPath: string | undefined
     if (this.isGetIssuePayloadEndpointEnabled(opts?.endpointOpts?.getIssuePayloadOpts)) {
@@ -309,5 +321,9 @@ export class OID4VCIServer {
 
   get baseUrl(): URL {
     return this._baseUrl
+  }
+
+  get wellknownHostLocation(): WellKnownHostLocation | undefined {
+    return this._wellknownHostLocation
   }
 }
