@@ -181,7 +181,7 @@ export class OID4VCIServer {
     this._issuer = opts?.issuer ? opts.issuer : buildVCIFromEnvironment()
     this._asClientOpts =
       opts.asClientOpts || this._issuer.asClientOpts ? ({ ...opts.asClientOpts, ...this._issuer.asClientOpts } as ClientMetadata) : undefined
-    this._wellknownHostLocation = opts?.wellKnownHostLocation ?? (process.env.WELLKNOWN_HOST_LOCATION as WellKnownHostLocation)
+    this._wellknownHostLocation = opts?.wellKnownHostLocation ?? (process.env.WELLKNOWN_HOST_LOCATION as WellKnownHostLocation) ?? WellKnownHostLocation.AT_BOTH
     pushedAuthorizationEndpoint(this.router, this.issuer, this.authRequestsData)
 
     // Create root router for alternative .well-known endpoints if needed
