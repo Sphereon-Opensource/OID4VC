@@ -104,10 +104,26 @@ export const extractDcqlPresentationFromDcqlVpToken = (
   opts?: { hasher?: HasherSync },
 ): PresentationSubmission => {
   return Object.fromEntries(
-      Object.entries(DcqlPresentation.parse(vpToken)).map(([credentialQueryId, vp]) => [
+    Object.entries(DcqlPresentation.parse(vpToken)).map(([credentialQueryId, vp]) => {
+      let singleVp: W3CVerifiablePresentation | CompactSdJwtVc | string
+
+      if (Array.isArray(vp)) {
+        if (vp.length === 0) {
+          throw new Error(`DCQL query '${credentialQueryId}' has empty array of presentations`)
+        }
+        if (vp.length > 1) {
+          throw new Error(`DCQL query '${credentialQueryId}' has multiple presentations (${vp.length}), but only one is supported atm`)
+        }
+        singleVp = vp[0]
+      } else {
+        singleVp = vp
+      }
+
+      return [
         credentialQueryId,
-        CredentialMapper.toWrappedVerifiablePresentation(vp as W3CVerifiablePresentation | CompactSdJwtVc | string, {hasher: opts?.hasher}),
-      ]),
+        CredentialMapper.toWrappedVerifiablePresentation(singleVp as W3CVerifiablePresentation | CompactSdJwtVc | string, {hasher: opts?.hasher}),
+      ]
+    }),
   )
 }
 

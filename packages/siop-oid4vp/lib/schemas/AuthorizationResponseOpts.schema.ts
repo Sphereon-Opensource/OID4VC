@@ -874,38 +874,76 @@ export const AuthorizationResponseOptsSchemaObj = {
       "type": "object",
       "properties": {
         "dcqlPresentation": {
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "additionalProperties": {}
-              },
-              {
-                "type": "array",
-                "items": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "additionalProperties": {}
-                    }
-                  ]
-                }
-              }
-            ]
-          }
+          "$ref": "#/definitions/DcqlVpTokenInput"
         }
       },
       "required": [
         "dcqlPresentation"
       ],
       "additionalProperties": false
+    },
+    "DcqlVpTokenInput": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/DcqlPresentationEntry"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/DcqlPresentationEntry"
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/definitions/DcqlPresentationEntry"
+            }
+          }
+        ]
+      }
+    },
+    "DcqlPresentationEntry": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Json"
+          }
+        }
+      ]
+    },
+    "Json": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Json"
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Json"
+          }
+        }
+      ]
     }
   }
 };
