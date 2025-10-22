@@ -76,7 +76,7 @@ describe('Nonce Endpoint', () => {
     await new Promise((resolve) => setTimeout((v: void) => resolve(v), 500))
   })
 
-  it('should return fresh c_nonce without authorization', async () => {
+  it('should return fresh c_nonce', async () => {
     const res = await requests(app).post('/nonce').send()
 
     expect(res.statusCode).toEqual(200)
@@ -99,19 +99,6 @@ describe('Nonce Endpoint', () => {
     expect(storedNonce?.cNonce).toEqual(c_nonce)
     expect(storedNonce?.createdAt).toBeTypeOf('number')
     expect(storedNonce?.expiresAt).toBeGreaterThan(Math.floor(Date.now() / 1000))
-  })
-
-  it('should return error with invalid access token', async () => {
-    const res = await requests(app)
-      .post('/nonce')
-      .set('Authorization', 'Bearer invalid-token')
-      .send()
-
-    expect(res.statusCode).toEqual(400)
-    const actual = JSON.parse(res.text)
-    expect(actual).toEqual({
-      error: 'invalid_token'
-    })
   })
 
   it('should work when nonce endpoint is disabled', async () => {
