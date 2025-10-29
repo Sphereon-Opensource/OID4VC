@@ -4,7 +4,7 @@ import { CredentialMapper } from '@sphereon/ssi-types'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 import { from } from '@trust/keyto'
-import { fetch } from 'cross-fetch'
+import fetch from 'cross-fetch'
 import pkg from 'debug'
 const { debug: Debug } = pkg
 import { base64url, importJWK, JWK, SignJWT } from 'jose'
@@ -12,7 +12,7 @@ import { base64url, importJWK, JWK, SignJWT } from 'jose'
 import { fromString } from 'uint8arrays/from-string'
 import { describe, expect, it } from 'vitest'
 
-import { OpenID4VCIClientV1_0_11 } from '..'
+import { OpenID4VCIClientV1_0_15 } from '..'
 
 export const UNIT_TEST_TIMEOUT = 30000
 
@@ -61,7 +61,7 @@ describe.skip('OID4VCI-Client using Sphereon issuer should', () => {
   async function test(credentialType: 'CTWalletCrossPreAuthorisedInTime' | 'CTWalletCrossPreAuthorisedDeferred' | 'CTWalletCrossAuthorisedInTime') {
     debug.enable('*')
     const offer = await getCredentialOffer(credentialType)
-    const client = await OpenID4VCIClientV1_0_11.fromURI({
+    const client = await OpenID4VCIClientV1_0_15.fromURI({
       uri: offer,
       kid,
       alg: Alg.ES256,

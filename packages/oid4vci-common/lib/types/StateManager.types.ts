@@ -37,8 +37,6 @@ export enum IssueStatus {
 
 export interface CNonceState extends StateType {
   cNonce: string
-  issuerState?: string
-  preAuthorizedCode?: string //todo: Probably good to hash it here, since it would come in from the client and we could match the hash and thus use the client value
 }
 
 export interface URIState extends StateType {

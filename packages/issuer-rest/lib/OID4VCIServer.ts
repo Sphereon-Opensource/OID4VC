@@ -2,18 +2,17 @@ import {
   AuthorizationRequest,
   ClientMetadata,
   CreateCredentialOfferURIResult,
-  CredentialConfigurationSupportedV1_0_13,
+  CredentialConfigurationSupportedV1_0_15,
   CredentialOfferMode,
-  IssuerCredentialSubjectDisplay,
   OID4VCICredentialFormat,
-  QRCodeOpts,
+  QRCodeOpts
 } from '@sphereon/oid4vci-common'
 import {
-  CredentialSupportedBuilderV1_13,
+  CredentialSupportedBuilderV1_15,
   ITokenEndpointOpts,
   oidcAccessTokenVerifyCallback,
   VcIssuer,
-  VcIssuerBuilder,
+  VcIssuerBuilder
 } from '@sphereon/oid4vci-issuer'
 import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
 import express, { Express } from 'express'
@@ -28,18 +27,18 @@ import {
   getCredentialOfferEndpoint,
   getCredentialOfferReferenceEndpoint,
   getIssueStatusEndpoint,
-  getMetadataEndpoints,
-  pushedAuthorizationEndpoint,
+  getMetadataEndpoints, nonceEndpoint,
+  pushedAuthorizationEndpoint
 } from './oid4vci-api-functions'
 
 function buildVCIFromEnvironment() {
-  const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_13> = new CredentialSupportedBuilderV1_13()
+  const credentialsSupported: Record<string, CredentialConfigurationSupportedV1_0_15> = new CredentialSupportedBuilderV1_15()
     .withCredentialSigningAlgValuesSupported(process.env.credential_signing_alg_values_supported as string)
     .withCryptographicBindingMethod(process.env.cryptographic_binding_methods_supported as string)
     .withFormat(process.env.credential_supported_format as unknown as OID4VCICredentialFormat)
     .withCredentialName(process.env.credential_supported_name_1 as string)
     .withCredentialDefinition({
-      type: [process.env.credential_supported_1_definition_type_1 as string, process.env.credential_supported_1_definition_type_2 as string],
+      type: [process.env.credential_supported_1_definition_type_1 as string, process.env.credential_supported_1_definition_type_2 as string]
       // TODO: setup credentialSubject here from env
       // credentialSubject
     })
@@ -48,27 +47,24 @@ function buildVCIFromEnvironment() {
       locale: process.env.credential_display_locale as string,
       logo: {
         url: process.env.credential_display_logo_url as string,
-        alt_text: process.env.credential_display_logo_alt_text as string,
+        alt_text: process.env.credential_display_logo_alt_text as string
       },
       background_color: process.env.credential_display_background_color as string,
-      text_color: process.env.credential_display_text_color as string,
+      text_color: process.env.credential_display_text_color as string
     })
-    .addCredentialSubjectPropertyDisplay(
-      process.env.credential_subject_display_key1 as string,
-      {
-        name: process.env.credential_subject_display_key1_name as string,
-        locale: process.env.credential_subject_display_key1_locale as string,
-      } as IssuerCredentialSubjectDisplay, // fixme: This is wrong (remove the cast and see it has no matches)
-    )
     .build()
   const issuerBuilder = new VcIssuerBuilder()
-    .withTXCode({ length: process.env.user_pin_length as unknown as number, input_mode: process.env.user_pin_input_mode as 'numeric' | 'text' })
+    .withTXCode({
+      length: process.env.user_pin_length as unknown as number,
+      input_mode: process.env.user_pin_input_mode as 'numeric' | 'text'
+    })
     .withAuthorizationServers(process.env.authorization_server as string)
     .withCredentialEndpoint(process.env.credential_endpoint as string)
+    .withNonceEndpoint(process.env.nonce_endpoint as string)
     .withCredentialIssuer(process.env.credential_issuer as string)
     .withIssuerDisplay({
       name: process.env.issuer_name as string,
-      locale: process.env.issuer_locale as string,
+      locale: process.env.issuer_locale as string
     })
     .withCredentialConfigurationsSupported(credentialsSupported)
     .withInMemoryCredentialOfferState()
@@ -81,7 +77,7 @@ function buildVCIFromEnvironment() {
     issuerBuilder.withASClientMetadataParams({
       client_id: process.env.authorization_server_client_id,
       client_secret: process.env.authorization_server_client_secret,
-      redirect_uris: [process.env.authorization_server_redirect_uri],
+      redirect_uris: [process.env.authorization_server_redirect_uri]
     })
   }
 
@@ -141,12 +137,24 @@ export interface IOID4VCIEndpointOpts {
   getIssuePayloadOpts?: IGetIssuePayloadEndpointOpts
   parOpts?: ISingleEndpointOpts
   authorizationChallengeOpts?: IAuthorizationChallengeEndpointOpts
+  nonceOpts?: INonceEndpointOpts
+}
+
+export interface INonceEndpointOpts extends ISingleEndpointOpts {
+  baseUrl: string | URL
+}
+
+export enum WellKnownHostLocation {
+  AT_CONTEXT_PATH = 'AT_CONTEXT_PATH',
+  AT_ROOT_PATH = 'AT_ROOT_PATH',
+  AT_BOTH = 'AT_BOTH'
 }
 
 export interface IOID4VCIServerOpts extends HasEndpointOpts {
   asClientOpts?: ClientMetadata
   endpointOpts?: IOID4VCIEndpointOpts
   baseUrl?: string
+  wellKnownHostLocation?: WellKnownHostLocation
 }
 
 export class OID4VCIServer {
@@ -158,10 +166,13 @@ export class OID4VCIServer {
   // private readonly _server?: http.Server
   private readonly _router: express.Router
   private readonly _asClientOpts?: ClientMetadata
+  private readonly _wellknownHostLocation?: WellKnownHostLocation
 
   constructor(
     expressSupport: ExpressSupport,
-    opts: IOID4VCIServerOpts & { issuer?: VcIssuer } /*If not supplied as argument, it will be fully configured from environment variables*/,
+    opts: IOID4VCIServerOpts & {
+      issuer?: VcIssuer
+    } /*If not supplied as argument, it will be fully configured from environment variables*/
   ) {
     this._baseUrl = new URL(opts?.baseUrl ?? process.env.BASE_URL ?? opts?.issuer?.issuerMetadata?.credential_issuer ?? 'http://localhost')
     this._expressSupport = expressSupport
@@ -170,14 +181,28 @@ export class OID4VCIServer {
     this._issuer = opts?.issuer ? opts.issuer : buildVCIFromEnvironment()
     this._asClientOpts =
       opts.asClientOpts || this._issuer.asClientOpts ? ({ ...opts.asClientOpts, ...this._issuer.asClientOpts } as ClientMetadata) : undefined
-
+    this._wellknownHostLocation = opts?.wellKnownHostLocation ?? (process.env.WELLKNOWN_HOST_LOCATION as WellKnownHostLocation) ?? WellKnownHostLocation.AT_BOTH
     pushedAuthorizationEndpoint(this.router, this.issuer, this.authRequestsData)
-    getMetadataEndpoints(this.router, this.issuer)
+
+    // Create root router for alternative .well-known endpoints if needed
+    const basePath = getBasePath(this.baseUrl)
+    let rootRouter: express.Router | undefined
+    if (basePath && basePath !== '/' && (this.wellknownHostLocation == WellKnownHostLocation.AT_ROOT_PATH || this.wellknownHostLocation == WellKnownHostLocation.AT_BOTH)) {
+      rootRouter = express.Router()
+      this._app.use('/', rootRouter)
+    }
+
+    getMetadataEndpoints(this.router, this.issuer, {
+      rootRouter,
+      basePath,
+      wellKnownHostLocation: this.wellknownHostLocation
+    })
+
     let issuerPayloadPath: string | undefined
     if (this.isGetIssuePayloadEndpointEnabled(opts?.endpointOpts?.getIssuePayloadOpts)) {
       issuerPayloadPath = getCredentialOfferReferenceEndpoint(this.router, this.issuer, {
         ...opts?.endpointOpts?.getIssuePayloadOpts,
-        baseUrl: this.baseUrl,
+        baseUrl: this.baseUrl
       })
     }
 
@@ -193,11 +218,11 @@ export class OID4VCIServer {
         opts.endpointOpts?.tokenEndpointOpts?.accessTokenVerificationCallback ??
         (this._asClientOpts
           ? oidcAccessTokenVerifyCallback({
-              clientMetadata: this._asClientOpts,
-              credentialIssuer: this._issuer.issuerMetadata.credential_issuer,
-              authorizationServer: this._issuer.issuerMetadata.authorization_servers![0],
-            })
-          : undefined),
+            clientMetadata: this._asClientOpts,
+            credentialIssuer: this._issuer.issuerMetadata.credential_issuer,
+            authorizationServer: this._issuer.issuerMetadata.authorization_servers![0]
+          })
+          : undefined)
     })
     this.assertAccessTokenHandling()
     if (!this.isTokenEndpointDisabled(opts?.endpointOpts?.tokenEndpointOpts, opts?.asClientOpts)) {
@@ -212,9 +237,19 @@ export class OID4VCIServer {
       } else if (!opts?.endpointOpts?.authorizationChallengeOpts?.verifyAuthResponseCallback) {
         throw Error(`Unable to enable authorization challenge endpoint. No verifyAuthResponseCallback present in authorization challenge options`)
       }
-      authorizationChallengeEndpoint(this.router, this.issuer, { ...opts?.endpointOpts?.authorizationChallengeOpts, baseUrl: this.baseUrl })
+      authorizationChallengeEndpoint(this.router, this.issuer, {
+        ...opts?.endpointOpts?.authorizationChallengeOpts,
+        baseUrl: this.baseUrl
+      })
     }
-    this._app.use(getBasePath(this.baseUrl), this._router)
+
+    if (this.isNonceEndpointEnabled(opts?.endpointOpts?.nonceOpts)) {
+      nonceEndpoint(this.router, this.issuer, {
+        ...opts?.endpointOpts?.nonceOpts,
+        baseUrl: this.baseUrl,
+      })
+    }
+    this._app.use(basePath, this._router)
   }
 
   public get app(): Express {
@@ -261,7 +296,7 @@ export class OID4VCIServer {
     if (this.isTokenEndpointDisabled(tokenEndpointOpts, this.issuer.asClientOpts)) {
       if (!authServer || authServer.length === 0) {
         throw Error(
-          `No Authorization Server (AS) is defined in the issuer metadata and the token endpoint is disabled. An AS or token endpoints needs to be present`,
+          `No Authorization Server (AS) is defined in the issuer metadata and the token endpoint is disabled. An AS or token endpoints needs to be present`
         )
       }
       if (this.issuer.asClientOpts) {
@@ -272,14 +307,23 @@ export class OID4VCIServer {
     } else {
       if (authServer && authServer.some((as) => as !== this.issuer.issuerMetadata.credential_issuer)) {
         throw Error(
-          `An external Authorization Server (AS) was already enabled in the issuer metadata (${authServer}). Cannot both have an AS and enable the token endpoint at the same time `,
+          `An external Authorization Server (AS) was already enabled in the issuer metadata (${authServer}). Cannot both have an AS and enable the token endpoint at the same time `
         )
       } else if (this._asClientOpts) {
         throw Error(`OIDC Client metadata is set, but the token endpoint is not disabled. This is not supported.`)
       }
     }
   }
+
+  private isNonceEndpointEnabled(nonceEndpointOpts?: INonceEndpointOpts) {
+    return nonceEndpointOpts?.enabled !== false || process.env.NONCE_ENDPOINT_ENABLED !== 'false'
+  }
+
   get baseUrl(): URL {
     return this._baseUrl
+  }
+
+  get wellknownHostLocation(): WellKnownHostLocation | undefined {
+    return this._wellknownHostLocation
   }
 }

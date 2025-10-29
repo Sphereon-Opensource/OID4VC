@@ -1,6 +1,5 @@
 import { Loggers } from '@sphereon/ssi-types'
-import { fetch } from 'cross-fetch'
-
+import fetch from 'cross-fetch'
 import { ContentType, SIOPErrors, SIOPResonse } from '../types'
 
 const logger = Loggers.DEFAULT.get('sphereon:siopv2:http')
@@ -119,9 +118,6 @@ export const getWithUrl = async <T>(url: string, textResponse?: boolean): Promis
     return (await response.text()) as unknown as T
   }
   return await response.json()
-  /*} catch (e) {
-    return Promise.reject(Error(`${(e as Error).message}`));
-  }*/
 }
 
 export const fetchByReferenceOrUseByValue = async <T>(referenceURI: string, valueObject: T, textResponse?: boolean): Promise<T> => {

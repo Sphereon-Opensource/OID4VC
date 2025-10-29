@@ -1,15 +1,13 @@
 import { EventEmitter } from 'events'
-
 import {
   jarmAuthResponseDirectPostJwtValidate,
   JarmAuthResponseParams,
   JarmDirectPostJwtAuthResponseValidationContext,
-  JarmDirectPostJwtResponseParams,
+  JarmDirectPostJwtResponseParams
 } from '@sphereon/jarm'
-import { decodeProtectedHeader, JwtIssuer } from '@sphereon/oid4vc-common'
+import { base64urlToString, decodeProtectedHeader, JwtIssuer } from '@sphereon/oid4vc-common'
 import { HasherSync } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
-
 import {
   AuthorizationRequest,
   ClaimPayloadCommonOpts,
@@ -17,17 +15,15 @@ import {
   PropertyTarget,
   RequestObjectPayloadOpts,
   RequestPropertyWithTargets,
-  URI,
+  URI
 } from '../authorization-request'
 import { mergeVerificationOpts } from '../authorization-request/Opts'
 import {
-  AuthorizationResponse,
+  AuthorizationResponse, DcqlQueryLookupCallback,
   extractPresentationsFromDcqlVpToken,
-  extractPresentationsFromVpToken,
-  PresentationDefinitionWithLocation,
-  VerifyAuthorizationResponseOpts,
+  VerifyAuthorizationResponseOpts
 } from '../authorization-response'
-import { base64urlToString, getNonce, getState } from '../helpers'
+import { getNonce, getState } from '../helpers'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
@@ -41,9 +37,15 @@ import {
   SupportedVersion,
   Verification,
   VerifiedAuthorizationResponse,
+  CallbackOpts, AuthorizationRequestState
 } from '../types'
 
-import { createRequestOptsFromBuilderOrExistingOpts, createVerifyResponseOptsFromBuilderOrExistingOpts, isTargetOrNoTargets } from './Opts'
+
+import {
+  createRequestOptsFromBuilderOrExistingOpts,
+  createVerifyResponseOptsFromBuilderOrExistingOpts,
+  isTargetOrNoTargets
+} from './Opts'
 import { RPBuilder } from './RPBuilder'
 import { IRPSessionManager } from './types'
 
@@ -57,6 +59,7 @@ export class RP {
   private readonly _eventEmitter?: EventEmitter
   private readonly _sessionManager?: IRPSessionManager
   private readonly _responseRedirectUri?: string
+  private readonly _dcqlQueryLookupCallback?: DcqlQueryLookupCallback
 
   private constructor(opts: {
     builder?: RPBuilder
@@ -69,6 +72,7 @@ export class RP {
     this._eventEmitter = opts.builder?.eventEmitter
     this._sessionManager = opts.builder?.sessionManager
     this._responseRedirectUri = opts.builder?._responseRedirectUri
+    this._dcqlQueryLookupCallback = opts.builder?.dcqlQueryLookupCallback
   }
 
   public static fromRequestOpts(opts: CreateAuthorizationRequestOpts): RP {
@@ -81,6 +85,7 @@ export class RP {
 
   public async createAuthorizationRequest(opts: {
     correlationId: string
+    queryId?: string,
     nonce: string | RequestPropertyWithTargets<string>
     state: string | RequestPropertyWithTargets<string>
     jwtIssuer?: JwtIssuer
@@ -88,13 +93,21 @@ export class RP {
     version?: SupportedVersion
     requestByReferenceURI?: string
     responseURI?: string
-    responseURIType?: ResponseURIType
+    responseURIType?: ResponseURIType,
+    responseRedirectURI?: string
   }): Promise<AuthorizationRequest> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
+
+    if(opts.queryId && this._dcqlQueryLookupCallback) {
+      const dcqlQuery:DcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
+      authorizationRequestOpts.payload.dcql_query = dcqlQuery
+    }
+
     return AuthorizationRequest.fromOpts(authorizationRequestOpts)
       .then((authorizationRequest: AuthorizationRequest) => {
         void this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
           correlationId: opts.correlationId,
+          queryId: opts.queryId,
           subject: authorizationRequest,
         })
         return authorizationRequest
@@ -110,6 +123,7 @@ export class RP {
 
   public async createAuthorizationRequestURI(opts: {
     correlationId: string
+    queryId?: string
     nonce: string | RequestPropertyWithTargets<string>
     state: string | RequestPropertyWithTargets<string>
     jwtIssuer?: JwtIssuer
@@ -118,6 +132,8 @@ export class RP {
     requestByReferenceURI?: string
     responseURI?: string
     responseURIType?: ResponseURIType
+    callback?: CallbackOpts,
+    responseRedirectURI?: string
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
@@ -126,7 +142,10 @@ export class RP {
       const authRequest = await AuthorizationRequest.fromOpts(authorizationRequestOpts)
       this.emitEvent(AuthorizationEvents.ON_AUTH_REQUEST_CREATED_SUCCESS, {
         correlationId: opts.correlationId,
+        queryId: opts.queryId,
         subject: authRequest,
+        callback: opts.callback,
+        responseRedirectURI: opts.responseRedirectURI
       })
       return uri
     } catch (error) {
@@ -172,10 +191,7 @@ export class RP {
       },
     )
 
-    const presentations = validatedResponse.authRequestParams.dcql_query
-      ? extractPresentationsFromDcqlVpToken(validatedResponse.authResponseParams.vp_token as string, { hasher })
-      : extractPresentationsFromVpToken(validatedResponse.authResponseParams.vp_token, { hasher })
-
+    const presentations = extractPresentationsFromDcqlVpToken(validatedResponse.authResponseParams.vp_token as string, { hasher })
     const mdocVerifiablePresentations = (Array.isArray(presentations) ? presentations : [presentations]).filter((p) => p.format === 'mso_mdoc')
 
     if (mdocVerifiablePresentations.length) {
@@ -208,7 +224,6 @@ export class RP {
       state?: string
       nonce?: string
       verification?: Verification
-      presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[]
       dcqlQuery?: DcqlQuery
     },
   ): Promise<VerifiedAuthorizationResponse> {
@@ -262,14 +277,35 @@ export class RP {
     return this._verifyResponseOptions
   }
 
-  public getResponseRedirectUri(mappings?: Record<string, string>): string | undefined {
-    if (!this._responseRedirectUri) {
-      return undefined
-    }
+  public async getResponseRedirectUri(mappings?: Record<string, string>): Promise<string | undefined> {
     if (!mappings) {
       return this._responseRedirectUri
     }
-    return Object.entries(mappings).reduce((uri, [key, value]) => uri.replace(`:${key}`, value), this._responseRedirectUri)
+
+    // Attempt to retrieve state from session manager
+    let state: AuthorizationRequestState | undefined
+    if (this.sessionManager) {
+      const correlationId = mappings['correlation_id'] ?? mappings['correlationId']
+
+      if (correlationId) {
+        state = await this.sessionManager.getRequestStateByCorrelationId(correlationId, true)
+      } else if (mappings['state']) {
+        state = await this.sessionManager.getRequestStateByState(mappings['state'], true)
+      }
+    }
+
+    // Determine the redirect URI from state or fallback to default
+    const redirectUri = state?.responseRedirectURI ?? this._responseRedirectUri
+
+    if (!redirectUri) {
+      return undefined
+    }
+
+    // Apply mappings to the redirect URI
+    return Object.entries(mappings).reduce(
+      (uri, [key, value]) => uri.replace(`:${key}`, value),
+      redirectUri
+    )
   }
 
   private newAuthorizationRequestOpts(opts: {
@@ -331,11 +367,16 @@ export class RP {
       }
     }
 
+    if (this._createRequestOptions.requestObject.payload?.dcql_query) {
+      this._createRequestOptions.requestObject.payload.scope = undefined
+    }
+
     const newOpts = { ...this._createRequestOptions, version }
     newOpts.requestObject = { ...newOpts.requestObject, jwtIssuer: opts.jwtIssuer }
 
     newOpts.requestObject.payload = newOpts.requestObject.payload ?? ({} as RequestObjectPayloadOpts<ClaimPayloadCommonOpts>)
     newOpts.payload = newOpts.payload ?? {}
+
     if (referenceURI) {
       if (newOpts.requestObject.passBy && newOpts.requestObject.passBy !== PassBy.REFERENCE) {
         throw Error(`Cannot pass by reference with uri ${referenceURI} when mode is ${newOpts.requestObject.passBy}`)
@@ -383,7 +424,6 @@ export class RP {
       nonce?: string
       verification?: Verification
       audience?: string
-      presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[]
       dcqlQuery?: DcqlQuery
     },
   ): Promise<VerifyAuthorizationResponseOpts> {
@@ -417,21 +457,6 @@ export class RP {
       }
     }
 
-    const hasPD =
-      (this._verifyResponseOptions.presentationDefinitions !== undefined && this._verifyResponseOptions.presentationDefinitions !== null) ||
-      (Array.isArray(this._verifyResponseOptions.presentationDefinitions) && this._verifyResponseOptions.presentationDefinitions.length > 0) ||
-      (opts.presentationDefinitions !== undefined && opts.presentationDefinitions !== null) ||
-      (Array.isArray(opts.presentationDefinitions) && opts.presentationDefinitions.length > 0)
-    const hasDcql =
-      (this._verifyResponseOptions.dcqlQuery !== undefined && this._verifyResponseOptions.dcqlQuery !== null) ||
-      (opts.dcqlQuery !== undefined && opts.dcqlQuery !== null)
-
-    if (hasPD && hasDcql) {
-      throw Error(`Only Presentation Definitions or DCQL is required`)
-    } else if (!hasPD && !hasDcql) {
-      throw Error(`Either a Presentation Definition or DCQL is required`)
-    }
-
     return {
       ...this._verifyResponseOptions,
       verifyJwtCallback: this._verifyResponseOptions.verifyJwtCallback,
@@ -441,16 +466,7 @@ export class RP {
       state,
       nonce,
       verification: mergeVerificationOpts(this._verifyResponseOptions, opts),
-      ...(opts?.presentationDefinitions &&
-        !opts?.dcqlQuery && {
-          presentationDefinitions: this._verifyResponseOptions.presentationDefinitions ?? opts?.presentationDefinitions,
-        }),
-      ...(opts?.dcqlQuery /*&&
-        !opts?.presentationDefinitions */ && {
-        // FIXME presentationDefinitions will be there until we fix the OID4VC-DEMO, it wants a PD purpose field for the screens
-
-        dcqlQuery: this._verifyResponseOptions.dcqlQuery ?? opts?.dcqlQuery,
-      }),
+      dcqlQuery: this._verifyResponseOptions.dcqlQuery ?? opts?.dcqlQuery,
     }
   }
 
@@ -458,7 +474,10 @@ export class RP {
     type: AuthorizationEvents,
     payload: {
       correlationId: string
+      queryId?: string
       subject?: AuthorizationRequest | AuthorizationResponse | AuthorizationResponsePayload
+      callback?: CallbackOpts
+      responseRedirectURI?: string
       error?: Error
     },
   ): void {

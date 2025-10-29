@@ -4,11 +4,11 @@ import { uuidv4 } from '@sphereon/oid4vc-common'
 import { Alg, Jwt, ProofOfPossessionCallbacks } from '@sphereon/oid4vci-common'
 import { CredentialMapper } from '@sphereon/ssi-types'
 import * as didts from '@transmute/did-key.js'
-import { fetch } from 'cross-fetch'
+import fetch from 'cross-fetch'
 import { importJWK, JWK, SignJWT } from 'jose'
 import { describe, expect, it } from 'vitest'
 
-import { OpenID4VCIClientV1_0_11 } from '..'
+import { OpenID4VCIClientV1_0_15 } from '..'
 
 export const UNIT_TEST_TIMEOUT = 60000
 
@@ -30,7 +30,7 @@ describe.skip('OID4VCI-Client using Sphereon issuer should', () => {
   async function test(format: 'ldp_vc' | 'jwt_vc_json') {
     debug.enable('*')
     const offer = await getCredentialOffer(format)
-    const client = await OpenID4VCIClientV1_0_11.fromURI({
+    const client = await OpenID4VCIClientV1_0_15.fromURI({
       uri: offer.uri,
       kid,
       alg: Alg.EdDSA,
@@ -120,7 +120,7 @@ describe('ismapolis bug report #63, https://github.com/Sphereon-Opensource/OID4V
   // Sphereon infra is not working currently
   it.skip('work as expected provided a correct JWT is supplied', async () => {
     const { uri } = await getCredentialOffer('jwt_vc_json')
-    const client = await OpenID4VCIClientV1_0_11.fromURI({ uri: uri, clientId: 'test-clientID' })
+    const client = await OpenID4VCIClientV1_0_15.fromURI({ uri: uri, clientId: 'test-clientID' })
     const metadata = await client.retrieveServerMetadata()
     console.log(JSON.stringify(metadata))
 

@@ -13,9 +13,9 @@
     "fix:lint": "biome lint --error-on-warnings",
     "fix:prettier": "biome format --write",
     "build": "turbo run build",
-    "test:ci": "vitest run --config ./vitest.config.ts --coverage",
+    "test:ci": "vitest run --config vitest.config.mts --coverage",
     "test": "turbo run test:vitest",
-    "test:vitest": "vitest run --config ./vitest.config.ts --coverage",
+    "test:vitest": "vitest run --config vitest.config.mts --coverage",
     "clean": "rimraf --glob **/dist **/.turbo **/.tsup **/coverage **/pnpm-lock.yaml packages/**/node_modules node_modules packages/**/tsconfig.tsbuildinfo",
     "publish:latest": "lerna publish --conventional-commits --include-merged-tags --create-release github --yes --dist-tag latest --registry https://registry.npmjs.org",
     "publish:next": "lerna publish --conventional-prerelease --force-publish --canary --no-git-tag-version --include-merged-tags --preid next --pre-dist-tag next --yes --registry https://registry.npmjs.org",
@@ -26,8 +26,8 @@
     "pnpm": ">=10"
   },
   "resolutions": {
-    "@sphereon/ssi-types": "0.34.1-next.3",
-    "dcql": "0.2.22",
+    "@sphereon/ssi-types": "0.34.1-feature.DIIPv4.245",
+    "dcql": "1.0.1",
     "node-fetch": "2.6.12",
     "typescript": "5.8.3"
   },
@@ -50,6 +50,12 @@
     "turbo": "^2.5.0",
     "typescript": "5.8.3",
     "vitest": "^3.1.1"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "did-jwt@6.11.6": "patches/did-jwt@6.11.6.patch",
+      "dcql@1.0.1": "patches/dcql@1.0.1.patch"
+    }
   },
   "keywords": [
     "Sphereon",

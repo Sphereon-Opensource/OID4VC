@@ -14,7 +14,6 @@ export type JwtPayload = jwtDecodePayload & {
   client_id?: string
   nonce?: string
   request_uri?: string
-  client_id_scheme?: string
 } & Record<string, unknown>
 
 export enum SigningAlgo {

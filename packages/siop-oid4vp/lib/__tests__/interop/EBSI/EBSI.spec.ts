@@ -2,7 +2,6 @@
 // @ts-ignore
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
-
 import { AuthorizationResponseOpts, OP, SupportedVersion, VerifyAuthorizationRequestOpts } from '../../../'
 import { getVerifyJwtCallback } from '../../DidJwtTestUtils'
 import { getResolver } from '../../ResolverTestUtils'
@@ -52,13 +51,12 @@ describe('EBSI', () => {
     verifyJwtCallback: getVerifyJwtCallback(getResolver('ebsi')),
     verification: {},
     correlationId: '1234',
-    supportedVersions: [SupportedVersion.SIOPv2_D12_OID4VP_D18],
+    supportedVersions: [SupportedVersion.OID4VP_v1],
   }
   it.skip(
     'succeed from request opts when all params are set',
     async () => {
       nock('https://conformance-test.ebsi.eu/conformance/v3/auth-mock/request_uri/4cb2dc1f-61a4-46b7-9660-06d62dd99700').get('').reply(200, JWT)
-
       const op = OP.fromOpts(responseOpts, verifyOpts)
       const verifiedRequest = await op.verifyAuthorizationRequest(SIOP_URI)
       expect(verifiedRequest.issuer).toMatch('https://conformance-test.ebsi.eu/conformance/v3/auth-mock')

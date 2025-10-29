@@ -1,14 +1,12 @@
 import { EventEmitter } from 'events'
-
-import { IPresentationDefinition } from '@sphereon/pex'
 import { HasherSync } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
-
 import { PropertyTarget, PropertyTargets } from '../authorization-request'
-import { PresentationVerificationCallback } from '../authorization-response'
+import { DcqlQueryLookupCallback, PresentationVerificationCallback } from '../authorization-response'
+import {assignIfAuth, assignIfRequestObject, isTarget, isTargetOrNoTargets} from './Opts'
+import { RP } from './RP'
 import {
   AuthorizationRequestPayload,
-  ClientIdScheme,
   ClientMetadataOpts,
   CreateJwtCallback,
   ObjectBy,
@@ -23,9 +21,6 @@ import {
   SupportedVersion,
   VerifyJwtCallback,
 } from '../types'
-
-import { assignIfAuth, assignIfRequestObject, isTarget, isTargetOrNoTargets } from './Opts'
-import { RP } from './RP'
 import { IRPSessionManager } from './types'
 
 export class RPBuilder {
@@ -35,18 +30,16 @@ export class RPBuilder {
   revocationVerification?: RevocationVerification
   revocationVerificationCallback?: RevocationVerificationCallback
   presentationVerificationCallback?: PresentationVerificationCallback
+  dcqlQueryLookupCallback?: DcqlQueryLookupCallback
   supportedVersions: SupportedVersion[]
   eventEmitter?: EventEmitter
   sessionManager?: IRPSessionManager
   _responseRedirectUri?: string
   private _authorizationRequestPayload: Partial<AuthorizationRequestPayload> = {}
   private _requestObjectPayload: Partial<RequestObjectPayload> = {}
-
   clientMetadata?: ClientMetadataOpts = undefined
   clientId: string
   entityId: string
-  clientIdScheme: string
-
   hasher: HasherSync
 
   private constructor(supportedRequestVersion?: SupportedVersion) {
@@ -78,13 +71,6 @@ export class RPBuilder {
     this._authorizationRequestPayload.client_id = assignIfAuth({ propertyValue: clientId, targets }, false)
     this._requestObjectPayload.client_id = assignIfRequestObject({ propertyValue: clientId, targets }, true)
     this.clientId = clientId
-    return this
-  }
-
-  withClientIdScheme(clientIdScheme: ClientIdScheme, targets?: PropertyTargets): RPBuilder {
-    this._authorizationRequestPayload.client_id_scheme = assignIfAuth({ propertyValue: clientIdScheme, targets }, false)
-    this._requestObjectPayload.client_id_scheme = assignIfRequestObject({ propertyValue: clientIdScheme, targets }, true)
-    this.clientIdScheme = clientIdScheme
     return this
   }
 
@@ -160,6 +146,7 @@ export class RPBuilder {
   withRequestByReference(referenceUri: string): RPBuilder {
     return this.withRequestBy(PassBy.REFERENCE, referenceUri /*, PropertyTarget.AUTHORIZATION_REQUEST*/)
   }
+
   withRequestByValue(): RPBuilder {
     return this.withRequestBy(PassBy.VALUE, undefined /*, PropertyTarget.AUTHORIZATION_REQUEST*/)
   }
@@ -184,37 +171,20 @@ export class RPBuilder {
 
   withClientMetadata(clientMetadata: ClientMetadataOpts, targets?: PropertyTargets): RPBuilder {
     clientMetadata.targets = targets
-    if (this.getSupportedRequestVersion() < SupportedVersion.SIOPv2_D11) {
-      this._authorizationRequestPayload.registration = assignIfAuth(
-        {
-          propertyValue: clientMetadata,
-          targets,
-        },
-        false,
-      )
-      this._requestObjectPayload.registration = assignIfRequestObject(
-        {
-          propertyValue: clientMetadata,
-          targets,
-        },
-        true,
-      )
-    } else {
-      this._authorizationRequestPayload.client_metadata = assignIfAuth(
-        {
-          propertyValue: clientMetadata,
-          targets,
-        },
-        false,
+    this._authorizationRequestPayload.client_metadata = assignIfAuth(
+      {
+        propertyValue: clientMetadata,
+        targets,
+      },
+      false,
       )
       this._requestObjectPayload.client_metadata = assignIfRequestObject(
-        {
-          propertyValue: clientMetadata,
-          targets,
-        },
-        true,
-      )
-    }
+      {
+        propertyValue: clientMetadata,
+        targets,
+      },
+      true,
+    )
     this.clientMetadata = clientMetadata
     //fixme: Add URL
     return this
@@ -230,93 +200,41 @@ export class RPBuilder {
     return this
   }
 
-  withDcqlQuery(dcqlQuery: DcqlQuery | string, targets?: PropertyTargets): RPBuilder {
-    if (this.getSupportedRequestVersion() >= SupportedVersion.SIOPv2_D12_OID4VP_D20) {
-      this._authorizationRequestPayload.dcql_query = assignIfAuth(
-        {
-          propertyValue: typeof dcqlQuery === 'string' ? dcqlQuery : JSON.stringify(dcqlQuery),
-          targets,
-        },
-        false,
-      )
-      this._requestObjectPayload.dcql_query = assignIfRequestObject(
-        {
-          propertyValue: typeof dcqlQuery === 'string' ? dcqlQuery : JSON.stringify(dcqlQuery),
-          targets,
-        },
-        true,
-      )
-
-      // FIXME SPRIND-144 we need to find a way in the config to select dcql vs PD without breaking OID4VC-DEMO
-      this._authorizationRequestPayload.presentation_definition = undefined
-      this._authorizationRequestPayload.presentation_definition_uri = undefined
-      this._requestObjectPayload.presentation_definition = undefined
-      this._requestObjectPayload.presentation_definition_uri = undefined
-    }
+  withDcqlQueryLookup(dcqlQueryLookupCallback:DcqlQueryLookupCallback) : RPBuilder {
+    this.dcqlQueryLookupCallback = dcqlQueryLookupCallback
     return this
   }
 
-  withPresentationDefinition(
-    definitionOpts: {
-      definition: IPresentationDefinition
-      definitionUri?: string
-    },
-    targets?: PropertyTargets,
-  ): RPBuilder {
-    if (this._authorizationRequestPayload.dcql_query) {
-      return this
-    }
-
-    const { definition, definitionUri } = definitionOpts
-
-    if (this.getSupportedRequestVersion() < SupportedVersion.SIOPv2_D11) {
-      const definitionProperties = {
-        presentation_definition: definition,
-        presentation_definition_uri: definitionUri,
-      }
-      const vp_token = { ...definitionProperties }
-      if (isTarget(PropertyTarget.AUTHORIZATION_REQUEST, targets)) {
-        this._authorizationRequestPayload.claims = {
-          ...(this._authorizationRequestPayload.claims ? this._authorizationRequestPayload.claims : {}),
-          vp_token: vp_token,
-        }
-      }
-      if (isTargetOrNoTargets(PropertyTarget.REQUEST_OBJECT, targets)) {
-        this._requestObjectPayload.claims = {
-          ...(this._requestObjectPayload.claims ? this._requestObjectPayload.claims : {}),
-          vp_token: vp_token,
-        }
-      }
-    } else {
-      this._authorizationRequestPayload.presentation_definition = assignIfAuth(
+  withDcqlQuery(dcqlQuery: DcqlQuery, targets?: PropertyTargets): RPBuilder {
+    const dcql = dcqlQuery
+    this._authorizationRequestPayload.dcql_query = assignIfAuth(
         {
-          propertyValue: definition,
+          propertyValue: dcql,
           targets,
         },
         false,
-      )
-      this._authorizationRequestPayload.presentation_definition_uri = assignIfAuth(
+    )
+    this._requestObjectPayload.dcql_query = assignIfRequestObject(
         {
-          propertyValue: definitionUri,
+          propertyValue: dcql,
           targets,
         },
         true,
-      )
-      this._requestObjectPayload.presentation_definition = assignIfRequestObject(
-        {
-          propertyValue: definition,
-          targets,
-        },
-        true,
-      )
-      this._requestObjectPayload.presentation_definition_uri = assignIfRequestObject(
-        {
-          propertyValue: definitionUri,
-          targets,
-        },
-        true,
-      )
+    )
+
+    if (isTarget(PropertyTarget.AUTHORIZATION_REQUEST, targets)) {
+      this._authorizationRequestPayload.claims = {
+        ...(this._authorizationRequestPayload.claims && { ...this._authorizationRequestPayload.claims }),
+        vp_token: dcql,
+      }
     }
+    if (isTargetOrNoTargets(PropertyTarget.REQUEST_OBJECT, targets)) {
+      this._requestObjectPayload.claims = {
+        ...(this._requestObjectPayload.claims && { ...this._requestObjectPayload.claims }),
+        vp_token: dcql,
+      }
+    }
+
     return this
   }
 
@@ -384,8 +302,4 @@ export class RPBuilder {
   get requestObjectPayload(): Partial<RequestObjectPayload> {
     return this._requestObjectPayload
   }
-
-  /* public mergedPayload(): Partial<AuthorizationRequestPayload> {
-    return { ...this.authorizationRequestPayload, ...this.requestObjectPayload };
-  }*/
 }

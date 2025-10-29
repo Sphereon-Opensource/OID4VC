@@ -1,5 +1,4 @@
 import { JWK } from '../types'
-
 import { getJson } from './HttpUtils'
 
 export type Jwks = {

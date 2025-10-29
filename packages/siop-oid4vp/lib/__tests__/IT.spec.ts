@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events'
-
 import { SigningAlgo } from '@sphereon/oid4vc-common'
 import { IPresentationDefinition } from '@sphereon/pex'
 import { CredentialMapper, IPresentation, IProofType, IVerifiableCredential, W3CVerifiablePresentation } from '@sphereon/ssi-types'
@@ -7,13 +6,11 @@ import { CredentialMapper, IPresentation, IProofType, IVerifiableCredential, W3C
 // @ts-ignore
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
-
-import { InMemoryRPSessionManager } from '..'
+import { DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlW3cVcCredential } from 'dcql'
+import {InMemoryRPSessionManager, Json} from '..'
 import {
   OP,
   PassBy,
-  PresentationDefinitionWithLocation,
-  PresentationExchange,
   PresentationSignCallback,
   PresentationVerificationCallback,
   PropertyTarget,
@@ -25,11 +22,9 @@ import {
   Scope,
   SubjectType,
   SupportedVersion,
-  verifyRevocation,
-  VPTokenLocation,
+  verifyRevocation
 } from '../'
 import { checkSIOPSpecVersionSupported } from '../helpers/SIOPSpecVersion'
-
 import { getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
 import { mockedGetEnterpriseAuthToken, WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
@@ -44,8 +39,6 @@ import {
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 const EXAMPLE_REFERENCE_URL = 'https://rp.acme.com/siop/jwts'
-
-const HOLDER_DID = 'did:example:ebfeb1f712ebc6f1c276e12ec21'
 
 const presentationSignCallback: PresentationSignCallback = async (_args) => ({
   ...(_args.presentation as IPresentation),
@@ -66,37 +59,42 @@ const presentationVerificationCallback: PresentationVerificationCallback = async
   verified: true,
 })
 
-function getPresentationDefinition(): IPresentationDefinition {
-  return {
-    id: 'Insurance Plans',
-    input_descriptors: [
-      {
-        id: 'Ontario Health Insurance Plan',
-        schema: [
-          {
-            uri: 'https://did.itsourweb.org:3000/smartcredential/Ontario-Health-Insurance-Plan',
-          },
-          {
-            uri: 'https://www.w3.org/2018/credentials/v1',
-          },
-        ],
-        constraints: {
-          limit_disclosure: 'preferred',
-          fields: [
-            {
-              path: ['$.issuer.id'],
-              purpose: 'We can only verify bank accounts if they are attested by a source.',
-              filter: {
-                type: 'string',
-                pattern: 'did:example:issuer',
-              },
+const dcqlQuery = {
+    credentials: [
+        {
+            id: 'my_credential',
+            format: 'ldp_vc',
+            meta: {
+                type_values: [
+                    ['https://www.w3.org/2018/credentials#VerifiableCredential'],
+                    ['PermanentResidentCard'],
+                ],
             },
-          ],
+            claims: [{ path: ['givenName'], values: ['JANE'] }],
         },
-      },
     ],
-  }
+} satisfies DcqlQuery.Input
+
+const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery)
+DcqlQuery.validate(parsedDcqlQuery)
+
+const dcqlCredential = {
+    credential_format: 'ldp_vc',
+    claims: getVCs()[0].credentialSubject as { [x: string]: Json },
+    type: getVCs()[0].type,
+    cryptographic_holder_binding: true
+} satisfies DcqlW3cVcCredential
+
+const dcqlQueryResult: DcqlQueryResult = DcqlQuery.query(parsedDcqlQuery, [dcqlCredential])
+
+const presentation: DcqlPresentation.Output = {}
+for (const [key, value] of Object.entries(dcqlQueryResult.credential_matches)) {
+    if (value.success) {
+        presentation[key] = getVCs()[0]
+    }
 }
+
+const dcqlPresentation = DcqlPresentation.parse(presentation)
 
 function getVCs(): IVerifiableCredential[] {
   const vcs: IVerifiableCredential[] = [
@@ -144,9 +142,7 @@ function getVCs(): IVerifiableCredential[] {
 
 describe.skip('RP and OP interaction should', () => {
   // FIXME SDK-45 Uniresolver failing
-  it(
-    'succeed when calling each other in the full flow',
-    async () => {
+  it('succeed when calling each other in the full flow', async () => {
       // expect.assertions(1);
       const rpMockEntity = await mockedGetEnterpriseAuthToken('ACME RP')
       const opMockEntity = await mockedGetEnterpriseAuthToken('ACME OP')
@@ -157,7 +153,7 @@ describe.skip('RP and OP interaction should', () => {
       const resolver = getResolver(['ethr'])
       const eventEmitter = new EventEmitter()
       const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-      const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
         .withEventEmitter(eventEmitter)
         .withSessionManager(replayRegistry)
         .withClientId(rpMockEntity.did)
@@ -172,21 +168,21 @@ describe.skip('RP and OP interaction should', () => {
         .withCreateJwtCallback(internalSignature(rpMockEntity.hexPrivateKey, rpMockEntity.did, `${rpMockEntity.did}#controller`, SigningAlgo.ES256K))
         .withClientMetadata({
           client_id: WELL_KNOWN_OPENID_FEDERATION,
-          idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-          requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-          responseTypesSupported: [ResponseType.ID_TOKEN],
-          vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-          scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-          subjectTypesSupported: [SubjectType.PAIRWISE],
+          id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+          request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+          response_types_supported: [ResponseType.ID_TOKEN],
+          vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+          scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+          subject_types_supported: [SubjectType.PAIRWISE],
           subject_syntax_types_supported: ['did', 'did:ethr'],
           passBy: PassBy.VALUE,
           logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-          clientName: VERIFIER_NAME_FOR_CLIENT,
-          'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100317',
+          client_name: VERIFIER_NAME_FOR_CLIENT,
+          'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100317',
           clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
           'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         })
-        .withSupportedVersions([SupportedVersion.SIOPv2_ID1])
+        .withSupportedVersions([SupportedVersion.OID4VP_v1])
         .build()
       const op = OP.builder()
         .withPresentationSignCallback(presentationSignCallback)
@@ -194,7 +190,7 @@ describe.skip('RP and OP interaction should', () => {
         .withIssuer(ResponseIss.SELF_ISSUED_V2)
         .withVerifyJwtCallback(getVerifyJwtCallback(resolver))
         .withCreateJwtCallback(internalSignature(opMockEntity.hexPrivateKey, opMockEntity.did, `${opMockEntity.did}#controller`, SigningAlgo.ES256K))
-        .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+        .withSupportedVersions(SupportedVersion.OID4VP_v1)
         //FIXME: Move payload options to seperate property
         .withRegistration({
           authorizationEndpoint: 'www.myauthorizationendpoint.com',
@@ -213,7 +209,7 @@ describe.skip('RP and OP interaction should', () => {
           clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
           'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         })
-        .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+        .withSupportedVersions(SupportedVersion.OID4VP_v1)
         .build()
 
       const requestURI = await rp.createAuthorizationRequestURI({
@@ -240,9 +236,7 @@ describe.skip('RP and OP interaction should', () => {
 
       expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
       expect(verifiedAuthResponseWithJWT.idToken?.payload.nonce).toMatch('qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg')
-    },
-    UNIT_TEST_TIMEOUT,
-  )
+    }, UNIT_TEST_TIMEOUT)
 
   it('succeed when calling optional steps in the full flow', async () => {
     const opMock = await mockedGetEnterpriseAuthToken('OP')
@@ -262,7 +256,7 @@ describe.skip('RP and OP interaction should', () => {
     const resolver = getResolver('ethr')
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
@@ -276,21 +270,21 @@ describe.skip('RP and OP interaction should', () => {
       .withVerifyJwtCallback(getVerifyJwtCallback(resolver))
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ethr'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100319',
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100319',
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
     const op = OP.builder()
       .withExpiresIn(1000)
@@ -313,7 +307,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({
@@ -347,7 +341,7 @@ describe.skip('RP and OP interaction should', () => {
     expect(verifiedAuthResponseWithJWT.idToken?.payload.nonce).toMatch('qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg')
   })
 
-  it('fail when calling with presentation definitions and without verifiable presentation', async () => {
+  it('fail when calling with DCQL query and without DCQL presentation', async () => {
     const opMock = await mockedGetEnterpriseAuthToken('OP')
     const opMockEntity = {
       ...opMock,
@@ -363,7 +357,7 @@ describe.skip('RP and OP interaction should', () => {
     const presentationVerificationCallback: PresentationVerificationCallback = async (_args) => ({ verified: true })
 
     const resolver = getResolver('ethr')
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withClientId(WELL_KNOWN_OPENID_FEDERATION)
       .withScope('test')
       .withResponseType([ResponseType.ID_TOKEN, ResponseType.VP_TOKEN])
@@ -374,22 +368,22 @@ describe.skip('RP and OP interaction should', () => {
       .withCreateJwtCallback(internalSignature(rpMockEntity.hexPrivateKey, rpMockEntity.did, rpMockEntity.didKey, SigningAlgo.ES256K))
       .withClientMetadata({
         client_id: rpMockEntity.did,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN, ResponseType.VP_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN, ResponseType.VP_TOKEN],
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ethr'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100321',
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100321',
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withPresentationDefinition({ definition: getPresentationDefinition() })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withDcqlQuery(parsedDcqlQuery, [PropertyTarget.REQUEST_OBJECT])
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
     const op = OP.builder()
       .withExpiresIn(1000)
@@ -412,7 +406,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({
@@ -441,7 +435,7 @@ describe.skip('RP and OP interaction should', () => {
     expect(verifiedAuthReqWithJWT.payload?.['registration']['client_name#nl-NL']).toEqual(VERIFIER_NAME_FOR_CLIENT_NL + '2022100321')
   })
 
-  it('succeed when calling with presentation definitions and right verifiable presentation', async () => {
+  it('succeed when calling with DCQL query and right DCQL presentation', async () => {
     const opMock = await mockedGetEnterpriseAuthToken('OP')
     const opMockEntity = {
       ...opMock,
@@ -459,14 +453,14 @@ describe.skip('RP and OP interaction should', () => {
     const resolver = getResolver('ethr')
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
       .withScope('test')
       .withResponseType([ResponseType.ID_TOKEN, ResponseType.VP_TOKEN])
       .withRedirectUri(EXAMPLE_REDIRECT_URL)
-      .withPresentationDefinition({ definition: getPresentationDefinition() }, [PropertyTarget.REQUEST_OBJECT, PropertyTarget.AUTHORIZATION_REQUEST])
+      .withDcqlQuery(parsedDcqlQuery, [PropertyTarget.REQUEST_OBJECT])
       .withPresentationVerification(presentationVerificationCallback)
       .withRevocationVerification(RevocationVerification.NEVER)
       .withRequestBy(PassBy.VALUE)
@@ -475,21 +469,21 @@ describe.skip('RP and OP interaction should', () => {
       .withAuthorizationEndpoint('www.myauthorizationendpoint.com')
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ethr'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100322',
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100322',
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
     const op = OP.builder()
       .withPresentationSignCallback(presentationSignCallback)
@@ -513,7 +507,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({
@@ -526,37 +520,24 @@ describe.skip('RP and OP interaction should', () => {
     const parsedAuthReqURI = await op.parseAuthorizationRequestURI(requestURI.encodedUri)
     expect(parsedAuthReqURI.authorizationRequestPayload).toBeDefined()
     expect(parsedAuthReqURI.requestObjectJwt).toBeDefined()
-    // expect(parsedAuthReqURI.registration).toBeDefined();
 
-    if (!parsedAuthReqURI.requestObjectJwt) throw new Error('Supported versions not set')
+    if (!parsedAuthReqURI.requestObjectJwt) {
+        throw new Error('Supported versions not set')
+    }
     const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt)
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
-    const pex = new PresentationExchange({ allDIDs: [HOLDER_DID], allVerifiableCredentials: getVCs() })
-    const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(
-      parsedAuthReqURI.authorizationRequestPayload,
-    )
-    await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
-    const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {})
+
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-      presentationExchange: {
-        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
-        vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
-        presentationSubmission: verifiablePresentationResult.presentationSubmission,
-        /*credentialsAndDefinitions: [
-          {
-            presentation: vp,
-            format: VerifiablePresentationTypeFormat.LDP_VP,
-            vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
-          },
-        ],*/
-      },
+      dcqlResponse: {
+          dcqlPresentation
+      }
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
 
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
       /*audience: EXAMPLE_REDIRECT_URL,*/
-      presentationDefinitions: [{ definition: pd[0].definition, location: pd[0].location }],
+      dcqlQuery: parsedDcqlQuery
     })
 
     expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
@@ -580,7 +561,7 @@ describe.skip('RP and OP interaction should', () => {
     const resolver = getResolver('ethr')
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
       .withClientId('test_client_id')
@@ -598,28 +579,28 @@ describe.skip('RP and OP interaction should', () => {
       .withAuthorizationEndpoint('www.myauthorizationendpoint.com')
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.ES256K],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.ES256K],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: {
+        id_token_signing_alg_values_supported: [SigningAlgo.ES256K],
+        request_object_signing_alg_values_supported: [SigningAlgo.ES256K],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: {
           jwt_vc: { alg: [SigningAlgo.EDDSA] },
           jwt_vp: { alg: [SigningAlgo.EDDSA] },
           ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp_vp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
         },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ion'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100330',
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100330',
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withPresentationDefinition({ definition: getPresentationDefinition() }, [PropertyTarget.REQUEST_OBJECT, PropertyTarget.AUTHORIZATION_REQUEST])
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withDcqlQuery(parsedDcqlQuery, [PropertyTarget.REQUEST_OBJECT])
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const op = OP.builder()
@@ -641,7 +622,7 @@ describe.skip('RP and OP interaction should', () => {
           ldp_vp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
         },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
         subjectTypesSupported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: [],
         passBy: PassBy.VALUE,
@@ -651,7 +632,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({
@@ -660,7 +641,9 @@ describe.skip('RP and OP interaction should', () => {
       state: 'b32f0087fc9816eb813fd11f',
     })
 
-    if (!op.verifyRequestOptions.supportedVersions) throw new Error('Supported versions not set')
+    if (!op.verifyRequestOptions.supportedVersions) {
+        throw new Error('Supported versions not set')
+    }
     await checkSIOPSpecVersionSupported(requestURI.authorizationRequestPayload, op.verifyRequestOptions.supportedVersions)
     // Let's test the parsing
     const parsedAuthReqURI = await op.parseAuthorizationRequestURI(requestURI.encodedUri)
@@ -672,26 +655,10 @@ describe.skip('RP and OP interaction should', () => {
     const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt) //, rp.authRequestOpts
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
 
-    const pex = new PresentationExchange({ allDIDs: [HOLDER_DID], allVerifiableCredentials: getVCs() })
-    const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(
-      parsedAuthReqURI.authorizationRequestPayload,
-    )
-    await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
-    const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {})
-
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-      presentationExchange: {
-        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
-        presentationSubmission: verifiablePresentationResult.presentationSubmission,
-        vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
-        /*credentialsAndDefinitions: [
-          {
-            presentation: vp,
-            format: VerifiablePresentationTypeFormat.LDP_VP,
-            vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
-          },
-        ],*/
-      },
+        dcqlResponse: {
+            dcqlPresentation
+        }
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
@@ -705,16 +672,14 @@ describe.skip('RP and OP interaction should', () => {
     }
     nock('https://ldtest.sphereon.com').get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION)
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-      presentationDefinitions: [{ definition: pd[0].definition, location: pd[0].location }],
+      dcqlQuery: parsedDcqlQuery
       // audience: EXAMPLE_REDIRECT_URL,
     })
     expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
     expect(verifiedAuthResponseWithJWT.idToken?.payload.nonce).toMatch('qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg')
   })
 
-  it(
-    'should succeed when calling with CheckLinkedDomain.IF_PRESENT',
-    async () => {
+  it('should succeed when calling with CheckLinkedDomain.IF_PRESENT', async () => {
       const opMock = await mockedGetEnterpriseAuthToken('OP')
       const opMockEntity = {
         ...opMock,
@@ -732,7 +697,7 @@ describe.skip('RP and OP interaction should', () => {
       const resolver = getResolver('ethr')
       const eventEmitter = new EventEmitter()
       const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-      const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
         .withEventEmitter(eventEmitter)
         .withSessionManager(replayRegistry)
         .withClientId(rpMockEntity.did)
@@ -747,29 +712,25 @@ describe.skip('RP and OP interaction should', () => {
         .withAuthorizationEndpoint('www.myauthorizationendpoint.com')
         .withClientMetadata({
           client_id: WELL_KNOWN_OPENID_FEDERATION,
-          idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-          requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-          responseTypesSupported: [ResponseType.ID_TOKEN],
-          vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-          scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-          subjectTypesSupported: [SubjectType.PAIRWISE],
+          id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+          request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+          response_types_supported: [ResponseType.ID_TOKEN],
+          vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+          scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+          subject_types_supported: [SubjectType.PAIRWISE],
           subject_syntax_types_supported: ['did', 'did:ethr'],
           passBy: PassBy.VALUE,
           logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-          clientName: VERIFIER_NAME_FOR_CLIENT,
-          'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100328',
+          client_name: VERIFIER_NAME_FOR_CLIENT,
+          'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100328',
           clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
           'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         })
-        .withPresentationDefinition({ definition: getPresentationDefinition() }, [
-          PropertyTarget.REQUEST_OBJECT,
-          PropertyTarget.AUTHORIZATION_REQUEST,
-        ])
-        .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+        .withDcqlQuery(parsedDcqlQuery, [PropertyTarget.REQUEST_OBJECT])
+        .withSupportedVersions(SupportedVersion.OID4VP_v1)
         .build()
       const op = OP.builder()
         .withPresentationSignCallback(presentationSignCallback)
-
         .withExpiresIn(1000)
         .withCreateJwtCallback(internalSignature(opMockEntity.hexPrivateKey, opMockEntity.did, opMockEntity.didKey, SigningAlgo.ES256K))
         .withVerifyJwtCallback(getVerifyJwtCallback(resolver, { checkLinkedDomain: 'never' }))
@@ -790,7 +751,7 @@ describe.skip('RP and OP interaction should', () => {
           clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
           'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         })
-        .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+        .withSupportedVersions(SupportedVersion.OID4VP_v1)
         .build()
 
       const requestURI = await rp.createAuthorizationRequestURI({
@@ -808,38 +769,22 @@ describe.skip('RP and OP interaction should', () => {
       if (!parsedAuthReqURI.requestObjectJwt) throw new Error('Request object JWT not found')
       const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt)
       expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
-      const pex = new PresentationExchange({ allDIDs: [HOLDER_DID], allVerifiableCredentials: getVCs() })
-      const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(
-        parsedAuthReqURI.authorizationRequestPayload,
-      )
-      await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
-      const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {})
+
       const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-        presentationExchange: {
-          verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
-          presentationSubmission: verifiablePresentationResult.presentationSubmission,
-          vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
-          /*credentialsAndDefinitions: [
-            {
-              presentation: vp,
-              format: VerifiablePresentationTypeFormat.LDP_VP,
-              vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
-            },
-          ],*/
-        },
+        dcqlResponse: {
+            dcqlPresentation
+        }
       })
       expect(authenticationResponseWithJWT.response.payload).toBeDefined()
       expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
 
       const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-        presentationDefinitions: [{ definition: pd[0].definition, location: pd[0].location }],
+        dcqlQuery: parsedDcqlQuery
         // audience: EXAMPLE_REDIRECT_URL,
       })
       expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
       expect(verifiedAuthResponseWithJWT.idToken?.payload.nonce).toMatch('qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg')
-    },
-    UNIT_TEST_TIMEOUT,
-  )
+    }, UNIT_TEST_TIMEOUT)
 
   it('succeed when calling with RevocationVerification.ALWAYS with ldp_vp', async () => {
     const opMock = await mockedGetEnterpriseAuthToken('OP')
@@ -858,7 +803,7 @@ describe.skip('RP and OP interaction should', () => {
     const resolver = getResolver('ethr')
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
       .withClientId('test_client_id')
@@ -866,7 +811,6 @@ describe.skip('RP and OP interaction should', () => {
       .withResponseType([ResponseType.VP_TOKEN, ResponseType.ID_TOKEN])
       .withRevocationVerification(RevocationVerification.ALWAYS)
       .withPresentationVerification(presentationVerificationCallback)
-
       .withRevocationVerificationCallback(async () => {
         return { status: RevocationStatus.VALID }
       })
@@ -877,28 +821,28 @@ describe.skip('RP and OP interaction should', () => {
       .withAuthorizationEndpoint('www.myauthorizationendpoint.com')
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.ES256K],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.ES256K],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: {
+        id_token_signing_alg_values_supported: [SigningAlgo.ES256K],
+        request_object_signing_alg_values_supported: [SigningAlgo.ES256K],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: {
           jwt_vc: { alg: [SigningAlgo.EDDSA] },
           jwt_vp: { alg: [SigningAlgo.EDDSA] },
           ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp_vp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
         },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ion'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100330',
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100330',
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withPresentationDefinition({ definition: getPresentationDefinition() }, [PropertyTarget.REQUEST_OBJECT, PropertyTarget.AUTHORIZATION_REQUEST])
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withDcqlQuery(parsedDcqlQuery, [PropertyTarget.REQUEST_OBJECT])
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const op = OP.builder()
@@ -930,7 +874,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({
@@ -951,26 +895,10 @@ describe.skip('RP and OP interaction should', () => {
     const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt) //, rp.authRequestOpts
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
 
-    const pex = new PresentationExchange({ allDIDs: [HOLDER_DID], allVerifiableCredentials: getVCs() })
-    const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(
-      parsedAuthReqURI.authorizationRequestPayload,
-    )
-    await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
-    const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {})
-
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-      presentationExchange: {
-        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
-        presentationSubmission: verifiablePresentationResult.presentationSubmission,
-        vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
-        /*credentialsAndDefinitions: [
-          {
-            presentation: vp,
-            format: VerifiablePresentationTypeFormat.LDP_VP,
-            vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
-          },
-        ],*/
-      },
+        dcqlResponse: {
+            dcqlPresentation
+        }
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
@@ -984,7 +912,7 @@ describe.skip('RP and OP interaction should', () => {
     }
     nock('https://ldtest.sphereon.com').get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION)
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-      presentationDefinitions: [{ definition: pd[0].definition, location: pd[0].location }],
+      dcqlQuery: parsedDcqlQuery
       // audience: EXAMPLE_REDIRECT_URL,
     })
     expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
@@ -1009,7 +937,7 @@ describe.skip('RP and OP interaction should', () => {
     const resolver = getResolver('ethr')
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
       .withClientId(rpMockEntity.did)
@@ -1024,31 +952,31 @@ describe.skip('RP and OP interaction should', () => {
       .withAuthorizationEndpoint('www.myauthorizationendpoint.com')
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.ES256K],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.ES256K],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: {
+        id_token_signing_alg_values_supported: [SigningAlgo.ES256K],
+        request_object_signing_alg_values_supported: [SigningAlgo.ES256K],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: {
           jwt_vc: { alg: [SigningAlgo.EDDSA] },
           ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp_vp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
         },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ion'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-        clientName: VERIFIER_NAME_FOR_CLIENT,
-        'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100326',
+        client_name: VERIFIER_NAME_FOR_CLIENT,
+        'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100326',
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withPresentationDefinition({ definition: getPresentationDefinition() }, [PropertyTarget.REQUEST_OBJECT, PropertyTarget.AUTHORIZATION_REQUEST])
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withDcqlQuery(parsedDcqlQuery, [PropertyTarget.REQUEST_OBJECT])
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
+
     const op = OP.builder()
       .withPresentationSignCallback(presentationSignCallback)
-
       .withExpiresIn(1000)
       .withVerifyJwtCallback(getVerifyJwtCallback(resolver, { checkLinkedDomain: 'always' }))
       .withCreateJwtCallback(internalSignature(opMockEntity.hexPrivateKey, opMockEntity.did, opMockEntity.didKey, SigningAlgo.ES256K))
@@ -1074,7 +1002,7 @@ describe.skip('RP and OP interaction should', () => {
         subject_syntax_types_supported: ['did:ethr'],
         passBy: PassBy.VALUE,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({
@@ -1092,25 +1020,11 @@ describe.skip('RP and OP interaction should', () => {
     if (!parsedAuthReqURI.requestObjectJwt) throw new Error('Request object JWT not found')
     const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt)
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
-    const pex = new PresentationExchange({ allDIDs: [HOLDER_DID], allVerifiableCredentials: getVCs() })
-    const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(
-      parsedAuthReqURI.authorizationRequestPayload,
-    )
-    await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
-    const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {})
+
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-      presentationExchange: {
-        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
-        presentationSubmission: verifiablePresentationResult.presentationSubmission,
-        vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
-        /*credentialsAndDefinitions: [
-          {
-            presentation: vp,
-            format: VerifiablePresentationTypeFormat.LDP_VP,
-            vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE,
-          },
-        ],*/
-      },
+      dcqlResponse: {
+          dcqlPresentation
+      }
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
 
@@ -1123,7 +1037,7 @@ describe.skip('RP and OP interaction should', () => {
     }
     nock('https://ldtest.sphereon.com').get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION)
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-      presentationDefinitions: [{ definition: pd[0].definition, location: pd[0].location }],
+      dcqlQuery: parsedDcqlQuery
       // audience: EXAMPLE_REDIRECT_URL,
     })
     expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
@@ -1305,7 +1219,7 @@ describe.skip('RP and OP interaction should', () => {
     const resolver = getResolver('ethr')
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
       .withClientId('test_client_id')
@@ -1320,26 +1234,27 @@ describe.skip('RP and OP interaction should', () => {
       .withAuthorizationEndpoint('www.myauthorizationendpoint.com')
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.ES256K],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.ES256K],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: {
+        id_token_signing_alg_values_supported: [SigningAlgo.ES256K],
+        request_object_signing_alg_values_supported: [SigningAlgo.ES256K],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: {
           jwt_vc: { alg: [SigningAlgo.EDDSA] },
           ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp_vp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
         },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ion'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
         clientName: VERIFIER_NAME_FOR_CLIENT,
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
       })
-      .withPresentationDefinition({ definition: getPresentationDefinition() }, [PropertyTarget.REQUEST_OBJECT, PropertyTarget.AUTHORIZATION_REQUEST])
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withDcqlQuery(parsedDcqlQuery, [PropertyTarget.REQUEST_OBJECT])
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
+
     const op = OP.builder()
       .withPresentationSignCallback(presentationSignCallback)
       .withExpiresIn(1000)
@@ -1365,7 +1280,7 @@ describe.skip('RP and OP interaction should', () => {
         subject_syntax_types_supported: ['did:ethr'],
         passBy: PassBy.VALUE,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({
@@ -1383,31 +1298,17 @@ describe.skip('RP and OP interaction should', () => {
     if (!parsedAuthReqURI.requestObjectJwt) throw new Error('Request object JWT not found')
     const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt)
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
-    const pex = new PresentationExchange({ allDIDs: [HOLDER_DID], allVerifiableCredentials: getVCs() })
-    const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(
-      parsedAuthReqURI.authorizationRequestPayload,
-    )
-    await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
-    const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {})
+
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-      presentationExchange: {
-        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
-        presentationSubmission: verifiablePresentationResult.presentationSubmission,
-        vpTokenLocation: VPTokenLocation.ID_TOKEN,
-        /*credentialsAndDefinitions: [
-          {
-            presentation: vp,
-            format: VerifiablePresentationTypeFormat.LDP_VP,
-            vpTokenLocation: VPTokenLocation.ID_TOKEN
-          }
-        ]*/
-      },
+        dcqlResponse: {
+            dcqlPresentation
+        }
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
 
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-      presentationDefinitions: [{ definition: pd[0].definition, location: pd[0].location }],
+      dcqlQuery: parsedDcqlQuery,
       audience: 'test_client_id',
     })
     expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
@@ -1429,7 +1330,7 @@ describe.skip('RP and OP interaction should', () => {
     const resolver = getResolver('ethr')
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
       .withClientId('test_client_id')
@@ -1444,18 +1345,18 @@ describe.skip('RP and OP interaction should', () => {
       .withAuthorizationEndpoint('www.myauthorizationendpoint.com')
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.ES256K],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.ES256K],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: {
+        id_token_signing_alg_values_supported: [SigningAlgo.ES256K],
+        request_object_signing_alg_values_supported: [SigningAlgo.ES256K],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: {
           jwt_vc: { alg: [SigningAlgo.EDDSA] },
           jwt_vp: { alg: [SigningAlgo.EDDSA] },
           ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp_vp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
         },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ion'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
@@ -1464,8 +1365,8 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withPresentationDefinition({ definition: getPresentationDefinition() }, [PropertyTarget.REQUEST_OBJECT, PropertyTarget.AUTHORIZATION_REQUEST])
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withDcqlQuery(parsedDcqlQuery, [PropertyTarget.REQUEST_OBJECT])
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const op = OP.builder()
@@ -1497,7 +1398,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
 
     const requestURI = await rp.createAuthorizationRequestURI({
@@ -1509,26 +1410,11 @@ describe.skip('RP and OP interaction should', () => {
     const parsedAuthReqURI = await op.parseAuthorizationRequestURI(requestURI.encodedUri)
     if (!parsedAuthReqURI.requestObjectJwt) throw new Error('No requestObjectJwt')
     const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt)
-    const pex = new PresentationExchange({ allDIDs: [HOLDER_DID], allVerifiableCredentials: getVCs() })
-    const pd: PresentationDefinitionWithLocation[] = await PresentationExchange.findValidPresentationDefinitions(
-      parsedAuthReqURI.authorizationRequestPayload,
-    )
-    await pex.selectVerifiableCredentialsForSubmission(pd[0].definition)
-    const verifiablePresentationResult = await pex.createVerifiablePresentation(pd[0].definition, getVCs(), presentationSignCallback, {})
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-      presentationExchange: {
-        verifiablePresentations: verifiablePresentationResult.verifiablePresentations,
-        presentationSubmission: verifiablePresentationResult.presentationSubmission,
-        vpTokenLocation: VPTokenLocation.ID_TOKEN,
-        /*credentialsAndDefinitions: [
-          {
-            presentation: vp,
-            format: VerifiablePresentationTypeFormat.LDP_VP,
-            vpTokenLocation: VPTokenLocation.AUTHORIZATION_RESPONSE
-          }
-        ]*/
-      },
+      dcqlResponse: {
+          dcqlPresentation
+      }
     })
 
     const DID_CONFIGURATION = {
@@ -1540,7 +1426,7 @@ describe.skip('RP and OP interaction should', () => {
     }
     nock('https://ldtest.sphereon.com').get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION)
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-      presentationDefinitions: [{ definition: pd[0].definition, location: pd[0].location }],
+      dcqlQuery: parsedDcqlQuery,
       audience: 'test_client_id',
     })
     expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
@@ -1556,7 +1442,7 @@ describe.skip('RP and OP interaction should', () => {
 
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withClientId('test_client_id')
       .withScope('test')
       .withResponseType(ResponseType.ID_TOKEN)
@@ -1568,18 +1454,18 @@ describe.skip('RP and OP interaction should', () => {
       .withAuthorizationEndpoint('www.myauthorizationendpoint.com')
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.ES256K],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.ES256K],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: {
+        id_token_signing_alg_values_supported: [SigningAlgo.ES256K],
+        request_object_signing_alg_values_supported: [SigningAlgo.ES256K],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: {
           jwt_vc: { alg: [SigningAlgo.EDDSA] },
           jwt_vp: { alg: [SigningAlgo.EDDSA] },
           ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp_vp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
           ldp: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] },
         },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ion'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
@@ -1588,8 +1474,8 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withPresentationDefinition({ definition: getPresentationDefinition() })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withDcqlQuery(parsedDcqlQuery, [PropertyTarget.REQUEST_OBJECT])
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .withSessionManager(replayRegistry)
       .withEventEmitter(eventEmitter)
       .build()
@@ -1635,7 +1521,7 @@ describe.skip('RP and OP interaction should', () => {
     const eventEmitter = new EventEmitter()
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
 
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withClientId(WELL_KNOWN_OPENID_FEDERATION)
       .withScope('test')
       .withResponseType(ResponseType.ID_TOKEN)
@@ -1647,12 +1533,12 @@ describe.skip('RP and OP interaction should', () => {
       .withCreateJwtCallback(internalSignature(rpMockEntity.hexPrivateKey, rpMockEntity.did, rpMockEntity.didKey, SigningAlgo.ES256K))
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ethr'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
@@ -1661,7 +1547,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions([SupportedVersion.SIOPv2_ID1])
+      .withSupportedVersions([SupportedVersion.OID4VP_v1])
       .withSessionManager(replayRegistry)
       .withEventEmitter(eventEmitter)
       .build()
@@ -1693,7 +1579,7 @@ describe.skip('RP and OP interaction should', () => {
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
 
     const resolver = getResolver('ethr')
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withClientId(rpMockEntity.did)
       .withScope('test')
       .withResponseType(ResponseType.ID_TOKEN)
@@ -1706,12 +1592,12 @@ describe.skip('RP and OP interaction should', () => {
       .withVerifyJwtCallback(getVerifyJwtCallback(resolver))
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ethr'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
@@ -1720,7 +1606,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions([SupportedVersion.SIOPv2_ID1])
+      .withSupportedVersions([SupportedVersion.OID4VP_v1])
       .withEventEmitter(eventEmitter)
       .withSessionManager(replayRegistry)
       .build()
@@ -1730,7 +1616,7 @@ describe.skip('RP and OP interaction should', () => {
       .withIssuer(ResponseIss.SELF_ISSUED_V2)
       .withVerifyJwtCallback(getVerifyJwtCallback(resolver))
       .withCreateJwtCallback(internalSignature(opMockEntity.hexPrivateKey, opMockEntity.did, opMockEntity.didKey, SigningAlgo.ES256K))
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       //FIXME: Move payload options to seperate property
       .withRegistration({
         authorizationEndpoint: 'www.myauthorizationendpoint.com',
@@ -1749,7 +1635,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
     const requestURI = await rp.createAuthorizationRequestURI({
       correlationId: '12345',
@@ -1788,7 +1674,7 @@ describe.skip('RP and OP interaction should', () => {
     const replayRegistry = new InMemoryRPSessionManager(eventEmitter)
 
     const resolver = getResolver('ethr')
-    const rp = RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+    const rp = RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
       .withClientId(rpMockEntity.did)
       .withScope('test')
       .withResponseType(ResponseType.ID_TOKEN)
@@ -1800,12 +1686,12 @@ describe.skip('RP and OP interaction should', () => {
       .withCreateJwtCallback(internalSignature(rpMockEntity.hexPrivateKey, rpMockEntity.did, rpMockEntity.didKey, SigningAlgo.ES256K))
       .withClientMetadata({
         client_id: WELL_KNOWN_OPENID_FEDERATION,
-        idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-        requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-        responseTypesSupported: [ResponseType.ID_TOKEN],
-        vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-        scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-        subjectTypesSupported: [SubjectType.PAIRWISE],
+        id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+        request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+        response_types_supported: [ResponseType.ID_TOKEN],
+        vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+        scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+        subject_types_supported: [SubjectType.PAIRWISE],
         subject_syntax_types_supported: ['did', 'did:ethr'],
         passBy: PassBy.VALUE,
         logo_uri: VERIFIER_LOGO_FOR_CLIENT,
@@ -1814,7 +1700,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions([SupportedVersion.SIOPv2_ID1])
+      .withSupportedVersions([SupportedVersion.OID4VP_v1])
       .withSessionManager(replayRegistry)
       .withEventEmitter(eventEmitter)
       .build()
@@ -1824,7 +1710,7 @@ describe.skip('RP and OP interaction should', () => {
       .withIssuer(ResponseIss.SELF_ISSUED_V2)
       .withVerifyJwtCallback(getVerifyJwtCallback(resolver))
       .withCreateJwtCallback(internalSignature(opMockEntity.hexPrivateKey, opMockEntity.did, `${opMockEntity.did}#controller`, SigningAlgo.ES256K))
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       //FIXME: Move payload options to seperate property
       .withRegistration({
         authorizationEndpoint: 'www.myauthorizationendpoint.com',
@@ -1843,7 +1729,7 @@ describe.skip('RP and OP interaction should', () => {
         clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
       })
-      .withSupportedVersions(SupportedVersion.SIOPv2_ID1)
+      .withSupportedVersions(SupportedVersion.OID4VP_v1)
       .build()
     const requestURI = await rp.createAuthorizationRequestURI({
       correlationId: '1234',
@@ -1867,5 +1753,77 @@ describe.skip('RP and OP interaction should', () => {
 
     const resState = await replayRegistry.getResponseStateByCorrelationId('1234', true)
     expect(resState?.status).toBe('error')
+  })
+})
+
+
+describe('credential_sets tests', () => {
+  it('DCQL credential_sets: happy flow (single required option is satisfied)', () => {
+    const queryWithSet: DcqlQuery.Input = {
+      credentials: [
+        {
+          id: 'credA',
+          format: 'ldp_vc',
+          meta: {
+            type_values: [
+              ['https://www.w3.org/2018/credentials#VerifiableCredential'],
+              ['PermanentResidentCard']
+            ]
+          },
+          claims: [{ path: ['givenName'], values: ['JANE'] }]
+        }
+      ],
+      credential_sets: [
+        {
+          options: [['credA']],
+          required: true,
+          purpose: 'must include credA'
+        }
+      ]
+    }
+
+    const parsed = DcqlQuery.parse(queryWithSet)
+    DcqlQuery.validate(parsed) // validates structure + credential_sets references
+
+    const dcqlCredential: DcqlW3cVcCredential = {
+      credential_format: 'ldp_vc',
+      claims: (getVCs()[0].credentialSubject as { [x: string]: Json }),
+      type: getVCs()[0].type,
+      cryptographic_holder_binding: true
+    }
+
+    const result: DcqlQueryResult = DcqlQuery.query(parsed, [dcqlCredential])
+
+    // set is satisfied and matching_options should include ['credA']
+    expect(result.can_be_satisfied).toBe(true)
+    expect(result.credential_sets?.[0].matching_options).toEqual([['credA']])
+  })
+
+  it('DCQL credential_sets: invalid rule (references unknown credential id) fails validation', () => {
+    const queryWithBadSet: DcqlQuery.Input = {
+      credentials: [
+        {
+          id: 'credA',
+          format: 'ldp_vc',
+          meta: {
+            type_values: [
+              ['https://www.w3.org/2018/credentials#VerifiableCredential'],
+              ['PermanentResidentCard']
+            ]
+          },
+          claims: [{ path: ['givenName'], values: ['JANE'] }]
+        }
+      ],
+      credential_sets: [
+        {
+          // This option references a non-existent credential query id
+          options: [['does_not_exist']],
+          required: true
+        }
+      ]
+    }
+
+    const parsed = DcqlQuery.parse(queryWithBadSet)
+    expect(() => DcqlQuery.validate(parsed)).toThrowError(/Credential set contains undefined credential id/i)
   })
 })

@@ -9,11 +9,7 @@ import {
   SIOPErrors,
   SupportedVersion,
 } from '../types'
-
 import { CreateAuthorizationRequestOpts } from './types'
-
-/*const ajv = new Ajv({ allowUnionTypes: true, strict: false });
-const validateRPRegistrationMetadata = ajv.compile(RPRegistrationMetadataPayloadSchema);*/
 
 export const assertValidRequestRegistrationOpts = (opts: ClientMetadataOpts) => {
   if (!opts) {
@@ -28,26 +24,14 @@ export const assertValidRequestRegistrationOpts = (opts: ClientMetadataOpts) => 
 const createRequestRegistrationPayload = async (
   opts: ClientMetadataOpts,
   metadataPayload: RPRegistrationMetadataPayload,
-  version: SupportedVersion,
+  version: SupportedVersion, // TODO we could remove this
 ): Promise<RequestRegistrationPayloadProperties | RequestClientMetadataPayloadProperties> => {
   assertValidRequestRegistrationOpts(opts)
 
   if (opts.passBy == PassBy.VALUE) {
-    if (version >= SupportedVersion.SIOPv2_D11.valueOf()) {
-      return { client_metadata: removeNullUndefined(metadataPayload) }
-    } else {
       return { registration: removeNullUndefined(metadataPayload) }
-    }
   } else {
-    if (version >= SupportedVersion.SIOPv2_D11.valueOf()) {
-      return {
-        client_metadata_uri: opts.reference_uri,
-      }
-    } else {
-      return {
-        registration_uri: opts.reference_uri,
-      }
-    }
+      return { registration_uri: opts.reference_uri }
   }
 }
 
@@ -60,7 +44,7 @@ export const createRequestRegistration = async (
   createRequestOpts: CreateAuthorizationRequestOpts
   clientMetadataOpts: ClientMetadataOpts
 }> => {
-  const metadata = createRPRegistrationMetadataPayload(clientMetadataOpts)
+  const metadata = createRPRegistrationMetadataPayload(clientMetadataOpts, createRequestOpts.version)
   const payload = await createRequestRegistrationPayload(clientMetadataOpts, metadata, createRequestOpts.version)
   return {
     payload,
@@ -70,25 +54,25 @@ export const createRequestRegistration = async (
   }
 }
 
-const createRPRegistrationMetadataPayload = (opts: RPRegistrationMetadataOpts): RPRegistrationMetadataPayload => {
+const createRPRegistrationMetadataPayload = (opts: RPRegistrationMetadataOpts, version: SupportedVersion): RPRegistrationMetadataPayload => {
   const rpRegistrationMetadataPayload = {
-    id_token_signing_alg_values_supported: opts.idTokenSigningAlgValuesSupported,
-    request_object_signing_alg_values_supported: opts.requestObjectSigningAlgValuesSupported,
-    response_types_supported: opts.responseTypesSupported,
-    scopes_supported: opts.scopesSupported,
-    subject_types_supported: opts.subjectTypesSupported,
+    id_token_signing_alg_values_supported: opts.id_token_signing_alg_values_supported,
+    request_object_signing_alg_values_supported: opts.request_object_signing_alg_values_supported,
+    response_types_supported: opts.response_types_supported,
+    scopes_supported: opts.scopes_supported,
+    subject_types_supported: opts.subject_types_supported,
     subject_syntax_types_supported: opts.subject_syntax_types_supported || ['did:web:', 'did:ion:'],
-    vp_formats: opts.vpFormatsSupported,
-    client_name: opts.clientName,
+    ...(version === SupportedVersion.OID4VP_v1 ? { vp_formats_supported: opts.vp_formats_supported } : { vp_formats: opts.vp_formats_supported }),
+    client_name: opts.client_name,
     logo_uri: opts.logo_uri,
     tos_uri: opts.tos_uri,
-    client_purpose: opts.clientPurpose,
+    client_purpose: opts.client_purpose,
     client_id: opts.client_id,
   }
 
   const languageTagEnabledFieldsNamesMapping = new Map<string, string>()
-  languageTagEnabledFieldsNamesMapping.set('clientName', 'client_name')
-  languageTagEnabledFieldsNamesMapping.set('clientPurpose', 'client_purpose')
+  languageTagEnabledFieldsNamesMapping.set('client_name', 'client_name')
+  languageTagEnabledFieldsNamesMapping.set('client_purpose', 'client_purpose')
 
   const languageTaggedFields: Map<string, string> = LanguageTagUtils.getLanguageTaggedPropertiesMapped(opts, languageTagEnabledFieldsNamesMapping)
 

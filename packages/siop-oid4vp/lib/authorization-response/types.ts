@@ -1,17 +1,19 @@
 import { JwtIssuer } from '@sphereon/oid4vc-common'
-import { IPresentationDefinition, PresentationSignCallBackParams } from '@sphereon/pex'
-import { Format } from '@sphereon/pex-models'
+import { PresentationSignCallBackParams } from '@sphereon/pex'
 import {
   CompactSdJwtVc,
+  Format,
   HasherSync,
   MdocOid4vpIssuerSigned,
-  MdocOid4vpMdocVpToken,
   PresentationSubmission,
-  W3CVerifiablePresentation,
+  W3CVerifiablePresentation
 } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
-
+import { AuthorizationResponse } from './AuthorizationResponse'
 import {
+  CreateJwtCallback,
+  DcqlVpTokenInput,
+  ResponseIss,
   ResponseMode,
   ResponseRegistrationOpts,
   ResponseType,
@@ -19,14 +21,10 @@ import {
   SupportedVersion,
   VerifiablePresentationWithFormat,
   Verification,
+  VerifyJwtCallback
 } from '../types'
-import { CreateJwtCallback } from '../types/VpJwtIssuer'
-import { VerifyJwtCallback } from '../types/VpJwtVerifier'
-
-import { AuthorizationResponse } from './AuthorizationResponse'
 
 export interface AuthorizationResponseOpts {
-  // redirectUri?: string; // It's typically comes from the request opts as a measure to prevent hijacking.
   responseURI?: string // This is either the redirect URI or response URI. See also responseURIType. response URI is used when response_mode is `direct_post`
   responseURIType?: ResponseURIType
   registration?: ResponseRegistrationOpts
@@ -36,63 +34,25 @@ export interface AuthorizationResponseOpts {
   jwtIssuer?: JwtIssuer
   responseMode?: ResponseMode
   responseType?: [ResponseType]
-  // did: string;
   expiresIn?: number
   accessToken?: string
   tokenType?: string
   refreshToken?: string
-  presentationExchange?: PresentationExchangeResponseOpts
   dcqlResponse?: DcqlResponseOpts
   isFirstParty?: boolean
 }
 
-export interface PresentationExchangeResponseOpts {
-  /* presentationSignCallback?: PresentationSignCallback;
-  signOptions?: PresentationSignOptions,
-*/
-  /*  credentialsAndDefinitions: {
-    presentationDefinition: IPresentationDefinition,
-    selectedCredentials: W3CVerifiableCredential[]
-  }[],*/
-
-  verifiablePresentations: Array<W3CVerifiablePresentation | CompactSdJwtVc | MdocOid4vpMdocVpToken>
-  vpTokenLocation?: VPTokenLocation
-  presentationSubmission?: PresentationSubmission
-  restrictToFormats?: Format
-  restrictToDIDMethods?: string[]
-}
-
 export interface DcqlResponseOpts {
-  dcqlPresentation: Record<string, Record<string, unknown> | string>
-}
-
-export interface PresentationDefinitionPayloadOpts {
-  presentation_definition?: IPresentationDefinition
-  presentation_definition_uri?: string
-  dcql_query?: never
+  dcqlPresentation: DcqlVpTokenInput
 }
 
 export interface DcqlQueryPayloadOpts {
-  dcql_query?: string
-  presentation_definition?: never
-  presentation_definition_uri?: never
-}
-
-export interface PresentationDefinitionWithLocation {
-  version?: SupportedVersion
-  location: PresentationDefinitionLocation
-  definition: IPresentationDefinition
+  dcql_query: Record<string, any> // TODO maybe Record<string, any> // string
 }
 
 export interface VerifiablePresentationWithSubmissionData extends VerifiablePresentationWithFormat {
   vpTokenLocation: VPTokenLocation
-
   submissionData: PresentationSubmission
-}
-
-export enum PresentationDefinitionLocation {
-  CLAIMS_VP_TOKEN = 'claims.vp_token',
-  TOPLEVEL_PRESENTATION_DEF = 'presentation_definition',
 }
 
 export enum VPTokenLocation {
@@ -110,6 +70,13 @@ export type PresentationVerificationCallback = (
 
 export type PresentationSignCallback = (args: PresentationSignCallBackParams) => Promise<W3CVerifiablePresentation | CompactSdJwtVc>
 
+export type DcqlQueryLookupCallback = (
+  queryId: string,
+  version?: string,
+  tenantId?: string
+) => Promise<DcqlQuery>
+
+
 export interface VerifyAuthorizationResponseOpts {
   correlationId: string
   verification: Verification
@@ -117,14 +84,10 @@ export interface VerifyAuthorizationResponseOpts {
   hasher?: HasherSync
   nonce?: string // To verify the response against the supplied nonce
   state?: string // To verify the response against the supplied state
-  presentationDefinitions?: PresentationDefinitionWithLocation | PresentationDefinitionWithLocation[] // The presentation definitions to match against VPs in the response
   dcqlQuery?: DcqlQuery
   audience?: string // The audience/redirect_uri
   restrictToFormats?: Format // Further restrict to certain VC formats, not expressed in the presentation definition
   restrictToDIDMethods?: string[]
-  // claims?: ClaimPayloadCommonOpts; // The claims, typically the same values used during request creation
-  // verifyCallback?: VerifyCallback;
-  // presentationVerificationCallback?: PresentationVerificationCallback;
 }
 
 export interface AuthorizationResponseWithCorrelationId {
@@ -132,4 +95,15 @@ export interface AuthorizationResponseWithCorrelationId {
   responseURI: string
   response: AuthorizationResponse
   correlationId: string
+}
+
+export interface CreateAuthorizationResponseOpts {
+  jwtIssuer?: JwtIssuer
+  version?: SupportedVersion
+  correlationId?: string
+  audience?: string
+  issuer?: ResponseIss | string
+  verification?: Verification
+  dcqlResponse?: DcqlResponseOpts
+  isFirstParty?: boolean
 }

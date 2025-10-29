@@ -1,6 +1,6 @@
-import { CredentialOfferPayloadV1_0_11, CredentialOfferPayloadV1_0_13, PRE_AUTH_CODE_LITERAL, PRE_AUTH_GRANT_LITERAL } from '@sphereon/oid4vci-common'
+import { CredentialOfferPayloadV1_0_15, PRE_AUTH_CODE_LITERAL, PRE_AUTH_GRANT_LITERAL } from '@sphereon/oid4vci-common'
 import { describe, expect, it } from 'vitest'
-import { createCredentialOfferObject, createCredentialOfferURI, createCredentialOfferURIv1_0_11 } from '../functions'
+import { createCredentialOfferObject, createCredentialOfferURI } from '../functions'
 
 describe('CredentialOfferUtils should', () => {
   it('create a deeplink from credentialOffer object', () => {
@@ -14,13 +14,13 @@ describe('CredentialOfferUtils should', () => {
           issuer_state: 'eyJhbGciOiJSU0Et...FYUaBy',
         },
       },
-    } satisfies CredentialOfferPayloadV1_0_13
+    } satisfies CredentialOfferPayloadV1_0_15
     expect(createCredentialOfferURI('VALUE', undefined, { credentialOffer })).toEqual(
       'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fcredential-issuer.example.com%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegreeCredential%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D%7D',
     )
   })
 
-  it('create a v13 credential offer with grants', () => {
+  it('create a v15 credential offer with grants', () => {
     const credentialOffer = {
       credential_issuer: 'https://credential-issuer.example.com',
       credential_configuration_ids: ['UniversityDegreeCredential'],
@@ -29,7 +29,7 @@ describe('CredentialOfferUtils should', () => {
           issuer_state: 'eyJhbGciOiJSU0Et...FYUaBy',
         },
       },
-    } satisfies CredentialOfferPayloadV1_0_13
+    } satisfies CredentialOfferPayloadV1_0_15
     expect(
       createCredentialOfferObject(undefined, {
         credentialOfferUri: 'https://test.com',
@@ -70,33 +70,26 @@ describe('CredentialOfferUtils should', () => {
     // https://credential-issuer.example.com?credential_offer=%7B%22credential_issuer%22:%22https://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D
     const credentialOffer = {
       credential_issuer: 'https://credential-issuer.example.com',
-
-      credentials: [
-        {
-          format: 'jwt_vc_json',
-          types: ['VerifiableCredential', 'UniversityDegreeCredential'],
-        },
-      ],
+      credential_configuration_ids: ['UniversityDegreeCredential'],
       grants: {
         authorization_code: {
           issuer_state: 'eyJhbGciOiJSU0Et...FYUaBy',
         },
       },
-    } as CredentialOfferPayloadV1_0_11
+    } satisfies CredentialOfferPayloadV1_0_15
 
     expect(
-      createCredentialOfferURIv1_0_11(
+      createCredentialOfferURI(
         'VALUE',
         {
           credential_issuer: credentialOffer.credential_issuer,
           credential_endpoint: 'test_issuer',
-          issuer: 'test_issuer',
-          credentials_supported: [],
+          credential_configurations_supported: {},
         },
         { credentialOffer, scheme: 'https' },
       ),
     ).toEqual(
-      `${credentialOffer.credential_issuer}?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fcredential-issuer.example.com%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D%7D`,
+      `${credentialOffer.credential_issuer}?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fcredential-issuer.example.com%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegreeCredential%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D%7D`,
     )
   })
 
@@ -105,32 +98,26 @@ describe('CredentialOfferUtils should', () => {
     // http://credential-issuer.example.com?credential_offer=%7B%22credential_issuer%22:%22http://credential-issuer.example.com%22,%22credentials%22:%5B%7B%22format%22:%22jwt_vc_json%22,%22types%22:%5B%22VerifiableCredential%22,%22UniversityDegreeCredential%22%5D%7D%5D,%22issuer_state%22:%22eyJhbGciOiJSU0Et...FYUaBy%22%7D
     const credentialOffer = {
       credential_issuer: 'http://credential-issuer.example.com',
-      credentials: [
-        {
-          format: 'jwt_vc_json',
-          types: ['VerifiableCredential', 'UniversityDegreeCredential'],
-        },
-      ],
+      credential_configuration_ids: ['UniversityDegreeCredential'],
       grants: {
         authorization_code: {
           issuer_state: 'eyJhbGciOiJSU0Et...FYUaBy',
         },
       },
-    } as CredentialOfferPayloadV1_0_11
+    } satisfies CredentialOfferPayloadV1_0_15
 
     expect(
-      createCredentialOfferURIv1_0_11(
+      createCredentialOfferURI(
         'VALUE',
         {
           credential_issuer: credentialOffer.credential_issuer,
           credential_endpoint: 'test_issuer',
-          issuer: 'test_issuer',
-          credentials_supported: [],
+          credential_configurations_supported: {},
         },
         { credentialOffer, scheme: 'http' },
       ),
     ).toEqual(
-      `${credentialOffer.credential_issuer}?credential_offer=%7B%22credential_issuer%22%3A%22http%3A%2F%2Fcredential-issuer.example.com%22%2C%22credentials%22%3A%5B%7B%22format%22%3A%22jwt_vc_json%22%2C%22types%22%3A%5B%22VerifiableCredential%22%2C%22UniversityDegreeCredential%22%5D%7D%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D%7D`,
+      `${credentialOffer.credential_issuer}?credential_offer=%7B%22credential_issuer%22%3A%22http%3A%2F%2Fcredential-issuer.example.com%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegreeCredential%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22eyJhbGciOiJSU0Et...FYUaBy%22%7D%7D%7D`,
     )
   })
 
@@ -138,13 +125,12 @@ describe('CredentialOfferUtils should', () => {
     const credentialOfferUri = 'https://example.com/credential-offer-1234'
 
     expect(
-      createCredentialOfferURIv1_0_11(
+      createCredentialOfferURI(
         'REFERENCE',
         {
           credential_issuer: 'https://credential-issuer.example.com',
           credential_endpoint: 'test_issuer',
-          issuer: 'test_issuer',
-          credentials_supported: [],
+          credential_configurations_supported: {},
         },
         { credentialOfferUri },
       ),
@@ -155,13 +141,12 @@ describe('CredentialOfferUtils should', () => {
     const credentialOfferUri = 'https://example.com/credential-offer-1234'
 
     expect(
-      createCredentialOfferURIv1_0_11(
+      createCredentialOfferURI(
         'REFERENCE',
         {
           credential_issuer: 'https://credential-issuer.example.com',
           credential_endpoint: 'test_issuer',
-          issuer: 'test_issuer',
-          credentials_supported: [],
+          credential_configurations_supported: {},
         },
         { credentialOfferUri, scheme: 'https', baseUri: 'credential-issuer.example.com' },
       ),
@@ -172,13 +157,12 @@ describe('CredentialOfferUtils should', () => {
     const credentialOfferUri = 'https://example.com?credential_offer_uri=https%3A%2F%2Fexample.com%2Foffer-1234'
 
     expect(
-      createCredentialOfferURIv1_0_11(
+      createCredentialOfferURI(
         'REFERENCE',
         {
           credential_issuer: 'https://credential-issuer.example.com',
           credential_endpoint: 'test_issuer',
-          issuer: 'test_issuer',
-          credentials_supported: [],
+          credential_configurations_supported: {},
         },
         { credentialOfferUri, scheme: 'https', baseUri: 'credential-issuer.example.com' },
       ),
@@ -187,13 +171,12 @@ describe('CredentialOfferUtils should', () => {
 
   it('should throw error when credential_offer_uri is missing in REFERENCE mode', () => {
     expect(() =>
-      createCredentialOfferURIv1_0_11(
+      createCredentialOfferURI(
         'REFERENCE',
         {
           credential_issuer: 'https://credential-issuer.example.com',
           credential_endpoint: 'test_issuer',
-          issuer: 'test_issuer',
-          credentials_supported: [],
+          credential_configurations_supported: {},
         },
         { scheme: 'https', baseUri: 'credential-issuer.example.com' },
       ),

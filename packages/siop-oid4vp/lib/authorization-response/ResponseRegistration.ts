@@ -1,7 +1,14 @@
 import { SigningAlgo } from '@sphereon/oid4vc-common'
-
 import { LanguageTagUtils, removeNullUndefined } from '../helpers'
-import { DiscoveryMetadataOpts, DiscoveryMetadataPayload, ResponseIss, ResponseType, Schema, Scope, SubjectType } from '../types'
+import {
+  DiscoveryMetadataOpts,
+  DiscoveryMetadataPayload,
+  ResponseIss,
+  ResponseType,
+  Schema,
+  Scope,
+  SubjectType
+} from '../types'
 
 export const createDiscoveryMetadataPayload = (opts: DiscoveryMetadataOpts): DiscoveryMetadataPayload => {
   const discoveryMetadataPayload: DiscoveryMetadataPayload = {
@@ -58,13 +65,13 @@ export const createDiscoveryMetadataPayload = (opts: DiscoveryMetadataOpts): Dis
     op_policy_uri: opts.opPolicyUri,
     op_tos_uri: opts.opTosUri,
     logo_uri: opts.logo_uri,
-    client_purpose: opts.clientPurpose,
+    client_purpose: opts.client_purpose,
     id_token_types_supported: opts.idTokenTypesSupported,
   }
 
   const languageTagEnabledFieldsNamesMapping = new Map<string, string>()
-  languageTagEnabledFieldsNamesMapping.set('clientName', 'client_name')
-  languageTagEnabledFieldsNamesMapping.set('clientPurpose', 'client_purpose')
+  languageTagEnabledFieldsNamesMapping.set('client_name', 'client_name')
+  languageTagEnabledFieldsNamesMapping.set('client_purpose', 'client_purpose')
 
   const languageTaggedFields: Map<string, string> = LanguageTagUtils.getLanguageTaggedPropertiesMapped(opts, languageTagEnabledFieldsNamesMapping)
   languageTaggedFields.forEach((value: string, key: string) => {

@@ -323,12 +323,12 @@ const rp = RP.builder()
   .withVerifyJwtCallback(verifyJwtCallback)
   .withRevocationVerification(RevocationVerification.NEVER)
   .withClientMetadata({
-    idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-    requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-    responseTypesSupported: [ResponseType.ID_TOKEN],
-    vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-    scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-    subjectTypesSupported: [SubjectType.PAIRWISE],
+    id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+    request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+    response_types_supported: [ResponseType.ID_TOKEN],
+    vp_formats_supported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
+    scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+    subject_types_supported: [SubjectType.PAIRWISE],
     subjectSyntaxTypesSupported: ['did', 'did:ethr'],
     passBY: PassBy.VALUE,
   })
@@ -363,13 +363,13 @@ const op = OP.builder()
   .withVerifyJwtCallback(verifyJwtCallback)
   .withClientMetadata({
     authorizationEndpoint: 'www.myauthorizationendpoint.com',
-    idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
+    id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
     issuer: ResponseIss.SELF_ISSUED_V2,
-    requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-    responseTypesSupported: [ResponseType.ID_TOKEN],
+    request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+    response_types_supported: [ResponseType.ID_TOKEN],
     vpFormats: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-    scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-    subjectTypesSupported: [SubjectType.PAIRWISE],
+    scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+    subject_types_supported: [SubjectType.PAIRWISE],
     subjectSyntaxTypesSupported: ['did:ethr'],
     passBy: PassBy.VALUE,
   })
@@ -474,28 +474,20 @@ console.log(`RP DID: ${verifiedReq.issuer}`)
 // RP DID: did:ethr:ropsten:0x028360fb95417724cb7dd2ff217b15d6f17fc45e0ffc1b3dce6c2b8dd1e704fa98
 ```
 
-### OP Presentation Exchange
+### OP DCQL Flow
 
-The Verified Request object created in the previous step contains a `presentationDefinitions` array property in case the
-OP wants to receive a Verifiable Presentation according to
-the [OpenID Connect for Verifiable Presentations (OIDC4VP)](https://openid.net/specs/openid-connect-4-verifiable-presentations-1_0.html)
-specification. If this is the case we need to select credentials and create a Verifiable Presentation. If the OP doesn't
-need to receive a Verifiable Presentation, meaning the presentationDefinitions property is undefined or empty, you can
-continue to the next chapter and create the Auth Response immediately.
+The Verified Request object created in the previous step may contain a dcql_query property in case the OP wants to receive a Verifiable Presentation according to a DCQL (Decentralized Credential Query Language) request.
+If this is the case we need to evaluate the query, select credentials, and create a Verifiable Presentation that satisfies the requested conditions.
+If the OP doesn’t need to receive a Verifiable Presentation, meaning the dcql_query property is undefined or empty, you can continue to the next chapter and create the Auth Response immediately.
 
-See the below sub flow for Presentation Exchange to explain the process:
+#### Create DCQL query Object
 
-![PE Flow diagram](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Sphereon-Opensource/did-auth-siop/develop/docs/presentation-exchange.puml)
+If the dcql_query property is present it means the op.verifyAuthorizationRequest already has
+established that the DCQL request itself was valid and present. It has populated the dcql_query property for you.
+If the query was not valid, the verify method would have thrown an error, which means you should never continue the authentication flow!
 
-#### Create PresentationExchange object
-
-If the `presentationDefinitions` array property is present it means the op.verifyAuthorizationRequest already has
-established that the Presentation Definition(s) itself were valid and present. It has populated the
-presentationDefinitions array for you. If the definition was not valid, the verify method would have thrown an error,
-which means you should never continue the authentication flow!
-
-Now we have to create a `PresentationExchange` object and pass in both the available Verifiable Credentials (typically
-from your wallet) and the holder DID.
+Now we have to create a DCQL query object (or equivalent) and pass in both the available Verifiable Credentials (typically
+from your wallet) and the holder DID. The DCQL execution will filter and match credentials according to the query.
 
 ---
 
@@ -508,18 +500,35 @@ method.
 ---
 
 ```typescript
-import { PresentationExchange } from './PresentationExchange'
-import { PresentationDefinition } from '@sphereon/pe-models'
-
 const verifiableCredentials: VerifiableCredential[] = [VC1, VC2, VC3] // This typically comes from your wallet
-const presentationDefs: PresentationDefinition[] = verifiedReq.presentationDefinitions
 
-if (presentationDefs) {
-  const pex = new PresentationExchange({
-    did: op.authResponseOpts.did,
-    allVerifiableCredentials: verifiableCredentials,
-  })
-}
+const dcqlQuery = {
+   credentials: [
+      {
+         id: 'Credentials',
+         format: 'dc+sd-jwt',
+         claims: [
+            { path: ['given_name'], values: ['John'] }
+         ],
+         require_cryptographic_holder_binding: true
+      },
+   ],
+} satisfies DcqlQuery.Input
+
+const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery)
+DcqlQuery.validate(parsedDcqlQuery)
+
+
+const dcqlCredentials = verifiableCredentials.map(vc => (
+    {
+       credential_format: 'ldp_vc',
+       claims: getVCs()[0].credentialSubject as { [x: string]: Json },
+       type: getVCs()[0].type,
+       cryptographic_holder_binding: true
+    } satisfies DcqlW3cVcCredential  
+))
+
+const dcqlQueryResult: DcqlQueryResult = DcqlQuery.query(parsedDcqlQuery, dcqlCredentials)
 ```
 
 #### Filter Credentials that match the Presentation Definition
@@ -727,7 +736,7 @@ const opts: AuthorizationRequestOpts = {
     scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
     subjectSyntaxTypesSupported: ['did:ethr:', SubjectIdentifierType.DID],
     subjectTypesSupported: [SubjectType.PAIRWISE],
-    vpFormatsSupported: {
+    vp_formats_supported: {
       ldp_vc: {
         proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
       },
@@ -776,7 +785,6 @@ metadata if the verification succeeds
 ```typescript
 export interface VerifiedAuthorizationRequestWithJWT extends VerifiedJWT {
     payload: AuthorizationRequestPayload;       // The unsigned Auth Request payload
-    presentationDefinitions?: PresentationDefinitionWithLocation[]; // The optional presentation definition objects that the RP requests
     verifyOpts: VerifyAuthorizationRequestOpts; // The verification options for the Auth Request
 }
 

@@ -1,18 +1,18 @@
 import { BaseJWK } from '@sphereon/oid4vc-common'
-import { IVerifiableCredential } from '@sphereon/ssi-types'
 
 import { ExperimentalSubjectIssuance } from '../experimental/holder-vci'
 
 import { AuthzFlowType } from './Authorization.types'
-import { OID4VCICredentialFormat, TxCode, UniformCredentialRequest } from './Generic.types'
+import { OID4VCICredentialFormat, TxCode } from './Generic.types'
 import { OpenId4VCIVersion } from './OpenID4VCIVersions.types'
-import { CredentialOfferPayloadV1_0_08, CredentialRequestV1_0_08 } from './v1_0_08.types'
-import { CredentialOfferPayloadV1_0_09, CredentialOfferV1_0_09 } from './v1_0_09.types'
-import { CredentialOfferPayloadV1_0_11, CredentialOfferV1_0_11, CredentialRequestV1_0_11 } from './v1_0_11.types'
-import { CredentialOfferPayloadV1_0_13, CredentialOfferV1_0_13, CredentialRequestV1_0_13 } from './v1_0_13.types'
+import {
+  CredentialOfferPayloadV1_0_15,
+  CredentialOfferV1_0_15,
+  CredentialResponseCredentialV1_0_15
+} from './v1_0_15.types'
 
 export interface CredentialResponse extends ExperimentalSubjectIssuance {
-  credential?: IVerifiableCredential | string // OPTIONAL. Contains issued Credential. MUST be present when acceptance_token is not returned. MAY be a JSON string or a JSON object, depending on the Credential format. See Appendix E for the Credential format specific encoding requirements
+  credentials?: Array<CredentialResponseCredentialV1_0_15>
   format?: OID4VCICredentialFormat /* | OID4VCICredentialFormat[]*/ // REQUIRED. JSON string denoting the format of the issued Credential  TODO: remove when cleaning <v13
   transaction_id?: string //OPTIONAL. A string identifying a Deferred Issuance transaction. This claim is contained in the response if the Credential Issuer was unable to immediately issue the credential. The value is subsequently used to obtain the respective Credential with the Deferred Credential Endpoint (see Section 9). It MUST be present when the credential parameter is not returned. It MUST be invalidated after the credential for which it was meant has been obtained by the Wallet.
   acceptance_token?: string //deprecated // OPTIONAL. A JSON string containing a security token subsequently used to obtain a Credential. MUST be present when credential is not returned
@@ -31,17 +31,12 @@ export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOffe
   userPinRequired: boolean
 }
 
-export type CredentialOffer = CredentialOfferV1_0_09 | CredentialOfferV1_0_11 | CredentialOfferV1_0_13
+export type CredentialOffer = CredentialOfferV1_0_15
 
-export type CredentialOfferPayloadLatest = CredentialOfferPayloadV1_0_13
-
-export type CredentialRequest = UniformCredentialRequest | CredentialRequestV1_0_13 | CredentialRequestV1_0_11 | CredentialRequestV1_0_08
+export type CredentialOfferPayloadLatest = CredentialOfferPayloadV1_0_15
 
 export type CredentialOfferPayload = (
-  | CredentialOfferPayloadV1_0_08
-  | CredentialOfferPayloadV1_0_09
-  | CredentialOfferPayloadV1_0_11
-  | CredentialOfferPayloadV1_0_13
+  CredentialOfferPayloadV1_0_15
 ) & {
   [x: string]: any
 }
@@ -61,8 +56,8 @@ export interface UniformCredentialOfferRequest extends AssertedUniformCredential
   supportedFlows: AuthzFlowType[]
 }
 
-//todo: drop v11
-export type UniformCredentialOfferPayload = CredentialOfferPayloadV1_0_11 | CredentialOfferPayloadV1_0_13
+//todo: drop v11 (done for now, but maybe not final)
+export type UniformCredentialOfferPayload = CredentialOfferPayloadV1_0_15
 
 export interface ProofOfPossession {
   proof_type: 'jwt'
@@ -169,7 +164,7 @@ export interface JWTPayload {
   [s: string]: unknown
 }
 
-export type JWTSignerCallback = (jwt: Jwt, kid?: string) => Promise<string>
+export type JWTSignerCallback = (jwt: Jwt, kid?: string, noIssPayloadUpdate?: boolean) => Promise<string>
 export type JWTVerifyCallback = (args: { jwt: string; kid?: string }) => Promise<JwtVerifyResult>
 
 export interface JwtVerifyResult {

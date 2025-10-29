@@ -1,40 +1,38 @@
 import { SigningAlgo } from '@sphereon/oid4vc-common'
-import { Format } from '@sphereon/pex-models'
-import { IProofType } from '@sphereon/ssi-types'
+import { Format, IProofType } from '@sphereon/ssi-types'
 import { describe, expect, it } from 'vitest'
-
 import { SIOPErrors, supportedCredentialsFormats } from '../..'
 
 describe('DidSiopMetadata should ', () => {
   it('find supportedCredentialsFormats correctly', async function () {
     const rpFormat: Format = {
       ldp_vc: {
-        proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+        proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
       },
       jwt_vc: {
-        alg: [SigningAlgo.ES256, SigningAlgo.ES256K],
+        alg_values: [SigningAlgo.ES256, SigningAlgo.ES256K],
       },
     }
     const opFormat: Format = {
       jwt_vc: {
-        alg: [SigningAlgo.ES256, SigningAlgo.ES256K],
+        alg_values: [SigningAlgo.ES256, SigningAlgo.ES256K],
       },
     }
-    expect(supportedCredentialsFormats(rpFormat, opFormat)).toStrictEqual({ jwt_vc: { alg: ['ES256', 'ES256K'] } })
+    expect(supportedCredentialsFormats(rpFormat, opFormat)).toStrictEqual({ jwt_vc: { alg_values: ['ES256', 'ES256K'] } })
   })
 
   it('throw CREDENTIAL_FORMATS_NOT_SUPPORTED for algs not matching', async function () {
     const rpFormat: Format = {
       ldp_vc: {
-        proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+        proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
       },
       jwt_vc: {
-        alg: [SigningAlgo.ES256K],
+        alg_values: [SigningAlgo.ES256K],
       },
     }
     const opFormat: Format = {
       jwt_vc: {
-        alg: [SigningAlgo.ES256],
+        alg_values: [SigningAlgo.ES256],
       },
     }
     expect(() => supportedCredentialsFormats(rpFormat, opFormat)).toThrow(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)
@@ -43,12 +41,12 @@ describe('DidSiopMetadata should ', () => {
   it('throw CREDENTIAL_FORMATS_NOT_SUPPORTED for types not matching', async function () {
     const rpFormat: Format = {
       ldp_vc: {
-        proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
+        proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019],
       },
     }
     const opFormat: Format = {
       jwt_vc: {
-        alg: [SigningAlgo.ES256],
+        alg_values: [SigningAlgo.ES256],
       },
     }
     expect(() => supportedCredentialsFormats(rpFormat, opFormat)).toThrow(SIOPErrors.CREDENTIAL_FORMATS_NOT_SUPPORTED)
@@ -58,7 +56,7 @@ describe('DidSiopMetadata should ', () => {
     const rpFormat: Format = {}
     const opFormat: Format = {
       jwt_vc: {
-        alg: [SigningAlgo.ES256, SigningAlgo.ES256K],
+        alg_values: [SigningAlgo.ES256, SigningAlgo.ES256K],
       },
     }
     expect(() => supportedCredentialsFormats(rpFormat, opFormat)).toThrow(SIOPErrors.CREDENTIALS_FORMATS_NOT_PROVIDED)

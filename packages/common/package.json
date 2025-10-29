@@ -19,10 +19,10 @@
   },
   "scripts": {
     "build": "tsup --config ../../tsup.config.ts --tsconfig ../../tsconfig.tsup.json",
-    "test": "vitest run --config ../../vitest.config.ts --coverage"
+    "test": "vitest run --config ../../vitest.config.mts --coverage"
   },
   "dependencies": {
-    "@sphereon/ssi-types": "0.34.1-next.3",
+    "@sphereon/ssi-types": "0.34.1-feature.DIIPv4.245",
     "jwt-decode": "^4.0.0",
     "uint8arrays": "^3.1.1",
     "uuid": "^9.0.0"

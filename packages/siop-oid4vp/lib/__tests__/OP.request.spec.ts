@@ -1,8 +1,9 @@
-import { SigningAlgo } from '@sphereon/oid4vc-common'
-import { IProofType } from '@sphereon/ssi-types'
+import {SigningAlgo} from '@sphereon/oid4vc-common'
+import {IProofType} from '@sphereon/ssi-types'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import nock from 'nock'
-import { describe, expect, it } from 'vitest'
-
+import {describe, expect, it} from 'vitest'
 import {
   AuthorizationResponseOpts,
   CreateAuthorizationRequestOpts,
@@ -18,10 +19,9 @@ import {
   SupportedVersion,
   VerifyAuthorizationRequestOpts,
 } from '..'
-
-import { getCreateJwtCallback, getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
-import { getResolver } from './ResolverTestUtils'
-import { mockedGetEnterpriseAuthToken, WELL_KNOWN_OPENID_FEDERATION } from './TestUtils'
+import {getCreateJwtCallback, getVerifyJwtCallback, internalSignature} from './DidJwtTestUtils'
+import {getResolver} from './ResolverTestUtils'
+import {mockedGetEnterpriseAuthToken, WELL_KNOWN_OPENID_FEDERATION} from './TestUtils'
 import {
   UNIT_TEST_TIMEOUT,
   VERIFIER_LOGO_FOR_CLIENT,
@@ -62,7 +62,7 @@ describe('OP OPBuilder should', () => {
         .withCreateJwtCallback(internalSignature('myprivatekey', 'did:example:123', 'did:example:123#key', SigningAlgo.ES256K))
         .withVerifyJwtCallback(getVerifyJwtCallback(getResolver('ethr'), { checkLinkedDomain: 'never' }))
         .withExpiresIn(1000)
-        .withSupportedVersions([SupportedVersion.SIOPv2_ID1])
+        .withSupportedVersions([SupportedVersion.OID4VP_v1])
         .build(),
     ).toBeInstanceOf(OP)
   })
@@ -106,7 +106,7 @@ describe('OP should', () => {
     verifyJwtCallback: getVerifyJwtCallback(resolver),
     verification: {},
     correlationId: '1234',
-    supportedVersions: [SupportedVersion.SIOPv2_ID1],
+    supportedVersions: [SupportedVersion.OID4VP_v1],
     nonce: 'qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg',
   }
 
@@ -126,8 +126,7 @@ describe('OP should', () => {
     async () => {
       const mockEntity = await mockedGetEnterpriseAuthToken('ACME Corp')
       const requestOpts: CreateAuthorizationRequestOpts = {
-        version: SupportedVersion.SIOPv2_ID1,
-
+        version: SupportedVersion.OID4VP_v1,
         requestObject: {
           jwtIssuer: {
             method: 'did',
@@ -139,7 +138,6 @@ describe('OP should', () => {
           },
           passBy: PassBy.REFERENCE,
           reference_uri: EXAMPLE_REFERENCE_URL,
-
           createJwtCallback: getCreateJwtCallback({
             hexPrivateKey: mockEntity.hexPrivateKey,
             did: mockEntity.did,
@@ -148,6 +146,7 @@ describe('OP should', () => {
           }),
           payload: {
             redirect_uri: EXAMPLE_REDIRECT_URL,
+            response_mode: ResponseMode.DIRECT_POST,
             client_id: WELL_KNOWN_OPENID_FEDERATION,
             scope: 'test',
             response_type: 'id_token',
@@ -155,23 +154,23 @@ describe('OP should', () => {
         },
         clientMetadata: {
           client_id: WELL_KNOWN_OPENID_FEDERATION,
-          idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+          id_token_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
           subject_syntax_types_supported: ['did:ethr', SubjectIdentifierType.DID],
-          requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-          responseTypesSupported: [ResponseType.ID_TOKEN],
-          scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-          subjectTypesSupported: [SubjectType.PAIRWISE],
-          vpFormatsSupported: {
-            jwt_vc: { alg: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
-            jwt_vp: { alg: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
-            jwt: { alg: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
+          request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+          response_types_supported: [ResponseType.ID_TOKEN],
+          scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+          subject_types_supported: [SubjectType.PAIRWISE],
+          vp_formats_supported: {
+            jwt_vc: { alg_values: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
+            jwt_vp: { alg_values: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
+            jwt: { alg_values: [SigningAlgo.EDDSA, SigningAlgo.ES256K, SigningAlgo.ES256] },
           },
           passBy: PassBy.VALUE,
           logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-          clientName: VERIFIER_NAME_FOR_CLIENT,
-          'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100334',
-          clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-          'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+          client_name: VERIFIER_NAME_FOR_CLIENT,
+          'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100334',
+          client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+          'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         },
       }
 
@@ -204,7 +203,7 @@ describe('OP should', () => {
       const rpMockEntity = await mockedGetEnterpriseAuthToken('ACME RP')
       const opMockEntity = await mockedGetEnterpriseAuthToken('ACME OP')
 
-      const requestURI = await RP.builder({ requestVersion: SupportedVersion.SIOPv2_ID1 })
+      const requestURI = await RP.builder({ requestVersion: SupportedVersion.OID4VP_v1 })
         .withClientId(WELL_KNOWN_OPENID_FEDERATION)
         .withScope('test')
         .withResponseType(ResponseType.ID_TOKEN)
@@ -222,19 +221,19 @@ describe('OP should', () => {
         )
         .withClientMetadata({
           client_id: WELL_KNOWN_OPENID_FEDERATION,
-          idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
-          requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
-          responseTypesSupported: [ResponseType.ID_TOKEN],
-          vpFormatsSupported: { jwt_vc: { alg: [SigningAlgo.EDDSA] } },
-          scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
-          subjectTypesSupported: [SubjectType.PAIRWISE],
+          id_token_signing_alg_values_supported: [SigningAlgo.EDDSA],
+          request_object_signing_alg_values_supported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
+          response_types_supported: [ResponseType.ID_TOKEN],
+          vp_formats_supported: { jwt_vc: { alg_values: [SigningAlgo.EDDSA] } },
+          scopes_supported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
+          subject_types_supported: [SubjectType.PAIRWISE],
           subject_syntax_types_supported: ['did', 'did:ethr'],
           passBy: PassBy.VALUE,
           logo_uri: VERIFIER_LOGO_FOR_CLIENT,
-          clientName: VERIFIER_NAME_FOR_CLIENT,
-          'clientName#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100335',
-          clientPurpose: VERIFIERZ_PURPOSE_TO_VERIFY,
-          'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
+          client_name: VERIFIER_NAME_FOR_CLIENT,
+          'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100335',
+          client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
+          'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         })
         .build()
 
@@ -246,7 +245,7 @@ describe('OP should', () => {
         })
 
       const verifiedRequest = await OP.builder()
-        .withSupportedVersions([SupportedVersion.SIOPv2_ID1])
+        .withSupportedVersions([SupportedVersion.OID4VP_v1])
         .withExpiresIn(1000)
         .withIssuer(ResponseIss.SELF_ISSUED_V2)
         .withVerifyJwtCallback(getVerifyJwtCallback(resolver, { checkLinkedDomain: 'never' }))
@@ -262,7 +261,7 @@ describe('OP should', () => {
           idTokenSigningAlgValuesSupported: [SigningAlgo.EDDSA],
           requestObjectSigningAlgValuesSupported: [SigningAlgo.EDDSA, SigningAlgo.ES256],
           responseTypesSupported: [ResponseType.ID_TOKEN],
-          vpFormats: { ldp_vc: { proof_type: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] } },
+          vpFormats: { ldp_vc: { proof_type_values: [IProofType.EcdsaSecp256k1Signature2019, IProofType.EcdsaSecp256k1Signature2019] } },
           scopesSupported: [Scope.OPENID_DIDAUTHN, Scope.OPENID],
           subjectTypesSupported: [SubjectType.PAIRWISE],
           subject_syntax_types_supported: ['did', 'did:ethr'],
@@ -274,9 +273,8 @@ describe('OP should', () => {
           'clientPurpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
         })
         .build()
-
         .verifyAuthorizationRequest(requestURI.encodedUri)
-      // console.log(JSON.stringify(verifiedRequest));
+
       expect(verifiedRequest.issuer).toMatch(rpMockEntity.did)
       expect(verifiedRequest.jwt).toBeDefined()
     } catch (e) {

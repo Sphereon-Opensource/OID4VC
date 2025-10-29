@@ -1,11 +1,9 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
-
-import { CreateAuthorizationRequestOpts, createPresentationDefinitionClaimsProperties } from '../authorization-request'
+import { CreateAuthorizationRequestOpts, createClaimsProperties } from '../authorization-request'
 import { createRequestRegistration } from '../authorization-request/RequestRegistration'
 import { getNonce, getState, removeNullUndefined } from '../helpers'
-import { RequestObjectPayload, ResponseMode, ResponseType, SIOPErrors, SupportedVersion } from '../types'
-
 import { assertValidRequestObjectOpts } from './Opts'
+import { RequestObjectPayload, ResponseMode, ResponseType, SIOPErrors } from '../types'
 
 export const createRequestObjectPayload = async (opts: CreateAuthorizationRequestOpts): Promise<RequestObjectPayload | undefined> => {
   assertValidRequestObjectOpts(opts.requestObject, false)
@@ -22,9 +20,9 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
   }*/
   const state = getState(payload.state)
   const registration = await createRequestRegistration(opts.clientMetadata, opts)
-  const claims = await createPresentationDefinitionClaimsProperties(payload.claims)
+  const claims = await createClaimsProperties(payload.claims)
 
-  const metadataKey = opts.version >= SupportedVersion.SIOPv2_D11.valueOf() ? 'client_metadata' : 'registration'
+  const metadataKey = 'client_metadata'
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const clientId = payload.client_id ?? registration.payload[metadataKey]?.client_id
@@ -41,7 +39,6 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
     response_type: payload.response_type ?? ResponseType.ID_TOKEN,
     scope: payload.scope,
     //TODO implement /.well-known/openid-federation support in the OP side to resolve the client_id (URL) and retrieve the metadata
-    client_id_scheme: payload.client_id_scheme,
     ...(clientId && { client_id: clientId }),
     ...(payload.entity_id && { entity_id: payload.entity_id }),
     ...(payload.redirect_uri && { redirect_uri: payload.redirect_uri }),
@@ -53,8 +50,6 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
     state,
     ...registration.payload,
     claims,
-    ...(payload.presentation_definition_uri && { presentation_definition_uri: payload.presentation_definition_uri }),
-    ...(payload.presentation_definition && { presentation_definition: payload.presentation_definition }),
     ...(payload.dcql_query && { dcql_query: payload.dcql_query }),
     client_metadata: payload.client_metadata,
     iat,

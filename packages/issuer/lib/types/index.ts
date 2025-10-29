@@ -2,23 +2,23 @@ import {
   AssertedUniformCredentialOffer,
   CNonceState,
   CredentialDataSupplierInput,
-  CredentialRequest,
+  CredentialRequestV1_0_15,
   CredentialSupplierConfig,
   JwtVerifyResult,
   OID4VCICredentialFormat,
   StatusListOpts,
-  UniformCredentialRequest,
+  CredentialRequest
 } from '@sphereon/oid4vci-common'
 import {
   CompactSdJwtVc,
   ICredential,
   SdJwtDecodedVerifiableCredentialPayload,
   SdJwtDisclosureFrame,
-  W3CVerifiableCredential,
+  W3CVerifiableCredential
 } from '@sphereon/ssi-types'
 
 export type CredentialSignerCallback = (opts: {
-  credentialRequest: CredentialRequest
+  credentialRequest: CredentialRequestV1_0_15
   credential: CredentialIssuanceInput
   format?: OID4VCICredentialFormat
   /**
@@ -30,8 +30,9 @@ export type CredentialSignerCallback = (opts: {
 }) => Promise<W3CVerifiableCredential | CompactSdJwtVc>
 
 export interface CredentialDataSupplierArgs extends CNonceState {
-  credentialRequest: UniformCredentialRequest
+  credentialRequest: CredentialRequest
   credentialOffer: AssertedUniformCredentialOffer
+  format: OID4VCICredentialFormat
   clientId?: string
   credentialSupplierConfig?: CredentialSupplierConfig
   credentialDataSupplierInput?: CredentialDataSupplierInput
@@ -46,3 +47,8 @@ export interface CredentialDataSupplierResult {
 }
 
 export type CredentialDataSupplier = (args: CredentialDataSupplierArgs) => Promise<CredentialDataSupplierResult>
+
+export type IssuerCorrelation = {
+  issuerState?: string
+  preAuthorizedCode?: string
+}
