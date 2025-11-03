@@ -109,12 +109,21 @@ export const createAuthorizationRequestUrl = async ({
   clientId?: string
   version?: OpenId4VCIVersion
 }): Promise<string> => {
-  function removeDisplayAndValueTypes(obj: any) {
+
+  function removeDisplayAndValueTypes(obj: any): any {
+    if (Array.isArray(obj)) {
+      return obj.map(item => removeDisplayAndValueTypes(item))
+    }
+
+    if (typeof obj !== 'object' || obj === null) {
+      return obj
+    }
+
     const newObj = { ...obj }
     for (const prop in newObj) {
       if (['display', 'value_type'].includes(prop)) {
         delete newObj[prop]
-      } else if (typeof newObj[prop] === 'object') {
+      } else if (typeof newObj[prop] === 'object' && newObj[prop] !== null) {
         newObj[prop] = removeDisplayAndValueTypes(newObj[prop])
       }
     }

@@ -23,7 +23,7 @@ receive verifiable credentials. W3C formats as well as other Credential formats 
 OAuth 2.0 deployments and OpenID Connect OPs (see [OpenID.Core]) to extend their service and become Credential Issuers.
 It also allows new applications built using Verifiable Credentials to utilize OAuth 2.0 as an integration and
 interoperability layer. This package provides holder/wallet support to interact with OpenID4VCI capable Issuer systems.
-
+fetch
 In addition to the client and issuer, there is also a common package, which has all the types and payloads shared between the client and issuer.
 
 # Packages
