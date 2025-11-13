@@ -224,7 +224,7 @@ export const createAuthorizationRequestUrl = async ({
     ...(credentialOffer?.issuerState && {
       issuer_state: credentialOffer.issuerState
     }),
-    scope: authorizationRequest.scope
+    scope: authorizationRequest.scope ?? 'openid'
   }
 
   if (credentialOffer?.issuerState) {
@@ -237,12 +237,11 @@ export const createAuthorizationRequestUrl = async ({
   } else if (parEndpoint && parMode !== PARMode.NEVER) {
     logger.debug(`USING PAR with endpoint ${parEndpoint}`)
 
-    const parResponse = await formPost<PushedAuthorizationResponse>(
-      parEndpoint,
-      convertJsonToURI(queryObj, {
-        mode: JsonURIMode.X_FORM_WWW_URLENCODED,
-        uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state', 'state']
-      }),
+    const parBody = convertJsonToURI(queryObj, {
+      mode: JsonURIMode.X_FORM_WWW_URLENCODED,
+      uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state', 'state']
+    })
+    const parResponse = await formPost<PushedAuthorizationResponse>(parEndpoint, parBody,
       { contentType: 'application/x-www-form-urlencoded', accept: 'application/json' }
     )
     if (parResponse.errorBody || !parResponse.successBody) {
@@ -330,6 +329,10 @@ const handleLocations = (
       }
     } else {
       authorizationDetails.locations = [endpointMetadata.issuer]
+    }
+
+    if (Array.isArray(authorizationDetails.locations)) {
+      authorizationDetails.locations = [...new Set(authorizationDetails.locations)]
     }
   }
   return authorizationDetails
