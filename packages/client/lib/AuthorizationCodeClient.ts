@@ -109,12 +109,21 @@ export const createAuthorizationRequestUrl = async ({
   clientId?: string
   version?: OpenId4VCIVersion
 }): Promise<string> => {
-  function removeDisplayAndValueTypes(obj: any) {
+
+  function removeDisplayAndValueTypes(obj: any): any {
+    if (Array.isArray(obj)) {
+      return obj.map(item => removeDisplayAndValueTypes(item))
+    }
+
+    if (typeof obj !== 'object' || obj === null) {
+      return obj
+    }
+
     const newObj = { ...obj }
     for (const prop in newObj) {
       if (['display', 'value_type'].includes(prop)) {
         delete newObj[prop]
-      } else if (typeof newObj[prop] === 'object') {
+      } else if (typeof newObj[prop] === 'object' && newObj[prop] !== null) {
         newObj[prop] = removeDisplayAndValueTypes(newObj[prop])
       }
     }
@@ -215,7 +224,7 @@ export const createAuthorizationRequestUrl = async ({
     ...(credentialOffer?.issuerState && {
       issuer_state: credentialOffer.issuerState
     }),
-    scope: authorizationRequest.scope
+    scope: authorizationRequest.scope ?? 'openid'
   }
 
   if (credentialOffer?.issuerState) {
@@ -228,12 +237,11 @@ export const createAuthorizationRequestUrl = async ({
   } else if (parEndpoint && parMode !== PARMode.NEVER) {
     logger.debug(`USING PAR with endpoint ${parEndpoint}`)
 
-    const parResponse = await formPost<PushedAuthorizationResponse>(
-      parEndpoint,
-      convertJsonToURI(queryObj, {
-        mode: JsonURIMode.X_FORM_WWW_URLENCODED,
-        uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state', 'state']
-      }),
+    const parBody = convertJsonToURI(queryObj, {
+      mode: JsonURIMode.X_FORM_WWW_URLENCODED,
+      uriTypeProperties: ['client_id', 'request_uri', 'redirect_uri', 'scope', 'authorization_details', 'issuer_state', 'state']
+    })
+    const parResponse = await formPost<PushedAuthorizationResponse>(parEndpoint, parBody,
       { contentType: 'application/x-www-form-urlencoded', accept: 'application/json' }
     )
     if (parResponse.errorBody || !parResponse.successBody) {
@@ -321,6 +329,10 @@ const handleLocations = (
       }
     } else {
       authorizationDetails.locations = [endpointMetadata.issuer]
+    }
+
+    if (Array.isArray(authorizationDetails.locations)) {
+      authorizationDetails.locations = [...new Set(authorizationDetails.locations)]
     }
   }
   return authorizationDetails
