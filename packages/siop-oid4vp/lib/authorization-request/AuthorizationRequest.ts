@@ -4,10 +4,6 @@ import { Dcql } from '../authorization-response'
 import { fetchByReferenceOrUseByValue, getClientIdentifierPrefix, removeNullUndefined } from '../helpers'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
 import { RequestObject } from '../request-object'
-import { assertValidAuthorizationRequestOpts, assertValidVerifyAuthorizationRequestOpts } from './Opts'
-import { assertValidRPRegistrationMedataPayload, createAuthorizationRequestPayload } from './Payload'
-import { URI } from './URI'
-import { CreateAuthorizationRequestOpts, VerifyAuthorizationRequestOpts } from './types'
 import {
   AuthorizationRequestPayload,
   ClientIdentifierPrefix,
@@ -24,6 +20,10 @@ import {
   SupportedVersion,
   VerifiedAuthorizationRequest,
 } from '../types'
+import { assertValidAuthorizationRequestOpts, assertValidVerifyAuthorizationRequestOpts } from './Opts'
+import { assertValidRPRegistrationMedataPayload, createAuthorizationRequestPayload } from './Payload'
+import { CreateAuthorizationRequestOpts, VerifyAuthorizationRequestOpts } from './types'
+import { URI } from './URI'
 
 export class AuthorizationRequest {
   private readonly _requestObject?: RequestObject
@@ -198,6 +198,14 @@ export class AuthorizationRequest {
 
     // TODO: we need to verify somewhere that if response_mode is direct_post, that the response_uri may be present,
     // BUT not both redirect_uri and response_uri. What is the best place to do this?
+
+    if (mergedPayload.presentation_definition || mergedPayload.presentation_definition_uri) {
+      return Promise.reject(
+        Error(
+          `${SIOPErrors.INVALID_REQUEST}, The verifier is using a older draft implementation that is not supported. The verifier should update (DCQL instead of PE)`,
+        ),
+      )
+    }
 
     const dcqlQuery = await Dcql.findValidDcqlQuery(mergedPayload, this._options?.version)
 
