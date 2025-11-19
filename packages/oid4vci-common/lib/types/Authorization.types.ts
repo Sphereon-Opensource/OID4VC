@@ -10,6 +10,7 @@ import {
   TxCode,
 } from './Generic.types'
 import { EndpointMetadata } from './ServerMetadata'
+import { AuthorizationDetailsV1_0_15 } from './v1_0_15.types'
 
 export interface CommonAuthorizationRequest {
   /**
@@ -51,7 +52,7 @@ export interface CommonAuthorizationRequest {
    * with one or more authorization details objects of type openid_credential Section 5.1.1.
    * (The other is through the use of scopes as defined in Section 5.1.2.)
    */
-  authorization_details?: AuthorizationDetails[] | AuthorizationDetails
+  authorization_details?: AuthorizationDetailsV1_0_15[] | AuthorizationDetailsV1_0_15
   /**
    * OPTIONAL. JSON string containing the Wallet's OpenID Connect issuer URL. The Credential Issuer will use the discovery process as defined in
    * [SIOPv2] to determine the Wallet's capabilities and endpoints. RECOMMENDED in Dynamic Credential Request.
@@ -194,7 +195,7 @@ export enum AuthorizationChallengeError {
 /**
  * string type added for conformity with our previous code in the client
  */
-export type AuthorizationDetails =
+export type credential_identifiers =
   | (CommonAuthorizationDetails &
       (AuthorizationDetailsJwtVcJson | AuthorizationDetailsJwtVcJsonLdAndLdpVc | AuthorizationDetailsSdJwtVc | AuthorizationDetailsMsoMdoc))
   | string
@@ -236,7 +237,7 @@ export interface CommonAuthorizationDetails {
    * REQUIRED. JSON string that determines the authorization details type.
    * MUST be set to openid_credential for the purpose of this specification.
    */
-  type: 'openid_credential' | string
+  type: 'openid_credential'
 
   /**
    *  REQUIRED when format parameter is not present. String specifying a unique identifier of the Credential being described in the credential_configurations_supported map in the Credential Issuer Metadata as defined in Section 11.2.3. The referenced object in the credential_configurations_supported map conveys the details, such as the format, for issuance of the requested Credential. This specification defines Credential Format specific Issuer Metadata in Appendix A. It MUST NOT be present if format parameter is present.
@@ -256,8 +257,8 @@ export interface CommonAuthorizationDetails {
    */
   locations?: string[]
 
-  /* // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // [key: string]: any;*/
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
 }
 
 export interface AuthorizationDetailsJwtVcJson extends CommonAuthorizationDetails {
@@ -432,7 +433,7 @@ export interface AuthorizationRequestOpts {
   clientId?: string
   pkce?: PKCEOpts
   parMode?: PARMode
-  authorizationDetails?: AuthorizationDetails | AuthorizationDetails[]
+  authorizationDetails?: AuthorizationDetailsV1_0_15 | AuthorizationDetailsV1_0_15[]
   redirectUri?: string
   scope?: string
   requestObjectOpts?: RequestObjectOpts
@@ -482,6 +483,7 @@ export interface AccessTokenResponse {
   c_nonce_expires_in?: number // in seconds
   authorization_pending?: boolean
   interval?: number // in seconds
+  authorization_details?: AuthorizationDetailsV1_0_15[]
 }
 
 export enum AuthzFlowType {

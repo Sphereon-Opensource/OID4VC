@@ -1,6 +1,6 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
-  AssertedUniformCredentialOffer,
+  AssertedUniformCredentialOffer, AuthorizationDetailsV1_0_15,
   CredentialIssuerMetadataOptsV1_0_15,
   CredentialOfferMode,
   CredentialOfferPayloadV1_0_15,
@@ -18,6 +18,7 @@ import {
 export interface CredentialOfferGrantInput {
   authorization_code?: Partial<GrantAuthorizationCode>
   [PRE_AUTH_GRANT_LITERAL]?: Partial<GrantUrnIetf>
+  'urn:ietf:params:oauth:grant-type:pre-authorized_code'?: Partial<GrantUrnIetf> // FIXME? Getting typscript errors when only PRE_AUTH_GRANT_LITERAL is there
 }
 
 function createCredentialOfferGrants(inputGrants?: CredentialOfferGrantInput) {
@@ -167,4 +168,40 @@ export const assertValidPinNumber = (pin?: string, pinLength?: number) => {
   if (pin && !RegExp(`[\\d\\D]{${pinLength ?? 6}}`).test(pin)) {
     throw Error(`${PIN_NOT_MATCH_ERROR}`)
   }
+}
+
+/**
+ * Generates unique credential identifiers for authorization details
+ * Each identifier represents a specific credential instance that can be issued
+ */
+export const generateCredentialIdentifiers = (
+  authDetail: AuthorizationDetailsV1_0_15,
+  session: CredentialOfferSession
+): string[] => {
+  if (typeof authDetail === 'string') {
+    return [uuidv4()]
+  }
+
+  const identifiers: string[] = []
+
+  if (authDetail.credential_configuration_id) {
+    const configId = authDetail.credential_configuration_id
+    const hasConfig = session.credentialOffer.credential_offer
+      .credential_configuration_ids?.includes(configId)
+
+    if (hasConfig) {
+      identifiers.push(`${configId}_${Date.now()}_${uuidv4()}`)
+    }
+  }
+
+  if (identifiers.length === 0 && authDetail.format) {
+    identifiers.push(`${authDetail.format}_${Date.now()}_${uuidv4()}`)
+  }
+
+  // Ultimate fallback
+  if (identifiers.length === 0) {
+    identifiers.push(uuidv4())
+  }
+
+  return identifiers
 }

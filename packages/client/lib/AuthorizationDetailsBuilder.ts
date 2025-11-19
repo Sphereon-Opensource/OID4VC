@@ -1,16 +1,15 @@
-import { AuthorizationDetails, AuthorizationDetailsJwtVcJson, OID4VCICredentialFormat } from '@sphereon/oid4vci-common'
+import {
+  AuthorizationDetailsJwtVcJson,
+  AuthorizationDetailsV1_0_15,
+  OID4VCICredentialFormat
+} from '@sphereon/oid4vci-common'
 
 //todo: refactor this builder to be able to create ldp details as well
 export class AuthorizationDetailsBuilder {
-  private readonly authorizationDetails: Partial<Exclude<AuthorizationDetails, string>>
+  private readonly authorizationDetails: Partial<Exclude<AuthorizationDetailsV1_0_15, string>>
 
   constructor() {
-    this.authorizationDetails = {}
-  }
-
-  withType(type: string): AuthorizationDetailsBuilder {
-    this.authorizationDetails.type = type
-    return this
+    this.authorizationDetails = { type: 'openid_credential' }
   }
 
   withFormats(format: OID4VCICredentialFormat): AuthorizationDetailsBuilder {

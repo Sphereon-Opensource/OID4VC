@@ -394,6 +394,17 @@ export class VcIssuer {
           throw Error(TokenErrorResponse.invalid_request)
         }
       }
+
+      // Validate credential_identifier against authorization_details if present
+      if ('credential_identifier' in credentialRequest && credentialRequest.credential_identifier && issuerCorrelation.authorizationDetails) {
+        const validIdentifiers = issuerCorrelation.authorizationDetails
+          .flatMap((detail: any) => detail.credential_identifiers || [])
+
+        if (!validIdentifiers.includes(credentialRequest.credential_identifier)) {
+          throw Error('credential_identifier not found in authorization_details')
+        }
+      }
+
       let format = this.lookupCredentialFormat(credentialRequest)
       const validated = await this.validateCredentialRequestProof({
         ...opts,

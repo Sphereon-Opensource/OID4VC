@@ -1,5 +1,11 @@
 import { DPoPVerifyJwtCallback, JWK, uuidv4, verifyDPoP } from '@sphereon/oid4vc-common'
-import { GrantTypes, PRE_AUTHORIZED_CODE_REQUIRED_ERROR, TokenError, TokenErrorResponse } from '@sphereon/oid4vci-common'
+import {
+  AuthorizationRequest,
+  GrantTypes,
+  PRE_AUTHORIZED_CODE_REQUIRED_ERROR,
+  TokenError,
+  TokenErrorResponse
+} from '@sphereon/oid4vci-common'
 import { assertValidAccessTokenRequest, createAccessTokenResponse, ITokenEndpointOpts, VcIssuer } from '@sphereon/oid4vci-issuer'
 import { sendErrorResponse } from '@sphereon/ssi-express-support'
 import { NextFunction, Request, Response } from 'express'
@@ -29,7 +35,7 @@ export const handleTokenRequest = ({
     dPoPVerifyJwtCallback: DPoPVerifyJwtCallback
   }
   // The full URL of the access token endpoint
-  accessTokenEndpoint?: string
+  accessTokenEndpoint?: string,
 }) => {
   return async (request: Request, response: Response) => {
     response.set({
@@ -115,14 +121,19 @@ export const handleTokenRequest = ({
 }
 
 export const verifyTokenRequest = ({
-  preAuthorizedCodeExpirationDuration,
-  issuer,
-}: Required<Pick<ITokenEndpointOpts, 'preAuthorizedCodeExpirationDuration'> & { issuer: VcIssuer }>) => {
+                                     preAuthorizedCodeExpirationDuration,
+                                     issuer,
+                                     authRequestsData
+                                   }: Required<Pick<ITokenEndpointOpts, 'preAuthorizedCodeExpirationDuration'>> & {
+  issuer: VcIssuer,
+  authRequestsData?: Map<string, AuthorizationRequest>
+}) => {
   return async (request: Request, response: Response, next: NextFunction) => {
     try {
       await assertValidAccessTokenRequest(request.body, {
         expirationDuration: preAuthorizedCodeExpirationDuration,
         credentialOfferSessions: issuer.credentialOfferSessions,
+        authRequestsData
       })
     } catch (error) {
       if (error instanceof TokenError) {

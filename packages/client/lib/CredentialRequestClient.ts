@@ -1,7 +1,8 @@
 import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereon/oid4vc-common'
 import {
   acquireDeferredCredential,
-  AuthorizationDetails,
+  AuthorizationDetailsV1_0_15,
+  CredentialRequest,
   CredentialRequestV1_0_15,
   CredentialResponse,
   DPoPResponseParams,
@@ -14,7 +15,6 @@ import {
   post,
   ProofOfPossession,
   supportedOID4VCICredentialFormat,
-  CredentialRequest,
   URL_NOT_VALID
 } from '@sphereon/oid4vci-common'
 import { CredentialFormat, Loggers } from '@sphereon/ssi-types'
@@ -40,7 +40,7 @@ export interface CredentialRequestOpts {
   version: OpenId4VCIVersion
   subjectIssuance?: ExperimentalSubjectIssuance
   issuerState?: string
-  authorizationDetails?: AuthorizationDetails[]
+  authorizationDetails?: AuthorizationDetailsV1_0_15[]
 }
 
 export type CreateCredentialRequestOpts = {
@@ -72,15 +72,14 @@ export async function buildProof(
   return await proofInput.build()
 }
 
-function isOpenIdCredentialDetail(ad: AuthorizationDetails): ad is AuthorizationDetails {
+function isOpenIdCredentialDetail(ad: AuthorizationDetailsV1_0_15): ad is AuthorizationDetailsV1_0_15 {
   return typeof ad === 'object' && ad !== null && ad.type === 'openid_credential'
 }
 
-// Update the helper function:
 function findAuthorizationDetail(
-  authorizationDetails: AuthorizationDetails[] | undefined,
+  authorizationDetails: AuthorizationDetailsV1_0_15[] | undefined,
   preferredConfigId?: string
-): AuthorizationDetails | undefined {
+): AuthorizationDetailsV1_0_15 | undefined {
   if (!authorizationDetails) {
     return undefined
   }
@@ -93,10 +92,20 @@ function findAuthorizationDetail(
 
   // If a preferred config ID is specified, try to find a match
   if (preferredConfigId) {
-    const match = openIdCredentialDetails.find(detail =>
-      typeof detail === 'object' && detail !== null &&
-      (detail as any).credential_configuration_id === preferredConfigId
-    )
+    const match = openIdCredentialDetails.find(detail => {
+      if (typeof detail !== 'object' || detail === null) return false
+
+      const detailObj = detail as any
+
+      if (detailObj.credential_configuration_id === preferredConfigId) {
+        return true
+      }
+      if (detailObj.credential_identifier === preferredConfigId) {
+        return true
+      }
+      return Array.isArray(detailObj.credential_identifiers) && detailObj.credential_identifiers.includes(preferredConfigId)
+    })
+
     if (match) {
       return match
     }
