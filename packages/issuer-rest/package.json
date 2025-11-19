@@ -1,6 +1,6 @@
 {
   "name": "@sphereon/oid4vci-issuer-server",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "description": "OpenID 4 Verifiable Credential Issuance Server",
   "source": "./src/index.ts",
   "type": "module",
@@ -47,10 +47,10 @@
     "@types/node": "^20.17.30",
     "@types/supertest": "^6.0.3",
     "did-resolver": "^4.1.0",
+    "dotenv": "^16.4.5",
     "jose": "^4.10.0",
     "supertest": "^6.3.3",
-    "vitest": "^3.1.1",
-    "dotenv": "^16.4.5"
+    "vitest": "^3.1.1"
   },
   "peerDependencies": {
     "awesome-qr": "^2.1.5-rc.0"
@@ -66,7 +66,12 @@
   "engines": {
     "node": ">=20"
   },
-  "files": ["src", "dist", "README.md", "LICENSE.md"],
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE.md"
+  ],
   "keywords": [
     "Sphereon",
     "Verifiable Credentials",

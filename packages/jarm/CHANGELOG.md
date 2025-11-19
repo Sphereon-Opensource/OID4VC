@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.20.0](https://github.com/Sphereon-Opensource/OID4VC/compare/v0.19.0...v0.20.0) (2025-11-19)
+
+
+### Features
+
+* use dcql queries only based on v1 of openid4vp spec ([2ea4e37](https://github.com/Sphereon-Opensource/OID4VC/commit/2ea4e37c465491bf437627840e1b420c97d5200f))
+
+
+
+
+
 # [0.19.0](https://github.com/Sphereon-Opensource/OID4VC/compare/v0.17.0...v0.19.0) (2025-05-22)
 
 
