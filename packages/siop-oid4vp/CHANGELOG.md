@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.20.0](https://github.com/Sphereon-Opensource/OID4VC/compare/v0.19.0...v0.20.0) (2025-11-19)
+
+
+### Bug Fixes
+
+* added verified data types ([73d688d](https://github.com/Sphereon-Opensource/OID4VC/commit/73d688d585a1635937029e65a579d567277eaa58))
+* DIIPv4 fixes ([012b87c](https://github.com/Sphereon-Opensource/OID4VC/commit/012b87c5aa0795286a6dbdf21fa9c7a1bb688384))
+
+
+### Features
+
+* added callback support when creating auth requests ([daddf2d](https://github.com/Sphereon-Opensource/OID4VC/commit/daddf2d8102adeaa3db71dd37c1ab6867c21e8b8))
+* support draft 28 OID4VP ([ab84e8b](https://github.com/Sphereon-Opensource/OID4VC/commit/ab84e8b6f4d69bb0b120a55ac6463a18878eded8))
+* use dcql queries only based on v1 of openid4vp spec ([2ea4e37](https://github.com/Sphereon-Opensource/OID4VC/commit/2ea4e37c465491bf437627840e1b420c97d5200f))
+
+
+
+
+
 # [0.19.0](https://github.com/Sphereon-Opensource/OID4VC/compare/v0.17.0...v0.19.0) (2025-05-22)
 
 

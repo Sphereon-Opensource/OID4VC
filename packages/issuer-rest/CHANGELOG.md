@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.20.0](https://github.com/Sphereon-Opensource/OID4VC/compare/v0.19.0...v0.20.0) (2025-11-19)
+
+
+### Bug Fixes
+
+* DIIPv4 fixes ([012b87c](https://github.com/Sphereon-Opensource/OID4VC/commit/012b87c5aa0795286a6dbdf21fa9c7a1bb688384))
+
+
+
+
+
 # [0.19.0](https://github.com/Sphereon-Opensource/OID4VC/compare/v0.17.0...v0.19.0) (2025-05-22)
 
 

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.20.0](https://github.com/Sphereon-Opensource/OID4VC/compare/v0.19.0...v0.20.0) (2025-11-19)
+
+**Note:** Version bump only for package @sphereon/did-auth-siop-adapter
+
+
+
+
+
 # [0.19.0](https://github.com/Sphereon-Opensource/OID4VC/compare/v0.17.0...v0.19.0) (2025-05-22)
 
 
