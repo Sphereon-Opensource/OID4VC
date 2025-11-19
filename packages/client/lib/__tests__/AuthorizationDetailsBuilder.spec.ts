@@ -27,9 +27,7 @@ describe('AuthorizationDetailsBuilder test', () => {
     })
   })
   it('should create AuthorizationDetails object if locations is missing', () => {
-    const actual = new AuthorizationDetailsBuilder()
-      .withFormats('jwt_vc' as OID4VCICredentialFormat)
-      .buildJwtVcJson()
+    const actual = new AuthorizationDetailsBuilder().withFormats('jwt_vc' as OID4VCICredentialFormat).buildJwtVcJson()
     expect(actual).toEqual({
       type: 'openid_credential',
       format: 'jwt_vc',

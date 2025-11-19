@@ -9,7 +9,7 @@ import {
   ProofOfPossession,
   CredentialRequest,
   URL_NOT_VALID,
-  WellKnownEndpoints
+  WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 import * as jose from 'jose'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -17,19 +17,14 @@ import * as jose from 'jose'
 import nock from 'nock'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import {
-  CredentialOfferClientV1_0_15,
-  CredentialRequestClientBuilderV1_0_15,
-  MetadataClientV1_0_15,
-  ProofOfPossessionBuilder
-} from '..'
+import { CredentialOfferClientV1_0_15, CredentialRequestClientBuilderV1_0_15, MetadataClientV1_0_15, ProofOfPossessionBuilder } from '..'
 
 import {
   IDENTIPROOF_ISSUER_URL,
   IDENTIPROOF_OID4VCI_METADATA,
   INITIATION_TEST,
   INITIATION_TEST_V1_0_15,
-  WALT_OID4VCI_METADATA
+  WALT_OID4VCI_METADATA,
 } from './MetadataMocks'
 import { getMockData } from './data/VciDataFixtures'
 
@@ -40,30 +35,29 @@ const jwt: Jwt = {
   header: {
     alg: Alg.ES256,
     kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1',
-    typ: 'openid4vci-proof+jwt' // ← required for v1.0.11+
+    typ: 'openid4vci-proof+jwt', // ← required for v1.0.11+
   },
   payload: {
     iss: 'sphereon:wallet',
     nonce: 'tZignsnFbp',
     jti: 'tZignsnFbp223',
-    aud: IDENTIPROOF_ISSUER_URL
-  }
+    aud: IDENTIPROOF_ISSUER_URL,
+  },
 }
 
 const jwt_withoutDid: Jwt = {
   header: {
     alg: Alg.ES256,
     kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1',
-    typ: 'openid4vci-proof+jwt'
+    typ: 'openid4vci-proof+jwt',
   },
   payload: {
     iss: 'sphereon:wallet',
     nonce: 'tZignsnFbp',
     jti: 'tZignsnFbp223',
-    aud: IDENTIPROOF_ISSUER_URL
-  }
+    aud: IDENTIPROOF_ISSUER_URL,
+  },
 }
-
 
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
 
@@ -249,9 +243,7 @@ describe('Credential Request Client ', () => {
       .withClientId('sphereon:wallet')
       .build()
     const uniformRequest = { credential_configuration_id: 'random', proof } satisfies CredentialRequest
-    await expect(credReqClient.acquireCredentialsUsingRequest(uniformRequest, 'jwt_vc_json')).rejects.toThrow(
-      Error(URL_NOT_VALID),
-    )
+    await expect(credReqClient.acquireCredentialsUsingRequest(uniformRequest, 'jwt_vc_json')).rejects.toThrow(Error(URL_NOT_VALID))
   })
 
   it('should fail with invalid url without did', async () => {
@@ -270,7 +262,7 @@ describe('Credential Request Client ', () => {
       .withKid(kid_withoutDid)
       .withClientId('sphereon:wallet')
       .build()
-    await expect(credReqClient.acquireCredentialsUsingRequest({ credential_configuration_id: 'random'}, 'jwt_vc_json')).rejects.toThrow(
+    await expect(credReqClient.acquireCredentialsUsingRequest({ credential_configuration_id: 'random' }, 'jwt_vc_json')).rejects.toThrow(
       Error(URL_NOT_VALID),
     )
   })
@@ -295,10 +287,10 @@ describe('Credential Request Client with Walt.id ', () => {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             'pre-authorized_code':
               'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA',
-            user_pin_required: false
-          }
-        }
-      })
+            user_pin_required: false,
+          },
+        },
+      }),
     )}`
     const credentialOffer = await CredentialOfferClientV1_0_15.fromURI(WALT_IRR_URI)
 
@@ -325,7 +317,7 @@ describe('Credential Request Client with different issuers ', () => {
   })
   it('should create correct CredentialRequest for Spruce', async () => {
     const IRR_URI =
-      'openid-initiate-issuance://?credential_offer=eyJjcmVkZW50aWFsX2lzc3VlciI6Imh0dHBzOi8vbmdpLW9pZGM0dmNpLXRlc3Quc3BydWNlaWQueHl6IiwiY3JlZGVudGlhbF9jb25maWd1cmF0aW9uX2lkcyI6WyJPcGVuQmFkZ2VDcmVkZW50aWFsIl0sImdyYW50cyI6eyJ1cm46aWV0ZjpwYXJhbXM6b2F1dGg6Z3JhbnQtdHlwZTpwcmUtYXV0aG9yaXplZF9jb2RlIjp7InByZS1hdXRob3JpemVkX2NvZGUiOiJleUpoYkdjaU9pSkZVekkxTmlKOS5leUpqY21Wa1pXNTBhV0ZzWDNSNWNHVWlPbHNpVDNCbGJrSmhaR2RsUTNKbFpHVnVkR2xoYkNKZExDSmxlSEFpT2lJeU1ESXpMVEEwTFRJd1ZEQTVPakEwT2pNMldpSXNJbTV2Ym1ObElqb2liV0ZpYm1WcFQwVlNaVkIzVjNCdVJGRndlRXQzVW5Sc1ZWUkZSbGhHVUV3aWZRLnFPWlJQTjhzVHZfa25ocDdXYVd0ZTItYURVTGFQWlgtLTJpOXVuRjZRRFFOVWxscURodnhnSUhNRENZSENWOE8yX0dqLVQyeDFKODRmRE1hakUzYXNnIiwidXNlcl9waW5fcmVxdWlyZWQiOmZhbHNlfX19';
+      'openid-initiate-issuance://?credential_offer=eyJjcmVkZW50aWFsX2lzc3VlciI6Imh0dHBzOi8vbmdpLW9pZGM0dmNpLXRlc3Quc3BydWNlaWQueHl6IiwiY3JlZGVudGlhbF9jb25maWd1cmF0aW9uX2lkcyI6WyJPcGVuQmFkZ2VDcmVkZW50aWFsIl0sImdyYW50cyI6eyJ1cm46aWV0ZjpwYXJhbXM6b2F1dGg6Z3JhbnQtdHlwZTpwcmUtYXV0aG9yaXplZF9jb2RlIjp7InByZS1hdXRob3JpemVkX2NvZGUiOiJleUpoYkdjaU9pSkZVekkxTmlKOS5leUpqY21Wa1pXNTBhV0ZzWDNSNWNHVWlPbHNpVDNCbGJrSmhaR2RsUTNKbFpHVnVkR2xoYkNKZExDSmxlSEFpT2lJeU1ESXpMVEEwTFRJd1ZEQTVPakEwT2pNMldpSXNJbTV2Ym1ObElqb2liV0ZpYm1WcFQwVlNaVkIzVjNCdVJGRndlRXQzVW5Sc1ZWUkZSbGhHVUV3aWZRLnFPWlJQTjhzVHZfa25ocDdXYVd0ZTItYURVTGFQWlgtLTJpOXVuRjZRRFFOVWxscURodnhnSUhNRENZSENWOE8yX0dqLVQyeDFKODRmRE1hakUzYXNnIiwidXNlcl9waW5fcmVxdWlyZWQiOmZhbHNlfX19'
     const credentialRequest = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
@@ -355,10 +347,10 @@ describe('Credential Request Client with different issuers ', () => {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             'pre-authorized_code':
               'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTc4OTNjYy04ZTY3LTQxNzItYWZlOS1lODcyYmYxNDBlNWMiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.ODfq2AIhOcB61dAb3zMrXBJjPJaf53zkeHh_AssYyYA',
-            user_pin_required: false
-          }
-        }
-      })
+            user_pin_required: false,
+          },
+        },
+      }),
     )}`
     const credentialOffer = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
@@ -410,26 +402,26 @@ describe('Credential Request Client with different issuers ', () => {
         grants: {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             'pre-authorized_code': 'g0UCOj6RAN5AwHU6gczm_GzB4_lH6GW39Z0Dl2DOOiO',
-            user_pin_required: false
-          }
-        }
-      })
+            user_pin_required: false,
+          },
+        },
+      }),
     )}`
     const credentialRequest = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
         uri: IRR_URI,
-        metadata: getMockData('mattr')?.metadata as unknown as EndpointMetadataResultV1_0_15
+        metadata: getMockData('mattr')?.metadata as unknown as EndpointMetadataResultV1_0_15,
       })
     )
       .build()
       .createCredentialRequest({
         proofInput: {
           proof_type: 'jwt',
-          jwt: getMockData('mattr')?.credential.request.proof.jwt as string
+          jwt: getMockData('mattr')?.credential.request.proof.jwt as string,
         },
         credentialTypes: ['OpenBadgeCredential'],
         format: 'ldp_vc',
-        version: OpenId4VCIVersion.VER_1_0_15
+        version: OpenId4VCIVersion.VER_1_0_15,
       })
     expect(credentialRequest).toEqual(getMockData('mattr')?.credential.request)
   })
@@ -443,10 +435,10 @@ describe('Credential Request Client with different issuers ', () => {
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             'pre-authorized_code':
               'eyJhbGciOiJIUzI1NiJ9.eyJjcmVkZW50aWFsX3R5cGUiOiJPcGVuQmFkZ2VDcmVkZW50aWFsIiwiZXhwIjoxNjgxOTg0NDY3fQ.fEAHKz2nuWfiYHw406iNxr-81pWkNkbi31bWsYSf6Ng',
-            user_pin_required: false
-          }
-        }
-      })
+            user_pin_required: false,
+          },
+        },
+      }),
     )}`
     const credentialRequest = await (
       await CredentialRequestClientBuilderV1_0_15.fromURI({
@@ -464,7 +456,6 @@ describe('Credential Request Client with different issuers ', () => {
         format: 'ldp_vc',
         version: OpenId4VCIVersion.VER_1_0_15,
       })
-
 
     expect(credentialRequest).toEqual(getMockData('diwala')?.credential.request)
   })

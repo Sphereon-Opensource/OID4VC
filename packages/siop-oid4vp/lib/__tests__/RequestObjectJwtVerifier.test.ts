@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
-import {describe, expect, it} from 'vitest'
-import {DcqlQuery} from 'dcql'
-import {ClientIdentifierPrefix, getRequestObjectJwtVerifier, JwtVerifier, PassBy, SIOPErrors} from '../types'
+import { describe, expect, it } from 'vitest'
+import { DcqlQuery } from 'dcql'
+import { ClientIdentifierPrefix, getRequestObjectJwtVerifier, JwtVerifier, PassBy, SIOPErrors } from '../types'
 
 dotenv.config()
 
@@ -14,24 +14,22 @@ const baseJwtPayload = {
 }
 
 const dcqlQuery = {
-    credentials: [
+  credentials: [
+    {
+      id: 'Credentials',
+      format: 'jwt_vc_json',
+      meta: {
+        type_values: [['VerifiableCredential']],
+      },
+      claims: [
         {
-            id: 'Credentials',
-            format: 'jwt_vc_json',
-            meta: {
-                type_values: [
-                    ['VerifiableCredential']
-                ],
-            },
-            claims: [
-                {
-                    id: 'ID_Card_Credential',
-                    path: ['$.issuer.id'],
-                    values: ['did:example:issuer'],
-                },
-            ],
+          id: 'ID_Card_Credential',
+          path: ['$.issuer.id'],
+          values: ['did:example:issuer'],
         },
-    ],
+      ],
+    },
+  ],
 } satisfies DcqlQuery.Input
 
 const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery)
@@ -39,21 +37,21 @@ DcqlQuery.validate(parsedDcqlQuery)
 
 describe('requestObjectJwtVerifier', () => {
   it('should throw when an invalid schema is passed', async () => {
-      expect(
-          getRequestObjectJwtVerifier(
-              {
-                  header: {},
-                  payload: {
-                      ...baseJwtPayload,
-                      client_id: `wrong:${baseJwtPayload.client_id}`,
-                      client_metadata: {
-                          passBy: PassBy.REFERENCE
-                      },
-                  },
-              },
-              { raw: '' },
-          ),
-      ).rejects.toThrow(SIOPErrors.INVALID_CLIENT_ID_SCHEME)
+    expect(
+      getRequestObjectJwtVerifier(
+        {
+          header: {},
+          payload: {
+            ...baseJwtPayload,
+            client_id: `wrong:${baseJwtPayload.client_id}`,
+            client_metadata: {
+              passBy: PassBy.REFERENCE,
+            },
+          },
+        },
+        { raw: '' },
+      ),
+    ).rejects.toThrow(SIOPErrors.INVALID_CLIENT_ID_SCHEME)
   })
 
   it('should succeed with a client_id_scheme did', async () => {
@@ -61,12 +59,12 @@ describe('requestObjectJwtVerifier', () => {
       {
         header: { kid: 'did:example.com#1234', alg: 'ES256' },
         payload: {
-            ...baseJwtPayload,
-            client_id: `${ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER}:${baseJwtPayload.client_id}`,
-            client_metadata: {
-                passBy: PassBy.REFERENCE
-            },
-            dcql_query: parsedDcqlQuery
+          ...baseJwtPayload,
+          client_id: `${ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER}:${baseJwtPayload.client_id}`,
+          client_metadata: {
+            passBy: PassBy.REFERENCE,
+          },
+          dcql_query: parsedDcqlQuery,
         },
       },
       { raw: '' },
@@ -81,12 +79,12 @@ describe('requestObjectJwtVerifier', () => {
       {
         header: {},
         payload: {
-            ...baseJwtPayload,
-            client_id: `${ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER}:${baseJwtPayload.client_id}`,
-            client_metadata: {
-                passBy: PassBy.REFERENCE
-            },
-            dcql_query: parsedDcqlQuery
+          ...baseJwtPayload,
+          client_id: `${ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER}:${baseJwtPayload.client_id}`,
+          client_metadata: {
+            passBy: PassBy.REFERENCE,
+          },
+          dcql_query: parsedDcqlQuery,
         },
       },
       { raw: '' },
@@ -100,11 +98,11 @@ describe('requestObjectJwtVerifier', () => {
       {
         header: {},
         payload: {
-            ...baseJwtPayload,
-            client_metadata: {
-                passBy: PassBy.REFERENCE
-            },
-            dcql_query: parsedDcqlQuery
+          ...baseJwtPayload,
+          client_metadata: {
+            passBy: PassBy.REFERENCE,
+          },
+          dcql_query: parsedDcqlQuery,
         },
       },
       { raw: '' },
@@ -119,13 +117,13 @@ describe('requestObjectJwtVerifier', () => {
       {
         header: { x5c: [''], alg: 'ES256' },
         payload: {
-            ...baseJwtPayload,
-            client_id: `${ClientIdentifierPrefix.X509_SAN_DNS}:${baseJwtPayload.client_id}`,
-            iss: '1234',
-            client_metadata: {
-                passBy: PassBy.REFERENCE
-            },
-            dcql_query: parsedDcqlQuery
+          ...baseJwtPayload,
+          client_id: `${ClientIdentifierPrefix.X509_SAN_DNS}:${baseJwtPayload.client_id}`,
+          iss: '1234',
+          client_metadata: {
+            passBy: PassBy.REFERENCE,
+          },
+          dcql_query: parsedDcqlQuery,
         },
       },
       { raw: '' },
@@ -140,12 +138,12 @@ describe('requestObjectJwtVerifier', () => {
       {
         header: { alg: 'ES256' },
         payload: {
-            ...baseJwtPayload,
-            client_id: `${ClientIdentifierPrefix.X509_SAN_DNS}:${baseJwtPayload.client_id}`,
-            client_metadata: {
-                passBy: PassBy.REFERENCE
-            },
-            dcql_query: parsedDcqlQuery
+          ...baseJwtPayload,
+          client_id: `${ClientIdentifierPrefix.X509_SAN_DNS}:${baseJwtPayload.client_id}`,
+          client_metadata: {
+            passBy: PassBy.REFERENCE,
+          },
+          dcql_query: parsedDcqlQuery,
         },
       },
       { raw: '' },
@@ -159,12 +157,12 @@ describe('requestObjectJwtVerifier', () => {
       {
         header: {},
         payload: {
-            ...baseJwtPayload,
-            client_id: `${ClientIdentifierPrefix.VERIFIER_ATTESTATION}:${baseJwtPayload.client_id}`,
-            client_metadata: {
-                passBy: PassBy.REFERENCE
-            },
-            dcql_query: parsedDcqlQuery
+          ...baseJwtPayload,
+          client_id: `${ClientIdentifierPrefix.VERIFIER_ATTESTATION}:${baseJwtPayload.client_id}`,
+          client_metadata: {
+            passBy: PassBy.REFERENCE,
+          },
+          dcql_query: parsedDcqlQuery,
         },
       },
       { raw: '' },
@@ -181,12 +179,12 @@ describe('requestObjectJwtVerifier', () => {
       {
         header: { jwt: attestationJwt, typ: 'verifier-attestation+jwt', alg: 'ES256' },
         payload: {
-            ...baseJwtPayload,
-            client_id: `${ClientIdentifierPrefix.VERIFIER_ATTESTATION}:client_id`,
-            client_metadata: {
-                passBy: PassBy.REFERENCE
-            },
-            dcql_query: parsedDcqlQuery
+          ...baseJwtPayload,
+          client_id: `${ClientIdentifierPrefix.VERIFIER_ATTESTATION}:client_id`,
+          client_metadata: {
+            passBy: PassBy.REFERENCE,
+          },
+          dcql_query: parsedDcqlQuery,
         },
       },
       { raw: '' },

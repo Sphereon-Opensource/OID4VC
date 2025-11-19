@@ -1,6 +1,6 @@
 import { AuthorizationRequest } from '../authorization-request'
 import { AuthorizationResponse } from '../authorization-response'
-import {CallbackOpts, VerifiedData} from '../types'
+import { CallbackOpts, VerifiedData } from '../types'
 
 export interface AuthorizationRequestState {
   correlationId: string
@@ -30,13 +30,13 @@ export interface AuthorizationResponseStateWithVerifiedData extends Authorizatio
 }
 
 export enum AuthorizationRequestStateStatus {
-  CREATED = "authorization_request_created",
-  RETRIEVED = "authorization_request_retrieved",
-  ERROR = "error"
+  CREATED = 'authorization_request_created',
+  RETRIEVED = 'authorization_request_retrieved',
+  ERROR = 'error',
 }
 
 export enum AuthorizationResponseStateStatus {
-  RECEIVED = "authorization_response_received",
-  VERIFIED = "authorization_response_verified",
-  ERROR = "error"
+  RECEIVED = 'authorization_response_received',
+  VERIFIED = 'authorization_response_verified',
+  ERROR = 'error',
 }

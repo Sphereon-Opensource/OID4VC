@@ -17,7 +17,7 @@ import {
 export class ProofOfPossessionBuilder<DIDDoc = never> {
   private readonly proof?: ProofOfPossession
   private readonly callbacks?: ProofOfPossessionCallbacks
-//  private readonly version: OpenId4VCIVersion
+  //  private readonly version: OpenId4VCIVersion
   private readonly mode: PoPMode = 'pop'
 
   private kid?: string
@@ -49,7 +49,7 @@ export class ProofOfPossessionBuilder<DIDDoc = never> {
     this.mode = mode
     this.proof = proof
     this.callbacks = callbacks
-//    this.version = version
+    //    this.version = version
     if (jwt) {
       this.withJwt(jwt)
     } else {

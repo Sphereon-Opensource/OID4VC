@@ -3,7 +3,7 @@ import {
   jarmAuthResponseDirectPostJwtValidate,
   JarmAuthResponseParams,
   JarmDirectPostJwtAuthResponseValidationContext,
-  JarmDirectPostJwtResponseParams
+  JarmDirectPostJwtResponseParams,
 } from '@sphereon/jarm'
 import { base64urlToString, decodeProtectedHeader, JwtIssuer } from '@sphereon/oid4vc-common'
 import { HasherSync } from '@sphereon/ssi-types'
@@ -15,13 +15,14 @@ import {
   PropertyTarget,
   RequestObjectPayloadOpts,
   RequestPropertyWithTargets,
-  URI
+  URI,
 } from '../authorization-request'
 import { mergeVerificationOpts } from '../authorization-request/Opts'
 import {
-  AuthorizationResponse, DcqlQueryLookupCallback,
+  AuthorizationResponse,
+  DcqlQueryLookupCallback,
   extractPresentationsFromDcqlVpToken,
-  VerifyAuthorizationResponseOpts
+  VerifyAuthorizationResponseOpts,
 } from '../authorization-response'
 import { getNonce, getState } from '../helpers'
 import {
@@ -37,15 +38,11 @@ import {
   SupportedVersion,
   Verification,
   VerifiedAuthorizationResponse,
-  CallbackOpts, AuthorizationRequestState
+  CallbackOpts,
+  AuthorizationRequestState,
 } from '../types'
 
-
-import {
-  createRequestOptsFromBuilderOrExistingOpts,
-  createVerifyResponseOptsFromBuilderOrExistingOpts,
-  isTargetOrNoTargets
-} from './Opts'
+import { createRequestOptsFromBuilderOrExistingOpts, createVerifyResponseOptsFromBuilderOrExistingOpts, isTargetOrNoTargets } from './Opts'
 import { RPBuilder } from './RPBuilder'
 import { IRPSessionManager } from './types'
 
@@ -85,7 +82,7 @@ export class RP {
 
   public async createAuthorizationRequest(opts: {
     correlationId: string
-    queryId?: string,
+    queryId?: string
     nonce: string | RequestPropertyWithTargets<string>
     state: string | RequestPropertyWithTargets<string>
     jwtIssuer?: JwtIssuer
@@ -93,13 +90,13 @@ export class RP {
     version?: SupportedVersion
     requestByReferenceURI?: string
     responseURI?: string
-    responseURIType?: ResponseURIType,
+    responseURIType?: ResponseURIType
     responseRedirectURI?: string
   }): Promise<AuthorizationRequest> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
 
-    if(opts.queryId && this._dcqlQueryLookupCallback) {
-      const dcqlQuery:DcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
+    if (opts.queryId && this._dcqlQueryLookupCallback) {
+      const dcqlQuery: DcqlQuery = await this._dcqlQueryLookupCallback(opts.queryId)
       authorizationRequestOpts.payload.dcql_query = dcqlQuery
     }
 
@@ -132,7 +129,7 @@ export class RP {
     requestByReferenceURI?: string
     responseURI?: string
     responseURIType?: ResponseURIType
-    callback?: CallbackOpts,
+    callback?: CallbackOpts
     responseRedirectURI?: string
   }): Promise<URI> {
     const authorizationRequestOpts = this.newAuthorizationRequestOpts(opts)
@@ -145,7 +142,7 @@ export class RP {
         queryId: opts.queryId,
         subject: authRequest,
         callback: opts.callback,
-        responseRedirectURI: opts.responseRedirectURI
+        responseRedirectURI: opts.responseRedirectURI,
       })
       return uri
     } catch (error) {
@@ -302,10 +299,7 @@ export class RP {
     }
 
     // Apply mappings to the redirect URI
-    return Object.entries(mappings).reduce(
-      (uri, [key, value]) => uri.replace(`:${key}`, value),
-      redirectUri
-    )
+    return Object.entries(mappings).reduce((uri, [key, value]) => uri.replace(`:${key}`, value), redirectUri)
   }
 
   private newAuthorizationRequestOpts(opts: {

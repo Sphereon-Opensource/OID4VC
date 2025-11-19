@@ -9,7 +9,7 @@ import {
   CredentialConfigurationSupportedV1_0_15,
   CredentialRequestV1_0_15,
   EndpointMetadataResultV1_0_15,
-  IssuerMetadataV1_0_15
+  IssuerMetadataV1_0_15,
 } from './v1_0_15.types'
 
 export type InputCharSet = 'numeric' | 'text'
@@ -29,7 +29,7 @@ export interface ImageInfo {
   [key: string]: unknown
 }
 
-export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'dc+sd-jwt'| 'vc+sd-jwt' | 'jwt_vc' | 'mso_mdoc' // jwt_vc & vc+sd-jwt are added for backwards compat TODO SSISDK-36
+export type OID4VCICredentialFormat = 'jwt_vc_json' | 'jwt_vc_json-ld' | 'ldp_vc' | 'dc+sd-jwt' | 'vc+sd-jwt' | 'jwt_vc' | 'mso_mdoc' // jwt_vc & vc+sd-jwt are added for backwards compat TODO SSISDK-36
 
 export const supportedOID4VCICredentialFormat: readonly (OID4VCICredentialFormat | string)[] = [
   'jwt_vc_json',
@@ -37,7 +37,7 @@ export const supportedOID4VCICredentialFormat: readonly (OID4VCICredentialFormat
   'ldp_vc',
   'dc+sd-jwt',
   'jwt_vc',
-  'mso_mdoc'
+  'mso_mdoc',
 ]
 
 export interface NameAndLocale {
@@ -198,7 +198,13 @@ export type CredentialConfigurationSupported =
       (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedMsoMdoc))
 
 export type CredentialsSupportedLegacy = CommonCredentialSupported &
-  (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedSdJwtVcV13 | CredentialSupportedMsoMdoc)
+  (
+    | CredentialSupportedJwtVcJson
+    | CredentialSupportedJwtVcJsonLdAndLdpVc
+    | CredentialSupportedSdJwtVc
+    | CredentialSupportedSdJwtVcV13
+    | CredentialSupportedMsoMdoc
+  )
 
 export interface CommonCredentialOfferFormat {
   format: OID4VCICredentialFormat | string
@@ -295,7 +301,6 @@ export interface CredentialRequestSdJwtVc extends CommonCredentialRequest {
   vct: string
   claims?: IssuerCredentialSubject
 }
-
 
 export interface CredentialRequestMsoMdoc extends CommonCredentialRequest {
   format: 'mso_mdoc'

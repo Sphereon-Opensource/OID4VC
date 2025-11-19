@@ -1,6 +1,7 @@
 import { uuidv4 } from '@sphereon/oid4vc-common'
 import {
-  AssertedUniformCredentialOffer, AuthorizationDetailsV1_0_15,
+  AssertedUniformCredentialOffer,
+  AuthorizationDetailsV1_0_15,
   CredentialIssuerMetadataOptsV1_0_15,
   CredentialOfferMode,
   CredentialOfferPayloadV1_0_15,
@@ -12,7 +13,7 @@ import {
   IssuerMetadataV1_0_15,
   PIN_NOT_MATCH_ERROR,
   PRE_AUTH_GRANT_LITERAL,
-  UniformCredentialOffer
+  UniformCredentialOffer,
 } from '@sphereon/oid4vci-common'
 
 export interface CredentialOfferGrantInput {
@@ -119,7 +120,6 @@ export function createCredentialOfferObject(
   return { credential_offer, credential_offer_uri: opts?.credentialOfferUri }
 }
 
-
 export function createCredentialOfferURIFromObject(
   credentialOffer: CredentialOfferV1_0_15 | UniformCredentialOffer,
   offerMode: CredentialOfferMode,
@@ -174,10 +174,7 @@ export const assertValidPinNumber = (pin?: string, pinLength?: number) => {
  * Generates unique credential identifiers for authorization details
  * Each identifier represents a specific credential instance that can be issued
  */
-export const generateCredentialIdentifiers = (
-  authDetail: AuthorizationDetailsV1_0_15,
-  session: CredentialOfferSession
-): string[] => {
+export const generateCredentialIdentifiers = (authDetail: AuthorizationDetailsV1_0_15, session: CredentialOfferSession): string[] => {
   if (typeof authDetail === 'string') {
     return [uuidv4()]
   }
@@ -186,8 +183,7 @@ export const generateCredentialIdentifiers = (
 
   if (authDetail.credential_configuration_id) {
     const configId = authDetail.credential_configuration_id
-    const hasConfig = session.credentialOffer.credential_offer
-      .credential_configuration_ids?.includes(configId)
+    const hasConfig = session.credentialOffer.credential_offer.credential_configuration_ids?.includes(configId)
 
     if (hasConfig) {
       identifiers.push(`${configId}_${Date.now()}_${uuidv4()}`)

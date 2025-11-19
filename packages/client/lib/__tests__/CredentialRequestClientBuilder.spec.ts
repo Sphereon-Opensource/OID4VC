@@ -1,26 +1,13 @@
 import { KeyObject } from 'crypto'
 
-import {
-  Alg,
-  CredentialIssuerMetadataV1_0_15,
-  Jwt,
-  JwtVerifyResult,
-  OpenId4VCIVersion,
-  ProofOfPossession
-} from '@sphereon/oid4vci-common'
+import { Alg, CredentialIssuerMetadataV1_0_15, Jwt, JwtVerifyResult, OpenId4VCIVersion, ProofOfPossession } from '@sphereon/oid4vci-common'
 import * as jose from 'jose'
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { CredentialRequestOpts, ProofOfPossessionBuilder } from '..'
 import { CredentialRequestClientBuilder } from '../CredentialRequestClientBuilder'
 
-import {
-  IDENTIPROOF_ISSUER_URL,
-  IDENTIPROOF_OID4VCI_METADATA,
-  INITIATION_TEST_URI,
-  WALT_ISSUER_URL,
-  WALT_OID4VCI_METADATA
-} from './MetadataMocks'
+import { IDENTIPROOF_ISSUER_URL, IDENTIPROOF_OID4VCI_METADATA, INITIATION_TEST_URI, WALT_ISSUER_URL, WALT_OID4VCI_METADATA } from './MetadataMocks'
 
 const partialJWT = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6ZXhhbXBsZTplYmZlYjFmN'
 const partialJWT_withoutDid = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJlYmZlYjFmNzEyZWJjNmYxYzI3N'
@@ -32,12 +19,12 @@ const partialJWT_withoutDid = 'eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJlYmZlYjFmNzEyZWJj
 
 const jwtv1_0_11: Jwt = {
   header: { alg: Alg.ES256, kid: 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'openid4vci-proof+jwt' },
-  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL }
+  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
 }
 
 const jwtv1_0_13_withoutDid: Jwt = {
   header: { alg: Alg.ES256, kid: 'ebfeb1f712ebc6f1c276e12ec21/keys/1', typ: 'openid4vci-proof+jwt' },
-  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL }
+  payload: { iss: 'sphereon:wallet', nonce: 'tZignsnFbp', jti: 'tZignsnFbp223', aud: IDENTIPROOF_ISSUER_URL },
 }
 
 const kid = 'did:example:ebfeb1f712ebc6f1c276e12ec21/keys/1'
@@ -72,7 +59,7 @@ interface KeyPair {
 }
 
 async function proofOfPossessionVerifierCallbackFunction(args: {
-  jwt: string;
+  jwt: string
   kid?: string
 }): Promise<JwtVerifyResult> {
   const result = await jose.jwtVerify(args.jwt, keypair.publicKey)
@@ -85,12 +72,12 @@ async function proofOfPossessionVerifierCallbackFunction(args: {
     did,
     kid,
     didDocument,
-    jwt: { header: result.protectedHeader, payload: result.payload }
+    jwt: { header: result.protectedHeader, payload: result.payload },
   }
 }
 
 describe('Credential Request Client Builder', () => {
-  it('should build correctly provided with correct params', async function() {
+  it('should build correctly provided with correct params', async function () {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialIdentifier('credentialType')
@@ -110,9 +97,9 @@ describe('Credential Request Client Builder', () => {
       jwt: jwtv1_0_11,
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
-        verifyCallback: proofOfPossessionVerifierCallbackFunction
+        verifyCallback: proofOfPossessionVerifierCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_15
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
       .withClientId('sphereon:wallet')
       .withKid(kid)
@@ -121,11 +108,10 @@ describe('Credential Request Client Builder', () => {
     const credentialRequest = await credReqClient.createCredentialRequest({
       proofInput: proof,
       credentialIdentifier: 'OpenBadgeCredential',
-      version: OpenId4VCIVersion.VER_1_0_15
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
     expect(credentialRequest.proof?.jwt).toContain(partialJWT)
     expect('credential_configuration_id' in credentialRequest).toBe(true)
-
   })
 
   it('should build credential request correctly without did', async () => {
@@ -137,9 +123,9 @@ describe('Credential Request Client Builder', () => {
       jwt: jwtv1_0_13_withoutDid,
       callbacks: {
         signCallback: proofOfPossessionCallbackFunction,
-        verifyCallback: proofOfPossessionVerifierCallbackFunction
+        verifyCallback: proofOfPossessionVerifierCallbackFunction,
       },
-      version: OpenId4VCIVersion.VER_1_0_15
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
       .withClientId('sphereon:wallet')
       .withKid(kid_withoutDid)
@@ -148,7 +134,7 @@ describe('Credential Request Client Builder', () => {
     const credentialRequest = await credReqClient.createCredentialRequest({
       proofInput: proof,
       credentialIdentifier: 'OpenBadgeCredential',
-      version: OpenId4VCIVersion.VER_1_0_15
+      version: OpenId4VCIVersion.VER_1_0_15,
     })
     expect(credentialRequest.proof?.jwt).toContain(partialJWT_withoutDid)
     if ('credential_identifier' in credentialRequest) {
@@ -160,15 +146,14 @@ describe('Credential Request Client Builder', () => {
     const credReqClient = (
       await CredentialRequestClientBuilder.fromURI({
         uri: INITIATION_TEST_URI,
-        metadata: WALT_OID4VCI_METADATA
+        metadata: WALT_OID4VCI_METADATA,
       })
     ).build()
     expect(credReqClient.credentialRequestOpts.credentialEndpoint).toBe(`${WALT_ISSUER_URL}/credential`)
   })
 
   it('should build correctly with endpoint from metadata', async () => {
-    const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
-      .build()
+    const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI })).build()
     expect(credReqClient.credentialRequestOpts.credentialEndpoint).toBe(`${WALT_ISSUER_URL}/credential`)
   })
 })

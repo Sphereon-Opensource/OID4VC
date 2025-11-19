@@ -12,7 +12,7 @@ import {
   MutableTypeFormatter,
   SchemaGenerator,
   SubTypeFormatter,
-  Schema
+  Schema,
 } from 'ts-json-schema-generator'
 
 class CustomTypeFormatter implements SubTypeFormatter {

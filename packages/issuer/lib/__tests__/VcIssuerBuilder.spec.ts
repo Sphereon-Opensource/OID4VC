@@ -26,21 +26,23 @@ describe('VcIssuer builder should', () => {
         locale: 'en-US',
         logo: {
           url: 'https://exampleuniversity.com/public/logo.png',
-          alt_text: 'a square logo of a university'
+          alt_text: 'a square logo of a university',
         },
         background_color: '#12107c',
-        text_color: '#FFFFFF'
+        text_color: '#FFFFFF',
       })
       .withCredentialDefinition({
-        type: ['UniversityDegree_JWT']
+        type: ['UniversityDegree_JWT'],
       })
       .addClaim({
         path: ['credentialSubject', 'given_name'],
         mandatory: false,
-        display: [{
-          name: 'given name',
-          locale: 'en-US'
-        }]
+        display: [
+          {
+            name: 'given name',
+            locale: 'en-US',
+          },
+        ],
       })
       .build()
     const vcIssuer = new VcIssuerBuilder()
@@ -50,7 +52,7 @@ describe('VcIssuer builder should', () => {
       .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
-        locale: 'en-US'
+        locale: 'en-US',
       })
       .withInMemoryCredentialOfferState()
       .withInMemoryCNonceState()
@@ -69,25 +71,27 @@ describe('VcIssuer builder should', () => {
       .withFormat('jwt_vc_json')
       .withCredentialName('UniversityDegree_JWT')
       .withCredentialDefinition({
-        type: ['VerifiableCredential', 'UniversityDegree_JWT']
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
       })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
         logo: {
           url: 'https://exampleuniversity.com/public/logo.png',
-          alt_text: 'a square logo of a university'
+          alt_text: 'a square logo of a university',
         },
         background_color: '#12107c',
-        text_color: '#FFFFFF'
+        text_color: '#FFFFFF',
       })
       .addClaim({
         path: ['credentialSubject', 'given_name'],
         mandatory: false,
-        display: [{
-          name: 'given name',
-          locale: 'en-US'
-        }]
+        display: [
+          {
+            name: 'given name',
+            locale: 'en-US',
+          },
+        ],
       })
       .build()
     expect(() =>
@@ -96,10 +100,10 @@ describe('VcIssuer builder should', () => {
         .withCredentialEndpoint('https://credential-endpoint')
         .withIssuerDisplay({
           name: 'example issuer',
-          locale: 'en-US'
+          locale: 'en-US',
         })
         .withCredentialConfigurationsSupported(credentialsSupported)
-        .build()
+        .build(),
     ).toThrowError(TokenErrorResponse.invalid_request)
   })
 
@@ -109,7 +113,7 @@ describe('VcIssuer builder should', () => {
         .withCredentialSigningAlgValuesSupported('ES256K')
         .withCryptographicBindingMethod('did')
         .withCredentialName('UniversityDegree_JWT')
-        .build()
+        .build(),
     ).toThrowError(TokenErrorResponse.invalid_request)
   })
   it('should successfully attach an instance of the ICredentialOfferStateManager to the VcIssuer instance', async () => {
@@ -119,25 +123,27 @@ describe('VcIssuer builder should', () => {
       .withFormat('jwt_vc_json')
       .withCredentialName('UniversityDegree_JWT')
       .withCredentialDefinition({
-        type: ['VerifiableCredential', 'UniversityDegree_JWT']
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
       })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
         logo: {
           url: 'https://exampleuniversity.com/public/logo.png',
-          alt_text: 'a square logo of a university'
+          alt_text: 'a square logo of a university',
         },
         background_color: '#12107c',
-        text_color: '#FFFFFF'
+        text_color: '#FFFFFF',
       })
       .addClaim({
         path: ['credentialSubject', 'given_name'],
         mandatory: false,
-        display: [{
-          name: 'given name',
-          locale: 'en-US'
-        }]
+        display: [
+          {
+            name: 'given name',
+            locale: 'en-US',
+          },
+        ],
       })
       .build()
     const vcIssuer = new VcIssuerBuilder()
@@ -147,7 +153,7 @@ describe('VcIssuer builder should', () => {
       .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
-        locale: 'en-US'
+        locale: 'en-US',
       })
       .withCredentialConfigurationsSupported(credentialsSupported)
       .withInMemoryCredentialOfferState()
@@ -167,10 +173,9 @@ describe('VcIssuer builder should', () => {
       credentialOffer: {
         credential_offer: {
           credential_configuration_ids: ['test_credential'],
-          credential_issuer: 'test_issuer'
-        }
-      }
-
+          credential_issuer: 'test_issuer',
+        },
+      },
     })
     await expect(vcIssuer.credentialOfferSessions?.get('test')).resolves.toMatchObject({
       clientId: 'test_client',
@@ -181,9 +186,9 @@ describe('VcIssuer builder should', () => {
       credentialOffer: {
         credential_offer: {
           credential_configuration_ids: ['test_credential'],
-          credential_issuer: 'test_issuer'
-        }
-      }
+          credential_issuer: 'test_issuer',
+        },
+      },
     })
   })
 
@@ -194,25 +199,27 @@ describe('VcIssuer builder should', () => {
       .withFormat('jwt_vc_json')
       .withCredentialName('UniversityDegree_JWT')
       .withCredentialDefinition({
-        type: ['VerifiableCredential', 'UniversityDegree_JWT']
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
       })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
         logo: {
           url: 'https://exampleuniversity.com/public/logo.png',
-          alt_text: 'a square logo of a university'
+          alt_text: 'a square logo of a university',
         },
         background_color: '#12107c',
-        text_color: '#FFFFFF'
+        text_color: '#FFFFFF',
       })
       .addClaim({
         path: ['credentialSubject', 'given_name'],
         mandatory: false,
-        display: [{
-          name: 'given name',
-          locale: 'en-US'
-        }]
+        display: [
+          {
+            name: 'given name',
+            locale: 'en-US',
+          },
+        ],
       })
       .build()
     const vcIssuer = new VcIssuerBuilder()
@@ -222,7 +229,7 @@ describe('VcIssuer builder should', () => {
       .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
-        locale: 'en-US'
+        locale: 'en-US',
       })
       .withCredentialConfigurationsSupported(credentialsSupported)
       .withInMemoryCredentialOfferState()
@@ -238,8 +245,7 @@ describe('VcIssuer builder should', () => {
       clientId: 'test_client',
       createdAt: preAuthorizedCodecreatedAt,
       txCode: '123456',
-      credentialOffer: { credential_offer: { credential_configuration_ids: ['test_credential'], credential_issuer: 'test_issuer' } }
-
+      credentialOffer: { credential_offer: { credential_configuration_ids: ['test_credential'], credential_issuer: 'test_issuer' } },
     })
     await expect(vcIssuer.credentialOfferSessions?.get('test')).resolves.toMatchObject({
       clientId: 'test_client',
@@ -247,8 +253,7 @@ describe('VcIssuer builder should', () => {
       status: IssueStatus.OFFER_CREATED,
       lastUpdatedAt: preAuthorizedCodecreatedAt,
       createdAt: preAuthorizedCodecreatedAt,
-      credentialOffer: { credential_offer: { credential_configuration_ids: ['test_credential'], credential_issuer: 'test_issuer' } }
-
+      credentialOffer: { credential_offer: { credential_configuration_ids: ['test_credential'], credential_issuer: 'test_issuer' } },
     })
   })
 })

@@ -6,7 +6,7 @@ import {
   IssuerMetadata,
   MetadataDisplay,
   OID4VCICredentialFormat,
-  OpenId4VCIVersion
+  OpenId4VCIVersion,
 } from '../types'
 import { getTypesFromObject, isW3cCredentialSupported } from './TypeConversionUtils'
 
@@ -27,7 +27,7 @@ export function getSupportedCredentials(opts?: {
           Object.assign(acc, result)
           return acc
         },
-        {} as Record<string, CredentialConfigurationSupportedV1_0_15>
+        {} as Record<string, CredentialConfigurationSupportedV1_0_15>,
       )
   }
 
@@ -40,10 +40,10 @@ export function determineVersionsFromIssuerMetadata(issuerMetadata: CredentialIs
     versions.add(OpenId4VCIVersion.VER_1_0_15)
   }
 
-//  if (versions.size === 0) {
+  //  if (versions.size === 0) {
   // The above checks where already very specific and only applicable to single versions we support, so let's skip if we encounter them
   // OLD VERSIONS REMOVED, re-enable when supporting new version
-//  }
+  //  }
   if (versions.size === 0) {
     versions.add(OpenId4VCIVersion.VER_UNKNOWN)
   }
@@ -87,11 +87,13 @@ export function getSupportedCredential(opts?: {
         isTypeMatch = normalizedTypes.every((type) => types.includes(type))
       } else {
         // Type guard to check if credential_definition has the expected structure
-        const hasValidCredentialDefinition = isW3cCredentialSupported(config)
-          && 'credential_definition' in config
-          && config.credential_definition
-          && typeof config.credential_definition === 'object' && 'type' in config.credential_definition
-          && Array.isArray(config.credential_definition.type)
+        const hasValidCredentialDefinition =
+          isW3cCredentialSupported(config) &&
+          'credential_definition' in config &&
+          config.credential_definition &&
+          typeof config.credential_definition === 'object' &&
+          'type' in config.credential_definition &&
+          Array.isArray(config.credential_definition.type)
 
         if (hasValidCredentialDefinition) {
           const credDef = config.credential_definition as { type: string[] }
@@ -121,7 +123,7 @@ export function getSupportedCredential(opts?: {
         }
         return filteredConfigs
       },
-      {} as Record<string, CredentialConfigurationSupportedV1_0_15>
+      {} as Record<string, CredentialConfigurationSupportedV1_0_15>,
     )
   }
 
@@ -133,15 +135,18 @@ export function getSupportedCredential(opts?: {
   return version >= OpenId4VCIVersion.VER_1_0_15 ? {} : []
 }
 
-
-export function getIssuerDisplays(metadata: CredentialIssuerMetadata | IssuerMetadata, opts?: {
-  prefLocales: string[]
-}): MetadataDisplay[] {
+export function getIssuerDisplays(
+  metadata: CredentialIssuerMetadata | IssuerMetadata,
+  opts?: {
+    prefLocales: string[]
+  },
+): MetadataDisplay[] {
   const matchedDisplays =
     metadata.display?.filter(
-      (item:MetadataDisplay) => !opts?.prefLocales || opts.prefLocales.length === 0 || (item.locale && opts.prefLocales.includes(item.locale)) || !item.locale
+      (item: MetadataDisplay) =>
+        !opts?.prefLocales || opts.prefLocales.length === 0 || (item.locale && opts.prefLocales.includes(item.locale)) || !item.locale,
     ) ?? []
-  return matchedDisplays.sort((item:MetadataDisplay) => (item.locale ? (opts?.prefLocales.indexOf(item.locale) ?? 1) : Number.MAX_VALUE))
+  return matchedDisplays.sort((item: MetadataDisplay) => (item.locale ? (opts?.prefLocales.indexOf(item.locale) ?? 1) : Number.MAX_VALUE))
 }
 
 /**
@@ -149,7 +154,7 @@ export function getIssuerDisplays(metadata: CredentialIssuerMetadata | IssuerMet
  */
 export function getIssuerName(
   url: string,
-  credentialIssuerMetadata?: Partial<AuthorizationServerMetadata> & (CredentialIssuerMetadata | IssuerMetadata)
+  credentialIssuerMetadata?: Partial<AuthorizationServerMetadata> & (CredentialIssuerMetadata | IssuerMetadata),
 ): string {
   if (credentialIssuerMetadata) {
     const displays: Array<MetadataDisplay> = credentialIssuerMetadata ? getIssuerDisplays(credentialIssuerMetadata) : []

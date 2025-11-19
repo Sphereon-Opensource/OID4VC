@@ -1,6 +1,6 @@
 import Tags from 'language-tags'
-import {SIOPErrors} from '../types'
-import {isStringNullOrEmpty} from './ObjectUtils'
+import { SIOPErrors } from '../types'
+import { isStringNullOrEmpty } from './ObjectUtils'
 
 export class LanguageTagUtils {
   private static readonly LANGUAGE_TAG_SEPARATOR = '#'

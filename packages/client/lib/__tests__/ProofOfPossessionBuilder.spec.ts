@@ -137,7 +137,7 @@ describe('ProofOfPossession Builder ', () => {
       ProofOfPossessionBuilder.fromJwt({
         jwt,
         callbacks: { signCallback: proofOfPossessionCallbackFunction },
-        version: OpenId4VCIVersion.VER_1_0_15
+        version: OpenId4VCIVersion.VER_1_0_15,
       })
         .withIssuer(IDENTIPROOF_ISSUER_URL)
         .withTyp('openid4vci-proof+jwt')

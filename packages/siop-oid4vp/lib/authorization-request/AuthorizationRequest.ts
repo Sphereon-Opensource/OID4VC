@@ -1,7 +1,7 @@
 import { parseJWT } from '@sphereon/oid4vc-common'
 import { DcqlQuery } from 'dcql'
 import { Dcql } from '../authorization-response'
-import {fetchByReferenceOrUseByValue, getClientIdentifierPrefix, removeNullUndefined} from '../helpers'
+import { fetchByReferenceOrUseByValue, getClientIdentifierPrefix, removeNullUndefined } from '../helpers'
 import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
 import { RequestObject } from '../request-object'
 import { assertValidAuthorizationRequestOpts, assertValidVerifyAuthorizationRequestOpts } from './Opts'
@@ -97,7 +97,7 @@ export class AuthorizationRequest {
   }
 
   public async getSupportedVersionsFromPayload(): Promise<SupportedVersion[]> {
-    const mergedPayload = { ...this.payload, ...(this.requestObject?.getPayload()) }
+    const mergedPayload = { ...this.payload, ...this.requestObject?.getPayload() }
     return authorizationRequestVersionDiscovery(mergedPayload)
   }
 

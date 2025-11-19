@@ -8,7 +8,7 @@ import {
   OID4VCICredentialFormat,
   ProofType,
   ProofTypesSupported,
-  TokenErrorResponse
+  TokenErrorResponse,
 } from '@sphereon/oid4vci-common'
 
 export class CredentialSupportedBuilderV1_15 {
@@ -35,7 +35,7 @@ export class CredentialSupportedBuilderV1_15 {
   }
 
   withCredentialDefinition(
-    credentialDefinition: CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15 | CredentialDefinitionJwtVcJsonV1_0_15
+    credentialDefinition: CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15 | CredentialDefinitionJwtVcJsonV1_0_15,
   ): CredentialSupportedBuilderV1_15 {
     if (!credentialDefinition.type) {
       throw new Error('credentialDefinition should contain a type array')
@@ -144,7 +144,7 @@ export class CredentialSupportedBuilderV1_15 {
     }
 
     const credentialSupported: CredentialConfigurationSupportedV1_0_15 = {
-      format: this.format
+      format: this.format,
     } as CredentialConfigurationSupportedV1_0_15
 
     if (!this.credentialName) {
@@ -182,7 +182,7 @@ export class CredentialSupportedBuilderV1_15 {
       credentialSupported.display = this.display
     }
     if (this.claims) {
-      (credentialSupported as any).claims = this.claims
+      ;(credentialSupported as any).claims = this.claims
     }
 
     const supportedConfiguration: Record<string, CredentialConfigurationSupportedV1_0_15> = {}

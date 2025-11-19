@@ -7,8 +7,14 @@ import {
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types'
 
-import { LOG, RevocationStatus, RevocationVerification, RevocationVerificationCallback,
-  SupportedRevocationFormats, VerifiableCredentialTypeFormat } from '../types'
+import {
+  LOG,
+  RevocationStatus,
+  RevocationVerification,
+  RevocationVerificationCallback,
+  SupportedRevocationFormats,
+  VerifiableCredentialTypeFormat,
+} from '../types'
 
 export const verifyRevocation = async (
   vpToken: WrappedVerifiablePresentation,

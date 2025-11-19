@@ -8,9 +8,10 @@ import { CredentialOfferClient } from '../CredentialOfferClient'
 import { CredentialOfferClientV1_0_15 } from '../CredentialOfferClientV1_0_15'
 
 import {
-  INITIATION_TEST, INITIATION_TEST_HTTPS_URI_V1_0_15_AUTH_CODE,
+  INITIATION_TEST,
+  INITIATION_TEST_HTTPS_URI_V1_0_15_AUTH_CODE,
   INITIATION_TEST_HTTPS_URI_V1_0_15_PRE_AUTH,
-  INITIATION_TEST_URI
+  INITIATION_TEST_URI,
 } from './MetadataMocks'
 
 describe('Issuance Initiation', () => {
@@ -19,10 +20,7 @@ describe('Issuance Initiation', () => {
       baseUrl: 'https://server.example.com',
       credential_offer: {
         credential_issuer: 'https://server.example.com',
-        credential_configuration_ids: [
-          'https://did.example.org/healthCard',
-          'https://did.example.org/driverLicense',
-        ],
+        credential_configuration_ids: ['https://did.example.org/healthCard', 'https://did.example.org/driverLicense'],
         grants: {
           authorization_code: {
             issuer_state: 'eyJhbGciOiJSU0Et...FYUaBy',
@@ -31,16 +29,13 @@ describe('Issuance Initiation', () => {
       },
       issuerState: 'eyJhbGciOiJSU0Et...FYUaBy',
       original_credential_offer: {
-        credential_configuration_ids: [
-          'https://did.example.org/healthCard',
-          'https://did.example.org/driverLicense'
-        ],
-        'credential_issuer': 'https://server.example.com',
-        'grants': {
-          'authorization_code': {
-            'issuer_state': 'eyJhbGciOiJSU0Et...FYUaBy'
-          }
-        }
+        credential_configuration_ids: ['https://did.example.org/healthCard', 'https://did.example.org/driverLicense'],
+        credential_issuer: 'https://server.example.com',
+        grants: {
+          authorization_code: {
+            issuer_state: 'eyJhbGciOiJSU0Et...FYUaBy',
+          },
+        },
       },
       scheme: 'https',
       supportedFlows: ['Authorization Code Flow'],
@@ -71,7 +66,6 @@ describe('Issuance Initiation', () => {
   it('Should return Credential Offer', async () => {
     const client = await CredentialOfferClient.fromURI(
       'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Flaunchpad.vii.electron.mattrlabs.io%22%2C%22credential_configuration_ids%22%3A%5B%22OpenBadgeCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22UPZohaodPlLBnGsqB02n2tIupCIg8nKRRUEUHWA665X%22%2C%22user_pin_required%22%3Afalse%7D%7D%7D',
-
     )
     expect(client.version).toEqual(OpenId4VCIVersion.VER_1_0_15)
     expect(client.baseUrl).toEqual('openid-credential-offer://')

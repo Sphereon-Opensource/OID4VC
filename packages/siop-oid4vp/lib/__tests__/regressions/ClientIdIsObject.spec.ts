@@ -2,16 +2,7 @@ import { parseJWT, SigningAlgo } from '@sphereon/oid4vc-common'
 import { describe, expect, it } from 'vitest'
 import { DcqlQuery } from 'dcql'
 import { internalSignature } from '../DidJwtTestUtils'
-import {
-    PassBy,
-    PropertyTarget,
-    ResponseType,
-    RevocationVerification,
-    RP,
-    Scope,
-    SubjectType,
-    SupportedVersion
-} from '../..'
+import { PassBy, PropertyTarget, ResponseType, RevocationVerification, RP, Scope, SubjectType, SupportedVersion } from '../..'
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 // const EXAMPLE_REFERENCE_URL = 'https://rp.acme.com/siop/jwts';
@@ -20,16 +11,16 @@ const DID = 'did:ethr:0x0106a2e985b1E1De9B5ddb4aF6dC9e928F4e99D0'
 const KID = 'did:ethr:0x0106a2e985b1E1De9B5ddb4aF6dC9e928F4e99D0#keys-1'
 
 const dcqlQuery = {
-    credentials: [
-        {
-            id: 'my_credential',
-            format: 'dc+sd-jwt',
-            meta: {
-                vct_values: ['https://high-assurance.com/StateBusinessLicense'],
-            },
-            claims: [{ path: ['license', 'number'] }, { path: ['user', 'name'] }],
-        },
-    ],
+  credentials: [
+    {
+      id: 'my_credential',
+      format: 'dc+sd-jwt',
+      meta: {
+        vct_values: ['https://high-assurance.com/StateBusinessLicense'],
+      },
+      claims: [{ path: ['license', 'number'] }, { path: ['user', 'name'] }],
+    },
+  ],
 } satisfies DcqlQuery.Input
 
 const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery)

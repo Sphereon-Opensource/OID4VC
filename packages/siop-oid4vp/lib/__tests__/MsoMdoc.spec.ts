@@ -12,7 +12,7 @@ import {
   RP,
   Scope,
   SubjectType,
-  SupportedVersion
+  SupportedVersion,
 } from '..'
 import { getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
@@ -26,17 +26,18 @@ const mdocBase64UrlUniversityPresentation =
   'uQADZ3ZlcnNpb25jMS4waWRvY3VtZW50c4GjZ2RvY1R5cGVxb3JnLmV1LnVuaXZlcnNpdHlsaXNzdWVyU2lnbmVkuQACam5hbWVTcGFjZXOhd2V1LmV1cm9wYS5lYy5ldWRpLnBpZC4xgtgYWGGkaGRpZ2VzdElEAnFlbGVtZW50SWRlbnRpZmllcmRuYW1lbGVsZW1lbnRWYWx1ZWhKb2huIERvZWZyYW5kb21YICTUPEzNlBwbcWWOXijZrs4Ed37zoxDCKJYvv0qKtpuv2BhYY6RoZGlnZXN0SUQBcWVsZW1lbnRJZGVudGlmaWVyZmRlZ3JlZWxlbGVtZW50VmFsdWVoYmFjaGVsb3JmcmFuZG9tWCC6uRVoNoBBcj5b-IEDTCUFoNEGVGsMSZP-3YuMUVCKrGppc3N1ZXJBdXRohEOhASaiBFgxekRuYWV0bk5naHRrNHk1VzFDNGpBM3E4VmRYbzhlUzNpWWViRm5MR3I3ZlhTYVVUNhghgVj8MIH5MIGgoAMCAQICEF36OiPSysIvMaLWuTCava8wCgYIKoZIzj0EAwIwDTELMAkGA1UEBhMCREUwHhcNMjQxMDMwMTI1ODQ0WhcNMjUxMDMwMTI1ODQ0WjANMQswCQYDVQQGEwJERTA5MBMGByqGSM49AgEGCCqGSM49AwEHAyIAA6VBlDzOG438-hsPWMSY56vJWrz8m5OaIimg0rG0vY6towIwADAKBggqhkjOPQQDAgNIADBFAiBc_30LjkQFX9YxWUyYH5jFK4Smw2h4KKYU85BBH2xDTAIhAKqb7RwT5_qoVJNYcom0x3N1eVd49TuPZfkbNaZsmhi5WQHd2BhZAdi5AAZndmVyc2lvbmMxLjBvZGlnZXN0QWxnb3JpdGhtZ1NIQS0yNTZsdmFsdWVEaWdlc3RzoXdldS5ldXJvcGEuZWMuZXVkaS5waWQuMaQAWCDrF96Sw8aHk1fZ8B92ZQE7I37MHjVSDoEq4MGhHuMIcwFYIAEsfqF7G_6k-lw2NKPRwHlWSalgrYsbXdcqz1ghPa-nAlggGq9DTWd1xmO8O84B0PCKhtf0daiT34V4xkU-wSGHYUwDWCDX5TNczi_TZSwmJ1VVeEzXpKXR9eweibocvAfpmKHEU21kZXZpY2VLZXlJbmZvuQABaWRldmljZUtleaQBAiABIVggN4_nyaOESmuHV8xhsUl2VqxaF83kIraAc2GV7M2-BKEiWCC0GqqvYnJ6U12ccZVDAOH8CeNGs9oOAF46jXJfauTSO2dkb2NUeXBlcW9yZy5ldS51bml2ZXJzaXR5bHZhbGlkaXR5SW5mb7kABGZzaWduZWTAdDIwMjQtMTAtMzBUMTI6NTg6NDRaaXZhbGlkRnJvbcB0MjAyNC0xMC0zMFQxMjo1ODo0NFpqdmFsaWRVbnRpbMB0MjAyNS0xMC0zMFQxMjo1ODo0NFpuZXhwZWN0ZWRVcGRhdGX3WEC3VoysIcxum_HtX5OCFEA3BwzhHcYmESJDzY58vz0Ez7Zo3fmP3D0M8evzMk7_Cz7_hwVL8sdLgiKpho5UXrunbGRldmljZVNpZ25lZLkAAmpuYW1lU3BhY2Vz2BhDuQAAamRldmljZUF1dGi5AAJvZGV2aWNlU2lnbmF0dXJlhEOhASag91hA9peGbzwyivN7UXvk4smItYMdt-RvcU87ZvXdDfRqIQsWSxGLcke2lHcit77fIEAw_8w0MOzM7ObQWK3T4vTMl2lkZXZpY2VNYWP3ZnN0YXR1cwA'
 
 const SD_JWT_VC = {
-  compactJwtVc: 'eyJ0eXAiOiJ2YytzZC1qd3QiLCJhbGciOiJFZERTQSIsImtpZCI6IiN6Nk1rcnpRUEJyNHB5cUM3NzZLS3RyejEzU2NoTTVlUFBic3N1UHVRWmI1dDR1S1EifQ.eyJ2Y3QiOiJPcGVuQmFkZ2VDcmVkZW50aWFsIiwiZGVncmVlIjoiYmFjaGVsb3IiLCJjbmYiOnsia2lkIjoiZGlkOmtleTp6Nk1rcEdSNGdzNFJjM1pwaDR2ajh3Um5qbkF4Z0FQU3hjUjhNQVZLdXRXc3BRemMjejZNa3BHUjRnczRSYzNacGg0dmo4d1Juam5BeGdBUFN4Y1I4TUFWS3V0V3NwUXpjIn0sImlzcyI6ImRpZDprZXk6ejZNa3J6UVBCcjRweXFDNzc2S0t0cnoxM1NjaE01ZVBQYnNzdVB1UVpiNXQ0dUtRIiwiaWF0IjoxNzMwMjkzMTIzLCJfc2QiOlsiVEtuSUJwVGp3ZmpVdFZra3ZBUWNrSDZxSEZFbmFsb1ZtZUF6UmlzZlNNNCIsInRLTFAxWFM3Vm55YkJET2ZWV3hTMVliNU5TTjhlMVBDMHFqRnBnbjd5XzgiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.GhgxbTA_cLZ6-enpOrTRqhIoZEzJoJMSQeutQdhcIayhiem9yd8i0x-h6NhQbN1NrNPwi-JQhy5lpNopVia_AA~WyI3NDU5ODc1MjgyODgyMTY5MjY3NTk1MTgiLCJ1bml2ZXJzaXR5IiwiaW5uc2JydWNrIl0~',
+  compactJwtVc:
+    'eyJ0eXAiOiJ2YytzZC1qd3QiLCJhbGciOiJFZERTQSIsImtpZCI6IiN6Nk1rcnpRUEJyNHB5cUM3NzZLS3RyejEzU2NoTTVlUFBic3N1UHVRWmI1dDR1S1EifQ.eyJ2Y3QiOiJPcGVuQmFkZ2VDcmVkZW50aWFsIiwiZGVncmVlIjoiYmFjaGVsb3IiLCJjbmYiOnsia2lkIjoiZGlkOmtleTp6Nk1rcEdSNGdzNFJjM1pwaDR2ajh3Um5qbkF4Z0FQU3hjUjhNQVZLdXRXc3BRemMjejZNa3BHUjRnczRSYzNacGg0dmo4d1Juam5BeGdBUFN4Y1I4TUFWS3V0V3NwUXpjIn0sImlzcyI6ImRpZDprZXk6ejZNa3J6UVBCcjRweXFDNzc2S0t0cnoxM1NjaE01ZVBQYnNzdVB1UVpiNXQ0dUtRIiwiaWF0IjoxNzMwMjkzMTIzLCJfc2QiOlsiVEtuSUJwVGp3ZmpVdFZra3ZBUWNrSDZxSEZFbmFsb1ZtZUF6UmlzZlNNNCIsInRLTFAxWFM3Vm55YkJET2ZWV3hTMVliNU5TTjhlMVBDMHFqRnBnbjd5XzgiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.GhgxbTA_cLZ6-enpOrTRqhIoZEzJoJMSQeutQdhcIayhiem9yd8i0x-h6NhQbN1NrNPwi-JQhy5lpNopVia_AA~WyI3NDU5ODc1MjgyODgyMTY5MjY3NTk1MTgiLCJ1bml2ZXJzaXR5IiwiaW5uc2JydWNrIl0~',
   decodedPayload: {
-    vct: "OpenBadgeCredential",
-    degree: "bachelor",
+    vct: 'OpenBadgeCredential',
+    degree: 'bachelor',
     cnf: {
-      kid: "did:key:z6MkpGR4gs4Rc3Zph4vj8wRnjnAxgAPSxcR8MAVKutWspQzc#z6MkpGR4gs4Rc3Zph4vj8wRnjnAxgAPSxcR8MAVKutWspQzc"
+      kid: 'did:key:z6MkpGR4gs4Rc3Zph4vj8wRnjnAxgAPSxcR8MAVKutWspQzc#z6MkpGR4gs4Rc3Zph4vj8wRnjnAxgAPSxcR8MAVKutWspQzc',
     },
-    iss: "did:key:z6MkrzQPBr4pyqC776KKtrz13SchM5ePPbssuPuQZb5t4uKQ",
+    iss: 'did:key:z6MkrzQPBr4pyqC776KKtrz13SchM5ePPbssuPuQZb5t4uKQ',
     iat: 1730293123,
-    university: "innsbruck"
-  }
+    university: 'innsbruck',
+  },
 }
 
 const dcqlQuery = {
@@ -156,14 +157,14 @@ describe.skip('mdoc RP and OP interaction should', () => {
         didUrl: `${rpMockEntity.did}#controller`,
       },
       dcqlResponse: {
-        dcqlPresentation
-      }
+        dcqlPresentation,
+      },
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeUndefined()
 
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-      dcqlQuery: parsedDcqlQuery
+      dcqlQuery: parsedDcqlQuery,
     })
 
     // Cannot extract nonce, should be handled by the verification callback that verifies

@@ -12,7 +12,7 @@ export default defineConfig({
   cjsInterop: true,
   experimentalDts: false,
   // external: ['whatwg-fetch', 'crypto', 'stream'],
-  onSuccess: "tsc --noEmit",
+  onSuccess: 'tsc --noEmit',
   shims: true,
   sourcemap: true,
   splitting: false,

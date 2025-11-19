@@ -16,9 +16,9 @@ describe('OpenID4VCIClientV1_0_15', () => {
     grants: {
       'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
         'pre-authorized_code': 'eyJhbGciOiJSU0Et...FYUaBy',
-        user_pin_required: false
-      }
-    }
+        user_pin_required: false,
+      },
+    },
   }
 
   // Build the URI once, avoid hand-encoding mistakes
@@ -35,10 +35,9 @@ describe('OpenID4VCIClientV1_0_15', () => {
     client = await OpenID4VCIClientV1_0_15.fromURI({
       createAuthorizationRequestURL: false,
       clientId: 'test-client',
-      uri: OFFER_URI
+      uri: OFFER_URI,
     })
   })
-
 
   afterEach(() => {
     nock.cleanAll()
@@ -51,8 +50,8 @@ describe('OpenID4VCIClientV1_0_15', () => {
       authorizationRequest: {
         parMode: PARMode.REQUIRE,
         scope: 'openid TestCredential',
-        redirectUri: 'http://localhost:8881/cb'
-      }
+        redirectUri: 'http://localhost:8881/cb',
+      },
     })
     expect(actual).toEqual('https://server.example.com/v1/auth/authorize?client_id=test-client&request_uri=test_uri')
   })
@@ -64,9 +63,9 @@ describe('OpenID4VCIClientV1_0_15', () => {
         authorizationRequest: {
           parMode: PARMode.REQUIRE,
           scope: 'openid TestCredential',
-          redirectUri: 'http://localhost:8881/cb'
-        }
-      })
+          redirectUri: 'http://localhost:8881/cb',
+        },
+      }),
     ).rejects.toThrow(Error('PAR mode is set to required by Authorization Server does not support PAR!'))
   })
 
@@ -75,9 +74,9 @@ describe('OpenID4VCIClientV1_0_15', () => {
       client.createAuthorizationRequestUrl({
         authorizationRequest: {
           parMode: PARMode.REQUIRE,
-          redirectUri: 'http://localhost:8881/cb'
-        }
-      })
+          redirectUri: 'http://localhost:8881/cb',
+        },
+      }),
     ).rejects.toThrow('Could not create authorization details from credential offer. Please pass in explicit details')
   })
 
@@ -93,12 +92,12 @@ describe('OpenID4VCIClientV1_0_15', () => {
             format: 'ldp_vc',
             credential_definition: {
               '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
-              types: ['VerifiableCredential', 'UniversityDegreeCredential']
-            }
-          }
+              types: ['VerifiableCredential', 'UniversityDegreeCredential'],
+            },
+          },
         ],
-        redirectUri: 'http://localhost:8881/cb'
-      }
+        redirectUri: 'http://localhost:8881/cb',
+      },
     })
     expect(actual).toEqual('https://server.example.com/v1/auth/authorize?client_id=test-client&request_uri=test_uri')
   })
@@ -110,8 +109,8 @@ describe('OpenID4VCIClientV1_0_15', () => {
       authorizationRequest: {
         parMode: PARMode.REQUIRE,
         scope: 'openid TestCredential',
-        redirectUri: 'http://localhost:8881/cb'
-      }
+        redirectUri: 'http://localhost:8881/cb',
+      },
     })
     expect(actual).toEqual('https://server.example.com/v1/auth/authorize?client_id=test-client&request_uri=test_uri')
   })
@@ -128,13 +127,13 @@ describe('OpenID4VCIClientV1_0_15', () => {
             format: 'ldp_vc',
             credential_definition: {
               '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
-              types: ['VerifiableCredential', 'UniversityDegreeCredential']
-            }
-          }
+              types: ['VerifiableCredential', 'UniversityDegreeCredential'],
+            },
+          },
         ],
         scope: 'openid TestCredential',
-        redirectUri: 'http://localhost:8881/cb'
-      }
+        redirectUri: 'http://localhost:8881/cb',
+      },
     })
     expect(actual).toEqual('https://server.example.com/v1/auth/authorize?client_id=test-client&request_uri=test_uri')
   })

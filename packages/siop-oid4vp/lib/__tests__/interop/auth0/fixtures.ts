@@ -6,21 +6,17 @@ const dcqlQuery = {
       id: '1',
       format: 'jwt_vc_json',
       meta: {
-        type_values: [
-            ['VerifiableCredential']
-        ]
-      }
+        type_values: [['VerifiableCredential']],
+      },
     },
     {
       id: '2',
       format: 'jwt_vc_json',
       meta: {
-        type_values: [
-          ['VerifiableCredential']
-        ]
-      }
+        type_values: [['VerifiableCredential']],
+      },
     },
-  ]
+  ],
 } satisfies DcqlQuery.Input
 
 export const parsedDcqlQueryAny = DcqlQuery.parse(dcqlQuery)

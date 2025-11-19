@@ -29,9 +29,9 @@ const createRequestRegistrationPayload = async (
   assertValidRequestRegistrationOpts(opts)
 
   if (opts.passBy == PassBy.VALUE) {
-      return { registration: removeNullUndefined(metadataPayload) }
+    return { registration: removeNullUndefined(metadataPayload) }
   } else {
-      return { registration_uri: opts.reference_uri }
+    return { registration_uri: opts.reference_uri }
   }
 }
 

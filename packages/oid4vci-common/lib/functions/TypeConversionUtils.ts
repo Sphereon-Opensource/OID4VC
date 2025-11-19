@@ -3,7 +3,7 @@ import {
   CredentialConfigurationSupportedMsoMdocV1_0_15,
   CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15,
   CredentialDefinitionJwtVcJsonV1_0_15,
-  VCI_LOG_COMMON
+  VCI_LOG_COMMON,
 } from '../index'
 import {
   CredentialConfigurationSupported,
@@ -12,7 +12,7 @@ import {
   CredentialsSupportedLegacy,
   CredentialSupportedMsoMdoc,
   CredentialSupportedSdJwtVc,
-  JsonLdIssuerCredentialDefinition
+  JsonLdIssuerCredentialDefinition,
 } from '../types'
 
 export function isW3cCredentialSupported(
@@ -68,7 +68,10 @@ export function getTypesFromObject(
   return undefined
 }
 
-export function getTypesFromAuthorizationDetails(authDetails: AuthorizationDetailsV1_0_15, opts?: { configIdAsType?: boolean }): string[] | undefined {
+export function getTypesFromAuthorizationDetails(
+  authDetails: AuthorizationDetailsV1_0_15,
+  opts?: { configIdAsType?: boolean },
+): string[] | undefined {
   const { configIdAsType = false } = { ...opts }
   if (typeof authDetails === 'string') {
     return [authDetails]

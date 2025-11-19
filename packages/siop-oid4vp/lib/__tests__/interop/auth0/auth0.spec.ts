@@ -13,14 +13,14 @@ describe.skip('auth0 presentation tool', () => {
           credential_format: 'jwt_vc_json',
           claims: CredentialMapper.decodeVerifiableCredential(vc).decodedPayload as { [x: string]: Json },
           type: CredentialMapper.decodeVerifiableCredential(vc).decodedPayload.vct,
-          cryptographic_holder_binding: true
+          cryptographic_holder_binding: true,
         } satisfies DcqlW3cVcCredential
       } else {
         return {
           credential_format: 'ldp_vc',
           claims: vc.credentialSubject as { [x: string]: Json },
           type: vc.type,
-          cryptographic_holder_binding: true
+          cryptographic_holder_binding: true,
         } satisfies DcqlW3cVcCredential
       }
     })

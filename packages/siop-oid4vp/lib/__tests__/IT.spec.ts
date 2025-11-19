@@ -7,7 +7,7 @@ import { CredentialMapper, IPresentation, IProofType, IVerifiableCredential, W3C
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 import { DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlW3cVcCredential } from 'dcql'
-import {InMemoryRPSessionManager, Json} from '..'
+import { InMemoryRPSessionManager, Json } from '..'
 import {
   OP,
   PassBy,
@@ -22,7 +22,7 @@ import {
   Scope,
   SubjectType,
   SupportedVersion,
-  verifyRevocation
+  verifyRevocation,
 } from '../'
 import { checkSIOPSpecVersionSupported } from '../helpers/SIOPSpecVersion'
 import { getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
@@ -60,38 +60,35 @@ const presentationVerificationCallback: PresentationVerificationCallback = async
 })
 
 const dcqlQuery = {
-    credentials: [
-        {
-            id: 'my_credential',
-            format: 'ldp_vc',
-            meta: {
-                type_values: [
-                    ['https://www.w3.org/2018/credentials#VerifiableCredential'],
-                    ['PermanentResidentCard'],
-                ],
-            },
-            claims: [{ path: ['givenName'], values: ['JANE'] }],
-        },
-    ],
+  credentials: [
+    {
+      id: 'my_credential',
+      format: 'ldp_vc',
+      meta: {
+        type_values: [['https://www.w3.org/2018/credentials#VerifiableCredential'], ['PermanentResidentCard']],
+      },
+      claims: [{ path: ['givenName'], values: ['JANE'] }],
+    },
+  ],
 } satisfies DcqlQuery.Input
 
 const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery)
 DcqlQuery.validate(parsedDcqlQuery)
 
 const dcqlCredential = {
-    credential_format: 'ldp_vc',
-    claims: getVCs()[0].credentialSubject as { [x: string]: Json },
-    type: getVCs()[0].type,
-    cryptographic_holder_binding: true
+  credential_format: 'ldp_vc',
+  claims: getVCs()[0].credentialSubject as { [x: string]: Json },
+  type: getVCs()[0].type,
+  cryptographic_holder_binding: true,
 } satisfies DcqlW3cVcCredential
 
 const dcqlQueryResult: DcqlQueryResult = DcqlQuery.query(parsedDcqlQuery, [dcqlCredential])
 
 const presentation: DcqlPresentation.Output = {}
 for (const [key, value] of Object.entries(dcqlQueryResult.credential_matches)) {
-    if (value.success) {
-        presentation[key] = getVCs()[0]
-    }
+  if (value.success) {
+    presentation[key] = getVCs()[0]
+  }
 }
 
 const dcqlPresentation = DcqlPresentation.parse(presentation)
@@ -142,7 +139,9 @@ function getVCs(): IVerifiableCredential[] {
 
 describe.skip('RP and OP interaction should', () => {
   // FIXME SDK-45 Uniresolver failing
-  it('succeed when calling each other in the full flow', async () => {
+  it(
+    'succeed when calling each other in the full flow',
+    async () => {
       // expect.assertions(1);
       const rpMockEntity = await mockedGetEnterpriseAuthToken('ACME RP')
       const opMockEntity = await mockedGetEnterpriseAuthToken('ACME OP')
@@ -236,7 +235,9 @@ describe.skip('RP and OP interaction should', () => {
 
       expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
       expect(verifiedAuthResponseWithJWT.idToken?.payload.nonce).toMatch('qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg')
-    }, UNIT_TEST_TIMEOUT)
+    },
+    UNIT_TEST_TIMEOUT,
+  )
 
   it('succeed when calling optional steps in the full flow', async () => {
     const opMock = await mockedGetEnterpriseAuthToken('OP')
@@ -522,22 +523,22 @@ describe.skip('RP and OP interaction should', () => {
     expect(parsedAuthReqURI.requestObjectJwt).toBeDefined()
 
     if (!parsedAuthReqURI.requestObjectJwt) {
-        throw new Error('Supported versions not set')
+      throw new Error('Supported versions not set')
     }
     const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt)
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
       dcqlResponse: {
-          dcqlPresentation
-      }
+        dcqlPresentation,
+      },
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
 
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
       /*audience: EXAMPLE_REDIRECT_URL,*/
-      dcqlQuery: parsedDcqlQuery
+      dcqlQuery: parsedDcqlQuery,
     })
 
     expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
@@ -642,7 +643,7 @@ describe.skip('RP and OP interaction should', () => {
     })
 
     if (!op.verifyRequestOptions.supportedVersions) {
-        throw new Error('Supported versions not set')
+      throw new Error('Supported versions not set')
     }
     await checkSIOPSpecVersionSupported(requestURI.authorizationRequestPayload, op.verifyRequestOptions.supportedVersions)
     // Let's test the parsing
@@ -656,9 +657,9 @@ describe.skip('RP and OP interaction should', () => {
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-        dcqlResponse: {
-            dcqlPresentation
-        }
+      dcqlResponse: {
+        dcqlPresentation,
+      },
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
@@ -672,14 +673,16 @@ describe.skip('RP and OP interaction should', () => {
     }
     nock('https://ldtest.sphereon.com').get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION)
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-      dcqlQuery: parsedDcqlQuery
+      dcqlQuery: parsedDcqlQuery,
       // audience: EXAMPLE_REDIRECT_URL,
     })
     expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
     expect(verifiedAuthResponseWithJWT.idToken?.payload.nonce).toMatch('qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg')
   })
 
-  it('should succeed when calling with CheckLinkedDomain.IF_PRESENT', async () => {
+  it(
+    'should succeed when calling with CheckLinkedDomain.IF_PRESENT',
+    async () => {
       const opMock = await mockedGetEnterpriseAuthToken('OP')
       const opMockEntity = {
         ...opMock,
@@ -772,19 +775,21 @@ describe.skip('RP and OP interaction should', () => {
 
       const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
         dcqlResponse: {
-            dcqlPresentation
-        }
+          dcqlPresentation,
+        },
       })
       expect(authenticationResponseWithJWT.response.payload).toBeDefined()
       expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
 
       const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-        dcqlQuery: parsedDcqlQuery
+        dcqlQuery: parsedDcqlQuery,
         // audience: EXAMPLE_REDIRECT_URL,
       })
       expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
       expect(verifiedAuthResponseWithJWT.idToken?.payload.nonce).toMatch('qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg')
-    }, UNIT_TEST_TIMEOUT)
+    },
+    UNIT_TEST_TIMEOUT,
+  )
 
   it('succeed when calling with RevocationVerification.ALWAYS with ldp_vp', async () => {
     const opMock = await mockedGetEnterpriseAuthToken('OP')
@@ -896,9 +901,9 @@ describe.skip('RP and OP interaction should', () => {
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-        dcqlResponse: {
-            dcqlPresentation
-        }
+      dcqlResponse: {
+        dcqlPresentation,
+      },
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
@@ -912,7 +917,7 @@ describe.skip('RP and OP interaction should', () => {
     }
     nock('https://ldtest.sphereon.com').get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION)
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-      dcqlQuery: parsedDcqlQuery
+      dcqlQuery: parsedDcqlQuery,
       // audience: EXAMPLE_REDIRECT_URL,
     })
     expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
@@ -1023,8 +1028,8 @@ describe.skip('RP and OP interaction should', () => {
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
       dcqlResponse: {
-          dcqlPresentation
-      }
+        dcqlPresentation,
+      },
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
 
@@ -1037,7 +1042,7 @@ describe.skip('RP and OP interaction should', () => {
     }
     nock('https://ldtest.sphereon.com').get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION)
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-      dcqlQuery: parsedDcqlQuery
+      dcqlQuery: parsedDcqlQuery,
       // audience: EXAMPLE_REDIRECT_URL,
     })
     expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
@@ -1300,9 +1305,9 @@ describe.skip('RP and OP interaction should', () => {
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-        dcqlResponse: {
-            dcqlPresentation
-        }
+      dcqlResponse: {
+        dcqlPresentation,
+      },
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
@@ -1413,8 +1418,8 @@ describe.skip('RP and OP interaction should', () => {
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
       dcqlResponse: {
-          dcqlPresentation
-      }
+        dcqlPresentation,
+      },
     })
 
     const DID_CONFIGURATION = {
@@ -1756,7 +1761,6 @@ describe.skip('RP and OP interaction should', () => {
   })
 })
 
-
 describe('credential_sets tests', () => {
   it('DCQL credential_sets: happy flow (single required option is satisfied)', () => {
     const queryWithSet: DcqlQuery.Input = {
@@ -1765,21 +1769,18 @@ describe('credential_sets tests', () => {
           id: 'credA',
           format: 'ldp_vc',
           meta: {
-            type_values: [
-              ['https://www.w3.org/2018/credentials#VerifiableCredential'],
-              ['PermanentResidentCard']
-            ]
+            type_values: [['https://www.w3.org/2018/credentials#VerifiableCredential'], ['PermanentResidentCard']],
           },
-          claims: [{ path: ['givenName'], values: ['JANE'] }]
-        }
+          claims: [{ path: ['givenName'], values: ['JANE'] }],
+        },
       ],
       credential_sets: [
         {
           options: [['credA']],
           required: true,
-          purpose: 'must include credA'
-        }
-      ]
+          purpose: 'must include credA',
+        },
+      ],
     }
 
     const parsed = DcqlQuery.parse(queryWithSet)
@@ -1787,9 +1788,9 @@ describe('credential_sets tests', () => {
 
     const dcqlCredential: DcqlW3cVcCredential = {
       credential_format: 'ldp_vc',
-      claims: (getVCs()[0].credentialSubject as { [x: string]: Json }),
+      claims: getVCs()[0].credentialSubject as { [x: string]: Json },
       type: getVCs()[0].type,
-      cryptographic_holder_binding: true
+      cryptographic_holder_binding: true,
     }
 
     const result: DcqlQueryResult = DcqlQuery.query(parsed, [dcqlCredential])
@@ -1806,21 +1807,18 @@ describe('credential_sets tests', () => {
           id: 'credA',
           format: 'ldp_vc',
           meta: {
-            type_values: [
-              ['https://www.w3.org/2018/credentials#VerifiableCredential'],
-              ['PermanentResidentCard']
-            ]
+            type_values: [['https://www.w3.org/2018/credentials#VerifiableCredential'], ['PermanentResidentCard']],
           },
-          claims: [{ path: ['givenName'], values: ['JANE'] }]
-        }
+          claims: [{ path: ['givenName'], values: ['JANE'] }],
+        },
       ],
       credential_sets: [
         {
           // This option references a non-existent credential query id
           options: [['does_not_exist']],
-          required: true
-        }
-      ]
+          required: true,
+        },
+      ],
     }
 
     const parsed = DcqlQuery.parse(queryWithBadSet)

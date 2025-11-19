@@ -1,7 +1,4 @@
-import {
-  AuthorizationRequestPayloadD28Schema,
-  AuthorizationRequestPayloadV1Schema
-} from '../schemas'
+import { AuthorizationRequestPayloadD28Schema, AuthorizationRequestPayloadV1Schema } from '../schemas'
 import { AuthorizationRequestPayload, SupportedVersion } from '../types'
 
 export const authorizationRequestVersionDiscovery = (authorizationRequest: AuthorizationRequestPayload): SupportedVersion[] => {

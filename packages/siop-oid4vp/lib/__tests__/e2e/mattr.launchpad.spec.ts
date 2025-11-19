@@ -26,58 +26,52 @@ export const UNIT_TEST_TIMEOUT = 30000
 export const VP_CREATE_URL = 'https://launchpad.mattrlabs.com/api/vp/create'
 
 const OPENBADGE_JWT_VC = {
-  compactJwtVc: 'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6bGF1bmNocGFkLnZpaS5lbGVjdHJvbi5tYXR0cmxhYnMuaW8jNkJoRk1DR1RKZyJ9.eyJpc3MiOiJkaWQ6d2ViOmxhdW5jaHBhZC52aWkuZWxlY3Ryb24ubWF0dHJsYWJzLmlvIiwic3ViIjoiZGlkOmtleTp6Nk1raXRHVmduTGRORlpqbUE5WEpwQThrM29lakVudU1GN205NkJEN3BaTGprWTIiLCJuYmYiOjE2OTYzNjA1MTEsImV4cCI6MTcyNzk4MjkxMSwidmMiOnsibmFtZSI6IkV4YW1wbGUgVW5pdmVyc2l0eSBEZWdyZWUiLCJkZXNjcmlwdGlvbiI6IkpGRiBQbHVnZmVzdCAzIE9wZW5CYWRnZSBDcmVkZW50aWFsIiwiY3JlZGVudGlhbEJyYW5kaW5nIjp7ImJhY2tncm91bmRDb2xvciI6IiM0NjRjNDkifSwiQGNvbnRleHQiOlsiaHR0cHM6Ly93d3cudzMub3JnLzIwMTgvY3JlZGVudGlhbHMvdjEiLCJodHRwczovL21hdHRyLmdsb2JhbC9jb250ZXh0cy92Yy1leHRlbnNpb25zL3YyIiwiaHR0cHM6Ly9wdXJsLmltc2dsb2JhbC5vcmcvc3BlYy9vYi92M3AwL2NvbnRleHQtMy4wLjIuanNvbiIsImh0dHBzOi8vcHVybC5pbXNnbG9iYWwub3JnL3NwZWMvb2IvdjNwMC9leHRlbnNpb25zLmpzb24iLCJodHRwczovL3czaWQub3JnL3ZjLXJldm9jYXRpb24tbGlzdC0yMDIwL3YxIl0sInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJPcGVuQmFkZ2VDcmVkZW50aWFsIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleTp6Nk1raXRHVmduTGRORlpqbUE5WEpwQThrM29lakVudU1GN205NkJEN3BaTGprWTIiLCJ0eXBlIjpbIkFjaGlldmVtZW50U3ViamVjdCJdLCJhY2hpZXZlbWVudCI6eyJpZCI6Imh0dHBzOi8vZXhhbXBsZS5jb20vYWNoaWV2ZW1lbnRzLzIxc3QtY2VudHVyeS1za2lsbHMvdGVhbXdvcmsiLCJuYW1lIjoiVGVhbXdvcmsiLCJ0eXBlIjpbIkFjaGlldmVtZW50Il0sImltYWdlIjp7ImlkIjoiaHR0cHM6Ly93M2MtY2NnLmdpdGh1Yi5pby92Yy1lZC9wbHVnZmVzdC0zLTIwMjMvaW1hZ2VzL0pGRi1WQy1FRFUtUExVR0ZFU1QzLWJhZGdlLWltYWdlLnBuZyIsInR5cGUiOiJJbWFnZSJ9LCJjcml0ZXJpYSI6eyJuYXJyYXRpdmUiOiJUZWFtIG1lbWJlcnMgYXJlIG5vbWluYXRlZCBmb3IgdGhpcyBiYWRnZSBieSB0aGVpciBwZWVycyBhbmQgcmVjb2duaXplZCB1cG9uIHJldmlldyBieSBFeGFtcGxlIENvcnAgbWFuYWdlbWVudC4ifSwiZGVzY3JpcHRpb24iOiJUaGlzIGJhZGdlIHJlY29nbml6ZXMgdGhlIGRldmVsb3BtZW50IG9mIHRoZSBjYXBhY2l0eSB0byBjb2xsYWJvcmF0ZSB3aXRoaW4gYSBncm91cCBlbnZpcm9ubWVudC4ifX0sImlzc3VlciI6eyJpZCI6ImRpZDp3ZWI6bGF1bmNocGFkLnZpaS5lbGVjdHJvbi5tYXR0cmxhYnMuaW8iLCJuYW1lIjoiRXhhbXBsZSBVbml2ZXJzaXR5IiwiaWNvblVybCI6Imh0dHBzOi8vdzNjLWNjZy5naXRodWIuaW8vdmMtZWQvcGx1Z2Zlc3QtMS0yMDIyL2ltYWdlcy9KRkZfTG9nb0xvY2t1cC5wbmciLCJpbWFnZSI6Imh0dHBzOi8vdzNjLWNjZy5naXRodWIuaW8vdmMtZWQvcGx1Z2Zlc3QtMS0yMDIyL2ltYWdlcy9KRkZfTG9nb0xvY2t1cC5wbmcifX19.JDQ5kp_nvqJbL9Q8o2xIdt_r_WG0cB1o-Boy1RiDZhXRlVTgwAxvCa41OiL97VnbovN98tL7VtXbM6slAt6TBg',
+  compactJwtVc:
+    'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6bGF1bmNocGFkLnZpaS5lbGVjdHJvbi5tYXR0cmxhYnMuaW8jNkJoRk1DR1RKZyJ9.eyJpc3MiOiJkaWQ6d2ViOmxhdW5jaHBhZC52aWkuZWxlY3Ryb24ubWF0dHJsYWJzLmlvIiwic3ViIjoiZGlkOmtleTp6Nk1raXRHVmduTGRORlpqbUE5WEpwQThrM29lakVudU1GN205NkJEN3BaTGprWTIiLCJuYmYiOjE2OTYzNjA1MTEsImV4cCI6MTcyNzk4MjkxMSwidmMiOnsibmFtZSI6IkV4YW1wbGUgVW5pdmVyc2l0eSBEZWdyZWUiLCJkZXNjcmlwdGlvbiI6IkpGRiBQbHVnZmVzdCAzIE9wZW5CYWRnZSBDcmVkZW50aWFsIiwiY3JlZGVudGlhbEJyYW5kaW5nIjp7ImJhY2tncm91bmRDb2xvciI6IiM0NjRjNDkifSwiQGNvbnRleHQiOlsiaHR0cHM6Ly93d3cudzMub3JnLzIwMTgvY3JlZGVudGlhbHMvdjEiLCJodHRwczovL21hdHRyLmdsb2JhbC9jb250ZXh0cy92Yy1leHRlbnNpb25zL3YyIiwiaHR0cHM6Ly9wdXJsLmltc2dsb2JhbC5vcmcvc3BlYy9vYi92M3AwL2NvbnRleHQtMy4wLjIuanNvbiIsImh0dHBzOi8vcHVybC5pbXNnbG9iYWwub3JnL3NwZWMvb2IvdjNwMC9leHRlbnNpb25zLmpzb24iLCJodHRwczovL3czaWQub3JnL3ZjLXJldm9jYXRpb24tbGlzdC0yMDIwL3YxIl0sInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJPcGVuQmFkZ2VDcmVkZW50aWFsIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleTp6Nk1raXRHVmduTGRORlpqbUE5WEpwQThrM29lakVudU1GN205NkJEN3BaTGprWTIiLCJ0eXBlIjpbIkFjaGlldmVtZW50U3ViamVjdCJdLCJhY2hpZXZlbWVudCI6eyJpZCI6Imh0dHBzOi8vZXhhbXBsZS5jb20vYWNoaWV2ZW1lbnRzLzIxc3QtY2VudHVyeS1za2lsbHMvdGVhbXdvcmsiLCJuYW1lIjoiVGVhbXdvcmsiLCJ0eXBlIjpbIkFjaGlldmVtZW50Il0sImltYWdlIjp7ImlkIjoiaHR0cHM6Ly93M2MtY2NnLmdpdGh1Yi5pby92Yy1lZC9wbHVnZmVzdC0zLTIwMjMvaW1hZ2VzL0pGRi1WQy1FRFUtUExVR0ZFU1QzLWJhZGdlLWltYWdlLnBuZyIsInR5cGUiOiJJbWFnZSJ9LCJjcml0ZXJpYSI6eyJuYXJyYXRpdmUiOiJUZWFtIG1lbWJlcnMgYXJlIG5vbWluYXRlZCBmb3IgdGhpcyBiYWRnZSBieSB0aGVpciBwZWVycyBhbmQgcmVjb2duaXplZCB1cG9uIHJldmlldyBieSBFeGFtcGxlIENvcnAgbWFuYWdlbWVudC4ifSwiZGVzY3JpcHRpb24iOiJUaGlzIGJhZGdlIHJlY29nbml6ZXMgdGhlIGRldmVsb3BtZW50IG9mIHRoZSBjYXBhY2l0eSB0byBjb2xsYWJvcmF0ZSB3aXRoaW4gYSBncm91cCBlbnZpcm9ubWVudC4ifX0sImlzc3VlciI6eyJpZCI6ImRpZDp3ZWI6bGF1bmNocGFkLnZpaS5lbGVjdHJvbi5tYXR0cmxhYnMuaW8iLCJuYW1lIjoiRXhhbXBsZSBVbml2ZXJzaXR5IiwiaWNvblVybCI6Imh0dHBzOi8vdzNjLWNjZy5naXRodWIuaW8vdmMtZWQvcGx1Z2Zlc3QtMS0yMDIyL2ltYWdlcy9KRkZfTG9nb0xvY2t1cC5wbmciLCJpbWFnZSI6Imh0dHBzOi8vdzNjLWNjZy5naXRodWIuaW8vdmMtZWQvcGx1Z2Zlc3QtMS0yMDIyL2ltYWdlcy9KRkZfTG9nb0xvY2t1cC5wbmcifX19.JDQ5kp_nvqJbL9Q8o2xIdt_r_WG0cB1o-Boy1RiDZhXRlVTgwAxvCa41OiL97VnbovN98tL7VtXbM6slAt6TBg',
   decodedPayload: {
-    iss: "did:web:launchpad.vii.electron.mattrlabs.io",
-    sub: "did:key:z6MkitGVgnLdNFZjmA9XJpA8k3oejEnuMF7m96BD7pZLjkY2",
+    iss: 'did:web:launchpad.vii.electron.mattrlabs.io',
+    sub: 'did:key:z6MkitGVgnLdNFZjmA9XJpA8k3oejEnuMF7m96BD7pZLjkY2',
     nbf: 1696360511,
     exp: 1727982911,
     vc: {
-      name: "Example University Degree",
-      description: "JFF Plugfest 3 OpenBadge Credential",
+      name: 'Example University Degree',
+      description: 'JFF Plugfest 3 OpenBadge Credential',
       credentialBranding: {
-        backgroundColor: "#464c49"
+        backgroundColor: '#464c49',
       },
-      "@context": [
-        "https://www.w3.org/2018/credentials/v1",
-        "https://mattr.global/contexts/vc-extensions/v2",
-        "https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.2.json",
-        "https://purl.imsglobal.org/spec/ob/v3p0/extensions.json",
-        "https://w3id.org/vc-revocation-list-2020/v1"
+      '@context': [
+        'https://www.w3.org/2018/credentials/v1',
+        'https://mattr.global/contexts/vc-extensions/v2',
+        'https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.2.json',
+        'https://purl.imsglobal.org/spec/ob/v3p0/extensions.json',
+        'https://w3id.org/vc-revocation-list-2020/v1',
       ],
-      type: [
-        "VerifiableCredential",
-        "OpenBadgeCredential"
-      ],
+      type: ['VerifiableCredential', 'OpenBadgeCredential'],
       credentialSubject: {
-        id: "did:key:z6MkitGVgnLdNFZjmA9XJpA8k3oejEnuMF7m96BD7pZLjkY2",
-        type: [
-          "AchievementSubject"
-        ],
+        id: 'did:key:z6MkitGVgnLdNFZjmA9XJpA8k3oejEnuMF7m96BD7pZLjkY2',
+        type: ['AchievementSubject'],
         achievement: {
-          id: "https://example.com/achievements/21st-century-skills/teamwork",
-          name: "Teamwork",
-          type: [
-            "Achievement"
-          ],
+          id: 'https://example.com/achievements/21st-century-skills/teamwork',
+          name: 'Teamwork',
+          type: ['Achievement'],
           image: {
-            id: "https://w3c-ccg.github.io/vc-ed/plugfest-3-2023/images/JFF-VC-EDU-PLUGFEST3-badge-image.png",
-            type: "Image"
+            id: 'https://w3c-ccg.github.io/vc-ed/plugfest-3-2023/images/JFF-VC-EDU-PLUGFEST3-badge-image.png',
+            type: 'Image',
           },
           criteria: {
-            narrative: "Team members are nominated for this badge by their peers and recognized upon review by Example Corp management."
+            narrative: 'Team members are nominated for this badge by their peers and recognized upon review by Example Corp management.',
           },
-          description: "This badge recognizes the development of the capacity to collaborate within a group environment."
-        }
+          description: 'This badge recognizes the development of the capacity to collaborate within a group environment.',
+        },
       },
       issuer: {
-        id: "did:web:launchpad.vii.electron.mattrlabs.io",
-        name: "Example University",
-        iconUrl: "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/images/JFF_LogoLockup.png",
-        image: "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/images/JFF_LogoLockup.png"
-      }
-    }
-  }
+        id: 'did:web:launchpad.vii.electron.mattrlabs.io',
+        name: 'Example University',
+        iconUrl: 'https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/images/JFF_LogoLockup.png',
+        image: 'https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/images/JFF_LogoLockup.png',
+      },
+    },
+  },
 }
 
 export const jwk: JWK = {
@@ -123,14 +117,9 @@ const dcqlQuery = {
       id: 'my_credential',
       format: 'jwt_vc_json',
       meta: {
-        type_values: [
-          ['https://www.w3.org/2018/credentials#VerifiableCredential'],
-          ['IDCardCredential'],
-        ],
+        type_values: [['https://www.w3.org/2018/credentials#VerifiableCredential'], ['IDCardCredential']],
       },
-      claims: [
-          { path: ['name'], values: ["Teamwork"] }
-      ],
+      claims: [{ path: ['name'], values: ['Teamwork'] }],
     },
   ],
 } satisfies DcqlQuery.Input
@@ -165,7 +154,7 @@ describe.skip('OID4VCI-Client using Mattr issuer should', () => {
       credential_format: 'jwt_vc_json',
       claims: OPENBADGE_JWT_VC.decodedPayload.vc.credentialSubject,
       type: OPENBADGE_JWT_VC.decodedPayload.vc.type,
-      cryptographic_holder_binding: true
+      cryptographic_holder_binding: true,
     } satisfies DcqlW3cVcCredential
 
     const dcqlQueryResult: DcqlQueryResult = DcqlQuery.query(parsedDcqlQuery, [dcqlCredential])
@@ -182,7 +171,7 @@ describe.skip('OID4VCI-Client using Mattr issuer should', () => {
     const authResponse = await op.createAuthorizationResponse(verifiedAuthRequest, {
       issuer: didStr,
       dcqlResponse: {
-        dcqlPresentation
+        dcqlPresentation,
       },
       correlationId,
       jwtIssuer: {
@@ -226,7 +215,7 @@ describe.skip('OID4VCI-Client using Mattr issuer should', () => {
       credential_format: 'jwt_vc_json',
       claims: OPENBADGE_JWT_VC.decodedPayload.vc.credentialSubject,
       type: OPENBADGE_JWT_VC.decodedPayload.vc.type,
-      cryptographic_holder_binding: true
+      cryptographic_holder_binding: true,
     } satisfies DcqlW3cVcCredential
 
     const dcqlQueryResult: DcqlQueryResult = DcqlQuery.query(parsedDcqlQuery, [dcqlCredential])
@@ -249,7 +238,7 @@ describe.skip('OID4VCI-Client using Mattr issuer should', () => {
           alg: SigningAlgo.EDDSA,
         },
         dcqlResponse: {
-          dcqlPresentation
+          dcqlPresentation,
         },
         createJwtCallback: getCreateJwtCallback({
           hexPrivateKey: '913466d1a38d1d8c0d3c0fb0fc3b633075085a31372bbd2a8022215a88d9d1e5',

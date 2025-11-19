@@ -15,7 +15,7 @@ import {
   CredentialOfferSession,
   GrantTypes,
   IssueStatus,
-  STATE_MISSING_ERROR
+  STATE_MISSING_ERROR,
 } from '@sphereon/oid4vci-common'
 import { createAccessTokenResponse } from '../tokens'
 
@@ -31,9 +31,9 @@ const verifiableCredential = {
     id: 'did:example:ebfeb1f712ebc6f1c276e12ec21',
     alumniOf: {
       id: 'did:example:c276e12ec21ebfeb1f712ebc6f1',
-      name: 'Example University'
-    }
-  }
+      name: 'Example University',
+    },
+  },
 }
 
 const verifiableCredential_withoutDid = {
@@ -46,9 +46,9 @@ const verifiableCredential_withoutDid = {
     id: 'ebfeb1f712ebc6f1c276e12ec21',
     alumniOf: {
       id: 'c276e12ec21ebfeb1f712ebc6f1',
-      name: 'Example University'
-    }
-  }
+      name: 'Example University',
+    },
+  },
 }
 
 const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
@@ -77,25 +77,27 @@ describe('VcIssuer', () => {
       .withFormat('jwt_vc_json')
       .withCredentialName('UniversityDegree_JWT')
       .withCredentialDefinition({
-        type: ['VerifiableCredential', 'UniversityDegree_JWT']
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
       })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
         logo: {
           url: 'https://exampleuniversity.com/public/logo.png',
-          alt_text: 'a square logo of a university'
+          alt_text: 'a square logo of a university',
         },
         background_color: '#12107c',
-        text_color: '#FFFFFF'
+        text_color: '#FFFFFF',
       })
       .addClaim({
         path: ['credentialSubject', 'given_name'],
         mandatory: false,
-        display: [{
-          name: 'given name',
-          locale: 'en-US'
-        }]
+        display: [
+          {
+            name: 'given name',
+            locale: 'en-US',
+          },
+        ],
       })
       .build()
     const stateManager = new MemoryStates<CredentialOfferSession>()
@@ -118,12 +120,12 @@ describe('VcIssuer', () => {
               'pre-authorized_code': preAuthorizedCode,
               tx_code: {
                 input_mode: 'text',
-                length: 4
-              }
-            }
-          }
-        }
-      }
+                length: 4,
+              },
+            },
+          },
+        },
+      },
     })
 
     vcIssuer = new VcIssuerBuilder()
@@ -133,7 +135,7 @@ describe('VcIssuer', () => {
       .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
-        locale: 'en-US'
+        locale: 'en-US',
       })
       .withCredentialConfigurationsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
@@ -151,14 +153,13 @@ describe('VcIssuer', () => {
             jwt: 'ye.ye.ye',
             created: new Date().toISOString(),
             proofPurpose: IProofPurpose.assertionMethod,
-            verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf'
-          }
-        })
+            verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
+          },
+        }),
       )
       .withJWTVerifyCallback(jwtVerifyCallback)
       .build()
   })
-
 
   it('should handle authorization_details flow with credential_identifiers', async () => {
     jwtVerifyCallback.mockResolvedValue({
@@ -167,35 +168,37 @@ describe('VcIssuer', () => {
       alg: Alg.ES256K,
       didDocument: {
         '@context': 'https://www.w3.org/ns/did/v1',
-        id: 'did:example:1234'
+        id: 'did:example:1234',
       },
       jwt: {
         header: {
           typ: 'openid4vci-proof+jwt',
           alg: Alg.ES256K,
-          kid: 'test-kid'
+          kid: 'test-kid',
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
           iat: +new Date() / 1000,
-          nonce: 'test-nonce'
-        }
-      }
+          nonce: 'test-nonce',
+        },
+      },
     })
 
     const createdAt = +new Date()
     await vcIssuer.cNonces.set('test-nonce', {
       cNonce: 'test-nonce',
-      createdAt: createdAt
+      createdAt: createdAt,
     })
 
     // Create session with authorization_details
-    const authorizationDetails: AuthorizationDetailsV1_0_15[] = [{
-      type: 'openid_credential',
-      credential_configuration_id: 'UniversityDegree_JWT',
-      format: 'jwt_vc_json' as const,
-      types: ['VerifiableCredential', 'UniversityDegree_JWT']
-    }]
+    const authorizationDetails: AuthorizationDetailsV1_0_15[] = [
+      {
+        type: 'openid_credential',
+        credential_configuration_id: 'UniversityDegree_JWT',
+        format: 'jwt_vc_json' as const,
+        types: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      },
+    ]
 
     await vcIssuer.credentialOfferSessions.set('test-pre-authorized-code', {
       createdAt: createdAt,
@@ -204,12 +207,12 @@ describe('VcIssuer', () => {
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'did:key:test',
-          credential_configuration_ids: ['UniversityDegree_JWT']
-        }
+          credential_configuration_ids: ['UniversityDegree_JWT'],
+        },
       },
       authorizationDetails: authorizationDetails,
       lastUpdatedAt: createdAt,
-      status: IssueStatus.ACCESS_TOKEN_CREATED
+      status: IssueStatus.ACCESS_TOKEN_CREATED,
     })
 
     const result = await vcIssuer.issueCredential({
@@ -218,36 +221,38 @@ describe('VcIssuer', () => {
         credential_configuration_id: 'UniversityDegree_JWT',
         proof: {
           proof_type: 'jwt',
-          jwt: 'ye.ye.ye'
-        }
+          jwt: 'ye.ye.ye',
+        },
       },
       issuerCorrelation: {
         preAuthorizedCode: 'test-pre-authorized-code',
-        authorizationDetails: authorizationDetails
+        authorizationDetails: authorizationDetails,
       },
-      newCNonce: 'new-test-nonce'
+      newCNonce: 'new-test-nonce',
     })
 
     expect(result).toEqual({
       c_nonce: 'new-test-nonce',
       c_nonce_expires_in: 300,
       notification_id: '43243',
-      credentials: [{
-        credential: {
-          '@context': ['https://www.w3.org/2018/credentials/v1'],
-          credentialSubject: {},
-          issuanceDate: expect.any(String),
-          issuer: 'did:key:test',
-          proof: {
-            created: expect.any(String),
-            jwt: 'ye.ye.ye',
-            proofPurpose: 'assertionMethod',
-            type: 'JwtProof2020',
-            verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf'
+      credentials: [
+        {
+          credential: {
+            '@context': ['https://www.w3.org/2018/credentials/v1'],
+            credentialSubject: {},
+            issuanceDate: expect.any(String),
+            issuer: 'did:key:test',
+            proof: {
+              created: expect.any(String),
+              jwt: 'ye.ye.ye',
+              proofPurpose: 'assertionMethod',
+              type: 'JwtProof2020',
+              verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
+            },
+            type: ['VerifiableCredential'],
           },
-          type: ['VerifiableCredential']
-        }
-      }]
+        },
+      ],
     })
   })
 
@@ -258,42 +263,46 @@ describe('VcIssuer', () => {
       alg: Alg.ES256K,
       didDocument: {
         '@context': 'https://www.w3.org/ns/did/v1',
-        id: 'did:example:1234'
+        id: 'did:example:1234',
       },
       jwt: {
         header: {
           typ: 'openid4vci-proof+jwt',
           alg: Alg.ES256K,
-          kid: 'test-kid'
+          kid: 'test-kid',
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
           iat: +new Date() / 1000,
           nonce: 'test-nonce',
           // Mock access token with authorization_details that includes credential_identifiers
-          authorization_details: [{
-            type: 'openid_credential',
-            credential_configuration_id: 'UniversityDegree_JWT',
-            format: 'jwt_vc_json',
-            types: ['VerifiableCredential', 'UniversityDegree_JWT'],
-            credential_identifiers: ['credential-123', 'credential-456']
-          }]
-        }
-      }
+          authorization_details: [
+            {
+              type: 'openid_credential',
+              credential_configuration_id: 'UniversityDegree_JWT',
+              format: 'jwt_vc_json',
+              types: ['VerifiableCredential', 'UniversityDegree_JWT'],
+              credential_identifiers: ['credential-123', 'credential-456'],
+            },
+          ],
+        },
+      },
     })
 
     const createdAt = +new Date()
     await vcIssuer.cNonces.set('test-nonce', {
       cNonce: 'test-nonce',
-      createdAt: createdAt
+      createdAt: createdAt,
     })
 
-    const authorizationDetails: AuthorizationDetailsV1_0_15[] = [{
-      type: 'openid_credential',
-      credential_configuration_id: 'UniversityDegree_JWT',
-      format: 'jwt_vc_json' as const,
-      types: ['VerifiableCredential', 'UniversityDegree_JWT']
-    }]
+    const authorizationDetails: AuthorizationDetailsV1_0_15[] = [
+      {
+        type: 'openid_credential',
+        credential_configuration_id: 'UniversityDegree_JWT',
+        format: 'jwt_vc_json' as const,
+        types: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      },
+    ]
 
     await vcIssuer.credentialOfferSessions.set('test-pre-authorized-code', {
       createdAt: createdAt,
@@ -302,12 +311,12 @@ describe('VcIssuer', () => {
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'did:key:test',
-          credential_configuration_ids: ['UniversityDegree_JWT']
-        }
+          credential_configuration_ids: ['UniversityDegree_JWT'],
+        },
       },
       authorizationDetails: authorizationDetails,
       lastUpdatedAt: createdAt,
-      status: IssueStatus.ACCESS_TOKEN_CREATED
+      status: IssueStatus.ACCESS_TOKEN_CREATED,
     })
 
     // Request credential using specific credential_identifier from token
@@ -318,20 +327,22 @@ describe('VcIssuer', () => {
         credential_identifier: 'credential-123',
         proof: {
           proof_type: 'jwt',
-          jwt: 'ye.ye.ye'
-        }
+          jwt: 'ye.ye.ye',
+        },
       } as any,
       issuerCorrelation: {
         preAuthorizedCode: 'test-pre-authorized-code',
-        authorizationDetails: [{
-          type: 'openid_credential',
-          credential_configuration_id: 'UniversityDegree_JWT',
-          format: 'jwt_vc_json' as const,
-          types: ['VerifiableCredential', 'UniversityDegree_JWT'],
-          credential_identifiers: ['credential-123', 'credential-456']
-        }]
+        authorizationDetails: [
+          {
+            type: 'openid_credential',
+            credential_configuration_id: 'UniversityDegree_JWT',
+            format: 'jwt_vc_json' as const,
+            types: ['VerifiableCredential', 'UniversityDegree_JWT'],
+            credential_identifiers: ['credential-123', 'credential-456'],
+          },
+        ],
       },
-      newCNonce: 'new-test-nonce'
+      newCNonce: 'new-test-nonce',
     })
 
     expect(result.credentials).toHaveLength(1)
@@ -342,12 +353,14 @@ describe('VcIssuer', () => {
     const createdAt = +new Date()
 
     // Setup session with authorization_details
-    const authorizationDetails: AuthorizationDetailsV1_0_15[] = [{
-      type: 'openid_credential',
-      credential_configuration_id: 'UniversityDegree_JWT',
-      format: 'jwt_vc_json' as const,
-      types: ['VerifiableCredential', 'UniversityDegree_JWT']
-    }]
+    const authorizationDetails: AuthorizationDetailsV1_0_15[] = [
+      {
+        type: 'openid_credential',
+        credential_configuration_id: 'UniversityDegree_JWT',
+        format: 'jwt_vc_json' as const,
+        types: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      },
+    ]
 
     await vcIssuer.credentialOfferSessions.set('test-pre-authorized-code', {
       createdAt: createdAt,
@@ -356,24 +369,27 @@ describe('VcIssuer', () => {
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'did:key:test',
-          credential_configuration_ids: ['UniversityDegree_JWT']
-        }
+          credential_configuration_ids: ['UniversityDegree_JWT'],
+        },
       },
       authorizationDetails: authorizationDetails,
       lastUpdatedAt: createdAt,
-      status: IssueStatus.ACCESS_TOKEN_CREATED
+      status: IssueStatus.ACCESS_TOKEN_CREATED,
     })
 
-    const tokenResponse = await createAccessTokenResponse({
-      grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
-      'pre-authorized_code': 'test-pre-authorized-code'
-    }, {
-      credentialOfferSessions: vcIssuer.credentialOfferSessions,
-      cNonces: vcIssuer.cNonces,
-      tokenExpiresIn: 300,
-      accessTokenSignerCallback: async () => 'mock-access-token',
-      accessTokenIssuer: 'test-issuer'
-    })
+    const tokenResponse = await createAccessTokenResponse(
+      {
+        grant_type: GrantTypes.PRE_AUTHORIZED_CODE,
+        'pre-authorized_code': 'test-pre-authorized-code',
+      },
+      {
+        credentialOfferSessions: vcIssuer.credentialOfferSessions,
+        cNonces: vcIssuer.cNonces,
+        tokenExpiresIn: 300,
+        accessTokenSignerCallback: async () => 'mock-access-token',
+        accessTokenIssuer: 'test-issuer',
+      },
+    )
 
     // Verify token response includes authorization_details with generated credential_identifiers
     expect(tokenResponse.authorization_details).toBeDefined()
@@ -391,27 +407,27 @@ describe('VcIssuer', () => {
       alg: Alg.ES256K,
       didDocument: {
         '@context': 'https://www.w3.org/ns/did/v1',
-        id: 'did:example:1234'
+        id: 'did:example:1234',
       },
       jwt: {
         header: {
           typ: 'openid4vci-proof+jwt',
           alg: Alg.ES256K,
-          kid: 'test-kid'
+          kid: 'test-kid',
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
           iat: +new Date() / 1000,
           nonce: 'test-nonce',
           // Include authorization_details from token response
-          authorization_details: tokenResponse.authorization_details
-        }
-      }
+          authorization_details: tokenResponse.authorization_details,
+        },
+      },
     })
 
     await vcIssuer.cNonces.set('test-nonce', {
       cNonce: 'test-nonce',
-      createdAt: createdAt
+      createdAt: createdAt,
     })
 
     // Step 3: Use generated credential_identifier in credential request
@@ -421,14 +437,14 @@ describe('VcIssuer', () => {
         credential_identifier: generatedIdentifier,
         proof: {
           proof_type: 'jwt',
-          jwt: 'ye.ye.ye'
-        }
+          jwt: 'ye.ye.ye',
+        },
       } as any,
       issuerCorrelation: {
         preAuthorizedCode: 'test-pre-authorized-code',
-        authorizationDetails: tokenResponse.authorization_details
+        authorizationDetails: tokenResponse.authorization_details,
       },
-      newCNonce: 'new-test-nonce'
+      newCNonce: 'new-test-nonce',
     })
 
     // Verify credential was issued successfully
@@ -444,34 +460,36 @@ describe('VcIssuer', () => {
       alg: Alg.ES256K,
       didDocument: {
         '@context': 'https://www.w3.org/ns/did/v1',
-        id: 'did:example:1234'
+        id: 'did:example:1234',
       },
       jwt: {
         header: {
           typ: 'openid4vci-proof+jwt',
           alg: Alg.ES256K,
-          kid: 'test-kid'
+          kid: 'test-kid',
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
           iat: +new Date() / 1000,
-          nonce: 'test-nonce'
-        }
-      }
+          nonce: 'test-nonce',
+        },
+      },
     })
 
     const createdAt = +new Date()
     await vcIssuer.cNonces.set('test-nonce', {
       cNonce: 'test-nonce',
-      createdAt: createdAt
+      createdAt: createdAt,
     })
 
-    const authorizationDetails: AuthorizationDetailsV1_0_15[] = [{
-      type: 'openid_credential',
-      credential_configuration_id: 'UniversityDegree_JWT',
-      format: 'jwt_vc_json' as const,
-      types: ['VerifiableCredential', 'UniversityDegree_JWT']
-    }]
+    const authorizationDetails: AuthorizationDetailsV1_0_15[] = [
+      {
+        type: 'openid_credential',
+        credential_configuration_id: 'UniversityDegree_JWT',
+        format: 'jwt_vc_json' as const,
+        types: ['VerifiableCredential', 'UniversityDegree_JWT'],
+      },
+    ]
 
     await vcIssuer.credentialOfferSessions.set('test-pre-authorized-code', {
       createdAt: createdAt,
@@ -480,12 +498,12 @@ describe('VcIssuer', () => {
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'did:key:test',
-          credential_configuration_ids: ['UniversityDegree_JWT']
-        }
+          credential_configuration_ids: ['UniversityDegree_JWT'],
+        },
       },
       authorizationDetails: authorizationDetails,
       lastUpdatedAt: createdAt,
-      status: IssueStatus.ACCESS_TOKEN_CREATED
+      status: IssueStatus.ACCESS_TOKEN_CREATED,
     })
 
     // Request credential using invalid credential_identifier
@@ -495,15 +513,15 @@ describe('VcIssuer', () => {
         credentialRequest: {
           ...{
             credential_configuration_id: 'UniversityDegree_JWT',
-            proof: { proof_type: 'jwt', jwt: 'ye.ye.ye' }
+            proof: { proof_type: 'jwt', jwt: 'ye.ye.ye' },
           },
-          credential_identifier: 'credential-123'
+          credential_identifier: 'credential-123',
         } as any,
         issuerCorrelation: {
           preAuthorizedCode: 'test-pre-authorized-code',
-          authorizationDetails: authorizationDetails
-        }
-      })
+          authorizationDetails: authorizationDetails,
+        },
+      }),
     ).rejects.toThrow(/credential_identifier not found in authorization_details/)
   })
 
@@ -517,15 +535,15 @@ describe('VcIssuer', () => {
       offerMode: 'VALUE',
       grants: {
         authorization_code: {
-          issuer_state: issuerState
+          issuer_state: issuerState,
         },
         'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
           'pre-authorized_code': preAuthorizedCode,
           tx_code: {
             input_mode: 'text',
-            length: 4
-          }
-        }
+            length: 4,
+          },
+        },
       },
       scheme: 'http',
       baseUri: 'issuer-example.com',
@@ -533,8 +551,8 @@ describe('VcIssuer', () => {
         size: 400,
         colorDark: '#000000',
         colorLight: '#ffffff',
-        correctLevel: 2
-      }
+        correctLevel: 2,
+      },
     })
 
     console.log(JSON.stringify(rest, null, 2))
@@ -547,16 +565,16 @@ describe('VcIssuer', () => {
         credential_configuration_ids: ['UniversityDegree_JWT'],
         grants: {
           authorization_code: {
-            issuer_state: 'previously-created-state'
+            issuer_state: 'previously-created-state',
           },
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             'pre-authorized_code': 'test_code',
             tx_code: {
               input_mode: 'text',
-              length: 4
-            }
-          }
-        }
+              length: 4,
+            },
+          },
+        },
       },
       issuerState: 'previously-created-state',
       original_credential_offer: {
@@ -564,22 +582,22 @@ describe('VcIssuer', () => {
         credential_configuration_ids: ['UniversityDegree_JWT'],
         grants: {
           authorization_code: {
-            issuer_state: 'previously-created-state'
+            issuer_state: 'previously-created-state',
           },
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
             'pre-authorized_code': 'test_code',
             tx_code: {
               input_mode: 'text',
-              length: 4
-            }
-          }
-        }
+              length: 4,
+            },
+          },
+        },
       },
       preAuthorizedCode: 'test_code',
       scheme: 'http',
       supportedFlows: ['Authorization Code Flow', 'Pre-Authorized Code Flow'],
       userPinRequired: true,
-      version: 1015
+      version: 1015,
     })
   })
 
@@ -591,14 +609,14 @@ describe('VcIssuer', () => {
           credentialOfferUri: 'http://issuer-example.com/:id',
           grants: {
             authorization_code: {
-              issuer_state: issuerState
-            }
+              issuer_state: issuerState,
+            },
           },
           scheme: 'http',
           baseUri: 'issuer-example.com',
-          credential_configuration_ids: ['UniversityDegree_JWT']
+          credential_configuration_ids: ['UniversityDegree_JWT'],
         })
-        .then((response) => response.uri)
+        .then((response) => response.uri),
     ).resolves.toContain('http://issuer-example.com?credential_offer_uri=http%3A%2F%2Fissuer-example.com%2F')
   })
 
@@ -610,20 +628,20 @@ describe('VcIssuer', () => {
       alg: Alg.ES256K,
       didDocument: {
         '@context': 'https://www.w3.org/ns/did/v1',
-        id: 'did:example:1234'
+        id: 'did:example:1234',
       },
       jwt: {
         header: {
           typ: 'openid4vci-proof+jwt',
           alg: Alg.ES256K,
-          kid: 'test-kid'
+          kid: 'test-kid',
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
           iat: +new Date() / 1000,
-          nonce: 'test-nonce'
-        }
-      }
+          nonce: 'test-nonce',
+        },
+      },
     })
 
     await expect(
@@ -632,13 +650,13 @@ describe('VcIssuer', () => {
           credential_configuration_id: 'UniversityDegree_JWT',
           proof: {
             proof_type: 'jwt',
-            jwt: 'ye.ye.ye'
-          }
+            jwt: 'ye.ye.ye',
+          },
         },
         issuerCorrelation: {
-          issuerState: 'invalid state'
-        }
-      })
+          issuerState: 'invalid state',
+        },
+      }),
     ).rejects.toThrow(Error(STATE_MISSING_ERROR + ' (test-nonce)'))
   })
 
@@ -649,26 +667,26 @@ describe('VcIssuer', () => {
       alg: alg,
       didDocument: {
         '@context': 'https://www.w3.org/ns/did/v1',
-        id: 'did:example:1234'
+        id: 'did:example:1234',
       },
       jwt: {
         header: {
           typ: 'openid4vci-proof+jwt',
           alg: alg,
-          kid: 'test-kid'
+          kid: 'test-kid',
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
           iat: +new Date() / 1000,
-          nonce: 'test-nonce'
-        }
-      }
+          nonce: 'test-nonce',
+        },
+      },
     })
 
     const createdAt = +new Date()
     await vcIssuer.cNonces.set('test-nonce', {
       cNonce: 'test-nonce',
-      createdAt: createdAt
+      createdAt: createdAt,
     })
     await vcIssuer.credentialOfferSessions.set('test-pre-authorized-code', {
       createdAt: createdAt,
@@ -677,11 +695,11 @@ describe('VcIssuer', () => {
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'did:key:test',
-          credential_configuration_ids: ['UniversityDegree_JWT']
-        }
+          credential_configuration_ids: ['UniversityDegree_JWT'],
+        },
       },
       lastUpdatedAt: createdAt,
-      status: IssueStatus.ACCESS_TOKEN_CREATED
+      status: IssueStatus.ACCESS_TOKEN_CREATED,
     })
 
     await expect(
@@ -691,35 +709,36 @@ describe('VcIssuer', () => {
           credential_configuration_id: 'UniversityDegree_JWT',
           proof: {
             proof_type: 'jwt',
-            jwt: 'ye.ye.ye'
-          }
+            jwt: 'ye.ye.ye',
+          },
         },
         issuerCorrelation: {
-          preAuthorizedCode: 'test-pre-authorized-code'
+          preAuthorizedCode: 'test-pre-authorized-code',
         },
-        newCNonce: 'new-test-nonce'
-      })
+        newCNonce: 'new-test-nonce',
+      }),
     ).resolves.toEqual({
       c_nonce: 'new-test-nonce',
       c_nonce_expires_in: 300,
       notification_id: '43243',
-      credentials: [{
-        credential: {
-          '@context': ['https://www.w3.org/2018/credentials/v1'],
-          credentialSubject: {},
-          issuanceDate: expect.any(String),
-          issuer: 'did:key:test',
-          proof: {
-            created: expect.any(String),
-            jwt: 'ye.ye.ye',
-            proofPurpose: 'assertionMethod',
-            type: 'JwtProof2020',
-            verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf'
+      credentials: [
+        {
+          credential: {
+            '@context': ['https://www.w3.org/2018/credentials/v1'],
+            credentialSubject: {},
+            issuanceDate: expect.any(String),
+            issuer: 'did:key:test',
+            proof: {
+              created: expect.any(String),
+              jwt: 'ye.ye.ye',
+              proofPurpose: 'assertionMethod',
+              type: 'JwtProof2020',
+              verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
+            },
+            type: ['VerifiableCredential'],
           },
-          type: ['VerifiableCredential']
-        }
-      }
-      ]
+        },
+      ],
     })
   })
 
@@ -727,7 +746,7 @@ describe('VcIssuer', () => {
     const createdAt = +new Date()
     await vcIssuer.cNonces.set('test-nonce', {
       cNonce: 'test-nonce',
-      createdAt: createdAt
+      createdAt: createdAt,
     })
 
     jwtVerifyCallback.mockResolvedValue({
@@ -736,20 +755,20 @@ describe('VcIssuer', () => {
       alg: undefined,
       didDocument: {
         '@context': 'https://www.w3.org/ns/did/v1',
-        id: 'did:example:1234'
+        id: 'did:example:1234',
       },
       jwt: {
         header: {
           typ: 'openid4vci-proof+jwt',
           alg: undefined,
-          kid: 'test-kid'
+          kid: 'test-kid',
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
           iat: +new Date() / 1000,
-          nonce: 'test-nonce'
-        }
-      }
+          nonce: 'test-nonce',
+        },
+      },
     })
 
     await expect(
@@ -758,13 +777,13 @@ describe('VcIssuer', () => {
           credential_configuration_id: 'UniversityDegree_JWT',
           proof: {
             proof_type: 'jwt',
-            jwt: 'ye.ye.ye'
-          }
+            jwt: 'ye.ye.ye',
+          },
         },
         issuerCorrelation: {
-          preAuthorizedCode: 'test-pre-authorized-code'
-        }
-      })
+          preAuthorizedCode: 'test-pre-authorized-code',
+        },
+      }),
     ).rejects.toThrow(Error(ALG_ERROR))
   })
 })
@@ -785,25 +804,27 @@ describe('VcIssuer without did', () => {
       .withFormat('jwt_vc_json')
       .withCredentialName('UniversityDegree_JWT')
       .withCredentialDefinition({
-        type: ['VerifiableCredential', 'UniversityDegree_JWT']
+        type: ['VerifiableCredential', 'UniversityDegree_JWT'],
       })
       .withCredentialSupportedDisplay({
         name: 'University Credential',
         locale: 'en-US',
         logo: {
           url: 'https://exampleuniversity.com/public/logo.png',
-          alt_text: 'a square logo of a university'
+          alt_text: 'a square logo of a university',
         },
         background_color: '#12107c',
-        text_color: '#FFFFFF'
+        text_color: '#FFFFFF',
       })
       .addClaim({
         path: ['credentialSubject', 'given_name'],
         mandatory: false,
-        display: [{
-          name: 'given name',
-          locale: 'en-US'
-        }]
+        display: [
+          {
+            name: 'given name',
+            locale: 'en-US',
+          },
+        ],
       })
       .build()
     const stateManager = new MemoryStates<CredentialOfferSession>()
@@ -826,12 +847,12 @@ describe('VcIssuer without did', () => {
               'pre-authorized_code': preAuthorizedCode,
               tx_code: {
                 input_mode: 'text',
-                length: 4
-              }
-            }
-          }
-        }
-      }
+                length: 4,
+              },
+            },
+          },
+        },
+      },
     })
     vcIssuer = new VcIssuerBuilder()
       .withAuthorizationServers('https://authorization-server')
@@ -840,7 +861,7 @@ describe('VcIssuer without did', () => {
       .withAuthorizationMetadata(authorizationServerMetadata)
       .withIssuerDisplay({
         name: 'example issuer',
-        locale: 'en-US'
+        locale: 'en-US',
       })
       .withCredentialConfigurationsSupported(credentialsSupported)
       .withCredentialOfferStateManager(stateManager)
@@ -858,9 +879,9 @@ describe('VcIssuer without did', () => {
             jwt: 'ye.ye.ye',
             created: new Date().toISOString(),
             proofPurpose: IProofPurpose.assertionMethod,
-            verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf'
-          }
-        })
+            verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
+          },
+        }),
       )
       .withJWTVerifyCallback(jwtVerifyCallback)
       .build()
@@ -879,14 +900,14 @@ describe('VcIssuer without did', () => {
         header: {
           typ: 'openid4vci-proof+jwt',
           alg: Alg.ES256K,
-          x5c: ['12', '34', '56']
+          x5c: ['12', '34', '56'],
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
           iat: +new Date() / 1000,
-          nonce: 'test-nonce'
-        }
-      }
+          nonce: 'test-nonce',
+        },
+      },
     })
 
     await expect(
@@ -895,14 +916,13 @@ describe('VcIssuer without did', () => {
           credential_configuration_id: 'UniversityDegree_JWT',
           proof: {
             proof_type: 'jwt',
-            jwt: 'ye.ye.ye'
-          }
-        }
-        ,
+            jwt: 'ye.ye.ye',
+          },
+        },
         issuerCorrelation: {
-          issuerState: 'invalid state'
-        }
-      })
+          issuerState: 'invalid state',
+        },
+      }),
     ).rejects.toThrow(Error(STATE_MISSING_ERROR + ' (test-nonce)'))
   })
 
@@ -913,20 +933,20 @@ describe('VcIssuer without did', () => {
         header: {
           typ: 'openid4vci-proof+jwt',
           alg: alg,
-          x5c: ['12', '34', '56']
+          x5c: ['12', '34', '56'],
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
           iat: +new Date() / 1000,
-          nonce: 'test-nonce'
-        }
-      }
+          nonce: 'test-nonce',
+        },
+      },
     })
 
     const createdAt = +new Date()
     await vcIssuer.cNonces.set('test-nonce', {
       cNonce: 'test-nonce',
-      createdAt: createdAt
+      createdAt: createdAt,
     })
     await vcIssuer.credentialOfferSessions.set('test-pre-authorized-code', {
       createdAt: createdAt,
@@ -935,11 +955,11 @@ describe('VcIssuer without did', () => {
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'test.com',
-          credential_configuration_ids: ['UniversityDegree_JWT']
-        }
+          credential_configuration_ids: ['UniversityDegree_JWT'],
+        },
       },
       lastUpdatedAt: createdAt,
-      status: IssueStatus.ACCESS_TOKEN_CREATED
+      status: IssueStatus.ACCESS_TOKEN_CREATED,
     })
 
     await expect(
@@ -949,34 +969,36 @@ describe('VcIssuer without did', () => {
           credential_configuration_id: 'UniversityDegree_JWT',
           proof: {
             proof_type: 'jwt',
-            jwt: 'ye.ye.ye'
-          }
+            jwt: 'ye.ye.ye',
+          },
         },
         issuerCorrelation: {
-          preAuthorizedCode: 'test-pre-authorized-code'
+          preAuthorizedCode: 'test-pre-authorized-code',
         },
-        newCNonce: 'new-test-nonce'
-      })
+        newCNonce: 'new-test-nonce',
+      }),
     ).resolves.toEqual({
       c_nonce: 'new-test-nonce',
       c_nonce_expires_in: 300,
       notification_id: '43243',
-      credentials: [{
-        credential: {
-          '@context': ['https://www.w3.org/2018/credentials/v1'],
-          credentialSubject: {},
-          issuanceDate: expect.any(String),
-          issuer: 'test.com',
-          proof: {
-            created: expect.any(String),
-            jwt: 'ye.ye.ye',
-            proofPurpose: 'assertionMethod',
-            type: 'JwtProof2020',
-            verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf'
+      credentials: [
+        {
+          credential: {
+            '@context': ['https://www.w3.org/2018/credentials/v1'],
+            credentialSubject: {},
+            issuanceDate: expect.any(String),
+            issuer: 'test.com',
+            proof: {
+              created: expect.any(String),
+              jwt: 'ye.ye.ye',
+              proofPurpose: 'assertionMethod',
+              type: 'JwtProof2020',
+              verificationMethod: 'sdfsdfasdfasdfasdfasdfassdfasdf',
+            },
+            type: ['VerifiableCredential'],
           },
-          type: ['VerifiableCredential']
-        }
-      }]
+        },
+      ],
     })
   })
 
@@ -984,7 +1006,7 @@ describe('VcIssuer without did', () => {
     const createdAt = +new Date()
     await vcIssuer.cNonces.set('test-nonce', {
       cNonce: 'test-nonce',
-      createdAt: createdAt
+      createdAt: createdAt,
     })
 
     jwtVerifyCallback.mockResolvedValue({
@@ -993,14 +1015,14 @@ describe('VcIssuer without did', () => {
         header: {
           typ: 'openid4vci-proof+jwt',
           alg: undefined,
-          x5c: ['12', '34', '56']
+          x5c: ['12', '34', '56'],
         },
         payload: {
           aud: IDENTIPROOF_ISSUER_URL,
           iat: +new Date() / 1000,
-          nonce: 'test-nonce'
-        }
-      }
+          nonce: 'test-nonce',
+        },
+      },
     })
 
     await expect(
@@ -1009,13 +1031,13 @@ describe('VcIssuer without did', () => {
           credential_configuration_id: 'UniversityDegree_JWT',
           proof: {
             proof_type: 'jwt',
-            jwt: 'ye.ye.ye'
-          }
+            jwt: 'ye.ye.ye',
+          },
         },
         issuerCorrelation: {
-          preAuthorizedCode: 'test-pre-authorized-code'
-        }
-      })
+          preAuthorizedCode: 'test-pre-authorized-code',
+        },
+      }),
     ).rejects.toThrow(Error(ALG_ERROR))
   })
 
@@ -1025,11 +1047,11 @@ describe('VcIssuer without did', () => {
       credentialOfferUri: 'https://example.com/api/credentials/:id',
       grants: {
         authorization_code: {
-          issuer_state: issuerState
-        }
+          issuer_state: issuerState,
+        },
       },
       scheme: 'http',
-      baseUri: 'issuer-example.com'
+      baseUri: 'issuer-example.com',
     })
 
     expect(result.uri).toMatch(/http:\/\/issuer-example\.com\?credential_offer_uri=https%3A%2F%2Fexample\.com%2Fapi%2Fcredentials%2F[\w-]+/)
@@ -1043,10 +1065,10 @@ describe('VcIssuer without did', () => {
         offerMode: 'REFERENCE',
         grants: {
           authorization_code: {
-            issuer_state: issuerState
-          }
-        }
-      })
+            issuer_state: issuerState,
+          },
+        },
+      }),
     ).rejects.toThrow('credentialOfferUri must be supplied for offerMode REFERENCE!')
   })
 
@@ -1056,12 +1078,12 @@ describe('VcIssuer without did', () => {
       credentialOfferUri: 'https://example.com/api/credentials/:id',
       grants: {
         authorization_code: {
-          issuer_state: issuerState
+          issuer_state: issuerState,
         },
         'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-          'pre-authorized_code': 'preAuthCode'
-        }
-      }
+          'pre-authorized_code': 'preAuthCode',
+        },
+      },
     })
 
     const session = await vcIssuer.getCredentialOfferSessionById(result.session.preAuthorizedCode!, ['uri'])
@@ -1072,7 +1094,7 @@ describe('VcIssuer without did', () => {
 
   it('should throw error when getting session with invalid uri', async () => {
     await expect(vcIssuer.getCredentialOfferSessionById('https://example.com/invalid-uri')).rejects.toThrow(
-      'no value found for id https://example.com/invalid-uri'
+      'no value found for id https://example.com/invalid-uri',
     )
   })
 
@@ -1089,7 +1111,7 @@ describe('VcIssuer without did', () => {
       .build()
 
     await expect(vcIssuerWithoutUriState.getCredentialOfferSessionById('https://example.com/some-uri')).rejects.toThrow(
-      'no value found for id https://example.com/some-uri'
+      'no value found for id https://example.com/some-uri',
     )
   })
 })
@@ -1099,14 +1121,15 @@ describe.skip('VcIssuer v15 nonce endpoint support', () => {
     // Mock the nonce endpoint response
     global.fetch = vitest.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({
-        c_nonce: 'fresh-nonce-from-endpoint'
-      })
+      json: () =>
+        Promise.resolve({
+          c_nonce: 'fresh-nonce-from-endpoint',
+        }),
     })
 
     const client: OpenID4VCIClientV1_0_15 = await OpenID4VCIClientV1_0_15.fromCredentialIssuer({
       credentialIssuer: IDENTIPROOF_ISSUER_URL,
-      retrieveServerMetadata: false
+      retrieveServerMetadata: false,
     })
 
     // Mock endpoint metadata with nonce endpoint
@@ -1119,27 +1142,24 @@ describe.skip('VcIssuer v15 nonce endpoint support', () => {
         credential_issuer: IDENTIPROOF_ISSUER_URL,
         credential_endpoint: 'https://issuer.example.com/credential',
         credential_configurations_supported: {},
-        nonce_endpoint: 'https://issuer.example.com/nonce'
-      }
+        nonce_endpoint: 'https://issuer.example.com/nonce',
+      },
     }
 
     const nonce = await client.acquireNonce()
 
     expect(nonce).toBe('fresh-nonce-from-endpoint')
-    expect(fetch).toHaveBeenCalledWith(
-      'https://issuer.example.com/nonce',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-      }
-    )
+    expect(fetch).toHaveBeenCalledWith('https://issuer.example.com/nonce', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    })
   })
 
   it('should fail when nonce endpoint is not available', async () => {
     const client = await OpenID4VCIClientV1_0_15.fromCredentialIssuer({
       credentialIssuer: IDENTIPROOF_ISSUER_URL,
-      retrieveServerMetadata: false
+      retrieveServerMetadata: false,
     })
 
     // Mock endpoint metadata without nonce endpoint
@@ -1147,7 +1167,7 @@ describe.skip('VcIssuer v15 nonce endpoint support', () => {
       credential_endpoint: 'https://issuer.example.com/credential',
       token_endpoint: 'https://issuer.example.com/token',
       issuer: IDENTIPROOF_ISSUER_URL,
-      authorizationServerType: 'OID4VCI'
+      authorizationServerType: 'OID4VCI',
     }
 
     await expect(client.acquireNonce()).rejects.toThrow('Nonce endpoint not available')
@@ -1156,7 +1176,7 @@ describe.skip('VcIssuer v15 nonce endpoint support', () => {
   it('should use cached nonce when available', async () => {
     const client = await OpenID4VCIClientV1_0_15.fromCredentialIssuer({
       credentialIssuer: IDENTIPROOF_ISSUER_URL,
-      retrieveServerMetadata: false
+      retrieveServerMetadata: false,
     })
 
     // Set cached nonce

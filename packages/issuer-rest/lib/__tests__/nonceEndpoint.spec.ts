@@ -30,25 +30,25 @@ describe('Nonce Endpoint', () => {
           TestCredential: {
             format: 'jwt_vc_json',
             credential_definition: {
-              type: ['VerifiableCredential']
+              type: ['VerifiableCredential'],
             },
             cryptographic_binding_methods_supported: ['did'],
-            credential_signing_alg_values_supported: ['ES256K']
-          }
-        }
+            credential_signing_alg_values_supported: ['ES256K'],
+          },
+        },
       } as CredentialIssuerMetadataOptsV1_0_15,
       authorizationServerMetadata,
       {
         cNonceExpiresIn: 300,
         credentialOfferSessions: new MemoryStates(),
-        cNonces: new MemoryStates<CNonceState>()
-      }
+        cNonces: new MemoryStates<CNonceState>(),
+      },
     )
 
     expressSupport = ExpressBuilder.fromServerOpts({
       startListening: false,
       port: 9002,
-      hostname: '0.0.0.0'
+      hostname: '0.0.0.0',
     }).build({ startListening: false })
 
     const vcIssuerServer = new OID4VCIServer(expressSupport, {
@@ -56,13 +56,13 @@ describe('Nonce Endpoint', () => {
       baseUrl: 'http://localhost:9002',
       endpointOpts: {
         tokenEndpointOpts: {
-          tokenEndpointDisabled: true
+          tokenEndpointDisabled: true,
         },
         nonceOpts: {
           enabled: true,
-          baseUrl: 'http://localhost:9002'
-        }
-      }
+          baseUrl: 'http://localhost:9002',
+        },
+      },
     })
 
     expressSupport.start()
@@ -83,7 +83,7 @@ describe('Nonce Endpoint', () => {
     const actual = JSON.parse(res.text)
     expect(actual).toEqual({
       c_nonce: expect.any(String),
-      c_nonce_expires_in: 300
+      c_nonce_expires_in: 300,
     })
     expect(actual.c_nonce).toMatch(/^[a-f0-9-]{36}$/) // UUID format
   })
@@ -106,21 +106,18 @@ describe('Nonce Endpoint', () => {
       {
         credential_endpoint: 'http://localhost:9003/credential-endpoint',
         credential_issuer: 'test_issuer',
-        credential_configurations_supported: {}
+        credential_configurations_supported: {},
       } as CredentialIssuerMetadataOptsV1_0_15,
-      new AuthorizationServerMetadataBuilder()
-        .withIssuer('test')
-        .withResponseTypesSupported(['code'])
-        .build(),
+      new AuthorizationServerMetadataBuilder().withIssuer('test').withResponseTypesSupported(['code']).build(),
       {
         credentialOfferSessions: new MemoryStates(),
-        cNonces: new MemoryStates<CNonceState>()
-      }
+        cNonces: new MemoryStates<CNonceState>(),
+      },
     )
 
     const disabledExpressSupport = ExpressBuilder.fromServerOpts({
       startListening: false,
-      port: 9003
+      port: 9003,
     }).build({ startListening: false })
 
     new OID4VCIServer(disabledExpressSupport, {
@@ -128,13 +125,13 @@ describe('Nonce Endpoint', () => {
       baseUrl: 'http://localhost:9003',
       endpointOpts: {
         tokenEndpointOpts: {
-          tokenEndpointDisabled: true
+          tokenEndpointDisabled: true,
         },
         nonceOpts: {
           enabled: false,
-          baseUrl: 'http://localhost:9003'
-        }
-      }
+          baseUrl: 'http://localhost:9003',
+        },
+      },
     })
 
     const res = await requests(disabledExpressSupport.express).post('/nonce').send()

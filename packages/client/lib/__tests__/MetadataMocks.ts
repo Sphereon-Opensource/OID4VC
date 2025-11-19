@@ -3,7 +3,7 @@ import {
   AuthzFlowType,
   CredentialOfferPayloadV1_0_15,
   CredentialOfferRequestWithBaseUrl,
-  PRE_AUTH_GRANT_LITERAL
+  PRE_AUTH_GRANT_LITERAL,
 } from '@sphereon/oid4vci-common'
 
 export const IDENTIPROOF_ISSUER_URL = 'https://issuer.research.identiproof.io'
@@ -14,32 +14,23 @@ export const WALT_ISSUER_URL = 'https://jff.walt.id/issuer-api/oidc'
 export const INITIATION_TEST_HTTPS_URI =
   'https://server.example.com?issuer=https%3A%2F%2Fserver%2Eexample%2Ecom&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FhealthCard&credential_type=https%3A%2F%2Fdid%2Eexample%2Eorg%2FdriverLicense&op_state=eyJhbGciOiJSU0Et...FYUaBy'
 
-
 const offerPreAuth = {
   credential_issuer: 'https://server.example.com',
-  credential_configuration_ids: [
-    'https://did.example.org/healthCard',
-    'https://did.example.org/driverLicense',
-  ],
+  credential_configuration_ids: ['https://did.example.org/healthCard', 'https://did.example.org/driverLicense'],
   grants: {
     'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-      'pre-authorized_code': 'eyJhbGciOiJSU0Et...FYUaBy'
+      'pre-authorized_code': 'eyJhbGciOiJSU0Et...FYUaBy',
       // No tx_code means no PIN required in v15
     },
   },
 }
 
 export const INITIATION_TEST_HTTPS_URI_V1_0_15_PRE_AUTH =
-  'https://server.example.com?' +
-  'credential_offer=' +
-  encodeURIComponent(JSON.stringify(offerPreAuth))
+  'https://server.example.com?' + 'credential_offer=' + encodeURIComponent(JSON.stringify(offerPreAuth))
 
 const offerAuthCode = {
   credential_issuer: 'https://server.example.com',
-  credential_configuration_ids: [
-    'https://did.example.org/healthCard',
-    'https://did.example.org/driverLicense',
-  ],
+  credential_configuration_ids: ['https://did.example.org/healthCard', 'https://did.example.org/driverLicense'],
   grants: {
     authorization_code: {
       issuer_state: 'eyJhbGciOiJSU0Et...FYUaBy',
@@ -48,14 +39,10 @@ const offerAuthCode = {
 }
 
 export const INITIATION_TEST_HTTPS_URI_V1_0_15_AUTH_CODE =
-  'https://server.example.com?' +
-  'credential_offer=' +
-  encodeURIComponent(JSON.stringify(offerAuthCode))
-
+  'https://server.example.com?' + 'credential_offer=' + encodeURIComponent(JSON.stringify(offerAuthCode))
 
 export const INITIATION_TEST_URI =
   'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fjff.walt.id%2Fissuer-api%2Foidc%2F%22%2C%22credential_configuration_ids%22%3A%5B%22OpenBadgeCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE%22%2C%22tx_code%22%3A%7B%22description%22%3A%22Please%20provide%20the%20one-time%20code%20that%20was%20sent%20via%20e-mail%22%2C%22input_mode%22%3A%22numeric%22%2C%22length%22%3A4%7D%7D%7D%7D'
-
 
 export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
   baseUrl: 'openid-credential-offer://',
@@ -69,10 +56,10 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
         tx_code: {
           length: 4,
           description: 'Please provide the one-time code that was sent via e-mail',
-          input_mode: 'numeric'
-        }
-      }
-    }
+          input_mode: 'numeric',
+        },
+      },
+    },
   } as CredentialOfferPayloadV1_0_15,
   original_credential_offer: {
     credential_issuer: 'https://jff.walt.id/issuer-api/oidc/',
@@ -84,10 +71,10 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
         tx_code: {
           description: 'Please provide the one-time code that was sent via e-mail',
           input_mode: 'numeric',
-          length: 4
-        }
-      }
-    }
+          length: 4,
+        },
+      },
+    },
   } as CredentialOfferPayloadV1_0_15,
   preAuthorizedCode:
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
@@ -97,9 +84,9 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
   txCode: {
     description: 'Please provide the one-time code that was sent via e-mail',
     input_mode: 'numeric',
-    length: 4
+    length: 4,
   },
-  userPinRequired: true // Determined from above tx_code
+  userPinRequired: true, // Determined from above tx_code
 }
 
 export const INITIATION_TEST_V1_0_15: CredentialOfferRequestWithBaseUrl = {
@@ -110,9 +97,9 @@ export const INITIATION_TEST_V1_0_15: CredentialOfferRequestWithBaseUrl = {
     grants: {
       'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
         'pre-authorized_code':
-          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE'
-      }
-    }
+          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
+      },
+    },
   },
   original_credential_offer: {
     credential_configuration_ids: ['OpenBadgeCredential'],
@@ -120,22 +107,20 @@ export const INITIATION_TEST_V1_0_15: CredentialOfferRequestWithBaseUrl = {
     grants: {
       'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
         'pre-authorized_code':
-          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE'
-      }
-    }
+          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
+      },
+    },
   },
   preAuthorizedCode:
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
   scheme: 'openid-credential-offer',
   supportedFlows: [AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW],
   userPinRequired: false,
-  version: 1015
+  version: 1015,
 } as CredentialOfferRequestWithBaseUrl
 
-
 export const INITIATION_TEST_URI_V1_0_15 =
-  'openid-credential-offer://?credential_offer=' +
-  encodeURIComponent(JSON.stringify(INITIATION_TEST_V1_0_15.credential_offer))
+  'openid-credential-offer://?credential_offer=' + encodeURIComponent(JSON.stringify(INITIATION_TEST_V1_0_15.credential_offer))
 
 export const IDENTIPROOF_AS_METADATA = {
   issuer: 'https://auth.research.identiproof.io',
@@ -149,7 +134,7 @@ export const IDENTIPROOF_AS_METADATA = {
   revocation_endpoint_auth_methods_supported: ['client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt'],
   introspection_endpoint: 'https://auth.research.identiproof.io/oauth2/introspect',
   introspection_endpoint_auth_methods_supported: ['client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt'],
-  code_challenge_methods_supported: ['S256']
+  code_challenge_methods_supported: ['S256'],
 }
 
 export const IDENTIPROOF_OID4VCI_METADATA = {
@@ -164,29 +149,29 @@ export const IDENTIPROOF_OID4VCI_METADATA = {
         jwt_vc: {
           types: ['VerifiableCredential', 'Cyber Security Certificate'],
           cryptographic_binding_methods_supported: ['did'],
-          cryptographic_suites_supported: ['ES256']
-        }
-      }
+          cryptographic_suites_supported: ['ES256'],
+        },
+      },
     },
     OpenBadgeCredential: {
       formats: {
         jwt_vc: {
           types: ['VerifiableCredential', 'OpenBadgeCredential'],
           cryptographic_binding_methods_supported: ['did'],
-          cryptographic_suites_supported: ['ES256']
-        }
-      }
+          cryptographic_suites_supported: ['ES256'],
+        },
+      },
     },
     OpenBadgeExtendedCredential: {
       formats: {
         jwt_vc: {
           types: ['VerifiableCredential', 'OpenBadgeExtendedCredential'],
           cryptographic_binding_methods_supported: ['did'],
-          cryptographic_suites_supported: ['ES256']
-        }
-      }
-    }
-  }
+          cryptographic_suites_supported: ['ES256'],
+        },
+      },
+    },
+  },
 }
 export const IDENTIPROOF_OID4VCI_METADATA_v15 = {
   issuer: 'https://issuer.research.identiproof.io',
@@ -199,29 +184,29 @@ export const IDENTIPROOF_OID4VCI_METADATA_v15 = {
         jwt_vc: {
           types: ['VerifiableCredential', 'Cyber Security Certificate'],
           cryptographic_binding_methods_supported: ['did'],
-          cryptographic_suites_supported: ['ES256']
-        }
-      }
+          cryptographic_suites_supported: ['ES256'],
+        },
+      },
     },
     OpenBadgeCredential: {
       formats: {
         jwt_vc: {
           types: ['VerifiableCredential', 'OpenBadgeCredential'],
           cryptographic_binding_methods_supported: ['did'],
-          cryptographic_suites_supported: ['ES256']
-        }
-      }
+          cryptographic_suites_supported: ['ES256'],
+        },
+      },
     },
     OpenBadgeExtendedCredential: {
       formats: {
         jwt_vc: {
           types: ['VerifiableCredential', 'OpenBadgeExtendedCredential'],
           cryptographic_binding_methods_supported: ['did'],
-          cryptographic_suites_supported: ['ES256']
-        }
-      }
-    }
-  }
+          cryptographic_suites_supported: ['ES256'],
+        },
+      },
+    },
+  },
 }
 
 export const SPRUCE_OID4VCI_METADATA = {
@@ -236,16 +221,16 @@ export const SPRUCE_OID4VCI_METADATA = {
         jwt_vc: {
           types: ['VerifiableCredential', 'OpenBadgeCredential'],
           cryptographic_binding_methods_supported: ['did'],
-          cryptographic_suites_supported: ['ES256', 'ES256K']
+          cryptographic_suites_supported: ['ES256', 'ES256K'],
         },
         ldp_vc: {
           types: ['VerifiableCredential', 'OpenBadgeCredential'],
           cryptographic_binding_methods_supported: ['did'],
-          cryptographic_suites_supported: ['Ed25519Signature2018']
-        }
-      }
-    }
-  }
+          cryptographic_suites_supported: ['Ed25519Signature2018'],
+        },
+      },
+    },
+  },
 }
 
 export const DANUBE_OIDC_METADATA = {
@@ -256,48 +241,48 @@ export const DANUBE_OIDC_METADATA = {
         {
           name: 'Open Badge V3',
           locale: 'en-US',
-          logo: { url: 'https://uniissuer.io/images/logo.jpg' }
-        }
+          logo: { url: 'https://uniissuer.io/images/logo.jpg' },
+        },
       ],
       formats: {
         ldp_vc: {
           types: ['VerifiableCredential', 'OpenBadgeCredential'],
           cryptographic_binding_methods_supported: ['did'],
-          cryptographic_suites_supported: ['Ed25519Signature2018', 'Ed25519Signature2020', 'EcdsaSecp256k1Signature2019', 'JsonWebSignature2020']
+          cryptographic_suites_supported: ['Ed25519Signature2018', 'Ed25519Signature2020', 'EcdsaSecp256k1Signature2019', 'JsonWebSignature2020'],
         },
         jwt_vc: {
           types: ['VerifiableCredential', 'OpenBadgeCredential'],
           cryptographic_binding_methods_supported: ['did'],
-          cryptographic_suites_supported: ['Ed25519Signature2018', 'Ed25519Signature2020', 'EcdsaSecp256k1Signature2019', 'JsonWebSignature2020']
-        }
+          cryptographic_suites_supported: ['Ed25519Signature2018', 'Ed25519Signature2020', 'EcdsaSecp256k1Signature2019', 'JsonWebSignature2020'],
+        },
       },
-      claims: { achievement: { mandatory: true, value_type: 'object' } }
+      claims: { achievement: { mandatory: true, value_type: 'object' } },
     },
     VaccinationCertificate: {
       formats: {
         jwt_vc: {
           types: ['VerifiableCredential', 'VaccinationCertificate'],
           cryptographic_binding_methods_supported: ['did'],
-          cryptographic_suites_supported: ['Ed25519Signature2018', 'Ed25519Signature2020', 'EcdsaSecp256k1Signature2019', 'JsonWebSignature2020']
-        }
-      }
-    }
+          cryptographic_suites_supported: ['Ed25519Signature2018', 'Ed25519Signature2020', 'EcdsaSecp256k1Signature2019', 'JsonWebSignature2020'],
+        },
+      },
+    },
   },
   credential_issuer: {
     display: [
       {
         name: 'Danube Tech',
         locale: 'en-US',
-        logo: { url: 'https://uniissuer.io/images/logo.jpg' }
-      }
-    ]
+        logo: { url: 'https://uniissuer.io/images/logo.jpg' },
+      },
+    ],
   },
   code_challenge_methods_supported: ['plain', 'S256'],
   grant_types_supported: ['authorization_code', PRE_AUTH_GRANT_LITERAL],
   token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic'],
   authorization_endpoint: 'https://oidc4vc.uniissuer.io/authorize',
   token_endpoint: 'https://oidc4vc.uniissuer.io/token',
-  credential_endpoint: 'https://oidc4vc.uniissuer.io/credential'
+  credential_endpoint: 'https://oidc4vc.uniissuer.io/credential',
 }
 
 export const WALT_OID4VCI_METADATA = {
@@ -321,16 +306,16 @@ export const WALT_OID4VCI_METADATA = {
             'EcdsaSecp256k1Signature2019',
             'RsaSignature2018',
             'JsonWebSignature2020',
-            'JcsEd25519Signature2020'
+            'JcsEd25519Signature2020',
           ],
-          types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableDiploma']
+          types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableDiploma'],
         },
         jwt_vc: {
           cryptographic_binding_methods_supported: ['did'],
           cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
-          types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableDiploma']
-        }
-      }
+          types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableDiploma'],
+        },
+      },
     },
     VerifiableVaccinationCertificate: {
       display: [{ name: 'VerifiableVaccinationCertificate' }],
@@ -343,16 +328,16 @@ export const WALT_OID4VCI_METADATA = {
             'EcdsaSecp256k1Signature2019',
             'RsaSignature2018',
             'JsonWebSignature2020',
-            'JcsEd25519Signature2020'
+            'JcsEd25519Signature2020',
           ],
-          types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableVaccinationCertificate']
+          types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableVaccinationCertificate'],
         },
         jwt_vc: {
           cryptographic_binding_methods_supported: ['did'],
           cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
-          types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableVaccinationCertificate']
-        }
-      }
+          types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableVaccinationCertificate'],
+        },
+      },
     },
     Europass: {
       display: [{ name: 'Europass' }],
@@ -365,16 +350,16 @@ export const WALT_OID4VCI_METADATA = {
             'EcdsaSecp256k1Signature2019',
             'RsaSignature2018',
             'JsonWebSignature2020',
-            'JcsEd25519Signature2020'
+            'JcsEd25519Signature2020',
           ],
-          types: ['VerifiableCredential', 'VerifiableAttestation', 'Europass']
+          types: ['VerifiableCredential', 'VerifiableAttestation', 'Europass'],
         },
         jwt_vc: {
           cryptographic_binding_methods_supported: ['did'],
           cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
-          types: ['VerifiableCredential', 'VerifiableAttestation', 'Europass']
-        }
-      }
+          types: ['VerifiableCredential', 'VerifiableAttestation', 'Europass'],
+        },
+      },
     },
     VerifiableMandate: {
       display: [{ name: 'VerifiableMandate' }],
@@ -387,16 +372,16 @@ export const WALT_OID4VCI_METADATA = {
             'EcdsaSecp256k1Signature2019',
             'RsaSignature2018',
             'JsonWebSignature2020',
-            'JcsEd25519Signature2020'
+            'JcsEd25519Signature2020',
           ],
-          types: ['VerifiableCredential', 'VerifiableMandate']
+          types: ['VerifiableCredential', 'VerifiableMandate'],
         },
         jwt_vc: {
           cryptographic_binding_methods_supported: ['did'],
           cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
-          types: ['VerifiableCredential', 'VerifiableMandate']
-        }
-      }
+          types: ['VerifiableCredential', 'VerifiableMandate'],
+        },
+      },
     },
     EuropeanBankIdentity: {
       display: [{ name: 'EuropeanBankIdentity' }],
@@ -409,16 +394,16 @@ export const WALT_OID4VCI_METADATA = {
             'EcdsaSecp256k1Signature2019',
             'RsaSignature2018',
             'JsonWebSignature2020',
-            'JcsEd25519Signature2020'
+            'JcsEd25519Signature2020',
           ],
-          types: ['VerifiableCredential', 'EuropeanBankIdentity']
+          types: ['VerifiableCredential', 'EuropeanBankIdentity'],
         },
         jwt_vc: {
           cryptographic_binding_methods_supported: ['did'],
           cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
-          types: ['VerifiableCredential', 'EuropeanBankIdentity']
-        }
-      }
+          types: ['VerifiableCredential', 'EuropeanBankIdentity'],
+        },
+      },
     },
     VerifiableAttestation: {
       display: [{ name: 'VerifiableAttestation' }],
@@ -431,16 +416,16 @@ export const WALT_OID4VCI_METADATA = {
             'EcdsaSecp256k1Signature2019',
             'RsaSignature2018',
             'JsonWebSignature2020',
-            'JcsEd25519Signature2020'
+            'JcsEd25519Signature2020',
           ],
-          types: ['VerifiableCredential', 'VerifiableAttestation']
+          types: ['VerifiableCredential', 'VerifiableAttestation'],
         },
         jwt_vc: {
           cryptographic_binding_methods_supported: ['did'],
           cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
-          types: ['VerifiableCredential', 'VerifiableAttestation']
-        }
-      }
+          types: ['VerifiableCredential', 'VerifiableAttestation'],
+        },
+      },
     },
     OpenBadgeCredential: {
       display: [{ name: 'OpenBadgeCredential' }],
@@ -453,16 +438,16 @@ export const WALT_OID4VCI_METADATA = {
             'EcdsaSecp256k1Signature2019',
             'RsaSignature2018',
             'JsonWebSignature2020',
-            'JcsEd25519Signature2020'
+            'JcsEd25519Signature2020',
           ],
-          types: ['VerifiableCredential', 'OpenBadgeCredential']
+          types: ['VerifiableCredential', 'OpenBadgeCredential'],
         },
         jwt_vc: {
           cryptographic_binding_methods_supported: ['did'],
           cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
-          types: ['VerifiableCredential', 'OpenBadgeCredential']
-        }
-      }
+          types: ['VerifiableCredential', 'OpenBadgeCredential'],
+        },
+      },
     },
     PeerReview: {
       display: [{ name: 'PeerReview' }],
@@ -475,16 +460,16 @@ export const WALT_OID4VCI_METADATA = {
             'EcdsaSecp256k1Signature2019',
             'RsaSignature2018',
             'JsonWebSignature2020',
-            'JcsEd25519Signature2020'
+            'JcsEd25519Signature2020',
           ],
-          types: ['VerifiableCredential', 'PeerReview']
+          types: ['VerifiableCredential', 'PeerReview'],
         },
         jwt_vc: {
           cryptographic_binding_methods_supported: ['did'],
           cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
-          types: ['VerifiableCredential', 'PeerReview']
-        }
-      }
+          types: ['VerifiableCredential', 'PeerReview'],
+        },
+      },
     },
     ProofOfResidence: {
       display: [{ name: 'ProofOfResidence' }],
@@ -497,16 +482,16 @@ export const WALT_OID4VCI_METADATA = {
             'EcdsaSecp256k1Signature2019',
             'RsaSignature2018',
             'JsonWebSignature2020',
-            'JcsEd25519Signature2020'
+            'JcsEd25519Signature2020',
           ],
-          types: ['VerifiableCredential', 'VerifiableAttestation', 'ProofOfResidence']
+          types: ['VerifiableCredential', 'VerifiableAttestation', 'ProofOfResidence'],
         },
         jwt_vc: {
           cryptographic_binding_methods_supported: ['did'],
           cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
-          types: ['VerifiableCredential', 'VerifiableAttestation', 'ProofOfResidence']
-        }
-      }
+          types: ['VerifiableCredential', 'VerifiableAttestation', 'ProofOfResidence'],
+        },
+      },
     },
     AmletCredential: {
       display: [{ name: 'AmletCredential' }],
@@ -519,16 +504,16 @@ export const WALT_OID4VCI_METADATA = {
             'EcdsaSecp256k1Signature2019',
             'RsaSignature2018',
             'JsonWebSignature2020',
-            'JcsEd25519Signature2020'
+            'JcsEd25519Signature2020',
           ],
-          types: ['VerifiableCredential', 'AmletCredential']
+          types: ['VerifiableCredential', 'AmletCredential'],
         },
         jwt_vc: {
           cryptographic_binding_methods_supported: ['did'],
           cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
-          types: ['VerifiableCredential', 'AmletCredential']
-        }
-      }
+          types: ['VerifiableCredential', 'AmletCredential'],
+        },
+      },
     },
     ParticipantCredential: {
       display: [{ name: 'ParticipantCredential' }],
@@ -541,16 +526,16 @@ export const WALT_OID4VCI_METADATA = {
             'EcdsaSecp256k1Signature2019',
             'RsaSignature2018',
             'JsonWebSignature2020',
-            'JcsEd25519Signature2020'
+            'JcsEd25519Signature2020',
           ],
-          types: ['VerifiableCredential', 'ParticipantCredential']
+          types: ['VerifiableCredential', 'ParticipantCredential'],
         },
         jwt_vc: {
           cryptographic_binding_methods_supported: ['did'],
           cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
-          types: ['VerifiableCredential', 'ParticipantCredential']
-        }
-      }
+          types: ['VerifiableCredential', 'ParticipantCredential'],
+        },
+      },
     },
     VerifiableId: {
       display: [{ name: 'VerifiableId' }],
@@ -563,19 +548,19 @@ export const WALT_OID4VCI_METADATA = {
             'EcdsaSecp256k1Signature2019',
             'RsaSignature2018',
             'JsonWebSignature2020',
-            'JcsEd25519Signature2020'
+            'JcsEd25519Signature2020',
           ],
-          types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableId']
+          types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableId'],
         },
         jwt_vc: {
           cryptographic_binding_methods_supported: ['did'],
           cryptographic_suites_supported: ['ES256', 'ES256K', 'EdDSA', 'RS256', 'PS256'],
-          types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableId']
-        }
-      }
-    }
+          types: ['VerifiableCredential', 'VerifiableAttestation', 'VerifiableId'],
+        },
+      },
+    },
   },
   credential_issuer: { display: [{ locale: null, name: 'https://jff.walt.id/issuer-api' }] },
   credential_endpoint: 'https://jff.walt.id/issuer-api/oidc/credential',
-  subject_types_supported: ['public']
+  subject_types_supported: ['public'],
 }

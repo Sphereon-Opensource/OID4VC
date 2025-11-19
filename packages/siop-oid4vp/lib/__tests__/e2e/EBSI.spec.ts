@@ -3,7 +3,7 @@ import { EbsiWallet } from '@cef-ebsi/wallet-lib'
 import { SigningAlgo, uuidv4 } from '@sphereon/oid4vc-common'
 import { PresentationSignCallBackParams } from '@sphereon/pex'
 import { parseDid, W3CVerifiablePresentation } from '@sphereon/ssi-types'
-import {type JsonWebKey, Resolver} from 'did-resolver'
+import { type JsonWebKey, Resolver } from 'did-resolver'
 import { importJWK, SignJWT } from 'jose'
 import { describe, expect, it } from 'vitest'
 

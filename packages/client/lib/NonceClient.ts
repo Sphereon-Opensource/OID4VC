@@ -7,11 +7,11 @@ export interface NonceSuccessBodyV1_0_15 {
 
 export const sendNonceRequest = async (
   nonceEndpointUrl: string,
-  opts?: { headers?: Record<string, string> }
+  opts?: { headers?: Record<string, string> },
 ): Promise<OpenIDResponse<NonceSuccessBodyV1_0_15>> => {
   // Empty x-www-form-urlencoded body (matches your formPost usage style)
   return await formPost<NonceSuccessBodyV1_0_15>(nonceEndpointUrl, new URLSearchParams(), {
-    customHeaders: opts?.headers
+    customHeaders: opts?.headers,
   })
 }
 

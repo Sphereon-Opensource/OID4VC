@@ -15,7 +15,7 @@ import {
   post,
   ProofOfPossession,
   supportedOID4VCICredentialFormat,
-  URL_NOT_VALID
+  URL_NOT_VALID,
 } from '@sphereon/oid4vci-common'
 import { CredentialFormat, Loggers } from '@sphereon/ssi-types'
 
@@ -24,7 +24,6 @@ import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
 import { shouldRetryResourceRequestWithDPoPNonce } from './functions/dpopUtil'
 
 const logger = Loggers.DEFAULT.get('sphereon:oid4vci:credential')
-
 
 export interface CredentialRequestOpts {
   deferredCredentialAwait?: boolean
@@ -58,7 +57,7 @@ export async function buildProof(
   opts: {
     version: OpenId4VCIVersion
     cNonce?: string
-  }
+  },
 ) {
   if ('proof_type' in proofInput) {
     if (opts.cNonce) {
@@ -78,7 +77,7 @@ function isOpenIdCredentialDetail(ad: AuthorizationDetailsV1_0_15): ad is Author
 
 function findAuthorizationDetail(
   authorizationDetails: AuthorizationDetailsV1_0_15[] | undefined,
-  preferredConfigId?: string
+  preferredConfigId?: string,
 ): AuthorizationDetailsV1_0_15 | undefined {
   if (!authorizationDetails) {
     return undefined
@@ -92,7 +91,7 @@ function findAuthorizationDetail(
 
   // If a preferred config ID is specified, try to find a match
   if (preferredConfigId) {
-    const match = openIdCredentialDetails.find(detail => {
+    const match = openIdCredentialDetails.find((detail) => {
       if (typeof detail !== 'object' || detail === null) return false
 
       const detailObj = detail as any
@@ -114,7 +113,6 @@ function findAuthorizationDetail(
   // Return the first one
   return openIdCredentialDetails[0]
 }
-
 
 export class CredentialRequestClient {
   private readonly _credentialRequestOpts: Partial<CredentialRequestOpts>
@@ -162,10 +160,11 @@ export class CredentialRequestClient {
       format,
       version: this.version(),
       credentialIdentifier,
-      subjectIssuance
+      subjectIssuance,
     })
 
-    if(!supportedOID4VCICredentialFormat.includes(format)) { // Check so we can cast format as OID4VCICredentialFormat
+    if (!supportedOID4VCICredentialFormat.includes(format)) {
+      // Check so we can cast format as OID4VCICredentialFormat
       return Promise.reject(Error(`Unsupported credential format: ${format}`))
     }
     return await this.acquireCredentialsUsingRequestWithoutProof(request, format as OID4VCICredentialFormat, opts.createDPoPOpts)
@@ -189,11 +188,11 @@ export class CredentialRequestClient {
       format,
       version: this.version(),
       credentialIdentifier,
-      subjectIssuance
+      subjectIssuance,
     })
 
     // Note: there is no lower version than VER_1_0_15, but code may be useful later
-/*
+    /*
     if(this.version() <= OpenId4VCIVersion.VER_1_0_15 && !supportedOID4VCICredentialFormat.includes(format)) { // Check so we can cast format as OID4VCICredentialFormat
       return Promise.reject(Error(`Unsupported credential format: ${format}`))
     }
@@ -205,7 +204,7 @@ export class CredentialRequestClient {
   public async acquireCredentialsUsingRequestWithoutProof(
     uniformRequest: CredentialRequest,
     format: OID4VCICredentialFormat,
-    createDPoPOpts?: CreateDPoPClientOpts
+    createDPoPOpts?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     return await this.acquireCredentialsUsingRequestImpl(uniformRequest, format, createDPoPOpts)
   }
@@ -213,7 +212,7 @@ export class CredentialRequestClient {
   public async acquireCredentialsUsingRequest(
     uniformRequest: CredentialRequest,
     format: OID4VCICredentialFormat,
-    createDPoPOpts?: CreateDPoPClientOpts
+    createDPoPOpts?: CreateDPoPClientOpts,
   ): Promise<OpenIDResponse<CredentialResponse, DPoPResponseParams> & { access_token: string }> {
     return await this.acquireCredentialsUsingRequestImpl(uniformRequest, format, createDPoPOpts)
   }
@@ -240,7 +239,7 @@ export class CredentialRequestClient {
 
     let response = (await post(credentialEndpoint, JSON.stringify(uniformRequest), {
       bearerToken: requestToken,
-      ...(dPoP && { customHeaders: { dpop: dPoP } })
+      ...(dPoP && { customHeaders: { dpop: dPoP } }),
     })) as OpenIDResponse<CredentialResponse> & {
       access_token: string
     }
@@ -253,7 +252,7 @@ export class CredentialRequestClient {
 
       response = (await post(credentialEndpoint, JSON.stringify(uniformRequest), {
         bearerToken: requestToken,
-        ...(createDPoPOpts && { customHeaders: { dpop: dPoP } })
+        ...(createDPoPOpts && { customHeaders: { dpop: dPoP } }),
       })) as OpenIDResponse<CredentialResponse> & {
         access_token: string
       }
@@ -268,7 +267,7 @@ export class CredentialRequestClient {
     }
     response.access_token = requestToken
 
-/* TODO SSISDK-85
+    /* TODO SSISDK-85
   if ((uniformRequest.credential_subject_issuance && response.successBody) || response.successBody?.credential_subject_issuance) {
       if (JSON.stringify(uniformRequest.credential_subject_issuance) !== JSON.stringify(response.successBody?.credential_subject_issuance)) {
         throw Error('Subject signing was requested, but issuer did not provide the options in its response')
@@ -278,7 +277,7 @@ export class CredentialRequestClient {
 
     return {
       ...response,
-      ...(nextDPoPNonce && { params: { dpop: { dpopNonce: nextDPoPNonce } } })
+      ...(nextDPoPNonce && { params: { dpop: { dpopNonce: nextDPoPNonce } } }),
     }
   }
 
@@ -286,7 +285,7 @@ export class CredentialRequestClient {
     response: Pick<CredentialResponse, 'transaction_id' | 'acceptance_token' | 'c_nonce'>,
     opts?: {
       bearerToken?: string
-    }
+    },
   ): Promise<OpenIDResponse<CredentialResponse> & { access_token: string }> {
     const transactionId = response.transaction_id
     const bearerToken = response.acceptance_token ?? opts?.bearerToken
@@ -302,7 +301,7 @@ export class CredentialRequestClient {
       transactionId,
       deferredCredentialEndpoint,
       deferredCredentialAwait: this.credentialRequestOpts.deferredCredentialAwait,
-      deferredCredentialIntervalInMS: this.credentialRequestOpts.deferredCredentialIntervalInMS
+      deferredCredentialIntervalInMS: this.credentialRequestOpts.deferredCredentialIntervalInMS,
     })
   }
 
@@ -313,7 +312,7 @@ export class CredentialRequestClient {
   public async createCredentialRequest(
     opts: CreateCredentialRequestOpts & {
       proofInput: ProofOfPossessionBuilder | ProofOfPossession
-    }
+    },
   ): Promise<CredentialRequestV1_0_15> {
     return await this.createCredentialRequestImpl(opts)
   }
@@ -321,7 +320,7 @@ export class CredentialRequestClient {
   private async createCredentialRequestImpl(
     opts: CreateCredentialRequestOpts & {
       proofInput?: ProofOfPossessionBuilder | ProofOfPossession
-    }
+    },
   ): Promise<CredentialRequestV1_0_15> {
     const { proofInput, credentialIdentifier, credentialConfigurationId } = opts
     let proof: ProofOfPossession | undefined = undefined
@@ -331,47 +330,45 @@ export class CredentialRequestClient {
 
     // For v15, handle authorization details from token response
     if (this.version() >= OpenId4VCIVersion.VER_1_0_15) {
-      const authDetail = findAuthorizationDetail(
-        this.credentialRequestOpts.authorizationDetails,
-        credentialConfigurationId ?? credentialIdentifier
-      )
+      const authDetail = findAuthorizationDetail(this.credentialRequestOpts.authorizationDetails, credentialConfigurationId ?? credentialIdentifier)
 
       const issuer_state = this.credentialRequestOpts.issuerState
 
       const commonBody = {
         ...(issuer_state && { issuer_state }),
         ...(proof && { proof }),
-        ...opts.subjectIssuance
+        ...opts.subjectIssuance,
       }
 
-      const authDetailObj = authDetail && typeof authDetail === 'object' ? authDetail as any : null
+      const authDetailObj = authDetail && typeof authDetail === 'object' ? (authDetail as any) : null
 
       if (authDetailObj?.credential_identifier) {
         return {
           credential_identifier: authDetailObj.credential_identifier,
-          ...commonBody
+          ...commonBody,
         }
       }
 
       if (authDetailObj?.credential_identifiers && authDetailObj.credential_identifiers.length > 0) {
         return {
           credential_identifier: authDetailObj.credential_identifiers[0],
-          ...commonBody
+          ...commonBody,
         }
       }
 
-      const configId = credentialConfigurationId ?? authDetailObj?.credential_configuration_id ?? this._credentialRequestOpts.credentialConfigurationId
+      const configId =
+        credentialConfigurationId ?? authDetailObj?.credential_configuration_id ?? this._credentialRequestOpts.credentialConfigurationId
       if (configId) {
         return {
           credential_configuration_id: configId,
-          ...commonBody
+          ...commonBody,
         }
       }
 
-      if(credentialIdentifier) {
+      if (credentialIdentifier) {
         return {
           credential_identifier: credentialIdentifier,
-          ...commonBody
+          ...commonBody,
         }
       }
 

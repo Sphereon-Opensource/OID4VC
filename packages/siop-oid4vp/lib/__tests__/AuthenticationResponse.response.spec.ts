@@ -1,11 +1,12 @@
 import { SigningAlgo } from '@sphereon/oid4vc-common'
-import { ICredential, IProofType} from '@sphereon/ssi-types'
+import { ICredential, IProofType } from '@sphereon/ssi-types'
 import { DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlSdJwtVcCredential, DcqlW3cVcCredential } from 'dcql'
 import { describe, expect, it, vitest } from 'vitest'
 import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
-  CreateAuthorizationRequestOpts, Json,
+  CreateAuthorizationRequestOpts,
+  Json,
   PassBy,
   RequestObject,
   ResponseIss,
@@ -15,7 +16,7 @@ import {
   SubjectIdentifierType,
   SubjectType,
   SupportedVersion,
-  VerifyAuthorizationRequestOpts
+  VerifyAuthorizationRequestOpts,
 } from '..'
 import SIOPErrors from '../types/Errors'
 import { getCreateJwtCallback, getVerifyJwtCallback } from './DidJwtTestUtils'
@@ -193,7 +194,9 @@ describe('create JWT from Request JWT should', () => {
     await expect(AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)).rejects.toThrow(/invalid_jwt: JWT has expired: exp: /)
   })
 
-  it('succeed when valid JWT is passed in', async () => {
+  it(
+    'succeed when valid JWT is passed in',
+    async () => {
       expect.assertions(1)
 
       try {
@@ -303,10 +306,8 @@ describe('create JWT from Request JWT should', () => {
         {
           id: 'Credentials',
           format: 'dc+sd-jwt',
-          claims: [
-            { path: ['given_name'], values: ['John'] }
-          ],
-          require_cryptographic_holder_binding: false
+          claims: [{ path: ['given_name'], values: ['John'] }],
+          require_cryptographic_holder_binding: false,
         },
       ],
     } satisfies DcqlQuery.Input
@@ -446,10 +447,7 @@ describe('create JWT from Request JWT should', () => {
           id: 'Credentials',
           format: 'ldp_vc',
           meta: {
-            type_values: [
-              ['https://www.w3.org/2018/credentials#VerifiableCredential'],
-              ['IDCardCredential'],
-            ],
+            type_values: [['https://www.w3.org/2018/credentials#VerifiableCredential'], ['IDCardCredential']],
           },
           claims: [
             {
@@ -528,7 +526,7 @@ describe('create JWT from Request JWT should', () => {
       credential_format: 'ldp_vc',
       claims: vc.credentialSubject as { [x: string]: Json },
       type: vc.type,
-      cryptographic_holder_binding: true
+      cryptographic_holder_binding: true,
     } satisfies DcqlW3cVcCredential
 
     const dcqlQueryResult: DcqlQueryResult = DcqlQuery.query(parsedDcqlQuery, [dcqlCredential])
@@ -582,5 +580,4 @@ describe('create JWT from Request JWT should', () => {
     const authResponse = AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
     expect(authResponse).toBeDefined()
   })
-
 })

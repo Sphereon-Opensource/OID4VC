@@ -3,7 +3,7 @@ import { HasherSync } from '@sphereon/ssi-types'
 import { DcqlQuery } from 'dcql'
 import { PropertyTarget, PropertyTargets } from '../authorization-request'
 import { DcqlQueryLookupCallback, PresentationVerificationCallback } from '../authorization-response'
-import {assignIfAuth, assignIfRequestObject, isTarget, isTargetOrNoTargets} from './Opts'
+import { assignIfAuth, assignIfRequestObject, isTarget, isTargetOrNoTargets } from './Opts'
 import { RP } from './RP'
 import {
   AuthorizationRequestPayload,
@@ -177,8 +177,8 @@ export class RPBuilder {
         targets,
       },
       false,
-      )
-      this._requestObjectPayload.client_metadata = assignIfRequestObject(
+    )
+    this._requestObjectPayload.client_metadata = assignIfRequestObject(
       {
         propertyValue: clientMetadata,
         targets,
@@ -200,7 +200,7 @@ export class RPBuilder {
     return this
   }
 
-  withDcqlQueryLookup(dcqlQueryLookupCallback:DcqlQueryLookupCallback) : RPBuilder {
+  withDcqlQueryLookup(dcqlQueryLookupCallback: DcqlQueryLookupCallback): RPBuilder {
     this.dcqlQueryLookupCallback = dcqlQueryLookupCallback
     return this
   }
@@ -208,18 +208,18 @@ export class RPBuilder {
   withDcqlQuery(dcqlQuery: DcqlQuery, targets?: PropertyTargets): RPBuilder {
     const dcql = dcqlQuery
     this._authorizationRequestPayload.dcql_query = assignIfAuth(
-        {
-          propertyValue: dcql,
-          targets,
-        },
-        false,
+      {
+        propertyValue: dcql,
+        targets,
+      },
+      false,
     )
     this._requestObjectPayload.dcql_query = assignIfRequestObject(
-        {
-          propertyValue: dcql,
-          targets,
-        },
-        true,
+      {
+        propertyValue: dcql,
+        targets,
+      },
+      true,
     )
 
     if (isTarget(PropertyTarget.AUTHORIZATION_REQUEST, targets)) {

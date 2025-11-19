@@ -1,24 +1,14 @@
-import {
-  AccessTokenRequest,
-  CredentialConfigurationSupportedSdJwtVcV1_0_15,
-  CredentialConfigurationSupportedV1_0_15
-} from '@sphereon/oid4vci-common'
+import { AccessTokenRequest, CredentialConfigurationSupportedSdJwtVcV1_0_15, CredentialConfigurationSupportedV1_0_15 } from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { OpenID4VCIClientV1_0_15 } from '..'
-import {
-  AuthorizationServerMetadataBuilder,
-  createAccessTokenResponse,
-  IssuerMetadataBuilderV1_15,
-  VcIssuerBuilder
-} from '../../../issuer'
+import { AuthorizationServerMetadataBuilder, createAccessTokenResponse, IssuerMetadataBuilderV1_15, VcIssuerBuilder } from '../../../issuer'
 import { vi } from 'vitest'
 
 export const UNIT_TEST_TIMEOUT = 30000
-
 
 const alg = 'ES256'
 const jwk = { kty: 'EC', crv: 'P-256', x: 'zQOowIC1gWJtdddB5GAt4lau6Lt8Ihy771iAfam-1pc', y: 'cjD_7o3gdQ1vgiQy3_sMGs7WrwCMU9FQYimA3HxnMlw' }
@@ -152,7 +142,7 @@ describe('sd-jwt vc', () => {
           vcIssuer.issueCredential({
             credentialRequest: { ...(body as any), credential_identifier: 'SdJwtCredential' },
             issuerCorrelation: {
-              preAuthorizedCode: '123'
+              preAuthorizedCode: '123',
             },
             credential: {
               vct: 'Hello',
@@ -185,9 +175,9 @@ describe('sd-jwt vc', () => {
         c_nonce_expires_in: 300,
         credentials: [
           {
-            credential: 'sd-jwt'
-          }
-        ]
+            credential: 'sd-jwt',
+          },
+        ],
       })
     },
     UNIT_TEST_TIMEOUT,
@@ -263,7 +253,7 @@ describe('sd-jwt vc', () => {
           vcIssuer.issueCredential({
             credentialRequest: { ...(body as any), credential_identifier: offered.vct },
             issuerCorrelation: {
-              preAuthorizedCode: '123'
+              preAuthorizedCode: '123',
             },
             credential: {
               vct: 'Hello',
@@ -296,9 +286,9 @@ describe('sd-jwt vc', () => {
         c_nonce_expires_in: 300,
         credentials: [
           {
-            credential: 'sd-jwt'
-          }
-        ]
+            credential: 'sd-jwt',
+          },
+        ],
       })
     },
     UNIT_TEST_TIMEOUT,

@@ -4,10 +4,11 @@ import {
   CredentialOffer,
   CredentialOfferRequestWithBaseUrl,
   CredentialOfferV1_0_15,
-  determineSpecVersionFromURI, JsonURIMode,
+  determineSpecVersionFromURI,
+  JsonURIMode,
   OpenId4VCIVersion,
   PRE_AUTH_GRANT_LITERAL,
-  toUniformCredentialOfferRequest
+  toUniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common'
 import { Loggers } from '@sphereon/ssi-types'
 
@@ -35,7 +36,7 @@ export class CredentialOfferClientV1_0_15 {
         arrayTypeProperties: uri.includes('credential_offer_uri=')
           ? ['credential_configuration_ids', 'credential_offer_uri=']
           : ['credential_configuration_ids', 'credential_offer='],
-        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['credential_offer=']
+        requiredProperties: uri.includes('credential_offer_uri=') ? ['credential_offer_uri='] : ['credential_offer='],
       }) as CredentialOfferV1_0_15
     }
     if (credentialOffer?.credential_offer_uri === undefined && !credentialOffer?.credential_offer) {
@@ -44,12 +45,12 @@ export class CredentialOfferClientV1_0_15 {
 
     const request = await toUniformCredentialOfferRequest(credentialOffer, {
       ...opts,
-      version
+      version,
     })
 
     return {
       ...constructBaseResponse(request, scheme, baseUrl),
-      userPinRequired: !!(request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code ?? false)
+      userPinRequired: !!(request.credential_offer?.grants?.[PRE_AUTH_GRANT_LITERAL]?.tx_code ?? false),
     }
   }
 
@@ -57,7 +58,7 @@ export class CredentialOfferClientV1_0_15 {
     requestWithBaseUrl: CredentialOfferRequestWithBaseUrl,
     opts?: {
       version?: OpenId4VCIVersion
-    }
+    },
   ): string {
     logger.debug(`Credential Offer Request with base URL: ${JSON.stringify(requestWithBaseUrl)}`)
     const version = opts?.version ?? requestWithBaseUrl.version
@@ -68,18 +69,21 @@ export class CredentialOfferClientV1_0_15 {
     const isUri = requestWithBaseUrl.credential_offer_uri !== undefined
 
     if (isUri) {
-      return convertJsonToURI({ credential_offer_uri: requestWithBaseUrl.credential_offer_uri }, {
-        baseUrl,
-        uriTypeProperties: ['credential_offer_uri'],
-        param: 'credential_offer_uri',
-        version
-      })
+      return convertJsonToURI(
+        { credential_offer_uri: requestWithBaseUrl.credential_offer_uri },
+        {
+          baseUrl,
+          uriTypeProperties: ['credential_offer_uri'],
+          param: 'credential_offer_uri',
+          version,
+        },
+      )
     } else {
       return convertJsonToURI(requestWithBaseUrl.original_credential_offer, {
         baseUrl,
         param: 'credential_offer',
         mode: JsonURIMode.JSON_STRINGIFY,
-        version
+        version,
       })
     }
   }

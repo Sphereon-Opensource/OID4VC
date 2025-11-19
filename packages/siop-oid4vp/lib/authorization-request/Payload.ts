@@ -4,14 +4,7 @@ import { isTarget, isTargetOrNoTargets } from '../rp/Opts'
 import { RPRegistrationMetadataPayloadSchema } from '../schemas'
 import { createRequestRegistration } from './RequestRegistration'
 import { ClaimPayloadOpts, CreateAuthorizationRequestOpts, PropertyTarget } from './types'
-import {
-  AuthorizationRequestPayload,
-  ClaimPayload,
-  ClientMetadataOpts,
-  PassBy,
-  RPRegistrationMetadataPayload,
-  SIOPErrors,
-} from '../types'
+import { AuthorizationRequestPayload, ClaimPayload, ClientMetadataOpts, PassBy, RPRegistrationMetadataPayload, SIOPErrors } from '../types'
 
 export const createClaimsProperties = async (opts: ClaimPayloadOpts): Promise<ClaimPayload | undefined> => {
   if (!opts || !opts.vp_token) {
@@ -20,7 +13,7 @@ export const createClaimsProperties = async (opts: ClaimPayloadOpts): Promise<Cl
 
   return {
     ...(opts.id_token && { id_token: opts.id_token }),
-    vp_token: { dcql_query: opts.vp_token.dcql_query }
+    vp_token: { dcql_query: opts.vp_token.dcql_query },
   }
 }
 
@@ -54,7 +47,9 @@ export const createAuthorizationRequestPayload = async (
     ...(isRequestTarget && isRequestByValue && { request }),
     ...(nonce && { nonce }),
     ...(state && { state }),
-    ...(registration.payload && registration.clientMetadataOpts.targets && isTarget(PropertyTarget.AUTHORIZATION_REQUEST, registration.clientMetadataOpts.targets) && { ...registration.payload }),
+    ...(registration.payload &&
+      registration.clientMetadataOpts.targets &&
+      isTarget(PropertyTarget.AUTHORIZATION_REQUEST, registration.clientMetadataOpts.targets) && { ...registration.payload }),
     ...(claims && { claims }),
   }
 

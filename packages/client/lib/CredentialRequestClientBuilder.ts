@@ -7,7 +7,7 @@ import {
   EndpointMetadataResultV1_0_15,
   ExperimentalSubjectIssuance,
   OpenId4VCIVersion,
-  UniformCredentialOfferRequest
+  UniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common'
 
 import { CredentialOfferClient } from './CredentialOfferClient'
@@ -27,12 +27,12 @@ export class CredentialRequestClientBuilder {
   }
 
   public static fromCredentialIssuer({
-                                       credentialIssuer,
-                                       metadata,
-                                       version,
-                                       credentialIdentifier,
-                                       credentialTypes
-                                     }: {
+    credentialIssuer,
+    metadata,
+    version,
+    credentialIdentifier,
+    credentialTypes,
+  }: {
     credentialIssuer: string
     metadata?: EndpointMetadata
     version?: OpenId4VCIVersion
@@ -42,21 +42,24 @@ export class CredentialRequestClientBuilder {
     // const specVersion = version ?? OpenId4VCIVersion.VER_1_0_15
     let builder
     const metadataV15 = metadata as EndpointMetadataResultV1_0_15
-//  if (specVersion >= OpenId4VCIVersion.VER_1_0_15) {
-      builder = CredentialRequestClientBuilderV1_0_15.fromCredentialIssuer({
-        credentialIssuer,
-        metadata: metadataV15,
-        version,
-        credentialIdentifier,
-        credentialTypes
-      })
-//  }
+    //  if (specVersion >= OpenId4VCIVersion.VER_1_0_15) {
+    builder = CredentialRequestClientBuilderV1_0_15.fromCredentialIssuer({
+      credentialIssuer,
+      metadata: metadataV15,
+      version,
+      credentialIdentifier,
+      credentialTypes,
+    })
+    //  }
 
     return new CredentialRequestClientBuilder(builder)
   }
 
-  public static async fromURI({ uri, metadata }: {
-    uri: string;
+  public static async fromURI({
+    uri,
+    metadata,
+  }: {
+    uri: string
     metadata?: EndpointMetadataResultV1_0_15
   }): Promise<CredentialRequestClientBuilder> {
     const offer = await CredentialOfferClient.fromURI(uri)
@@ -64,7 +67,7 @@ export class CredentialRequestClientBuilder {
       request: offer,
       ...offer,
       metadata,
-      version: offer.version
+      version: offer.version,
     })
   }
 
@@ -83,17 +86,17 @@ export class CredentialRequestClientBuilder {
   }
 
   public static fromCredentialOffer({
-                                      credentialOffer,
-                                      metadata
-                                    }: {
+    credentialOffer,
+    metadata,
+  }: {
     credentialOffer: CredentialOfferRequestWithBaseUrl
     metadata?: EndpointMetadataResultV1_0_15
   }): CredentialRequestClientBuilder {
     //const version = determineSpecVersionFromOffer(credentialOffer.credential_offer)
     const builder = CredentialRequestClientBuilderV1_0_15.fromCredentialOffer({
-        credentialOffer,
-        metadata
-      })
+      credentialOffer,
+      metadata,
+    })
 
     return new CredentialRequestClientBuilder(builder)
   }

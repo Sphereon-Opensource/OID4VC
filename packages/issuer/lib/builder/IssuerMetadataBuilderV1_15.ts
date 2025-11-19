@@ -3,7 +3,7 @@ import {
   CredentialConfigurationSupportedV1_0_15,
   IssuerMetadataV1_0_15,
   MetadataDisplay,
-  ResponseEncryption
+  ResponseEncryption,
 } from '@sphereon/oid4vci-common'
 
 import { CredentialSupportedBuilderV1_15 } from './CredentialSupportedBuilderV1_15'
@@ -131,7 +131,7 @@ export class IssuerMetadataBuilderV1_15 {
     }
     const credential_configurations_supported: Record<string, CredentialConfigurationSupportedV1_0_15> = this.credentialConfigurationsSupported
     const configurationsEntryList: Record<string, CredentialConfigurationSupportedV1_0_15>[] = this.supportedBuilders.map((builder) =>
-      builder.build()
+      builder.build(),
     )
     configurationsEntryList.forEach((configRecord) => {
       Object.keys(configRecord).forEach((key) => {
@@ -158,7 +158,7 @@ export class IssuerMetadataBuilderV1_15 {
       ...(this.credentialResponseEncryption && { credential_response_encryption: this.credentialResponseEncryption }),
       ...(this.signedMetadata && { signed_metadata: this.signedMetadata }),
       ...(this.credentialIdentifiersSupported !== undefined && { credential_identifiers_supported: this.credentialIdentifiersSupported }),
-      ...(display.length > 0 && { display })
+      ...(display.length > 0 && { display }),
     }
 
     return issuerMetadata

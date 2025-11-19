@@ -1,25 +1,14 @@
 import { JarmClientMetadata } from '@sphereon/jarm'
 import { DynamicRegistrationClientMetadata, SigningAlgo } from '@sphereon/oid4vc-common'
-import {
-  AdditionalClaims,
-  Format,
-  W3CVerifiableCredential,
-  W3CVerifiablePresentation,
-  WrappedVerifiablePresentation
-} from '@sphereon/ssi-types'
+import { AdditionalClaims, Format, W3CVerifiableCredential, W3CVerifiablePresentation, WrappedVerifiablePresentation } from '@sphereon/ssi-types'
 import { DcqlPresentationResult, DcqlQuery } from 'dcql'
 import { z } from 'zod'
-import {
-  AuthorizationRequest,
-  CreateAuthorizationRequestOpts,
-  PropertyTargets,
-  VerifyAuthorizationRequestOpts
-} from '../authorization-request'
+import { AuthorizationRequest, CreateAuthorizationRequestOpts, PropertyTargets, VerifyAuthorizationRequestOpts } from '../authorization-request'
 import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   PresentationVerificationCallback,
-  VerifyAuthorizationResponseOpts
+  VerifyAuthorizationResponseOpts,
 } from '../authorization-response'
 import { JwksMetadataParams } from '../helpers'
 import { RequestObject, RequestObjectOpts } from '../request-object'
@@ -38,7 +27,7 @@ import {
   QRCodeOptsSchema,
   RequestErrorPayloadSchema,
   RequestErrorSchema,
-  VerifiedDataOptsSchema
+  VerifiedDataOptsSchema,
 } from '../schemas'
 import { Json } from './Json.types'
 
@@ -91,9 +80,9 @@ export interface RequestCommonPayload extends JWTPayload {
 }
 
 export interface AuthorizationRequestPayloadD28
-    extends AuthorizationRequestCommonPayload,
-        RequestClientMetadataPayloadProperties,
-        RequestIdTokenPayloadProperties {
+  extends AuthorizationRequestCommonPayload,
+    RequestClientMetadataPayloadProperties,
+    RequestIdTokenPayloadProperties {
   claims?: ClaimPayloadCommon // OPTIONAL. As specified in Section 5.5 of [OpenID.Core]
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
   dcql_query?: Record<string, any> // A JSON object containing a DCQL query as defined in Section 6. // see https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#dcql_query
@@ -102,9 +91,9 @@ export interface AuthorizationRequestPayloadD28
 }
 
 export interface AuthorizationRequestPayloadV1
-    extends AuthorizationRequestCommonPayload,
-      RequestClientMetadataPayloadProperties,
-      RequestIdTokenPayloadProperties {
+  extends AuthorizationRequestCommonPayload,
+    RequestClientMetadataPayloadProperties,
+    RequestIdTokenPayloadProperties {
   claims?: ClaimPayloadCommon // OPTIONAL. As specified in Section 5.5 of [OpenID.Core]
   response_uri?: string // New since OID4VP18 OPTIONAL. The Response URI to which the Wallet MUST send the Authorization Response using an HTTPS POST request as defined by the Response Mode direct_post. The Response URI receives all Authorization Response parameters as defined by the respective Response Type. When the response_uri parameter is present, the redirect_uri Authorization Request parameter MUST NOT be present. If the redirect_uri Authorization Request parameter is present when the Response Mode is direct_post, the Wallet MUST return an invalid_request Authorization Response error.
   dcql_query?: Record<string, any> // A JSON object containing a DCQL query as defined in Section 6. // see https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#dcql_query
@@ -182,10 +171,7 @@ export interface IDTokenPayload extends JWTPayload {
 export type NonEmptyArray<T> = [T, ...T[]]
 export type DcqlPresentationEntry = string | Record<string, Json>
 export type DcqlVpToken = Record<string, NonEmptyArray<DcqlPresentationEntry>>
-export type DcqlVpTokenInput = Record<
-  string,
-  DcqlPresentationEntry | DcqlPresentationEntry[] | Record<string, DcqlPresentationEntry>
->
+export type DcqlVpTokenInput = Record<string, DcqlPresentationEntry | DcqlPresentationEntry[] | Record<string, DcqlPresentationEntry>>
 
 export type EncodedDcqlPresentationVpToken = string
 
@@ -528,7 +514,7 @@ export enum ResponseMode {
 export enum VerifiedDataMode {
   AUTHORIZATION_RESPONSE = 'authorization_response',
   CREDENTIAL_CLAIMS_DESERIALIZED = 'credential_claims_deserialized',
-  VP_TOKEN = 'vp_token'
+  VP_TOKEN = 'vp_token',
 }
 
 export enum ProtocolFlow {
@@ -675,7 +661,7 @@ export interface RevocationOpts {
 
 export enum SupportedVersion {
   SIOPv2_OID4VP_D28 = 280,
-  OID4VP_v1 = 1000
+  OID4VP_v1 = 1000,
 }
 
 export interface SIOPResonse<T> {
@@ -710,7 +696,6 @@ export type RequestErrorPayload = z.infer<typeof RequestErrorPayloadSchema>
 export type AuthStatusResponse = z.infer<typeof AuthStatusResponseSchema>
 export type AuthStatusResponsePayload = z.infer<typeof AuthStatusResponsePayloadSchema>
 
-
 export type VerifiedData = {
   authorization_response?: VerifiedDataAuthorizationResponse
   credential_claims?: Array<VerifiedDataClaimsSet>
@@ -737,8 +722,4 @@ export type MultipleVpTokenDCQL = {
   [x: string]: MultipleVpTokens
 }
 
-export type VpToken =
-    | SingleObjectVpTokenPE
-    | SingleStringVpTokenPE
-    | MultipleVpTokens
-    | MultipleVpTokenDCQL
+export type VpToken = SingleObjectVpTokenPE | SingleStringVpTokenPE | MultipleVpTokens | MultipleVpTokenDCQL

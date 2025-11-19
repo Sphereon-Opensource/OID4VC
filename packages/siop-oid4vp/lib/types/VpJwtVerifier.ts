@@ -17,8 +17,8 @@ import {
   X5cJwtVerifier,
 } from '@sphereon/oid4vc-common'
 import SIOPErrors from './Errors'
-import {ClientIdentifierPrefix, RequestObjectPayload} from './SIOP.types'
-import {getClientIdentifierPrefix, removeClientIdentifierPrefix} from '../helpers';
+import { ClientIdentifierPrefix, RequestObjectPayload } from './SIOP.types'
+import { getClientIdentifierPrefix, removeClientIdentifierPrefix } from '../helpers'
 
 type JwkJwtVerifier =
   | (JwkJwtVerifierBase & {
@@ -82,11 +82,7 @@ export const getRequestObjectJwtVerifier = async (
   const clientIdentifierPrefix = getClientIdentifierPrefix(jwt.payload.client_id)
 
   // If a : character is not present in the Client Identifier, the Wallet MUST treat the Client Identifier as referencing a pre-registered client
-  if (
-      !clientIdentifierPrefix ||
-      jwt.header.alg === 'none' ||
-      clientIdentifierPrefix.match(/^https?/)
-  ) {
+  if (!clientIdentifierPrefix || jwt.header.alg === 'none' || clientIdentifierPrefix.match(/^https?/)) {
     // All validations must be done manually
     // The Verifier metadata is obtained using [RFC7591] or through out-of-band mechanisms.
     return getJwtVerifierWithContext(jwt, { type })
@@ -94,7 +90,7 @@ export const getRequestObjectJwtVerifier = async (
 
   if (clientIdentifierPrefix === ClientIdentifierPrefix.DECENTRALIZED_IDENTIFIER || clientIdentifierPrefix === 'did') {
     return getDidJwtVerifier(jwt, { type })
-  } else  if (clientIdentifierPrefix === ClientIdentifierPrefix.X509_SAN_DNS || clientIdentifierPrefix === ClientIdentifierPrefix.X509_HASH) {
+  } else if (clientIdentifierPrefix === ClientIdentifierPrefix.X509_SAN_DNS || clientIdentifierPrefix === ClientIdentifierPrefix.X509_HASH) {
     return getX5cVerifier(jwt, { type })
   } else if (clientIdentifierPrefix === ClientIdentifierPrefix.REDIRECT_URI) {
     if (jwt.payload.redirect_uri && jwt.payload.redirect_uri !== clientId) {

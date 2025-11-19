@@ -1,6 +1,6 @@
-import {calculateJwkThumbprintUri, JwtHeader, JwtIssuer, parseJWT} from '@sphereon/oid4vc-common'
-import {AuthorizationResponseOpts, VerifyAuthorizationResponseOpts} from '../authorization-response'
-import {assertValidVerifyOpts} from '../authorization-response/Opts'
+import { calculateJwkThumbprintUri, JwtHeader, JwtIssuer, parseJWT } from '@sphereon/oid4vc-common'
+import { AuthorizationResponseOpts, VerifyAuthorizationResponseOpts } from '../authorization-response'
+import { assertValidVerifyOpts } from '../authorization-response/Opts'
 import {
   getJwtVerifierWithContext,
   IDTokenJwt,
@@ -14,7 +14,7 @@ import {
   VerifiedIDToken,
 } from '../types'
 
-import {createIDTokenPayload} from './Payload'
+import { createIDTokenPayload } from './Payload'
 
 export class IDToken {
   private _header?: JwtHeader

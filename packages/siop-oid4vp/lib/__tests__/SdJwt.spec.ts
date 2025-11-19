@@ -4,21 +4,21 @@ import { CredentialMapper, decodeSdJwtVc } from '@sphereon/ssi-types'
 import { DcqlPresentation, DcqlQuery, DcqlQueryResult, DcqlSdJwtVcCredential } from 'dcql'
 import { describe, expect, it } from 'vitest'
 import {
-    hasCryptographicHolderBinding,
-    InMemoryRPSessionManager,
-    Json,
-    OP,
-    PassBy,
-    PresentationVerificationCallback,
-    PropertyTarget,
-    ResponseIss,
-    ResponseMode,
-    ResponseType,
-    RevocationVerification,
-    RP,
-    Scope,
-    SubjectType,
-    SupportedVersion,
+  hasCryptographicHolderBinding,
+  InMemoryRPSessionManager,
+  Json,
+  OP,
+  PassBy,
+  PresentationVerificationCallback,
+  PropertyTarget,
+  ResponseIss,
+  ResponseMode,
+  ResponseType,
+  RevocationVerification,
+  RP,
+  Scope,
+  SubjectType,
+  SupportedVersion,
 } from '../'
 import { getVerifyJwtCallback, internalSignature } from './DidJwtTestUtils'
 import { getResolver } from './ResolverTestUtils'
@@ -34,32 +34,32 @@ import {
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 
 const KB_SD_JWT_PRESENTATION =
-    'eyJ0eXAiOiJ2YytzZC1qd3QiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6a2V5OnNvbWUtcmFuZG9tLWRpZC1rZXkiLCJpYXQiOjE3MzU4MzY0NzY1NjksInZjdCI6Imh0dHBzOi8vaGlnaC1hc3N1cmFuY2UuY29tL1N0YXRlQnVzaW5lc3NMaWNlbnNlIiwiX3NkIjpbIk5ub3U2OGN6VG9qQWY0Z3dIMmJiNFBaWHB4WHJzQ29oWm5CbEZvQ293TTAiLCJ1ajZZZVZwSnRwUjhVWHRpbmVDOGM5LXpTRFJVQzJzSGhsRkNNNWtkLXlNIl0sIl9zZF9hbGciOiJzaGEtMjU2In0.X1pNBBmR-7h6SgxtmZY9GL_nSBzoIvWNw7nqqgJVCnSEbvyTjqTgu4bLSPKeaxf1jY2zHJK1jdxiDzIizRZ0gA~WyI4OTE4YjkxZGFjMzk1OTdkIiwidXNlciIseyJkYXRlX29mX2JpcnRoIjoiMDEvMDEvMTk3MCIsIl9zZCI6WyJ6UE8zb1RCT3BxMmRNcWQtekt5SmF2UlQyWVIwSHBPaV9jczZRajEtVmR3Il19XQ~WyIyOTc4NTNiODE5MTI0MTJkIiwibmFtZSIsIkpvaG4iXQ~WyJkYjEzNDQ4NTgxMzY0M2JlIiwibGljZW5zZSIseyJfc2QiOlsiWUFUR3A3TGxjNEMtTWtYWkZWTEF6RHRtbDFTMVpFWFFyTW5CdmVDWVFwayJdfV0~WyJlOTc3MzhiNmM0OGNhMWJlIiwibnVtYmVyIiwxMF0~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3MzU4MzY0NzYsImF1ZCI6Imh0dHBzOi8vZXhhbXBsZS5jb20iLCJub25jZSI6InFCclI3bXFuWTNRcjQ5ZEFaeWNQRjhGemdFODNtNkgwYzJsMGJ6UDR4U2ciLCJjdXN0b20iOiJkYXRhIiwic2RfaGFzaCI6IlVwYzNYQWpzRU1mdnVmSzJ5Q3RkNDZXUFJmTDVfVDc4UThEZVNZQXlEX28ifQ.Crw56nLFFnVulRQElpq9HoskdKIyd5Mj6vg9UVNSWfhxQ0oGe10RHtifUv4BiFharSvWN99y_DnkhCPu1sPIYw'
+  'eyJ0eXAiOiJ2YytzZC1qd3QiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6a2V5OnNvbWUtcmFuZG9tLWRpZC1rZXkiLCJpYXQiOjE3MzU4MzY0NzY1NjksInZjdCI6Imh0dHBzOi8vaGlnaC1hc3N1cmFuY2UuY29tL1N0YXRlQnVzaW5lc3NMaWNlbnNlIiwiX3NkIjpbIk5ub3U2OGN6VG9qQWY0Z3dIMmJiNFBaWHB4WHJzQ29oWm5CbEZvQ293TTAiLCJ1ajZZZVZwSnRwUjhVWHRpbmVDOGM5LXpTRFJVQzJzSGhsRkNNNWtkLXlNIl0sIl9zZF9hbGciOiJzaGEtMjU2In0.X1pNBBmR-7h6SgxtmZY9GL_nSBzoIvWNw7nqqgJVCnSEbvyTjqTgu4bLSPKeaxf1jY2zHJK1jdxiDzIizRZ0gA~WyI4OTE4YjkxZGFjMzk1OTdkIiwidXNlciIseyJkYXRlX29mX2JpcnRoIjoiMDEvMDEvMTk3MCIsIl9zZCI6WyJ6UE8zb1RCT3BxMmRNcWQtekt5SmF2UlQyWVIwSHBPaV9jczZRajEtVmR3Il19XQ~WyIyOTc4NTNiODE5MTI0MTJkIiwibmFtZSIsIkpvaG4iXQ~WyJkYjEzNDQ4NTgxMzY0M2JlIiwibGljZW5zZSIseyJfc2QiOlsiWUFUR3A3TGxjNEMtTWtYWkZWTEF6RHRtbDFTMVpFWFFyTW5CdmVDWVFwayJdfV0~WyJlOTc3MzhiNmM0OGNhMWJlIiwibnVtYmVyIiwxMF0~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3MzU4MzY0NzYsImF1ZCI6Imh0dHBzOi8vZXhhbXBsZS5jb20iLCJub25jZSI6InFCclI3bXFuWTNRcjQ5ZEFaeWNQRjhGemdFODNtNkgwYzJsMGJ6UDR4U2ciLCJjdXN0b20iOiJkYXRhIiwic2RfaGFzaCI6IlVwYzNYQWpzRU1mdnVmSzJ5Q3RkNDZXUFJmTDVfVDc4UThEZVNZQXlEX28ifQ.Crw56nLFFnVulRQElpq9HoskdKIyd5Mj6vg9UVNSWfhxQ0oGe10RHtifUv4BiFharSvWN99y_DnkhCPu1sPIYw'
 
 const SD_JWT_VC = {
-    compactJwtVc: KB_SD_JWT_PRESENTATION,
-    decodedPayload: {
-        iat: 1700464736076,
-        iss: "did:key:some-random-did-key",
-        nbf: 1700464736176,
-        vct: "https://high-assurance.com/StateBusinessLicense",
-        user: {
-            dateOfBirth: "20000101",
-            lastName: "Doe",
-            name: "John"
-        },
-        license: {
-            "number": 10
-        },
-        cnf: {
-            jwk: {
-                kty: "EC",
-                crv: "P-256",
-                x: "TCAER19Zvu3OHF4j4W4vfSVoHIP1ILilDls7vCeGemc",
-                y: "ZxjiWWbZMQGHVWKVQ4hbSIirsVfuecCE6t4jT9F2HZQ"
-            }
-        }
-    }
+  compactJwtVc: KB_SD_JWT_PRESENTATION,
+  decodedPayload: {
+    iat: 1700464736076,
+    iss: 'did:key:some-random-did-key',
+    nbf: 1700464736176,
+    vct: 'https://high-assurance.com/StateBusinessLicense',
+    user: {
+      dateOfBirth: '20000101',
+      lastName: 'Doe',
+      name: 'John',
+    },
+    license: {
+      number: 10,
+    },
+    cnf: {
+      jwk: {
+        kty: 'EC',
+        crv: 'P-256',
+        x: 'TCAER19Zvu3OHF4j4W4vfSVoHIP1ILilDls7vCeGemc',
+        y: 'ZxjiWWbZMQGHVWKVQ4hbSIirsVfuecCE6t4jT9F2HZQ',
+      },
+    },
+  },
 }
 
 const dcqlQuery = {
@@ -71,7 +71,7 @@ const dcqlQuery = {
         vct_values: ['https://high-assurance.com/StateBusinessLicense'],
       },
       claims: [{ path: ['license', 'number'] }, { path: ['user', 'name'] }],
-      require_cryptographic_holder_binding: false
+      require_cryptographic_holder_binding: false,
     },
   ],
 } satisfies DcqlQuery.Input
@@ -80,10 +80,13 @@ const parsedDcqlQuery = DcqlQuery.parse(dcqlQuery)
 DcqlQuery.validate(parsedDcqlQuery)
 
 const dcqlCredential = {
-    credential_format: 'dc+sd-jwt',
-    vct: SD_JWT_VC.decodedPayload.vct,
-    claims: SD_JWT_VC.decodedPayload,
-    cryptographic_holder_binding: hasCryptographicHolderBinding('dc+sd-jwt', CredentialMapper.toWrappedVerifiableCredential(decodeSdJwtVc(SD_JWT_VC.compactJwtVc, defaultHasher)))
+  credential_format: 'dc+sd-jwt',
+  vct: SD_JWT_VC.decodedPayload.vct,
+  claims: SD_JWT_VC.decodedPayload,
+  cryptographic_holder_binding: hasCryptographicHolderBinding(
+    'dc+sd-jwt',
+    CredentialMapper.toWrappedVerifiableCredential(decodeSdJwtVc(SD_JWT_VC.compactJwtVc, defaultHasher)),
+  ),
 } satisfies DcqlSdJwtVcCredential
 
 describe.skip('RP and OP interaction should', () => {
@@ -180,7 +183,7 @@ describe.skip('RP and OP interaction should', () => {
     expect(parsedAuthReqURI.requestObjectJwt).toBeDefined()
 
     if (!parsedAuthReqURI.requestObjectJwt) {
-        throw new Error('requestObjectJwt is undefined')
+      throw new Error('requestObjectJwt is undefined')
     }
     const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt)
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
@@ -189,23 +192,23 @@ describe.skip('RP and OP interaction should', () => {
 
     const presentation: DcqlPresentation.Output = {}
     for (const [key, value] of Object.entries(dcqlQueryResult.credential_matches)) {
-        if (value.success) {
-            presentation[key] = SD_JWT_VC.compactJwtVc
-        }
+      if (value.success) {
+        presentation[key] = SD_JWT_VC.compactJwtVc
+      }
     }
 
     const dcqlPresentation = DcqlPresentation.parse(presentation)
 
     const authenticationResponseWithJWT = await op.createAuthorizationResponse(verifiedAuthReqWithJWT, {
-        dcqlResponse: {
-            dcqlPresentation
-        }
+      dcqlResponse: {
+        dcqlPresentation,
+      },
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeDefined()
 
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-      dcqlQuery: parsedDcqlQuery
+      dcqlQuery: parsedDcqlQuery,
     })
 
     expect(verifiedAuthResponseWithJWT.idToken?.jwt).toBeDefined()
@@ -297,7 +300,7 @@ describe.skip('RP and OP interaction should', () => {
     expect(parsedAuthReqURI.requestObjectJwt).toBeDefined()
 
     if (!parsedAuthReqURI.requestObjectJwt) {
-        throw new Error('requestObjectJwt is undefined')
+      throw new Error('requestObjectJwt is undefined')
     }
     const verifiedAuthReqWithJWT = await op.verifyAuthorizationRequest(parsedAuthReqURI.requestObjectJwt)
     expect(verifiedAuthReqWithJWT.issuer).toMatch(rpMockEntity.did)
@@ -306,9 +309,9 @@ describe.skip('RP and OP interaction should', () => {
 
     const presentation: DcqlPresentation.Output = {}
     for (const [key, value] of Object.entries(dcqlQueryResult.credential_matches)) {
-        if (value.success) {
-            presentation[key] = SD_JWT_VC.compactJwtVc
-        }
+      if (value.success) {
+        presentation[key] = SD_JWT_VC.compactJwtVc
+      }
     }
 
     const dcqlPresentation = DcqlPresentation.parse(presentation)
@@ -320,14 +323,14 @@ describe.skip('RP and OP interaction should', () => {
         didUrl: `${rpMockEntity.did}#controller`,
       },
       dcqlResponse: {
-          dcqlPresentation
-      }
+        dcqlPresentation,
+      },
     })
     expect(authenticationResponseWithJWT.response.payload).toBeDefined()
     expect(authenticationResponseWithJWT.response.idToken).toBeUndefined()
 
     const verifiedAuthResponseWithJWT = await rp.verifyAuthorizationResponse(authenticationResponseWithJWT.response.payload, {
-        dcqlQuery: parsedDcqlQuery
+      dcqlQuery: parsedDcqlQuery,
     })
 
     expect(verifiedAuthResponseWithJWT.oid4vpSubmission?.nonce).toEqual('qBrR7mqnY3Qr49dAZycPF8FzgE83m6H0c2l0bzP4xSg')
@@ -434,12 +437,12 @@ describe.skip('RP and OP interaction should', () => {
       credential_format: 'dc+sd-jwt',
       claims: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload as { [x: string]: Json },
       vct: decodeSdJwtVc(vc as string, defaultHasher).decodedPayload.vct,
-      cryptographic_holder_binding: true
+      cryptographic_holder_binding: true,
     })) satisfies DcqlSdJwtVcCredential[]
 
     const queryResult = DcqlQuery.query(parsedDcqlQuery, dcqlCredentials)
 
-      // TODO
+    // TODO
     // expect(queryResult).toEqual({
     //   canBeSatisfied: true,
     //   credential_matches: {

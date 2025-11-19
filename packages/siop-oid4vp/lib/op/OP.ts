@@ -1,20 +1,20 @@
-import {EventEmitter} from 'events'
-import {jarmAuthResponseSend, JarmClientMetadata, jarmMetadataValidate, JarmServerMetadata} from '@sphereon/jarm'
-import {uuidv4} from '@sphereon/oid4vc-common'
-import {IIssuerId} from '@sphereon/ssi-types'
-import {AuthorizationRequest, URI, VerifyAuthorizationRequestOpts} from '../authorization-request'
-import {mergeVerificationOpts} from '../authorization-request/Opts'
+import { EventEmitter } from 'events'
+import { jarmAuthResponseSend, JarmClientMetadata, jarmMetadataValidate, JarmServerMetadata } from '@sphereon/jarm'
+import { uuidv4 } from '@sphereon/oid4vc-common'
+import { IIssuerId } from '@sphereon/ssi-types'
+import { AuthorizationRequest, URI, VerifyAuthorizationRequestOpts } from '../authorization-request'
+import { mergeVerificationOpts } from '../authorization-request/Opts'
 import {
   AuthorizationResponse,
   AuthorizationResponseOpts,
   AuthorizationResponseWithCorrelationId,
   CreateAuthorizationResponseOpts,
-  DcqlResponseOpts
+  DcqlResponseOpts,
 } from '../authorization-response'
-import {encodeJsonAsURI, extractJwksFromJwksMetadata, JwksMetadataParams, post} from '../helpers'
-import {authorizationRequestVersionDiscovery} from '../helpers/SIOPSpecVersion'
-import {OPBuilder} from './OPBuilder'
-import {createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFromBuilderOrExistingOpts} from './Opts'
+import { encodeJsonAsURI, extractJwksFromJwksMetadata, JwksMetadataParams, post } from '../helpers'
+import { authorizationRequestVersionDiscovery } from '../helpers/SIOPSpecVersion'
+import { OPBuilder } from './OPBuilder'
+import { createResponseOptsFromBuilderOrExistingOpts, createVerifyRequestOptsFromBuilderOrExistingOpts } from './Opts'
 import {
   AuthorizationEvent,
   AuthorizationEvents,
@@ -307,7 +307,7 @@ export class OP {
       ...dcqlResponse,
       registration: { ...this._createResponseOptions?.registration, issuer },
       responseURI,
-      responseURIType: this._createResponseOptions.responseURIType
+      responseURIType: this._createResponseOptions.responseURIType,
     }
   }
 

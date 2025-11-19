@@ -16,7 +16,7 @@ import {
   PRE_AUTH_GRANT_LITERAL,
   UniformCredentialOffer,
   UniformCredentialOfferPayload,
-  UniformCredentialOfferRequest
+  UniformCredentialOfferRequest,
 } from '../types'
 
 import { getJson } from './HttpUtils'
@@ -34,50 +34,47 @@ export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
   return version
 }
 
-export function determineSpecVersionFromScheme(
-  credentialOfferURI: string,
-  openId4VCIVersion: OpenId4VCIVersion
-) {
-  const scheme = getScheme(credentialOfferURI);
+export function determineSpecVersionFromScheme(credentialOfferURI: string, openId4VCIVersion: OpenId4VCIVersion) {
+  const scheme = getScheme(credentialOfferURI)
 
-  const url = toUrlWithDummyBase(credentialOfferURI);
-  const qp = url.searchParams;
+  const url = toUrlWithDummyBase(credentialOfferURI)
+  const qp = url.searchParams
 
   // ----------------- 1) openid-initiate-issuance -----------------
   if (scheme === DefaultURISchemes.INITIATE_ISSUANCE) {
     // v15 indicators
     if (qp.has('credential_offer') || qp.has('credential_offer_uri')) {
-      return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_15], scheme);
+      return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_15], scheme)
     }
 
     // Could not decide
-    return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_UNKNOWN], scheme);
+    return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_UNKNOWN], scheme)
   }
 
   // ----------------- 2) openid-credential-offer -----------------
   if (scheme === DefaultURISchemes.CREDENTIAL_OFFER) {
     // Indirection URI -> Draft 15 style (can't confirm 11/13 via scheme alone)
     if (qp.has('credential_offer_uri')) {
-      return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_15], scheme);
+      return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_1_0_15], scheme)
     }
 
     // Inline payload -> sniff JSON keys
-    const rawParam = getParamValueLoose(qp, 'credential_offer');
+    const rawParam = getParamValueLoose(qp, 'credential_offer')
     if (rawParam) {
-      const decoded = tryDecodeOffer(rawParam);
+      const decoded = tryDecodeOffer(rawParam)
 
-      const version = sniffOfferVersion(decoded);
+      const version = sniffOfferVersion(decoded)
       if (version !== OpenId4VCIVersion.VER_UNKNOWN) {
-        return recordVersion(openId4VCIVersion, [version], scheme);
+        return recordVersion(openId4VCIVersion, [version], scheme)
       }
     }
 
     // If we still can't tell, DO NOT default to 15 — stay unknown
-    return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_UNKNOWN], scheme);
+    return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_UNKNOWN], scheme)
   }
 
   // ----------------- 3) Unknown scheme -----------------
-  return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_UNKNOWN], scheme);
+  return recordVersion(openId4VCIVersion, [OpenId4VCIVersion.VER_UNKNOWN], scheme)
 }
 
 /* ----------------- helpers ----------------- */
@@ -87,8 +84,8 @@ export function determineSpecVersionFromScheme(
  * Make sure to end with '/?' to avoid the "?param" name issue.
  */
 function toUrlWithDummyBase(uri: string): URL {
-  const normalized = uri.replace(/^openid-[^?]+:\/\//, 'https://dummy/?');
-  return new URL(normalized);
+  const normalized = uri.replace(/^openid-[^?]+:\/\//, 'https://dummy/?')
+  return new URL(normalized)
 }
 
 /**
@@ -96,9 +93,9 @@ function toUrlWithDummyBase(uri: string): URL {
  * This helper checks both.
  */
 function getParamValueLoose(qp: URLSearchParams, key: string): string | null {
-  if (qp.has(key)) return qp.get(key);
-  if (qp.has(`?${key}`)) return qp.get(`?${key}`);
-  return null;
+  if (qp.has(key)) return qp.get(key)
+  if (qp.has(`?${key}`)) return qp.get(`?${key}`)
+  return null
 }
 
 /**
@@ -108,17 +105,26 @@ function getParamValueLoose(qp: URLSearchParams, key: string): string | null {
  * return the final string (JSON) or empty string on failure.
  */
 function tryDecodeOffer(input: string): string {
-  let candidate = input;
+  let candidate = input
 
-  try { candidate = decodeURIComponent(candidate); } catch {/* ignore */}
+  try {
+    candidate = decodeURIComponent(candidate)
+  } catch {
+    /* ignore */
+  }
   // Fast check for base64url: only URL-safe chars and no braces
   if (!/[{}]/.test(candidate) && /^[A-Za-z0-9\-_]+$/.test(candidate)) {
     try {
-      const b64 = candidate.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(candidate.length / 4) * 4, '=');
-      candidate = atob(b64);
-    } catch {/* ignore */}
+      const b64 = candidate
+        .replace(/-/g, '+')
+        .replace(/_/g, '/')
+        .padEnd(Math.ceil(candidate.length / 4) * 4, '=')
+      candidate = atob(b64)
+    } catch {
+      /* ignore */
+    }
   }
-  return candidate; // may still be encoded JSON but good enough for key sniffing
+  return candidate // may still be encoded JSON but good enough for key sniffing
 }
 
 /**
@@ -126,13 +132,13 @@ function tryDecodeOffer(input: string): string {
  * returns only  VER_UNKNOWN atm, for future versions support
  */
 function sniffOfferVersion(jsonLike: string): OpenId4VCIVersion {
-  if (!jsonLike) return OpenId4VCIVersion.VER_UNKNOWN;
+  if (!jsonLike) return OpenId4VCIVersion.VER_UNKNOWN
 
   // Use cheap regex so we don't crash on invalid JSON
   // const has = (k: string) => new RegExp(`"${k}"\\s*:`, 'i').test(jsonLike);
   // if (has('credentials')) return OpenId4VCIVersion.VER_1_0_11;  left as example
 
-  return OpenId4VCIVersion.VER_UNKNOWN;
+  return OpenId4VCIVersion.VER_UNKNOWN
 }
 
 export function getScheme(credentialOfferURI: string) {
@@ -218,7 +224,7 @@ function isCredentialOfferV1_0_15(offer: CredentialOfferPayload | CredentialOffe
   if (!offer) {
     return false
   }
-  offer = normalizeOfferInput(offer);
+  offer = normalizeOfferInput(offer)
 
   // Direct payload
   if ('credential_issuer' in offer && 'credential_configuration_ids' in offer) {
@@ -234,13 +240,12 @@ function isCredentialOfferV1_0_15(offer: CredentialOfferPayload | CredentialOffe
   return 'credential_offer_uri' in offer
 }
 
-
 export async function toUniformCredentialOfferRequest(
   offer: CredentialOffer,
   opts?: {
     resolve?: boolean
     version?: OpenId4VCIVersion
-  }
+  },
 ): Promise<UniformCredentialOfferRequest> {
   let version = opts?.version ?? determineSpecVersionFromOffer(offer)
   let originalCredentialOffer = offer.credential_offer
@@ -268,12 +273,12 @@ export async function toUniformCredentialOfferRequest(
     original_credential_offer: originalCredentialOffer,
     ...(credentialOfferURI && { credential_offer_uri: credentialOfferURI }),
     supportedFlows,
-    version
+    version,
   }
 }
 
 export function isPreAuthCode(request: UniformCredentialOfferPayload | UniformCredentialOffer) {
-  request = normalizeOfferInput(request);
+  request = normalizeOfferInput(request)
 
   const payload = 'credential_offer' in request ? request.credential_offer : (request as UniformCredentialOfferPayload)
   return payload?.grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL] !== undefined
@@ -283,7 +288,7 @@ export async function assertedUniformCredentialOffer(
   origCredentialOffer: UniformCredentialOffer,
   opts?: {
     resolve?: boolean
-  }
+  },
 ): Promise<AssertedUniformCredentialOffer> {
   const credentialOffer = JSON.parse(JSON.stringify(origCredentialOffer))
   if (credentialOffer.credential_offer_uri && !credentialOffer.credential_offer) {
@@ -315,9 +320,8 @@ export function toUniformCredentialOfferPayload(
   rawOffer: CredentialOfferPayload,
   opts?: {
     version?: OpenId4VCIVersion
-  }
+  },
 ): UniformCredentialOfferPayload {
-
   const offer = normalizeOfferInput<CredentialOfferPayload>(rawOffer)
 
   // todo: create test to check idempotence once a payload is already been made uniform.
@@ -325,7 +329,7 @@ export function toUniformCredentialOfferPayload(
   if (version >= OpenId4VCIVersion.VER_1_0_15) {
     const orig = offer as UniformCredentialOfferPayload
     return {
-      ...orig
+      ...orig,
     }
   }
 
@@ -334,7 +338,7 @@ export function toUniformCredentialOfferPayload(
 
 export function determineFlowType(
   suppliedOffer: AssertedUniformCredentialOffer | UniformCredentialOfferPayload,
-  version: OpenId4VCIVersion
+  version: OpenId4VCIVersion,
 ): AuthzFlowType[] {
   const payload: UniformCredentialOfferPayload = getCredentialOfferPayload(suppliedOffer)
   const supportedFlows: AuthzFlowType[] = []
@@ -348,7 +352,7 @@ export function determineFlowType(
 }
 
 export function getCredentialOfferPayload(offer: AssertedUniformCredentialOffer | UniformCredentialOfferPayload): UniformCredentialOfferPayload {
-  offer = normalizeOfferInput(offer);
+  offer = normalizeOfferInput(offer)
 
   let payload: UniformCredentialOfferPayload
   if ('credential_offer' in offer && offer['credential_offer']) {
@@ -364,10 +368,10 @@ export function determineGrantTypes(
     | AssertedUniformCredentialOffer
     | UniformCredentialOfferPayload
     | ({
-    grants: Grant
-  } & Record<never, never>)
+        grants: Grant
+      } & Record<never, never>),
 ): GrantTypes[] {
-  offer = normalizeOfferInput(offer);
+  offer = normalizeOfferInput(offer)
 
   let grants: Grant | undefined
   if ('grants' in offer && offer.grants) {
@@ -413,17 +417,13 @@ function recordVersion(currentVersion: OpenId4VCIVersion, matchingVersion: OpenI
   }
 
   throw new Error(
-    `Invalid param. Some keys have been used from version: ${currentVersion} version while '${key}' is used from version: ${JSON.stringify(matchingVersion)}`
+    `Invalid param. Some keys have been used from version: ${currentVersion} version while '${key}' is used from version: ${JSON.stringify(matchingVersion)}`,
   )
 }
 
-
-export function getCredentialConfigurationIdsFromOfferV1_0_15(
-  offer: CredentialOfferPayloadV1_0_15
-): string[] {
+export function getCredentialConfigurationIdsFromOfferV1_0_15(offer: CredentialOfferPayloadV1_0_15): string[] {
   return offer.credential_configuration_ids ?? []
 }
-
 
 export function normalizeOfferInput<T = any>(input: unknown): T {
   if (typeof input !== 'string') {
@@ -439,10 +439,8 @@ export function normalizeOfferInput<T = any>(input: unknown): T {
   // JSON?
   try {
     return JSON.parse(input) as T
-  } catch {
-  }
+  } catch {}
 
   // Last resort: just return as-is
   return input as T
 }
-

@@ -488,7 +488,7 @@ describe('create Request JWT should', () => {
         'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100303',
         client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      }
+      },
     }
 
     expect((await RequestObject.fromOpts(opts)).getPayload()).toMatchObject(expected)
@@ -501,9 +501,7 @@ describe('create Request JWT should', () => {
           id: 'Credentials',
           format: 'jwt_vc_json',
           meta: {
-            type_values: [
-                ['VerifiableCredential']
-            ],
+            type_values: [['VerifiableCredential']],
           },
           claims: [
             {
@@ -570,7 +568,7 @@ describe('create Request JWT should', () => {
         'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100305',
         client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      }
+      },
     }
 
     const uriRequest = await URI.fromOpts(opts)
@@ -578,7 +576,7 @@ describe('create Request JWT should', () => {
     const uriDecoded = decodeURIComponent(uriRequest.encodedUri)
     expect(uriDecoded.startsWith('openid4vp://?')).toBeTruthy()
     expect(uriDecoded).toContain(`request_uri=https://rp.acme.com/siop/jwts`)
-    expect(((await uriRequest.toAuthorizationRequest())?.requestObject?.getPayload())?.claims.vp_token).toBeDefined()
+    expect((await uriRequest.toAuthorizationRequest())?.requestObject?.getPayload()?.claims.vp_token).toBeDefined()
   })
 
   it('should throw when requesting with a dcql query without meta property on v1', async () => {
@@ -652,9 +650,9 @@ describe('create Request JWT should', () => {
         'client_name#nl-NL': VERIFIER_NAME_FOR_CLIENT_NL + '2022100305',
         client_purpose: VERIFIERZ_PURPOSE_TO_VERIFY,
         'client_purpose#nl-NL': VERIFIERZ_PURPOSE_TO_VERIFY_NL,
-      }
+      },
     }
 
-    expect(URI.fromOpts(opts)).rejects.toThrow("Missing meta property in DCQL query")
+    expect(URI.fromOpts(opts)).rejects.toThrow('Missing meta property in DCQL query')
   })
 })

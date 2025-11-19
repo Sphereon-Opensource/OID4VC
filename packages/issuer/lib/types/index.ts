@@ -8,14 +8,14 @@ import {
   CredentialSupplierConfig,
   JwtVerifyResult,
   OID4VCICredentialFormat,
-  StatusListOpts
+  StatusListOpts,
 } from '@sphereon/oid4vci-common'
 import {
   CompactSdJwtVc,
   ICredential,
   SdJwtDecodedVerifiableCredentialPayload,
   SdJwtDisclosureFrame,
-  W3CVerifiableCredential
+  W3CVerifiableCredential,
 } from '@sphereon/ssi-types'
 
 export type CredentialSignerCallback = (opts: {

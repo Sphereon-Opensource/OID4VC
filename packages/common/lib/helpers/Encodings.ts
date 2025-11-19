@@ -4,8 +4,6 @@ import * as u8a from 'uint8arrays'
 
 const { fromString, toString } = u8a
 
-
-
 export function base64ToHexString(input: string, encoding?: 'base64url' | 'base64'): string {
   return toString(fromString(input, encoding ?? 'base64url'), 'base16')
 }

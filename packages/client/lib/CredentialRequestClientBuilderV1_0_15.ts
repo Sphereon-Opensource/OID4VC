@@ -8,7 +8,7 @@ import {
   ExperimentalSubjectIssuance,
   getIssuerFromCredentialOfferPayload,
   OpenId4VCIVersion,
-  UniformCredentialOfferRequest
+  UniformCredentialOfferRequest,
 } from '@sphereon/oid4vci-common'
 
 import { CredentialOfferClient } from './CredentialOfferClient'
@@ -31,13 +31,13 @@ export class CredentialRequestClientBuilderV1_0_15 {
   // Note: format removed from v15 - credential requests no longer include format parameter
 
   public static fromCredentialIssuer({
-                                       credentialIssuer,
-                                       metadata,
-                                       version,
-                                       credentialIdentifier,
-                                       credentialConfigurationId,
-                                       credentialTypes
-                                     }: {
+    credentialIssuer,
+    metadata,
+    version,
+    credentialIdentifier,
+    credentialConfigurationId,
+    credentialTypes,
+  }: {
     credentialIssuer: string
     metadata?: EndpointMetadataResultV1_0_15
     version?: OpenId4VCIVersion
@@ -68,15 +68,19 @@ export class CredentialRequestClientBuilderV1_0_15 {
     return builder
   }
 
-  public static async fromURI({ uri, metadata }: {
-    uri: string;
+  public static async fromURI({
+    uri,
+    metadata,
+  }: {
+    uri: string
     metadata?: EndpointMetadataResultV1_0_15
   }): Promise<CredentialRequestClientBuilderV1_0_15> {
     const offer = await CredentialOfferClient.fromURI(uri)
     return CredentialRequestClientBuilderV1_0_15.fromCredentialOfferRequest({
-      request: offer, ...offer,
+      request: offer,
+      ...offer,
       metadata,
-      version: offer.version
+      version: offer.version,
     })
   }
 
@@ -93,7 +97,7 @@ export class CredentialRequestClientBuilderV1_0_15 {
       throw new Error('Versions below v1.0.15 (draft 15) are not supported.')
     }
     const builder = new CredentialRequestClientBuilderV1_0_15()
-    const issuer = getIssuerFromCredentialOfferPayload(request.credential_offer) ?? (metadata ? metadata.issuer as string : undefined)
+    const issuer = getIssuerFromCredentialOfferPayload(request.credential_offer) ?? (metadata ? (metadata.issuer as string) : undefined)
     if (!issuer && !metadata?.credential_endpoint) {
       throw Error(`Issuer could not be determined`)
     }
@@ -116,16 +120,16 @@ export class CredentialRequestClientBuilderV1_0_15 {
   }
 
   public static fromCredentialOffer({
-                                      credentialOffer,
-                                      metadata
-                                    }: {
+    credentialOffer,
+    metadata,
+  }: {
     credentialOffer: CredentialOfferRequestWithBaseUrl
     metadata?: EndpointMetadataResultV1_0_15
   }): CredentialRequestClientBuilderV1_0_15 {
     const builder = CredentialRequestClientBuilderV1_0_15.fromCredentialOfferRequest({
       request: credentialOffer,
       metadata,
-      version: credentialOffer.version
+      version: credentialOffer.version,
     })
 
     return builder

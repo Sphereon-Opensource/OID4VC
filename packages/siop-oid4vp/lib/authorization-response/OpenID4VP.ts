@@ -7,14 +7,14 @@ import {
   WrappedMdocCredential,
   WrappedSdJwtVerifiableCredential,
   WrappedVerifiablePresentation,
-  WrappedW3CVerifiableCredential
+  WrappedW3CVerifiableCredential,
 } from '@sphereon/ssi-types'
-import {DcqlPresentation, DcqlQuery} from 'dcql'
-import {verifyRevocation} from '../helpers'
-import {AuthorizationResponse} from './AuthorizationResponse'
-import {Dcql} from './Dcql'
-import {PresentationSubmission, RevocationVerification, VerifiedOpenID4VPSubmission} from '../types'
-import {VerifyAuthorizationResponseOpts,} from './types'
+import { DcqlPresentation, DcqlQuery } from 'dcql'
+import { verifyRevocation } from '../helpers'
+import { AuthorizationResponse } from './AuthorizationResponse'
+import { Dcql } from './Dcql'
+import { PresentationSubmission, RevocationVerification, VerifiedOpenID4VPSubmission } from '../types'
+import { VerifyAuthorizationResponseOpts } from './types'
 
 export const extractNonceFromWrappedVerifiablePresentation = (wrappedVp: WrappedVerifiablePresentation): string | undefined => {
   // SD-JWT uses kb-jwt for the nonce
@@ -49,27 +49,29 @@ export const verifyPresentations = async (
   authorizationResponse: AuthorizationResponse,
   verifyOpts: VerifyAuthorizationResponseOpts,
 ): Promise<{ dcql: VerifiedOpenID4VPSubmission }> => {
-  const dcqlQuery = DcqlQuery.parse(verifyOpts.dcqlQuery ?? authorizationResponse?.authorizationRequest.payload.dcql_query as DcqlQuery)
+  const dcqlQuery = DcqlQuery.parse(verifyOpts.dcqlQuery ?? (authorizationResponse?.authorizationRequest.payload.dcql_query as DcqlQuery))
   DcqlQuery.validate(dcqlQuery)
   const dcqlPresentation = extractDcqlPresentationFromDcqlVpToken(authorizationResponse.payload.vp_token as string, { hasher: verifyOpts.hasher })
 
   const wrappedPresentations = Object.values(dcqlPresentation)
   const verifiedPresentations = await Promise.all(
-      wrappedPresentations.map((presentation) =>
-        verifyOpts.verification.presentationVerificationCallback?.(presentation.original as W3CVerifiablePresentation),
-      ),
-    )
+    wrappedPresentations.map((presentation) =>
+      verifyOpts.verification.presentationVerificationCallback?.(presentation.original as W3CVerifiablePresentation),
+    ),
+  )
 
-    const dcqlPresentationResult = await Dcql.assertValidDcqlPresentationResult(authorizationResponse.payload.vp_token as string, dcqlQuery, { hasher: verifyOpts.hasher })
+  const dcqlPresentationResult = await Dcql.assertValidDcqlPresentationResult(authorizationResponse.payload.vp_token as string, dcqlQuery, {
+    hasher: verifyOpts.hasher,
+  })
 
-    if (verifiedPresentations.some((verified) => !verified)) {
-      const message = verifiedPresentations
-        .filter((verified) => !!verified)
-        .map((verified) => verified.reason)
-        .filter(Boolean)
-        .join(', ')
+  if (verifiedPresentations.some((verified) => !verified)) {
+    const message = verifiedPresentations
+      .filter((verified) => !!verified)
+      .map((verified) => verified.reason)
+      .filter(Boolean)
+      .join(', ')
 
-      throw Error(`Failed to verify presentations. ${message}`)
+    throw Error(`Failed to verify presentations. ${message}`)
   }
 
   const presentationsWithoutMdoc = wrappedPresentations.filter((p) => p.format !== 'mso_mdoc')
@@ -96,7 +98,7 @@ export const verifyPresentations = async (
     }
   }
 
-  return { dcql: { nonce, presentation: dcqlPresentation, dcqlQuery , dcqlPresentationResult} }
+  return { dcql: { nonce, presentation: dcqlPresentation, dcqlQuery, dcqlPresentationResult } }
 }
 
 export const extractDcqlPresentationFromDcqlVpToken = (
@@ -121,7 +123,7 @@ export const extractDcqlPresentationFromDcqlVpToken = (
 
       return [
         credentialQueryId,
-        CredentialMapper.toWrappedVerifiablePresentation(singleVp as W3CVerifiablePresentation | CompactSdJwtVc | string, {hasher: opts?.hasher}),
+        CredentialMapper.toWrappedVerifiablePresentation(singleVp as W3CVerifiablePresentation | CompactSdJwtVc | string, { hasher: opts?.hasher }),
       ]
     }),
   )
@@ -136,8 +138,8 @@ export const extractPresentationsFromDcqlVpToken = (
 
 // FIXME probably too naive
 export const hasCryptographicHolderBinding = (
-    format: 'mso_mdoc' | 'dc+sd-jwt' | 'jwt_vc_json' | 'ldp_vc',
-    vc: WrappedMdocCredential | WrappedSdJwtVerifiableCredential | WrappedW3CVerifiableCredential
+  format: 'mso_mdoc' | 'dc+sd-jwt' | 'jwt_vc_json' | 'ldp_vc',
+  vc: WrappedMdocCredential | WrappedSdJwtVerifiableCredential | WrappedW3CVerifiableCredential,
 ): boolean => {
   switch (format) {
     case 'mso_mdoc':

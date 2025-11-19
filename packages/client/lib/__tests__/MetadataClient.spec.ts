@@ -2,7 +2,7 @@ import {
   AuthorizationServerMetadata,
   getIssuerFromCredentialOfferPayload,
   PRE_AUTH_GRANT_LITERAL,
-  WellKnownEndpoints
+  WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -23,7 +23,7 @@ import {
   SPRUCE_ISSUER_URL,
   SPRUCE_OID4VCI_METADATA,
   WALT_ISSUER_URL,
-  WALT_OID4VCI_METADATA
+  WALT_OID4VCI_METADATA,
 } from './MetadataMocks'
 import { getMockData } from './data/VciDataFixtures'
 //todo: skipping this. it was written for pre v13 version and we have to do some modifications to make it work
@@ -77,7 +77,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }))
 
     await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Issuer https://issuer.research.identiproof.io does not expose /.well-known/openid-credential-issuer'
+      'Issuer https://issuer.research.identiproof.io does not expose /.well-known/openid-credential-issuer',
     )
   })
 
@@ -89,7 +89,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
 
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, JSON.stringify({}))
     await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL)).rejects.toThrowError(
-      'Issuer https://issuer.research.identiproof.io provided a separate authorization server https://auth.research.identiproof.io, but that server did not provide metadata'
+      'Issuer https://issuer.research.identiproof.io provided a separate authorization server https://auth.research.identiproof.io, but that server did not provide metadata',
     )
   })
 
@@ -101,7 +101,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404)
 
     await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Authorization Server https://auth.research.identiproof.io did not provide a token_endpoint'
+      'Authorization Server https://auth.research.identiproof.io did not provide a token_endpoint',
     )
   })
 
@@ -113,7 +113,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     nock(IDENTIPROOF_AS_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404)
 
     await expect(() => MetadataClient.retrieveAllMetadata(IDENTIPROOF_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Could not deduce the credential endpoint for https://issuer.research.identiproof.io'
+      'Could not deduce the credential endpoint for https://issuer.research.identiproof.io',
     )
   })
 
@@ -130,7 +130,7 @@ describe('MetadataClient with IdentiProof Issuer should', () => {
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, {
       credential_issuer: IDENTIPROOF_ISSUER_URL,
       credential_endpoint: 'https://issuer.research.identiproof.io/credential',
-      credential_configurations_supported: {}
+      credential_configurations_supported: {},
     })
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OAUTH_AS).reply(404, {})
     nock(IDENTIPROOF_ISSUER_URL).get(WellKnownEndpoints.OPENID_CONFIGURATION).reply(404, {})
@@ -168,7 +168,7 @@ describe('Metadataclient with Spruce Issuer should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }))
 
     await expect(() => MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Issuer https://ngi-oidc4vci-test.spruceid.xyz does not expose /.well-known/openid-credential-issuer'
+      'Issuer https://ngi-oidc4vci-test.spruceid.xyz does not expose /.well-known/openid-credential-issuer',
     )
   })
 })
@@ -181,7 +181,7 @@ describe('Metadataclient with Danubetech should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }))
 
     await expect(() => MetadataClient.retrieveAllMetadata(SPRUCE_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Issuer https://ngi-oidc4vci-test.spruceid.xyz does not expose /.well-known/openid-credential-issuer'
+      'Issuer https://ngi-oidc4vci-test.spruceid.xyz does not expose /.well-known/openid-credential-issuer',
     )
   })
 })
@@ -208,7 +208,7 @@ describe('Metadataclient with Walt-id should', () => {
       .reply(404, JSON.stringify({ error: 'does not exist' }))
 
     await expect(() => MetadataClient.retrieveAllMetadata(WALT_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
-      'Issuer https://jff.walt.id/issuer-api/oidc does not expose /.well-known/openid-credential-issuer'
+      'Issuer https://jff.walt.id/issuer-api/oidc does not expose /.well-known/openid-credential-issuer',
     )
   })
 })
@@ -245,16 +245,16 @@ describe.skip('Metadataclient with SpruceId should', () => {
             jwt_vc: {
               types: ['VerifiableCredential', 'OpenBadgeCredential'],
               cryptographic_binding_methods_supported: ['did'],
-              cryptographic_suites_supported: ['ES256', 'ES256K']
+              cryptographic_suites_supported: ['ES256', 'ES256K'],
             },
             ldp_vc: {
               types: ['VerifiableCredential', 'OpenBadgeCredential'],
               cryptographic_binding_methods_supported: ['did'],
-              cryptographic_suites_supported: ['Ed25519Signature2018']
-            }
-          }
-        }
-      }
+              cryptographic_suites_supported: ['Ed25519Signature2018'],
+            },
+          },
+        },
+      },
     })
   })
 
@@ -281,16 +281,16 @@ describe.skip('Metadataclient with SpruceId should', () => {
             jwt_vc: {
               types: ['VerifiableCredential', 'OpenBadgeCredential'],
               cryptographic_binding_methods_supported: ['did'],
-              cryptographic_suites_supported: ['ES256', 'ES256K']
+              cryptographic_suites_supported: ['ES256', 'ES256K'],
             },
             ldp_vc: {
               types: ['VerifiableCredential', 'OpenBadgeCredential'],
               cryptographic_binding_methods_supported: ['did'],
-              cryptographic_suites_supported: ['Ed25519Signature2018']
-            }
-          }
-        }
-      }
+              cryptographic_suites_supported: ['Ed25519Signature2018'],
+            },
+          },
+        },
+      },
     })
   })
 })
@@ -308,7 +308,7 @@ describe('Metadataclient with Credenco should', () => {
       'pre-authorized_grant_anonymous_access_supported': true,
       issuer: 'https://issuer.research.identiproof.io',
       token_endpoint: 'https://mijnkvk.acc.credenco.com/token',
-      response_types_supported: ['token']
+      response_types_supported: ['token'],
     }
     nock('https://mijnkvk.acc.credenco.com').get('/.well-known/oauth-authorization-server').reply(200, JSON.stringify(authMetadata))
   })
@@ -318,7 +318,7 @@ describe('Metadataclient with Credenco should', () => {
     expect(metadata.credential_endpoint).toEqual('https://mijnkvk.acc.credenco.com/credential')
     expect(metadata.token_endpoint).toEqual('https://mijnkvk.acc.credenco.com/token')
     expect(metadata.credentialIssuerMetadata?.credential_configurations_supported).toEqual(
-      getMockData('credenco')?.metadata.openid4vci_metadata.credential_configurations_supported
+      getMockData('credenco')?.metadata.openid4vci_metadata.credential_configurations_supported,
     )
   })
 })

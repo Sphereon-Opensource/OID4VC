@@ -14,7 +14,7 @@ import {
   SubjectType,
   SupportedVersion,
   Verification,
-  VerifyJwtCallback
+  VerifyJwtCallback,
 } from '../types'
 
 export interface ClaimPayloadOpts extends ClaimPayloadCommonOpts {

@@ -35,9 +35,9 @@ describe('OID4VCIServer', () => {
       credentialOffer: {
         credential_offer: {
           credential_issuer: 'test_issuer',
-          credential_configuration_ids: ['TestCredential']
-        }
-      }
+          credential_configuration_ids: ['TestCredential'],
+        },
+      },
     }
     const credentialOfferSessions = new MemoryStates<CredentialOfferSession>()
     await credentialOfferSessions.set(sessionId, credentialOfferState1)
@@ -51,13 +51,13 @@ describe('OID4VCIServer', () => {
             format: 'ldp_vc',
             credential_definition: {
               '@context': ['https://www.w3.org/2018/credentials/v1'],
-              type: ['VerifiableCredential']
+              type: ['VerifiableCredential'],
             },
             cryptographic_binding_methods_supported: ['did'],
-            credential_signing_alg_values_supported: ['ES256K']
-          }
+            credential_signing_alg_values_supported: ['ES256K'],
+          },
         },
-        credential_issuer: 'test_issuer'
+        credential_issuer: 'test_issuer',
       } as CredentialIssuerMetadataOptsV1_0_15,
       authorizationServerMetadata,
       {

@@ -11,10 +11,9 @@ import {
   DcqlVpTokenInput,
   IDTokenPayload,
   NonEmptyArray,
-  SIOPErrors
+  SIOPErrors,
 } from '../types'
 import { AuthorizationResponseOpts } from './types'
-
 
 /**
  * Checks if an object is array-like (has only numeric string keys: "0", "1", "2", etc.)
@@ -25,7 +24,7 @@ const isArrayLikeObject = (value: unknown): value is Record<string, DcqlPresenta
     return false
   }
   const keys = Object.keys(value)
-  return keys.length > 0 && keys.every(key => /^\d+$/.test(key))
+  return keys.length > 0 && keys.every((key) => /^\d+$/.test(key))
 }
 
 /**
@@ -37,7 +36,7 @@ const isArrayLikeObject = (value: unknown): value is Record<string, DcqlPresenta
  */
 const normalizeToArray = (
   credentialQueryId: string,
-  value: DcqlPresentationEntry | DcqlPresentationEntry[] | Record<string, DcqlPresentationEntry>
+  value: DcqlPresentationEntry | DcqlPresentationEntry[] | Record<string, DcqlPresentationEntry>,
 ): NonEmptyArray<DcqlPresentationEntry> => {
   let presentationsArray: DcqlPresentationEntry[]
 
@@ -45,15 +44,13 @@ const normalizeToArray = (
     presentationsArray = value
   } else if (isArrayLikeObject(value)) {
     const sortedKeys = Object.keys(value).sort((a, b) => Number(a) - Number(b))
-    presentationsArray = sortedKeys.map(key => value[key])
+    presentationsArray = sortedKeys.map((key) => value[key])
   } else {
     presentationsArray = [value]
   }
 
   if (presentationsArray.length === 0) {
-    throw new Error(
-      `DCQL presentations for credential query '${credentialQueryId}' cannot be empty`
-    )
+    throw new Error(`DCQL presentations for credential query '${credentialQueryId}' cannot be empty`)
   }
 
   return presentationsArray as NonEmptyArray<DcqlPresentationEntry>
@@ -73,15 +70,14 @@ const toCanonicalDcqlPresentation = (input: DcqlVpTokenInput): DcqlVpToken => {
     Object.entries(input).map(([credentialQueryId, value]) => {
       const presentationsArray = normalizeToArray(credentialQueryId, value)
       return [credentialQueryId, presentationsArray]
-    })
+    }),
   ) as DcqlVpToken
 }
-
 
 export const createResponsePayload = async (
   authorizationRequest: AuthorizationRequest,
   responseOpts: AuthorizationResponseOpts,
-  idTokenPayload?: IDTokenPayload
+  idTokenPayload?: IDTokenPayload,
 ): Promise<AuthorizationResponsePayload | undefined> => {
   assertValidResponseOpts(responseOpts)
   if (!authorizationRequest) {
@@ -94,18 +90,16 @@ export const createResponsePayload = async (
   const responsePayload: AuthorizationResponsePayload = {
     ...(responseOpts.accessToken && {
       access_token: responseOpts.accessToken,
-      expires_in: responseOpts.expiresIn || 3600
+      expires_in: responseOpts.expiresIn || 3600,
     }),
     ...(responseOpts.tokenType && { token_type: responseOpts.tokenType }),
     ...(responseOpts.refreshToken && { refresh_token: responseOpts.refreshToken }),
     ...(responseOpts.isFirstParty && { is_first_party: responseOpts.isFirstParty }),
-    state
+    state,
   }
 
   if (responseOpts.dcqlResponse?.dcqlPresentation) {
-    const canonicalPresentation = toCanonicalDcqlPresentation(
-      responseOpts.dcqlResponse.dcqlPresentation
-    )
+    const canonicalPresentation = toCanonicalDcqlPresentation(responseOpts.dcqlResponse.dcqlPresentation)
     responsePayload.vp_token = DcqlPresentation.encode(canonicalPresentation)
   }
 
@@ -124,7 +118,7 @@ export const createResponsePayload = async (
  */
 export const mergeOAuth2AndOpenIdInRequestPayload = async (
   payload: AuthorizationRequestPayload,
-  requestObject?: RequestObject
+  requestObject?: RequestObject,
 ): Promise<AuthorizationRequestPayload> => {
   const payloadCopy = JSON.parse(JSON.stringify(payload))
 

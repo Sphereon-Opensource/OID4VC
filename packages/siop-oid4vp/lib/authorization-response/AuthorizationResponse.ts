@@ -4,20 +4,10 @@ import { AuthorizationRequest, VerifyAuthorizationRequestOpts } from '../authori
 import { assertValidVerifyAuthorizationRequestOpts } from '../authorization-request/Opts'
 import { IDToken } from '../id-token'
 import { Dcql } from './Dcql'
-import {
-  extractNonceFromWrappedVerifiablePresentation,
-  extractPresentationsFromDcqlVpToken,
-  verifyPresentations,
-} from './OpenID4VP'
+import { extractNonceFromWrappedVerifiablePresentation, extractPresentationsFromDcqlVpToken, verifyPresentations } from './OpenID4VP'
 import { assertValidResponseOpts } from './Opts'
 import { createResponsePayload } from './Payload'
-import {
-  AuthorizationResponsePayload,
-  ResponseType,
-  SIOPErrors,
-  VerifiedAuthorizationRequest,
-  VerifiedAuthorizationResponse
-} from '../types'
+import { AuthorizationResponsePayload, ResponseType, SIOPErrors, VerifiedAuthorizationRequest, VerifiedAuthorizationResponse } from '../types'
 import { AuthorizationResponseOpts, VerifyAuthorizationResponseOpts } from './types'
 
 export class AuthorizationResponse {
@@ -126,11 +116,11 @@ export class AuthorizationResponse {
     }
 
     await Dcql.assertValidDcqlPresentationResult(
-        responseOpts.dcqlResponse.dcqlPresentation as DcqlPresentation,
-        verifiedAuthorizationRequest.dcqlQuery,
-        {
-          hasher: verifyOpts.hasher,
-        },
+      responseOpts.dcqlResponse.dcqlPresentation as DcqlPresentation,
+      verifiedAuthorizationRequest.dcqlQuery,
+      {
+        hasher: verifyOpts.hasher,
+      },
     )
 
     return response

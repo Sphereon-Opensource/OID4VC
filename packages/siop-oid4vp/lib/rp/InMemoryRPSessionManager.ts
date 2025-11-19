@@ -10,7 +10,7 @@ import {
   AuthorizationResponseState,
   AuthorizationResponseStateStatus,
   AuthorizationResponseStateWithVerifiedData,
-  CallbackOpts
+  CallbackOpts,
 } from '../types'
 import { IRPSessionManager } from './types'
 
@@ -199,7 +199,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         queryId: event.queryId ?? this.queryIdMapping[event.correlationId],
         ...(type === 'request' && { request: event.subject }),
         ...(type === 'response' && { response: event.subject }),
-        ...(type === 'request' && event.responseRedirectURI && {responseRedirectURI: event.responseRedirectURI}),
+        ...(type === 'request' && event.responseRedirectURI && { responseRedirectURI: event.responseRedirectURI }),
         ...(event.error && { error: event.error }),
         status,
         timestamp: event.timestamp,
@@ -210,7 +210,7 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
         const prevState = this.authorizationRequests[event.correlationId]
         state = {
           ...prevState,
-          ...eventState
+          ...eventState,
         } as AuthorizationRequestState
         this.authorizationRequests[event.correlationId] = state
         this.updateMapping(this.nonceMapping, event, 'nonce', event.correlationId, true)
@@ -280,11 +280,10 @@ export class InMemoryRPSessionManager implements IRPSessionManager {
       query_id: state.queryId,
       last_updated: state.lastUpdated,
       ...('verifiedData' in state && { verified_data: state.verifiedData }),
-      ...(state.error && { message: state.error.message })
+      ...(state.error && { message: state.error.message }),
     }
 
-    post(url, JSON.stringify(statusBody))
-        .catch(error => console.error("Callback failed:", error))
+    post(url, JSON.stringify(statusBody)).catch((error) => console.error('Callback failed:', error))
   }
 }
 

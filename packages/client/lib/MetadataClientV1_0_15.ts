@@ -8,7 +8,7 @@ import {
   getIssuerFromCredentialOfferPayload,
   IssuerMetadataV1_0_15,
   OpenIDResponse,
-  WellKnownEndpoints
+  WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 import { Loggers } from '@sphereon/ssi-types'
 
@@ -23,7 +23,7 @@ export class MetadataClientV1_0_15 {
    * @param credentialOffer
    */
   public static async retrieveAllMetadataFromCredentialOffer(
-    credentialOffer: CredentialOfferRequestWithBaseUrl
+    credentialOffer: CredentialOfferRequestWithBaseUrl,
   ): Promise<EndpointMetadataResultV1_0_15> {
     return MetadataClientV1_0_15.retrieveAllMetadataFromCredentialOfferRequest(credentialOffer.credential_offer as CredentialOfferPayloadV1_0_15)
   }
@@ -37,7 +37,7 @@ export class MetadataClientV1_0_15 {
     if (issuer) {
       return MetadataClientV1_0_15.retrieveAllMetadata(issuer)
     }
-    throw new Error('can\'t retrieve metadata from CredentialOfferRequest. No issuer field is present')
+    throw new Error("can't retrieve metadata from CredentialOfferRequest. No issuer field is present")
   }
 
   /**
@@ -45,9 +45,12 @@ export class MetadataClientV1_0_15 {
    * @param issuer The issuer URL
    * @param opts
    */
-  public static async retrieveAllMetadata(issuer: string, opts?: {
-    errorOnNotFound: boolean
-  }): Promise<EndpointMetadataResultV1_0_15> {
+  public static async retrieveAllMetadata(
+    issuer: string,
+    opts?: {
+      errorOnNotFound: boolean
+    },
+  ): Promise<EndpointMetadataResultV1_0_15> {
     let token_endpoint: string | undefined
     let credential_endpoint: string | undefined
     let nonce_endpoint: string | undefined
@@ -76,7 +79,7 @@ export class MetadataClientV1_0_15 {
     let response: OpenIDResponse<AuthorizationServerMetadata> = await retrieveWellknown(
       authorization_servers[0],
       WellKnownEndpoints.OPENID_CONFIGURATION,
-      { errorOnNotFound: false }
+      { errorOnNotFound: false },
     )
     let authMetadata = response.successBody
     if (authMetadata) {
@@ -97,17 +100,17 @@ export class MetadataClientV1_0_15 {
       logger.debug(`Issuer ${issuer} has ${authorizationServerType} Server metadata in well-known location`)
       if (!authMetadata.authorization_endpoint) {
         console.warn(
-          `Issuer ${issuer} of type ${authorizationServerType} has no authorization_endpoint! Will use ${authorization_endpoint}. This only works for pre-authorized flows`
+          `Issuer ${issuer} of type ${authorizationServerType} has no authorization_endpoint! Will use ${authorization_endpoint}. This only works for pre-authorized flows`,
         )
       } else if (authorization_endpoint && authMetadata.authorization_endpoint !== authorization_endpoint) {
         throw Error(
-          `Credential issuer has a different authorization_endpoint (${authorization_endpoint}) from the Authorization Server (${authMetadata.authorization_endpoint})`
+          `Credential issuer has a different authorization_endpoint (${authorization_endpoint}) from the Authorization Server (${authMetadata.authorization_endpoint})`,
         )
       }
       authorization_endpoint = authMetadata.authorization_endpoint
       if (authorization_challenge_endpoint && authMetadata.authorization_challenge_endpoint !== authorization_challenge_endpoint) {
         throw Error(
-          `Credential issuer has a different authorization_challenge_endpoint (${authorization_challenge_endpoint}) from the Authorization Server (${authMetadata.authorization_challenge_endpoint})`
+          `Credential issuer has a different authorization_challenge_endpoint (${authorization_challenge_endpoint}) from the Authorization Server (${authMetadata.authorization_challenge_endpoint})`,
         )
       }
       authorization_challenge_endpoint = authMetadata.authorization_challenge_endpoint
@@ -115,14 +118,14 @@ export class MetadataClientV1_0_15 {
         throw Error(`Authorization Server ${authorization_servers} did not provide a token_endpoint`)
       } else if (token_endpoint && authMetadata.token_endpoint !== token_endpoint) {
         throw Error(
-          `Credential issuer has a different token_endpoint (${token_endpoint}) from the Authorization Server (${authMetadata.token_endpoint})`
+          `Credential issuer has a different token_endpoint (${token_endpoint}) from the Authorization Server (${authMetadata.token_endpoint})`,
         )
       }
       token_endpoint = authMetadata.token_endpoint
       if (authMetadata.credential_endpoint) {
         if (credential_endpoint && authMetadata.credential_endpoint !== credential_endpoint) {
           logger.debug(
-            `Credential issuer has a different credential_endpoint (${credential_endpoint}) from the Authorization Server (${authMetadata.credential_endpoint}). Will use the issuer value`
+            `Credential issuer has a different credential_endpoint (${credential_endpoint}) from the Authorization Server (${authMetadata.credential_endpoint}). Will use the issuer value`,
           )
         } else {
           credential_endpoint = authMetadata.credential_endpoint
@@ -131,7 +134,7 @@ export class MetadataClientV1_0_15 {
       if (authMetadata.deferred_credential_endpoint) {
         if (deferred_credential_endpoint && authMetadata.deferred_credential_endpoint !== deferred_credential_endpoint) {
           logger.debug(
-            `Credential issuer has a different deferred_credential_endpoint (${deferred_credential_endpoint}) from the Authorization Server (${authMetadata.deferred_credential_endpoint}). Will use the issuer value`
+            `Credential issuer has a different deferred_credential_endpoint (${deferred_credential_endpoint}) from the Authorization Server (${authMetadata.deferred_credential_endpoint}). Will use the issuer value`,
           )
         } else {
           deferred_credential_endpoint = authMetadata.deferred_credential_endpoint
@@ -168,9 +171,8 @@ export class MetadataClientV1_0_15 {
 
     // Ensure v15 array form under CI metadata
     const ci = (credentialIssuerMetadata ?? {}) as Partial<CredentialIssuerMetadataV1_0_15>
-    const ciAuthorizationServers = Array.isArray(ci.authorization_servers) && ci.authorization_servers.length > 0
-      ? ci.authorization_servers
-      : authorization_servers
+    const ciAuthorizationServers =
+      Array.isArray(ci.authorization_servers) && ci.authorization_servers.length > 0 ? ci.authorization_servers : authorization_servers
 
     const v15CredentialIssuerMetadata: CredentialIssuerMetadataV1_0_15 = {
       credential_issuer: ci.credential_issuer ?? issuer,
@@ -179,7 +181,7 @@ export class MetadataClientV1_0_15 {
       credential_configurations_supported: ci.credential_configurations_supported ?? {},
       display: ci.display ?? [],
       ...(nonce_endpoint && { nonce_endpoint }),
-      ...(deferred_credential_endpoint && { deferred_credential_endpoint })
+      ...(deferred_credential_endpoint && { deferred_credential_endpoint }),
     }
 
     logger.debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`)
@@ -192,7 +194,7 @@ export class MetadataClientV1_0_15 {
       authorization_challenge_endpoint,
       authorizationServerType,
       credentialIssuerMetadata: v15CredentialIssuerMetadata,
-      authorizationServerMetadata: authMetadata
+      authorizationServerMetadata: authMetadata,
     }
   }
 
@@ -206,10 +208,10 @@ export class MetadataClientV1_0_15 {
     issuerHost: string,
     opts?: {
       errorOnNotFound?: boolean
-    }
+    },
   ): Promise<OpenIDResponse<IssuerMetadataV1_0_15> | undefined> {
     return retrieveWellknown(issuerHost, WellKnownEndpoints.OPENID4VCI_ISSUER, {
-      errorOnNotFound: opts?.errorOnNotFound === undefined ? true : opts.errorOnNotFound
+      errorOnNotFound: opts?.errorOnNotFound === undefined ? true : opts.errorOnNotFound,
     })
   }
 }

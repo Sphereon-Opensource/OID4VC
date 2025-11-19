@@ -20,7 +20,7 @@ import {
   TokenErrorResponse,
   toUniformCredentialOfferRequest,
   TxCodeAndPinRequired,
-  UniformCredentialOfferPayload
+  UniformCredentialOfferPayload,
 } from '@sphereon/oid4vci-common'
 import { ObjectUtils } from '@sphereon/ssi-types'
 

@@ -126,10 +126,7 @@ export interface ProofOfPossessionMap {
 
 // Main credential request type for v15 - removes format and format-specific parameters from Credential Request
 export type CredentialRequestV1_0_15 = CredentialRequestV1_0_15Common &
-  (
-    | CredentialRequestV1_0_15CredentialIdentifier
-    | CredentialRequestV1_0_15CredentialConfigurationId
-  )
+  (CredentialRequestV1_0_15CredentialIdentifier | CredentialRequestV1_0_15CredentialConfigurationId)
 
 export interface CredentialRequestV1_0_15CredentialIdentifier extends CredentialRequestV1_0_15Common {
   credential_identifier: string // REQUIRED when an Authorization Details of type openid_credential was returned from the Token Response. It MUST NOT be used otherwise. A string that identifies a Credential Dataset that is requested for issuance. When this parameter is used, the credential_configuration_id MUST NOT be present.
@@ -359,7 +356,6 @@ export interface CredentialIssuerMetadataV1_0_15 extends CredentialIssuerMetadat
   credential_identifiers_supported?: boolean // OPTIONAL. Boolean value specifying whether the Credential Issuer supports returning credential_identifiers parameter.
   nonce_endpoint?: string // OPTIONAL. URL of the Credential Issuer's Nonce Endpoint, as defined in Section 7. This URL MUST use the https scheme and MAY contain port, path, and query parameter components. If omitted, the Credential Issuer does not support the Nonce Endpoint
 }
-
 
 export interface NotificationResponseV1_0_15 {
   // Success responses typically return 204 No Content - When the Credential Issuer has successfully received the Notification Request from the Wallet, it MUST respond with an HTTP status code in the 2xx range.

@@ -2,7 +2,8 @@ import { calculateJwkThumbprint, JWK, uuidv4 } from '@sphereon/oid4vc-common'
 import {
   AccessTokenRequest,
   AccessTokenResponse,
-  Alg, AuthorizationRequest,
+  Alg,
+  AuthorizationRequest,
   CNonceState,
   CredentialOfferSession,
   EXPIRED_PRE_AUTHORIZED_CODE,
@@ -22,7 +23,7 @@ import {
   UNSUPPORTED_GRANT_TYPE_ERROR,
   USER_PIN_NOT_REQUIRED_ERROR,
   USER_PIN_REQUIRED_ERROR,
-  USER_PIN_TX_CODE_SPEC_ERROR
+  USER_PIN_TX_CODE_SPEC_ERROR,
 } from '@sphereon/oid4vci-common'
 
 import { generateCredentialIdentifiers, isPreAuthorizedCodeExpired } from '../functions'
@@ -106,7 +107,7 @@ export const assertValidAccessTokenRequest = async (
     credentialOfferSessions: IStateManager<CredentialOfferSession>
     expirationDuration: number
     authRequestsData?: Map<string, any>
-  }
+  },
 ) => {
   const { credentialOfferSessions, expirationDuration, authRequestsData } = opts
 
@@ -118,8 +119,9 @@ export const assertValidAccessTokenRequest = async (
 
     // Find the authorization request data by code
     // This is simplified - you'll need to implement proper code->request mapping
-    const authRequestData:AuthorizationRequest | undefined = Array.from(authRequestsData.values())
-      .find(data => data.authorization_code === request.code)
+    const authRequestData: AuthorizationRequest | undefined = Array.from(authRequestsData.values()).find(
+      (data) => data.authorization_code === request.code,
+    )
 
     if (!authRequestData) {
       throw new TokenError(400, TokenErrorResponse.invalid_grant, 'Invalid authorization code')
@@ -140,11 +142,11 @@ export const assertValidAccessTokenRequest = async (
           credential_offer: {
             credential_issuer: '', // Set appropriately
             credential_configuration_ids: [], // Set from authorization_details
-            grants: {}
-          }
+            grants: {},
+          },
         },
         authorizationDetails: authRequestData?.authorization_details,
-        authorizationCode: request.code
+        authorizationCode: request.code,
       }
       await credentialOfferSessions.set(sessionId, credentialOfferSession)
     } else {
@@ -322,16 +324,16 @@ export const createAccessTokenResponse = async (
     c_nonce_expires_in: cNonceExpiresIn,
     interval,
     ...(credentialOfferSession.authorizationDetails && {
-      authorization_details: credentialOfferSession.authorizationDetails.map(detail => {
+      authorization_details: credentialOfferSession.authorizationDetails.map((detail) => {
         if (typeof detail === 'string') {
           return detail
         }
         return {
           ...detail,
-          credential_identifiers: generateCredentialIdentifiers(detail, credentialOfferSession)
+          credential_identifiers: generateCredentialIdentifiers(detail, credentialOfferSession),
         }
-      })
-    })
+      }),
+    }),
   }
   await credentialOfferSessions.set(sessionKey, credentialOfferSession)
   return response

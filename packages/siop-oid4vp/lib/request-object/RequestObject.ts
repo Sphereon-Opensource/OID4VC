@@ -4,13 +4,7 @@ import { assertValidAuthorizationRequestOpts } from '../authorization-request/Op
 import { fetchByReferenceOrUseByValue, removeNullUndefined } from '../helpers'
 import { assertValidRequestObjectOpts } from './Opts'
 import { assertValidRequestObjectPayload, createRequestObjectPayload } from './Payload'
-import {
-  AuthorizationRequestPayload,
-  JwtIssuerWithContext,
-  RequestObjectJwt,
-  RequestObjectPayload,
-  SIOPErrors
-} from '../types'
+import { AuthorizationRequestPayload, JwtIssuerWithContext, RequestObjectJwt, RequestObjectPayload, SIOPErrors } from '../types'
 import { RequestObjectOpts } from './types'
 
 export class RequestObject {

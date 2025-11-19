@@ -1,20 +1,8 @@
-import {
-  HasherSync,
-  WrappedMdocCredential,
-  WrappedSdJwtVerifiableCredential,
-  WrappedW3CVerifiableCredential,
-} from '@sphereon/ssi-types'
-import {
-  DcqlMdocCredential,
-  DcqlPresentation,
-  DcqlPresentationResult,
-  DcqlQuery,
-  DcqlSdJwtVcCredential,
-  DcqlW3cVcCredential
-} from 'dcql'
-import {extractDataFromPath} from '../helpers'
-import {extractDcqlPresentationFromDcqlVpToken, hasCryptographicHolderBinding} from './OpenID4VP'
-import {AuthorizationRequestPayload, SupportedVersion} from '../types'
+import { HasherSync, WrappedMdocCredential, WrappedSdJwtVerifiableCredential, WrappedW3CVerifiableCredential } from '@sphereon/ssi-types'
+import { DcqlMdocCredential, DcqlPresentation, DcqlPresentationResult, DcqlQuery, DcqlSdJwtVcCredential, DcqlW3cVcCredential } from 'dcql'
+import { extractDataFromPath } from '../helpers'
+import { extractDcqlPresentationFromDcqlVpToken, hasCryptographicHolderBinding } from './OpenID4VP'
+import { AuthorizationRequestPayload, SupportedVersion } from '../types'
 
 /**
  * Finds a valid DcqlQuery inside the given AuthenticationRequestPayload
@@ -25,7 +13,10 @@ import {AuthorizationRequestPayload, SupportedVersion} from '../types'
  */
 
 export class Dcql {
-  static findValidDcqlQuery = async (authorizationRequestPayload: AuthorizationRequestPayload, version?: SupportedVersion): Promise<DcqlQuery | undefined> => {
+  static findValidDcqlQuery = async (
+    authorizationRequestPayload: AuthorizationRequestPayload,
+    version?: SupportedVersion,
+  ): Promise<DcqlQuery | undefined> => {
     const dcqlQuery: DcqlQuery.Input[] = extractDataFromPath(authorizationRequestPayload ?? {}, '$..dcql_query').map((d) => d.value)
 
     if (dcqlQuery.length === 0) {
@@ -40,8 +31,8 @@ export class Dcql {
 
     if (version === SupportedVersion.OID4VP_v1) {
       const hasMeta = parsedDcqlQuery.credentials
-          .filter(q => q.format === 'jwt_vc_json' || q.format === 'ldp_vc')
-          .every(q => q.meta !== undefined)
+        .filter((q) => q.format === 'jwt_vc_json' || q.format === 'ldp_vc')
+        .every((q) => q.meta !== undefined)
 
       if (!hasMeta) {
         throw new Error('Missing meta property in DCQL query')
@@ -52,32 +43,32 @@ export class Dcql {
   }
 
   static getDcqlPresentationResult = (
-      record: DcqlPresentation | string,
-      dcqlQuery: DcqlQuery,
-      opts: {
-        hasher?: HasherSync
-      },
-  ) : DcqlPresentationResult.Output => {
+    record: DcqlPresentation | string,
+    dcqlQuery: DcqlQuery,
+    opts: {
+      hasher?: HasherSync
+    },
+  ): DcqlPresentationResult.Output => {
     const dcqlPresentation = Object.fromEntries(
-        Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
-          const credentials = p.vcs.map(vc => {
-            switch (p.format) {
-              case 'mso_mdoc':
-                return Dcql.toDcqlMdocCredential(vc.original)
-              case 'dc+sd-jwt':
-                return Dcql.toDcqlSdJwtCredential(vc)
-              case 'jwt_vp':
-                return Dcql.toDcqlJwtCredential(vc)
-              case 'ldp_vp':
-                return Dcql.toDcqlJsonLdCredential(vc)
-              default:
-                const format: string = (p as any).format;
-                throw new Error(`Unknown DcqlPresentation format ${format}`)
-            }
-          })
-
-          return [queryId, credentials]
+      Object.entries(extractDcqlPresentationFromDcqlVpToken(record, opts)).map(([queryId, p]) => {
+        const credentials = p.vcs.map((vc) => {
+          switch (p.format) {
+            case 'mso_mdoc':
+              return Dcql.toDcqlMdocCredential(vc.original)
+            case 'dc+sd-jwt':
+              return Dcql.toDcqlSdJwtCredential(vc)
+            case 'jwt_vp':
+              return Dcql.toDcqlJwtCredential(vc)
+            case 'ldp_vp':
+              return Dcql.toDcqlJsonLdCredential(vc)
+            default:
+              const format: string = (p as any).format
+              throw new Error(`Unknown DcqlPresentation format ${format}`)
+          }
         })
+
+        return [queryId, credentials]
+      }),
     )
 
     return DcqlPresentationResult.fromDcqlPresentation(dcqlPresentation, { dcqlQuery })

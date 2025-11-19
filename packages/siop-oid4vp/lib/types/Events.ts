@@ -36,11 +36,11 @@ export class AuthorizationEvent<T> {
   private readonly _responseRedirectURI: string
 
   public constructor(args: {
-    correlationId: string;
-    queryId?: string,
-    subject?: T;
-    callback?: CallbackOpts;
-    responseRedirectURI?: string,
+    correlationId: string
+    queryId?: string
+    subject?: T
+    callback?: CallbackOpts
+    responseRedirectURI?: string
     error?: Error
   }) {
     //fixme: Create correlationId if not provided. Might need to be deferred to registry though

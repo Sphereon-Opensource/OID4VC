@@ -10,7 +10,7 @@ import {
   getIssuerFromCredentialOfferPayload,
   OpenId4VCIVersion,
   OpenIDResponse,
-  WellKnownEndpoints
+  WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 import { Loggers } from '@sphereon/ssi-types'
 import { retrieveWellknown } from './functions'
@@ -38,9 +38,7 @@ export class MetadataClient {
    * Retrieve the metada using the initiation request obtained from a previous step
    * @param request
    */
-  public static async retrieveAllMetadataFromCredentialOfferRequest(
-    request: CredentialOfferPayload,
-  ): Promise<EndpointMetadataResultV1_0_15> {
+  public static async retrieveAllMetadataFromCredentialOfferRequest(request: CredentialOfferPayload): Promise<EndpointMetadataResultV1_0_15> {
     const issuer = getIssuerFromCredentialOfferPayload(request)
     if (issuer) {
       const openId4VCIVersion = determineSpecVersionFromOffer(request)
@@ -58,10 +56,7 @@ export class MetadataClient {
    * @param issuer The issuer URL
    * @param opts
    */
-  public static async retrieveAllMetadata(
-    issuer: string,
-    opts?: { errorOnNotFound: boolean },
-  ): Promise<EndpointMetadataResultV1_0_15> {
+  public static async retrieveAllMetadata(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadataResultV1_0_15> {
     let token_endpoint: string | undefined
     let credential_endpoint: string | undefined
     let deferred_credential_endpoint: string | undefined
@@ -216,10 +211,7 @@ export class MetadataClient {
     opts?: {
       errorOnNotFound?: boolean
     },
-  ): Promise<
-    | OpenIDResponse<CredentialIssuerMetadataV1_0_15>
-    | undefined
-  > {
+  ): Promise<OpenIDResponse<CredentialIssuerMetadataV1_0_15> | undefined> {
     return retrieveWellknown(issuerHost, WellKnownEndpoints.OPENID4VCI_ISSUER, {
       errorOnNotFound: opts?.errorOnNotFound === undefined ? true : opts.errorOnNotFound,
     })
