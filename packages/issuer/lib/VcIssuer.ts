@@ -54,7 +54,7 @@ import { LOG } from './index'
 const shortUUID = ShortUUID()
 
 export class VcIssuer {
-  private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_15
+  private _issuerMetadata: CredentialIssuerMetadataOptsV1_0_15
   private readonly _authorizationServerMetadata: AuthorizationServerMetadata
   private readonly _defaultCredentialOfferBaseUri?: string
   private readonly _credentialSignerCallback?: CredentialSignerCallback
@@ -861,6 +861,10 @@ export class VcIssuer {
 
   public get issuerMetadata() {
     return this._issuerMetadata
+  }
+
+  public set issuerMetadata(value: CredentialIssuerMetadataOptsV1_0_15) {
+    this._issuerMetadata = value;
   }
 
   public get authorizationServerMetadata() {
