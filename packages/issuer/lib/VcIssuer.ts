@@ -54,7 +54,7 @@ import { LOG } from './index'
 const shortUUID = ShortUUID()
 
 export class VcIssuer {
-  private readonly _issuerMetadata: CredentialIssuerMetadataOptsV1_0_15
+  private _issuerMetadata: CredentialIssuerMetadataOptsV1_0_15 // TODO SSISDK-87 create proper solution to update issuer metadata
   private readonly _authorizationServerMetadata: AuthorizationServerMetadata
   private readonly _defaultCredentialOfferBaseUri?: string
   private readonly _credentialSignerCallback?: CredentialSignerCallback
@@ -861,6 +861,11 @@ export class VcIssuer {
 
   public get issuerMetadata() {
     return this._issuerMetadata
+  }
+
+  // TODO SSISDK-87 create proper solution to update issuer metadata
+  public set issuerMetadata(value: CredentialIssuerMetadataOptsV1_0_15) {
+    this._issuerMetadata = value;
   }
 
   public get authorizationServerMetadata() {
