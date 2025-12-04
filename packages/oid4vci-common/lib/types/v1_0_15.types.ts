@@ -73,7 +73,7 @@ export type CredentialConfigurationSupportedCommonV1_0_15 = {
 }
 
 export interface CredentialConfigurationSupportedSdJwtVcV1_0_15 extends CredentialConfigurationSupportedCommonV1_0_15 {
-  format: 'dc+sd-jwt' // REQUIRED. Updated format identifier for SD-JWT VC to align with the media type in draft -06 of [I-D.ietf-oauth-sd-jwt-vc]
+  format: 'dc+sd-jwt' | 'vc+sd-jwt' // REQUIRED. Updated format identifier for SD-JWT VC to align with the media type in draft -06 of [I-D.ietf-oauth-sd-jwt-vc]
   vct: string // REQUIRED. String designating the type of a Credential, as defined in [I-D.ietf-oauth-sd-jwt-vc].
   claims?: ClaimsDescriptionV1_0_15[] // OPTIONAL. Array of claims description objects using claims path pointers as defined in Appendix C.
   order?: string[] // OPTIONAL. An array of claims.display.name values that lists them in the order they should be displayed by the Wallet.
