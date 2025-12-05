@@ -23,7 +23,7 @@ export type CredentialOfferMode = 'VALUE' | 'REFERENCE'
  * Important Note: please be aware that these Common interfaces are based on versions v1_0.11 and v1_0.09
  */
 export interface ImageInfo {
-  url?: string
+  uri?: string
   alt_text?: string
 
   [key: string]: unknown

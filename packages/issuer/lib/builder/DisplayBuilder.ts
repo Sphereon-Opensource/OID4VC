@@ -21,7 +21,7 @@ export class DisplayBuilder {
 
   withLogo(logo: ImageInfo) {
     if (logo) {
-      if (!logo.url) {
+      if (!logo.uri) {
         throw Error(`logo without url will not work`)
       }
     }
