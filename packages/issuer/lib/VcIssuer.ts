@@ -678,7 +678,7 @@ export class VcIssuer {
         throw Error(`Format ${format} not supported yet`)
       }
 
-      const verifyFn = jwtVerifyCallback ?? this._jwtVerifyCallback
+      const verifyFn: JWTVerifyCallback | undefined = jwtVerifyCallback ?? this._jwtVerifyCallback
       if (typeof verifyFn !== 'function') {
         throw Error(JWT_VERIFY_CONFIG_ERROR)
       }
@@ -690,7 +690,7 @@ export class VcIssuer {
         throw Error('Credential request may not contain both proof and proofs parameters')
       }
 
-      // Normalize candidates into a single array
+      // Normalize candidates into a single array of ProofOfPossession objects
       const proofCandidates: Array<ProofOfPossession> = []
 
       if (credReq.proof) {
@@ -698,7 +698,19 @@ export class VcIssuer {
       } else if (credReq.proofs) {
         // Handle "proofs": prioritize 'jwt' as it's the only fully supported type
         if (Array.isArray(credReq.proofs.jwt)) {
-          proofCandidates.push(...credReq.proofs.jwt)
+          // Map to ProofOfPossession objects, handling both string and object formats
+          for (const jwtProof of credReq.proofs.jwt) {
+            if (typeof jwtProof === 'string') {
+              // Handle case where jwt array contains strings instead of ProofOfPossession objects
+              proofCandidates.push({
+                proof_type: 'jwt',
+                jwt: jwtProof,
+              })
+            } else if (jwtProof && typeof jwtProof === 'object' && 'jwt' in jwtProof) {
+              // Handle proper ProofOfPossession object
+              proofCandidates.push(jwtProof)
+            }
+          }
         }
 
         // Check if there are no supported proofs found
@@ -716,7 +728,7 @@ export class VcIssuer {
 
       for (const proof of proofCandidates) {
         try {
-          jwtVerifyResult = await verifyFn(proof)
+          jwtVerifyResult = await verifyFn({ jwt: proof.jwt })
           break
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error)
