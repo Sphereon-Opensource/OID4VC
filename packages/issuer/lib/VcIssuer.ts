@@ -34,6 +34,7 @@ import {
   OID4VCICredentialFormat,
   OpenId4VCIVersion,
   PRE_AUTH_GRANT_LITERAL,
+  ProofOfPossession,
   QRCodeOpts,
   StatusListOpts,
   TokenErrorResponse,
@@ -675,16 +676,58 @@ export class VcIssuer {
     try {
       if (format && !supportedIssuanceFormats.includes(format)) {
         throw Error(`Format ${format} not supported yet`)
-      } else if (typeof this._jwtVerifyCallback !== 'function' && typeof jwtVerifyCallback !== 'function') {
-        throw new Error(JWT_VERIFY_CONFIG_ERROR)
-      } else if (!credentialRequest.proof) {
-        throw Error('Proof of possession is required. No proof value present in credential request')
       }
 
-      const jwtVerifyResult = jwtVerifyCallback
-        ? await jwtVerifyCallback(credentialRequest.proof)
-        : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          await this._jwtVerifyCallback!(credentialRequest.proof)
+      const verifyFn = jwtVerifyCallback ?? this._jwtVerifyCallback
+      if (typeof verifyFn !== 'function') {
+        throw Error(JWT_VERIFY_CONFIG_ERROR)
+      }
+
+      const credReq = credentialRequest as CredentialRequestV1_0_15
+
+      // Validate request structure (mutually exclusive)
+      if (credReq.proof && credReq.proofs) {
+        throw Error('Credential request may not contain both proof and proofs parameters')
+      }
+
+      // Normalize candidates into a single array
+      const proofCandidates: Array<ProofOfPossession> = []
+
+      if (credReq.proof) {
+        proofCandidates.push(credReq.proof)
+      } else if (credReq.proofs) {
+        // Handle "proofs": prioritize 'jwt' as it's the only fully supported type
+        if (Array.isArray(credReq.proofs.jwt)) {
+          proofCandidates.push(...credReq.proofs.jwt)
+        }
+
+        // Check if there are no supported proofs found
+        if (proofCandidates.length === 0) {
+          const availableTypes = Object.keys(credReq.proofs).join(', ')
+          throw Error(`No supported proof types found in request. Available: [${availableTypes}]`)
+        }
+      } else {
+        throw Error('Proof of possession is required. No proof or proofs value present in credential request')
+      }
+
+      // Execute verification
+      let jwtVerifyResult: JwtVerifyResult | undefined
+      const validationErrors: string[] = []
+
+      for (const proof of proofCandidates) {
+        try {
+          jwtVerifyResult = await verifyFn(proof)
+          break
+        } catch (error) {
+          const msg = error instanceof Error ? error.message : String(error)
+          validationErrors.push(msg)
+        }
+      }
+
+      // Check success
+      if (!jwtVerifyResult) {
+        throw Error(`Unable to verify any provided proofs. Errors: ${validationErrors.join('; ')}`)
+      }
 
       const { didDocument, did, jwt } = jwtVerifyResult
       const { header, payload } = jwt
