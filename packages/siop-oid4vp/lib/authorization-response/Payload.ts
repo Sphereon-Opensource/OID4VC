@@ -1,4 +1,3 @@
-import { DcqlPresentation } from 'dcql'
 import { AuthorizationRequest } from '../authorization-request'
 import { IDToken } from '../id-token'
 import { RequestObject } from '../request-object'
@@ -99,8 +98,7 @@ export const createResponsePayload = async (
   }
 
   if (responseOpts.dcqlResponse?.dcqlPresentation) {
-    const canonicalPresentation = toCanonicalDcqlPresentation(responseOpts.dcqlResponse.dcqlPresentation)
-    responsePayload.vp_token = DcqlPresentation.encode(canonicalPresentation)
+    responsePayload.vp_token = toCanonicalDcqlPresentation(responseOpts.dcqlResponse.dcqlPresentation)
   }
 
   if (idTokenPayload) {
