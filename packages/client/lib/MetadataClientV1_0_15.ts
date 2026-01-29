@@ -55,6 +55,7 @@ export class MetadataClientV1_0_15 {
     let credential_endpoint: string | undefined
     let nonce_endpoint: string | undefined
     let deferred_credential_endpoint: string | undefined
+    let notification_endpoint: string | undefined
     let authorization_endpoint: string | undefined
     let authorization_challenge_endpoint: string | undefined
     let authorizationServerType: AuthorizationServerType = 'OID4VCI'
@@ -66,6 +67,7 @@ export class MetadataClientV1_0_15 {
       credential_endpoint = credentialIssuerMetadata.credential_endpoint
       nonce_endpoint = credentialIssuerMetadata.nonce_endpoint
       deferred_credential_endpoint = credentialIssuerMetadata.deferred_credential_endpoint
+      notification_endpoint = credentialIssuerMetadata.notification_endpoint
       if (credentialIssuerMetadata.token_endpoint) {
         token_endpoint = credentialIssuerMetadata.token_endpoint
       }
@@ -140,6 +142,15 @@ export class MetadataClientV1_0_15 {
           deferred_credential_endpoint = authMetadata.deferred_credential_endpoint
         }
       }
+      if (authMetadata.notification_endpoint) {
+        if (notification_endpoint && authMetadata.notification_endpoint !== notification_endpoint) {
+          logger.debug(
+            `Credential issuer has a different notification_endpoint (${notification_endpoint}) from the Authorization Server (${authMetadata.notification_endpoint}). Will use the issuer value`,
+          )
+        } else {
+          notification_endpoint = authMetadata.notification_endpoint
+        }
+      }
     }
 
     if (!authorization_endpoint) {
@@ -182,6 +193,7 @@ export class MetadataClientV1_0_15 {
       display: ci.display ?? [],
       ...(nonce_endpoint && { nonce_endpoint }),
       ...(deferred_credential_endpoint && { deferred_credential_endpoint }),
+      ...(notification_endpoint && { notification_endpoint }),
     }
 
     logger.debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`)
@@ -192,6 +204,7 @@ export class MetadataClientV1_0_15 {
       token_endpoint,
       credential_endpoint,
       authorization_challenge_endpoint,
+      notification_endpoint,
       authorizationServerType,
       credentialIssuerMetadata: v15CredentialIssuerMetadata,
       authorizationServerMetadata: authMetadata,
