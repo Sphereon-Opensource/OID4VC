@@ -548,7 +548,6 @@ export class OpenID4VCIClient {
       if (!this.shouldRetryWithFreshNonce(e)) {
         return Promise.reject(e instanceof Error ? e : Error(String(e)))
       }
-
       // one retry with fresh nonce + rebuilt proof
       ;(this._state as OpenID4VCIClientStateV1_0_15).cachedCNonce = undefined
 

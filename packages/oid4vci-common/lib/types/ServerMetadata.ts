@@ -148,6 +148,7 @@ export interface EndpointMetadata {
   token_endpoint: string
   credential_endpoint: string
   deferred_credential_endpoint?: string
+  notification_endpoint?: string
   authorization_server?: string
   authorization_endpoint?: string // Can be undefined in pre-auth flow
   authorization_challenge_endpoint?: string

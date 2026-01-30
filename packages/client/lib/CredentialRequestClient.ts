@@ -267,12 +267,11 @@ export class CredentialRequestClient {
     }
     response.access_token = requestToken
 
-    /* TODO SSISDK-85
-  if ((uniformRequest.credential_subject_issuance && response.successBody) || response.successBody?.credential_subject_issuance) {
+    if ((uniformRequest.credential_subject_issuance && response.successBody) || response.successBody?.credential_subject_issuance) {
       if (JSON.stringify(uniformRequest.credential_subject_issuance) !== JSON.stringify(response.successBody?.credential_subject_issuance)) {
         throw Error('Subject signing was requested, but issuer did not provide the options in its response')
       }
-    }*/
+    }
     logger.debug(`Credential endpoint ${credentialEndpoint} response:\r\n${JSON.stringify(response, null, 2)}`)
 
     return {

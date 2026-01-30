@@ -173,7 +173,7 @@ export type DcqlPresentationEntry = string | Record<string, Json>
 export type DcqlVpToken = Record<string, NonEmptyArray<DcqlPresentationEntry>>
 export type DcqlVpTokenInput = Record<string, DcqlPresentationEntry | DcqlPresentationEntry[] | Record<string, DcqlPresentationEntry>>
 
-export type EncodedDcqlPresentationVpToken = string
+export type EncodedDcqlPresentationVpToken = string | DcqlVpToken
 
 export interface AuthorizationResponsePayload {
   access_token?: string

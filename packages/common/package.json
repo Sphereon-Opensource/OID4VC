@@ -22,7 +22,7 @@
     "test": "vitest run --config ../../vitest.config.mts --coverage"
   },
   "dependencies": {
-    "@sphereon/ssi-types": "0.34.1-feature.SSISDK.78.280",
+    "@sphereon/ssi-types": "0.36.1-next.159",
     "jwt-decode": "^4.0.0",
     "uint8arrays": "^3.1.1",
     "uuid": "^9.0.0"
@@ -34,12 +34,7 @@
   "engines": {
     "node": ">=20"
   },
-  "files": [
-    "src",
-    "dist",
-    "README.md",
-    "LICENSE.md"
-  ],
+  "files": ["src", "dist", "README.md", "LICENSE.md"],
   "keywords": [
     "Sphereon",
     "Verifiable Credentials",
