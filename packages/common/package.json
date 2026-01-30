@@ -22,7 +22,7 @@
     "test": "vitest run --config ../../vitest.config.mts --coverage"
   },
   "dependencies": {
-    "@sphereon/ssi-types": "0.36.1-next.156",
+    "@sphereon/ssi-types": "0.36.1-next.159",
     "jwt-decode": "^4.0.0",
     "uint8arrays": "^3.1.1",
     "uuid": "^9.0.0"

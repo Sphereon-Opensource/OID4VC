@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@sphereon/ssi-types': 0.36.1-next.156
+  '@sphereon/ssi-types': 0.36.1-next.159
   dcql: 1.0.1
   node-fetch: 2.6.12
   typescript: 5.8.3
@@ -89,8 +89,8 @@ importers:
         specifier: workspace:^
         version: link:../issuer
       '@sphereon/ssi-types':
-        specifier: 0.36.1-next.156
-        version: 0.36.1-next.156(typescript@5.8.3)
+        specifier: 0.36.1-next.159
+        version: 0.36.1-next.159(typescript@5.8.3)
       jose:
         specifier: ^4.10.0
         version: 4.15.9
@@ -129,8 +129,8 @@ importers:
         specifier: workspace:^
         version: link:../oid4vci-common
       '@sphereon/ssi-types':
-        specifier: 0.36.1-next.156
-        version: 0.36.1-next.156(typescript@5.8.3)
+        specifier: 0.36.1-next.159
+        version: 0.36.1-next.159(typescript@5.8.3)
       cross-fetch:
         specifier: ^4.1.0
         version: 4.1.0(encoding@0.1.13)
@@ -193,8 +193,8 @@ importers:
   packages/common:
     dependencies:
       '@sphereon/ssi-types':
-        specifier: 0.36.1-next.156
-        version: 0.36.1-next.156(typescript@5.8.3)
+        specifier: 0.36.1-next.159
+        version: 0.36.1-next.159(typescript@5.8.3)
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
@@ -249,8 +249,8 @@ importers:
         specifier: 0.34.1-next.3
         version: 0.34.1-next.3(@noble/hashes@1.6.1)(typescript@5.8.3)
       '@sphereon/ssi-types':
-        specifier: 0.36.1-next.156
-        version: 0.36.1-next.156(typescript@5.8.3)
+        specifier: 0.36.1-next.159
+        version: 0.36.1-next.159(typescript@5.8.3)
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0(encoding@0.1.13)
@@ -292,8 +292,8 @@ importers:
         specifier: 0.34.1-next.3
         version: 0.34.1-next.3(@noble/hashes@1.6.1)(typescript@5.8.3)
       '@sphereon/ssi-types':
-        specifier: 0.36.1-next.156
-        version: 0.36.1-next.156(typescript@5.8.3)
+        specifier: 0.36.1-next.159
+        version: 0.36.1-next.159(typescript@5.8.3)
       awesome-qr:
         specifier: ^2.1.5-rc.0
         version: 2.1.5-rc.0(encoding@0.1.13)
@@ -384,8 +384,8 @@ importers:
         specifier: workspace:^
         version: link:../common
       '@sphereon/ssi-types':
-        specifier: 0.36.1-next.156
-        version: 0.36.1-next.156(typescript@5.8.3)
+        specifier: 0.36.1-next.159
+        version: 0.36.1-next.159(typescript@5.8.3)
       cross-fetch:
         specifier: ^4.1.0
         version: 4.1.0(encoding@0.1.13)
@@ -427,8 +427,8 @@ importers:
         specifier: 5.0.0-unstable.28
         version: 5.0.0-unstable.28(typescript@5.8.3)
       '@sphereon/ssi-types':
-        specifier: 0.36.1-next.156
-        version: 0.36.1-next.156(typescript@5.8.3)
+        specifier: 0.36.1-next.159
+        version: 0.36.1-next.159(typescript@5.8.3)
       cross-fetch:
         specifier: ^4.0.0
         version: 4.1.0(encoding@0.1.13)
@@ -2781,7 +2781,6 @@ packages:
 
   '@sphereon/kmp-mdoc-core@0.2.0-SNAPSHOT.26':
     resolution: {integrity: sha512-QXJ6R8ENiZV2rPMbn06cw5JKwqUYN1kzVRbYfONqE1PEXx1noQ4md7uxr2zSczi0ubKkNcbyYDNtIMTZIhGzmQ==}
-    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.2':
     resolution: {integrity: sha512-foFxfLkRwcn/MOp/eht46Q7wsvpQGlO7aowowIIb5Tz9u97kYZ2kz6K2h2ODxWuv5CRA7Q0MY8XUBGE2lfOhOQ==}
@@ -2810,8 +2809,8 @@ packages:
   '@sphereon/ssi-sdk-ext.x509-utils@0.28.1-next.54':
     resolution: {integrity: sha512-Eqv45nUxC6j4LDaUrYJZ17qgFKzKVAwIcFc+hcoDgHWraWrnYFob92cujwSupgWee6pSyopao3OBsGdGG19vgQ==}
 
-  '@sphereon/ssi-types@0.36.1-next.156':
-    resolution: {integrity: sha512-Xw9Gr1O8Kay7ONlBLiOqed/j5BXXevz78+cXpae/KLLvuI+LP2VhLSM7HurdHD97u2yuDppfZqN5ERj02y369Q==}
+  '@sphereon/ssi-types@0.36.1-next.159':
+    resolution: {integrity: sha512-acHj2YnHD8trm+JA906DqzQMSOKBq+KvWClK75PQnswm/Oe+p762da+pmkmK6UbOS3pgPo7MdcOF++r3JRduLg==}
 
   '@sphereon/wellknown-dids-client@0.1.3':
     resolution: {integrity: sha512-TAT24L3RoXD8ocrkTcsz7HuJmgjNjdoV6IXP1p3DdaI/GqkynytXE3J1+F7vUFMRYwY5nW2RaXSgDQhrFJemaA==}
@@ -12253,7 +12252,7 @@ snapshots:
       '@sd-jwt/present': 0.7.2
       '@sd-jwt/types': 0.7.2
       '@sphereon/pex-models': 2.3.2
-      '@sphereon/ssi-types': 0.36.1-next.156(typescript@5.8.3)
+      '@sphereon/ssi-types': 0.36.1-next.159(typescript@5.8.3)
       ajv: 8.17.1
       ajv-formats: 2.1.1(ajv@8.17.1)
       jwt-decode: 3.1.2
@@ -12265,7 +12264,7 @@ snapshots:
 
   '@sphereon/ssi-express-support@0.34.1-next.3(@noble/hashes@1.6.1)(typescript@5.8.3)':
     dependencies:
-      '@sphereon/ssi-types': 0.36.1-next.156(typescript@5.8.3)
+      '@sphereon/ssi-types': 0.36.1-next.159(typescript@5.8.3)
       body-parser: 1.20.3
       casbin: 5.40.0
       cookie-session: 2.1.1
@@ -12291,7 +12290,7 @@ snapshots:
       '@noble/curves': 1.7.0
       '@noble/hashes': 1.6.1
       '@sphereon/ssi-sdk-ext.x509-utils': 0.28.1-next.54(typescript@5.8.3)
-      '@sphereon/ssi-types': 0.36.1-next.156(typescript@5.8.3)
+      '@sphereon/ssi-types': 0.36.1-next.159(typescript@5.8.3)
       '@stablelib/ed25519': 1.0.3
       '@trust/keyto': 1.0.1
       '@veramo/core': 4.2.0
@@ -12314,7 +12313,7 @@ snapshots:
       '@peculiar/asn1-schema': 2.5.0
       '@peculiar/asn1-x509': 2.5.0
       '@peculiar/x509': 1.14.0
-      '@sphereon/ssi-types': 0.36.1-next.156(typescript@5.8.3)
+      '@sphereon/ssi-types': 0.36.1-next.159(typescript@5.8.3)
       '@trust/keyto': 1.0.1
       debug: 4.4.3
       js-x509-utils: 1.0.7
@@ -12325,7 +12324,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@sphereon/ssi-types@0.36.1-next.156(typescript@5.8.3)':
+  '@sphereon/ssi-types@0.36.1-next.159(typescript@5.8.3)':
     dependencies:
       '@noble/hashes': 1.6.1
       '@sd-jwt/decode': 0.15.0
@@ -12342,7 +12341,7 @@ snapshots:
 
   '@sphereon/wellknown-dids-client@0.1.3(encoding@0.1.13)(typescript@5.8.3)':
     dependencies:
-      '@sphereon/ssi-types': 0.36.1-next.156(typescript@5.8.3)
+      '@sphereon/ssi-types': 0.36.1-next.159(typescript@5.8.3)
       cross-fetch: 3.2.0(encoding@0.1.13)
       jwt-decode: 3.1.2
     transitivePeerDependencies:

@@ -426,8 +426,8 @@ describe('create JWT from Request JWT should', () => {
       const requestObject = await RequestObject.fromOpts(requestOpts)
       const jwt = await requestObject.toJwt()
       if (!jwt) throw new Error('JWT is undefined')
-      const authorizationRequest = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
-      expect(authorizationRequest).toBeDefined()
+      const authorizationResponse = await AuthorizationResponse.fromRequestObject(jwt, responseOpts, verifyOpts)
+      expect(authorizationResponse).toBeDefined()
     } catch (e) {
       if (e.message.includes('Service Unavailable')) {
         console.warn('Temporarily skipped due to Service Unavailable')
