@@ -215,7 +215,11 @@ export class URI implements AuthorizationRequestURI {
       throw Error(SIOPErrors.BAD_PARAMS)
     }
     // We strip the uri scheme before passing it to the decode function
-    const scheme: string = uri.match(/^([a-zA-Z][a-zA-Z0-9-_]*:\/\/)/g)[0]
+    const schemeMatch = uri.match(/^([a-zA-Z][a-zA-Z0-9-_]*:\/\/)/g)
+    if (!schemeMatch) {
+      throw Error(SIOPErrors.BAD_PARAMS)
+    }
+    const scheme: string = schemeMatch[0]
     const authorizationRequestPayload = decodeUriAsJson(uri) as AuthorizationRequestPayload
     return { scheme, authorizationRequestPayload }
   }
