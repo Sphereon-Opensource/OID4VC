@@ -213,10 +213,10 @@ export class OID4VCIServer {
     }
 
     if (opts?.endpointOpts?.createCredentialOfferOpts?.enabled !== false || process.env.CREDENTIAL_OFFER_ENDPOINT_ENABLED === 'true') {
-      createCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.createCredentialOfferOpts, issuerPayloadPath)
-      deleteCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.deleteCredentialOfferOpts)
+      createCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.createCredentialOfferOpts, issuerPayloadPath, opts?.endpointOpts?.globalAuth)
+      deleteCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.deleteCredentialOfferOpts, opts?.endpointOpts?.globalAuth)
     }
-    getCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.getCredentialOfferOpts)
+    getCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.getCredentialOfferOpts, opts?.endpointOpts?.globalAuth)
     getCredentialEndpoint(this.router, this.issuer, {
       ...opts?.endpointOpts?.tokenEndpointOpts,
       baseUrl: this.baseUrl,

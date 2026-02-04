@@ -30,7 +30,7 @@ import {
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 import { IssuerCorrelation, ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
-import { checkAuth, env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
+import { checkAuth, EndpointArgs, env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
 
@@ -488,10 +488,10 @@ export function nonceEndpoint(router: Router, issuer: VcIssuer, opts: INonceEndp
   })
 }
 
-export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: IGetCredentialOfferEndpointOpts) {
+export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: IGetCredentialOfferEndpointOpts, globalAuth?: EndpointArgs) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers/:id', { stripBasePath: true })
   LOG.log(`[OID4VCI] getCredentialOffer endpoint enabled at ${path}`)
-  router.get(path, checkAuth(opts?.endpoint), async (request: Request, response: Response) => {
+  router.get(path, checkAuth(opts?.endpoint ?? globalAuth), async (request: Request, response: Response) => {
     try {
       const { id } = request.params
       const session = await issuer.getCredentialOfferSessionById(id)
@@ -516,10 +516,10 @@ export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opt
   })
 }
 
-export function deleteCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: IGetCredentialOfferEndpointOpts) {
+export function deleteCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: IGetCredentialOfferEndpointOpts, globalAuth?: EndpointArgs) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers/:id', { stripBasePath: true })
   LOG.log(`[OID4VCI] deleteCredentialOffer endpoint enabled at ${path}`)
-  router.delete(path, checkAuth(opts?.endpoint), async (request: Request, response: Response) => {
+  router.delete(path, checkAuth(opts?.endpoint ?? globalAuth), async (request: Request, response: Response) => {
     try {
       const { id } = request.params
       if (!id) {
@@ -567,13 +567,14 @@ export function createCredentialOfferEndpoint(
   issuer: VcIssuer,
   opts?: ICreateCredentialOfferEndpointOpts & { baseUrl?: string },
   issuerPayloadPath?: string, // backwards compat, sigh
+  globalAuth?: EndpointArgs,
 ) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers', { stripBasePath: true })
   const offerReferencePath =
     opts?.credentialOfferReferenceBasePath ?? issuerPayloadPath ?? determinePath(opts?.baseUrl, '/credential-offers', { stripBasePath: true })
 
   LOG.log(`[OID4VCI] createCredentialOffer endpoint enabled at ${path}`)
-  router.post(path, checkAuth(opts?.endpoint), async (request: Request<CredentialOfferRESTRequestV1_0_15>, response: Response<ICreateCredentialOfferURIResponse>) => {
+  router.post(path, checkAuth(opts?.endpoint ?? globalAuth), async (request: Request<CredentialOfferRESTRequestV1_0_15>, response: Response<ICreateCredentialOfferURIResponse>) => {
     try {
       // const specVersion = determineSpecVersionFromOffer(request.body.original_credential_offer)
       // if (specVersion < OpenId4VCIVersion.VER_1_0_15) {
