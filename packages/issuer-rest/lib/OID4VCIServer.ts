@@ -14,7 +14,7 @@ import {
   VcIssuer,
   VcIssuerBuilder,
 } from '@sphereon/oid4vci-issuer'
-import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
+import { EndpointArgs, ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
 import express, { Express } from 'express'
 
 import {
@@ -128,6 +128,7 @@ export interface IAuthorizationChallengeEndpointOpts extends ISingleEndpointOpts
 }
 
 export interface IOID4VCIEndpointOpts {
+  globalAuth?: EndpointArgs
   trustProxy?: boolean | Array<string>
   tokenEndpointOpts?: ITokenEndpointOpts
   notificationOpts?: ISingleEndpointOpts
