@@ -3,13 +3,15 @@ import {
   AuthorizationServerType,
   CredentialIssuerMetadataV1_0_15,
   CredentialOfferPayload,
-  CredentialOfferPayloadV1_0_15,
   CredentialOfferRequestWithBaseUrl,
   determineSpecVersionFromOffer,
-  EndpointMetadataResultV1_0_15,
+  determineVersionsFromIssuerMetadata,
+  EndpointMetadataResult,
   getIssuerFromCredentialOfferPayload,
   OpenId4VCIVersion,
   OpenIDResponse,
+  processSignedMetadata,
+  SignedMetadataVerifyCallback,
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 import { Loggers } from '@sphereon/ssi-types'
@@ -26,7 +28,12 @@ export class MetadataClient {
    */
   public static async retrieveAllMetadataFromCredentialOffer(
     credentialOffer: CredentialOfferRequestWithBaseUrl,
-  ): Promise<EndpointMetadataResultV1_0_15> {
+  ): Promise<EndpointMetadataResult> {
+    const issuer = getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer)
+    if (issuer) {
+      // Use the generic retrieveAllMetadata which detects version from metadata
+      return MetadataClient.retrieveAllMetadata(issuer)
+    }
     const openId4VCIVersion = determineSpecVersionFromOffer(credentialOffer.credential_offer)
     if (openId4VCIVersion >= OpenId4VCIVersion.VER_1_0_15) {
       return await MetadataClientV1_0_15.retrieveAllMetadataFromCredentialOffer(credentialOffer)
@@ -38,15 +45,11 @@ export class MetadataClient {
    * Retrieve the metada using the initiation request obtained from a previous step
    * @param request
    */
-  public static async retrieveAllMetadataFromCredentialOfferRequest(request: CredentialOfferPayload): Promise<EndpointMetadataResultV1_0_15> {
+  public static async retrieveAllMetadataFromCredentialOfferRequest(request: CredentialOfferPayload): Promise<EndpointMetadataResult> {
     const issuer = getIssuerFromCredentialOfferPayload(request)
     if (issuer) {
-      const openId4VCIVersion = determineSpecVersionFromOffer(request)
-      if (openId4VCIVersion >= OpenId4VCIVersion.VER_1_0_15) {
-        return MetadataClientV1_0_15.retrieveAllMetadataFromCredentialOfferRequest(request as CredentialOfferPayloadV1_0_15)
-      } else {
-        return Promise.reject(Error(`OpenId4VCIVersion ${openId4VCIVersion} is not supported in retrieveAllMetadataFromCredentialOfferRequest`))
-      }
+      // Use retrieveAllMetadata which does version detection from issuer metadata
+      return MetadataClient.retrieveAllMetadata(issuer)
     }
     throw new Error("can't retrieve metadata from CredentialOfferRequest. No issuer field is present")
   }
@@ -56,7 +59,10 @@ export class MetadataClient {
    * @param issuer The issuer URL
    * @param opts
    */
-  public static async retrieveAllMetadata(issuer: string, opts?: { errorOnNotFound: boolean }): Promise<EndpointMetadataResultV1_0_15> {
+  public static async retrieveAllMetadata(
+    issuer: string,
+    opts?: { errorOnNotFound?: boolean; signedMetadataVerifyCallback?: SignedMetadataVerifyCallback },
+  ): Promise<EndpointMetadataResult> {
     let token_endpoint: string | undefined
     let credential_endpoint: string | undefined
     let deferred_credential_endpoint: string | undefined
@@ -185,19 +191,31 @@ export class MetadataClient {
     }
     logger.debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`)
 
+    // Detect version from the fetched metadata
+    const versions = credentialIssuerMetadata ? determineVersionsFromIssuerMetadata(credentialIssuerMetadata) : []
+    const detectedVersion = versions.length > 0 ? versions[0] : OpenId4VCIVersion.VER_1_0
+    logger.debug(`Detected OID4VCI version ${detectedVersion} for issuer ${issuer}`)
+
+    // Process signed_metadata if present and a verify callback is provided
+    const processedMetadata = await processSignedMetadata({
+      metadata: credentialIssuerMetadata as CredentialIssuerMetadataV1_0_15,
+      issuer,
+      signedMetadataVerifyCallback: opts?.signedMetadataVerifyCallback,
+    })
+
     return {
       issuer,
       token_endpoint,
       credential_endpoint,
       deferred_credential_endpoint,
-      nonce_endpoint: credentialIssuerMetadata.nonce_endpoint,
+      nonce_endpoint: credentialIssuerMetadata?.nonce_endpoint,
       authorization_servers: authorization_server ? [authorization_server] : (authorization_servers ?? [issuer]),
       authorization_endpoint,
       authorization_challenge_endpoint,
       authorizationServerType,
-      credentialIssuerMetadata: credentialIssuerMetadata as CredentialIssuerMetadataV1_0_15,
+      credentialIssuerMetadata: processedMetadata as CredentialIssuerMetadataV1_0_15,
       authorizationServerMetadata: authMetadata,
-    } as EndpointMetadataResultV1_0_15
+    } as EndpointMetadataResult
   }
 
   /**

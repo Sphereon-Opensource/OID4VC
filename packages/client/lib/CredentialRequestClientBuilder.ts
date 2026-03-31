@@ -5,6 +5,7 @@ import {
   CredentialOfferRequestWithBaseUrl,
   EndpointMetadata,
   EndpointMetadataResultV1_0_15,
+  EndpointMetadataResultV1_0,
   ExperimentalSubjectIssuance,
   OpenId4VCIVersion,
   UniformCredentialOfferRequest,
@@ -12,11 +13,16 @@ import {
 
 import { CredentialOfferClient } from './CredentialOfferClient'
 import { CredentialRequestClientBuilderV1_0_15 } from './CredentialRequestClientBuilderV1_0_15'
+import { CredentialRequestClientBuilderV1_0 } from './CredentialRequestClientBuilderV1_0'
 
-type CredentialRequestClientBuilderVersionSpecific = CredentialRequestClientBuilderV1_0_15
+type CredentialRequestClientBuilderVersionSpecific = CredentialRequestClientBuilderV1_0_15 | CredentialRequestClientBuilderV1_0
 
 function isV1_0_15(builder: CredentialRequestClientBuilderVersionSpecific): builder is CredentialRequestClientBuilderV1_0_15 {
   return (builder as CredentialRequestClientBuilderV1_0_15).withCredentialIdentifier !== undefined
+}
+
+function isV1_0(builder: CredentialRequestClientBuilderVersionSpecific): builder is CredentialRequestClientBuilderV1_0 {
+  return (builder as CredentialRequestClientBuilderV1_0).withCredentialIdentifiers !== undefined
 }
 
 export class CredentialRequestClientBuilder {
@@ -31,26 +37,35 @@ export class CredentialRequestClientBuilder {
     metadata,
     version,
     credentialIdentifier,
+    credentialIdentifiers,
     credentialTypes,
   }: {
     credentialIssuer: string
     metadata?: EndpointMetadata
     version?: OpenId4VCIVersion
     credentialIdentifier?: string
+    credentialIdentifiers?: string[]
     credentialTypes?: string | string[]
   }): CredentialRequestClientBuilder {
-    // const specVersion = version ?? OpenId4VCIVersion.VER_1_0_15
-    let builder
-    const metadataV15 = metadata as EndpointMetadataResultV1_0_15
-    //  if (specVersion >= OpenId4VCIVersion.VER_1_0_15) {
-    builder = CredentialRequestClientBuilderV1_0_15.fromCredentialIssuer({
-      credentialIssuer,
-      metadata: metadataV15,
-      version,
-      credentialIdentifier,
-      credentialTypes,
-    })
-    //  }
+    const specVersion = version ?? OpenId4VCIVersion.VER_1_0
+    let builder: CredentialRequestClientBuilderVersionSpecific
+    if (specVersion >= OpenId4VCIVersion.VER_1_0) {
+      builder = CredentialRequestClientBuilderV1_0.fromCredentialIssuer({
+        credentialIssuer,
+        metadata: metadata as EndpointMetadataResultV1_0,
+        version: specVersion,
+        credentialIdentifiers: credentialIdentifiers ?? (credentialIdentifier ? [credentialIdentifier] : undefined),
+        credentialTypes,
+      })
+    } else {
+      builder = CredentialRequestClientBuilderV1_0_15.fromCredentialIssuer({
+        credentialIssuer,
+        metadata: metadata as EndpointMetadataResultV1_0_15,
+        version: specVersion,
+        credentialIdentifier,
+        credentialTypes,
+      })
+    }
 
     return new CredentialRequestClientBuilder(builder)
   }
@@ -138,7 +153,21 @@ export class CredentialRequestClientBuilder {
     if (this._builder.version === undefined || this._builder.version < OpenId4VCIVersion.VER_1_0_15) {
       throw new Error('Version of spec should be equal or higher than v1_0_15')
     }
-    ;(this._builder as CredentialRequestClientBuilderV1_0_15).withCredentialIdentifier(credentialIdentifier)
+    if (isV1_0(this._builder)) {
+      this._builder.withCredentialIdentifiers([credentialIdentifier])
+    } else if (isV1_0_15(this._builder)) {
+      this._builder.withCredentialIdentifier(credentialIdentifier)
+    }
+    return this
+  }
+
+  public withCredentialIdentifiers(credentialIdentifiers: string[]): this {
+    if (isV1_0(this._builder)) {
+      this._builder.withCredentialIdentifiers(credentialIdentifiers)
+    } else if (isV1_0_15(this._builder) && credentialIdentifiers.length > 0) {
+      // d15 only supports singular, use the first one
+      this._builder.withCredentialIdentifier(credentialIdentifiers[0])
+    }
     return this
   }
 

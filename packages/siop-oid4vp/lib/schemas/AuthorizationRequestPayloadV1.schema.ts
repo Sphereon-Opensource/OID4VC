@@ -109,6 +109,18 @@ export const AuthorizationRequestPayloadV1SchemaObj = {
           "items": {
             "$ref": "#/definitions/RelyingPartyAttestation"
           }
+        },
+        "wallet_nonce": {
+          "type": "string"
+        },
+        "expected_origins": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "wallet_metadata": {
+          "type": "object"
         }
       }
     },
@@ -509,7 +521,9 @@ export const AuthorizationRequestPayloadV1SchemaObj = {
         "query",
         "direct_post.jwt",
         "query.jwt",
-        "fragment.jwt"
+        "fragment.jwt",
+        "dc_api",
+        "dc_api.jwt"
       ]
     },
     "ClaimPayloadCommon": {

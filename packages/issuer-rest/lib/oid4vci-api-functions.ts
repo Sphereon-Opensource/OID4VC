@@ -11,7 +11,7 @@ import {
   CredentialIssuerMetadataOptsV1_0_15,
   CredentialOfferMode,
   CredentialOfferRESTRequestV1_0_15,
-  CredentialRequestV1_0_15,
+  CredentialRequest,
   determineGrantTypes,
   EVENTS,
   extractBearerToken,
@@ -303,7 +303,7 @@ export function getCredentialEndpoint(
   LOG.log(`[OID4VCI] getCredential endpoint enabled at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
     try {
-      const credentialRequest = request.body as CredentialRequestV1_0_15
+      const credentialRequest = request.body as CredentialRequest
       LOG.log(`credential request received`, credentialRequest)
       const issuerCorrelation: IssuerCorrelation = {}
       try {
@@ -319,14 +319,23 @@ export function getCredentialEndpoint(
           issuerCorrelation.issuerState = tokenClaims.issuer_state
         }
 
-        // Handle credential_identifier from authorization_details flow
+        // Handle credential_identifier(s) from authorization_details flow
         if ('authorization_details' in tokenClaims && Array.isArray(tokenClaims.authorization_details)) {
           issuerCorrelation.authorizationDetails = tokenClaims.authorization_details
 
-          if (credentialRequest.credential_identifier) {
-            const validIdentifiers = tokenClaims.authorization_details.flatMap((detail: any) => detail.credential_identifiers || [])
+          // d15: singular credential_identifier, 1.0: credential_identifiers array
+          const requestIdentifiers: string[] = []
+          if ('credential_identifier' in credentialRequest && (credentialRequest as any).credential_identifier) {
+            requestIdentifiers.push((credentialRequest as any).credential_identifier)
+          }
+          if ('credential_identifiers' in credentialRequest && Array.isArray((credentialRequest as any).credential_identifiers)) {
+            requestIdentifiers.push(...(credentialRequest as any).credential_identifiers)
+          }
 
-            if (!validIdentifiers.includes(credentialRequest.credential_identifier)) {
+          if (requestIdentifiers.length > 0) {
+            const validIdentifiers = tokenClaims.authorization_details.flatMap((detail: any) => detail.credential_identifiers || [])
+            const invalidIdentifier = requestIdentifiers.find((id) => !validIdentifiers.includes(id))
+            if (invalidIdentifier) {
               return sendErrorResponse(response, 400, {
                 error: 'invalid_credential_request',
                 error_description: 'credential_identifier not found in authorization_details',

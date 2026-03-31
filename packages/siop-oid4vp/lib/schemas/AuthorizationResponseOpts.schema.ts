@@ -821,7 +821,9 @@ export const AuthorizationResponseOptsSchemaObj = {
         "query",
         "direct_post.jwt",
         "query.jwt",
-        "fragment.jwt"
+        "fragment.jwt",
+        "dc_api",
+        "dc_api.jwt"
       ]
     },
     "GrantType": {

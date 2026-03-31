@@ -11,9 +11,15 @@ import {
   EndpointMetadataResultV1_0_15,
   IssuerMetadataV1_0_15,
 } from './v1_0_15.types'
+import {
+  CredentialConfigurationSupportedV1_0,
+  CredentialRequestV1_0,
+  EndpointMetadataResultV1_0,
+  IssuerMetadataV1_0,
+} from './v1_0.types'
 
 export type InputCharSet = 'numeric' | 'text'
-export type KeyProofType = 'jwt' | 'cwt' | 'ldp_vp'
+export type KeyProofType = 'jwt' | 'cwt' | 'ldp_vp' | 'di_vp'
 
 export type PoPMode = 'pop' | 'JWT' // Proof of possession, or regular JWT
 
@@ -194,6 +200,7 @@ export interface CredentialSupportedMsoMdoc extends CommonCredentialSupported {
 
 export type CredentialConfigurationSupported =
   | CredentialConfigurationSupportedV1_0_15
+  | CredentialConfigurationSupportedV1_0
   | (CommonCredentialSupported &
       (CredentialSupportedJwtVcJson | CredentialSupportedJwtVcJsonLdAndLdpVc | CredentialSupportedSdJwtVc | CredentialSupportedMsoMdoc))
 
@@ -278,7 +285,7 @@ export interface ErrorResponse {
   state?: string
 }
 
-export type CredentialRequest = CredentialRequestV1_0_15
+export type CredentialRequest = CredentialRequestV1_0_15 | CredentialRequestV1_0
 
 export interface CommonCredentialRequest extends ExperimentalSubjectIssuance {
   format: OID4VCICredentialFormat /* | OID4VCICredentialFormat[];*/ // for now it seems only one is supported in the spec
@@ -434,9 +441,17 @@ export interface GrantUrnIetf {
 export const PRE_AUTH_CODE_LITERAL = 'pre-authorized_code'
 export const PRE_AUTH_GRANT_LITERAL = 'urn:ietf:params:oauth:grant-type:pre-authorized_code'
 
-export type EndpointMetadataResult = EndpointMetadataResultV1_0_15
+export type EndpointMetadataResult = EndpointMetadataResultV1_0_15 | EndpointMetadataResultV1_0
 
-export type IssuerMetadata = IssuerMetadataV1_0_15
+export type IssuerMetadata = IssuerMetadataV1_0_15 | IssuerMetadataV1_0
+
+export type SignedMetadataVerifyCallback = (args: {
+  signedMetadata: string // The raw signed JWT from the issuer metadata
+  issuer: string // The credential_issuer URL for validation
+}) => Promise<{
+  verified: boolean // Whether the JWT signature was successfully verified
+  metadata: Record<string, unknown> // The decoded metadata claims from the JWT payload
+}>
 
 export type NotificationEventType = 'credential_accepted' | 'credential_failure' | 'credential_deleted'
 

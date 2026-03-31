@@ -10,12 +10,14 @@ import {
   CredentialDataSupplierInput,
   CredentialEventNames,
   CredentialIssuerMetadataOptsV1_0_15,
+  CredentialIssuerMetadataOptsV1_0,
   CredentialOfferEventNames,
   CredentialOfferMode,
   CredentialOfferSession,
   CredentialOfferV1_0_15,
   CredentialRequest,
   CredentialRequestV1_0_15,
+  CredentialRequestV1_0,
   CredentialResponse,
   DID_NO_DIDDOC_ERROR,
   EVENTS,
@@ -55,7 +57,7 @@ import { LOG } from './index'
 const shortUUID = ShortUUID()
 
 export class VcIssuer {
-  private _issuerMetadata: CredentialIssuerMetadataOptsV1_0_15 // TODO SSISDK-87 create proper solution to update issuer metadata
+  private _issuerMetadata: CredentialIssuerMetadataOptsV1_0_15 | CredentialIssuerMetadataOptsV1_0
   private readonly _authorizationServerMetadata: AuthorizationServerMetadata
   private readonly _defaultCredentialOfferBaseUri?: string
   private readonly _credentialSignerCallback?: CredentialSignerCallback
@@ -66,9 +68,10 @@ export class VcIssuer {
   private readonly _uris: IStateManager<URIState>
   private readonly _cNonceExpiresIn: number
   private readonly _asClientOpts?: ClientMetadata
+  private readonly _version: OpenId4VCIVersion
 
   constructor(
-    issuerMetadata: CredentialIssuerMetadataOptsV1_0_15,
+    issuerMetadata: CredentialIssuerMetadataOptsV1_0_15 | CredentialIssuerMetadataOptsV1_0,
     authorizationServerMetadata: AuthorizationServerMetadata,
     args: {
       txCode?: TxCode
@@ -82,6 +85,7 @@ export class VcIssuer {
       credentialDataSupplier?: CredentialDataSupplier
       cNonceExpiresIn?: number | undefined // expiration duration in seconds
       asClientOpts?: ClientMetadata
+      version?: OpenId4VCIVersion
     },
   ) {
     this._issuerMetadata = issuerMetadata
@@ -95,6 +99,11 @@ export class VcIssuer {
     this._credentialDataSupplier = args?.credentialDataSupplier
     this._cNonceExpiresIn = (args?.cNonceExpiresIn ?? (process.env.C_NONCE_EXPIRES_IN ? parseInt(process.env.C_NONCE_EXPIRES_IN) : 300)) as number
     this._asClientOpts = args?.asClientOpts
+    this._version = args?.version ?? OpenId4VCIVersion.VER_1_0
+  }
+
+  public get version(): OpenId4VCIVersion {
+    return this._version
   }
 
   public async getCredentialOfferSessionById(
@@ -373,11 +382,12 @@ export class VcIssuer {
     /*if (!('credential_identifier' in opts.credentialRequest)) {
       throw new Error('credential request should be of spec version 1.0.13 or above')
     }*/
-    const credentialRequest = opts.credentialRequest as CredentialRequestV1_0_15
+    const credentialRequest = opts.credentialRequest as CredentialRequestV1_0_15 | CredentialRequestV1_0
     const issuerCorrelation = opts.issuerCorrelation
     try {
-      if (!('credential_identifier' in credentialRequest) && !('credential_configuration_id' in credentialRequest)) {
-        throw Error('credential request should have either credential_identifier or credential_configuration_id')
+      // 1.0 final requires credential_configuration_id; d15 requires either credential_identifier or credential_configuration_id
+      if (!('credential_identifier' in credentialRequest) && !('credential_configuration_id' in credentialRequest) && !('credential_identifiers' in credentialRequest)) {
+        throw Error('credential request should have either credential_identifier(s) or credential_configuration_id')
       }
 
       // Validate the credential_configuration_id exists in metadata if used
@@ -540,12 +550,23 @@ export class VcIssuer {
         await this._credentialOfferSessions.set(issuerCorrelation.issuerState, authSession)
       }
 
-      const response: CredentialResponse = {
-        credentials: [{ credential: verifiableCredential }],
-        // format: credentialRequest.format,
-        c_nonce: newcNonce,
-        c_nonce_expires_in: this._cNonceExpiresIn,
-        ...(notification_id && { notification_id }),
+      let response: CredentialResponse
+      if (this._version >= OpenId4VCIVersion.VER_1_0) {
+        // 1.0 final: singular credential field, c_nonce and c_nonce_expires_in back in response
+        response = {
+          credential: verifiableCredential,
+          c_nonce: newcNonce,
+          c_nonce_expires_in: this._cNonceExpiresIn,
+          ...(notification_id && { notification_id }),
+        }
+      } else {
+        // Draft 15: credentials array with wrapper objects
+        response = {
+          credentials: [{ credential: verifiableCredential }],
+          c_nonce: newcNonce,
+          c_nonce_expires_in: this._cNonceExpiresIn,
+          ...(notification_id && { notification_id }),
+        }
       }
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -564,7 +585,7 @@ export class VcIssuer {
     }
   }
 
-  private lookupCredentialFormat(credentialRequest: CredentialRequestV1_0_15): OID4VCICredentialFormat | undefined {
+  private lookupCredentialFormat(credentialRequest: CredentialRequestV1_0_15 | CredentialRequestV1_0): OID4VCICredentialFormat | undefined {
     let format: OID4VCICredentialFormat | undefined
 
     if ('credential_configuration_id' in credentialRequest && credentialRequest.credential_configuration_id) {

@@ -133,6 +133,7 @@ describe('VcIssuer', () => {
     }
 
     vcIssuer = new VcIssuerBuilder()
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withAuthorizationMetadata(authorizationServerMetadata)
       .withAuthorizationServers([ISSUER_URL])
       .withCredentialEndpoint('http://localhost:3456/test/credential-endpoint')

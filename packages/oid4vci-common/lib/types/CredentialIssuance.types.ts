@@ -6,12 +6,15 @@ import { AuthzFlowType } from './Authorization.types'
 import { OID4VCICredentialFormat, TxCode } from './Generic.types'
 import { OpenId4VCIVersion } from './OpenID4VCIVersions.types'
 import { CredentialOfferPayloadV1_0_15, CredentialOfferV1_0_15, CredentialResponseCredentialV1_0_15 } from './v1_0_15.types'
+import { CredentialOfferPayloadV1_0, CredentialOfferV1_0 } from './v1_0.types'
 
 export interface CredentialResponse extends ExperimentalSubjectIssuance {
-  credentials?: Array<CredentialResponseCredentialV1_0_15>
+  credential?: string | object // 1.0 final: singular credential value
+  credentials?: Array<CredentialResponseCredentialV1_0_15> // draft 15: array of wrapped credentials
   format?: OID4VCICredentialFormat /* | OID4VCICredentialFormat[]*/ // REQUIRED. JSON string denoting the format of the issued Credential  TODO: remove when cleaning <v13
   transaction_id?: string //OPTIONAL. A string identifying a Deferred Issuance transaction. This claim is contained in the response if the Credential Issuer was unable to immediately issue the credential. The value is subsequently used to obtain the respective Credential with the Deferred Credential Endpoint (see Section 9). It MUST be present when the credential parameter is not returned. It MUST be invalidated after the credential for which it was meant has been obtained by the Wallet.
-  acceptance_token?: string //deprecated // OPTIONAL. A JSON string containing a security token subsequently used to obtain a Credential. MUST be present when credential is not returned
+  acceptance_token?: string // OPTIONAL. Token for deferred issuance (1.0 final) / deprecated in draft 15
+  interval?: number // OPTIONAL. Seconds before retrying deferred request (1.0 final)
   c_nonce?: string // OPTIONAL. JSON string containing a nonce to be used to create a proof of possession of key material when requesting a Credential (see Section 7.2). When received, the Wallet MUST use this nonce value for its subsequent credential requests until the Credential Issuer provides a fresh nonce
   c_nonce_expires_in?: number // OPTIONAL. JSON integer denoting the lifetime in seconds of the c_nonce
   notification_id?: string
@@ -27,11 +30,11 @@ export interface CredentialOfferRequestWithBaseUrl extends UniformCredentialOffe
   userPinRequired: boolean
 }
 
-export type CredentialOffer = CredentialOfferV1_0_15
+export type CredentialOffer = CredentialOfferV1_0_15 | CredentialOfferV1_0
 
-export type CredentialOfferPayloadLatest = CredentialOfferPayloadV1_0_15
+export type CredentialOfferPayloadLatest = CredentialOfferPayloadV1_0
 
-export type CredentialOfferPayload = CredentialOfferPayloadV1_0_15 & {
+export type CredentialOfferPayload = (CredentialOfferPayloadV1_0_15 | CredentialOfferPayloadV1_0) & {
   [x: string]: any
 }
 
@@ -51,7 +54,7 @@ export interface UniformCredentialOfferRequest extends AssertedUniformCredential
 }
 
 //todo: drop v11 (done for now, but maybe not final)
-export type UniformCredentialOfferPayload = CredentialOfferPayloadV1_0_15
+export type UniformCredentialOfferPayload = CredentialOfferPayloadV1_0_15 | CredentialOfferPayloadV1_0
 
 export interface ProofOfPossession {
   proof_type: 'jwt'

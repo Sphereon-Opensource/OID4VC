@@ -200,6 +200,8 @@ export const getStateFromCredentialOfferPayload = (credentialOffer: CredentialOf
 
 export function determineSpecVersionFromOffer(offer: CredentialOfferPayload | CredentialOffer): OpenId4VCIVersion {
   if (isCredentialOfferV1_0_15(offer)) {
+    // Cannot distinguish 1.0 final from draft 15 based on offer alone (same fields).
+    // Default to VER_1_0_15 from offer. The wallet will upgrade after fetching metadata.
     return OpenId4VCIVersion.VER_1_0_15
   }
   return OpenId4VCIVersion.VER_UNKNOWN

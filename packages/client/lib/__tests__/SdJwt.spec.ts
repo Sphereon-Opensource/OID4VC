@@ -1,4 +1,4 @@
-import { AccessTokenRequest, CredentialConfigurationSupportedSdJwtVcV1_0_15, CredentialConfigurationSupportedV1_0_15 } from '@sphereon/oid4vci-common'
+import { AccessTokenRequest, CredentialConfigurationSupportedSdJwtVcV1_0_15, CredentialConfigurationSupportedV1_0_15, OpenId4VCIVersion } from '@sphereon/oid4vci-common'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nock from 'nock'
@@ -35,6 +35,7 @@ const authorizationServerMetadata = new AuthorizationServerMetadataBuilder()
   .build()
 
 const vcIssuer = new VcIssuerBuilder()
+  .withVersion(OpenId4VCIVersion.VER_1_0_15)
   .withIssuerMetadata(issuerMetadata)
   .withAuthorizationMetadata(authorizationServerMetadata)
   .withInMemoryCNonceState()

@@ -11,8 +11,10 @@ import {
   CreateJwtCallback,
   ObjectBy,
   PassBy,
+  RelyingPartyAttestation,
   RequestAud,
   RequestObjectPayload,
+  RequestUriMethod,
   ResponseIss,
   ResponseMode,
   ResponseType,
@@ -41,6 +43,12 @@ export class RPBuilder {
   clientId: string
   entityId: string
   hasher: HasherSync
+  verifierInfo?: RelyingPartyAttestation[]
+  verifierAttestations?: RelyingPartyAttestation[]
+  transactionData?: string[]
+  requestUriMethod?: RequestUriMethod
+  expectedOrigins?: string[]
+  walletNonce?: string
 
   private constructor(supportedRequestVersion?: SupportedVersion) {
     if (supportedRequestVersion) {
@@ -235,6 +243,36 @@ export class RPBuilder {
       }
     }
 
+    return this
+  }
+
+  withVerifierInfo(verifierInfo: RelyingPartyAttestation[]): RPBuilder {
+    this.verifierInfo = verifierInfo
+    return this
+  }
+
+  withVerifierAttestations(attestations: RelyingPartyAttestation[]): RPBuilder {
+    this.verifierAttestations = attestations
+    return this
+  }
+
+  withTransactionData(transactionData: string[]): RPBuilder {
+    this.transactionData = transactionData
+    return this
+  }
+
+  withRequestUriMethod(method: RequestUriMethod): RPBuilder {
+    this.requestUriMethod = method
+    return this
+  }
+
+  withExpectedOrigins(origins: string[]): RPBuilder {
+    this.expectedOrigins = origins
+    return this
+  }
+
+  withWalletNonce(nonce: string): RPBuilder {
+    this.walletNonce = nonce
     return this
   }
 

@@ -179,8 +179,15 @@ export class OP {
       throw Error('No correlation Id provided')
     }
 
-    const isJarmResponseMode = (responseMode: string): responseMode is 'jwt' | 'direct_post.jwt' | 'query.jwt' | 'fragment.jwt' => {
-      return responseMode === ResponseMode.DIRECT_POST_JWT || responseMode === ResponseMode.QUERY_JWT || responseMode === ResponseMode.FRAGMENT_JWT
+    const isJarmResponseMode = (
+      responseMode: string,
+    ): responseMode is 'jwt' | 'direct_post.jwt' | 'query.jwt' | 'fragment.jwt' | 'dc_api.jwt' => {
+      return (
+        responseMode === ResponseMode.DIRECT_POST_JWT ||
+        responseMode === ResponseMode.QUERY_JWT ||
+        responseMode === ResponseMode.FRAGMENT_JWT ||
+        responseMode === ResponseMode.DC_API_JWT
+      )
     }
 
     const requestObjectPayload = response.authorizationRequest.requestObject?.getPayload()
@@ -193,6 +200,7 @@ export class OP {
           responseMode === ResponseMode.POST ||
           responseMode === ResponseMode.FORM_POST ||
           responseMode === ResponseMode.DIRECT_POST ||
+          responseMode === ResponseMode.DC_API ||
           isJarmResponseMode(responseMode)
         ))
     ) {

@@ -223,6 +223,9 @@ export class AuthorizationRequest {
       requestObject: this.requestObject,
       authorizationRequestPayload: this.payload,
       versions: await this.getSupportedVersionsFromPayload(),
+      ...((mergedPayload as RequestObjectPayload).expected_origins && {
+        expectedOrigins: (mergedPayload as RequestObjectPayload).expected_origins,
+      }),
     }
   }
 

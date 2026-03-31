@@ -4,13 +4,17 @@ import {
   ClientResponseType,
   CNonceState,
   CredentialConfigurationSupportedV1_0_15,
+  CredentialConfigurationSupportedV1_0,
   CredentialIssuerMetadataOptsV1_0_15,
+  CredentialIssuerMetadataOptsV1_0,
   CredentialOfferSession,
   IssuerMetadata,
   IssuerMetadataV1_0_15,
+  IssuerMetadataV1_0,
   IStateManager,
   JWTVerifyCallback,
   MetadataDisplay,
+  OpenId4VCIVersion,
   TokenErrorResponse,
   TxCode,
   URIState,
@@ -22,10 +26,12 @@ import { MemoryStates } from '../state-manager'
 import { CredentialDataSupplier, CredentialSignerCallback } from '../types'
 
 import { IssuerMetadataBuilderV1_15 } from './IssuerMetadataBuilderV1_15'
+import { IssuerMetadataBuilderV1_0 } from './IssuerMetadataBuilderV1_0'
 
 export class VcIssuerBuilder {
-  issuerMetadataBuilder?: IssuerMetadataBuilderV1_15
-  issuerMetadata: Partial<CredentialIssuerMetadataOptsV1_0_15> = {}
+  issuerMetadataBuilder?: IssuerMetadataBuilderV1_15 | IssuerMetadataBuilderV1_0
+  issuerMetadata: Partial<CredentialIssuerMetadataOptsV1_0_15 | CredentialIssuerMetadataOptsV1_0> = {}
+  version: OpenId4VCIVersion = OpenId4VCIVersion.VER_1_0
   authorizationServerMetadata: Partial<AuthorizationServerMetadata> = {}
   asClientOpts?: ClientMetadata
   txCode?: TxCode
@@ -39,11 +45,16 @@ export class VcIssuerBuilder {
   jwtVerifyCallback?: JWTVerifyCallback
   credentialDataSupplier?: CredentialDataSupplier
 
+  public withVersion(version: OpenId4VCIVersion): this {
+    this.version = version
+    return this
+  }
+
   public withIssuerMetadata(issuerMetadata: IssuerMetadata) {
     if (!issuerMetadata.credential_configurations_supported) {
       throw new Error('IssuerMetadata should be from type v1_0_15 or higher.')
     }
-    this.issuerMetadata = issuerMetadata as IssuerMetadataV1_0_15
+    this.issuerMetadata = issuerMetadata as IssuerMetadataV1_0_15 | IssuerMetadataV1_0
     return this
   }
 
@@ -68,7 +79,7 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withIssuerMetadataBuilder(builder: IssuerMetadataBuilderV1_15) {
+  public withIssuerMetadataBuilder(builder: IssuerMetadataBuilderV1_15 | IssuerMetadataBuilderV1_0) {
     this.issuerMetadataBuilder = builder
     return this
   }
@@ -113,16 +124,16 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withCredentialConfigurationsSupported(credentialConfigurationsSupported: Record<string, CredentialConfigurationSupportedV1_0_15>) {
-    this.issuerMetadata.credential_configurations_supported = credentialConfigurationsSupported
+  public withCredentialConfigurationsSupported(credentialConfigurationsSupported: Record<string, CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0>) {
+    this.issuerMetadata.credential_configurations_supported = credentialConfigurationsSupported as any
     return this
   }
 
-  public addCredentialConfigurationsSupported(id: string, supportedCredential: CredentialConfigurationSupportedV1_0_15) {
+  public addCredentialConfigurationsSupported(id: string, supportedCredential: CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0) {
     if (!this.issuerMetadata.credential_configurations_supported) {
-      this.issuerMetadata.credential_configurations_supported = {}
+      (this.issuerMetadata as any).credential_configurations_supported = {}
     }
-    this.issuerMetadata.credential_configurations_supported[id] = supportedCredential
+    (this.issuerMetadata as any).credential_configurations_supported[id] = supportedCredential
     return this
   }
 
@@ -215,7 +226,7 @@ export class VcIssuerBuilder {
         authorizationServer: this.issuerMetadata.authorization_servers[0],
       })
     }
-    return new VcIssuer(metadata as IssuerMetadataV1_0_15, this.authorizationServerMetadata as AuthorizationServerMetadata, {
+    return new VcIssuer(metadata as CredentialIssuerMetadataOptsV1_0_15 | CredentialIssuerMetadataOptsV1_0, this.authorizationServerMetadata as AuthorizationServerMetadata, {
       //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
       ...(this.txCode && { txCode: this.txCode }),
       defaultCredentialOfferBaseUri: this.defaultCredentialOfferBaseUri,
@@ -227,6 +238,7 @@ export class VcIssuerBuilder {
       cNonceExpiresIn: this.cNonceExpiresIn,
       uris: this.credentialOfferURIManager,
       asClientOpts: this.asClientOpts,
+      version: this.version,
     })
   }
 }
