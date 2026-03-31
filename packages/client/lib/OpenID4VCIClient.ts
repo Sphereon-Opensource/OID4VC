@@ -381,6 +381,8 @@ export class OpenID4VCIClient {
   }
 
   public async acquireCredentials({
+    credentialIdentifier,
+    credentialConfigurationId,
     credentialTypes,
     context,
     proofCallbacks,
@@ -393,7 +395,9 @@ export class OpenID4VCIClient {
     deferredCredentialIntervalInMS,
     createDPoPOpts,
   }: {
-    credentialTypes: string | string[]
+    credentialIdentifier?: string
+    credentialConfigurationId?: string
+    credentialTypes?: string | string[]
     context?: string[]
     proofCallbacks: ProofOfPossessionCallbacks
     format: CredentialFormat | OID4VCICredentialFormat
@@ -432,9 +436,17 @@ export class OpenID4VCIClient {
       : CredentialRequestClientBuilderV1_0_15.fromCredentialIssuer({
           credentialIssuer: this.getIssuer(),
           credentialTypes,
+          credentialIdentifier,
+          credentialConfigurationId,
           metadata: this.endpointMetadata as EndpointMetadataResultV1_0_15,
           version: this.version(),
         })
+
+    if (credentialIdentifier) {
+      requestBuilder.withCredentialIdentifier(credentialIdentifier)
+    } else if (credentialConfigurationId) {
+      requestBuilder.withCredentialConfigurationId(credentialConfigurationId)
+    }
 
     // If we are in an auth code flow, without a c nonce, we return the issuerState back to the issuer in case it is present
     const issuerState =
@@ -449,7 +461,7 @@ export class OpenID4VCIClient {
     requestBuilder.withTokenFromResponse(this.accessTokenResponse)
     requestBuilder.withDeferredCredentialAwait(deferredCredentialAwait ?? false, deferredCredentialIntervalInMS)
     let subjectIssuance: ExperimentalSubjectIssuance | undefined
-    if (this.endpointMetadata?.credentialIssuerMetadata) {
+    if (this.endpointMetadata?.credentialIssuerMetadata && credentialTypes) {
       const metadata = this.endpointMetadata.credentialIssuerMetadata
       const types = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes]
 
@@ -519,7 +531,7 @@ export class OpenID4VCIClient {
 
       const response = await credentialRequestClient.acquireCredentialsUsingProof({
         proofInput: proofBuilder,
-        credentialTypes,
+        credentialTypes: credentialTypes ?? credentialIdentifier ?? credentialConfigurationId,
         context,
         format,
         subjectIssuance,
