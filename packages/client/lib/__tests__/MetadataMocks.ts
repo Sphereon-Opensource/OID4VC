@@ -80,7 +80,7 @@ export const INITIATION_TEST: CredentialOfferRequestWithBaseUrl = {
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhOTUyZjUxNi1jYWVmLTQ4YjMtODIxYy00OTRkYzgyNjljZjAiLCJwcmUtYXV0aG9yaXplZCI6dHJ1ZX0.YE5DlalcLC2ChGEg47CQDaN1gTxbaQqSclIVqsSAUHE',
   scheme: 'openid-credential-offer',
   supportedFlows: [AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW],
-  version: 1015,
+  version: 1100,
   txCode: {
     description: 'Please provide the one-time code that was sent via e-mail',
     input_mode: 'numeric',
@@ -116,7 +116,7 @@ export const INITIATION_TEST_V1_0_15: CredentialOfferRequestWithBaseUrl = {
   scheme: 'openid-credential-offer',
   supportedFlows: [AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW],
   userPinRequired: false,
-  version: 1015,
+  version: 1100,
 } as CredentialOfferRequestWithBaseUrl
 
 export const INITIATION_TEST_URI_V1_0_15 =

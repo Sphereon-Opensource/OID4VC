@@ -280,9 +280,10 @@ describe('VcIssuer', () => {
       scheme: 'http',
       supportedFlows: ['Authorization Code Flow', 'Pre-Authorized Code Flow'],
       userPinRequired: false,
-      version: 1015,
+      version: 1100,
     })
     expect(client.getIssuer()).toEqual(ISSUER_URL)
+    // OpenID4VCIClientV1_0_15 always returns VER_1_0_15 from version()
     expect(client.version()).toEqual(OpenId4VCIVersion.VER_1_0_15)
   })
 
