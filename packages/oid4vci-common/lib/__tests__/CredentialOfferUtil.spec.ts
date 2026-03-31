@@ -7,14 +7,14 @@ export const UNIT_TEST_TIMEOUT = 30000
 
 describe('CredentialOfferUtil should', () => {
   it(
-    'get version 15 as default value',
+    'get version 1.0 as default value',
     async () => {
-      expect(determineSpecVersionFromURI('test://uri')).toEqual(OpenId4VCIVersion.VER_1_0_15)
+      expect(determineSpecVersionFromURI('test://uri')).toEqual(OpenId4VCIVersion.VER_1_0)
     },
     UNIT_TEST_TIMEOUT,
   )
 
-  it('determine to be version 15', async () => {
+  it('determine to be version 1.0 from offer (cannot distinguish from d15)', async () => {
     const offer: CredentialOfferPayloadV1_0_15 = {
       grants: {
         'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
@@ -25,7 +25,7 @@ describe('CredentialOfferUtil should', () => {
       credential_issuer: 'https://example.com',
     }
 
-    expect(determineSpecVersionFromOffer(offer)).toEqual(OpenId4VCIVersion.VER_1_0_15)
+    expect(determineSpecVersionFromOffer(offer)).toEqual(OpenId4VCIVersion.VER_1_0)
   })
 
   it('get client_id from JWT pre-auth code offer', () => {
@@ -56,7 +56,7 @@ describe('CredentialOfferUtil should', () => {
       },
     }
 
-    expect(determineSpecVersionFromOffer(offer)).toEqual(OpenId4VCIVersion.VER_1_0_15)
+    expect(determineSpecVersionFromOffer(offer)).toEqual(OpenId4VCIVersion.VER_1_0)
     expect(getClientIdFromCredentialOfferPayload(offer)).toEqual(
       'did:key:z2dmzD81cgPx8Vki7JbuuMmFYrWPgYoytykUZ3eyqht1j9KbqSZZFjG4tVgKhEwKprojqLB3C2Ypj4H73StgjMkSXg2mQxuWLfzuR12QsNvgQWzrzKSf7YRBNrRXK71vfq12BbyxTLFEZBWfnHqezBVGQiNLfqeuywZHgstMCcS44TXfb2',
     )

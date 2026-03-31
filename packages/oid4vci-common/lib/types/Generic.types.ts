@@ -6,12 +6,14 @@ import { ProofOfPossession } from './CredentialIssuance.types'
 import { AuthorizationServerMetadata } from './ServerMetadata'
 import { CredentialOfferSession } from './StateManager.types'
 import {
+  AuthorizationDetailsV1_0_15,
   CredentialConfigurationSupportedV1_0_15,
   CredentialRequestV1_0_15,
   EndpointMetadataResultV1_0_15,
   IssuerMetadataV1_0_15,
 } from './v1_0_15.types'
 import {
+  AuthorizationDetailsV1_0,
   CredentialConfigurationSupportedV1_0,
   CredentialRequestV1_0,
   EndpointMetadataResultV1_0,
@@ -286,6 +288,8 @@ export interface ErrorResponse {
 }
 
 export type CredentialRequest = CredentialRequestV1_0_15 | CredentialRequestV1_0
+
+export type AuthorizationDetails = AuthorizationDetailsV1_0_15 | AuthorizationDetailsV1_0
 
 export interface CommonCredentialRequest extends ExperimentalSubjectIssuance {
   format: OID4VCICredentialFormat /* | OID4VCICredentialFormat[];*/ // for now it seems only one is supported in the spec

@@ -414,14 +414,13 @@ export class OpenID4VCIClient {
     if (jwk) this._state.jwk = jwk
     if (kid) this._state.kid = kid
 
-    if (this.version() === OpenId4VCIVersion.VER_1_0_15 && this.hasNonceEndpoint()) {
-      if (!(this._state as OpenID4VCIClientStateV1_0_15).cachedCNonce) {
-        try {
-          await this.acquireNonceViaV15Delegate()
-        } catch (e) {
-          // strict only when v15 or server claims nonce support
-          return Promise.reject(Error(`failed to acquire nonce: ${String(e)}`))
-        }
+    // Acquire nonce if we don't have one cached. Both d15 (nonce endpoint only) and
+    // V1.0 (nonce from token response OR nonce endpoint) are supported.
+    if (!this._state.cachedCNonce && this.hasNonceEndpoint()) {
+      try {
+        await this.acquireNonceViaV15Delegate()
+      } catch (e) {
+        return Promise.reject(Error(`failed to acquire nonce: ${String(e)}`))
       }
     }
 
@@ -661,9 +660,8 @@ export class OpenID4VCIClient {
   }
 
   public version(): OpenId4VCIVersion {
-    if (this.credentialOffer?.version && this.credentialOffer.version !== OpenId4VCIVersion.VER_UNKNOWN) {
-      return this.credentialOffer.version
-    }
+    // Metadata-based detection takes precedence since it has discriminating fields.
+    // The offer format is identical for d15 and V1.0, so offer-based detection cannot distinguish them.
     const metadata = this._state.endpointMetadata
     if (metadata?.credentialIssuerMetadata) {
       const versions = determineVersionsFromIssuerMetadata(metadata.credentialIssuerMetadata)
@@ -671,7 +669,10 @@ export class OpenID4VCIClient {
         return versions[0]
       }
     }
-    return OpenId4VCIVersion.VER_1_0_15
+    if (this.credentialOffer?.version && this.credentialOffer.version !== OpenId4VCIVersion.VER_UNKNOWN) {
+      return this.credentialOffer.version
+    }
+    return OpenId4VCIVersion.VER_1_0
   }
 
   public get endpointMetadata(): EndpointMetadataResult {
@@ -858,8 +859,10 @@ export class OpenID4VCIClient {
   }
 
   private shouldRetryWithFreshNonce(err: unknown): boolean {
-    // Only consider retrying if the server actually supports nonce
-    if (!this.hasNonceEndpoint() && this.version() !== OpenId4VCIVersion.VER_1_0_15) {
+    // V1.0 can get c_nonce from error responses; d15 requires a nonce endpoint.
+    // Both versions >= d15 support nonce retry when a nonce endpoint exists.
+    const canRetry = this.hasNonceEndpoint() || this.version() >= OpenId4VCIVersion.VER_1_0
+    if (!canRetry) {
       return false
     }
 

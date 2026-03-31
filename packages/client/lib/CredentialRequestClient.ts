@@ -415,6 +415,6 @@ export class CredentialRequestClient {
   }
 
   private version(): OpenId4VCIVersion {
-    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_15
+    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0
   }
 }
