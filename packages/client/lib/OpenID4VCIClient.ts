@@ -541,8 +541,13 @@ export class OpenID4VCIClient {
       this._state.dpopResponseParams = response.params
       if (response.errorBody) {
         logger.debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`)
+        const errDesc = response.errorBody.error_description
+          ? `: ${response.errorBody.error_description}`
+          : response.errorBody.error
+            ? `: ${response.errorBody.error}`
+            : ''
         throw Error(
-          `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}`,
+          `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}${errDesc}`,
         )
       } else if (!response.successBody) {
         logger.debug(`Credential request error. No success body`)
@@ -603,9 +608,14 @@ export class OpenID4VCIClient {
       this._state.dpopResponseParams = response2.params
       if (response2.errorBody) {
         logger.debug(`Credential request error (after retry):\r\n${JSON.stringify(response2.errorBody)}`)
+        const errDesc2 = response2.errorBody.error_description
+          ? `: ${response2.errorBody.error_description}`
+          : response2.errorBody.error
+            ? `: ${response2.errorBody.error}`
+            : ''
         return Promise.reject(
           Error(
-            `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed after retry with status: ${response2.origResponse.status}`,
+            `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed after retry with status: ${response2.origResponse.status}${errDesc2}`,
           ),
         )
       } else if (!response2.successBody) {

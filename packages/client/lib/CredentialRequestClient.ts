@@ -362,11 +362,21 @@ export class CredentialRequestClient {
             ? [credentialIdentifier]
             : undefined)
 
+      // OID4VCI 1.0 uses 'proofs' (plural) instead of 'proof' (singular)
+      // See https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-proof-types
+      let proofsBody: Record<string, unknown> = {}
+      if (proof) {
+        const proofJwt = proof.jwt
+        proofsBody = { proofs: { jwt: [proofJwt] } }
+      }
+
       const request: CredentialRequestV1_0 = {
         credential_configuration_id: configId,
         ...(identifiers && identifiers.length > 0 && { credential_identifiers: identifiers }),
-        ...commonBody,
-      }
+        ...(issuer_state && { issuer_state }),
+        ...proofsBody,
+        ...opts.subjectIssuance,
+      } as CredentialRequestV1_0
       return request
     }
 
