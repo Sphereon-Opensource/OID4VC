@@ -37,7 +37,7 @@ describe('Issuance Initiation V1_0_15', () => {
       scheme: 'https',
       supportedFlows: ['Authorization Code Flow'],
       userPinRequired: false,
-      version: 1015,
+      version: 1100,
     })
   })
 
