@@ -1,4 +1,4 @@
-import { BaseJWK } from '@sphereon/oid4vc-common'
+import { BaseJWK, JWK } from '@sphereon/oid4vc-common'
 
 import { ExperimentalSubjectIssuance } from '../experimental/holder-vci'
 
@@ -56,12 +56,21 @@ export interface UniformCredentialOfferRequest extends AssertedUniformCredential
 //todo: drop v11 (done for now, but maybe not final)
 export type UniformCredentialOfferPayload = CredentialOfferPayloadV1_0_15 | CredentialOfferPayloadV1_0
 
-export interface ProofOfPossession {
+export interface JwtProofOfPossession {
   proof_type: 'jwt'
   jwt: string
 
   [x: string]: unknown
 }
+
+export interface CwtProofOfPossession {
+  proof_type: 'cwt'
+  cwt: string
+
+  [x: string]: unknown
+}
+
+export type ProofOfPossession = JwtProofOfPossession | CwtProofOfPossession
 
 export type SearchValue = {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
@@ -94,6 +103,7 @@ export interface Jwt {
 
 export interface ProofOfPossessionCallbacks {
   signCallback: JWTSignerCallback
+  cwtSignCallback?: CWTSignerCallback
   verifyCallback?: JWTVerifyCallback
 }
 
@@ -162,6 +172,7 @@ export interface JWTPayload {
 }
 
 export type JWTSignerCallback = (jwt: Jwt, kid?: string, noIssPayloadUpdate?: boolean) => Promise<string>
+export type CWTSignerCallback = (args: { iss?: string; aud: string; nonce?: string; alg?: string; jwk?: JWK; kid?: string; coseKey?: unknown }) => Promise<string>
 export type JWTVerifyCallback = (args: { jwt: string; kid?: string }) => Promise<JwtVerifyResult>
 
 export interface JwtVerifyResult {

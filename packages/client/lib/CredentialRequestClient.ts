@@ -366,8 +366,11 @@ export class CredentialRequestClient {
       // See https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-proof-types
       let proofsBody: Record<string, unknown> = {}
       if (proof) {
-        const proofJwt = proof.jwt
-        proofsBody = { proofs: { jwt: [proofJwt] } }
+        if (proof.proof_type === 'cwt' && 'cwt' in proof) {
+          proofsBody = { proofs: { cwt: [proof.cwt] } }
+        } else if ('jwt' in proof) {
+          proofsBody = { proofs: { jwt: [proof.jwt] } }
+        }
       }
 
       const request: CredentialRequestV1_0 = {
