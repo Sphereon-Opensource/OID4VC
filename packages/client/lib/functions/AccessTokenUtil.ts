@@ -9,7 +9,7 @@ export const createJwtBearerClientAssertion = async (
     version?: OpenId4VCIVersion
   },
 ): Promise<void> => {
-  const { asOpts, credentialIssuer } = opts
+  const { asOpts, credentialIssuer, metadata } = opts
   if (asOpts?.clientOpts?.clientAssertionType === 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer') {
     const { clientId = request.client_id, signCallbacks, alg } = asOpts.clientOpts
     let { kid } = asOpts.clientOpts
@@ -25,6 +25,8 @@ export const createJwtBearerClientAssertion = async (
     if (clientId.startsWith('http') && kid.includes('#')) {
       kid = kid.split('#')[1]
     }
+    // Per RFC 7523, aud should identify the authorization server (token endpoint or issuer)
+    const aud = metadata?.token_endpoint ?? asOpts?.tokenEndpoint ?? credentialIssuer
     const jwt: Jwt = {
       header: {
         typ: 'JWT',
@@ -34,10 +36,10 @@ export const createJwtBearerClientAssertion = async (
       payload: {
         iss: clientId,
         sub: clientId,
-        aud: credentialIssuer,
+        aud,
         jti: uuidv4(),
-        exp: Math.floor(Date.now()) / 1000 + 60,
-        iat: Math.floor(Date.now()) / 1000 - 60,
+        exp: Math.floor(Date.now() / 1000) + 60,
+        iat: Math.floor(Date.now() / 1000) - 60,
       },
     }
     const pop = await ProofOfPossessionBuilder.fromJwt({
