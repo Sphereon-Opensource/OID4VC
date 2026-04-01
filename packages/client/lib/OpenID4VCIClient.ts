@@ -354,11 +354,12 @@ export class OpenID4VCIClient {
       })
 
       if (response.errorBody) {
-        logger.debug(`Access token error:\r\n${JSON.stringify(response.errorBody)}`)
+        const errorDetail = typeof response.errorBody === 'object' ? JSON.stringify(response.errorBody) : String(response.errorBody)
+        logger.error(`Access token error response (status ${response.origResponse.status}):\r\n${errorDetail}`)
         throw Error(
           `Retrieving an access token from ${this._state.endpointMetadata?.token_endpoint} for issuer ${this.getIssuer()} failed with status: ${
             response.origResponse.status
-          }`,
+          }. Response: ${errorDetail}`,
         )
       } else if (!response.successBody) {
         logger.debug(`Access token error. No success body`)

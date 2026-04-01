@@ -259,7 +259,9 @@ export class AccessTokenClient {
     accessTokenRequest: AccessTokenRequest,
     opts?: { headers?: Record<string, string> },
   ): Promise<OpenIDResponse<AccessTokenResponse, DPoPResponseParams>> {
-    return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }), {
+    const body = convertJsonToURI(accessTokenRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED })
+    LOG.info(`Token request to ${requestTokenURL}: ${body}`)
+    return await formPost(requestTokenURL, body, {
       customHeaders: opts?.headers ? opts.headers : undefined,
     })
   }
