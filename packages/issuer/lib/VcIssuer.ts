@@ -749,6 +749,10 @@ export class VcIssuer {
 
       for (const proof of proofCandidates) {
         try {
+          if (proof.proof_type !== 'jwt' || !('jwt' in proof)) {
+            validationErrors.push(`Unsupported proof type: ${proof.proof_type}`)
+            continue
+          }
           jwtVerifyResult = await verifyFn({ jwt: proof.jwt })
           break
         } catch (error) {
