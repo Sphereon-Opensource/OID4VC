@@ -252,6 +252,7 @@ describe('issuerCallback', () => {
 
   it('Should pass requesting a verifiable credential using the client', async () => {
     const credReqClient = (await CredentialRequestClientBuilderV1_0_15.fromURI({ uri: INITIATION_TEST_URI }))
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialConfigurationId('VeriCred')
       .withCredentialEndpointFromMetadata({
