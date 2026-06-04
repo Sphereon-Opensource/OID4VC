@@ -124,16 +124,21 @@ export class VcIssuerBuilder {
     return this
   }
 
-  public withCredentialConfigurationsSupported(credentialConfigurationsSupported: Record<string, CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0>) {
+  public withCredentialConfigurationsSupported(
+    credentialConfigurationsSupported: Record<string, CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0>,
+  ) {
     this.issuerMetadata.credential_configurations_supported = credentialConfigurationsSupported as any
     return this
   }
 
-  public addCredentialConfigurationsSupported(id: string, supportedCredential: CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0) {
+  public addCredentialConfigurationsSupported(
+    id: string,
+    supportedCredential: CredentialConfigurationSupportedV1_0_15 | CredentialConfigurationSupportedV1_0,
+  ) {
     if (!this.issuerMetadata.credential_configurations_supported) {
-      (this.issuerMetadata as any).credential_configurations_supported = {}
+      ;(this.issuerMetadata as any).credential_configurations_supported = {}
     }
-    (this.issuerMetadata as any).credential_configurations_supported[id] = supportedCredential
+    ;(this.issuerMetadata as any).credential_configurations_supported[id] = supportedCredential
     return this
   }
 
@@ -226,19 +231,23 @@ export class VcIssuerBuilder {
         authorizationServer: this.issuerMetadata.authorization_servers[0],
       })
     }
-    return new VcIssuer(metadata as CredentialIssuerMetadataOptsV1_0_15 | CredentialIssuerMetadataOptsV1_0, this.authorizationServerMetadata as AuthorizationServerMetadata, {
-      //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
-      ...(this.txCode && { txCode: this.txCode }),
-      defaultCredentialOfferBaseUri: this.defaultCredentialOfferBaseUri,
-      credentialSignerCallback: this.credentialSignerCallback,
-      jwtVerifyCallback: this.jwtVerifyCallback,
-      credentialDataSupplier: this.credentialDataSupplier,
-      credentialOfferSessions: this.credentialOfferStateManager,
-      cNonces: this.cNonceStateManager,
-      cNonceExpiresIn: this.cNonceExpiresIn,
-      uris: this.credentialOfferURIManager,
-      asClientOpts: this.asClientOpts,
-      version: this.version,
-    })
+    return new VcIssuer(
+      metadata as CredentialIssuerMetadataOptsV1_0_15 | CredentialIssuerMetadataOptsV1_0,
+      this.authorizationServerMetadata as AuthorizationServerMetadata,
+      {
+        //TODO: discuss this with Niels. I did not find this in the spec. but I think we should somehow communicate this
+        ...(this.txCode && { txCode: this.txCode }),
+        defaultCredentialOfferBaseUri: this.defaultCredentialOfferBaseUri,
+        credentialSignerCallback: this.credentialSignerCallback,
+        jwtVerifyCallback: this.jwtVerifyCallback,
+        credentialDataSupplier: this.credentialDataSupplier,
+        credentialOfferSessions: this.credentialOfferStateManager,
+        cNonces: this.cNonceStateManager,
+        cNonceExpiresIn: this.cNonceExpiresIn,
+        uris: this.credentialOfferURIManager,
+        asClientOpts: this.asClientOpts,
+        version: this.version,
+      },
+    )
   }
 }

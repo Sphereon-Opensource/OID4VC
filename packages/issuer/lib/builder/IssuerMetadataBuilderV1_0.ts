@@ -1,9 +1,4 @@
-import {
-  CredentialConfigurationSupportedV1_0,
-  IssuerMetadataV1_0,
-  MetadataDisplay,
-  ResponseEncryption,
-} from '@sphereon/oid4vci-common'
+import { CredentialConfigurationSupportedV1_0, IssuerMetadataV1_0, MetadataDisplay, ResponseEncryption } from '@sphereon/oid4vci-common'
 
 import { CredentialSupportedBuilderV1_0 } from './CredentialSupportedBuilderV1_0'
 import { DisplayBuilder } from './DisplayBuilder'

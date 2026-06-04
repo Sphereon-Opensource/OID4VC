@@ -1,9 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import {
-  OpenId4VCIVersion,
-  ProofOfPossessionCallbacks,
-  CWTSignerCallback,
-} from '@sphereon/oid4vci-common'
+import { OpenId4VCIVersion, ProofOfPossessionCallbacks, CWTSignerCallback } from '@sphereon/oid4vci-common'
 import { ProofOfPossessionBuilder } from '..'
 
 describe('ProofOfPossessionBuilder - CWT Support', () => {

@@ -179,9 +179,7 @@ export class OP {
       throw Error('No correlation Id provided')
     }
 
-    const isJarmResponseMode = (
-      responseMode: string,
-    ): responseMode is 'jwt' | 'direct_post.jwt' | 'query.jwt' | 'fragment.jwt' | 'dc_api.jwt' => {
+    const isJarmResponseMode = (responseMode: string): responseMode is 'jwt' | 'direct_post.jwt' | 'query.jwt' | 'fragment.jwt' | 'dc_api.jwt' => {
       return (
         responseMode === ResponseMode.DIRECT_POST_JWT ||
         responseMode === ResponseMode.QUERY_JWT ||

@@ -23,10 +23,7 @@ export const assertValidAuthorizationRequestOpts = (opts: CreateAuthorizationReq
 
   // DC API response modes are only valid for OID4VP v1
   const responseMode = opts.payload?.response_mode ?? opts.requestObject?.payload?.response_mode
-  if (
-    (responseMode === ResponseMode.DC_API || responseMode === ResponseMode.DC_API_JWT) &&
-    opts.version === SupportedVersion.SIOPv2_OID4VP_D28
-  ) {
+  if ((responseMode === ResponseMode.DC_API || responseMode === ResponseMode.DC_API_JWT) && opts.version === SupportedVersion.SIOPv2_OID4VP_D28) {
     throw new Error(`${SIOPErrors.INVALID_REQUEST}: dc_api response modes are only supported in OID4VP v1`)
   }
 }

@@ -26,9 +26,7 @@ export class MetadataClient {
    *
    * @param credentialOffer
    */
-  public static async retrieveAllMetadataFromCredentialOffer(
-    credentialOffer: CredentialOfferRequestWithBaseUrl,
-  ): Promise<EndpointMetadataResult> {
+  public static async retrieveAllMetadataFromCredentialOffer(credentialOffer: CredentialOfferRequestWithBaseUrl): Promise<EndpointMetadataResult> {
     const issuer = getIssuerFromCredentialOfferPayload(credentialOffer.credential_offer)
     if (issuer) {
       // Use the generic retrieveAllMetadata which detects version from metadata

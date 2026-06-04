@@ -154,9 +154,7 @@ export const createAuthorizationRequestUrl = async ({
     }
     const ver = version ?? determineSpecVersionFromOffer(credentialOffer.credential_offer) ?? OpenId4VCIVersion.VER_1_0
     const creds =
-      ver >= OpenId4VCIVersion.VER_1_0_15
-        ? filterSupportedCredentials(credentialOffer.credential_offer, credentialConfigurationSupported)
-        : []
+      ver >= OpenId4VCIVersion.VER_1_0_15 ? filterSupportedCredentials(credentialOffer.credential_offer, credentialConfigurationSupported) : []
 
     authorizationDetails = creds.flatMap((cred) => {
       const locations = [credentialOffer?.credential_offer.credential_issuer ?? endpointMetadata.issuer]

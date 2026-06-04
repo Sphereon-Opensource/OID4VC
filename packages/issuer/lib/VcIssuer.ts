@@ -386,7 +386,11 @@ export class VcIssuer {
     const issuerCorrelation = opts.issuerCorrelation
     try {
       // 1.0 final requires credential_configuration_id; d15 requires either credential_identifier or credential_configuration_id
-      if (!('credential_identifier' in credentialRequest) && !('credential_configuration_id' in credentialRequest) && !('credential_identifiers' in credentialRequest)) {
+      if (
+        !('credential_identifier' in credentialRequest) &&
+        !('credential_configuration_id' in credentialRequest) &&
+        !('credential_identifiers' in credentialRequest)
+      ) {
         throw Error('credential request should have either credential_identifier(s) or credential_configuration_id')
       }
 
@@ -945,7 +949,7 @@ export class VcIssuer {
 
   // TODO SSISDK-87 create proper solution to update issuer metadata
   public set issuerMetadata(value: CredentialIssuerMetadataOptsV1_0_15) {
-    this._issuerMetadata = value;
+    this._issuerMetadata = value
   }
 
   public get authorizationServerMetadata() {

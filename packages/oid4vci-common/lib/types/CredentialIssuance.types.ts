@@ -172,7 +172,15 @@ export interface JWTPayload {
 }
 
 export type JWTSignerCallback = (jwt: Jwt, kid?: string, noIssPayloadUpdate?: boolean) => Promise<string>
-export type CWTSignerCallback = (args: { iss?: string; aud: string; nonce?: string; alg?: string; jwk?: JWK; kid?: string; coseKey?: unknown }) => Promise<string>
+export type CWTSignerCallback = (args: {
+  iss?: string
+  aud: string
+  nonce?: string
+  alg?: string
+  jwk?: JWK
+  kid?: string
+  coseKey?: unknown
+}) => Promise<string>
 export type JWTVerifyCallback = (args: { jwt: string; kid?: string }) => Promise<JwtVerifyResult>
 
 export interface JwtVerifyResult {

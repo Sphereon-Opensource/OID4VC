@@ -58,6 +58,7 @@ export type CredentialConfigurationSupportedCommonV1_0 = {
   credential_signing_alg_values_supported?: string[] // Keep for backward compat with issuers that use draft 15 naming
   proof_types_supported?: ProofTypesSupportedV1_0 // OPTIONAL
   display?: CredentialsSupportedDisplay[] // OPTIONAL
+  credential_metadata?: CredentialMetadataV1_0 // OPTIONAL (OID4VCI 1.0 final §12.2.4 / #credential-issuer-parameters). Object holding credential-level `display` and `claims`. In 1.0 final these live here rather than at the top level of the configuration object; the top-level `display`/`claims` are retained for pre-final / draft-15 issuers.
   [x: string]: unknown
 }
 
@@ -102,6 +103,14 @@ export interface ClaimsDescriptionV1_0 {
   path: (string | number | null)[] // REQUIRED. Claims path pointer
   mandatory?: boolean // OPTIONAL. Defaults to false
   display?: CredentialsSupportedDisplay[] // OPTIONAL
+}
+
+// OID4VCI 1.0 final §12.2.4 credential_metadata object: the spec-compliant home for credential-level
+// `display` and `claims`, used by every Credential Format (the §A.x format profiles only add format-specific
+// members like `vct`/`doctype`/`credential_definition` on top of those defined in #credential-issuer-parameters).
+export interface CredentialMetadataV1_0 {
+  display?: CredentialsSupportedDisplay[] // OPTIONAL. Display properties of the supported Credential for each language.
+  claims?: ClaimsDescriptionV1_0[] // OPTIONAL. Array of claims description objects using claims path pointers.
 }
 
 // =====================
