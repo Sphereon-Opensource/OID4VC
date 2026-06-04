@@ -15,6 +15,7 @@ import {
   CredentialOfferSession,
   GrantTypes,
   IssueStatus,
+  OpenId4VCIVersion,
   STATE_MISSING_ERROR,
 } from '@sphereon/oid4vci-common'
 import { createAccessTokenResponse } from '../tokens'
@@ -129,6 +130,7 @@ describe('VcIssuer', () => {
     })
 
     vcIssuer = new VcIssuerBuilder()
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
@@ -855,6 +857,7 @@ describe('VcIssuer without did', () => {
       },
     })
     vcIssuer = new VcIssuerBuilder()
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
@@ -1101,6 +1104,7 @@ describe('VcIssuer without did', () => {
   it('should throw error when getting session by uri without uri state manager', async () => {
     // Create issuer without URI state manager
     const vcIssuerWithoutUriState = new VcIssuerBuilder()
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)

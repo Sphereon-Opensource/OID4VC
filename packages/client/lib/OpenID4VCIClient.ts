@@ -354,11 +354,12 @@ export class OpenID4VCIClient {
       })
 
       if (response.errorBody) {
-        logger.debug(`Access token error:\r\n${JSON.stringify(response.errorBody)}`)
+        const errorDetail = typeof response.errorBody === 'object' ? JSON.stringify(response.errorBody) : String(response.errorBody)
+        logger.error(`Access token error response (status ${response.origResponse.status}):\r\n${errorDetail}`)
         throw Error(
           `Retrieving an access token from ${this._state.endpointMetadata?.token_endpoint} for issuer ${this.getIssuer()} failed with status: ${
             response.origResponse.status
-          }`,
+          }. Response: ${errorDetail}`,
         )
       } else if (!response.successBody) {
         logger.debug(`Access token error. No success body`)
@@ -381,6 +382,8 @@ export class OpenID4VCIClient {
   }
 
   public async acquireCredentials({
+    credentialIdentifier,
+    credentialConfigurationId,
     credentialTypes,
     context,
     proofCallbacks,
@@ -393,7 +396,9 @@ export class OpenID4VCIClient {
     deferredCredentialIntervalInMS,
     createDPoPOpts,
   }: {
-    credentialTypes: string | string[]
+    credentialIdentifier?: string
+    credentialConfigurationId?: string
+    credentialTypes?: string | string[]
     context?: string[]
     proofCallbacks: ProofOfPossessionCallbacks
     format: CredentialFormat | OID4VCICredentialFormat
@@ -414,14 +419,13 @@ export class OpenID4VCIClient {
     if (jwk) this._state.jwk = jwk
     if (kid) this._state.kid = kid
 
-    if (this.version() === OpenId4VCIVersion.VER_1_0_15 && this.hasNonceEndpoint()) {
-      if (!(this._state as OpenID4VCIClientStateV1_0_15).cachedCNonce) {
-        try {
-          await this.acquireNonceViaV15Delegate()
-        } catch (e) {
-          // strict only when v15 or server claims nonce support
-          return Promise.reject(Error(`failed to acquire nonce: ${String(e)}`))
-        }
+    // Acquire nonce if we don't have one cached. Both d15 (nonce endpoint only) and
+    // V1.0 (nonce from token response OR nonce endpoint) are supported.
+    if (!this._state.cachedCNonce && this.hasNonceEndpoint()) {
+      try {
+        await this.acquireNonceViaV15Delegate()
+      } catch (e) {
+        return Promise.reject(Error(`failed to acquire nonce: ${String(e)}`))
       }
     }
 
@@ -433,9 +437,17 @@ export class OpenID4VCIClient {
       : CredentialRequestClientBuilderV1_0_15.fromCredentialIssuer({
           credentialIssuer: this.getIssuer(),
           credentialTypes,
+          credentialIdentifier,
+          credentialConfigurationId,
           metadata: this.endpointMetadata as EndpointMetadataResultV1_0_15,
           version: this.version(),
         })
+
+    if (credentialIdentifier) {
+      requestBuilder.withCredentialIdentifier(credentialIdentifier)
+    } else if (credentialConfigurationId) {
+      requestBuilder.withCredentialConfigurationId(credentialConfigurationId)
+    }
 
     // If we are in an auth code flow, without a c nonce, we return the issuerState back to the issuer in case it is present
     const issuerState =
@@ -450,7 +462,7 @@ export class OpenID4VCIClient {
     requestBuilder.withTokenFromResponse(this.accessTokenResponse)
     requestBuilder.withDeferredCredentialAwait(deferredCredentialAwait ?? false, deferredCredentialIntervalInMS)
     let subjectIssuance: ExperimentalSubjectIssuance | undefined
-    if (this.endpointMetadata?.credentialIssuerMetadata) {
+    if (this.endpointMetadata?.credentialIssuerMetadata && credentialTypes) {
       const metadata = this.endpointMetadata.credentialIssuerMetadata
       const types = Array.isArray(credentialTypes) ? credentialTypes : [credentialTypes]
 
@@ -520,7 +532,7 @@ export class OpenID4VCIClient {
 
       const response = await credentialRequestClient.acquireCredentialsUsingProof({
         proofInput: proofBuilder,
-        credentialTypes,
+        credentialTypes: credentialTypes ?? credentialIdentifier ?? credentialConfigurationId,
         context,
         format,
         subjectIssuance,
@@ -530,8 +542,13 @@ export class OpenID4VCIClient {
       this._state.dpopResponseParams = response.params
       if (response.errorBody) {
         logger.debug(`Credential request error:\r\n${JSON.stringify(response.errorBody)}`)
+        const errDesc = response.errorBody.error_description
+          ? `: ${response.errorBody.error_description}`
+          : response.errorBody.error
+            ? `: ${response.errorBody.error}`
+            : ''
         throw Error(
-          `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}`,
+          `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed with status: ${response.origResponse.status}${errDesc}`,
         )
       } else if (!response.successBody) {
         logger.debug(`Credential request error. No success body`)
@@ -592,9 +609,14 @@ export class OpenID4VCIClient {
       this._state.dpopResponseParams = response2.params
       if (response2.errorBody) {
         logger.debug(`Credential request error (after retry):\r\n${JSON.stringify(response2.errorBody)}`)
+        const errDesc2 = response2.errorBody.error_description
+          ? `: ${response2.errorBody.error_description}`
+          : response2.errorBody.error
+            ? `: ${response2.errorBody.error}`
+            : ''
         return Promise.reject(
           Error(
-            `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed after retry with status: ${response2.origResponse.status}`,
+            `Retrieving a credential from ${this._state.endpointMetadata?.credential_endpoint} for issuer ${this.getIssuer()} failed after retry with status: ${response2.origResponse.status}${errDesc2}`,
           ),
         )
       } else if (!response2.successBody) {
@@ -661,9 +683,8 @@ export class OpenID4VCIClient {
   }
 
   public version(): OpenId4VCIVersion {
-    if (this.credentialOffer?.version && this.credentialOffer.version !== OpenId4VCIVersion.VER_UNKNOWN) {
-      return this.credentialOffer.version
-    }
+    // Metadata-based detection takes precedence since it has discriminating fields.
+    // The offer format is identical for d15 and V1.0, so offer-based detection cannot distinguish them.
     const metadata = this._state.endpointMetadata
     if (metadata?.credentialIssuerMetadata) {
       const versions = determineVersionsFromIssuerMetadata(metadata.credentialIssuerMetadata)
@@ -671,7 +692,10 @@ export class OpenID4VCIClient {
         return versions[0]
       }
     }
-    return OpenId4VCIVersion.VER_1_0_15
+    if (this.credentialOffer?.version && this.credentialOffer.version !== OpenId4VCIVersion.VER_UNKNOWN) {
+      return this.credentialOffer.version
+    }
+    return OpenId4VCIVersion.VER_1_0
   }
 
   public get endpointMetadata(): EndpointMetadataResult {
@@ -858,8 +882,10 @@ export class OpenID4VCIClient {
   }
 
   private shouldRetryWithFreshNonce(err: unknown): boolean {
-    // Only consider retrying if the server actually supports nonce
-    if (!this.hasNonceEndpoint() && this.version() !== OpenId4VCIVersion.VER_1_0_15) {
+    // V1.0 can get c_nonce from error responses; d15 requires a nonce endpoint.
+    // Both versions >= d15 support nonce retry when a nonce endpoint exists.
+    const canRetry = this.hasNonceEndpoint() || this.version() >= OpenId4VCIVersion.VER_1_0
+    if (!canRetry) {
       return false
     }
 

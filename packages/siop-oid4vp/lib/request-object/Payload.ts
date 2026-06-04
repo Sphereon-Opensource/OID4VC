@@ -3,7 +3,7 @@ import { CreateAuthorizationRequestOpts, createClaimsProperties } from '../autho
 import { createRequestRegistration } from '../authorization-request/RequestRegistration'
 import { getNonce, getState, removeNullUndefined } from '../helpers'
 import { assertValidRequestObjectOpts } from './Opts'
-import { RequestObjectPayload, ResponseMode, ResponseType, SIOPErrors } from '../types'
+import { RequestObjectPayload, ResponseMode, ResponseType, SIOPErrors, SupportedVersion } from '../types'
 
 export const createRequestObjectPayload = async (opts: CreateAuthorizationRequestOpts): Promise<RequestObjectPayload | undefined> => {
   assertValidRequestObjectOpts(opts.requestObject, false)
@@ -35,6 +35,8 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
   const aud = payload.aud
   const jti = payload.jti ?? uuidv4()
 
+  const version = opts.version
+
   return removeNullUndefined({
     response_type: payload.response_type ?? ResponseType.ID_TOKEN,
     scope: payload.scope,
@@ -57,6 +59,17 @@ export const createRequestObjectPayload = async (opts: CreateAuthorizationReques
     exp,
     jti,
     aud,
+    // Version-specific fields
+    ...(opts.transaction_data && { transaction_data: opts.transaction_data }),
+    ...(version === SupportedVersion.OID4VP_v1 && {
+      ...(opts.verifier_info && { verifier_info: opts.verifier_info }),
+      ...(opts.request_uri_method && { request_uri_method: opts.request_uri_method }),
+      ...(opts.expected_origins && { expected_origins: opts.expected_origins }),
+      ...(opts.wallet_nonce && { wallet_nonce: opts.wallet_nonce }),
+    }),
+    ...(version === SupportedVersion.SIOPv2_OID4VP_D28 && {
+      ...(opts.verifier_attestations && { verifier_attestations: opts.verifier_attestations }),
+    }),
   })
 }
 

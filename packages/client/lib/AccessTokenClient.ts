@@ -131,6 +131,10 @@ export class AccessTokenClient {
     }
     const credentialIssuer = opts.credentialIssuer ?? credentialOfferRequest?.credential_offer?.credential_issuer ?? opts.metadata?.issuer
     await createJwtBearerClientAssertion(request, { ...opts, credentialIssuer })
+    // Per RFC 7521, client_id is not needed when client_assertion conveys the client identity
+    if (request.client_assertion) {
+      delete request.client_id
+    }
 
     // Prefer AUTHORIZATION_CODE over PRE_AUTHORIZED_CODE_FLOW
     if (!credentialOfferRequest || credentialOfferRequest.supportedFlows.includes(AuthzFlowType.AUTHORIZATION_CODE_FLOW)) {
@@ -147,8 +151,12 @@ export class AccessTokenClient {
 
     if (credentialOfferRequest?.supportedFlows.includes(AuthzFlowType.PRE_AUTHORIZED_CODE_FLOW)) {
       this.assertAlphanumericPin(opts.pinMetadata, pin)
-      request.user_pin = pin
-      request.tx_code = pin
+      // OID4VCI 1.0 uses tx_code, older drafts used user_pin
+      if (opts.pinMetadata?.txCode) {
+        request.tx_code = pin
+      } else {
+        request.user_pin = pin
+      }
 
       request.grant_type = GrantTypes.PRE_AUTHORIZED_CODE
       // we actually know it is there because of the isPreAuthCode call
@@ -259,7 +267,9 @@ export class AccessTokenClient {
     accessTokenRequest: AccessTokenRequest,
     opts?: { headers?: Record<string, string> },
   ): Promise<OpenIDResponse<AccessTokenResponse, DPoPResponseParams>> {
-    return await formPost(requestTokenURL, convertJsonToURI(accessTokenRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED }), {
+    const body = convertJsonToURI(accessTokenRequest, { mode: JsonURIMode.X_FORM_WWW_URLENCODED })
+    LOG.info(`Token request to ${requestTokenURL}: ${body}`)
+    return await formPost(requestTokenURL, body, {
       customHeaders: opts?.headers ? opts.headers : undefined,
     })
   }

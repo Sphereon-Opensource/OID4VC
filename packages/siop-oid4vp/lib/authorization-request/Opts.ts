@@ -1,6 +1,6 @@
 import { assertValidRequestObjectOpts } from '../request-object/Opts'
 import { assertValidRequestRegistrationOpts } from './RequestRegistration'
-import { SIOPErrors, Verification } from '../types'
+import { ResponseMode, SIOPErrors, SupportedVersion, Verification } from '../types'
 import { CreateAuthorizationRequestOpts, VerifyAuthorizationRequestOpts } from './types'
 
 export const assertValidVerifyAuthorizationRequestOpts = (opts: VerifyAuthorizationRequestOpts) => {
@@ -20,6 +20,12 @@ export const assertValidAuthorizationRequestOpts = (opts: CreateAuthorizationReq
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   assertValidRequestRegistrationOpts(opts['registration'] ?? opts.clientMetadata)
+
+  // DC API response modes are only valid for OID4VP v1
+  const responseMode = opts.payload?.response_mode ?? opts.requestObject?.payload?.response_mode
+  if ((responseMode === ResponseMode.DC_API || responseMode === ResponseMode.DC_API_JWT) && opts.version === SupportedVersion.SIOPv2_OID4VP_D28) {
+    throw new Error(`${SIOPErrors.INVALID_REQUEST}: dc_api response modes are only supported in OID4VP v1`)
+  }
 }
 
 export const mergeVerificationOpts = (

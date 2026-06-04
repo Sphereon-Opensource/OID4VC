@@ -2,8 +2,10 @@ import { createDPoP, CreateDPoPClientOpts, getCreateDPoPOptions } from '@sphereo
 import {
   acquireDeferredCredential,
   AuthorizationDetailsV1_0_15,
+  AuthorizationDetailsV1_0,
   CredentialRequest,
   CredentialRequestV1_0_15,
+  CredentialRequestV1_0,
   CredentialResponse,
   DPoPResponseParams,
   ExperimentalSubjectIssuance,
@@ -20,6 +22,7 @@ import {
 import { CredentialFormat, Loggers } from '@sphereon/ssi-types'
 
 import { CredentialRequestClientBuilderV1_0_15 } from './CredentialRequestClientBuilderV1_0_15'
+import { CredentialRequestClientBuilderV1_0 } from './CredentialRequestClientBuilderV1_0'
 import { ProofOfPossessionBuilder } from './ProofOfPossessionBuilder'
 import { shouldRetryResourceRequestWithDPoPNonce } from './functions/dpopUtil'
 
@@ -32,14 +35,15 @@ export interface CredentialRequestOpts {
   notificationEndpoint?: string
   deferredCredentialEndpoint?: string
   credentialTypes?: string[]
-  credentialIdentifier?: string
+  credentialIdentifier?: string // d15: singular
+  credentialIdentifiers?: string[] // 1.0 final: array
   credentialConfigurationId?: string
   proof: ProofOfPossession
   token: string
   version: OpenId4VCIVersion
   subjectIssuance?: ExperimentalSubjectIssuance
   issuerState?: string
-  authorizationDetails?: AuthorizationDetailsV1_0_15[]
+  authorizationDetails?: (AuthorizationDetailsV1_0_15 | AuthorizationDetailsV1_0)[]
 }
 
 export type CreateCredentialRequestOpts = {
@@ -134,7 +138,7 @@ export class CredentialRequestClient {
     return this.credentialRequestOpts.deferredCredentialEndpoint
   }
 
-  public constructor(builder: CredentialRequestClientBuilderV1_0_15) {
+  public constructor(builder: CredentialRequestClientBuilderV1_0_15 | CredentialRequestClientBuilderV1_0) {
     this._credentialRequestOpts = { ...builder }
   }
 
@@ -304,7 +308,7 @@ export class CredentialRequestClient {
     })
   }
 
-  public async createCredentialRequestWithoutProof(opts: CreateCredentialRequestOpts): Promise<CredentialRequestV1_0_15> {
+  public async createCredentialRequestWithoutProof(opts: CreateCredentialRequestOpts): Promise<CredentialRequestV1_0_15 | CredentialRequestV1_0> {
     return await this.createCredentialRequestImpl(opts)
   }
 
@@ -312,7 +316,7 @@ export class CredentialRequestClient {
     opts: CreateCredentialRequestOpts & {
       proofInput: ProofOfPossessionBuilder | ProofOfPossession
     },
-  ): Promise<CredentialRequestV1_0_15> {
+  ): Promise<CredentialRequestV1_0_15 | CredentialRequestV1_0> {
     return await this.createCredentialRequestImpl(opts)
   }
 
@@ -320,25 +324,71 @@ export class CredentialRequestClient {
     opts: CreateCredentialRequestOpts & {
       proofInput?: ProofOfPossessionBuilder | ProofOfPossession
     },
-  ): Promise<CredentialRequestV1_0_15> {
+  ): Promise<CredentialRequestV1_0_15 | CredentialRequestV1_0> {
     const { proofInput, credentialIdentifier, credentialConfigurationId } = opts
     let proof: ProofOfPossession | undefined = undefined
     if (proofInput) {
       proof = await buildProof(proofInput, opts)
     }
 
-    // For v15, handle authorization details from token response
-    if (this.version() >= OpenId4VCIVersion.VER_1_0_15) {
-      const authDetail = findAuthorizationDetail(this.credentialRequestOpts.authorizationDetails, credentialConfigurationId ?? credentialIdentifier)
+    const issuer_state = this.credentialRequestOpts.issuerState
+    const commonBody = {
+      ...(issuer_state && { issuer_state }),
+      ...(proof && { proof }),
+      ...opts.subjectIssuance,
+    }
 
-      const issuer_state = this.credentialRequestOpts.issuerState
+    // 1.0 final: credential_configuration_id is REQUIRED, credential_identifiers is OPTIONAL array
+    if (this.version() >= OpenId4VCIVersion.VER_1_0) {
+      const authDetail = findAuthorizationDetail(
+        this.credentialRequestOpts.authorizationDetails as AuthorizationDetailsV1_0_15[],
+        credentialConfigurationId ?? credentialIdentifier,
+      )
+      const authDetailObj = authDetail && typeof authDetail === 'object' ? (authDetail as any) : null
 
-      const commonBody = {
-        ...(issuer_state && { issuer_state }),
-        ...(proof && { proof }),
-        ...opts.subjectIssuance,
+      const configId =
+        credentialConfigurationId ?? authDetailObj?.credential_configuration_id ?? this._credentialRequestOpts.credentialConfigurationId
+
+      if (!configId) {
+        return Promise.reject(Error('credential_configuration_id is required for 1.0 final credential request'))
       }
 
+      // Build credential_identifiers array from various sources
+      const identifiers: string[] | undefined =
+        this._credentialRequestOpts.credentialIdentifiers ??
+        (authDetailObj?.credential_identifiers && authDetailObj.credential_identifiers.length > 0
+          ? authDetailObj.credential_identifiers
+          : credentialIdentifier
+            ? [credentialIdentifier]
+            : undefined)
+
+      // OID4VCI 1.0 uses 'proofs' (plural) instead of 'proof' (singular)
+      // See https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-proof-types
+      let proofsBody: Record<string, unknown> = {}
+      if (proof) {
+        if (proof.proof_type === 'cwt' && 'cwt' in proof) {
+          proofsBody = { proofs: { cwt: [proof.cwt] } }
+        } else if ('jwt' in proof) {
+          proofsBody = { proofs: { jwt: [proof.jwt] } }
+        }
+      }
+
+      const request: CredentialRequestV1_0 = {
+        credential_configuration_id: configId,
+        ...(identifiers && identifiers.length > 0 && { credential_identifiers: identifiers }),
+        ...(issuer_state && { issuer_state }),
+        ...proofsBody,
+        ...opts.subjectIssuance,
+      } as CredentialRequestV1_0
+      return request
+    }
+
+    // Draft 15: credential_identifier (singular) OR credential_configuration_id
+    if (this.version() >= OpenId4VCIVersion.VER_1_0_15) {
+      const authDetail = findAuthorizationDetail(
+        this.credentialRequestOpts.authorizationDetails as AuthorizationDetailsV1_0_15[],
+        credentialConfigurationId ?? credentialIdentifier,
+      )
       const authDetailObj = authDetail && typeof authDetail === 'object' ? (authDetail as any) : null
 
       if (authDetailObj?.credential_identifier) {
@@ -374,11 +424,10 @@ export class CredentialRequestClient {
       return Promise.reject(Error('No credential_identifier or credential_configuration_id available for v1.0-15 request'))
     }
 
-    // Since you only support V15+, this should never execute
     throw new Error(`Unsupported version: ${this.version()}`)
   }
 
   private version(): OpenId4VCIVersion {
-    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0_15
+    return this.credentialRequestOpts?.version ?? OpenId4VCIVersion.VER_1_0
   }
 }

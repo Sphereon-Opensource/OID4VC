@@ -37,13 +37,52 @@ export function getSupportedCredentials(opts?: {
 export function determineVersionsFromIssuerMetadata(issuerMetadata: CredentialIssuerMetadata | IssuerMetadata): Array<OpenId4VCIVersion> {
   const versions = new Set<OpenId4VCIVersion>()
   if ('credential_configurations_supported' in issuerMetadata) {
-    versions.add(OpenId4VCIVersion.VER_1_0_15)
+    // detect 1.0 final vs draft 15 based on metadata field differences
+    let is1_0Final = false
+
+    // 1.0 final uses batch_credential_issuance_supported (boolean) instead of batch_credential_issuance (object)
+    if ('batch_credential_issuance_supported' in issuerMetadata && typeof (issuerMetadata as any).batch_credential_issuance_supported === 'boolean') {
+      is1_0Final = true
+    }
+
+    // 1.0 final has credential_issuer_public_key
+    if ('credential_issuer_public_key' in issuerMetadata) {
+      is1_0Final = true
+    }
+
+    // Check credential configs for 1.0-specific fields
+    if (!is1_0Final) {
+      const configs = issuerMetadata.credential_configurations_supported
+      if (configs) {
+        for (const config of Object.values(configs)) {
+          // 1.0 final uses cryptographic_suites_supported instead of credential_signing_alg_values_supported
+          if ('cryptographic_suites_supported' in config) {
+            is1_0Final = true
+            break
+          }
+          // 1.0 final uses di_vp proof type instead of ldp_vp
+          if (config.proof_types_supported && 'di_vp' in config.proof_types_supported) {
+            is1_0Final = true
+            break
+          }
+        }
+      }
+    }
+
+    if (is1_0Final) {
+      versions.add(OpenId4VCIVersion.VER_1_0)
+    } else {
+      // Default to 1.0 final if ambiguous (since both versions share credential_configurations_supported)
+      // but if batch_credential_issuance object exists, it's clearly draft 15
+      if ('batch_credential_issuance' in issuerMetadata && typeof (issuerMetadata as any).batch_credential_issuance === 'object') {
+        versions.add(OpenId4VCIVersion.VER_1_0_15)
+      } else {
+        // Ambiguous - default to 1.0 final as the latest version
+        versions.add(OpenId4VCIVersion.VER_1_0)
+      }
+    }
   }
 
-  //  if (versions.size === 0) {
-  // The above checks where already very specific and only applicable to single versions we support, so let's skip if we encounter them
-  // OLD VERSIONS REMOVED, re-enable when supporting new version
-  //  }
   if (versions.size === 0) {
     versions.add(OpenId4VCIVersion.VER_UNKNOWN)
   }

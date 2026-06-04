@@ -11,7 +11,7 @@ import {
   CredentialIssuerMetadataOptsV1_0_15,
   CredentialOfferMode,
   CredentialOfferRESTRequestV1_0_15,
-  CredentialRequestV1_0_15,
+  CredentialRequest,
   determineGrantTypes,
   EVENTS,
   extractBearerToken,
@@ -30,7 +30,7 @@ import {
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 import { IssuerCorrelation, ITokenEndpointOpts, LOG, VcIssuer } from '@sphereon/oid4vci-issuer'
-import { env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
+import { checkAuth, EndpointArgs, env, ISingleEndpointOpts, sendErrorResponse } from '@sphereon/ssi-express-support'
 import { InitiatorType, SubSystem, System } from '@sphereon/ssi-types'
 import { NextFunction, Request, Response, Router } from 'express'
 
@@ -303,7 +303,7 @@ export function getCredentialEndpoint(
   LOG.log(`[OID4VCI] getCredential endpoint enabled at ${path}`)
   router.post(path, async (request: Request, response: Response) => {
     try {
-      const credentialRequest = request.body as CredentialRequestV1_0_15
+      const credentialRequest = request.body as CredentialRequest
       LOG.log(`credential request received`, credentialRequest)
       const issuerCorrelation: IssuerCorrelation = {}
       try {
@@ -319,14 +319,23 @@ export function getCredentialEndpoint(
           issuerCorrelation.issuerState = tokenClaims.issuer_state
         }
 
-        // Handle credential_identifier from authorization_details flow
+        // Handle credential_identifier(s) from authorization_details flow
         if ('authorization_details' in tokenClaims && Array.isArray(tokenClaims.authorization_details)) {
           issuerCorrelation.authorizationDetails = tokenClaims.authorization_details
 
-          if (credentialRequest.credential_identifier) {
-            const validIdentifiers = tokenClaims.authorization_details.flatMap((detail: any) => detail.credential_identifiers || [])
+          // d15: singular credential_identifier, 1.0: credential_identifiers array
+          const requestIdentifiers: string[] = []
+          if ('credential_identifier' in credentialRequest && (credentialRequest as any).credential_identifier) {
+            requestIdentifiers.push((credentialRequest as any).credential_identifier)
+          }
+          if ('credential_identifiers' in credentialRequest && Array.isArray((credentialRequest as any).credential_identifiers)) {
+            requestIdentifiers.push(...(credentialRequest as any).credential_identifiers)
+          }
 
-            if (!validIdentifiers.includes(credentialRequest.credential_identifier)) {
+          if (requestIdentifiers.length > 0) {
+            const validIdentifiers = tokenClaims.authorization_details.flatMap((detail: any) => detail.credential_identifiers || [])
+            const invalidIdentifier = requestIdentifiers.find((id) => !validIdentifiers.includes(id))
+            if (invalidIdentifier) {
               return sendErrorResponse(response, 400, {
                 error: 'invalid_credential_request',
                 error_description: 'credential_identifier not found in authorization_details',
@@ -488,10 +497,10 @@ export function nonceEndpoint(router: Router, issuer: VcIssuer, opts: INonceEndp
   })
 }
 
-export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: IGetCredentialOfferEndpointOpts) {
+export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: IGetCredentialOfferEndpointOpts, globalAuth?: EndpointArgs) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers/:id', { stripBasePath: true })
   LOG.log(`[OID4VCI] getCredentialOffer endpoint enabled at ${path}`)
-  router.get(path, async (request: Request, response: Response) => {
+  router.get(path, checkAuth(opts?.endpoint ?? globalAuth), async (request: Request, response: Response) => {
     try {
       const { id } = request.params
       const session = await issuer.getCredentialOfferSessionById(id)
@@ -516,10 +525,10 @@ export function getCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opt
   })
 }
 
-export function deleteCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: IGetCredentialOfferEndpointOpts) {
+export function deleteCredentialOfferEndpoint(router: Router, issuer: VcIssuer, opts?: IGetCredentialOfferEndpointOpts, globalAuth?: EndpointArgs) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers/:id', { stripBasePath: true })
   LOG.log(`[OID4VCI] deleteCredentialOffer endpoint enabled at ${path}`)
-  router.delete(path, async (request: Request, response: Response) => {
+  router.delete(path, checkAuth(opts?.endpoint ?? globalAuth), async (request: Request, response: Response) => {
     try {
       const { id } = request.params
       if (!id) {
@@ -567,69 +576,74 @@ export function createCredentialOfferEndpoint(
   issuer: VcIssuer,
   opts?: ICreateCredentialOfferEndpointOpts & { baseUrl?: string },
   issuerPayloadPath?: string, // backwards compat, sigh
+  globalAuth?: EndpointArgs,
 ) {
   const path = determinePath(opts?.baseUrl, opts?.path ?? '/webapp/credential-offers', { stripBasePath: true })
   const offerReferencePath =
     opts?.credentialOfferReferenceBasePath ?? issuerPayloadPath ?? determinePath(opts?.baseUrl, '/credential-offers', { stripBasePath: true })
 
   LOG.log(`[OID4VCI] createCredentialOffer endpoint enabled at ${path}`)
-  router.post(path, async (request: Request<CredentialOfferRESTRequestV1_0_15>, response: Response<ICreateCredentialOfferURIResponse>) => {
-    try {
-      // const specVersion = determineSpecVersionFromOffer(request.body.original_credential_offer)
-      // if (specVersion < OpenId4VCIVersion.VER_1_0_15) {
-      //   return sendErrorResponse(response, 400, {
-      //     error: TokenErrorResponse.invalid_client,
-      //     error_description: 'credential offer request should be of spec version 1.0.15 or above',
-      //   })
-      // }
+  router.post(
+    path,
+    checkAuth(opts?.endpoint ?? globalAuth),
+    async (request: Request<CredentialOfferRESTRequestV1_0_15>, response: Response<ICreateCredentialOfferURIResponse>) => {
+      try {
+        // const specVersion = determineSpecVersionFromOffer(request.body.original_credential_offer)
+        // if (specVersion < OpenId4VCIVersion.VER_1_0_15) {
+        //   return sendErrorResponse(response, 400, {
+        //     error: TokenErrorResponse.invalid_client,
+        //     error_description: 'credential offer request should be of spec version 1.0.15 or above',
+        //   })
+        // }
 
-      const grantTypes = determineGrantTypes(request.body)
-      if (grantTypes.length === 0) {
-        return sendErrorResponse(response, 400, {
-          error: TokenErrorResponse.invalid_grant,
-          error_description: 'No grant type supplied',
-        })
-      }
-      const grants = request.body.grants as Grant
-      const credentialConfigIds = request.body.credential_configuration_ids as string[]
-      if (!credentialConfigIds || credentialConfigIds.length === 0) {
-        return sendErrorResponse(response, 400, {
-          error: TokenErrorResponse.invalid_request,
-          error_description: 'credential_configuration_ids missing credential_configuration_ids in credential offer payload',
-        })
-      }
-      const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
-      const offerMode: CredentialOfferMode = request.body.offerMode ?? opts?.defaultCredentialOfferMode ?? 'VALUE' // default to existing mode when nothing specified
+        const grantTypes = determineGrantTypes(request.body)
+        if (grantTypes.length === 0) {
+          return sendErrorResponse(response, 400, {
+            error: TokenErrorResponse.invalid_grant,
+            error_description: 'No grant type supplied',
+          })
+        }
+        const grants = request.body.grants as Grant
+        const credentialConfigIds = request.body.credential_configuration_ids as string[]
+        if (!credentialConfigIds || credentialConfigIds.length === 0) {
+          return sendErrorResponse(response, 400, {
+            error: TokenErrorResponse.invalid_request,
+            error_description: 'credential_configuration_ids missing credential_configuration_ids in credential offer payload',
+          })
+        }
+        const qrCodeOpts = request.body.qrCodeOpts ?? opts?.qrCodeOpts
+        const offerMode: CredentialOfferMode = request.body.offerMode ?? opts?.defaultCredentialOfferMode ?? 'VALUE' // default to existing mode when nothing specified
 
-      const client_id: string | undefined = request.body.client_id ?? request.body.original_credential_offer?.client_id
-      const result = await issuer.createCredentialOfferURI({
-        ...request.body,
-        offerMode,
-        client_id,
-        ...(request.body.correlationId && { correlationId: request.body.correlationId }),
-        ...(offerMode === 'REFERENCE' && { credentialOfferUri: buildCredentialOfferReferenceUri(request, offerReferencePath) }),
-        qrCodeOpts,
-        grants,
-      })
-      const resultResponse: ICreateCredentialOfferURIResponse = result
-      if ('session' in resultResponse) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        delete resultResponse.session
+        const client_id: string | undefined = request.body.client_id ?? request.body.original_credential_offer?.client_id
+        const result = await issuer.createCredentialOfferURI({
+          ...request.body,
+          offerMode,
+          client_id,
+          ...(request.body.correlationId && { correlationId: request.body.correlationId }),
+          ...(offerMode === 'REFERENCE' && { credentialOfferUri: buildCredentialOfferReferenceUri(request, offerReferencePath) }),
+          qrCodeOpts,
+          grants,
+        })
+        const resultResponse: ICreateCredentialOfferURIResponse = result
+        if ('session' in resultResponse) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          delete resultResponse.session
+        }
+        return response.json(resultResponse)
+      } catch (e) {
+        return sendErrorResponse(
+          response,
+          500,
+          {
+            error: TokenErrorResponse.invalid_request,
+            error_description: (e as Error).message,
+          },
+          e,
+        )
       }
-      return response.json(resultResponse)
-    } catch (e) {
-      return sendErrorResponse(
-        response,
-        500,
-        {
-          error: TokenErrorResponse.invalid_request,
-          error_description: (e as Error).message,
-        },
-        e,
-      )
-    }
-  })
+    },
+  )
 }
 
 export function pushedAuthorizationEndpoint(

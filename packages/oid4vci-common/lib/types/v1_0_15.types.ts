@@ -69,7 +69,16 @@ export type CredentialConfigurationSupportedCommonV1_0_15 = {
   credential_signing_alg_values_supported?: string[] // OPTIONAL. Array of case sensitive strings that identify the algorithms that the Issuer uses to sign the issued Credential. Algorithm names used are determined by the Credential Format and are defined in Appendix A.
   proof_types_supported?: ProofTypesSupported // OPTIONAL. Object that describes specifics of the key proof(s) that the Credential Issuer supports. This object contains a list of name/value pairs, where each name is a unique identifier of the supported proof type(s).
   display?: CredentialsSupportedDisplay[] // OPTIONAL. An array of objects, where each object contains the display properties of the supported credential for a certain language
+  credential_metadata?: CredentialMetadataV1_0_15 // OPTIONAL (OID4VCI 1.0 final §12.2.4 / #credential-issuer-parameters). Object holding credential-level `display` and `claims`. In 1.0 final these live here rather than at the top level of the configuration object; the top-level `display`/`claims` above are retained for pre-final / draft issuers.
   [x: string]: unknown
+}
+
+// OID4VCI 1.0 final §12.2.4 credential_metadata object: the spec-compliant home for credential-level
+// `display` and `claims`, used by every Credential Format (the §A.x format profiles only add format-specific
+// members like `vct`/`doctype`/`credential_definition` on top of those defined in #credential-issuer-parameters).
+export interface CredentialMetadataV1_0_15 {
+  display?: CredentialsSupportedDisplay[] // OPTIONAL. Display properties of the supported Credential for each language.
+  claims?: ClaimsDescriptionV1_0_15[] // OPTIONAL. Array of claims description objects using claims path pointers as defined in Appendix C.
 }
 
 export interface CredentialConfigurationSupportedSdJwtVcV1_0_15 extends CredentialConfigurationSupportedCommonV1_0_15 {

@@ -1,20 +1,20 @@
 import {
   AuthorizationChallengeCodeResponse,
   AuthorizationChallengeRequestOpts,
-  AuthorizationDetailsV1_0_15,
   AuthorizationRequestOpts,
   CodeChallengeMethod,
   CommonAuthorizationChallengeRequest,
   convertJsonToURI,
-  CreateRequestObjectMode,
-  CredentialConfigurationSupportedV1_0_15,
+  CredentialConfigurationSupported,
   CredentialDefinitionJwtVcJsonLdAndLdpVcV1_0_15,
   CredentialDefinitionJwtVcJsonV1_0_15,
-  CredentialOfferPayloadV1_0_15,
+  AuthorizationDetails,
+  CredentialOfferPayload,
   CredentialOfferRequestWithBaseUrl,
+  CreateRequestObjectMode,
   determineSpecVersionFromOffer,
   EndpointMetadata,
-  EndpointMetadataResultV1_0_15,
+  EndpointMetadataResult,
   formPost,
   IssuerOpts,
   isW3cCredentialSupported,
@@ -72,7 +72,7 @@ export async function createSignedAuthRequestWhenNeeded(
     const pop = await ProofOfPossessionBuilder.fromJwt({
       jwt,
       callbacks: opts.signCallbacks,
-      version: OpenId4VCIVersion.VER_1_0_15,
+      version: OpenId4VCIVersion.VER_1_0,
       mode: 'JWT',
     }).build()
     requestObject['request'] = pop.jwt
@@ -80,9 +80,9 @@ export async function createSignedAuthRequestWhenNeeded(
 }
 
 function filterSupportedCredentials(
-  credentialOffer: CredentialOfferPayloadV1_0_15,
-  credentialsSupported?: Record<string, CredentialConfigurationSupportedV1_0_15>,
-): (CredentialConfigurationSupportedV1_0_15 & {
+  credentialOffer: CredentialOfferPayload,
+  credentialsSupported?: Record<string, CredentialConfigurationSupported>,
+): (CredentialConfigurationSupported & {
   configuration_id: string
 })[] {
   if (!credentialOffer.credential_configuration_ids || !credentialsSupported) {
@@ -105,10 +105,10 @@ export const createAuthorizationRequestUrl = async ({
   version,
 }: {
   pkce: PKCEOpts
-  endpointMetadata: EndpointMetadataResultV1_0_15
+  endpointMetadata: EndpointMetadataResult
   authorizationRequest: AuthorizationRequestOpts
   credentialOffer?: CredentialOfferRequestWithBaseUrl
-  credentialConfigurationSupported?: Record<string, CredentialConfigurationSupportedV1_0_15>
+  credentialConfigurationSupported?: Record<string, CredentialConfigurationSupported>
   clientId?: string
   version?: OpenId4VCIVersion
 }): Promise<string> => {
@@ -152,11 +152,9 @@ export const createAuthorizationRequestUrl = async ({
     if ('credentials' in credentialOffer.credential_offer) {
       throw new Error('CredentialOffer format is wrong.')
     }
-    const ver = version ?? determineSpecVersionFromOffer(credentialOffer.credential_offer) ?? OpenId4VCIVersion.VER_1_0_15
+    const ver = version ?? determineSpecVersionFromOffer(credentialOffer.credential_offer) ?? OpenId4VCIVersion.VER_1_0
     const creds =
-      ver === OpenId4VCIVersion.VER_1_0_15
-        ? filterSupportedCredentials(credentialOffer.credential_offer as CredentialOfferPayloadV1_0_15, credentialConfigurationSupported)
-        : []
+      ver >= OpenId4VCIVersion.VER_1_0_15 ? filterSupportedCredentials(credentialOffer.credential_offer, credentialConfigurationSupported) : []
 
     authorizationDetails = creds.flatMap((cred) => {
       const locations = [credentialOffer?.credential_offer.credential_issuer ?? endpointMetadata.issuer]
@@ -194,9 +192,9 @@ export const createAuthorizationRequestUrl = async ({
         ...(credential_definition && { credential_definition }),
         ...(credential_configuration_id && { credential_configuration_id }),
         ...(format && { format }),
-        ...(vct && { vct, claims: cred.claims ? removeDisplayAndValueTypes(cred.claims) : undefined }),
-        ...(doctype && { doctype, claims: cred.claims ? removeDisplayAndValueTypes(cred.claims) : undefined }),
-      } as AuthorizationDetailsV1_0_15
+        ...(vct && { vct, claims: (cred as any).claims ? removeDisplayAndValueTypes((cred as any).claims) : undefined }),
+        ...(doctype && { doctype, claims: (cred as any).claims ? removeDisplayAndValueTypes((cred as any).claims) : undefined }),
+      } as AuthorizationDetails
     })
     if (!authorizationDetails || authorizationDetails.length === 0) {
       throw Error(`Could not create authorization details from credential offer. Please pass in explicit details`)
@@ -205,8 +203,8 @@ export const createAuthorizationRequestUrl = async ({
   // v15: authorization endpoint is under Authorization Server metadata (or duplicated in CI metadata)
   const authorizationEndpoint =
     (endpointMetadata as any).authorization_endpoint ??
-    (endpointMetadata as EndpointMetadataResultV1_0_15).authorizationServerMetadata?.authorization_endpoint ??
-    (endpointMetadata as EndpointMetadataResultV1_0_15).credentialIssuerMetadata?.authorization_endpoint
+    (endpointMetadata as EndpointMetadataResult).authorizationServerMetadata?.authorization_endpoint ??
+    (endpointMetadata as EndpointMetadataResult).credentialIssuerMetadata?.authorization_endpoint
 
   if (!authorizationEndpoint) {
     throw Error('Server metadata does not contain authorization endpoint')
@@ -292,9 +290,9 @@ const hasCredentialDefinition = (
   Array.isArray(cred.credential_definition.type)
 
 const handleAuthorizationDetails = (
-  endpointMetadata: EndpointMetadataResultV1_0_15,
-  authorizationDetails?: AuthorizationDetailsV1_0_15 | AuthorizationDetailsV1_0_15[],
-): AuthorizationDetailsV1_0_15 | AuthorizationDetailsV1_0_15[] | undefined => {
+  endpointMetadata: EndpointMetadataResult,
+  authorizationDetails?: AuthorizationDetails | AuthorizationDetails[],
+): AuthorizationDetails | AuthorizationDetails[] | undefined => {
   if (authorizationDetails) {
     if (typeof authorizationDetails === 'string') {
       // backwards compat for older versions of the lib
@@ -311,14 +309,14 @@ const handleAuthorizationDetails = (
   return authorizationDetails
 }
 
-const handleLocations = (endpointMetadata: EndpointMetadataResultV1_0_15, authorizationDetails: AuthorizationDetailsV1_0_15) => {
+const handleLocations = (endpointMetadata: EndpointMetadataResult, authorizationDetails: AuthorizationDetails) => {
   if (typeof authorizationDetails === 'string') {
     // backwards compat for older versions of the lib
     return authorizationDetails
   }
 
   // v15 signal: CI metadata lists external Authorization Server(s)
-  const ciMeta = (endpointMetadata as EndpointMetadataResultV1_0_15).credentialIssuerMetadata as any
+  const ciMeta = (endpointMetadata as EndpointMetadataResult).credentialIssuerMetadata as any
   const hasAuthorizationServers = Array.isArray(ciMeta?.authorization_servers) && ciMeta.authorization_servers.length > 0
 
   // v13/v11 fallback: some older metadata exposed authorization_endpoint at top level

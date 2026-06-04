@@ -2,6 +2,7 @@ import { JWK } from '@sphereon/oid4vc-common'
 import {
   AccessTokenResponse,
   Alg,
+  createCwtProofOfPossession,
   createProofOfPossession,
   EndpointMetadata,
   Jwt,
@@ -30,6 +31,8 @@ export class ProofOfPossessionBuilder<DIDDoc = never> {
   private jti?: string
   private cNonce?: string
   private typ?: Typ
+  private proofType: 'jwt' | 'cwt' = 'jwt'
+  private coseKey?: unknown
 
   private constructor({
     proof,
@@ -155,6 +158,16 @@ export class ProofOfPossessionBuilder<DIDDoc = never> {
     return this
   }
 
+  withProofType(proofType: 'jwt' | 'cwt'): this {
+    this.proofType = proofType
+    return this
+  }
+
+  withCoseKey(coseKey: unknown): this {
+    this.coseKey = coseKey
+    return this
+  }
+
   withAccessTokenNonce(cNonce: string): this {
     this.cNonce = cNonce
     return this
@@ -212,6 +225,17 @@ export class ProofOfPossessionBuilder<DIDDoc = never> {
     if (this.proof) {
       return Promise.resolve(this.proof)
     } else if (this.callbacks) {
+      if (this.proofType === 'cwt' && this.callbacks.cwtSignCallback) {
+        return await createCwtProofOfPossession(this.callbacks, {
+          iss: this.clientId ?? this.issuer,
+          aud: Array.isArray(this.aud) ? this.aud[0] : (this.aud ?? this.issuer ?? ''),
+          nonce: this.cNonce,
+          alg: this.alg,
+          jwk: this.jwk,
+          kid: this.kid,
+          coseKey: this.coseKey,
+        })
+      }
       return await createProofOfPossession(
         this.mode,
         this.callbacks,

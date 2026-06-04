@@ -92,6 +92,7 @@ describe('Credential Request Client Builder', () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialIdentifier('OpenBadgeCredential')
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .build()
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt: jwtv1_0_11,
@@ -118,6 +119,7 @@ describe('Credential Request Client Builder', () => {
     const credReqClient = (await CredentialRequestClientBuilder.fromURI({ uri: INITIATION_TEST_URI }))
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialIdentifier('OpenBadgeCredential')
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .build()
     const proof: ProofOfPossession = await ProofOfPossessionBuilder.fromJwt({
       jwt: jwtv1_0_13_withoutDid,

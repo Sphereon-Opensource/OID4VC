@@ -108,6 +108,7 @@ describe('Credential Request Client ', () => {
     })
 
     const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOffer({ credentialOffer: INITIATION_TEST_V1_0_15 })
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withCredentialEndpoint(basePath + '/credential')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build()
@@ -137,6 +138,7 @@ describe('Credential Request Client ', () => {
     })
 
     const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOffer({ credentialOffer: INITIATION_TEST_V1_0_15 })
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withCredentialEndpoint(basePath + '/credential')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build()
@@ -168,6 +170,7 @@ describe('Credential Request Client ', () => {
         credential: mockedVC,
       })
     const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOfferRequest({ request: INITIATION_TEST })
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build()
@@ -202,6 +205,7 @@ describe('Credential Request Client ', () => {
         credential: mockedVC,
       })
     const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOfferRequest({ request: INITIATION_TEST })
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build()
@@ -228,6 +232,7 @@ describe('Credential Request Client ', () => {
 
   it('should fail with invalid url', async () => {
     const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOfferRequest({ request: INITIATION_TEST })
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withCredentialEndpoint('httpsf://oidc4vci.demo.spruceid.com/credential')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build()
@@ -248,6 +253,7 @@ describe('Credential Request Client ', () => {
 
   it('should fail with invalid url without did', async () => {
     const credReqClient = CredentialRequestClientBuilderV1_0_15.fromCredentialOfferRequest({ request: INITIATION_TEST })
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withCredentialEndpoint('httpsf://oidc4vci.demo.spruceid.com/credential')
       .withCredentialType('https://imsglobal.github.io/openbadges-specification/ob_v3p0.html#OpenBadgeCredential')
       .build()
@@ -324,6 +330,7 @@ describe('Credential Request Client with different issuers ', () => {
         metadata: getMockData('spruce')?.metadata as unknown as EndpointMetadataResultV1_0_15,
       })
     )
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .build()
       .createCredentialRequest({
         proofInput: {
@@ -358,6 +365,7 @@ describe('Credential Request Client with different issuers ', () => {
         metadata: getMockData('walt')?.metadata as unknown as EndpointMetadataResultV1_0_15,
       })
     )
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .build()
       .createCredentialRequest({
         proofInput: {
@@ -413,6 +421,7 @@ describe('Credential Request Client with different issuers ', () => {
         metadata: getMockData('mattr')?.metadata as unknown as EndpointMetadataResultV1_0_15,
       })
     )
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .build()
       .createCredentialRequest({
         proofInput: {
@@ -446,6 +455,7 @@ describe('Credential Request Client with different issuers ', () => {
         metadata: getMockData('diwala')?.metadata as unknown as EndpointMetadataResultV1_0_15,
       })
     )
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .build()
       .createCredentialRequest({
         proofInput: {

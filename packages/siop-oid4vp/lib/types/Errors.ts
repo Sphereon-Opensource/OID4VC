@@ -53,6 +53,7 @@ enum SIOPErrors {
   VERIFIABLE_PRESENTATION_SIGNATURE_NOT_VALID = 'The signature of the verifiable presentation is not valid',
   VERIFIABLE_PRESENTATION_VERIFICATION_FUNCTION_MISSING = 'The verifiable presentation verification function is missing',
   PRESENTATION_SUBMISSION_DEFINITION_ID_DOES_NOT_MATCHING_DEFINITION_ID = "The 'definition_id' in the presentation submission does not match the id of the presentation definition.",
+  INVALID_TRANSACTION_DATA = 'invalid_transaction_data',
 }
 
 export default SIOPErrors

@@ -69,7 +69,10 @@ export interface AuthorizationRequestOptsV1 extends AuthorizationRequestCommonOp
   idTokenType?: string // OPTIONAL. Space-separated string that specifies the types of ID token the RP wants to obtain, with the values appearing in order of preference. The allowed individual values are subject_signed and attester_signed (see Section 8.2). The default value is attester_signed.
   transaction_data?: string[]
   verifier_info?: RelyingPartyAttestation[]
+  verifier_attestations?: RelyingPartyAttestation[] // D28 equivalent of verifier_info
   request_uri_method?: RequestUriMethod
+  expected_origins?: string[]
+  wallet_nonce?: string
 }
 
 export type CreateAuthorizationRequestOpts = AuthorizationRequestOptsV1
