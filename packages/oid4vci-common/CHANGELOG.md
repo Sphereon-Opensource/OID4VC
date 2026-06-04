@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.21.0](https://github.com/Sphereon-Opensource/OID4VC/compare/v0.20.1...v0.21.0) (2026-06-04)
+
+
+### Features
+
+* add support for 1.0 final for both oid4vp (was already mostly there) and OID4VCI ([4654cf4](https://github.com/Sphereon-Opensource/OID4VC/commit/4654cf42eaf470ecf588c6b9f3fffbf25ac44094))
+* cwt support for ProofOfPossessionBuilder ([25c13e0](https://github.com/Sphereon-Opensource/OID4VC/commit/25c13e09f588576ec2bf2c082ff7666bc7f17b94))
+
+
+
+
+
 ## [0.20.1](https://github.com/Sphereon-Opensource/OID4VC/compare/v0.20.0...v0.20.1) (2026-01-30)
 
 **Note:** Version bump only for package @sphereon/oid4vci-common
