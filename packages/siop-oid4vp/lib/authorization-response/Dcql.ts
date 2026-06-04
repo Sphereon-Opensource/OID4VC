@@ -54,7 +54,11 @@ export class Dcql {
         const credentials = p.vcs.map((vc) => {
           switch (p.format) {
             case 'mso_mdoc':
-              return Dcql.toDcqlMdocCredential(vc.original)
+              // `vc` is the WrappedMdocCredential (has `.credential` = MdocDocument, `.decoded` = namespaces).
+              // Passing `vc.original` (the raw MdocDocument, no `.credential`) made toDcqlMdocCredential read
+              // `vc.original.credential.toJson()` -> 'Cannot read property toJson of undefined'. Mirror the
+              // sibling sd-jwt/jwt/ldp branches, which pass the wrapper `vc`.
+              return Dcql.toDcqlMdocCredential(vc)
             case 'dc+sd-jwt':
               return Dcql.toDcqlSdJwtCredential(vc)
             case 'jwt_vp':
