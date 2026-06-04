@@ -506,7 +506,9 @@ export const AuthorizationRequestPayloadD28SchemaObj = {
         "query",
         "direct_post.jwt",
         "query.jwt",
-        "fragment.jwt"
+        "fragment.jwt",
+        "dc_api",
+        "dc_api.jwt"
       ]
     },
     "ClaimPayloadCommon": {

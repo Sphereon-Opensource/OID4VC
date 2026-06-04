@@ -5,7 +5,9 @@ import { post } from './HttpUtils'
 export function isDeferredCredentialResponse(credentialResponse: OpenIDResponse<CredentialResponse>) {
   const orig = credentialResponse.successBody
   // Specs mention 202, but some implementations like EBSI return 200
-  return credentialResponse.origResponse.status % 200 <= 2 && !!orig && !orig.credentials && (!!orig.acceptance_token || !!orig.transaction_id)
+  // Check for both d15 (credentials array) and 1.0 final (singular credential) absence
+  const hasNoCredential = !orig?.credentials && !orig?.credential
+  return credentialResponse.origResponse.status % 200 <= 2 && !!orig && hasNoCredential && (!!orig.acceptance_token || !!orig.transaction_id)
 }
 function assertNonFatalError(credentialResponse: OpenIDResponse<CredentialResponse>) {
   if (credentialResponse.origResponse.status === 400 && credentialResponse.errorBody?.error) {
@@ -55,7 +57,7 @@ export async function acquireDeferredCredential({
   })
 
   const DEFAULT_SLEEP_IN_MS = 5000
-  while (!credentialResponse.successBody?.credentials && deferredCredentialAwait) {
+  while (!credentialResponse.successBody?.credentials && !credentialResponse.successBody?.credential && deferredCredentialAwait) {
     assertNonFatalError(credentialResponse)
     const pending = isDeferredCredentialIssuancePending(credentialResponse)
     console.log(`Issuance still pending?: ${pending}`)

@@ -89,21 +89,19 @@ export function getTypesFromCredentialSupported(
   opts?: { filterVerifiableCredential: boolean },
 ) {
   let types: string[] = []
-  if (
-    credentialSupported.format === 'jwt_vc_json' ||
-    credentialSupported.format === 'jwt_vc' ||
-    credentialSupported.format === 'jwt_vc_json-ld' ||
-    credentialSupported.format === 'ldp_vc'
-  ) {
+  const format = credentialSupported.format
+  if (format === 'jwt_vc_json' || format === 'jwt_vc' || format === 'jwt_vc_json-ld' || format === 'ldp_vc') {
     types = getTypesFromObject(credentialSupported) ?? []
-  } else if (credentialSupported.format === 'dc+sd-jwt' || credentialSupported.format === 'vc+sd-jwt') {
+  } else if (format === 'dc+sd-jwt' || format === 'vc+sd-jwt') {
     types = [credentialSupported.vct]
-  } else if (credentialSupported.format === 'mso_mdoc') {
+  } else if (format === 'mso_mdoc') {
     types = [credentialSupported.doctype]
+  } else {
+    throw Error(`Unsupported credential format '${format}'`)
   }
 
   if (!types || types.length === 0) {
-    throw Error('Could not deduce types from credential supported')
+    throw Error(`Could not deduce types from credential supported (format '${format}')`)
   }
   if (opts?.filterVerifiableCredential) {
     return types.filter((type) => type !== 'VerifiableCredential')

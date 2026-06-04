@@ -14,7 +14,7 @@ import {
   VcIssuer,
   VcIssuerBuilder,
 } from '@sphereon/oid4vci-issuer'
-import { ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
+import { EndpointArgs, ExpressSupport, HasEndpointOpts, ISingleEndpointOpts } from '@sphereon/ssi-express-support'
 import express, { Express } from 'express'
 
 import {
@@ -128,6 +128,7 @@ export interface IAuthorizationChallengeEndpointOpts extends ISingleEndpointOpts
 }
 
 export interface IOID4VCIEndpointOpts {
+  globalAuth?: EndpointArgs
   trustProxy?: boolean | Array<string>
   tokenEndpointOpts?: ITokenEndpointOpts
   notificationOpts?: ISingleEndpointOpts
@@ -213,10 +214,16 @@ export class OID4VCIServer {
     }
 
     if (opts?.endpointOpts?.createCredentialOfferOpts?.enabled !== false || process.env.CREDENTIAL_OFFER_ENDPOINT_ENABLED === 'true') {
-      createCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.createCredentialOfferOpts, issuerPayloadPath)
-      deleteCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.deleteCredentialOfferOpts)
+      createCredentialOfferEndpoint(
+        this.router,
+        this.issuer,
+        opts?.endpointOpts?.createCredentialOfferOpts,
+        issuerPayloadPath,
+        opts?.endpointOpts?.globalAuth,
+      )
+      deleteCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.deleteCredentialOfferOpts, opts?.endpointOpts?.globalAuth)
     }
-    getCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.getCredentialOfferOpts)
+    getCredentialOfferEndpoint(this.router, this.issuer, opts?.endpointOpts?.getCredentialOfferOpts, opts?.endpointOpts?.globalAuth)
     getCredentialEndpoint(this.router, this.issuer, {
       ...opts?.endpointOpts?.tokenEndpointOpts,
       baseUrl: this.baseUrl,

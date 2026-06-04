@@ -28,6 +28,12 @@ export const createRequestOptsFromBuilderOrExistingOpts = (opts: { builder?: RPB
           createJwtCallback: opts.builder.createJwtCallback,
         },
         clientMetadata: opts.builder.clientMetadata as ClientMetadataOpts,
+        ...(opts.builder.verifierInfo && { verifier_info: opts.builder.verifierInfo }),
+        ...(opts.builder.verifierAttestations && { verifier_attestations: opts.builder.verifierAttestations }),
+        ...(opts.builder.transactionData && { transaction_data: opts.builder.transactionData }),
+        ...(opts.builder.requestUriMethod && { request_uri_method: opts.builder.requestUriMethod }),
+        ...(opts.builder.expectedOrigins && { expected_origins: opts.builder.expectedOrigins }),
+        ...(opts.builder.walletNonce && { wallet_nonce: opts.builder.walletNonce }),
       }
     : opts.createRequestOpts
 

@@ -29,7 +29,7 @@ export function determineSpecVersionFromURI(uri: string): OpenId4VCIVersion {
   // version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_13, OpenId4VCIVersion.VER_1_0_15], 'tx_code')  (left as examples)
   // version = getVersionFromURIParam(uri, version, [OpenId4VCIVersion.VER_1_0_15], 'credential_offer_uri ') // optional so last resort
   if (version === OpenId4VCIVersion.VER_UNKNOWN) {
-    version = OpenId4VCIVersion.VER_1_0_15
+    version = OpenId4VCIVersion.VER_1_0
   }
   return version
 }
@@ -200,7 +200,10 @@ export const getStateFromCredentialOfferPayload = (credentialOffer: CredentialOf
 
 export function determineSpecVersionFromOffer(offer: CredentialOfferPayload | CredentialOffer): OpenId4VCIVersion {
   if (isCredentialOfferV1_0_15(offer)) {
-    return OpenId4VCIVersion.VER_1_0_15
+    // Cannot distinguish 1.0 final from draft 15 based on offer alone (same fields).
+    // Default to VER_1_0 since it's the latest version. Metadata-based detection
+    // will refine this if the issuer uses d15-specific metadata fields.
+    return OpenId4VCIVersion.VER_1_0
   }
   return OpenId4VCIVersion.VER_UNKNOWN
 }

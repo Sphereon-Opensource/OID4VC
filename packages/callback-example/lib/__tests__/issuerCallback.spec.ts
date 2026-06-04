@@ -169,6 +169,7 @@ describe('issuerCallback', () => {
     const nonces = new MemoryStates<CNonceState>()
     await nonces.set('test_value', { cNonce: 'test_value', createdAt: +new Date() })
     vcIssuer = new VcIssuerBuilder()
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withAuthorizationServers('https://authorization-server')
       .withCredentialEndpoint('https://credential-endpoint')
       .withCredentialIssuer(IDENTIPROOF_ISSUER_URL)
@@ -251,6 +252,7 @@ describe('issuerCallback', () => {
 
   it('Should pass requesting a verifiable credential using the client', async () => {
     const credReqClient = (await CredentialRequestClientBuilderV1_0_15.fromURI({ uri: INITIATION_TEST_URI }))
+      .withVersion(OpenId4VCIVersion.VER_1_0_15)
       .withCredentialEndpoint('https://oidc4vci.demo.spruceid.com/credential')
       .withCredentialConfigurationId('VeriCred')
       .withCredentialEndpointFromMetadata({

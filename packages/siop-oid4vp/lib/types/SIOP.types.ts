@@ -46,6 +46,12 @@ export interface RequestObjectPayload extends RequestCommonPayload, JWTPayload {
   nonce: string
   state: string
   dcql_query?: Record<string, any>
+  transaction_data?: string[]
+  verifier_info?: RelyingPartyAttestation[] // V1: verifier attestation objects
+  verifier_attestations?: RelyingPartyAttestation[] // D28: verifier attestation objects
+  request_uri_method?: RequestUriMethod
+  expected_origins?: string[]
+  wallet_nonce?: string
 }
 
 export type RequestObjectJwt = string
@@ -102,6 +108,9 @@ export interface AuthorizationRequestPayloadV1
   transaction_data?: string[]
   // TODO SSISDK-38
   verifier_info?: RelyingPartyAttestation[]
+  wallet_nonce?: string // OPTIONAL. Nonce from wallet echoed back when request_uri_method=post, to prevent replay
+  expected_origins?: string[] // OPTIONAL. For DC API signed requests, array of expected browser origins
+  wallet_metadata?: Record<string, any> // OPTIONAL. Wallet metadata sent during request_uri_method=post flow
 }
 
 export type RelyingPartyAttestation = {
@@ -145,6 +154,7 @@ export interface VerifiedAuthorizationRequest extends Partial<VerifiedJWT> {
   dcqlQuery: DcqlQuery
   verifyOpts: VerifyAuthorizationRequestOpts // The verification options for the authentication request
   versions: SupportedVersion[]
+  expectedOrigins?: string[] // V1: expected browser origins for DC API validation
 }
 
 export type IDTokenJwt = string
@@ -509,6 +519,8 @@ export enum ResponseMode {
   DIRECT_POST_JWT = 'direct_post.jwt',
   QUERY_JWT = 'query.jwt',
   FRAGMENT_JWT = 'fragment.jwt',
+  DC_API = 'dc_api',
+  DC_API_JWT = 'dc_api.jwt',
 }
 
 export enum VerifiedDataMode {
@@ -618,6 +630,12 @@ export enum ResponseIss {
 
 export enum RequestAud {
   SELF_ISSUED_V2 = 'https://self-issued.me/v2',
+}
+
+export enum DCAPIProtocolIdentifier {
+  UNSIGNED = 'openid4vp-v1-unsigned',
+  SIGNED = 'openid4vp-v1-signed',
+  MULTISIGNED = 'openid4vp-v1-multisigned',
 }
 
 export const isRequestOpts = (object: CreateAuthorizationRequestOpts | AuthorizationResponseOpts): object is CreateAuthorizationRequestOpts =>

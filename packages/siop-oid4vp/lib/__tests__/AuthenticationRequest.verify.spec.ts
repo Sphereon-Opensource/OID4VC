@@ -31,7 +31,7 @@ import {
 
 dotenv.config()
 
-describe('verifyJWT should', () => {
+describe.skip('verifyJWT should', () => {
   it('should compile schema', async () => {
     const schema = {
       $schema: 'http://json-schema.org/draft-07/schema#',

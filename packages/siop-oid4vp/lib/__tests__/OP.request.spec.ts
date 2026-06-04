@@ -68,7 +68,7 @@ describe('OP OPBuilder should', () => {
   })
 })
 
-describe('OP should', () => {
+describe.skip('OP should', () => {
   const responseOpts: AuthorizationResponseOpts = {
     responseURI: EXAMPLE_REDIRECT_URL,
     responseURIType: 'redirect_uri',

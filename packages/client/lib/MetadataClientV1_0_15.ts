@@ -8,6 +8,8 @@ import {
   getIssuerFromCredentialOfferPayload,
   IssuerMetadataV1_0_15,
   OpenIDResponse,
+  processSignedMetadata,
+  SignedMetadataVerifyCallback,
   WellKnownEndpoints,
 } from '@sphereon/oid4vci-common'
 import { Loggers } from '@sphereon/ssi-types'
@@ -48,7 +50,8 @@ export class MetadataClientV1_0_15 {
   public static async retrieveAllMetadata(
     issuer: string,
     opts?: {
-      errorOnNotFound: boolean
+      errorOnNotFound?: boolean
+      signedMetadataVerifyCallback?: SignedMetadataVerifyCallback
     },
   ): Promise<EndpointMetadataResultV1_0_15> {
     let token_endpoint: string | undefined
@@ -194,9 +197,17 @@ export class MetadataClientV1_0_15 {
       ...(nonce_endpoint && { nonce_endpoint }),
       ...(deferred_credential_endpoint && { deferred_credential_endpoint }),
       ...(notification_endpoint && { notification_endpoint }),
+      ...(ci.signed_metadata && { signed_metadata: ci.signed_metadata }),
     }
 
     logger.debug(`Issuer ${issuer} token endpoint ${token_endpoint}, credential endpoint ${credential_endpoint}`)
+
+    // Process signed_metadata if present and a verify callback is provided
+    const processedMetadata = await processSignedMetadata({
+      metadata: v15CredentialIssuerMetadata,
+      issuer,
+      signedMetadataVerifyCallback: opts?.signedMetadataVerifyCallback,
+    })
 
     // Return v15-only fields (no legacy top-level authorization_server/authorization_endpoint and no nonce/deferred at top-level)
     return {
@@ -206,7 +217,7 @@ export class MetadataClientV1_0_15 {
       authorization_challenge_endpoint,
       notification_endpoint,
       authorizationServerType,
-      credentialIssuerMetadata: v15CredentialIssuerMetadata,
+      credentialIssuerMetadata: processedMetadata,
       authorizationServerMetadata: authMetadata,
     }
   }

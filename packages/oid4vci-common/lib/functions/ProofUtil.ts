@@ -15,6 +15,7 @@ import {
   ProofOfPossessionCallbacks,
   Typ,
 } from '../types'
+import type { CwtProofOfPossession } from '../types'
 
 const logger = Loggers.DEFAULT.get('sphereon:oid4vci:common')
 
@@ -67,6 +68,28 @@ export const createProofOfPossession = async <DIDDoc extends object = never>(
   }
   logger.debug(`Proof of Possession JWT:\r\n${jwt}`)
   return proof
+}
+
+export const createCwtProofOfPossession = async (
+  callbacks: ProofOfPossessionCallbacks,
+  opts: {
+    iss?: string
+    aud: string
+    nonce?: string
+    alg?: string
+    jwk?: JWK
+    kid?: string
+    coseKey?: unknown
+  },
+): Promise<CwtProofOfPossession> => {
+  if (!callbacks.cwtSignCallback) {
+    throw new Error('No CWT signer callback supplied')
+  }
+  const cwt = await callbacks.cwtSignCallback(opts)
+  return {
+    proof_type: 'cwt',
+    cwt,
+  }
 }
 
 const partiallyValidateJWS = (jws: string): void => {

@@ -35,6 +35,6 @@ describe('IssuerMetadataUtils should', () => {
 
     expect(() => {
       getTypesFromCredentialSupported(credentialSupported)
-    }).toThrow('Could not deduce types from credential supported')
+    }).toThrow("Unsupported credential format 'unknown_format'")
   })
 })

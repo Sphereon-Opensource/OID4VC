@@ -40,7 +40,7 @@ describe('Issuance Initiation', () => {
       scheme: 'https',
       supportedFlows: ['Authorization Code Flow'],
       userPinRequired: false,
-      version: 1015,
+      version: 1100,
     })
   })
 
@@ -67,7 +67,7 @@ describe('Issuance Initiation', () => {
     const client = await CredentialOfferClient.fromURI(
       'openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Flaunchpad.vii.electron.mattrlabs.io%22%2C%22credential_configuration_ids%22%3A%5B%22OpenBadgeCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22UPZohaodPlLBnGsqB02n2tIupCIg8nKRRUEUHWA665X%22%2C%22user_pin_required%22%3Afalse%7D%7D%7D',
     )
-    expect(client.version).toEqual(OpenId4VCIVersion.VER_1_0_15)
+    expect(client.version).toEqual(OpenId4VCIVersion.VER_1_0)
     expect(client.baseUrl).toEqual('openid-credential-offer://')
     expect(client.scheme).toEqual('openid-credential-offer')
     expect(client.credential_offer.credential_issuer).toEqual('https://launchpad.vii.electron.mattrlabs.io')
@@ -78,7 +78,7 @@ describe('Issuance Initiation', () => {
     const client = await CredentialOfferClient.fromURI(
       'https://launchpad.vii.electron.mattrlabs.io?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Flaunchpad.vii.electron.mattrlabs.io%22%2C%22credential_configuration_ids%22%3A%5B%22OpenBadgeCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22UPZohaodPlLBnGsqB02n2tIupCIg8nKRRUEUHWA665X%22%2C%22user_pin_required%22%3Afalse%7D%7D%7D',
     )
-    expect(client.version).toEqual(OpenId4VCIVersion.VER_1_0_15)
+    expect(client.version).toEqual(OpenId4VCIVersion.VER_1_0)
     expect(client.baseUrl).toEqual('https://launchpad.vii.electron.mattrlabs.io')
     expect(client.scheme).toEqual('https')
     expect(client.credential_offer.credential_issuer).toEqual('https://launchpad.vii.electron.mattrlabs.io')
@@ -89,7 +89,7 @@ describe('Issuance Initiation', () => {
     const client = await CredentialOfferClient.fromURI(
       'https://launchpad.vii.electron.mattrlabs.io?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Flaunchpad.vii.electron.mattrlabs.io%22%2C%22credential_configuration_ids%22%3A%5B%22OpenBadgeCredential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22UPZohaodPlLBnGsqB02n2tIupCIg8nKRRUEUHWA665X%22%2C%22user_pin_required%22%3Afalse%7D%7D%7D',
     )
-    expect(client.version).toEqual(OpenId4VCIVersion.VER_1_0_15)
+    expect(client.version).toEqual(OpenId4VCIVersion.VER_1_0)
     expect(client.baseUrl).toEqual('https://launchpad.vii.electron.mattrlabs.io')
     expect(client.scheme).toEqual('https')
     expect(client.credential_offer.credential_issuer).toEqual('https://launchpad.vii.electron.mattrlabs.io')
@@ -115,7 +115,7 @@ describe('Issuance Initiation', () => {
     const client = await CredentialOfferClient.fromURI(
       'openid-credential-offer://mijnkvk.acc.credenco.com/?credential_offer_uri=https%3A%2F%2Fmijnkvk.acc.credenco.com%2Fopenid4vc%2FcredentialOffer%3Fid%3D32fc4ebf-9e31-4149-9877-e3c0b602d559',
     )
-    expect(client.version).toEqual(OpenId4VCIVersion.VER_1_0_15)
+    expect(client.version).toEqual(OpenId4VCIVersion.VER_1_0)
     expect(client.baseUrl).toEqual('openid-credential-offer://mijnkvk.acc.credenco.com/')
     expect(client.scheme).toEqual('openid-credential-offer')
     expect(client.credential_offer.credential_issuer).toEqual('https://mijnkvk.acc.credenco.com')

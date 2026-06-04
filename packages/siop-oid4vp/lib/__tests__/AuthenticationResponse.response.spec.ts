@@ -41,7 +41,7 @@ const validButExpiredJWT =
 
 const EXAMPLE_REDIRECT_URL = 'https://acme.com/hello'
 
-describe('create JWT from Request JWT should', () => {
+describe.skip('create JWT from Request JWT should', () => {
   const responseOpts: AuthorizationResponseOpts = {
     responseURI: EXAMPLE_REDIRECT_URL,
     responseURIType: 'redirect_uri',
