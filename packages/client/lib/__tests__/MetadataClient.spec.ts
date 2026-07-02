@@ -11,7 +11,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { CredentialOfferClientV1_0_15 } from '../CredentialOfferClientV1_0_15'
 import { MetadataClient } from '../MetadataClient'
-import { retrieveWellknown } from '../functions/OpenIDUtils'
+import { determineWellknownLocations, retrieveWellknown } from '../functions/OpenIDUtils'
 
 import {
   DANUBE_ISSUER_URL,
@@ -188,6 +188,11 @@ describe('Metadataclient with Danubetech should', () => {
 
 describe('Metadataclient with Walt-id should', () => {
   it('succeed without OID4VCI and with OIDC metadata', async () => {
+    // Walt-id issuer has a path component (/issuer-api/oidc) and only exposes the legacy (draft) well-known locations
+    nock('https://jff.walt.id')
+      .get(/^\/\.well-known\/.*/)
+      .times(3)
+      .reply(404, JSON.stringify({ error: 'does not exist' }))
     nock(WALT_ISSUER_URL).get(WellKnownEndpoints.OPENID4VCI_ISSUER).reply(200, JSON.stringify(WALT_OID4VCI_METADATA))
 
     nock(WALT_ISSUER_URL)
@@ -292,6 +297,109 @@ describe.skip('Metadataclient with SpruceId should', () => {
         },
       },
     })
+  })
+})
+
+describe('determineWellknownLocations should', () => {
+  const TENANT_HOST = 'https://issuer.example.com'
+  const TENANT_PATH = '/tenant/1234'
+  const TENANT_ISSUER_URL = `${TENANT_HOST}${TENANT_PATH}`
+
+  it('return the OID4VCI 1.0 final location first and the legacy location as fallback for issuers with a path', () => {
+    expect(determineWellknownLocations(TENANT_ISSUER_URL, WellKnownEndpoints.OPENID4VCI_ISSUER)).toEqual([
+      `${TENANT_HOST}/.well-known/openid-credential-issuer${TENANT_PATH}`,
+      `${TENANT_ISSUER_URL}/.well-known/openid-credential-issuer`,
+    ])
+  })
+
+  it('return the RFC 8414 location first and the legacy location as fallback for oauth-authorization-server with a path', () => {
+    expect(determineWellknownLocations(TENANT_ISSUER_URL, WellKnownEndpoints.OAUTH_AS)).toEqual([
+      `${TENANT_HOST}/.well-known/oauth-authorization-server${TENANT_PATH}`,
+      `${TENANT_ISSUER_URL}/.well-known/oauth-authorization-server`,
+    ])
+  })
+
+  it('return the OIDC Discovery (appended) location first and the RFC 8414 location as fallback for openid-configuration with a path', () => {
+    expect(determineWellknownLocations(TENANT_ISSUER_URL, WellKnownEndpoints.OPENID_CONFIGURATION)).toEqual([
+      `${TENANT_ISSUER_URL}/.well-known/openid-configuration`,
+      `${TENANT_HOST}/.well-known/openid-configuration${TENANT_PATH}`,
+    ])
+  })
+
+  it('return a single location when the issuer has no path component', () => {
+    expect(determineWellknownLocations(TENANT_HOST, WellKnownEndpoints.OPENID4VCI_ISSUER)).toEqual([
+      `${TENANT_HOST}/.well-known/openid-credential-issuer`,
+    ])
+  })
+
+  it('handle trailing slashes on the issuer identifier', () => {
+    expect(determineWellknownLocations(`${TENANT_ISSUER_URL}/`, WellKnownEndpoints.OPENID4VCI_ISSUER)).toEqual([
+      `${TENANT_HOST}/.well-known/openid-credential-issuer${TENANT_PATH}`,
+      `${TENANT_ISSUER_URL}/.well-known/openid-credential-issuer`,
+    ])
+  })
+})
+
+describe('MetadataClient with path-based (multi-tenant) credential issuer should', () => {
+  const TENANT_HOST = 'https://issuer.example.com'
+  const TENANT_PATH = '/tenant/1234'
+  const TENANT_ISSUER_URL = `${TENANT_HOST}${TENANT_PATH}`
+  const TENANT_OID4VCI_METADATA = {
+    credential_issuer: TENANT_ISSUER_URL,
+    credential_endpoint: `${TENANT_ISSUER_URL}/credential`,
+    token_endpoint: `${TENANT_ISSUER_URL}/token`,
+    credential_configurations_supported: {
+      'org.iso.18013.5.1.mDL': {
+        format: 'mso_mdoc',
+        doctype: 'org.iso.18013.5.1.mDL',
+      },
+    },
+  }
+
+  const nockAuthorizationServer404s = () => {
+    nock(TENANT_HOST).get(`${TENANT_PATH}${WellKnownEndpoints.OPENID_CONFIGURATION}`).reply(404, {})
+    nock(TENANT_HOST).get(`${WellKnownEndpoints.OPENID_CONFIGURATION}${TENANT_PATH}`).reply(404, {})
+    nock(TENANT_HOST).get(`${WellKnownEndpoints.OAUTH_AS}${TENANT_PATH}`).reply(404, {})
+    nock(TENANT_HOST).get(`${TENANT_PATH}${WellKnownEndpoints.OAUTH_AS}`).reply(404, {})
+  }
+
+  beforeEach(() => {
+    nock.cleanAll()
+    nock.disableNetConnect()
+  })
+
+  afterEach(() => {
+    nock.cleanAll()
+    nock.enableNetConnect()
+  })
+
+  it('retrieve metadata from the OID4VCI 1.0 final well-known location (inserted between host and path)', async () => {
+    nock(TENANT_HOST).get(`${WellKnownEndpoints.OPENID4VCI_ISSUER}${TENANT_PATH}`).reply(200, JSON.stringify(TENANT_OID4VCI_METADATA))
+    nockAuthorizationServer404s()
+
+    const metadata = await MetadataClient.retrieveAllMetadata(TENANT_ISSUER_URL)
+    expect(metadata.credential_endpoint).toEqual(`${TENANT_ISSUER_URL}/credential`)
+    expect(metadata.token_endpoint).toEqual(`${TENANT_ISSUER_URL}/token`)
+    expect(metadata.credentialIssuerMetadata).toMatchObject(TENANT_OID4VCI_METADATA)
+  })
+
+  it('fall back to the legacy (draft) well-known location when the 1.0 final location is not available', async () => {
+    nock(TENANT_HOST).get(`${WellKnownEndpoints.OPENID4VCI_ISSUER}${TENANT_PATH}`).reply(404, {})
+    nock(TENANT_HOST).get(`${TENANT_PATH}${WellKnownEndpoints.OPENID4VCI_ISSUER}`).reply(200, JSON.stringify(TENANT_OID4VCI_METADATA))
+    nockAuthorizationServer404s()
+
+    const metadata = await MetadataClient.retrieveAllMetadata(TENANT_ISSUER_URL)
+    expect(metadata.credential_endpoint).toEqual(`${TENANT_ISSUER_URL}/credential`)
+    expect(metadata.credentialIssuerMetadata).toMatchObject(TENANT_OID4VCI_METADATA)
+  })
+
+  it('fail when neither the 1.0 final nor the legacy well-known location is available', async () => {
+    nock(TENANT_HOST).get(`${WellKnownEndpoints.OPENID4VCI_ISSUER}${TENANT_PATH}`).reply(404, {})
+    nock(TENANT_HOST).get(`${TENANT_PATH}${WellKnownEndpoints.OPENID4VCI_ISSUER}`).reply(404, {})
+
+    await expect(() => MetadataClient.retrieveAllMetadata(TENANT_ISSUER_URL, { errorOnNotFound: true })).rejects.toThrowError(
+      `Issuer ${TENANT_ISSUER_URL} does not expose /.well-known/openid-credential-issuer`,
+    )
   })
 })
 
