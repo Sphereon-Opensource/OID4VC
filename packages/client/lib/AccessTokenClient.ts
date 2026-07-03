@@ -162,6 +162,13 @@ export class AccessTokenClient {
       // we actually know it is there because of the isPreAuthCode call
       request[PRE_AUTH_CODE_LITERAL] = credentialOfferRequest?.credential_offer.grants?.[PRE_AUTH_GRANT_LITERAL]?.[PRE_AUTH_CODE_LITERAL]
 
+      // OID4VCI 1.0 (Token Request): for the pre-authorized code grant client authentication is OPTIONAL and client_id
+      // "is only needed when a form of Client Authentication that relies on the parameter is used", so omit it unless
+      // such a method is in play (client_assertion was handled above) or it was explicitly passed as additional param
+      if (request.client_id && !request.client_secret && opts.additionalParams?.client_id === undefined) {
+        delete request.client_id
+      }
+
       return request as AccessTokenRequest
     }
 

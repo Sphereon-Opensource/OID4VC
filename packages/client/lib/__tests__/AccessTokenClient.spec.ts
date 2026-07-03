@@ -235,4 +235,77 @@ describe('AccessTokenClient should', () => {
       }),
     ).toThrow(Error('Cannot determine token URL if no issuer, metadata and no Authorization Server values are present'))
   })
+
+  it(
+    'not include client_id in a pre-authorized code token request when no client authentication is used',
+    async () => {
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient()
+
+      const accessTokenRequest = await accessTokenClient.createAccessTokenRequest({
+        credentialOffer: INITIATION_TEST,
+        pin: '1234',
+        pinMetadata: { isPinRequired: true, txCode: INITIATION_TEST.txCode },
+        asOpts: { clientOpts: { clientId: 'https://sphereon.com/ssi-wallet' } },
+      })
+
+      expect(accessTokenRequest.grant_type).toEqual(GrantTypes.PRE_AUTHORIZED_CODE)
+      expect(accessTokenRequest.client_id).toBeUndefined()
+    },
+    UNIT_TEST_TIMEOUT,
+  )
+
+  it(
+    'include client_id in a pre-authorized code token request when client authentication relying on it is used',
+    async () => {
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient()
+
+      const accessTokenRequest = await accessTokenClient.createAccessTokenRequest({
+        credentialOffer: INITIATION_TEST,
+        pin: '1234',
+        pinMetadata: { isPinRequired: true, txCode: INITIATION_TEST.txCode },
+        asOpts: { clientOpts: { clientId: 'my-client' } },
+        additionalParams: { client_secret: 'my-secret' },
+      })
+
+      expect(accessTokenRequest.grant_type).toEqual(GrantTypes.PRE_AUTHORIZED_CODE)
+      expect(accessTokenRequest.client_id).toEqual('my-client')
+      expect(accessTokenRequest.client_secret).toEqual('my-secret')
+    },
+    UNIT_TEST_TIMEOUT,
+  )
+
+  it(
+    'include client_id in a pre-authorized code token request when explicitly provided as additional param',
+    async () => {
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient()
+
+      const accessTokenRequest = await accessTokenClient.createAccessTokenRequest({
+        credentialOffer: INITIATION_TEST,
+        pin: '1234',
+        pinMetadata: { isPinRequired: true, txCode: INITIATION_TEST.txCode },
+        additionalParams: { client_id: 'forced-client-id' },
+      })
+
+      expect(accessTokenRequest.grant_type).toEqual(GrantTypes.PRE_AUTHORIZED_CODE)
+      expect(accessTokenRequest.client_id).toEqual('forced-client-id')
+    },
+    UNIT_TEST_TIMEOUT,
+  )
+
+  it(
+    'include client_id in an authorization code token request for a public client without client authentication',
+    async () => {
+      const accessTokenClient: AccessTokenClient = new AccessTokenClient()
+
+      const accessTokenRequest = await accessTokenClient.createAccessTokenRequest({
+        code: '9mq3kwIuNZ88czRjJ2-UDxtaNXulOfxHSXo-kM01MLV',
+        redirectUri: 'http://test.com/cb',
+        asOpts: { clientOpts: { clientId: 'test-client' } },
+      })
+
+      expect(accessTokenRequest.grant_type).toEqual(GrantTypes.AUTHORIZATION_CODE)
+      expect(accessTokenRequest.client_id).toEqual('test-client')
+    },
+    UNIT_TEST_TIMEOUT,
+  )
 })
