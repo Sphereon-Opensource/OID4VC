@@ -94,12 +94,7 @@
   "engines": {
     "node": ">=20.6"
   },
-  "files": [
-    "src",
-    "dist",
-    "README.md",
-    "LICENSE.md"
-  ],
+  "files": ["src", "dist", "README.md", "LICENSE.md"],
   "keywords": [
     "Sphereon",
     "SSI",
