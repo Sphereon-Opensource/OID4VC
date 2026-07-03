@@ -1,6 +1,10 @@
 {
-  "packages": ["packages/*"],
-  "version": "0.21.0",
+  "packages": [
+    "packages/*"
+  ],
+  "version": "0.21.1",
   "npmClient": "pnpm",
-  "workspaces": ["packages/*"]
+  "workspaces": [
+    "packages/*"
+  ]
 }
